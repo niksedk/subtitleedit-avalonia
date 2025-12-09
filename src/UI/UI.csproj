@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.3.9" />
+		<PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
 		<PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.9" />
 		<PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.9" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
@@ -34,6 +35,7 @@
 			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="AvaloniaEdit.TextMate" Version="11.3.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Google.Cloud.TextToSpeech.V1" Version="3.17.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />

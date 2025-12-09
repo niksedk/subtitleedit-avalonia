@@ -7,11 +7,13 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using AvaloniaEdit;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
+using System.ComponentModel;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -969,34 +971,157 @@ public static class InitListViewAndEditBox
         });
         textEditGrid.Children.Add(textCharsSecLabel);
 
-        var textBox = new TextBox
+        var textEditor = new TextEditor
         {
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
             MinHeight = 92,
             Height = 92,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Text))
-            {
-                Mode = BindingMode.TwoWay
-            },
             FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
-            IsUndoEnabled = false,
-            ClearSelectionOnLostFocus = false,
+            WordWrap = true,
+            ShowLineNumbers = false,
+            SyntaxHighlighting = SubtitleSyntaxHighlighting.CreateHighlightingDefinition(),
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Focusable = true,
+            Padding = new Thickness(4, 0, 4, 4),            
         };
-        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
-        {
-            textBox.TextAlignment = TextAlignment.Center;
-        }
+
         if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
         {
-            textBox.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+            textEditor.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
         }
-        vm.EditTextBox = textBox;
-        textEditGrid.Children.Add(textBox);
-        textBox.TextChanged += vm.SubtitleTextChanged;
-        textBox.GotFocus += vm.SubtitleTextBoxGotFocus;
-        Grid.SetRow(textBox, 1);
+
+        // Wrap TextEditor in a Border to provide rounded corners and focus border
+        var defaultBorderBrush = UiUtil.GetBorderBrush();
+        var focusedBorderBrush = new SolidColorBrush(Colors.DodgerBlue);
+        
+        var textEditorBorder = new Border
+        {
+            Child = textEditor,
+            BorderThickness = new Thickness(1),
+            BorderBrush = defaultBorderBrush,
+            CornerRadius = new CornerRadius(3),
+            ClipToBounds = true,
+        };
+        
+        // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
+        textEditor.Loaded += (s, e) =>
+        {
+            var textArea = textEditor.TextArea;
+            if (textArea != null)
+            {
+                textArea.GotFocus += (_, __) =>
+                {
+                    textEditorBorder.BorderBrush = focusedBorderBrush;
+                };
+
+                textArea.LostFocus += (_, __) =>
+                {
+                    textEditorBorder.BorderBrush = defaultBorderBrush;
+                };
+            }
+        };
+
+        // Setup two-way binding manually since TextEditor doesn't support direct binding
+        var isUpdatingFromViewModel = false;
+        var isUpdatingFromEditor = false;
+        SubtitleLineViewModel? currentSubtitle = null;
+        
+        void UpdateEditorFromViewModel()
+        {
+            if (isUpdatingFromEditor)
+            {
+                return;
+            }
+            
+            isUpdatingFromViewModel = true;
+            try
+            {
+                var text = vm.SelectedSubtitle?.Text ?? string.Empty;
+                if (textEditor.Text != text)
+                {
+                    textEditor.Text = text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromViewModel = false;
+            }
+        }
+
+        void UpdateViewModelFromEditor()
+        {
+            if (isUpdatingFromViewModel)
+            {
+                return;
+            }
+            
+            isUpdatingFromEditor = true;
+            try
+            {
+                if (vm.SelectedSubtitle != null && vm.SelectedSubtitle.Text != textEditor.Text)
+                {
+                    vm.SelectedSubtitle.Text = textEditor.Text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromEditor = false;
+            }
+        }
+
+        void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SubtitleLineViewModel.Text))
+            {
+                UpdateEditorFromViewModel();
+            }
+        }
+
+        // Listen to SelectedSubtitle changes
+        vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(vm.SelectedSubtitle))
+            {
+                // Unsubscribe from old subtitle
+                if (currentSubtitle != null)
+                {
+                    currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
+                }
+                
+                // Subscribe to new subtitle
+                currentSubtitle = vm.SelectedSubtitle;
+                if (currentSubtitle != null)
+                {
+                    currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
+                }
+                
+                UpdateEditorFromViewModel();
+            }
+        };
+
+        // Initial text load and subscription
+        currentSubtitle = vm.SelectedSubtitle;
+        if (currentSubtitle != null)
+        {
+            currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
+        }
+        UpdateEditorFromViewModel();
+
+        // Create a wrapper TextBox for compatibility
+        //var textBoxWrapper =  CreateTextBoxWrapper(textEditor);
+        vm.EditTextBox = textEditor;
+        
+        textEditGrid.Children.Add(textEditorBorder);
+        
+        textEditor.TextChanged += (s, e) =>
+        {
+            UpdateViewModelFromEditor();
+            vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("TextChanged", RoutingStrategies.Bubble)));
+        };
+        
+        textEditor.GotFocus += vm.SubtitleTextBoxGotFocus;
+        Grid.SetRow(textEditorBorder, 1);
 
         var textTotalLengthLabel = new TextBlock
         {
@@ -1027,11 +1152,11 @@ public static class InitListViewAndEditBox
         textEditGrid.Children.Add(panelSingleLineLengths);
         Grid.SetRow(panelSingleLineLengths, 2);
 
-        // Create a Flyout for the TextBox
+        // Create a Flyout for the TextEditor
         var flyoutTextBox = new MenuFlyout();
-        textBox.ContextFlyout = flyoutTextBox;
+        textEditor.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
-        textBox.PointerReleased += vm.ControlMacPointerReleased;
+        textEditor.PointerReleased += vm.ControlMacPointerReleased;
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;

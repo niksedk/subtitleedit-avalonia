@@ -2,6 +2,7 @@
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
+using AvaloniaEdit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -206,7 +207,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isVideoOffsetVisible;
 
     public DataGrid SubtitleGrid { get; set; }
-    public TextBox EditTextBox { get; set; }
+    public TextEditor EditTextBox { get; set; }
     public Window? Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView? MainView { get; set; }
@@ -335,7 +336,7 @@ public partial class MainViewModel :
         EditTextLineLengths = string.Empty;
         StatusTextLeftLabel = new TextBlock();
         SubtitleGrid = new DataGrid();
-        EditTextBox = new TextBox();
+        EditTextBox = new TextEditor();
         ContentGrid = new Grid();
         MenuReopen = new MenuItem();
         Menu = new Menu();
@@ -4017,7 +4018,7 @@ public partial class MainViewModel :
     }
 
     private DataGrid _oldSubtitleGrid = new DataGrid();
-    private TextBox _oldEditTextBox = new TextBox();
+    private TextEditor _oldEditTextBox = new TextEditor();
     private bool _oldGenerateSpectrogram;
     private string _oldSpectrogramStyle = string.Empty;
 
@@ -5043,7 +5044,7 @@ public partial class MainViewModel :
         }
 
         var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
-        var currentCharIndex = EditTextBox.CaretIndex;
+        var currentCharIndex = EditTextBox.CaretOffset;
         var subs = Subtitles.Select(p => p.Text).ToList();
         _findViewModel.InitializeFindData(_findService, subs, _findService.SearchText, this);
     }
@@ -5069,7 +5070,7 @@ public partial class MainViewModel :
             }
 
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
-            var currentCharIndex = EditTextBox.CaretIndex;
+            var currentCharIndex = EditTextBox.CaretOffset;
             var subs = Subtitles.Select(p => p.Text).ToList();
             _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
 
@@ -5099,9 +5100,9 @@ public partial class MainViewModel :
                 // wait for text box to update
                 Task.Delay(50);
 
-                EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                EditTextBox.CaretOffset = _findService.CurrentTextIndex;
                 EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-                EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+                EditTextBox.CaretOffset = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
             });
         }
     }
@@ -5117,7 +5118,7 @@ public partial class MainViewModel :
 
         var subs = Subtitles.Select(p => p.Text).ToList();
         var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
-        var currentCharIndex = EditTextBox.CaretIndex;
+        var currentCharIndex = EditTextBox.CaretOffset;
         var idx = _findService.FindNext(_findService.SearchText, subs, currentLineIndex, currentCharIndex + 1);
 
         if (idx < 0)
@@ -5136,9 +5137,9 @@ public partial class MainViewModel :
             // wait for text box to update
             Task.Delay(50);
 
-            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+            EditTextBox.CaretOffset = _findService.CurrentTextIndex;
             EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+            EditTextBox.SelectionLength = _findService.CurrentTextFound.Length;
         });
 
 
@@ -5156,7 +5157,7 @@ public partial class MainViewModel :
 
         var subs = Subtitles.Select(p => p.Text).ToList();
         var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
-        var currentCharIndex = EditTextBox.CaretIndex;
+        var currentCharIndex = EditTextBox.CaretOffset;
         var idx = _findService.FindPrevious(_findService.SearchText, subs, currentLineIndex, currentCharIndex - 1);
 
         if (idx < 0)
@@ -5175,9 +5176,9 @@ public partial class MainViewModel :
             // wait for text box to update
             Task.Delay(50);
 
-            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+            EditTextBox.CaretOffset = _findService.CurrentTextIndex;
             EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+            EditTextBox.SelectionLength = _findService.CurrentTextFound.Length;
         });
     }
 
@@ -5245,7 +5246,7 @@ public partial class MainViewModel :
             }
 
             var currentLineIndex = Subtitles.IndexOf(selectedSubtitle);
-            var currentCharIndex = EditTextBox.CaretIndex;
+            var currentCharIndex = EditTextBox.CaretOffset;
             var subs = Subtitles.Select(p => p.Text).ToList();
             _findService.Initialize(subs, SelectedSubtitleIndex ?? 0, result.WholeWord, findMode);
 
@@ -5293,9 +5294,9 @@ public partial class MainViewModel :
                             // wait for text box to update
                             Task.Delay(50);
 
-                            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                            EditTextBox.CaretOffset = _findService.CurrentTextIndex;
                             EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-                            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+                            EditTextBox.SelectionLength = _findService.CurrentTextFound.Length;
                         });
                         return;
                     }
@@ -5321,9 +5322,9 @@ public partial class MainViewModel :
                 // wait for text box to update
                 Task.Delay(50);
 
-                EditTextBox.CaretIndex = _findService.CurrentTextIndex;
+                EditTextBox.CaretOffset = _findService.CurrentTextIndex;
                 EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-                EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
+                EditTextBox.SelectionLength = _findService.CurrentTextFound.Length;
             });
         }
     }
@@ -5984,8 +5985,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
         var selectionLength = selectionEnd - selectionStart;
 
         if (selectionLength == 0)
@@ -6000,7 +6001,7 @@ public partial class MainViewModel :
                 .Remove(selectionStart, selectionLength)
                 .Insert(selectionStart, newText);
             tb.SelectionStart = selectionStart;
-            tb.SelectionEnd = selectionStart + newText.Length;
+            tb.SelectionLength = newText.Length;
         }
 
         _updateAudioVisualizer = true;
@@ -6039,8 +6040,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
         var selectionLength = selectionEnd - selectionStart;
 
         var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>();
@@ -6084,7 +6085,7 @@ public partial class MainViewModel :
             {
                 tb.Focus();
                 tb.SelectionStart = selectionStart;
-                tb.SelectionEnd = selectionStart + selectedText.Length;
+                tb.SelectionLength = selectedText.Length;
             });
         }
     }
@@ -6098,8 +6099,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
         var selectionLength = selectionEnd - selectionStart;
 
         var result =
@@ -6128,7 +6129,7 @@ public partial class MainViewModel :
             {
                 tb.Focus();
                 tb.SelectionStart = selectionStart;
-                tb.SelectionEnd = selectionStart + selectedText.Length;
+                tb.SelectionLength = selectedText.Length;
             });
         }
     }
@@ -7340,15 +7341,15 @@ public partial class MainViewModel :
         }, DispatcherPriority.Background);
     }
 
-    private bool ToggleTextBoxTag(TextBox tb, string htmlTag, string assaOn, string assaOff)
+    private bool ToggleTextBoxTag(TextEditor tb, string htmlTag, string assaOn, string assaOff)
     {
         if (tb == null || tb.Text == null)
         {
             return false;
         }
 
-        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionStart + tb.SelectionLength);
         var selectionLength = selectionEnd - selectionStart;
 
         var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
@@ -7414,7 +7415,7 @@ public partial class MainViewModel :
             {
                 tb.Focus();
                 tb.SelectionStart = selectionStart;
-                tb.SelectionEnd = selectionStart + selectedText.Length;
+                tb.SelectionLength = selectedText.Length;
             });
         }
 
@@ -10297,7 +10298,7 @@ public partial class MainViewModel :
     private void SubtitleGridSelectionChanged()
     {
         var selectedItems = SubtitleGrid.SelectedItems;
-        EditTextBox.ClearSelection();
+        EditTextBox.SelectionLength = 0;
         EditTextBoxOriginal.ClearSelection();
         ResetPlaySelection();
 

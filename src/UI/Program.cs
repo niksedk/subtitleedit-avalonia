@@ -109,6 +109,14 @@ namespace Nikse.SubtitleEdit
                 });
             }
 
+            if (b.Instance != null)
+            {
+                b.Instance.Styles.Add(new StyleInclude(new Uri("avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml", UriKind.Absolute))
+                {
+                    Source = new Uri("avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml")
+                });
+            }
+
             // Add ColorPicker styles
             if (b.Instance != null)
             {
