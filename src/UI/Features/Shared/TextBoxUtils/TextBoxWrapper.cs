@@ -2,87 +2,101 @@ using Avalonia.Controls;
 
 namespace Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 
-public class TextBoxWrapper(TextBox textBox) : INikseTextBox
+public class TextBoxWrapper : ITextBoxWrapper
 {
+    private readonly TextBox _textBox;
+
+    public TextBoxWrapper(TextBox textBox)
+    {
+        _textBox = textBox;
+    }
+
     public string Text
     {
         get
         {
-            if (textBox.Text != null)
+            if (_textBox.Text != null)
             {
-                return textBox.Text;
+                return _textBox.Text;
             }
 
             return string.Empty;
         }
-        set => textBox.Text = value;
+        set => _textBox.Text = value;
     }
 
     public string SelectedText
     {
-        get => textBox.SelectedText;    
-        set => textBox.SelectedText = value;
+        get => _textBox.SelectedText;    
+        set => _textBox.SelectedText = value;
     }
 
     public int SelectionStart
     {
-        get => textBox.SelectionStart;
-        set => textBox.SelectionStart = value;
+        get => _textBox.SelectionStart;
+        set => _textBox.SelectionStart = value;
     }
 
     public int SelectionLength
     {
-        get => textBox.SelectionEnd - textBox.SelectionStart;
-        set => textBox.SelectionEnd = textBox.SelectionStart + value;
+        get => _textBox.SelectionEnd - _textBox.SelectionStart;
+        set => _textBox.SelectionEnd = _textBox.SelectionStart + value;
     }
     
     public int SelectionEnd
     {
-        get => textBox.SelectionEnd;
-        set => textBox.SelectionEnd =  value;
+        get => _textBox.SelectionEnd;
+        set => _textBox.SelectionEnd =  value;
     }
 
     public void Select(int start, int length)
     {
-        textBox.SelectionStart = start;
-        textBox.SelectionEnd = start + length;
+        _textBox.SelectionStart = start;
+        _textBox.SelectionEnd = start + length;
     }
 
     public int CaretIndex
     {
-        get => textBox.CaretIndex;
-        set => textBox.CaretIndex = value;
+        get => _textBox.CaretIndex;
+        set => _textBox.CaretIndex = value;
     }
 
     public void Focus()
     {
-        textBox.Focus();
+        _textBox.Focus();
     }
 
-    public Control Control => textBox;
+    public Control TextControl => _textBox;
+    public Control ContentControl => _textBox;
+
     public bool IsFocused { get; }
     public void Cut()
     {
-        textBox.Cut();
+        _textBox.Cut();
     }
 
     public void Copy()
     {
-        textBox.Copy();
+        _textBox.Copy();
     }
 
     public void Paste()
     {
-        textBox.Paste();
+        _textBox.Paste();
     }
 
     public void SelectAll()
     {
-        textBox.SelectAll();
+        _textBox.SelectAll();
     }
 
     public void ClearSelection()
     {
-        textBox.ClearSelection();
+        _textBox.ClearSelection();
+    }
+
+    public void SetAlignment(Avalonia.Media.TextAlignment alignment)
+    {
+        _textBox.TextAlignment = alignment;
     }
 }

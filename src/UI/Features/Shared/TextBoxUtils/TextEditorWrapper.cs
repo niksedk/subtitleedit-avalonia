@@ -1,84 +1,100 @@
 using System;
 using Avalonia.Controls;
+using Avalonia.Media;
 using AvaloniaEdit;
 
 namespace Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 
-public class TextEditorWrapper(TextEditor textEditor) : INikseTextBox
+public class TextEditorWrapper : ITextBoxWrapper
 {
+    private readonly TextEditor _textEditor;
+    private readonly Border _border;
+
+    public TextEditorWrapper(TextEditor textEditor, Border border)
+    {
+        _textEditor = textEditor;
+        _border = border;
+    }
+
     public string Text
     {
-        get => textEditor.Text;
-        set => textEditor.Text = value;
+        get => _textEditor.Text;
+        set => _textEditor.Text = value;
     }
 
     public string SelectedText
     {
-        get => textEditor.SelectedText;
-        set => textEditor.SelectedText = value;
+        get => _textEditor.SelectedText;
+        set => _textEditor.SelectedText = value;
     }
 
     public int SelectionStart
     {
-        get => textEditor.SelectionStart;
-        set => textEditor.SelectionStart = value;
+        get => _textEditor.SelectionStart;
+        set => _textEditor.SelectionStart = value;
     }
 
     public int SelectionLength
     {
-        get => textEditor.SelectionLength;
-        set => textEditor.SelectionLength = value;
+        get => _textEditor.SelectionLength;
+        set => _textEditor.SelectionLength = value;
     }
 
     public int SelectionEnd
     {
-        get => textEditor.SelectionStart + textEditor.SelectionLength;
-        set => textEditor.SelectionLength = Math.Max(0, value - textEditor.SelectionStart);
+        get => _textEditor.SelectionStart + _textEditor.SelectionLength;
+        set => _textEditor.SelectionLength = Math.Max(0, value - _textEditor.SelectionStart);
     }
 
     public void Select(int start, int length)
     {
-        textEditor.SelectionStart = start;
-        textEditor.SelectionLength = length;
+        _textEditor.SelectionStart = start;
+        _textEditor.SelectionLength = length;
     }
 
     public int CaretIndex
     {
-        get => textEditor.CaretOffset;
-        set => textEditor.CaretOffset = value;
+        get => _textEditor.CaretOffset;
+        set => _textEditor.CaretOffset = value;
     }
 
     public void Focus()
     {
-        textEditor.Focus();
+        _textEditor.Focus();
     }
 
-    public Control Control => textEditor;
+    public Control TextControl => _textEditor;
+    public Control ContentControl => _border;
 
-    public bool IsFocused => textEditor.IsFocused;
+    public bool IsFocused => _textEditor.IsFocused;
 
     public void Cut()
     {
-        textEditor.Cut();
+        _textEditor.Cut();
     }
 
     public void Copy()
     {
-        textEditor.Copy();
+        _textEditor.Copy();
     }
 
     public void Paste()
     {
-        textEditor.Paste();
+        _textEditor.Paste();
     }
 
     public void SelectAll()
     {
-        textEditor.SelectAll();
+        _textEditor.SelectAll();
     }
 
     public void ClearSelection()
     {
-        textEditor.SelectionLength = 0;
+        _textEditor.SelectionLength = 0;
+    }
+
+    public void SetAlignment(TextAlignment alignment)
+    {
+        // not supported in TextEditor
     }
 }

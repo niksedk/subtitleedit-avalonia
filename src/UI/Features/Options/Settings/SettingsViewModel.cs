@@ -164,6 +164,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _subtitleTextBoxAndGridFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
+    [ObservableProperty] private bool _textBoxColorTags;
     [ObservableProperty] private bool _textBoxCenterText;
     [ObservableProperty] private bool _showButtonHints;
     [ObservableProperty] private bool _gridCompactMode;
@@ -430,6 +431,7 @@ public partial class SettingsViewModel : ObservableObject
         SubtitleTextBoxAndGridFontName = appearance.SubtitleTextBoxAndGridFontName;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
+        TextBoxColorTags = appearance.SubtitleTextBoxColorTags;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
         ShowButtonHints = appearance.ShowHints;
         GridCompactMode = appearance.GridCompactMode;
@@ -650,6 +652,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.SubtitleTextBoxAndGridFontName = string.IsNullOrEmpty(SubtitleTextBoxAndGridFontName) ? new Label().FontFamily.Name : SubtitleTextBoxAndGridFontName;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
+        appearance.SubtitleTextBoxColorTags = TextBoxColorTags;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();

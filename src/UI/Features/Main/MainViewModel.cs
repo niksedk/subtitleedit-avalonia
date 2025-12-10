@@ -207,7 +207,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isVideoOffsetVisible;
 
     public DataGrid SubtitleGrid { get; set; }
-    public INikseTextBox EditTextBox { get; set; }
+    public ITextBoxWrapper EditTextBox { get; set; }
     public Window? Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView? MainView { get; set; }
@@ -4018,7 +4018,7 @@ public partial class MainViewModel :
     }
 
     private DataGrid _oldSubtitleGrid = new DataGrid();
-    private INikseTextBox _oldEditTextBox = new TextBoxWrapper(new TextBox());
+    private ITextBoxWrapper _oldEditTextBox = new TextBoxWrapper(new TextBox());
     private bool _oldGenerateSpectrogram;
     private string _oldSpectrogramStyle = string.Empty;
 
@@ -4049,7 +4049,7 @@ public partial class MainViewModel :
 
         InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
         UiUtil.ReplaceControl(_oldSubtitleGrid, SubtitleGrid);
-        UiUtil.ReplaceControl(_oldEditTextBox.Control, EditTextBox.Control);
+        UiUtil.ReplaceControl(_oldEditTextBox.ContentControl, EditTextBox.ContentControl);
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -7341,7 +7341,7 @@ public partial class MainViewModel :
         }, DispatcherPriority.Background);
     }
 
-    private bool ToggleTextBoxTag(INikseTextBox tb, string htmlTag, string assaOn, string assaOff)
+    private bool ToggleTextBoxTag(ITextBoxWrapper tb, string htmlTag, string assaOn, string assaOff)
     {
         if (tb == null || tb.Text == null)
         {
