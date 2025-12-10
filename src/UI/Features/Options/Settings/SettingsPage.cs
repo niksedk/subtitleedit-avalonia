@@ -11,6 +11,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Collections.Generic;
@@ -453,7 +454,7 @@ public class SettingsPage : UserControl
             MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxColorTags, nameof(_vm.TextBoxColorTags)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText), new Binding(nameof(_vm.TextBoxColorTags)) { Source =  _vm,  Converter = new InverseBooleanConverter(), Mode = BindingMode.OneWay }),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownStartTime, nameof(_vm.ShowUpDownStartTime)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownEndTime, nameof(_vm.ShowUpDownEndTime)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownDuration, nameof(_vm.ShowUpDownDuration)),
@@ -802,13 +803,22 @@ public class SettingsPage : UserControl
         return numericUpDown;
     }
 
-    private SettingsItem MakeCheckboxSetting(string label, string bindingProperty)
+    private SettingsItem MakeCheckboxSetting(string label, string bindingProperty, Binding? bindingEnabled = null)
     {
-        return new SettingsItem(label, () => new CheckBox
+        var cb = new CheckBox
         {
             VerticalAlignment = VerticalAlignment.Center,
             [!ToggleButton.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
-        });
+        };
+
+        if (bindingEnabled != null)
+        {
+            cb[!Control.IsEnabledProperty] = bindingEnabled;
+        }
+
+        var item = new SettingsItem(label, () => cb);
+
+        return item;
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
