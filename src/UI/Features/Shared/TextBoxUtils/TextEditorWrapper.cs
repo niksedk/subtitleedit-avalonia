@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using AvaloniaEdit;
 
@@ -32,7 +33,7 @@ public class TextEditorWrapper(TextEditor textEditor) : INikseTextBox
     public int SelectionEnd
     {
         get => textEditor.SelectionStart + textEditor.SelectionLength;
-        set => textEditor.SelectionLength = SelectionStart + value;
+        set => textEditor.SelectionLength = Math.Max(0, value - textEditor.SelectionStart);
     }
 
     public void Select(int start, int length)
@@ -78,6 +79,6 @@ public class TextEditorWrapper(TextEditor textEditor) : INikseTextBox
 
     public void ClearSelection()
     {
-        textEditor.Cut();
+        textEditor.SelectionLength = 0;
     }
 }
