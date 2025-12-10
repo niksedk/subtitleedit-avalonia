@@ -207,7 +207,6 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isVideoOffsetVisible;
 
     public DataGrid SubtitleGrid { get; set; }
-    public ITextBoxWrapper EditTextBox { get; set; }
     public Window? Window { get; set; }
     public Grid ContentGrid { get; set; }
     public MainView? MainView { get; set; }
@@ -281,7 +280,8 @@ public partial class MainViewModel :
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
-    public TextBox EditTextBoxOriginal { get; set; }
+    public ITextBoxWrapper EditTextBoxOriginal { get; set; }
+    public ITextBoxWrapper EditTextBox { get; set; }
     public StackPanel PanelSingleLineLengthsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
     public MenuItem MenuItemActors { get; set; }
@@ -390,7 +390,7 @@ public partial class MainViewModel :
         ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
         ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
         ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
-        EditTextBoxOriginal = new TextBox();
+        EditTextBoxOriginal = new TextBoxWrapper(new TextBox());
         EditTextCharactersPerSecondOriginal = string.Empty;
         EditTextCharactersPerSecondBackgroundOriginal = Brushes.Transparent;
         EditTextTotalLengthOriginal = string.Empty;

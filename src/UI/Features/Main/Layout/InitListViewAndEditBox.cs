@@ -1103,33 +1103,8 @@ public static class InitListViewAndEditBox
             Source = vm
         });
 
-        var textBoxOriginal = new TextBox
-        {
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            MinHeight = 92,
-            Height = 92,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.OriginalText))
-            {
-                Mode = BindingMode.TwoWay
-            },
-            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
-            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
-            IsUndoEnabled = false,
-            Margin = new Thickness(3, 0, 0, 0),
-            ClearSelectionOnLostFocus = false,
-        };
-        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
-        {
-            textBoxOriginal.TextAlignment = TextAlignment.Center;
-        }
-        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
-        {
-            textBoxOriginal.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
-        }
-        vm.EditTextBoxOriginal = textBoxOriginal;
+        var textBoxOriginal = MakeTextBoxOriginal(vm);
         textEditGrid.Add(textBoxOriginal, 1, 1);
-        textBoxOriginal.TextChanged += vm.SubtitleTextOriginalChanged;
         textBoxOriginal.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnOriginalText))
         {
             Mode = BindingMode.OneWay,
@@ -1280,12 +1255,14 @@ public static class InitListViewAndEditBox
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
             WordWrap = true,
             ShowLineNumbers = false,
-            SyntaxHighlighting = SubtitleSyntaxHighlighting.CreateHighlightingDefinition(),
             HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
             Focusable = true,
             Padding = new Thickness(4, 0, 4, 4),
         };
+
+        // Add syntax highlighting transformer
+        textEditor.TextArea.TextView.LineTransformers.Add(new SubtitleSyntaxHighlighting());
 
         if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
         {
@@ -1414,6 +1391,196 @@ public static class InitListViewAndEditBox
         {
             UpdateViewModelFromEditor();
             vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("TextChanged", RoutingStrategies.Bubble)));
+        };
+
+        textEditor.GotFocus += vm.SubtitleTextBoxGotFocus;
+
+        return textEditorBorder;
+    }
+
+    private static Control MakeTextBoxOriginal(MainViewModel vm)
+    {
+        if (Se.Settings.Appearance.SubtitleTextBoxColorTags)
+        {
+            return MakeTextEditorOriginal(vm);
+        }
+        else
+        {
+            var textBox = new TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                MinHeight = 92,
+                Height = 92,
+                [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.OriginalText))
+                {
+                    Mode = BindingMode.TwoWay
+                },
+                FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+                FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+                IsUndoEnabled = false,
+                ClearSelectionOnLostFocus = false,
+            };
+            if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+            {
+                textBox.TextAlignment = TextAlignment.Center;
+            }
+            if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+            {
+                textBox.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+            }
+
+            vm.EditTextBoxOriginal = new TextBoxWrapper(textBox);
+            return textBox;
+        }
+    }
+
+    private static Border MakeTextEditorOriginal(MainViewModel vm)
+    {
+        var textEditor = new TextEditor
+        {
+            MinHeight = 92,
+            Height = 92,
+            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+            WordWrap = true,
+            ShowLineNumbers = false,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Focusable = true,
+            Padding = new Thickness(4, 0, 4, 4),
+        };
+
+        // Add syntax highlighting transformer
+        textEditor.TextArea.TextView.LineTransformers.Add(new SubtitleSyntaxHighlighting());
+
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textEditor.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
+
+        var defaultBorderBrush = UiUtil.GetBorderBrush();
+        var focusedBorderBrush = new SolidColorBrush(Colors.DodgerBlue);
+
+        var textEditorBorder = new Border
+        {
+            Child = textEditor,
+            BorderThickness = new Thickness(1),
+            BorderBrush = defaultBorderBrush,
+            CornerRadius = new CornerRadius(3),
+            ClipToBounds = true,
+        };
+
+        // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
+        textEditor.Loaded += (s, e) =>
+        {
+            var textArea = textEditor.TextArea;
+            if (textArea != null)
+            {
+                textArea.GotFocus += (_, __) =>
+                {
+                    textEditorBorder.BorderBrush = focusedBorderBrush;
+                };
+
+                textArea.LostFocus += (_, __) =>
+                {
+                    textEditorBorder.BorderBrush = defaultBorderBrush;
+                };
+            }
+        };
+
+        // Setup two-way binding manually since TextEditor doesn't support direct binding
+        var isUpdatingFromViewModel = false;
+        var isUpdatingFromEditor = false;
+        SubtitleLineViewModel? currentSubtitle = null;
+
+        void UpdateEditorFromViewModel()
+        {
+            if (isUpdatingFromEditor)
+            {
+                return;
+            }
+
+            isUpdatingFromViewModel = true;
+            try
+            {
+                var text = vm.SelectedSubtitle?.OriginalText ?? string.Empty;
+                if (textEditor.Text != text)
+                {
+                    textEditor.Text = text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromViewModel = false;
+            }
+        }
+
+        void UpdateViewModelFromEditor()
+        {
+            if (isUpdatingFromViewModel)
+            {
+                return;
+            }
+
+            isUpdatingFromEditor = true;
+            try
+            {
+                if (vm.SelectedSubtitle != null && vm.SelectedSubtitle.OriginalText != textEditor.Text)
+                {
+                    vm.SelectedSubtitle.OriginalText = textEditor.Text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromEditor = false;
+            }
+        }
+
+        void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SubtitleLineViewModel.OriginalText))
+            {
+                UpdateEditorFromViewModel();
+            }
+        }
+
+        // Listen to SelectedSubtitle changes
+        vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(vm.SelectedSubtitle))
+            {
+                // Unsubscribe from old subtitle
+                if (currentSubtitle != null)
+                {
+                    currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
+                }
+
+                // Subscribe to new subtitle
+                currentSubtitle = vm.SelectedSubtitle;
+                if (currentSubtitle != null)
+                {
+                    currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
+                }
+
+                UpdateEditorFromViewModel();
+            }
+        };
+
+        // Initial text load and subscription
+        currentSubtitle = vm.SelectedSubtitle;
+        if (currentSubtitle != null)
+        {
+            currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
+        }
+        UpdateEditorFromViewModel();
+
+        vm.EditTextBox = new TextEditorWrapper(textEditor, textEditorBorder);
+
+        textEditor.TextChanged += (s, e) =>
+        {
+            UpdateViewModelFromEditor();
+            vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("OriginalTextChanged", RoutingStrategies.Bubble)));
         };
 
         textEditor.GotFocus += vm.SubtitleTextBoxGotFocus;
