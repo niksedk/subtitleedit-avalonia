@@ -121,6 +121,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
+using AvaloniaEdit;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -4654,6 +4655,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             SetAlignmentToSelected(result.Alignment);
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -10049,7 +10051,8 @@ public partial class MainViewModel :
     {
         var focusedElement = Window?.FocusManager?.GetFocusedElement();
 
-        return focusedElement is TextBox ||
+        return focusedElement is TextEditor ||
+               focusedElement is TextBox ||
                focusedElement is MaskedTextBox ||
                focusedElement is AutoCompleteBox ||
                (focusedElement is Control control && IsTextInputControl(control));
@@ -10058,8 +10061,10 @@ public partial class MainViewModel :
     private static bool IsTextInputControl(Control control)
     {
         var typeName = control.GetType().Name;
-        return typeName.Contains("TextBox") ||
-               typeName.Contains("TextEditor") ||
+        return typeName.Contains("TextEditor") ||
+               typeName.Contains("TextBox") ||
+               typeName.Contains("MaskedTextBox") ||
+               typeName.Contains("TextArea") ||
                typeName.Contains("TextInput");
     }
 
