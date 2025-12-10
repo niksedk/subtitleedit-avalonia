@@ -14,6 +14,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using System.ComponentModel;
+using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -1110,7 +1111,7 @@ public static class InitListViewAndEditBox
 
         // Create a wrapper TextBox for compatibility
         //var textBoxWrapper =  CreateTextBoxWrapper(textEditor);
-        vm.EditTextBox = textEditor;
+        vm.EditTextBox = new TextEditorWrapper(textEditor);
         
         textEditGrid.Children.Add(textEditorBorder);
         
