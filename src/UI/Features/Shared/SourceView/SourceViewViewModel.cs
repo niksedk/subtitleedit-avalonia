@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Threading.Tasks;
@@ -23,13 +24,13 @@ public partial class SourceViewViewModel : ObservableObject
     public Subtitle Subtitle { get; private set; }
 
     public SubtitleFormat _subtitleFormat { get; private set; }
-    public TextBox SourceViewTextBox { get; set; }
+    public ITextBoxWrapper SourceViewTextBox { get; set; }
 
     private readonly System.Timers.Timer _cursorTimer;
 
     public SourceViewViewModel()
     {
-        SourceViewTextBox = new TextBox();
+        SourceViewTextBox = new TextBoxWrapper(new TextBox());  
         Title = string.Empty;
         Text = string.Empty;
         LineAndColumnInfo = string.Empty;
