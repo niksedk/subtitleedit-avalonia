@@ -7,12 +7,12 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
 {
-    // Pastel color scheme for HTML syntax highlighting
-    private static readonly Color ElementColor = Color.FromRgb(183, 89, 155);    // Soft purple - HTML element tags (e.g., <div>, <span>)
+    // Pastel color scheme for HTML and ASS/SSA syntax highlighting
+    private static readonly Color ElementColor = Color.FromRgb(183, 89, 155);    // Soft purple - HTML element tags (e.g., <div>, <span>) / ASS tag names
     private static readonly Color AttributeColor = Color.FromRgb(86, 156, 214);  // Soft blue - HTML attribute names (e.g., class, id, style)
     private static readonly Color CommentColor = Color.FromRgb(106, 153, 85);    // Soft green - HTML comments (<!-- -->)
-    private static readonly Color CharsColor = Color.FromRgb(128, 128, 128);     // Gray - delimiters and special chars (<, >, ", ', =)
-    private static readonly Color ValuesColor = Color.FromRgb(206, 145, 120);    // Soft orange/peach - attribute values (e.g., "myclass")
+    private static readonly Color CharsColor = Color.FromRgb(128, 128, 128);     // Gray - delimiters and special chars (<, >, ", ', =, {, }, \)
+    private static readonly Color ValuesColor = Color.FromRgb(206, 145, 120);    // Soft orange/peach - attribute values (e.g., "myclass") / ASS tag values
     private static readonly Color StyleColor = Color.FromRgb(156, 220, 254);     // Light cyan - CSS property values in style attribute
 
     protected override void ColorizeLine(DocumentLine line)
@@ -29,6 +29,55 @@ public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
         {
             var c = text[i];
             var c2 = i + 1 < text.Length ? text[i + 1] : '\0';
+
+            // Handle ASS/SSA tags: {\tag} or {\tagValue}
+            if (c == '{' && c2 == '\\')
+            {
+                var tagEnd = text.IndexOf('}', i + 2);
+                if (tagEnd != -1)
+                {
+                    // Color opening brace and backslash
+                    ChangeLinePart(lineStartOffset + i, lineStartOffset + i + 2, element =>
+                    {
+                        element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(CharsColor));
+                    });
+
+                    // Find where the tag name ends (before any numbers or special chars)
+                    var tagNameStart = i + 2;
+                    var tagNameEnd = tagNameStart;
+                    while (tagNameEnd < tagEnd && char.IsLetter(text[tagNameEnd]))
+                    {
+                        tagNameEnd++;
+                    }
+
+                    // Color tag name (e.g., "i", "b", "fn", "fs", "c", "1c", etc.)
+                    if (tagNameEnd > tagNameStart)
+                    {
+                        ChangeLinePart(lineStartOffset + tagNameStart, lineStartOffset + tagNameEnd, element =>
+                        {
+                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ElementColor));
+                        });
+                    }
+
+                    // Color tag value/parameters (e.g., "1", "Arial", "&HFFFFFF&")
+                    if (tagNameEnd < tagEnd)
+                    {
+                        ChangeLinePart(lineStartOffset + tagNameEnd, lineStartOffset + tagEnd, element =>
+                        {
+                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ValuesColor));
+                        });
+                    }
+
+                    // Color closing brace
+                    ChangeLinePart(lineStartOffset + tagEnd, lineStartOffset + tagEnd + 1, element =>
+                    {
+                        element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(CharsColor));
+                    });
+
+                    i = tagEnd;
+                    continue;
+                }
+            }
 
             if (!inComment && c == '<')
             {
