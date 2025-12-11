@@ -15,6 +15,8 @@ public class SeAppearance
     public string SubtitleTextBoxAndGridFontName { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
     public bool SubtitleTextBoxColorTags { get; set; }
+    public bool SubtitleGridColorTags { get; set; };
+
     public bool SubtitleTextBoxCenterText { get; set; }
     public bool ShowHints { get; set; }
     public bool GridCompactMode { get; set; }
@@ -44,7 +46,7 @@ public class SeAppearance
     public bool ShowUpDownDuration { get; set; }
     public bool ShowUpDownLabels { get; set; }
 
-    public LayoutPositions CurrentLayoutPositions { get; set; } 
+    public LayoutPositions CurrentLayoutPositions { get; set; }
 
     public SeAppearance()
     {

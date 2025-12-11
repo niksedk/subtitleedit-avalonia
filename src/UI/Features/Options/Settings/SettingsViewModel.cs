@@ -161,6 +161,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _selectedFontName;
     [ObservableProperty] private double _subtitleGridFontSize;
     [ObservableProperty] private bool _subtitleGridTextSingleLine;
+    [ObservableProperty] private bool _subtitleGridColorTags;
     [ObservableProperty] private string _subtitleTextBoxAndGridFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
@@ -428,6 +429,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
         SubtitleGridFontSize = appearance.SubtitleGridFontSize;
         SubtitleGridTextSingleLine = appearance.SubtitleGridTextSingleLine;
+        SubtitleGridColorTags = appearance.SubtitleGridColorTags;
         SubtitleTextBoxAndGridFontName = appearance.SubtitleTextBoxAndGridFontName;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
@@ -649,6 +651,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
         appearance.SubtitleGridFontSize = SubtitleGridFontSize;
         appearance.SubtitleGridTextSingleLine = SubtitleGridTextSingleLine;
+        appearance.SubtitleGridColorTags = SubtitleGridColorTags;
         appearance.SubtitleTextBoxAndGridFontName = string.IsNullOrEmpty(SubtitleTextBoxAndGridFontName) ? new Label().FontFamily.Name : SubtitleTextBoxAndGridFontName;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;

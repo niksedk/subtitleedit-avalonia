@@ -17,6 +17,14 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
     private static readonly Color ValuesColor = Color.FromRgb(206, 145, 120);    // Soft orange/peach - attribute values / ASS tag values
     private static readonly Color StyleColor = Color.FromRgb(156, 220, 254);     // Light cyan - CSS property values
 
+    // Reuse brushes instead of creating new ones each time
+    private static readonly SolidColorBrush ElementBrush = new(ElementColor);
+    private static readonly SolidColorBrush AttributeBrush = new(AttributeColor);
+    private static readonly SolidColorBrush CommentBrush = new(CommentColor);
+    private static readonly SolidColorBrush CharsBrush = new(CharsColor);
+    private static readonly SolidColorBrush ValuesBrush = new(ValuesColor);
+    private static readonly SolidColorBrush StyleBrush = new(StyleColor);
+
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string str)
@@ -38,6 +46,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 .Replace("\n", separator);
         }
 
+        // Check if syntax highlighting is disabled
+        if (!Se.Settings.Appearance.SubtitleGridColorTags)
+        {
+            inlines.Add(new Run(str));
+            return inlines;
+        }
+
         // Truncate long strings for performance
         if (str.Length > 500)
         {
@@ -57,7 +72,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 if (tagEnd != -1)
                 {
                     // Add opening brace and backslash
-                    inlines.Add(new Run(str.Substring(i, 2)) { Foreground = new SolidColorBrush(CharsColor) });
+                    inlines.Add(new Run(str.Substring(i, 2)) { Foreground = CharsBrush });
                     i += 2;
 
                     // Find where the tag name ends
@@ -73,7 +88,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     {
                         inlines.Add(new Run(str.Substring(tagNameStart, tagNameEnd - tagNameStart))
                         {
-                            Foreground = new SolidColorBrush(ElementColor)
+                            Foreground = ElementBrush
                         });
                     }
 
@@ -82,12 +97,12 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     {
                         inlines.Add(new Run(str.Substring(tagNameEnd, tagEnd - tagNameEnd))
                         {
-                            Foreground = new SolidColorBrush(ValuesColor)
+                            Foreground = ValuesBrush
                         });
                     }
 
                     // Add closing brace
-                    inlines.Add(new Run("}") { Foreground = new SolidColorBrush(CharsColor) });
+                    inlines.Add(new Run("}") { Foreground = CharsBrush });
                     i = tagEnd + 1;
                     continue;
                 }
@@ -107,7 +122,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 var commentLength = commentEnd != -1 ? commentEnd + 3 - i : str.Length - i;
                 inlines.Add(new Run(str.Substring(i, commentLength))
                 {
-                    Foreground = new SolidColorBrush(CommentColor)
+                    Foreground = CommentBrush
                 });
                 i += commentLength;
                 continue;
@@ -166,13 +181,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
     private static void ParseHtmlTag(InlineCollection inlines, string tagContent)
     {
         // Add opening <
-        inlines.Add(new Run("<") { Foreground = new SolidColorBrush(CharsColor) });
+        inlines.Add(new Run("<") { Foreground = CharsBrush });
 
         var content = tagContent.Substring(1, tagContent.Length - 2); // Remove < and >
         var isClosingTag = content.StartsWith('/');
         if (isClosingTag)
         {
-            inlines.Add(new Run("/") { Foreground = new SolidColorBrush(CharsColor) });
+            inlines.Add(new Run("/") { Foreground = CharsBrush });
             content = content.Substring(1);
         }
 
@@ -187,7 +202,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
         var elementName = spaceIndex > 0 ? content.Substring(0, spaceIndex) : content;
 
         // Add element name
-        inlines.Add(new Run(elementName) { Foreground = new SolidColorBrush(ElementColor) });
+        inlines.Add(new Run(elementName) { Foreground = ElementBrush });
 
         // Parse attributes if any
         if (spaceIndex > 0)
@@ -199,11 +214,11 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
         // Add self-closing /
         if (isSelfClosing)
         {
-            inlines.Add(new Run(" /") { Foreground = new SolidColorBrush(CharsColor) });
+            inlines.Add(new Run(" /") { Foreground = CharsBrush });
         }
 
         // Add closing >
-        inlines.Add(new Run(">") { Foreground = new SolidColorBrush(CharsColor) });
+        inlines.Add(new Run(">") { Foreground = CharsBrush });
     }
 
     private static void ParseHtmlAttributes(InlineCollection inlines, string attributesPart)
@@ -232,7 +247,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             {
                 inlines.Add(new Run(attributesPart.Substring(attrStart, i - attrStart))
                 {
-                    Foreground = new SolidColorBrush(AttributeColor)
+                    Foreground = AttributeBrush
                 });
             }
             else if (i < attributesPart.Length)
@@ -252,7 +267,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             // Check for =
             if (i < attributesPart.Length && attributesPart[i] == '=')
             {
-                inlines.Add(new Run("=") { Foreground = new SolidColorBrush(CharsColor) });
+                inlines.Add(new Run("=") { Foreground = CharsBrush });
                 i++;
 
                 // Skip whitespace
@@ -266,7 +281,7 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 if (i < attributesPart.Length && (attributesPart[i] == '"' || attributesPart[i] == '\''))
                 {
                     var quote = attributesPart[i];
-                    inlines.Add(new Run(quote.ToString()) { Foreground = new SolidColorBrush(CharsColor) });
+                    inlines.Add(new Run(quote.ToString()) { Foreground = CharsBrush });
                     i++;
 
                     var valueStart = i;
@@ -281,13 +296,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                         var hasColon = value.Contains(':');
                         inlines.Add(new Run(value)
                         {
-                            Foreground = new SolidColorBrush(hasColon ? StyleColor : ValuesColor)
+                            Foreground = hasColon ? StyleBrush : ValuesBrush
                         });
                     }
 
                     if (i < attributesPart.Length)
                     {
-                        inlines.Add(new Run(quote.ToString()) { Foreground = new SolidColorBrush(CharsColor) });
+                        inlines.Add(new Run(quote.ToString()) { Foreground = CharsBrush });
                         i++;
                     }
                 }
