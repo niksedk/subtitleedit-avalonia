@@ -1,10 +1,7 @@
-﻿using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
+﻿using Avalonia.Media.Imaging;
 using SkiaSharp;
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -133,52 +130,6 @@ internal static class SkBitmapExtensions
     }
 
     public static Bitmap ToAvaloniaBitmap(this SKBitmap skBitmap)
-    {
-        var targetColorType = SKColorType.Bgra8888;
-        var targetAlphaType = SKAlphaType.Premul;
-
-        SKBitmap convertedBitmap;
-        if (skBitmap.ColorType != targetColorType || skBitmap.AlphaType != targetAlphaType)
-        {
-            convertedBitmap = new SKBitmap(skBitmap.Width, skBitmap.Height, targetColorType, targetAlphaType);
-            skBitmap.CopyTo(convertedBitmap, targetColorType);
-        }
-        else
-        {
-            convertedBitmap = skBitmap;
-        }
-
-        var width = convertedBitmap.Width;
-        var height = convertedBitmap.Height;
-        var stride = width * 4;
-        var pixelSize = new PixelSize(width, height);
-        var dpi = new Vector(96, 96);
-
-        // Copy pixel data from SKBitmap to managed byte array
-        byte[] pixelBytes = new byte[height * stride];
-        Marshal.Copy(convertedBitmap.GetPixels(), pixelBytes, 0, pixelBytes.Length);
-
-        // Allocate unmanaged memory and copy pixel data into it
-        IntPtr unmanagedPointer = Marshal.AllocHGlobal(pixelBytes.Length);
-        Marshal.Copy(pixelBytes, 0, unmanagedPointer, pixelBytes.Length);
-
-        try
-        {
-            return new Bitmap(
-                PixelFormat.Bgra8888,
-                AlphaFormat.Premul,
-                unmanagedPointer,
-                pixelSize,
-                dpi,
-                stride);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(unmanagedPointer);
-        }
-    }
-
-    public static Bitmap ToAvaloniaBitmap2(this SKBitmap skBitmap)
     {
         using var image = SKImage.FromBitmap(skBitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
