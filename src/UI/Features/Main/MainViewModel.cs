@@ -616,9 +616,14 @@ public partial class MainViewModel :
             vm.Initialize(title, text, SelectedSubtitleFormat);
         });
 
+        var oldSelectedIndex = SelectedSubtitleIndex ?? 0;
+
         if (result.OkPressed)
         {
             SetSubtitles(result.Subtitle);
+            var idx = Math.Min(oldSelectedIndex, Subtitles.Count - 1);  
+            SelectAndScrollToRow(idx);
+            _updateAudioVisualizer = true;
         }
     }
 
