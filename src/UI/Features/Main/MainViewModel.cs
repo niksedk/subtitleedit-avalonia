@@ -1583,6 +1583,120 @@ public partial class MainViewModel :
             Subtitles[i].SetStartTimeOnly(subtitle.Paragraphs[i].StartTime.TimeSpan);
             Subtitles[i].EndTime = subtitle.Paragraphs[i].EndTime.TimeSpan;
         }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private async Task ImportStyling()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        if (Subtitles.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.NoVideoLoaded,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        if (subtitle.Paragraphs.Count != Subtitles.Count)
+        {
+            var message = "The style import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
+                + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                + "Current lines: " + Subtitles.Count + Environment.NewLine
+                + Environment.NewLine +
+                "Do you want to continue anyway?";
+
+            var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Error);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                _shortcutManager.ClearKeys();
+                return;
+            }
+        }
+
+        for (var i = 0; i < Subtitles.Count && i < subtitle.Paragraphs.Count; i++)
+        {
+            var importText = subtitle.Paragraphs[i].Text;
+            var s = Subtitles[i].Text;
+
+            var pre = string.Empty;
+            if (importText.StartsWith("{\\") && importText.Contains('}'))
+            {
+                pre = importText.Substring(0, importText.IndexOf('}') + 1);
+                importText = importText.Remove(0, pre.Length);
+            }
+
+            for (var j = 0; j < 3; j++)
+            {
+                if (importText.StartsWith("<i>", StringComparison.OrdinalIgnoreCase) && importText.EndsWith("</i>", StringComparison.OrdinalIgnoreCase))
+                {
+                    importText = importText.Substring(0, importText.Length - 4);
+                    s = "<i>" + s + "</i>";
+                }
+
+                if (importText.StartsWith("<b>", StringComparison.OrdinalIgnoreCase) && importText.EndsWith("</b>", StringComparison.OrdinalIgnoreCase))
+                {
+                    importText = importText.Substring(0, importText.Length - 4);
+                    s = "<b>" + s + "</b>";
+                }
+
+                if (importText.StartsWith("<u>", StringComparison.OrdinalIgnoreCase) && importText.EndsWith("</u>", StringComparison.OrdinalIgnoreCase))
+                {
+                    importText = importText.Substring(0, importText.Length - 4);
+                    s = "<u>" + s + "</u>";
+                }
+
+                var startFont = importText.IndexOf("<font", StringComparison.OrdinalIgnoreCase);
+                if (startFont >= 0)
+                {
+                    var startFontEnd = importText.IndexOf('>', startFont);
+                    var endFont = importText.IndexOf("</font>", StringComparison.OrdinalIgnoreCase);
+                    if (startFontEnd > startFont && startFont < endFont)
+                    {
+                        var fontTag = importText.Substring(startFont, startFontEnd - startFont + 1);
+                        s = fontTag + s + "</font>";
+                    }
+                }
+            }
+
+            s = pre + s;
+
+            if (!string.IsNullOrWhiteSpace(s))
+            {
+                Subtitles[i].Text = s;
+            }
+        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]

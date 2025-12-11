@@ -115,6 +115,11 @@ public static class InitMenu
                     {
                         new MenuItem
                         {
+                            Header = Se.Language.File.Import.SubtitleWithManuallyChosenEncodingDotDotDot,
+                            Command = vm.ShowImportSubtitleWithManuallyChosenEncodingCommand,
+                        },
+                        new MenuItem
+                        {
                             Header = Se.Language.File.Import.ImagesDotDotDot,
                             Command = vm.ImportImagesCommand,
                         },
@@ -125,8 +130,8 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Import.SubtitleWithManuallyChosenEncodingDotDotDot,
-                            Command = vm.ShowImportSubtitleWithManuallyChosenEncodingCommand,
+                            Header = Se.Language.File.Import.FormattingDotDotDot,
+                            Command = vm.ImportStylingCommand,
                         },
                     }
                 },

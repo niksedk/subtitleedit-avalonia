@@ -9,6 +9,7 @@ public class LanguageImport
     public string TitleImportImages { get; set; }
     public string ImportFileLabel { get; set; }
     public string ImportFilesInfo { get; set; }
+    public string FormattingDotDotDot { get; set; }
 
     public LanguageImport()
     {
@@ -16,6 +17,7 @@ public class LanguageImport
         ImagesDotDotDot = "Images...";
         TitleImportImages = "Import images";
         TimeCodesDotDotDot = "Time codes...";
+        FormattingDotDotDot = "Formatting...";
         SubtitleWithManuallyChosenEncodingDotDotDot = "_Subtitle with manually chosen encoding...";
         ImportFileLabel = "Choose images to import (time codes in file names supported)";
         ImportFilesInfo = @"Use time-coded filenames:
