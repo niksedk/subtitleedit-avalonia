@@ -10477,7 +10477,7 @@ public partial class MainViewModel :
         }
 
         StatusTextRight = $"{Subtitles.IndexOf(item) + 1}/{Subtitles.Count}";
-        if (item == SelectedSubtitle)
+        if (item == SelectedSubtitle && item.Text == EditText)
         {
             return;
         }
