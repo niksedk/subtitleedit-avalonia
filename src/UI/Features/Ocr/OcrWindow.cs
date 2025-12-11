@@ -285,7 +285,7 @@ public class OcrWindow : Window
                             Spacing = 5,
                             Margin = new Thickness(5),
                         };
-                        var bitmap = item.GetBitmap();
+                        var bitmap = item.GetBitmapCropped();
                         if (bitmap != null)
                         {
                             var image = new Image

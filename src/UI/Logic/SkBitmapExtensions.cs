@@ -115,6 +115,68 @@ internal static class SkBitmapExtensions
         return MakeImageBrighter(bitmap, brightnessIncrease);
     }
 
+    public static SKBitmap CropTransparentColors(this SKBitmap originalBitmap, byte alphaThreshold = 0)
+    {
+        if (originalBitmap.Width == 0 || originalBitmap.Height == 0)
+        {
+            return originalBitmap;
+        }
+
+        var left = originalBitmap.Width;
+        var top = originalBitmap.Height;
+        var right = 0;
+        var bottom = 0;
+
+        // Find the bounds of non-transparent pixels
+        for (var y = 0; y < originalBitmap.Height; y++)
+        {
+            for (var x = 0; x < originalBitmap.Width; x++)
+            {
+                var pixel = originalBitmap.GetPixel(x, y);
+                if (pixel.Alpha > alphaThreshold)
+                {
+                    if (x < left)
+                    {
+                        left = x;
+                    }
+
+                    if (x > right)
+                    {
+                        right = x;
+                    }
+
+                    if (y < top)
+                    {
+                        top = y;
+                    }
+
+                    if (y > bottom)
+                    {
+                        bottom = y;
+                    }
+                }
+            }
+        }
+
+        // If no non-transparent pixels found, return a 1x1 transparent bitmap
+        if (left > right || top > bottom)
+        {
+            return new SKBitmap(1, 1);
+        }
+
+        var width = right - left + 1;
+        var height = bottom - top + 1;
+
+        // Create the cropped bitmap
+        var croppedBitmap = new SKBitmap(width, height);
+        using var canvas = new SKCanvas(croppedBitmap);
+        var sourceRect = new SKRect(left, top, right + 1, bottom + 1);
+        var destRect = new SKRect(0, 0, width, height);
+        canvas.DrawBitmap(originalBitmap, sourceRect, destRect);
+
+        return croppedBitmap;
+    }
+
     public static string ToBase64String(this SKBitmap bitmap)
     {
         using var image = SKImage.FromBitmap(bitmap);

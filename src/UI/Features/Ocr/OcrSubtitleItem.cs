@@ -69,6 +69,13 @@ public partial class OcrSubtitleItem : ObservableObject
         return GetSkBitmap().ToAvaloniaBitmap();
     }
 
+    public Bitmap GetBitmapCropped(byte alphaThreshold = 0)
+    {
+        var skBitmap = GetSkBitmap();
+        var cropped = skBitmap.CropTransparentColors(alphaThreshold);
+        return cropped.ToAvaloniaBitmap();
+    }
+
     public SKPointI GetPosition()
     {
         return _ocrSubtitle.GetPosition(_index);
