@@ -168,7 +168,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = textToSingleLineConverter },
+                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = new TextWithSubtitleSyntaxHighlightingConverter() },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -199,7 +199,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = textToSingleLineConverter },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = new TextWithSubtitleSyntaxHighlightingConverter() },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
