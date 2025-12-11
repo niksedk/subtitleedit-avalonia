@@ -1,11 +1,17 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
+using AvaloniaEdit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Threading.Tasks;
@@ -25,6 +31,7 @@ public partial class SourceViewViewModel : ObservableObject
 
     public SubtitleFormat _subtitleFormat { get; private set; }
     public ITextBoxWrapper SourceViewTextBox { get; set; }
+    public Border TextBoxContainer { get; set; }
 
     private readonly System.Timers.Timer _cursorTimer;
 
@@ -36,6 +43,7 @@ public partial class SourceViewViewModel : ObservableObject
         LineAndColumnInfo = string.Empty;
         Subtitle = new Subtitle();
         _subtitleFormat = new SubRip();
+        TextBoxContainer = new Border();
 
         _cursorTimer = new System.Timers.Timer(200);
         _cursorTimer.Elapsed += (sender, args) =>
@@ -78,6 +86,127 @@ public partial class SourceViewViewModel : ObservableObject
         Text = text;
         _subtitleFormat = subtitleFormat;
         _cursorTimer.Start();
+
+        var  useSimpleTextBox = text.Length > 2_000_000;
+        if (useSimpleTextBox)
+        {
+            SourceViewTextBox = CreateSimpleTextBoxWrapper();
+        }
+        else
+        {
+            SourceViewTextBox = CreateAdvancedTextBoxWrapper();
+        }
+
+        TextBoxContainer.Child = SourceViewTextBox.ContentControl;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            Task.Delay(100).Wait(); // Slight delay to ensure control is ready  
+            SourceViewTextBox.Focus();
+            SourceViewTextBox.CaretIndex = 0;
+        }, DispatcherPriority.Input);
+    }
+
+    private TextBoxWrapper CreateSimpleTextBoxWrapper()
+    {
+        var textBox = new TextBox
+        {
+            Margin = new Thickness(0, 0, 10, 0),
+            [!TextBox.TextProperty] = new Binding(nameof(Text)) { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            AcceptsReturn = true,
+        };
+
+        return new TextBoxWrapper(textBox);
+    }
+
+    private TextEditorWrapper CreateAdvancedTextBoxWrapper()
+    {
+        var textBox = new TextEditor
+        {
+            Margin = new Thickness(0, 0, 10, 0),
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            ShowLineNumbers = true,
+            WordWrap = true,
+        };
+
+        // Add syntax highlighting for subtitle source formats
+        textBox.TextArea.TextView.LineTransformers.Add(new SubtitleSourceSyntaxHighlighting());
+
+        // Setup two-way binding manually since TextEditor doesn't support direct binding
+        var isUpdatingFromViewModel = false;
+        var isUpdatingFromEditor = false;
+
+        void UpdateEditorFromViewModel()
+        {
+            if (isUpdatingFromEditor)
+            {
+                return;
+            }
+
+            isUpdatingFromViewModel = true;
+            try
+            {
+                var text = Text ?? string.Empty;
+                if (textBox.Text != text)
+                {
+                    textBox.Text = text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromViewModel = false;
+            }
+        }
+
+        void UpdateViewModelFromEditor()
+        {
+            if (isUpdatingFromViewModel)
+            {
+                return;
+            }
+
+            isUpdatingFromEditor = true;
+            try
+            {
+                if (Text != textBox.Text)
+                {
+                    Text = textBox.Text;
+                }
+            }
+            finally
+            {
+                isUpdatingFromEditor = false;
+            }
+        }
+
+        // Listen to ViewModel changes
+        PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(Text))
+            {
+                UpdateEditorFromViewModel();
+            }
+        };
+
+        // Listen to TextEditor changes
+        textBox.TextChanged += (s, e) => UpdateViewModelFromEditor();
+
+        // Initial text load
+        UpdateEditorFromViewModel();
+
+        var textBoxBorder = new Border
+        {
+            BorderBrush = Brushes.Gray,
+            BorderThickness = new Thickness(1),
+            Child = textBox,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        return new TextEditorWrapper(textBox, textBoxBorder);
     }
 
     [RelayCommand]

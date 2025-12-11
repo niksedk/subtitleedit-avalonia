@@ -1,20 +1,12 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Media;
-using AvaloniaEdit;
-using AvaloniaEdit.Editing;
-using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Shared.SourceView;
 
 public class SourceViewWindow : Window
 {
-    private readonly SourceViewViewModel _vm;
-    
     public SourceViewWindow(SourceViewViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -24,100 +16,17 @@ public class SourceViewWindow : Window
         MinWidth = 700;
         MinHeight = 400;
         CanResize = true;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
-        var textBox = new TextEditor
+        var contentBorder = new Border
         {
-            Margin = new Thickness(0, 0, 10, 0),
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            ShowLineNumbers = true,
-            WordWrap = true,
+            Width = double.NaN,
+            Height = double.NaN,
         };
-        
-        // Setup two-way binding manually since TextEditor doesn't support direct binding
-        var isUpdatingFromViewModel = false;
-        var isUpdatingFromEditor = false;
-
-        void UpdateEditorFromViewModel()
-        {
-            if (isUpdatingFromEditor)
-            {
-                return;
-            }
-
-            isUpdatingFromViewModel = true;
-            try
-            {
-                var text = vm.Text ?? string.Empty;
-                if (textBox.Text != text)
-                {
-                    textBox.Text = text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromViewModel = false;
-            }
-        }
-
-        void UpdateViewModelFromEditor()
-        {
-            if (isUpdatingFromViewModel)
-            {
-                return;
-            }
-
-            isUpdatingFromEditor = true;
-            try
-            {
-                if (vm.Text != textBox.Text)
-                {
-                    vm.Text = textBox.Text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromEditor = false;
-            }
-        }
-
-        // Listen to ViewModel changes
-        vm.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(vm.Text))
-            {
-                UpdateEditorFromViewModel();
-            }
-        };
-
-        // Listen to TextEditor changes
-        textBox.TextChanged += (s, e) => UpdateViewModelFromEditor();
-
-        // Initial text load
-        UpdateEditorFromViewModel();
-
-        //var textBox = new TextBox 
-        //{
-        //    Margin = new Thickness(0, 0, 10, 0),
-        //    [!TextBox.TextProperty] = new Binding(nameof(vm.Text)) { Mode = BindingMode.TwoWay },
-        //    VerticalAlignment = VerticalAlignment.Stretch,
-        //    HorizontalAlignment = HorizontalAlignment.Stretch,
-        //    AcceptsReturn = true,
-        //};
-
-        var textBoxBorder = new Border
-        {
-            BorderBrush = Brushes.Gray,
-            BorderThickness = new Thickness(1),
-            Child = textBox,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };  
-
-        vm.SourceViewTextBox = new TextEditorWrapper(textBox, textBoxBorder);
+        vm.TextBoxContainer = contentBorder;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
@@ -143,18 +52,12 @@ public class SourceViewWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(textBoxBorder, 0);
+        grid.Add(contentBorder, 0);
         grid.Add(labelCursorPosition, 1);
         grid.Add(buttonPanel, 1);
 
-        Content = grid;
-        
-        Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
-    }
+        Content = grid;       
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);  
     }
 }
