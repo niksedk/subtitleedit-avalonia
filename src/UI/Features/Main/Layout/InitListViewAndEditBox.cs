@@ -1247,27 +1247,7 @@ public static class InitListViewAndEditBox
 
     private static Border MakeTextEditor(MainViewModel vm)
     {
-        var textEditor = new TextEditor
-        {
-            MinHeight = 92,
-            Height = 92,
-            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
-            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
-            WordWrap = true,
-            ShowLineNumbers = false,
-            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Focusable = true,
-            Padding = new Thickness(4, 0, 4, 4),
-        };
-
-        // Add syntax highlighting transformer
-        textEditor.TextArea.TextView.LineTransformers.Add(new SubtitleSyntaxHighlighting());
-
-        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
-        {
-            textEditor.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
-        }
+        var textEditor  = MakeTextEditor();
 
         var defaultBorderBrush = UiUtil.GetBorderBrush();
         var focusedBorderBrush = new SolidColorBrush(Colors.DodgerBlue);
@@ -1280,6 +1260,7 @@ public static class InitListViewAndEditBox
             CornerRadius = new CornerRadius(3),
             ClipToBounds = true,
         };
+
 
         // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
         textEditor.Loaded += (s, e) =>
@@ -1298,6 +1279,7 @@ public static class InitListViewAndEditBox
                 };
             }
         };
+
 
         // Setup two-way binding manually since TextEditor doesn't support direct binding
         var isUpdatingFromViewModel = false;
@@ -1398,6 +1380,33 @@ public static class InitListViewAndEditBox
         return textEditorBorder;
     }
 
+    private static TextEditor MakeTextEditor()
+    {
+        var textEditor = new TextEditor
+        {
+            MinHeight = 92,
+            Height = 92,
+            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
+            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
+            WordWrap = true,
+            ShowLineNumbers = false,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Focusable = true,
+            Padding = new Thickness(6, 4, 4, 4),
+        };
+
+        // Add syntax highlighting transformer
+        textEditor.TextArea.TextView.LineTransformers.Add(new SubtitleSyntaxHighlighting());
+
+        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+        {
+            textEditor.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+        }
+
+        return textEditor;
+    }
+
     private static Control MakeTextBoxOriginal(MainViewModel vm)
     {
         if (Se.Settings.Appearance.SubtitleTextBoxColorTags)
@@ -1437,27 +1446,7 @@ public static class InitListViewAndEditBox
 
     private static Border MakeTextEditorOriginal(MainViewModel vm)
     {
-        var textEditor = new TextEditor
-        {
-            MinHeight = 92,
-            Height = 92,
-            FontSize = Se.Settings.Appearance.SubtitleTextBoxFontSize,
-            FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
-            WordWrap = true,
-            ShowLineNumbers = false,
-            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Focusable = true,
-            Padding = new Thickness(4, 0, 4, 4),
-        };
-
-        // Add syntax highlighting transformer
-        textEditor.TextArea.TextView.LineTransformers.Add(new SubtitleSyntaxHighlighting());
-
-        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
-        {
-            textEditor.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
-        }
+        var textEditor = MakeTextEditor();
 
         var defaultBorderBrush = UiUtil.GetBorderBrush();
         var focusedBorderBrush = new SolidColorBrush(Colors.DodgerBlue);
