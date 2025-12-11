@@ -22,7 +22,7 @@ public class MultipleReplaceWindow : Window
         Title = Se.Language.Edit.MultipleReplace.Title;
         Width = 1110;
         Height = 740;
-        MinWidth = 800;
+        MinWidth = 850;
         MinHeight = 400;
         CanResize = true;
         _vm = vm;
@@ -280,7 +280,7 @@ public class MultipleReplaceWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = new Thickness(0, 0, 0, 10),
@@ -291,7 +291,7 @@ public class MultipleReplaceWindow : Window
         var labelFind =  UiUtil.MakeLabel(Se.Language.General.Find);
         var textBoxFind = new TextBox
         {
-            MinWidth = 200,
+            MinWidth = 100,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
@@ -302,9 +302,9 @@ public class MultipleReplaceWindow : Window
         var labelReplaceWith = UiUtil.MakeLabel(Se.Language.General.ReplaceWith);
         var textBoxReplaceWith = new TextBox
         {
-            MinWidth = 200,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Width = 190,
+            MinWidth = 100,
+            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.ReplaceWith)) { Source = vm }
         };
