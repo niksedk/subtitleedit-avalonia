@@ -38,6 +38,12 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 .Replace("\n", separator);
         }
 
+        // Truncate long strings for performance
+        if (str.Length > 500)
+        {
+            str = str.Substring(0, 100).TrimEnd() + "...";
+        }
+
         int i = 0;
         while (i < str.Length)
         {
@@ -85,6 +91,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     i = tagEnd + 1;
                     continue;
                 }
+                else
+                {
+                    // Malformed ASS/SSA tag - treat as regular text
+                    inlines.Add(new Run(c.ToString()));
+                    i++;
+                    continue;
+                }
             }
 
             // Handle HTML comments
@@ -111,6 +124,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     i = tagEnd + 1;
                     continue;
                 }
+                else
+                {
+                    // Malformed HTML tag - treat as regular text
+                    inlines.Add(new Run(c.ToString()));
+                    i++;
+                    continue;
+                }
             }
 
             // Handle line breaks
@@ -131,6 +151,12 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             if (i > textStart)
             {
                 inlines.Add(new Run(str.Substring(textStart, i - textStart)));
+            }
+            else
+            {
+                // Safety: if we didn't match any condition and haven't advanced, treat as regular character
+                inlines.Add(new Run(str[i].ToString()));
+                i++;
             }
         }
 
@@ -208,6 +234,12 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 {
                     Foreground = new SolidColorBrush(AttributeColor)
                 });
+            }
+            else if (i < attributesPart.Length)
+            {
+                // Unexpected character - add it and move on to prevent infinite loop
+                inlines.Add(new Run(attributesPart[i].ToString()));
+                i++;
             }
 
             // Skip whitespace
