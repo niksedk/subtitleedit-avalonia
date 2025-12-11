@@ -925,5 +925,11 @@ public partial class MultipleReplaceViewModel : ObservableObject
     internal void OnClosing()
     {
         SaveSettings();
+        UiUtil.SaveWindowPosition(Window);
+    }
+
+    internal void OnLoaded()
+    {
+        UiUtil.RestoreWindowPosition(Window);
     }
 }

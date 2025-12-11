@@ -20,10 +20,10 @@ public class MultipleReplaceWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Edit.MultipleReplace.Title;
-        Width = 1010;
+        Width = 1110;
         Height = 740;
-        MinWidth = 400;
-        MinHeight = 300;
+        MinWidth = 800;
+        MinHeight = 400;
         CanResize = true;
         _vm = vm;
         vm.Window = this;
@@ -76,6 +76,7 @@ public class MultipleReplaceWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         Closing += (_,_) => vm.OnClosing();
+        Loaded += (_,_) => vm.OnLoaded();
         KeyDown += vm.OnKeyDown;
     }
     private static Border MakeRulesView(MultipleReplaceViewModel vm)
@@ -278,23 +279,21 @@ public class MultipleReplaceWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = new Thickness(0, 0, 0, 10),
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            ColumnSpacing = 5,
         }.WithBindVisible(vm, nameof(vm.IsEditPanelVisible));
 
-        var labelFind = UiUtil.MakeLabel(Se.Language.General.Find);
+        var labelFind =  UiUtil.MakeLabel(Se.Language.General.Find);
         var textBoxFind = new TextBox
         {
-            Width = 200,
-            HorizontalAlignment = HorizontalAlignment.Left,
+            MinWidth = 200,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.Find)) { Source = vm }
         };
@@ -303,8 +302,9 @@ public class MultipleReplaceWindow : Window
         var labelReplaceWith = UiUtil.MakeLabel(Se.Language.General.ReplaceWith);
         var textBoxReplaceWith = new TextBox
         {
-            Width = 200,
-            HorizontalAlignment = HorizontalAlignment.Left,
+            MinWidth = 200,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedNode) + "." + nameof(RuleTreeNode.ReplaceWith)) { Source = vm }
         };
@@ -313,7 +313,7 @@ public class MultipleReplaceWindow : Window
         var labelType = UiUtil.MakeLabel(Se.Language.General.Type);
         var comboBoxType = new ComboBox
         {
-            Width = 200,
+            Width = 190,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.RuleTypes)) { Source = vm },
@@ -324,11 +324,11 @@ public class MultipleReplaceWindow : Window
         editGrid.Add(labelFind, 0, 0);
         editGrid.Add(textBoxFind, 1, 0);
 
-        editGrid.Add(labelReplaceWith, 0, 2);
-        editGrid.Add(textBoxReplaceWith, 1, 2);
+        editGrid.Add(labelReplaceWith, 0, 1);
+        editGrid.Add(textBoxReplaceWith, 1, 1);
 
-        editGrid.Add(labelType, 0, 3);
-        editGrid.Add(comboBoxType, 1, 4);
+        editGrid.Add(labelType, 0, 2);
+        editGrid.Add(comboBoxType, 1, 2);
 
         var dataGrid = new DataGrid
         {
