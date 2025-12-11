@@ -11,8 +11,8 @@ public class SourceViewWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
-        Width = 1000;
-        Height = 700;   
+        Width = 1200;
+        Height = 800;   
         MinWidth = 700;
         MinHeight = 400;
         CanResize = true;

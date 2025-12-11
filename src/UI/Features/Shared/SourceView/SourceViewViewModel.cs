@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
@@ -37,7 +38,7 @@ public partial class SourceViewViewModel : ObservableObject
 
     public SourceViewViewModel()
     {
-        SourceViewTextBox = new TextBoxWrapper(new TextBox());  
+        SourceViewTextBox = new TextBoxWrapper(new TextBox());
         Title = string.Empty;
         Text = string.Empty;
         LineAndColumnInfo = string.Empty;
@@ -87,21 +88,23 @@ public partial class SourceViewViewModel : ObservableObject
         _subtitleFormat = subtitleFormat;
         _cursorTimer.Start();
 
-        var  useSimpleTextBox = text.Length > 2_000_000;
-        if (useSimpleTextBox)
-        {
-            SourceViewTextBox = CreateSimpleTextBoxWrapper();
-        }
-        else
-        {
-            SourceViewTextBox = CreateAdvancedTextBoxWrapper();
-        }
-
-        TextBoxContainer.Child = SourceViewTextBox.ContentControl;
-
         Dispatcher.UIThread.Post(() =>
         {
-            Task.Delay(100).Wait(); // Slight delay to ensure control is ready  
+            Task.Delay(50).Wait(); // Slight delay to ensure control is ready  
+
+            var useSimpleTextBox = text.Length > 2_000_000;
+            if (useSimpleTextBox)
+            {
+                SourceViewTextBox = CreateSimpleTextBoxWrapper();
+            }
+            else
+            {
+                SourceViewTextBox = CreateAdvancedTextBoxWrapper(text, subtitleFormat);
+            }
+
+            TextBoxContainer.Child = SourceViewTextBox.ContentControl;
+
+            Task.Delay(50).Wait(); // Slight delay to ensure control is ready  
             SourceViewTextBox.Focus();
             SourceViewTextBox.CaretIndex = 0;
         }, DispatcherPriority.Input);
@@ -121,7 +124,7 @@ public partial class SourceViewViewModel : ObservableObject
         return new TextBoxWrapper(textBox);
     }
 
-    private TextEditorWrapper CreateAdvancedTextBoxWrapper()
+    private TextEditorWrapper CreateAdvancedTextBoxWrapper(string text, SubtitleFormat subtitleFormat)
     {
         var textBox = new TextEditor
         {
@@ -133,7 +136,11 @@ public partial class SourceViewViewModel : ObservableObject
         };
 
         // Add syntax highlighting for subtitle source formats
-        textBox.TextArea.TextView.LineTransformers.Add(new SubtitleSourceSyntaxHighlighting());
+        var lineTransformer = GetLineTransformer(text, subtitleFormat);
+        if (lineTransformer != null)
+        {
+            textBox.TextArea.TextView.LineTransformers.Add(lineTransformer);
+        }
 
         // Setup two-way binding manually since TextEditor doesn't support direct binding
         var isUpdatingFromViewModel = false;
@@ -207,6 +214,45 @@ public partial class SourceViewViewModel : ObservableObject
         };
 
         return new TextEditorWrapper(textBox, textBoxBorder);
+    }
+
+    private static DocumentColorizingTransformer? GetLineTransformer(string text, SubtitleFormat subtitleFormat)
+    {
+        // SubRip (.srt) and WebVTT (.vtt) use similar time code formats
+        if (subtitleFormat is SubRip ||
+            subtitleFormat is WebVTT ||
+            subtitleFormat is WebVTTFileWithLineNumber)
+        {
+            return new SubRipSourceSyntaxHighlighting();
+        }
+
+        // Advanced SubStation Alpha (.ass) and SubStation Alpha (.ssa) formats
+        if (subtitleFormat is AdvancedSubStationAlpha || subtitleFormat is SubStationAlpha)
+        {
+            return new AssaSourceSyntaxHighlighting();
+        }
+
+        // XML-based formats (e.g., TTML, Netflix DFXP, etc.)
+        if (subtitleFormat.Extension == ".xml" ||
+            subtitleFormat.AlternateExtensions.Contains(".xml") ||
+            text.Contains("<?xml version=") ||
+            subtitleFormat is Sami ||
+            subtitleFormat is SamiModern ||
+            subtitleFormat is SamiYouTube ||
+            subtitleFormat is SamiAvDicPlayer)
+        {
+            return new XmlSourceSyntaxHighlighting();
+        }
+
+        // Json-based formats
+        if (subtitleFormat.Extension == ".json" ||
+            subtitleFormat.AlternateExtensions.Contains(".json"))
+        {
+            return new JsonSourceSyntaxHighlighting();
+        }
+
+        // No syntax highlighting for other formats
+        return null;
     }
 
     [RelayCommand]
