@@ -1281,7 +1281,7 @@ public static class InitListViewAndEditBox
                 textArea.LostFocus += (_, __) =>
                 {
                     textEditorBorder.BorderBrush = defaultBorderBrush;
-                    wrapper.HasFocus = false;
+                    //wrapper.HasFocus = false;
                 };
             }
         };
@@ -1372,8 +1372,6 @@ public static class InitListViewAndEditBox
             currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
         }
         UpdateEditorFromViewModel();
-
-        vm.EditTextBox = new TextEditorWrapper(textEditor, textEditorBorder);
 
         textEditor.TextChanged += (s, e) =>
         {
@@ -1575,8 +1573,6 @@ public static class InitListViewAndEditBox
             currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
         }
         UpdateEditorFromViewModel();
-
-        vm.EditTextBox = new TextEditorWrapper(textEditor, textEditorBorder);
 
         textEditor.TextChanged += (s, e) =>
         {
