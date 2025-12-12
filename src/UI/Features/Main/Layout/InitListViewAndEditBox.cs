@@ -1240,6 +1240,9 @@ public static class InitListViewAndEditBox
                 textBox.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
             }
 
+            textBox.TextChanged += vm.SubtitleTextChanged;
+            textBox.GotFocus += (_,_) => vm.SubtitleTextBoxGotFocus();
+
             vm.EditTextBox = new TextBoxWrapper(textBox); 
             return textBox;
         }
@@ -1375,7 +1378,7 @@ public static class InitListViewAndEditBox
             vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("TextChanged", RoutingStrategies.Bubble)));
         };
 
-        textEditor.GotFocus += vm.SubtitleTextBoxGotFocus;
+        textEditor.Tapped += (_, _) => vm.SubtitleTextBoxGotFocus();
 
         return textEditorBorder;
     }
@@ -1572,7 +1575,7 @@ public static class InitListViewAndEditBox
             vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("OriginalTextChanged", RoutingStrategies.Bubble)));
         };
 
-        textEditor.GotFocus += vm.SubtitleTextBoxGotFocus;
+        textEditor.Tapped += (_, _) => vm.SubtitleTextBoxGotFocus();
 
         return textEditorBorder;
     }

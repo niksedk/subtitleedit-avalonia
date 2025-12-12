@@ -11223,7 +11223,7 @@ public partial class MainViewModel :
         }
     }
 
-    internal void SubtitleTextBoxGotFocus(object? sender, GotFocusEventArgs e)
+    internal void SubtitleTextBoxGotFocus()
     {
         if (Subtitles.Count == 0)
         {

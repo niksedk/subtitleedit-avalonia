@@ -15,7 +15,7 @@ public class SeAppearance
     public string SubtitleTextBoxAndGridFontName { get; set; }
     public bool SubtitleTextBoxFontBold { get; set; }
     public bool SubtitleTextBoxColorTags { get; set; }
-    public bool SubtitleGridColorTags { get; set; };
+    public bool SubtitleGridColorTags { get; set; }
 
     public bool SubtitleTextBoxCenterText { get; set; }
     public bool ShowHints { get; set; }
