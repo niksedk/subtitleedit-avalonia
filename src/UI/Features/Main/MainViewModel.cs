@@ -244,6 +244,8 @@ public partial class MainViewModel :
     private SubtitleLineViewModel? _repeatSubtitle;
     private bool _ignoreRepeatToggleCommand;
     private VideoPlayerControl? _fullScreenVideoPlayerControl;
+    private static SolidColorBrush _transparentBrush = new SolidColorBrush(Colors.Transparent);
+    private static SolidColorBrush _errorBrush = new SolidColorBrush(_errorColor);
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -4239,6 +4241,7 @@ public partial class MainViewModel :
         ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
+        _errorBrush = new SolidColorBrush(_errorColor);
 
         if (!AreVideoControlsUndocked)
         {
@@ -10533,7 +10536,7 @@ public partial class MainViewModel :
             if (Se.Settings.General.ColorTextTooLong &&
                 lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
             {
-                tb.Background = new SolidColorBrush(_errorColor);
+                tb.Background = _errorBrush;
             }
 
             PanelSingleLineLengths.Children.Add(tb);
@@ -10544,13 +10547,13 @@ public partial class MainViewModel :
 
         EditTextCharactersPerSecondBackground = Se.Settings.General.ColorTextTooLong &&
                                                 cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
-            ? new SolidColorBrush(_errorColor)
-            : new SolidColorBrush(Colors.Transparent);
+            ? _errorBrush
+            : _transparentBrush;
 
         EditTextTotalLengthBackground = Se.Settings.General.ColorTextTooLong &&
                                         totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
-            ? new SolidColorBrush(_errorColor)
-            : new SolidColorBrush(Colors.Transparent);
+            ? _errorBrush
+            : _transparentBrush;
     }
 
     private void MakeSubtitleTextInfoOriginal(string text, SubtitleLineViewModel item)
