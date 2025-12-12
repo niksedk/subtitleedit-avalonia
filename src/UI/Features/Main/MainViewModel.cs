@@ -623,7 +623,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             SetSubtitles(result.Subtitle);
-            var idx = Math.Min(oldSelectedIndex, Subtitles.Count - 1);  
+            var idx = Math.Min(oldSelectedIndex, Subtitles.Count - 1);
             SelectAndScrollToRow(idx);
             _updateAudioVisualizer = true;
         }
@@ -1630,10 +1630,11 @@ public partial class MainViewModel :
         if (subtitle.Paragraphs.Count != Subtitles.Count)
         {
             var message = "The style import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
-                + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
-                + "Current lines: " + Subtitles.Count + Environment.NewLine
-                + Environment.NewLine +
-                "Do you want to continue anyway?";
+                                                                                                                      + "Imported lines: " + subtitle.Paragraphs.Count +
+                                                                                                                      Environment.NewLine
+                                                                                                                      + "Current lines: " + Subtitles.Count + Environment.NewLine
+                                                                                                                      + Environment.NewLine +
+                                                                                                                      "Do you want to continue anyway?";
 
             var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Error);
@@ -6313,6 +6314,7 @@ public partial class MainViewModel :
             {
                 AudioVisualizer.SkipNextPointerEntered = true;
             }
+
             EditTextBox.Focus();
             Task.Delay(10);
             EditTextBox.Focus();
@@ -9445,6 +9447,7 @@ public partial class MainViewModel :
                     {
                         AudioVisualizer.UseSmpteDropFrameTime();
                     }
+
                     InitializeWaveformDisplayMode();
                 }
 
@@ -10264,6 +10267,20 @@ public partial class MainViewModel :
 
                     if (!allowedSingleKeyShortcuts.Contains(key))
                     {
+                        if (EditTextBox.IsFocused)
+                        {
+                            if (key == Key.Return &&
+                                Se.Settings.General.SubtitleTextBoxLimitNewLines)
+                            {
+                                var newLineCount =  EditTextBox.Text.SplitToLines().Count;
+                                if (newLineCount >= Se.Settings.General.MaxNumberOfLines)
+                                {
+                                    keyEventArgs.Handled = true;
+                                }
+                            }
+                        }
+
+                        
                         return;
                     }
                 }

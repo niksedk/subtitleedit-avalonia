@@ -69,7 +69,7 @@ public class TextBoxWrapper : ITextBoxWrapper
     public Control TextControl => _textBox;
     public Control ContentControl => _textBox;
 
-    public bool IsFocused { get; }
+    public bool IsFocused => _textBox.IsFocused;
     public void Cut()
     {
         _textBox.Cut();
