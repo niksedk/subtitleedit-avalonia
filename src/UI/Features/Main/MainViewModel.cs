@@ -9167,8 +9167,12 @@ public partial class MainViewModel :
                         {
                             await vp.WaitForPlayersReadyAsync();
                             await Task.Delay(200);
-                            vp.Position = SelectedSubtitle.StartTime.TotalSeconds;
-                            Dispatcher.UIThread.Post(() => { vp.Position = SelectedSubtitle.StartTime.TotalSeconds; });
+                            var s = SelectedSubtitle;
+                            if (vp != null && s != null)
+                            {
+                                vp.Position = s.StartTime.TotalSeconds;
+                                Dispatcher.UIThread.Post(() => { vp.Position = SelectedSubtitle.StartTime.TotalSeconds; });
+                            }
                         }
 
                         SetRecentFileProperties(first);

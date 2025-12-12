@@ -10,6 +10,8 @@ public class TextEditorWrapper : ITextBoxWrapper
     private readonly TextEditor _textEditor;
     private readonly Border _border;
 
+    public bool HasFocus { get; set; }
+
     public TextEditorWrapper(TextEditor textEditor, Border border)
     {
         _textEditor = textEditor;
@@ -66,27 +68,7 @@ public class TextEditorWrapper : ITextBoxWrapper
     public Control TextControl => _textEditor;
     public Control ContentControl => _border;
 
-    public bool IsFocused
-    {
-        get
-        {
-            if (_textEditor.IsFocused || _border.IsFocused || (_textEditor.TextArea != null && _textEditor.TextArea.IsFocused))
-            {
-                return true;
-            }
-
-            // check if border brush color is DogeBlue (indicating focus)
-            if (_border.BorderBrush is SolidColorBrush brush)
-            {
-                if (brush.Color == Colors.DodgerBlue)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+    public bool IsFocused => HasFocus;
 
     public void Cut()
     {

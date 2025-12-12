@@ -876,7 +876,6 @@ public static class InitListViewAndEditBox
         panelLayer.Children.Add(upDownLayer);
         timeControlsPanel.Children.Add(panelLayer);
 
-
         Grid.SetColumn(timeControlsPanel, 0);
         editGrid.Children.Add(timeControlsPanel);
 
@@ -1264,6 +1263,8 @@ public static class InitListViewAndEditBox
             ClipToBounds = true,
         };
 
+        var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
+        vm.EditTextBox = wrapper;
 
         // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
         textEditor.Loaded += (s, e) =>
@@ -1274,11 +1275,13 @@ public static class InitListViewAndEditBox
                 textArea.GotFocus += (_, __) =>
                 {
                     textEditorBorder.BorderBrush = focusedBorderBrush;
+                    wrapper.HasFocus = true;
                 };
 
                 textArea.LostFocus += (_, __) =>
                 {
                     textEditorBorder.BorderBrush = defaultBorderBrush;
+                    wrapper.HasFocus = false;
                 };
             }
         };
@@ -1463,6 +1466,9 @@ public static class InitListViewAndEditBox
             ClipToBounds = true,
         };
 
+        var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
+        vm.EditTextBoxOriginal = wrapper;
+
         // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
         textEditor.Loaded += (s, e) =>
         {
@@ -1472,14 +1478,17 @@ public static class InitListViewAndEditBox
                 textArea.GotFocus += (_, __) =>
                 {
                     textEditorBorder.BorderBrush = focusedBorderBrush;
+                    wrapper.HasFocus = true;
                 };
 
                 textArea.LostFocus += (_, __) =>
                 {
                     textEditorBorder.BorderBrush = defaultBorderBrush;
+                    wrapper.HasFocus = false;
                 };
             }
         };
+
 
         // Setup two-way binding manually since TextEditor doesn't support direct binding
         var isUpdatingFromViewModel = false;
