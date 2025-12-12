@@ -10510,48 +10510,69 @@ public partial class MainViewModel :
 
         text ??= string.Empty;
 
-        text = HtmlUtil.RemoveHtmlTags(text, true);
-        var totalLength = text.CountCharacters(false);
-        var cps = new Paragraph(text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds)
-            .GetCharactersPerSecond();
+        // Cache settings and frequently accessed values
+        var colorTextTooLong = Se.Settings.General.ColorTextTooLong;
+        var maxLineLength = Se.Settings.General.SubtitleLineMaximumLength;
+        var maxCps = Se.Settings.General.SubtitleMaximumCharactersPerSeconds;
 
-        var lines = text.SplitToLines();
-        var lineLenghts = new List<string>(lines);
-        PanelSingleLineLengths.Children.Clear();
-        PanelSingleLineLengths.Children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength).WithFontSize(12)
+        // Remove HTML tags once
+        var cleanText = HtmlUtil.RemoveHtmlTags(text, true);
+        var totalLength = (double)cleanText.CountCharacters(false);
+
+        // Calculate CPS once using cached values
+        var duration = item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds;
+        var cps = duration > 0.001 ? totalLength / (duration / 1000.0) : 0.0;
+
+        // Split lines once and cache count
+        var lines = cleanText.SplitToLines();
+        var lineCount = lines.Count;
+
+        // Pre-allocate panel children capacity: label + (lines + separators)
+        var childrenCapacity = 1 + lineCount + Math.Max(0, lineCount - 1);
+        var children = new List<Control>(childrenCapacity);
+
+        // Add header label
+        children.Add(UiUtil.MakeTextBlock(Se.Language.Main.SingleLineLength)
+            .WithFontSize(12)
             .WithPadding(2));
-        var first = true;
-        for (var i = 0; i < lines.Count; i++)
+
+        // Process lines with minimal allocations
+        for (var i = 0; i < lineCount; i++)
         {
-            if (first)
+            if (i > 0)
             {
-                first = false;
-            }
-            else
-            {
-                PanelSingleLineLengths.Children.Add(UiUtil.MakeTextBlock("/").WithFontSize(12).WithPadding(2));
+                children.Add(UiUtil.MakeTextBlock("/")
+                    .WithFontSize(12)
+                    .WithPadding(2));
             }
 
-            var tb = UiUtil.MakeTextBlock(lineLenghts[i].Length.ToString(CultureInfo.InvariantCulture)).WithFontSize(12).WithPadding(2);
-            if (Se.Settings.General.ColorTextTooLong &&
-                lineLenghts[i].Length > Se.Settings.General.SubtitleLineMaximumLength)
+            var lineLength = lines[i].Length;
+            var tb = UiUtil.MakeTextBlock(lineLength.ToString(CultureInfo.InvariantCulture))
+                .WithFontSize(12)
+                .WithPadding(2);
+
+            if (colorTextTooLong && lineLength > maxLineLength)
             {
                 tb.Background = _errorBrush;
             }
 
-            PanelSingleLineLengths.Children.Add(tb);
+            children.Add(tb);
         }
 
+        // Batch update to minimize layout recalculations
+        PanelSingleLineLengths.Children.Clear();
+        PanelSingleLineLengths.Children.AddRange(children);
+
+        // Update CPS display with formatted string
         EditTextCharactersPerSecond = string.Format(Se.Language.Main.CharactersPerSecond, $"{cps:0.0}");
         EditTextTotalLength = string.Format(Se.Language.Main.TotalCharacters, totalLength);
 
-        EditTextCharactersPerSecondBackground = Se.Settings.General.ColorTextTooLong &&
-                                                cps > Se.Settings.General.SubtitleMaximumCharactersPerSeconds
+        // Use cached brush instances
+        EditTextCharactersPerSecondBackground = colorTextTooLong && cps > maxCps
             ? _errorBrush
             : _transparentBrush;
 
-        EditTextTotalLengthBackground = Se.Settings.General.ColorTextTooLong &&
-                                        totalLength > Se.Settings.General.SubtitleLineMaximumLength * lines.Count
+        EditTextTotalLengthBackground = colorTextTooLong && totalLength > maxLineLength * lineCount
             ? _errorBrush
             : _transparentBrush;
     }
