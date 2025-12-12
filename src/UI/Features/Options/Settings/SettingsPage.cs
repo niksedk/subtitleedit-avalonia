@@ -204,12 +204,9 @@ public class SettingsPage : UserControl
             MakeNumericSettingInt(Se.Language.Options.Settings.NewEmptyDefaultMs, nameof(_vm.NewEmptyDefaultMs)),
             MakeCheckboxSetting(Se.Language.Options.Settings.PromptDeleteLines, nameof(_vm.PromptDeleteLines)),
             MakeCheckboxSetting(Se.Language.Options.Settings.UseFrameMode, nameof(_vm.UseFrameMode)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxLimitNewLines, nameof(_vm.TextBoxLimitNewLines)),
             MakeCheckboxSetting(Se.Language.General.LockTimeCodes, nameof(_vm.LockTimeCodes)),
             MakeCheckboxSetting(Se.Language.Options.Settings.RememberPositionAndSize, nameof(_vm.RememberPositionAndSize)),
-            MakeSeparator(),
-            MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
-            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes), 1),
-            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterDays, nameof(_vm.AutoBackupDeleteAfterDays), 1),
             new SettingsItem(Se.Language.Options.Settings.DefaultEncoding, () => new ComboBox
             {
                 Width = 200,
@@ -230,6 +227,10 @@ public class SettingsPage : UserControl
                     Mode = BindingMode.TwoWay,
                 }
             }),
+            MakeSeparator(),
+            MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes), 1),
+            MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupDeleteAfterDays, nameof(_vm.AutoBackupDeleteAfterDays), 1),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.SubtitleFormats,
@@ -806,18 +807,21 @@ public class SettingsPage : UserControl
 
     private SettingsItem MakeCheckboxSetting(string label, string bindingProperty, Binding? bindingEnabled = null)
     {
-        var cb = new CheckBox
+        var item = new SettingsItem(label, () =>
         {
-            VerticalAlignment = VerticalAlignment.Center,
-            [!ToggleButton.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
-        };
+            var cb = new CheckBox
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                [!ToggleButton.IsCheckedProperty] = new Binding(bindingProperty) { Source = _vm, Mode = BindingMode.TwoWay }
+            };
 
-        if (bindingEnabled != null)
-        {
-            cb[!Control.IsEnabledProperty] = bindingEnabled;
-        }
+            if (bindingEnabled != null)
+            {
+                cb[!Control.IsEnabledProperty] = bindingEnabled;
+            }
 
-        var item = new SettingsItem(label, () => cb);
+            return cb;
+        });
 
         return item;
     }

@@ -70,6 +70,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _rememberPositionAndSize;
     [ObservableProperty] private bool _useFrameMode;
+    [ObservableProperty] private bool _textBoxLimitNewLines;
     [ObservableProperty] private bool _autoBackupOn;
     [ObservableProperty] private int? _autoBackupIntervalMinutes;
     [ObservableProperty] private int? _autoBackupDeleteAfterDays;
@@ -396,6 +397,7 @@ public partial class SettingsViewModel : ObservableObject
         CpsLineLengthStrategy = CpsLineLengthStrategies.FirstOrDefault(p => p.Code == general.CpsLineLengthStrategy) ?? CpsLineLengthStrategies.First();
 
         UseFrameMode = general.UseFrameMode;
+        TextBoxLimitNewLines = general.SubtitleTextBoxLimitNewLines;
         NewEmptyDefaultMs = general.NewEmptyDefaultMs;
         PromptDeleteLines = general.PromptDeleteLines;
         LockTimeCodes = general.LockTimeCodes;
@@ -620,6 +622,7 @@ public partial class SettingsViewModel : ObservableObject
         general.CpsLineLengthStrategy = CpsLineLengthStrategy.Code;
 
         general.UseFrameMode = UseFrameMode;
+        general.SubtitleTextBoxLimitNewLines = TextBoxLimitNewLines;
         general.NewEmptyDefaultMs = NewEmptyDefaultMs ?? general.NewEmptyDefaultMs;
         general.PromptDeleteLines = PromptDeleteLines;
         general.LockTimeCodes = LockTimeCodes;

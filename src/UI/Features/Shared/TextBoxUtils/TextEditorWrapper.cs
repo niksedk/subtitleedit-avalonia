@@ -66,7 +66,13 @@ public class TextEditorWrapper : ITextBoxWrapper
     public Control TextControl => _textEditor;
     public Control ContentControl => _border;
 
-    public bool IsFocused => _textEditor.IsFocused;
+    public bool IsFocused
+    {
+        get
+        {
+            return _textEditor.IsFocused;
+        }
+    }
 
     public void Cut()
     {

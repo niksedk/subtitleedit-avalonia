@@ -188,6 +188,7 @@ public class LanguageSettings
     public string ResetWaveform { get; set; }
     public string ResetRules { get; set; }
     public string UseFrameMode { get; set; }
+    public string TextBoxLimitNewLines { get; set; }
     public string MpvVideoOutput { get; set; }
     public string MpvOpenGl { get; set; }
     public string MpvSoftwareRendering { get; set; }
@@ -204,7 +205,7 @@ public class LanguageSettings
     public string GridGoToSubtitleAndPause { get; set; }
     public string GridGoToSubtitleAndPlay { get; set; }
     public string GridGoToSubtitleOnly { get; set; }
-    public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }
+    public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }    
 
     public LanguageSettings()
     {
@@ -389,6 +390,7 @@ public class LanguageSettings
         ResetWaveform = "Reset waveform";
         ResetRules = "Reset rules";
         UseFrameMode = "Use frame mode (hh.mm.ss.ff)";
+        TextBoxLimitNewLines = "Limit number of lines in subtitle text box";
         MpvVideoOutput = "Video output  (mpv)";
         MpvOpenGl = "libmpv - OpenGL";
         MpvWidRendering = "libmpv - Native Window ID rendering";
