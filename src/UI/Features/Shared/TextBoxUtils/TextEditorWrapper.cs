@@ -70,7 +70,21 @@ public class TextEditorWrapper : ITextBoxWrapper
     {
         get
         {
-            return _textEditor.IsFocused;
+            if (_textEditor.IsFocused || _border.IsFocused || (_textEditor.TextArea != null && _textEditor.TextArea.IsFocused))
+            {
+                return true;
+            }
+
+            // check if border brush color is DogeBlue (indicating focus)
+            if (_border.BorderBrush is SolidColorBrush brush)
+            {
+                if (brush.Color == Colors.DodgerBlue)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
