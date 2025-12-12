@@ -55,7 +55,7 @@ public class BluRayRectangle
     internal static BluRayRectangle Union(BluRayRectangle a, BluRayRectangle b)
     {
         var x = Math.Min(a.Location.X, b.Location.X);
-        var width = Math.Max(a.Location.X + a.Size.Width, b.Location.X + b.Size.Width) -x;
+        var width = Math.Max(a.Location.X + a.Size.Width, b.Location.X + b.Size.Width) - x;
 
         var y = Math.Min(a.Location.Y, b.Location.Y);
         var height = Math.Max(a.Location.Y + a.Size.Height, b.Location.Y + b.Size.Height) - y;
@@ -178,7 +178,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                     return new SKBitmap(1, 1);
                 }
 
-                var bm = new SKBitmap(w, h, SKColorType.Rgba8888, SKAlphaType.Premul);
+                var bm = new SKBitmap(w, h, SKColorType.Rgba8888, SKAlphaType.Opaque);
                 var pixelPtr = bm.GetPixels(); // Writable pixel buffer
                 if (pixelPtr == IntPtr.Zero)
                 {
@@ -205,6 +205,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                             if (b == 0)
                             {
                                 // Next line
+                                //ofs = (ofs / w + 1) * w;
                                 ofs = ofs / w * w;
                                 if (xpos < w)
                                 {
@@ -263,15 +264,20 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             }
 
             // Helper for filling multiple pixels
-            private static unsafe void FillPixels(Span<byte> pixelSpan, int offset, int count, SKColor color)
+            private static void FillPixels(Span<byte> pixelSpan, int offset, int count, SKColor color)
             {
                 var idx = offset * 4; // Assuming RGBA8888 (4 bytes per pixel)
-                Span<byte> colorBytes = stackalloc byte[4] { color.Red, color.Green, color.Blue, color.Alpha };
+                var r = color.Red;
+                var g = color.Green;
+                var b = color.Blue;
+                var a = color.Alpha;
                 
                 for (var i = 0; i < count; i++)
                 {
-                    colorBytes.CopyTo(pixelSpan.Slice(idx, 4));
-                    idx += 4;
+                    pixelSpan[idx++] = r;
+                    pixelSpan[idx++] = g;
+                    pixelSpan[idx++] = b;
+                    pixelSpan[idx++] = a;
                 }
             }
 
@@ -279,10 +285,10 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             private static void PutPixelFast(Span<byte> pixelSpan, int offset, SKColor color)
             {
                 var idx = offset * 4; // Assuming RGBA8888 (4 bytes per pixel)
-                pixelSpan[idx++] = color.Red;
-                pixelSpan[idx++] = color.Green;
-                pixelSpan[idx++] = color.Blue;
-                pixelSpan[idx] = color.Alpha;
+                pixelSpan[idx] = color.Red;
+                pixelSpan[idx + 1] = color.Green;
+                pixelSpan[idx + 2] = color.Blue;
+                pixelSpan[idx + 3] = color.Alpha;
             }
         }
 
@@ -332,22 +338,21 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                     }
                 }
 
-            var mergedBmp = new SKBitmap(r.Size.Width, r.Size.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            using (var canvas = new SKCanvas(mergedBmp))
-            {
-                canvas.Clear(SKColors.Transparent);
-                for (var ioIndex = 0; ioIndex < PcsObjects.Count; ioIndex++)
+                var mergedBmp = new SKBitmap(r.Size.Width, r.Size.Height);
+                using (var canvas = new SKCanvas(mergedBmp))
                 {
-                    if (ioIndex < BitmapObjects.Count)
+                    for (var ioIndex = 0; ioIndex < PcsObjects.Count; ioIndex++)
                     {
-                        var offset = new BluRayPoint(PcsObjects[ioIndex].Origin.X - r.Location.X, PcsObjects[ioIndex].Origin.Y - r.Location.Y);
-                        using (var singleBmp = SupDecoder.DecodeImage(PcsObjects[ioIndex], BitmapObjects[ioIndex], PaletteInfos))
+                        if (ioIndex < BitmapObjects.Count)
                         {
-                            canvas.DrawBitmap(singleBmp, offset.X, offset.Y);
+                            var offset = new BluRayPoint(PcsObjects[ioIndex].Origin.X - r.Location.X, PcsObjects[ioIndex].Origin.Y - r.Location.Y);
+                            using (var singleBmp = SupDecoder.DecodeImage(PcsObjects[ioIndex], BitmapObjects[ioIndex], PaletteInfos))
+                            {
+                                canvas.DrawBitmap(singleBmp, offset.X, offset.Y);
+                            }
                         }
                     }
                 }
-            }
 
                 return mergedBmp;
             }
@@ -656,9 +661,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             for (var index = 0; index < pcs.PcsObjects.Count; index++)
             {
                 var objId = pcs.PcsObjects[index].ObjectId;
-                if (bitmapObjects.ContainsKey(objId))
+                if (bitmapObjects.TryGetValue(objId, out var objData))
                 {
-                    pcs.BitmapObjects.Add(bitmapObjects[objId]);
+                    pcs.BitmapObjects.Add(objData);
                     found = true;
                 }
             }
@@ -755,7 +760,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             var palettes = new Dictionary<int, List<PaletteInfo>>();
             var forceFirstOds = true;
             PcsData latestPcs = null;
-            var pcsList = new List<PcsData>(64); // Pre-allocate reasonable capacity
+            var pcsList = new List<PcsData>();
             var headerBuffer = fromMatroskaFile ? new byte[3] : new byte[HeaderSize];
 
             while (ms.Read(headerBuffer, 0, headerBuffer.Length) == headerBuffer.Length)
@@ -792,15 +797,16 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 #endif
                                 if (pds.PaletteInfo != null)
                                 {
-                                    if (!palettes.ContainsKey(pds.PaletteId))
+                                    if (!palettes.TryGetValue(pds.PaletteId, out var paletteList))
                                     {
-                                        palettes[pds.PaletteId] = new List<PaletteInfo>();
+                                        paletteList = new List<PaletteInfo>();
+                                        palettes[pds.PaletteId] = paletteList;
                                     }
                                     else
                                     {
                                         if (latestPcs.PaletteUpdate)
                                         {
-                                            palettes[pds.PaletteId].RemoveAt(palettes[pds.PaletteId].Count - 1);
+                                            paletteList.RemoveAt(paletteList.Count - 1);
                                         }
                                         else
                                         {
@@ -809,7 +815,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 #endif
                                         }
                                     }
-                                    palettes[pds.PaletteId].Add(pds.PaletteInfo);
+                                    paletteList.Add(pds.PaletteInfo);
                                 }
                             }
                             break;
@@ -962,19 +968,25 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                 {
                     if (odsList.Count > 1)
                     {
-                        var bufSize = odsList.Sum(ods => ods.Fragment.ImagePacketSize);
-                        var buf = new byte[bufSize];
-                        var offset = 0;
-                        
+                        var bufSize = 0;
                         foreach (var ods in odsList)
                         {
-                            Array.Copy(ods.Fragment.ImageBuffer, 0, buf, offset, ods.Fragment.ImagePacketSize);
+                            bufSize += ods.Fragment.ImagePacketSize;
+                        }
+
+                        var buf = new byte[bufSize];
+                        var offset = 0;
+                        foreach (var ods in odsList)
+                        {
+                            Buffer.BlockCopy(ods.Fragment.ImageBuffer, 0, buf, offset, ods.Fragment.ImagePacketSize);
                             offset += ods.Fragment.ImagePacketSize;
                         }
-                        
                         odsList[0].Fragment.ImageBuffer = buf;
                         odsList[0].Fragment.ImagePacketSize = bufSize;
-                        odsList.RemoveRange(1, odsList.Count - 1);
+                        while (odsList.Count > 1)
+                        {
+                            odsList.RemoveAt(1);
+                        }
                     }
                 }
             }
@@ -1113,7 +1125,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
             using (var b1 = i1.GetBitmap())
             {
-                var n1 = new NikseBitmap(b1);
+                var n1 = b1.Copy();
                 var height = n1.GetNonTransparentHeight();
                 var width = n1.GetNonTransparentWidth();
                 if (height > 110 || width > 300)
@@ -1123,8 +1135,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
                 using (var b2 = i2.GetBitmap())
                 {
-                    var n2 = new NikseBitmap(b2);
-                    return n1.IsEqualTo(n2);
+                    var n2 = b2.Copy();
+                    var areEqual = n1.IsEqualTo(n2);
+                    return areEqual;
                 }
             }
         }
@@ -1174,7 +1187,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
         public static int BigEndianInt16(byte[] buffer, int index)
         {
-            if (buffer.Length < 2)
+            if (index + 1 >= buffer.Length)
             {
                 return 0;
             }
@@ -1184,7 +1197,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
         private static uint BigEndianInt32(byte[] buffer, int index)
         {
-            if (buffer.Length < 4)
+            if (index + 3 >= buffer.Length)
             {
                 return 0;
             }
