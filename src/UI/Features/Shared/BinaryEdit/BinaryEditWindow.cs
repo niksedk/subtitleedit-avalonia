@@ -89,7 +89,7 @@ public class BinaryEditWindow : Window
         Closing += (_, _) => vm.Closing();
     }
 
-    private static Menu MakeTopMenu(BinaryEdit.BinaryEditViewModel vm)
+    private static Menu MakeTopMenu(BinaryEditViewModel vm)
     {
         var l = Se.Language.Main.Menu;
         var menu = new Menu
@@ -232,7 +232,7 @@ public class BinaryEditWindow : Window
         return menu;
     }
 
-    private Control MakeLayoutListViewAndEditBox(BinaryEdit.BinaryEditViewModel vm)
+    private Control MakeLayoutListViewAndEditBox(BinaryEditViewModel vm)
     {
         var mainGrid = new Grid
         {
@@ -291,6 +291,7 @@ public class BinaryEditWindow : Window
             MinWidth = 40,
             IsReadOnly = true,
             Binding = new Binding(nameof(BinarySubtitleItem.Number)),
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
         dataGrid.Columns.Add(new DataGridTextColumn
@@ -300,6 +301,7 @@ public class BinaryEditWindow : Window
             MinWidth = 100,
             IsReadOnly = true,
             Binding = new Binding(nameof(BinarySubtitleItem.StartTime)),
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
         dataGrid.Columns.Add(new DataGridTextColumn
@@ -309,24 +311,26 @@ public class BinaryEditWindow : Window
             MinWidth = 60,
             IsReadOnly = true,
             Binding = new Binding(nameof(BinarySubtitleItem.Duration)),
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
         dataGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Image,
-            Width = new DataGridLength(100),
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star),
             MinWidth = 80,
             IsReadOnly = true,
             CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<BinarySubtitleItem>((_, _) =>
             {
                 var image = new Image
                 {
-                    MaxHeight = 40,
+                    MaxHeight = 22,
                     Stretch = Avalonia.Media.Stretch.Uniform,
                     [!Image.SourceProperty] = new Binding(nameof(BinarySubtitleItem.Bitmap)),
                 };
                 return image;
             }),
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
         mainGrid.Add(dataGrid, 0, 0);

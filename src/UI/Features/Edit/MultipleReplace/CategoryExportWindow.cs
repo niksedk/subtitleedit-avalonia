@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class CategoryExportWindow : Window
 {
-    public CategoryExportWindow(Edit.MultipleReplace.CategoryExportViewModel vm)
+    public CategoryExportWindow(CategoryExportViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Edit.MultipleReplace.ExportReplaceRules;
@@ -23,13 +23,6 @@ public class CategoryExportWindow : Window
         MinHeight = 700;
         vm.Window = this;
         DataContext = vm;
-
-        var label = new Label
-        {
-            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(10, 0, 0, 0),
-        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -63,7 +56,7 @@ public class CategoryExportWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Border MakeDataGrid(Edit.MultipleReplace.CategoryExportViewModel vm)
+    private static Border MakeDataGrid(CategoryExportViewModel vm)
     {
         var grid = new Grid
         {
