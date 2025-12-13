@@ -6,7 +6,6 @@ using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
-using System;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
@@ -264,7 +263,7 @@ public class BinaryEditWindow : Window
         // Columns: Forced, Number, Show, Hide, Duration, Text
         dataGrid.Columns.Add(new DataGridCheckBoxColumn
         {
-            Header = "Forced",
+            Header = Se.Language.General.Forced,
             Width = new DataGridLength(60),
             MinWidth = 50,
             Binding = new Binding("IsForced"),
@@ -393,25 +392,8 @@ public class BinaryEditWindow : Window
 
     private Control MakeVideoPlayer(BinaryEditViewModel vm)
     {
-        var videoPanel = new StackPanel
-        {
-            Margin = new Thickness(5),
-        };
-
-        var videoLabel = UiUtil.MakeLabel("Video player");
-        videoLabel.FontWeight = Avalonia.Media.FontWeight.Bold;
-        videoLabel.Margin = new Thickness(0, 0, 0, 5);
-        videoPanel.Children.Add(videoLabel);
-
-        var videoPlaceholder = new Border
-        {
-            Height = 400,
-            Background = Avalonia.Media.Brushes.Black,
-            Child = UiUtil.MakeLabel("Video player will be displayed here"),
-        };
-        videoPanel.Children.Add(videoPlaceholder);
-
-        return videoPanel;
+        var vp = InitVideoPlayer.MakeVideoPlayer();
+        vp.FullScreenIsVisible = false;
+        return vp;
     }
-
 }
