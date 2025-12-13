@@ -12,9 +12,11 @@ public partial class BinaryEditViewModel : ObservableObject
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
+    public Grid ContentGrid { get; set; }
 
     public BinaryEditViewModel()
     {
+        ContentGrid = new Grid();
         FileName = string.Empty;    
     }
 
