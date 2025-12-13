@@ -123,6 +123,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
+using BinaryEditViewModel = Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryEditViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1558,9 +1561,27 @@ public partial class MainViewModel :
             return;
         }
 
+        IOcrSubtitle? imageSubtitle = null;
+        if (FileUtil.IsBluRaySup((fileName)))
+        {
+            var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
+            if (subtitles.Count > 0)
+            { 
+                imageSubtitle = new  OcrSubtitleBluRay(subtitles); 
+            }
+        }
+        
+        if (imageSubtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
         var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => 
         { 
-            vm.Initialize(fileName);
+            vm.Initialize(fileName, imageSubtitle);
         });
     }
 

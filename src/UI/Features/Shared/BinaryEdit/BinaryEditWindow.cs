@@ -8,7 +8,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using MenuItem = Avalonia.Controls.MenuItem;
 
-namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 
 public class BinaryEditWindow : Window
 {
@@ -86,9 +86,10 @@ public class BinaryEditWindow : Window
 
         Content = mainGrid;
         KeyDown += (_, args) => vm.OnKeyDown(args);
+        Closing += (_, _) => vm.Closing();
     }
 
-    private static Menu MakeTopMenu(BinaryEditViewModel vm)
+    private static Menu MakeTopMenu(BinaryEdit.BinaryEditViewModel vm)
     {
         var l = Se.Language.Main.Menu;
         var menu = new Menu
@@ -231,7 +232,7 @@ public class BinaryEditWindow : Window
         return menu;
     }
 
-    private Control MakeLayoutListViewAndEditBox(BinaryEditViewModel vm)
+    private Control MakeLayoutListViewAndEditBox(BinaryEdit.BinaryEditViewModel vm)
     {
         var mainGrid = new Grid
         {
@@ -257,16 +258,30 @@ public class BinaryEditWindow : Window
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
             FontSize = Se.Settings.Appearance.SubtitleGridFontSize,
         };
+        
+        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Subtitles)));
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Mode = BindingMode.Default });
 
         vm.SubtitleGrid = dataGrid;
 
-        // Columns: Forced, Number, Show, Hide, Duration, Text
-        dataGrid.Columns.Add(new DataGridCheckBoxColumn
+        // Columns: Forced, Number, Show, Duration, Text, Image
+        dataGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.Forced,
             Width = new DataGridLength(60),
             MinWidth = 50,
-            Binding = new Binding("IsForced"),
+            CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+            CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<BinarySubtitleItem>((_, _) =>
+                new Border
+                {
+                    Background = Avalonia.Media.Brushes.Transparent, // Prevents highlighting
+                    Padding = new Thickness(4),
+                    Child = new CheckBox
+                    {
+                        [!CheckBox.IsCheckedProperty] = new Binding(nameof(BinarySubtitleItem.IsForced)),
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    }
+                }),
         });
 
         dataGrid.Columns.Add(new DataGridTextColumn
@@ -274,7 +289,8 @@ public class BinaryEditWindow : Window
             Header = Se.Language.General.NumberSymbol,
             Width = new DataGridLength(50),
             MinWidth = 40,
-            Binding = new Binding("Number"),
+            IsReadOnly = true,
+            Binding = new Binding(nameof(BinarySubtitleItem.Number)),
         });
 
         dataGrid.Columns.Add(new DataGridTextColumn
@@ -282,15 +298,8 @@ public class BinaryEditWindow : Window
             Header = Se.Language.General.Show,
             Width = new DataGridLength(120),
             MinWidth = 100,
-            Binding = new Binding("StartTime"),
-        });
-
-        dataGrid.Columns.Add(new DataGridTextColumn
-        {
-            Header = Se.Language.General.Hide,
-            Width = new DataGridLength(120),
-            MinWidth = 100,
-            Binding = new Binding("EndTime"),
+            IsReadOnly = true,
+            Binding = new Binding(nameof(BinarySubtitleItem.StartTime)),
         });
 
         dataGrid.Columns.Add(new DataGridTextColumn
@@ -298,15 +307,26 @@ public class BinaryEditWindow : Window
             Header = Se.Language.General.Duration,
             Width = new DataGridLength(80),
             MinWidth = 60,
-            Binding = new Binding("Duration"),
+            IsReadOnly = true,
+            Binding = new Binding(nameof(BinarySubtitleItem.Duration)),
         });
 
-        dataGrid.Columns.Add(new DataGridTextColumn
+        dataGrid.Columns.Add(new DataGridTemplateColumn
         {
-            Header = Se.Language.General.Text,
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-            MinWidth = 100,
-            Binding = new Binding("Text"),
+            Header = Se.Language.General.Image,
+            Width = new DataGridLength(100),
+            MinWidth = 80,
+            IsReadOnly = true,
+            CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<BinarySubtitleItem>((_, _) =>
+            {
+                var image = new Image
+                {
+                    MaxHeight = 40,
+                    Stretch = Avalonia.Media.Stretch.Uniform,
+                    [!Image.SourceProperty] = new Binding(nameof(BinarySubtitleItem.Bitmap)),
+                };
+                return image;
+            }),
         });
 
         mainGrid.Add(dataGrid, 0, 0);
@@ -338,7 +358,7 @@ public class BinaryEditWindow : Window
         {
             Width = 120,
             Margin = new Thickness(0, 0, 10, 5),
-            [!TextBox.TextProperty] = new Binding("SelectedStartTime") { Mode = BindingMode.TwoWay },
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedStartTime)) { Mode = BindingMode.TwoWay },
         };
         controlsGrid.Add(startTimeTextBox, 0, 1);
 
@@ -352,7 +372,7 @@ public class BinaryEditWindow : Window
         {
             Width = 100,
             Margin = new Thickness(0, 0, 10, 5),
-            [!TextBox.TextProperty] = new Binding("SelectedDuration") { Mode = BindingMode.TwoWay },
+            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedDuration)) { Mode = BindingMode.TwoWay },
         };
         controlsGrid.Add(durationTextBox, 1, 1);
 
@@ -361,7 +381,7 @@ public class BinaryEditWindow : Window
         {
             Content = "Forced",
             Margin = new Thickness(0, 0, 10, 5),
-            [!CheckBox.IsCheckedProperty] = new Binding("SelectedIsForced") { Mode = BindingMode.TwoWay },
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.SelectedIsForced)) { Mode = BindingMode.TwoWay },
         };
         controlsGrid.Add(forcedCheckBox, 2, 1);
 
@@ -390,10 +410,11 @@ public class BinaryEditWindow : Window
         return mainGrid;
     }
 
-    private Control MakeVideoPlayer(BinaryEditViewModel vm)
+    private static Control MakeVideoPlayer(BinaryEdit.BinaryEditViewModel vm)
     {
         var vp = InitVideoPlayer.MakeVideoPlayer();
         vp.FullScreenIsVisible = false;
+        vm.VideoPlayerControl = vp;
         return vp;
     }
 }

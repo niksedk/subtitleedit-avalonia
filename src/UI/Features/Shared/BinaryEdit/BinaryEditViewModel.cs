@@ -1,10 +1,15 @@
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 
-namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
+namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 
 public partial class BinaryEditViewModel : ObservableObject
 {
@@ -12,24 +17,38 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private string _selectedStartTime;
     [ObservableProperty] private string _selectedDuration;
     [ObservableProperty] private bool _selectedIsForced;
-    
-    public Window? Window { get; set; }
-    public DataGrid? SubtitleGrid { get; set; }
-    public bool OkPressed { get; private set; }
-    public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
+    [ObservableProperty] private BinarySubtitleItem? _selectedSubtitle;
 
     public BinaryEditViewModel()
     {
+    }
+
+    public Window? Window { get; set; }
+    public DataGrid? SubtitleGrid { get; set; }
+    public VideoPlayerControl? VideoPlayerControl { get; set; }
+    public bool OkPressed { get; private set; }
+    public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
+
+    IFileHelper _fileHelper;
+
+    public BinaryEditViewModel(IFileHelper fileHelper)
+    {
+        _fileHelper = fileHelper;
         _fileName = string.Empty;
         _selectedStartTime = string.Empty;
         _selectedDuration = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
     }
 
-    public void Initialize(string fileName)
+    public void Initialize(string fileName, IOcrSubtitle subtitle)
     {
         FileName = fileName;
-        // TODO: Load binary subtitle file and populate Subtitles collection
+        
+        Subtitles.Clear();
+        foreach (var s in subtitle.MakeOcrSubtitleItems())
+        {
+            Subtitles.Add(new BinarySubtitleItem(s));
+        }
     }
 
     [RelayCommand]
@@ -111,9 +130,30 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenVideo()
+    private async Task OpenVideo()
     {
-        // TODO: Implement open video
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(VideoPlayerControl.VideoPlayerInstance.FileName))
+        {
+            VideoPlayerControl.VideoPlayerInstance.CloseFile();
+        }
+
+        var videoFileName = await _fileHelper.PickOpenVideoFile(Window, Se.Language.General.OpenVideoFileTitle);
+        if (string.IsNullOrEmpty(videoFileName))
+        {
+            return;
+        }
+
+        await VideoPlayerControl.Open(videoFileName);
     }
 
     [RelayCommand]
@@ -140,15 +180,15 @@ public partial class BinaryEditViewModel : ObservableObject
         // TODO: Implement set text
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }
@@ -166,14 +206,19 @@ public partial class BinaryEditViewModel : ObservableObject
             Ok();
         }
     }
-}
 
-public class BinarySubtitleItem
-{
-    public int Number { get; set; }
-    public bool IsForced { get; set; }
-    public string StartTime { get; set; } = string.Empty;
-    public string EndTime { get; set; } = string.Empty;
-    public string Duration { get; set; } = string.Empty;
-    public string Text { get; set; } = string.Empty;
+    public void Closing()
+    {
+        if (VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(VideoPlayerControl.VideoPlayerInstance.FileName))
+        {
+            return;
+        }
+
+        VideoPlayerControl.VideoPlayerInstance.CloseFile();
+    }
 }
