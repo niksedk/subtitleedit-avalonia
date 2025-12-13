@@ -1551,7 +1551,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, ".sup", "Blu-ray sup");
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, "sup", "Blu-ray sup");
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
