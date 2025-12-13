@@ -7,7 +7,8 @@ public class LanguageSpellCheck
     public string GetDictionaryInstructions { get; set; }
     public string AddNameToUserDictionary { get; set; }
     public string AddNameToNamesList { get; set; }
-    public string NoDictionariesFound { get; internal set; }
+    public string NoDictionariesFound { get; set; }
+    public string WordNotFound { get; set; }
 
     public LanguageSpellCheck()
     {
@@ -17,5 +18,6 @@ public class LanguageSpellCheck
         AddNameToUserDictionary = "Add name to user dictionary";
         AddNameToNamesList = "Add name to names list";
         NoDictionariesFound = "No dictionaries found";
+        WordNotFound = "Word not found";
     }
 }

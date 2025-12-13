@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -10,15 +9,12 @@ namespace Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 
 public class PromptTextBoxWindow : Window
 {
-    private readonly PromptTextBoxViewModel _vm;
-    
     public PromptTextBoxWindow(PromptTextBoxViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
-        SizeToContent = SizeToContent.WidthAndHeight;   
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -34,9 +30,9 @@ public class PromptTextBoxWindow : Window
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -59,13 +55,8 @@ public class PromptTextBoxWindow : Window
         grid.Add(buttonPanel, 2);
 
         Content = grid;
-        
-        Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
-    }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

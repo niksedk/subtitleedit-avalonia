@@ -12,7 +12,7 @@ public class AddToNamesListWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.SpellCheck.AddNameToNamesList;
-        SizeToContent = SizeToContent.WidthAndHeight;   
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         MinWidth = 400;
         vm.Window = this;
@@ -30,9 +30,9 @@ public class AddToNamesListWindow : Window
         };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -61,7 +61,7 @@ public class AddToNamesListWindow : Window
         grid.Add(buttonPanel, 4);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
     }

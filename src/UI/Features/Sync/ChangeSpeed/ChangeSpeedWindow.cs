@@ -11,16 +11,13 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 
 public class ChangeSpeedWindow : Window
 {
-    private readonly ChangeSpeedViewModel _vm;
-    
+   
     public ChangeSpeedWindow(ChangeSpeedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.ChangeSpeed;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -117,11 +114,6 @@ public class ChangeSpeedWindow : Window
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

@@ -10,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Sync.PointSync.SetSyncPoint;
 
 public class SetSyncPointWindow : Window
 {
-    private readonly SetSyncPointViewModel _vm;
-
     public SetSyncPointWindow(SetSyncPointViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +19,6 @@ public class SetSyncPointWindow : Window
         Height = 800;
         MinWidth = 800;
         MinHeight = 650;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -125,18 +121,8 @@ public class SetSyncPointWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
 
-        AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        _vm.OnClosing();
+        AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
+        Loaded += (_, e) => vm.OnLoaded();
+        Closing += (_, e) => vm.OnClosing();
     }
 }

@@ -12,7 +12,7 @@ public class PromptFileSavedWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
-        SizeToContent = SizeToContent.WidthAndHeight;   
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         vm.Window = this;
         DataContext = vm;
@@ -26,7 +26,7 @@ public class PromptFileSavedWindow : Window
             .WithBindIsVisible(nameof(vm.IsShowFileVisible));
         var buttonDone = UiUtil.MakeButtonDone(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOpenContainingFolder, buttonOpenFile, buttonDone);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -49,8 +49,8 @@ public class PromptFileSavedWindow : Window
         grid.Add(buttonPanel, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
-        KeyDown += (s, e) => vm.OnKeyDown(e);  
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 }

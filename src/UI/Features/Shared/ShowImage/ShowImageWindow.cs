@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.ShowImage;
 
 public class ShowImageWindow : Window
 {
-    private readonly ShowImageViewModel _vm;
-    
     public ShowImageWindow(ShowImageViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -20,9 +17,7 @@ public class ShowImageWindow : Window
         Height = 760;
         MinWidth = 400;
         MinHeight = 300;
-
         CanResize = true;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -57,7 +52,7 @@ public class ShowImageWindow : Window
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -80,13 +75,8 @@ public class ShowImageWindow : Window
         grid.Add(buttonPanel, 1);
 
         Content = grid;
-        
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

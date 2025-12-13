@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,16 +9,12 @@ namespace Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 
 public class GoToLineNumberWindow : Window
 {
-    private readonly GoToLineNumberViewModel _vm;
-
     public GoToLineNumberWindow(GoToLineNumberViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.GoToLineNumber;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -28,11 +23,11 @@ public class GoToLineNumberWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Width = 150,
             VerticalContentAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(_vm.LineNumber))
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.LineNumber))
             {
                 Mode = BindingMode.TwoWay,
             },
-            [!NumericUpDown.MaximumProperty] = new Binding(nameof(_vm.MaxLineNumber))
+            [!NumericUpDown.MaximumProperty] = new Binding(nameof(vm.MaxLineNumber))
             {
                 Mode = BindingMode.OneWay,
             },
@@ -40,7 +35,7 @@ public class GoToLineNumberWindow : Window
             Increment = 1,          // Only step in whole numbers
             FormatString = "F0",    // Show 0 decimal places
         };
-        vm.UpDown.KeyDown += (sender, args) => vm.OnKeyDown(args);  
+        vm.UpDown.KeyDown += (sender, args) => vm.OnKeyDown(args);
 
         var panel = new StackPanel
         {
@@ -59,7 +54,7 @@ public class GoToLineNumberWindow : Window
         };
 
         var buttonPanel = UiUtil.MakeButtonBar(
-            UiUtil.MakeButtonOk(vm.OkCommand), 
+            UiUtil.MakeButtonOk(vm.OkCommand),
             UiUtil.MakeButtonCancel(vm.CancelCommand));
 
         var contentPanel = new StackPanel
@@ -76,12 +71,7 @@ public class GoToLineNumberWindow : Window
 
         Content = contentPanel;
 
-        Activated += delegate { vm.Activated(); }; 
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        Activated += delegate { vm.Activated(); };
+        KeyDown += (_, args) => vm.OnKeyDown(args);
     }
 }

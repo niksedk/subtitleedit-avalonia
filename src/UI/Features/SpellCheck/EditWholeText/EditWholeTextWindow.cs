@@ -9,16 +9,12 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 
 public class EditWholeTextWindow : Window
 {
-    private readonly EditWholeTextViewModel _vm;
-
     public EditWholeTextWindow(EditWholeTextViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Spell check - Edit whole text";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -68,11 +64,6 @@ public class EditWholeTextWindow : Window
         Content = grid;
 
         Activated += delegate { textBoxWholeText.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

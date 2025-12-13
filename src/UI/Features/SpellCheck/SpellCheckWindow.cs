@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -12,8 +11,6 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck;
 
 public class SpellCheckWindow : Window
 {
-    private readonly SpellCheckViewModel _vm;
-
     public SpellCheckWindow(SpellCheckViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,6 @@ public class SpellCheckWindow : Window
         SizeToContent = SizeToContent.Height;
         Width = 700;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -61,7 +56,7 @@ public class SpellCheckWindow : Window
         var labelDictionary = new Label
         {
             VerticalAlignment = VerticalAlignment.Bottom,
-            Content = "Dictionary",
+            Content = Se.Language.General.Dictionary,
         };
         var panelSuggestions = MakeSuggestions(vm);
 
@@ -102,6 +97,7 @@ public class SpellCheckWindow : Window
         Content = grid;
 
         Activated += delegate { buttonDone.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static Grid MakeWordNotFound(SpellCheckViewModel vm)
@@ -109,7 +105,7 @@ public class SpellCheckWindow : Window
         var labelWordNotFound = new Label
         {
             VerticalAlignment = VerticalAlignment.Bottom,
-            Content = "Word not found",
+            Content = Se.Language.SpellCheck.WordNotFound,
             Margin = new Thickness(0, 13, 0, 0),
         };
 
@@ -123,7 +119,7 @@ public class SpellCheckWindow : Window
 
         var buttonChange = new Button
         {
-            Content = "Change",
+            Content = Se.Language.General.Change,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -133,7 +129,7 @@ public class SpellCheckWindow : Window
 
         var buttonChangeAll = new Button
         {
-            Content = "Change all",
+            Content = Se.Language.General.ChangeAll,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordAllCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -143,7 +139,7 @@ public class SpellCheckWindow : Window
 
         var buttonSkipOne = new Button
         {
-            Content = "Skip one",
+            Content = Se.Language.General.SkipOnce,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -153,7 +149,7 @@ public class SpellCheckWindow : Window
 
         var buttonSkipAll = new Button
         {
-            Content = "Skip all",
+            Content = Se.Language.General.SkipAll,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordAllCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -163,7 +159,7 @@ public class SpellCheckWindow : Window
 
         var buttonAddToNames = new Button
         {
-            Content = "Add to names",
+            Content = Se.Language.General.AddToNamesListCaseSensitive,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToNamesListCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -173,7 +169,7 @@ public class SpellCheckWindow : Window
 
         var buttonAddToDictionary = new Button
         {
-            Content = "Add to user dictionary",
+            Content = Se.Language.General.AddToUserDictionary,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToUserDictionaryCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -183,7 +179,7 @@ public class SpellCheckWindow : Window
 
         var buttonGoogleSearch = new Button
         {
-            Content = "Google it",
+            Content = Se.Language.General.GoogleIt,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.GoogleItCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -262,7 +258,7 @@ public class SpellCheckWindow : Window
         var labelSuggestions = new Label
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Content = "Suggestions",
+            Content = Se.Language.General.Suggestions,
             Margin = new Thickness(0, 10, 0, 0),
         };
 
@@ -288,7 +284,7 @@ public class SpellCheckWindow : Window
 
         var buttonUseOnce = new Button
         {
-            Content = "Use once",
+            Content = Se.Language.General.UseOnce,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseOnceCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -297,7 +293,7 @@ public class SpellCheckWindow : Window
 
         var buttonUseAlways = new Button
         {
-            Content = "Use always",
+            Content = Se.Language.General.UseAlways,
             [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand), BindingMode.OneWay),
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -342,11 +338,5 @@ public class SpellCheckWindow : Window
         grid.Add(panelButtons, 3, 0);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

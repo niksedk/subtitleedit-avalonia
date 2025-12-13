@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
-using static Google.Protobuf.WellKnownTypes.Field.Types;
 
 namespace Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
 

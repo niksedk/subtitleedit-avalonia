@@ -1,25 +1,18 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System.Collections.ObjectModel;
 
 namespace Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 
 public class ChangeFrameRateWindow : Window
 {
-    private readonly ChangeFrameRateViewModel _vm;
-    
     public ChangeFrameRateWindow(ChangeFrameRateViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Sync.ChangeFrameRate;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -100,11 +93,6 @@ public class ChangeFrameRateWindow : Window
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

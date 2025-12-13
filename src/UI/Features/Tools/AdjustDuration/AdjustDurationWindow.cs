@@ -2,19 +2,15 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using System;
 
 namespace Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 
 public class AdjustDurationWindow : Window
 {
-    private readonly AdjustDurationViewModel _vm;
-
     private const int LabelMinWidth = 100;
     private const int NumericUpDownWidth = 150;
 
@@ -24,8 +20,6 @@ public class AdjustDurationWindow : Window
         Title = Se.Language.Tools.AdjustDurations.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -102,6 +96,7 @@ public class AdjustDurationWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static StackPanel MakeAdjustSeconds(AdjustDurationViewModel vm)
@@ -117,7 +112,7 @@ public class AdjustDurationWindow : Window
             Minimum = -1000000,
             Maximum = 1000000,
             Width = NumericUpDownWidth,
-            VerticalAlignment = VerticalAlignment.Center,            
+            VerticalAlignment = VerticalAlignment.Center,
         };
         numericUpDownSeconds.Bind(NumericUpDown.ValueProperty, new Binding
         {
@@ -320,12 +315,5 @@ public class AdjustDurationWindow : Window
         });
 
         return grid;
-    }
-
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

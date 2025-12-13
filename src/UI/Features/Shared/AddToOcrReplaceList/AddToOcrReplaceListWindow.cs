@@ -31,7 +31,7 @@ public class AddToOcrReplaceListWindow : Window
                 UiUtil.MakeLabel("→"),
                 textBoxTo
             }
-        };  
+        };
 
         var labelDictionary = UiUtil.MakeLabel(Se.Language.General.Dictionary).WithMarginTop(20);
         var comboBoxDictionaries = new ComboBox

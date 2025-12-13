@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -12,11 +10,8 @@ namespace Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 
 public class PickTsTrackWindow : Window
 {
-    private readonly PickTsTrackViewModel _vm;
-
     public PickTsTrackWindow(PickTsTrackViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = vm.WindowTitle;
@@ -65,12 +60,9 @@ public class PickTsTrackWindow : Window
         {
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
-    }
 
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.SelectAndScrollToRow(0);
+        Loaded += (_, _) => vm.SelectAndScrollToRow(0);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private Border MakeTracksView(PickTsTrackViewModel vm)
@@ -85,8 +77,8 @@ public class PickTsTrackWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.Tracks,
+            DataContext = vm,
+            ItemsSource = vm.Tracks,
             Columns =
             {
                 new DataGridTextColumn
@@ -133,7 +125,7 @@ public class PickTsTrackWindow : Window
                 },
             },
         };
-        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(_vm.SelectedTrack)));
+        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTrack)));
         dataGridTracks.SelectionChanged += vm.DataGridTracksSelectionChanged;
         dataGridTracks.DoubleTapped += (s, e) => vm.OkCommand.Execute(null);
         vm.TracksGrid = dataGridTracks;
@@ -141,7 +133,7 @@ public class PickTsTrackWindow : Window
         return UiUtil.MakeBorderForControlNoPadding(dataGridTracks);
     }
 
-    private Border MakeSubtitleView(PickTsTrackViewModel vm)
+    private static Border MakeSubtitleView(PickTsTrackViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -155,8 +147,8 @@ public class PickTsTrackWindow : Window
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
             Height = double.NaN,
-            DataContext = _vm,
-            ItemsSource = _vm.Rows,
+            DataContext = vm,
+            ItemsSource = vm.Rows,
             Columns =
             {
                 new DataGridTextColumn
@@ -224,11 +216,5 @@ public class PickTsTrackWindow : Window
         };
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

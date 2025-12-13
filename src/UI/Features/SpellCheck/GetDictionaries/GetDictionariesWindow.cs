@@ -12,16 +12,12 @@ namespace Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
 
 public class GetDictionariesWindow : Window
 {
-    private readonly GetDictionariesViewModel _vm;
-
     public GetDictionariesWindow(GetDictionariesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.SpellCheck.GetDictionariesTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -143,11 +139,6 @@ public class GetDictionariesWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

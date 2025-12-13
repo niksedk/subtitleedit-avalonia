@@ -10,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
 
 public class VisualSyncWindow : Window
 {
-    private readonly VisualSyncViewModel _vm;
-
     public VisualSyncWindow(VisualSyncViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +19,6 @@ public class VisualSyncWindow : Window
         Height = 700;
         MinWidth = 900;
         MinHeight = 650;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -191,18 +187,8 @@ public class VisualSyncWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
 
-        AddHandler(KeyDownEvent, _vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        _vm.OnClosing();
+        AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
+        Loaded += (_, _) => vm.OnLoaded();
+        Closing += (_, e) => vm.OnClosing();
     }
 }

@@ -554,6 +554,7 @@ public class LanguageGeneral
     public string PlaySelectedLinesWithLoop { get; set; }
     public string ToggleCasing { get; set; }
     public string SetEndAndOffsetTheRest { get; set; }
+    public string Change { get; set; }
 
     public LanguageGeneral()
     {
@@ -1107,5 +1108,6 @@ public class LanguageGeneral
         PlaySelectedLinesWithLoop = "Play selected lines with loop";
         ToggleCasing = "Toggle casing";
         SetEndAndOffsetTheRest = "Set end and offset the rest";
+        Change = "Change";
     }
 }

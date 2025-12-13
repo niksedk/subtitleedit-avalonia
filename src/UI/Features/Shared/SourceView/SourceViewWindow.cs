@@ -12,7 +12,7 @@ public class SourceViewWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Bind(TitleProperty, new Binding(nameof(vm.Title)));
         Width = 1200;
-        Height = 800;   
+        Height = 800;
         MinWidth = 700;
         MinHeight = 400;
         CanResize = true;
@@ -29,7 +29,7 @@ public class SourceViewWindow : Window
         vm.TextBoxContainer = contentBorder;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var labelCursorPosition = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.LineAndColumnInfo)).WithAlignmentTop();
@@ -56,8 +56,8 @@ public class SourceViewWindow : Window
         grid.Add(labelCursorPosition, 1);
         grid.Add(buttonPanel, 1);
 
-        Content = grid;       
+        Content = grid;
 
-        KeyDown += (_, e) => vm.OnKeyDown(e);  
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }
