@@ -26,16 +26,29 @@ public class BinaryEditWindow : Window
             {
                 new ColumnDefinition(GridLength.Star),
                 new ColumnDefinition(GridLength.Auto),
-                new ColumnDefinition(GridLength.Star)
-            }
+                new ColumnDefinition(GridLength.Star),
+            },
+            RowDefinitions =
+            {
+                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Auto),
+            },
         };
+
+        // Top file menu
+        var topContent = new Border
+        {
+            Child = MakeTopFileMenu(),
+            Margin = new Thickness(0, 0, 0, 5),
+        };
+        contentGrid.Add(topContent, 0, 0, 1, 3);
 
         // Left section
         var leftContent = new Border
         {
             Child = MakeLayoutListViewAndEditBox(vm)
         };
-        contentGrid.Add(leftContent, 0);
+        contentGrid.Add(leftContent, 1, 0);
 
         // Vertical splitter
         var splitter = new GridSplitter
@@ -44,14 +57,14 @@ public class BinaryEditWindow : Window
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Stretch
         };
-        contentGrid.Add(splitter,1);
+        contentGrid.Add(splitter, 1, 1);
 
         // Right section
         var rightContent = new Border
         {
             Child = MakeVideoPlayer(vm),
         };
-        contentGrid.Add(rightContent, 2);
+        contentGrid.Add(rightContent, 1,2);
 
         vm.ContentGrid.Children.Clear();
         vm.ContentGrid.Children.Add(contentGrid);
@@ -63,13 +76,19 @@ public class BinaryEditWindow : Window
         KeyDown += (_, args) => vm.OnKeyDown(args);
     }
 
-    private Control MakeVideoPlayer(BinaryEditViewModel vm)
+    private static Label MakeTopFileMenu()
     {
-        throw new NotImplementedException();
+        return UiUtil.MakeLabel("File menu not implemented yet.");
     }
 
     private Control MakeLayoutListViewAndEditBox(BinaryEditViewModel vm)
     {
-        throw new NotImplementedException();
+        return UiUtil.MakeLabel("List view and edit box");
     }
+
+    private Control MakeVideoPlayer(BinaryEditViewModel vm)
+    {
+        return UiUtil.MakeLabel("Video player not implemented yet.");
+    }
+
 }
