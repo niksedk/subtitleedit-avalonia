@@ -555,6 +555,8 @@ public class LanguageGeneral
     public string ToggleCasing { get; set; }
     public string SetEndAndOffsetTheRest { get; set; }
     public string Change { get; set; }
+    public string EditImagedBaseSubtitle { get; set; }
+    public string OpenImageBasedSubtitle { get; set; }
 
     public LanguageGeneral()
     {
@@ -1109,5 +1111,7 @@ public class LanguageGeneral
         ToggleCasing = "Toggle casing";
         SetEndAndOffsetTheRest = "Set end and offset the rest";
         Change = "Change";
+        EditImagedBaseSubtitle = "Edit imaged-based subtitle";
+        OpenImageBasedSubtitle = "Open image-based subtitle";
     }
 }

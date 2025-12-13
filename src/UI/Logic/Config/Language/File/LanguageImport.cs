@@ -10,6 +10,9 @@ public class LanguageImport
     public string ImportFileLabel { get; set; }
     public string ImportFilesInfo { get; set; }
     public string FormattingDotDotDot { get; set; }
+    public string ImagedBasedSubtitleForEditDotDotDot { get;  set; }
+    public string ImagedBasedSubtitleForOcrDotDotDot { get;  set; }
+
 
     public LanguageImport()
     {
@@ -31,5 +34,7 @@ Rules:
 • HH_MM_SS_MMM for start and end times
 • Double underscore separates start/end
 • Optional index after end time";
+        ImagedBasedSubtitleForEditDotDotDot = "Imaged-based subtitle for edit...";
+        ImagedBasedSubtitleForOcrDotDotDot = "Imaged-based subtitle for OCR...";
     }
 }

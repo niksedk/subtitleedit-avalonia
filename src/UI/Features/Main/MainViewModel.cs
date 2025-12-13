@@ -2,11 +2,13 @@
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
+using AvaloniaEdit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -59,6 +61,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
 using Nikse.SubtitleEdit.Features.Shared.SourceView;
+using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Features.Shared.Undocked;
 using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
 using Nikse.SubtitleEdit.Features.Shared.WaveformSeekSilence;
@@ -120,8 +123,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
-using AvaloniaEdit;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1522,6 +1523,45 @@ public partial class MainViewModel :
             Subtitles.Clear();
             Subtitles.AddRange(ocrResult.OcredSubtitle);
         }
+    }
+
+    [RelayCommand]
+    private async Task ImportImageSubtitleForOcr()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, ".sup", "Blu-ray sup");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        await SubtitleOpen(fileName);
+    }
+
+    [RelayCommand]
+    private async Task ImportImageSubtitleForEdit()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, ".sup", "Blu-ray sup");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => 
+        { 
+            vm.Initialize(fileName);
+        });
     }
 
     [RelayCommand]
@@ -10276,7 +10316,7 @@ public partial class MainViewModel :
                             if (key == Key.Return &&
                                 Se.Settings.General.SubtitleTextBoxLimitNewLines)
                             {
-                                var newLineCount =  EditTextBox.Text.SplitToLines().Count;
+                                var newLineCount = EditTextBox.Text.SplitToLines().Count;
                                 if (newLineCount >= Se.Settings.General.MaxNumberOfLines)
                                 {
                                     keyEventArgs.Handled = true;
@@ -10284,7 +10324,7 @@ public partial class MainViewModel :
                             }
                         }
 
-                        
+
                         return;
                     }
                 }

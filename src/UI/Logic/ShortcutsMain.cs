@@ -271,6 +271,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.PlaySelectedLinesWithoutLoopCommand), Se.Language.General.PlaySelectedLines },
         { nameof(MainViewModel.PlaySelectedLinesWithLoopCommand), Se.Language.General.PlaySelectedLinesWithLoop },
         { nameof(MainViewModel.ToggleCasingCommand), Se.Language.General.ToggleCasing },
+        { nameof(MainViewModel.ImportImageSubtitleForEditCommand), Se.Language.Options.Shortcuts.ImportImageSubtitleForEdit },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -484,6 +485,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.PlaySelectedLinesWithoutLoopCommand, nameof(vm.PlaySelectedLinesWithoutLoopCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.PlaySelectedLinesWithLoopCommand, nameof(vm.PlaySelectedLinesWithLoopCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleCasingCommand, nameof(vm.ToggleCasingCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.ImportImageSubtitleForEditCommand, nameof(vm.ImportImageSubtitleForEditCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

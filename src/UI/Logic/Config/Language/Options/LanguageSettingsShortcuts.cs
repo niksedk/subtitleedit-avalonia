@@ -230,6 +230,7 @@ public class LanguageSettingsShortcuts
     public string ExportShortcutsTitle { get; set; }
     public string XShortcutsImportedFromY { get; set; }
     public string XShortcutsExportedToY { get; set; }
+    public string ImportImageSubtitleForEdit { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -463,5 +464,6 @@ public class LanguageSettingsShortcuts
         ExportShortcutsTitle = "Export shortcuts";
         XShortcutsImportedFromY = "{0} shortcuts imported from {1}";
         XShortcutsExportedToY = "{0} shortcuts exported to {1}";
+        ImportImageSubtitleForEdit = "Import image-based subtitle for edit";
     }
 }

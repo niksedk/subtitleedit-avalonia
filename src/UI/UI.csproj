@@ -163,8 +163,4 @@
 	    <CopyToOutputDirectory></CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Features\Shared\BinaryEdit\" />
-	</ItemGroup>
 </Project>
