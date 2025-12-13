@@ -2,9 +2,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using MenuItem = Avalonia.Controls.MenuItem;
 
@@ -167,11 +170,6 @@ public class BinaryEditWindow : Window
                     Header = "Adjust alpha...",
                     Command = vm.AdjustAlphaCommand,
                 },
-                new MenuItem
-                {
-                    Header = "Quick OCR...",
-                    Command = vm.QuickOcrCommand,
-                },
             },
         });
 
@@ -232,7 +230,7 @@ public class BinaryEditWindow : Window
         return menu;
     }
 
-    private Control MakeLayoutListViewAndEditBox(BinaryEditViewModel vm)
+    private static Grid MakeLayoutListViewAndEditBox(BinaryEditViewModel vm)
     {
         var mainGrid = new Grid
         {
@@ -300,7 +298,7 @@ public class BinaryEditWindow : Window
             Width = new DataGridLength(120),
             MinWidth = 100,
             IsReadOnly = true,
-            Binding = new Binding(nameof(BinarySubtitleItem.StartTime)),
+            Binding = new Binding(nameof(BinarySubtitleItem.StartTime)) { Converter = new TimeSpanToDisplayFullConverter() },
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
@@ -310,7 +308,7 @@ public class BinaryEditWindow : Window
             Width = new DataGridLength(80),
             MinWidth = 60,
             IsReadOnly = true,
-            Binding = new Binding(nameof(BinarySubtitleItem.Duration)),
+            Binding = new Binding(nameof(BinarySubtitleItem.Duration)) { Converter = new TimeSpanToDisplayShortConverter() },
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
@@ -335,66 +333,160 @@ public class BinaryEditWindow : Window
 
         mainGrid.Add(dataGrid, 0, 0);
 
-        // Controls section
+        // Controls section - using Grid layout for better organization
         var controlsGrid = new Grid
         {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Auto),
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Auto),
-            },
             RowDefinitions =
             {
-                new RowDefinition(GridLength.Auto),
-                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Auto), // Labels
+                new RowDefinition(GridLength.Auto), // Controls
             },
-            Margin = new Thickness(0, 5, 0, 0),
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto), // Start Time
+                new ColumnDefinition(GridLength.Auto), // Duration
+                new ColumnDefinition(GridLength.Auto), // X
+                new ColumnDefinition(GridLength.Auto), // Y
+                new ColumnDefinition(GridLength.Auto), // Forced
+                new ColumnDefinition(GridLength.Star), // Buttons
+            },
+            Margin = new Thickness(0, 10, 0, 0),
         };
 
-        // Start time
-        var startTimeLabel = UiUtil.MakeLabel(Se.Language.General.Show);
-        startTimeLabel.FontWeight = Avalonia.Media.FontWeight.Bold;
-        startTimeLabel.Margin = new Thickness(0, 0, 5, 0);
-        controlsGrid.Add(startTimeLabel, 0, 0);
-
-        var startTimeTextBox = new TextBox
+        // Start Time - Column 0
+        var startTimeLabel = new TextBlock
         {
-            Width = 120,
-            Margin = new Thickness(0, 0, 10, 5),
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedStartTime)) { Mode = BindingMode.TwoWay },
+            Text = Se.Language.General.Show,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 10, 2),
         };
-        controlsGrid.Add(startTimeTextBox, 0, 1);
+        Grid.SetRow(startTimeLabel, 0);
+        Grid.SetColumn(startTimeLabel, 0);
+        controlsGrid.Children.Add(startTimeLabel);
 
-        // Duration
-        var durationLabel = UiUtil.MakeLabel(Se.Language.General.Duration);
-        durationLabel.FontWeight = Avalonia.Media.FontWeight.Bold;
-        durationLabel.Margin = new Thickness(0, 0, 5, 0);
-        controlsGrid.Add(durationLabel, 1, 0);
+        var startTimeUpDown = new Nikse.SubtitleEdit.Controls.TimeCodeUpDown
+        {
+            DataContext = vm,
+            Margin = new Thickness(0, 0, 10, 0),
+            [!Nikse.SubtitleEdit.Controls.TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}") 
+            { 
+                Mode = BindingMode.TwoWay 
+            },
+        };
+        Grid.SetRow(startTimeUpDown, 1);
+        Grid.SetColumn(startTimeUpDown, 0);
+        controlsGrid.Children.Add(startTimeUpDown);
 
-        var durationTextBox = new TextBox
+        // Duration - Column 1
+        var durationLabel = new TextBlock
+        {
+            Text = Se.Language.General.Duration,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 10, 2),
+        };
+        Grid.SetRow(durationLabel, 0);
+        Grid.SetColumn(durationLabel, 1);
+        controlsGrid.Children.Add(durationLabel);
+
+        var durationUpDown = new Nikse.SubtitleEdit.Controls.SecondsUpDown
+        {
+            DataContext = vm,
+            Margin = new Thickness(0, 0, 10, 0),
+            [!Nikse.SubtitleEdit.Controls.SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}") 
+            { 
+                Mode = BindingMode.TwoWay 
+            },
+        };
+        Grid.SetRow(durationUpDown, 1);
+        Grid.SetColumn(durationUpDown, 1);
+        controlsGrid.Children.Add(durationUpDown);
+
+        // X Position - Column 2
+        var xLabel = new TextBlock
+        {
+            Text = "X",
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 10, 2),
+        };
+        Grid.SetRow(xLabel, 0);
+        Grid.SetColumn(xLabel, 2);
+        controlsGrid.Children.Add(xLabel);
+
+        var xUpDown = new NumericUpDown
         {
             Width = 100,
-            Margin = new Thickness(0, 0, 10, 5),
-            [!TextBox.TextProperty] = new Binding(nameof(vm.SelectedDuration)) { Mode = BindingMode.TwoWay },
+            Minimum = int.MinValue,
+            Maximum = int.MaxValue,
+            Increment = 1,
+            FormatString = "F0",
+            DataContext = vm,
+            Margin = new Thickness(0, 0, 10, 0),
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.X)}") 
+            { 
+                Mode = BindingMode.TwoWay 
+            },
         };
-        controlsGrid.Add(durationTextBox, 1, 1);
+        Grid.SetRow(xUpDown, 1);
+        Grid.SetColumn(xUpDown, 2);
+        controlsGrid.Children.Add(xUpDown);
 
-        // Forced checkbox
+        // Y Position - Column 3
+        var yLabel = new TextBlock
+        {
+            Text = "Y",
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 10, 2),
+        };
+        Grid.SetRow(yLabel, 0);
+        Grid.SetColumn(yLabel, 3);
+        controlsGrid.Children.Add(yLabel);
+
+        var yUpDown = new NumericUpDown
+        {
+            Width = 100,
+            Minimum = int.MinValue,
+            Maximum = int.MaxValue,
+            Increment = 1,
+            FormatString = "F0",
+            DataContext = vm,
+            Margin = new Thickness(0, 0, 10, 0),
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Y)}") 
+            { 
+                Mode = BindingMode.TwoWay 
+            },
+        };
+        Grid.SetRow(yUpDown, 1);
+        Grid.SetColumn(yUpDown, 3);
+        controlsGrid.Children.Add(yUpDown);
+
+        // Forced Checkbox - Column 4
+        var forcedLabel = new TextBlock
+        {
+            Text = Se.Language.General.Forced,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 10, 2),
+        };
+        Grid.SetRow(forcedLabel, 0);
+        Grid.SetColumn(forcedLabel, 4);
+        controlsGrid.Children.Add(forcedLabel);
+
         var forcedCheckBox = new CheckBox
         {
-            Content = "Forced",
-            Margin = new Thickness(0, 0, 10, 5),
-            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.SelectedIsForced)) { Mode = BindingMode.TwoWay },
+            [!CheckBox.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.IsForced)}") { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
         };
-        controlsGrid.Add(forcedCheckBox, 2, 1);
+        Grid.SetRow(forcedCheckBox, 1);
+        Grid.SetColumn(forcedCheckBox, 4);
+        controlsGrid.Children.Add(forcedCheckBox);
 
-        // Buttons
+        // Buttons - Column 5
         var buttonsPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
-            Margin = new Thickness(0, 10, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Bottom,
         };
 
         var exportImageButton = UiUtil.MakeButton(vm.ExportImageCommand, IconNames.Export);
@@ -406,19 +498,114 @@ public class BinaryEditWindow : Window
         var setTextButton = UiUtil.MakeButton(vm.SetTextCommand, IconNames.NewText);
         buttonsPanel.Children.Add(setTextButton);
 
-        controlsGrid.Add(buttonsPanel, 2, 0, 1, 2);
-        controlsGrid.Children[controlsGrid.Children.Count - 1].SetValue(Grid.RowSpanProperty, 2);
+        Grid.SetRow(buttonsPanel, 1);
+        Grid.SetColumn(buttonsPanel, 5);
+        controlsGrid.Children.Add(buttonsPanel);
 
         mainGrid.Add(controlsGrid, 1, 0);
+
+        // Subscribe to X and Y changes to update overlay position
+        xUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();
+        yUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();
 
         return mainGrid;
     }
 
-    private static Control MakeVideoPlayer(BinaryEdit.BinaryEditViewModel vm)
+    private static Grid MakeVideoPlayer(BinaryEditViewModel vm)
     {
         var vp = InitVideoPlayer.MakeVideoPlayer();
         vp.FullScreenIsVisible = false;
+
+        // Create a grid to hold the video player and overlay image
+        var videoGrid = new Grid
+        {
+            ClipToBounds = true,
+        };
+
+        // Add video player as background
+        videoGrid.Children.Add(vp);
+
+        // Create overlay image for subtitle bitmap
+        var overlayImage = new Image
+        {
+            Stretch = Avalonia.Media.Stretch.None,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
+            [!Visual.IsVisibleProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}") 
+            { 
+                Converter = new NotNullConverter() 
+            },
+            [!Image.SourceProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}"),
+        };
+
+        // Set up transform group for scaling and positioning
+        var scaleTransform = new Avalonia.Media.ScaleTransform();
+        var translateTransform = new TranslateTransform();
+        var transformGroup = new Avalonia.Media.TransformGroup();
+        transformGroup.Children.Add(scaleTransform);
+        transformGroup.Children.Add(translateTransform);
+        overlayImage.RenderTransform = transformGroup;
+
+        videoGrid.Children.Add(overlayImage);
+        
+        // Store references
         vm.VideoPlayerControl = vp;
-        return vp;
+        vm.SubtitleOverlayImage = overlayImage;
+        vm.SubtitleOverlayTransform = translateTransform;
+        vm.SubtitleOverlayScaleTransform = scaleTransform;
+
+        // Update position when video player size changes
+        vp.SizeChanged += (_, _) => vm.UpdateOverlayPosition();
+
+        // Implement mouse dragging for overlay image
+        Point? dragStartPoint = null;
+        int originalX = 0;
+        int originalY = 0;
+
+        overlayImage.PointerPressed += (_, e) =>
+        {
+            if (e.GetCurrentPoint(overlayImage).Properties.IsLeftButtonPressed && vm.SelectedSubtitle != null)
+            {
+                dragStartPoint = e.GetPosition(videoGrid);
+                originalX = vm.SelectedSubtitle.X;
+                originalY = vm.SelectedSubtitle.Y;
+                e.Handled = true;
+            }
+        };
+
+        overlayImage.PointerMoved += (_, e) =>
+        {
+            if (dragStartPoint.HasValue && vm.SelectedSubtitle != null)
+            {
+                var currentPoint = e.GetPosition(videoGrid);
+                var delta = currentPoint - dragStartPoint.Value;
+
+                // Convert screen delta to subtitle coordinate delta (inverse of scale)
+                if (vm.SubtitleOverlayScaleTransform != null)
+                {
+                    var deltaX = (int)(delta.X / vm.SubtitleOverlayScaleTransform.ScaleX);
+                    var deltaY = (int)(delta.Y / vm.SubtitleOverlayScaleTransform.ScaleY);
+
+                    vm.SelectedSubtitle.X = originalX + deltaX;
+                    vm.SelectedSubtitle.Y = originalY + deltaY;
+
+                    vm.UpdateOverlayPosition();
+                }
+
+                e.Handled = true;
+            }
+        };
+
+        overlayImage.PointerReleased += (_, e) =>
+        {
+            if (dragStartPoint.HasValue)
+            {
+                dragStartPoint = null;
+                e.Handled = true;
+            }
+        };
+
+        return videoGrid;
     }
 }

@@ -14,11 +14,10 @@ namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 public partial class BinaryEditViewModel : ObservableObject
 {
     [ObservableProperty] private string _fileName;
-    [ObservableProperty] private string _selectedStartTime;
-    [ObservableProperty] private string _selectedDuration;
-    [ObservableProperty] private bool _selectedIsForced;
     [ObservableProperty] private BinarySubtitleItem? _selectedSubtitle;
 
+    public IOcrSubtitle? OcrSubtitle { get; set; }
+    
     public BinaryEditViewModel()
     {
     }
@@ -26,8 +25,92 @@ public partial class BinaryEditViewModel : ObservableObject
     public Window? Window { get; set; }
     public DataGrid? SubtitleGrid { get; set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }
+    public Avalonia.Controls.Image? SubtitleOverlayImage { get; set; }
+    public Avalonia.Media.TranslateTransform? SubtitleOverlayTransform { get; set; }
+    public Avalonia.Media.ScaleTransform? SubtitleOverlayScaleTransform { get; set; }
     public bool OkPressed { get; private set; }
     public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
+
+    partial void OnSelectedSubtitleChanged(BinarySubtitleItem? value)
+    {
+        UpdateOverlayPosition();
+    }
+
+    public void UpdateOverlayPosition()
+    {
+        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null || 
+            SelectedSubtitle == null || VideoPlayerControl == null)
+        {
+            return;
+        }
+
+        // Get video player bounds (total including controls)
+        var videoPlayerWidth = VideoPlayerControl.Bounds.Width;
+        var videoPlayerHeight = VideoPlayerControl.Bounds.Height;
+
+        if (videoPlayerWidth <= 0 || videoPlayerHeight <= 0)
+        {
+            return;
+        }
+
+        // Account for video player controls at bottom (approximately 50-60 pixels)
+        // The video content is in row 0 of the VideoPlayerControl's internal grid
+        const double controlsHeight = 55; // Approximate height of controls panel
+        var videoDisplayHeight = videoPlayerHeight - controlsHeight;
+        
+        if (videoDisplayHeight <= 0)
+        {
+            return;
+        }
+
+        // Get screen size from subtitle
+        var screenWidth = SelectedSubtitle.ScreenSize.Width;
+        var screenHeight = SelectedSubtitle.ScreenSize.Height;
+
+        if (screenWidth <= 0 || screenHeight <= 0)
+        {
+            return;
+        }
+
+        // Calculate video aspect ratio and screen aspect ratio
+        var videoAspect = videoPlayerWidth / videoDisplayHeight;
+        var screenAspect = (double)screenWidth / screenHeight;
+
+        // Calculate actual video display area (accounting for letterboxing/pillarboxing)
+        double actualVideoWidth, actualVideoHeight, offsetX, offsetY;
+
+        if (videoAspect > screenAspect)
+        {
+            // Video is wider than screen aspect - will have letterboxing (black bars top/bottom)
+            actualVideoWidth = videoPlayerWidth;
+            actualVideoHeight = videoPlayerWidth / screenAspect;
+            offsetX = 0;
+            offsetY = (videoDisplayHeight - actualVideoHeight) / 2;
+        }
+        else
+        {
+            // Video is taller than screen aspect - will have pillarboxing (black bars left/right)
+            actualVideoHeight = videoDisplayHeight;
+            actualVideoWidth = videoDisplayHeight * screenAspect;
+            offsetX = (videoPlayerWidth - actualVideoWidth) / 2;
+            offsetY = 0;
+        }
+
+        // Calculate scale factor
+        var scaleX = actualVideoWidth / screenWidth;
+        var scaleY = actualVideoHeight / screenHeight;
+
+        // Update scale transform
+        SubtitleOverlayScaleTransform.ScaleX = scaleX;
+        SubtitleOverlayScaleTransform.ScaleY = scaleY;
+
+        // Calculate and update position
+        var x = offsetX + (SelectedSubtitle.X * scaleX);
+        var y = offsetY + (SelectedSubtitle.Y * scaleY);
+
+        SubtitleOverlayTransform.X = x;
+        SubtitleOverlayTransform.Y = y;
+    }
 
     IFileHelper _fileHelper;
 
@@ -35,14 +118,13 @@ public partial class BinaryEditViewModel : ObservableObject
     {
         _fileHelper = fileHelper;
         _fileName = string.Empty;
-        _selectedStartTime = string.Empty;
-        _selectedDuration = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
     }
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
     {
         FileName = fileName;
+        OcrSubtitle = subtitle;
         
         Subtitles.Clear();
         foreach (var s in subtitle.MakeOcrSubtitleItems())
@@ -103,12 +185,6 @@ public partial class BinaryEditViewModel : ObservableObject
     private void AdjustAlpha()
     {
         // TODO: Implement adjust alpha
-    }
-
-    [RelayCommand]
-    private void QuickOcr()
-    {
-        // TODO: Implement quick OCR
     }
 
     [RelayCommand]

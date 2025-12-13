@@ -2,11 +2,16 @@ using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Core.Common;
 using System;
+using SkiaSharp;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 
-public class BinarySubtitleItem
+public partial class BinarySubtitleItem : ObservableObject
 {
+    [ObservableProperty] private int _x;
+    [ObservableProperty] private int _y;
+
     public BinarySubtitleItem(OcrSubtitleItem item)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
@@ -15,11 +20,13 @@ public class BinarySubtitleItem
         IsForced = false; // OcrSubtitleItem does not expose forced flag; default to false
         Text = item.Text;
 
-        // Format times using TimeCode to match project conventions
-        StartTime = new TimeCode(item.StartTime).ToString(false);
-        EndTime = new TimeCode(item.EndTime).ToString(false);
-        Duration = new TimeCode(item.Duration).ToString(false);
+        // Store times as TimeSpan for use with TimeCodeUpDown and SecondsUpDown controls
+        StartTime = item.StartTime;
+        EndTime = item.EndTime;
+        Duration = item.Duration;
 
+        ScreenSize = item.GetScreenSize();
+        
         // Get bitmap (cropped to remove transparent borders)
         try
         {
@@ -34,25 +41,22 @@ public class BinarySubtitleItem
         try
         {
             var pos = item.GetPosition();
-            X = pos.X;
-            Y = pos.Y;
+            _x = pos.X;
+            _y = pos.Y;
         }
         catch
         {
-            X = 0;
-            Y = 0;
+            _x = 0;
+            _y = 0;
         }
     }
     
     public int Number { get; set; }
     public bool IsForced { get; set; }
     public Bitmap? Bitmap { get; set; }
-    public string StartTime { get; set; }
-    public string EndTime { get; set; }
-    public string Duration { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan EndTime { get; set; }
+    public TimeSpan Duration { get; set; }
     public string Text { get; set; }
-
-    // Position on screen
-    public int X { get; set; }
-    public int Y { get; set; }
+    public SKSizeI ScreenSize { get; set; }
 }
