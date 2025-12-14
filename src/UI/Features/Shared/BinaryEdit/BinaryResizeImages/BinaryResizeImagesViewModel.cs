@@ -60,8 +60,8 @@ public partial class BinaryResizeImagesViewModel : ObservableObject
         
         if (_subtitles.Count > 0 && _subtitles[0].Bitmap != null)
         {
-            _originalWidth = (int)_subtitles[0].Bitmap.Size.Width;
-            _originalHeight = (int)_subtitles[0].Bitmap.Size.Height;
+            _originalWidth = (int)_subtitles[0].Bitmap!.Size.Width;
+            _originalHeight = (int)_subtitles[0].Bitmap!.Size.Height;
         }
         
         UpdatePreview();
@@ -92,7 +92,7 @@ public partial class BinaryResizeImagesViewModel : ObservableObject
         }
 
         var firstSubtitle = _subtitles[0];
-        using var originalBitmap = firstSubtitle.Bitmap.ToSkBitmap();
+        using var originalBitmap = firstSubtitle.Bitmap!.ToSkBitmap();
         
         var newWidth = (int)(originalBitmap.Width * Percentage / 100.0);
         var newHeight = (int)(originalBitmap.Height * Percentage / 100.0);
@@ -128,16 +128,18 @@ public partial class BinaryResizeImagesViewModel : ObservableObject
         using (var canvas = new SKCanvas(resizedBitmap))
         {
             canvas.Clear(SKColors.Transparent);
+
+            var scale = SKMatrix.CreateScale((float)width / originalBitmap.Width,
+                                             (float)height / originalBitmap.Height);
+
+            using (var shader = SKShader.CreateBitmap(originalBitmap, SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, scale))
             using (var paint = new SKPaint())
             {
-                paint.FilterQuality = SKFilterQuality.High;
+                paint.Shader = shader;
                 paint.IsAntialias = true;
-                
-                var destRect = new SKRect(0, 0, width, height);
-                canvas.DrawBitmap(originalBitmap, destRect, paint);
+                canvas.DrawRect(new SKRect(0, 0, width, height), paint);
             }
         }
-
         return resizedBitmap;
     }
 

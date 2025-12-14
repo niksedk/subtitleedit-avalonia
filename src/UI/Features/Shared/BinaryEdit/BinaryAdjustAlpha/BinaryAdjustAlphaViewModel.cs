@@ -104,7 +104,7 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
         }
 
         var firstSubtitle = _subtitles[0];
-        using var originalBitmap = firstSubtitle.Bitmap.ToSkBitmap();
+        using var originalBitmap = firstSubtitle.Bitmap!.ToSkBitmap();
         
         // Create checkered background
         CheckeredBackgroundBitmap = CreateCheckeredBackground(originalBitmap.Width, originalBitmap.Height);
@@ -207,7 +207,7 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Ok()
+    private void Ok()
     {
         if (Window == null)
         {

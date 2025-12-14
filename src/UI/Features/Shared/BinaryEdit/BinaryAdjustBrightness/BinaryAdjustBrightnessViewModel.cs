@@ -112,7 +112,7 @@ public partial class BinaryAdjustBrightnessViewModel : ObservableObject
         }
 
         var firstSubtitle = _subtitles[0];
-        using var originalBitmap = firstSubtitle.Bitmap.ToSkBitmap();
+        using var originalBitmap = firstSubtitle.Bitmap!.ToSkBitmap();
         
         var adjustedBitmap = AdjustBrightness(originalBitmap, (float)Brightness, (float)Contrast, (float)(Gamma / 100.0));
         PreviewBitmap = adjustedBitmap.ToAvaloniaBitmap();
@@ -198,7 +198,7 @@ public partial class BinaryAdjustBrightnessViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Ok()
+    private void Ok()
     {
         if (Window == null)
         {

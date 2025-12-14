@@ -4,7 +4,6 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -340,7 +339,6 @@ public class BinaryEditWindow : Window
 
     private static StackPanel MakeControls(BinaryEditViewModel vm)
     {
-
         // Controls section - using vertical StackPanel with two rows
         var controlsPanel = new StackPanel
         {
@@ -504,9 +502,9 @@ public class BinaryEditWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
-            [!Visual.IsVisibleProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}") 
-            { 
-                Converter = new NotNullConverter() 
+            [!Visual.IsVisibleProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}")
+            {
+                Converter = new NotNullConverter()
             },
             [!Image.SourceProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}"),
         };
@@ -520,7 +518,7 @@ public class BinaryEditWindow : Window
         overlayImage.RenderTransform = transformGroup;
 
         videoGrid.Children.Add(overlayImage);
-        
+
         // Store references
         vm.VideoPlayerControl = vp;
         vm.SubtitleOverlayImage = overlayImage;
