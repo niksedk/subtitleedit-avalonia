@@ -251,12 +251,12 @@ public class BinaryEditWindow : Window
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
             FontSize = Se.Settings.Appearance.SubtitleGridFontSize,
         };
-        
+
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Subtitles)));
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Mode = BindingMode.Default });
 
         vm.SubtitleGrid = dataGrid;
-        
+
         var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);
         dataGridBorder.Margin = new Thickness(0, 0, 0, 5);
 
@@ -331,6 +331,16 @@ public class BinaryEditWindow : Window
 
         mainGrid.Add(dataGridBorder, 0, 0);
 
+        var controlsPanel = MakeControls(vm);
+        mainGrid.Add(UiUtil.MakeBorderForControl(controlsPanel), 1, 0);
+
+
+        return mainGrid;
+    }
+
+    private static StackPanel MakeControls(BinaryEditViewModel vm)
+    {
+
         // Controls section - using vertical StackPanel with two rows
         var controlsPanel = new StackPanel
         {
@@ -376,9 +386,9 @@ public class BinaryEditWindow : Window
         var durationUpDown = new Nikse.SubtitleEdit.Controls.SecondsUpDown
         {
             DataContext = vm,
-            [!Nikse.SubtitleEdit.Controls.SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}") 
-            { 
-                Mode = BindingMode.TwoWay 
+            [!Nikse.SubtitleEdit.Controls.SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}")
+            {
+                Mode = BindingMode.TwoWay
             },
         };
         durationPanel.Children.Add(durationUpDown);
@@ -409,9 +419,9 @@ public class BinaryEditWindow : Window
             Increment = 1,
             FormatString = "F0",
             DataContext = vm,
-            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.X)}") 
-            { 
-                Mode = BindingMode.TwoWay 
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.X)}")
+            {
+                Mode = BindingMode.TwoWay
             },
         };
         xPanel.Children.Add(xUpDown);
@@ -433,9 +443,9 @@ public class BinaryEditWindow : Window
             Increment = 1,
             FormatString = "F0",
             DataContext = vm,
-            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Y)}") 
-            { 
-                Mode = BindingMode.TwoWay 
+            [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Y)}")
+            {
+                Mode = BindingMode.TwoWay
             },
         };
         yPanel.Children.Add(yUpDown);
@@ -465,13 +475,12 @@ public class BinaryEditWindow : Window
 
         controlsPanel.Children.Add(secondRowPanel);
 
-        mainGrid.Add(UiUtil.MakeBorderForControl(controlsPanel), 1, 0);
-
         // Subscribe to X and Y changes to update overlay position
         xUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();
         yUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();
 
-        return mainGrid;
+
+        return controlsPanel;
     }
 
     private static Grid MakeVideoPlayer(BinaryEditViewModel vm)
