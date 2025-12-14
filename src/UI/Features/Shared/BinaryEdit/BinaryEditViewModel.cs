@@ -1,28 +1,28 @@
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Google.Protobuf.WellKnownTypes;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
+using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
+using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
-using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Assa;
-using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
-using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
-using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
-using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
-using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Media;
 
 namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 
@@ -33,17 +33,33 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
-    private readonly IWindowService _windowService;
-    private string _loadFileName = string.Empty;
-
     public Window? Window { get; set; }
     public DataGrid? SubtitleGrid { get; set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }
-    public Avalonia.Controls.Image? SubtitleOverlayImage { get; set; }
+    public Image? SubtitleOverlayImage { get; set; }
     public Avalonia.Media.TranslateTransform? SubtitleOverlayTransform { get; set; }
     public Avalonia.Media.ScaleTransform? SubtitleOverlayScaleTransform { get; set; }
     public bool OkPressed { get; private set; }
     public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
+
+    private readonly IFileHelper _fileHelper;
+    private readonly IWindowService _windowService;
+
+    private string _loadFileName = string.Empty;
+
+    public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
+    {
+        _windowService = windowService;
+        _fileHelper = fileHelper;
+        _fileHelper = fileHelper;
+        _fileName = string.Empty;
+        Subtitles = new ObservableCollection<BinarySubtitleItem>();
+    }
+
+    public void Initialize(string fileName, IOcrSubtitle subtitle)
+    {
+        _loadFileName = fileName;
+    }
 
     partial void OnSelectedSubtitleChanged(BinarySubtitleItem? value)
     {
@@ -126,22 +142,6 @@ public partial class BinaryEditViewModel : ObservableObject
         SubtitleOverlayTransform.Y = y;
     }
 
-    private readonly IFileHelper _fileHelper;
-
-    public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
-    {
-        _windowService = windowService;
-        _fileHelper = fileHelper;
-        _fileHelper = fileHelper;
-        _fileName = string.Empty;
-        Subtitles = new ObservableCollection<BinarySubtitleItem>();
-    }
-
-    public void Initialize(string fileName, IOcrSubtitle subtitle)
-    {
-        _loadFileName = fileName;
-    }
-
     [RelayCommand]
     private async Task FileOpen()
     {
@@ -150,12 +150,12 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickSaveFile(Window, ".sup", "export.sup", Se.Language.General.SaveFileAsTitle);
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup",  "All files", ".*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
-        
+
         await DoFileOpen(fileName);
     }
 
@@ -165,26 +165,26 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             return;
         }
-        
+
         IOcrSubtitle? imageSubtitle = null;
-        if (FileUtil.IsBluRaySup((fileName)))
+        if (FileUtil.IsBluRaySup(fileName))
         {
             var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
             if (subtitles.Count > 0)
-            { 
-                imageSubtitle = new  OcrSubtitleBluRay(subtitles); 
+            {
+                imageSubtitle = new OcrSubtitleBluRay(subtitles);
             }
         }
-        
+
         //TODO: other image based formats
-        
+
         if (imageSubtitle == null)
         {
             await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
-        
+
         FileName = fileName;
         OcrSubtitle = imageSubtitle;
 
@@ -280,6 +280,12 @@ public partial class BinaryEditViewModel : ObservableObject
         exportHandler.WriteHeader(fileName, imageParameter);
         for (var i = 0; i < Subtitles.Count; i++)
         {
+            imageParameter.Bitmap = Subtitles[i].Bitmap!.ToSkBitmap();
+            imageParameter.Text = Subtitles[i].Text;
+            imageParameter.StartTime = Subtitles[i].StartTime;
+            imageParameter.EndTime = Subtitles[i].EndTime;
+            imageParameter.Index = i;
+
             exportHandler.CreateParagraph(imageParameter);
             exportHandler.WriteParagraph(imageParameter);
         }
@@ -288,9 +294,55 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ImportTimeCodes()
+    private async Task ImportTimeCodes()
     {
-        // TODO: Implement import time codes
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        if (subtitle.Paragraphs.Count != Subtitles.Count)
+        {
+            var message = "The time code import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
+                + "Imported lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                + "Current lines: " + Subtitles.Count + Environment.NewLine
+                + Environment.NewLine +
+                "Do you want to continue anyway?";
+
+            var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Error);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
+        for (var i = 0; i < Subtitles.Count && i < subtitle.Paragraphs.Count; i++)
+        {
+            Subtitles[i].StartTime = subtitle.Paragraphs[i].StartTime.TimeSpan;
+            Subtitles[i].EndTime = subtitle.Paragraphs[i].EndTime.TimeSpan;
+            Subtitles[i].Duration = Subtitles[i].EndTime - Subtitles[i].StartTime;
+        }
     }
 
     [RelayCommand]
@@ -608,7 +660,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        Dispatcher.UIThread.InvokeAsync(async() =>
+        Dispatcher.UIThread.InvokeAsync(async () =>
         {
             await DoFileOpen(_loadFileName);
         });
