@@ -75,11 +75,31 @@ public class BinaryEditWindow : Window
 
         mainGrid.Add(contentGrid, 1, 0);
 
-        // Button panel
+        // Status bar and button panel
+        var bottomPanel = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto),
+            },
+            Margin = new Thickness(5),
+        };
+
+        var statusTextBlock = new TextBlock
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(5, 0, 0, 0),
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.StatusText)),
+        };
+        bottomPanel.Add(statusTextBlock, 0, 0);
+
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButtonOk(vm.OkCommand),
             UiUtil.MakeButtonCancel(vm.CancelCommand));
-        mainGrid.Add(buttonPanel, 2, 0);
+        bottomPanel.Add(buttonPanel, 1, 0);
+
+        mainGrid.Add(bottomPanel, 2, 0);
 
         Content = mainGrid;
         KeyDown += (_, args) => vm.OnKeyDown(args);
@@ -365,6 +385,7 @@ public class BinaryEditWindow : Window
         var startTimeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
+            MinWidth = 165,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}")
             {
                 Mode = BindingMode.TwoWay,
@@ -381,16 +402,17 @@ public class BinaryEditWindow : Window
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 2),
         });
-        var durationUpDown = new Nikse.SubtitleEdit.Controls.SecondsUpDown
+        var durationUpDown = new SecondsUpDown
         {
             DataContext = vm,
-            [!Nikse.SubtitleEdit.Controls.SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}")
+            [!SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}")
             {
                 Mode = BindingMode.TwoWay
             },
         };
         durationPanel.Children.Add(durationUpDown);
         firstRowPanel.Children.Add(durationPanel);
+        firstRowPanel.Children.Add(UiUtil.MakeLabel().WithBindText(vm, nameof(vm.CurrentPositionAndSize)));
 
         controlsPanel.Children.Add(firstRowPanel);
 
@@ -411,7 +433,7 @@ public class BinaryEditWindow : Window
         });
         var xUpDown = new NumericUpDown
         {
-            Width = 100,
+            Width = 130,
             Minimum = int.MinValue,
             Maximum = int.MaxValue,
             Increment = 1,
@@ -435,7 +457,7 @@ public class BinaryEditWindow : Window
         });
         var yUpDown = new NumericUpDown
         {
-            Width = 100,
+            Width = 130,
             Minimum = int.MinValue,
             Maximum = int.MaxValue,
             Increment = 1,
@@ -472,6 +494,64 @@ public class BinaryEditWindow : Window
         secondRowPanel.Children.Add(buttonsPanel);
 
         controlsPanel.Children.Add(secondRowPanel);
+
+        // Third row - Screen Width, Screen Height
+        var thirdRowPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Margin = new Thickness(0, 10, 0, 0),
+        };
+
+        // Screen Width
+        var screenWidthPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
+        screenWidthPanel.Children.Add(new TextBlock
+        {
+            Text = "Screen Width",
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        var screenWidthUpDown = new NumericUpDown
+        {
+            Width = 130,
+            Minimum = 1,
+            Maximum = int.MaxValue,
+            Increment = 1,
+            FormatString = "F0",
+            DataContext = vm,
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.ScreenWidth))
+            {
+                Mode = BindingMode.TwoWay
+            },
+        };
+        screenWidthPanel.Children.Add(screenWidthUpDown);
+        thirdRowPanel.Children.Add(screenWidthPanel);
+
+        // Screen Height
+        var screenHeightPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
+        screenHeightPanel.Children.Add(new TextBlock
+        {
+            Text = "Screen Height",
+            FontWeight = FontWeight.Bold,
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        var screenHeightUpDown = new NumericUpDown
+        {
+            Width = 130,
+            Minimum = 1,
+            Maximum = int.MaxValue,
+            Increment = 1,
+            FormatString = "F0",
+            DataContext = vm,
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.ScreenHeight))
+            {
+                Mode = BindingMode.TwoWay
+            },
+        };
+        screenHeightPanel.Children.Add(screenHeightUpDown);
+        thirdRowPanel.Children.Add(screenHeightPanel);
+
+        controlsPanel.Children.Add(thirdRowPanel);
 
         // Subscribe to X and Y changes to update overlay position
         xUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();

@@ -32,6 +32,7 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private int _screenWidth;
     [ObservableProperty] private int _screenHeight;
     [ObservableProperty] private string _statusText;
+    [ObservableProperty] private string _currentPositionAndSize;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
@@ -57,6 +58,7 @@ public partial class BinaryEditViewModel : ObservableObject
         _fileName = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
         StatusText = string.Empty;
+        CurrentPositionAndSize = string.Empty;
     }
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
@@ -66,6 +68,52 @@ public partial class BinaryEditViewModel : ObservableObject
 
     partial void OnSelectedSubtitleChanged(BinarySubtitleItem? value)
     {
+        UpdateOverlayPosition();
+        UpdateStatusText();
+    }
+
+    private void UpdateStatusText()
+    {
+        if (SelectedSubtitle == null)
+        {
+            StatusText = $"{Subtitles.Count} subtitles";
+            CurrentPositionAndSize = string.Empty;
+        }
+        else
+        {
+            var index = Subtitles.IndexOf(SelectedSubtitle);
+            StatusText = $"Subtitle {index + 1} of {Subtitles.Count}";
+            CurrentPositionAndSize = $"Position: {SelectedSubtitle.X}, {SelectedSubtitle.Y}   Size: {SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}";
+        }
+    }
+
+    partial void OnScreenWidthChanged(int value)
+    {
+        if (value <= 0)
+        {
+            return;
+        }
+
+        foreach (var subtitle in Subtitles)
+        {
+            subtitle.ScreenWidth = value;
+        }
+
+        UpdateOverlayPosition();
+    }
+
+    partial void OnScreenHeightChanged(int value)
+    {
+        if (value <= 0)
+        {
+            return;
+        }
+
+        foreach (var subtitle in Subtitles)
+        {
+            subtitle.ScreenHeight = value;
+        }
+
         UpdateOverlayPosition();
     }
 
@@ -202,6 +250,7 @@ public partial class BinaryEditViewModel : ObservableObject
             SelectAndScrollToRow(0);
             ScreenWidth = Subtitles[0].ScreenSize.Width;
             ScreenHeight = Subtitles[0].ScreenSize.Height;
+            UpdateStatusText();
         }
     }
 

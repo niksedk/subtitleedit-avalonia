@@ -14,6 +14,8 @@ public partial class BinarySubtitleItem : ObservableObject
     [ObservableProperty] private TimeSpan _startTime;
     [ObservableProperty] private TimeSpan _endTime;
     [ObservableProperty] private TimeSpan _duration;
+    [ObservableProperty] private int _screenWidth;
+    [ObservableProperty] private int _screenHeight;
     
     private bool _isUpdating;
 
@@ -30,7 +32,9 @@ public partial class BinarySubtitleItem : ObservableObject
         _endTime = item.EndTime;
         _duration = item.Duration;
 
-        ScreenSize = item.GetScreenSize();
+        var screenSize = item.GetScreenSize();
+        _screenWidth = screenSize.Width;
+        _screenHeight = screenSize.Height;
         
         // Get bitmap (cropped to remove transparent borders)
         try
@@ -60,7 +64,7 @@ public partial class BinarySubtitleItem : ObservableObject
     public bool IsForced { get; set; }
     public Bitmap? Bitmap { get; set; }
     public string Text { get; set; }
-    public SKSizeI ScreenSize { get; set; }
+    public SKSizeI ScreenSize => new SKSizeI(ScreenWidth, ScreenHeight);
 
     // When StartTime changes, update EndTime to maintain Duration
     partial void OnStartTimeChanged(TimeSpan value)
