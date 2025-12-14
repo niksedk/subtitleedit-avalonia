@@ -51,13 +51,7 @@ public class BinaryEditWindow : Window
         };
 
         // Left section - grid with subtitles lines + controls
-        var leftContent = new Border
-        {
-            Child = MakeLayoutListViewAndEditBox(vm),
-            BorderBrush = UiUtil.GetBorderBrush(),
-            BorderThickness = new Thickness(1),
-            Margin = new Thickness(5),
-        };
+        var leftContent = MakeLayoutListViewAndEditBox(vm);
         contentGrid.Add(leftContent, 0, 0);
 
         // Vertical splitter
@@ -122,7 +116,7 @@ public class BinaryEditWindow : Window
                 new Separator(),
                 new MenuItem
                 {
-                    Header = Se.Language.File.Import.TimeCodesDotDotDot,
+                    Header = "Import time codes...",
                     Command = vm.ImportTimeCodesCommand,
                 },
                 new Separator(),
@@ -246,7 +240,6 @@ public class BinaryEditWindow : Window
         var dataGrid = new DataGrid
         {
             Height = double.NaN,
-            Margin = new Thickness(0, 0, 0, 5),
             CanUserSortColumns = false,
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Extended,
@@ -261,6 +254,9 @@ public class BinaryEditWindow : Window
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Mode = BindingMode.Default });
 
         vm.SubtitleGrid = dataGrid;
+        
+        var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);
+        dataGridBorder.Margin = new Thickness(0, 0, 0, 5);
 
         // Columns: Forced, Number, Show, Duration, Text, Image
         dataGrid.Columns.Add(new DataGridTemplateColumn
@@ -331,87 +327,94 @@ public class BinaryEditWindow : Window
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
-        mainGrid.Add(dataGrid, 0, 0);
+        mainGrid.Add(dataGridBorder, 0, 0);
 
-        // Controls section - using Grid layout for better organization
-        var controlsGrid = new Grid
+        // Controls section - using vertical StackPanel with two rows
+        var controlsPanel = new StackPanel
         {
-            RowDefinitions =
-            {
-                new RowDefinition(GridLength.Auto), // Labels
-                new RowDefinition(GridLength.Auto), // Controls
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Auto), // Start Time
-                new ColumnDefinition(GridLength.Auto), // Duration
-                new ColumnDefinition(GridLength.Auto), // X
-                new ColumnDefinition(GridLength.Auto), // Y
-                new ColumnDefinition(GridLength.Auto), // Forced
-                new ColumnDefinition(GridLength.Star), // Buttons
-            },
+            Orientation = Orientation.Vertical,
             Margin = new Thickness(0, 10, 0, 0),
         };
 
-        // Start Time - Column 0
-        var startTimeLabel = new TextBlock
+        // First row - Start Time, Duration, Forced
+        var firstRowPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+
+        // Start Time
+        var startTimePanel = new StackPanel { Orientation = Orientation.Vertical };
+        startTimePanel.Children.Add(new TextBlock
         {
             Text = Se.Language.General.Show,
             FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 10, 2),
-        };
-        Grid.SetRow(startTimeLabel, 0);
-        Grid.SetColumn(startTimeLabel, 0);
-        controlsGrid.Children.Add(startTimeLabel);
-
+            Margin = new Thickness(0, 0, 0, 2),
+        });
         var startTimeUpDown = new Nikse.SubtitleEdit.Controls.TimeCodeUpDown
         {
             DataContext = vm,
-            Margin = new Thickness(0, 0, 10, 0),
             [!Nikse.SubtitleEdit.Controls.TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}") 
             { 
                 Mode = BindingMode.TwoWay 
             },
         };
-        Grid.SetRow(startTimeUpDown, 1);
-        Grid.SetColumn(startTimeUpDown, 0);
-        controlsGrid.Children.Add(startTimeUpDown);
+        startTimePanel.Children.Add(startTimeUpDown);
+        firstRowPanel.Children.Add(startTimePanel);
 
-        // Duration - Column 1
-        var durationLabel = new TextBlock
+        // Duration
+        var durationPanel = new StackPanel { Orientation = Orientation.Vertical };
+        durationPanel.Children.Add(new TextBlock
         {
             Text = Se.Language.General.Duration,
             FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 10, 2),
-        };
-        Grid.SetRow(durationLabel, 0);
-        Grid.SetColumn(durationLabel, 1);
-        controlsGrid.Children.Add(durationLabel);
-
+            Margin = new Thickness(0, 0, 0, 2),
+        });
         var durationUpDown = new Nikse.SubtitleEdit.Controls.SecondsUpDown
         {
             DataContext = vm,
-            Margin = new Thickness(0, 0, 10, 0),
             [!Nikse.SubtitleEdit.Controls.SecondsUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Duration)}") 
             { 
                 Mode = BindingMode.TwoWay 
             },
         };
-        Grid.SetRow(durationUpDown, 1);
-        Grid.SetColumn(durationUpDown, 1);
-        controlsGrid.Children.Add(durationUpDown);
+        durationPanel.Children.Add(durationUpDown);
+        firstRowPanel.Children.Add(durationPanel);
 
-        // X Position - Column 2
-        var xLabel = new TextBlock
+        // Forced
+        var forcedPanel = new StackPanel { Orientation = Orientation.Vertical };
+        forcedPanel.Children.Add(new TextBlock
+        {
+            Text = Se.Language.General.Forced,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            Margin = new Thickness(0, 0, 0, 2),
+        });
+        var forcedCheckBox = new CheckBox
+        {
+            [!CheckBox.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.IsForced)}") { Mode = BindingMode.TwoWay },
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        forcedPanel.Children.Add(forcedCheckBox);
+        firstRowPanel.Children.Add(forcedPanel);
+
+        controlsPanel.Children.Add(firstRowPanel);
+
+        // Second row - X, Y, Buttons
+        var secondRowPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+        };
+
+        // X Position
+        var xPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
+        xPanel.Children.Add(new TextBlock
         {
             Text = "X",
             FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 10, 2),
-        };
-        Grid.SetRow(xLabel, 0);
-        Grid.SetColumn(xLabel, 2);
-        controlsGrid.Children.Add(xLabel);
-
+            VerticalAlignment = VerticalAlignment.Center,
+        });
         var xUpDown = new NumericUpDown
         {
             Width = 100,
@@ -420,27 +423,22 @@ public class BinaryEditWindow : Window
             Increment = 1,
             FormatString = "F0",
             DataContext = vm,
-            Margin = new Thickness(0, 0, 10, 0),
             [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.X)}") 
             { 
                 Mode = BindingMode.TwoWay 
             },
         };
-        Grid.SetRow(xUpDown, 1);
-        Grid.SetColumn(xUpDown, 2);
-        controlsGrid.Children.Add(xUpDown);
+        xPanel.Children.Add(xUpDown);
+        secondRowPanel.Children.Add(xPanel);
 
-        // Y Position - Column 3
-        var yLabel = new TextBlock
+        // Y Position
+        var yPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
+        yPanel.Children.Add(new TextBlock
         {
             Text = "Y",
             FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 10, 2),
-        };
-        Grid.SetRow(yLabel, 0);
-        Grid.SetColumn(yLabel, 3);
-        controlsGrid.Children.Add(yLabel);
-
+            VerticalAlignment = VerticalAlignment.Center,
+        });
         var yUpDown = new NumericUpDown
         {
             Width = 100,
@@ -449,43 +447,19 @@ public class BinaryEditWindow : Window
             Increment = 1,
             FormatString = "F0",
             DataContext = vm,
-            Margin = new Thickness(0, 0, 10, 0),
             [!NumericUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Y)}") 
             { 
                 Mode = BindingMode.TwoWay 
             },
         };
-        Grid.SetRow(yUpDown, 1);
-        Grid.SetColumn(yUpDown, 3);
-        controlsGrid.Children.Add(yUpDown);
+        yPanel.Children.Add(yUpDown);
+        secondRowPanel.Children.Add(yPanel);
 
-        // Forced Checkbox - Column 4
-        var forcedLabel = new TextBlock
-        {
-            Text = Se.Language.General.Forced,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 10, 2),
-        };
-        Grid.SetRow(forcedLabel, 0);
-        Grid.SetColumn(forcedLabel, 4);
-        controlsGrid.Children.Add(forcedLabel);
-
-        var forcedCheckBox = new CheckBox
-        {
-            [!CheckBox.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.IsForced)}") { Mode = BindingMode.TwoWay },
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 10, 0),
-        };
-        Grid.SetRow(forcedCheckBox, 1);
-        Grid.SetColumn(forcedCheckBox, 4);
-        controlsGrid.Children.Add(forcedCheckBox);
-
-        // Buttons - Column 5
+        // Buttons
         var buttonsPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 5,
-            HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Bottom,
         };
 
@@ -498,11 +472,11 @@ public class BinaryEditWindow : Window
         var setTextButton = UiUtil.MakeButton(vm.SetTextCommand, IconNames.NewText);
         buttonsPanel.Children.Add(setTextButton);
 
-        Grid.SetRow(buttonsPanel, 1);
-        Grid.SetColumn(buttonsPanel, 5);
-        controlsGrid.Children.Add(buttonsPanel);
+        secondRowPanel.Children.Add(buttonsPanel);
 
-        mainGrid.Add(controlsGrid, 1, 0);
+        controlsPanel.Children.Add(secondRowPanel);
+
+        mainGrid.Add(UiUtil.MakeBorderForControl(controlsPanel), 1, 0);
 
         // Subscribe to X and Y changes to update overlay position
         xUpDown.ValueChanged += (_, _) => vm.UpdateOverlayPosition();
