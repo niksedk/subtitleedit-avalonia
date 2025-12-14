@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
+using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -391,15 +394,118 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ChangeFrameRate()
+    private async Task ChangeFrameRate()
     {
-        // TODO: Implement change frame rate
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ChangeFrameRateWindow, ChangeFrameRateViewModel>(Window, vm => { });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        var ratio = result.SelectedToFrameRate / result.SelectedFromFrameRate;
+
+        // If there are selected items in the grid, apply only to them
+        var appliedToSelected = false;
+        if (SubtitleGrid?.SelectedItems != null && SubtitleGrid.SelectedItems.Count > 0)
+        {
+            var selectedIndices = new List<int>();
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    var index = Subtitles.IndexOf(binaryItem);
+                    if (index >= 0)
+                    {
+                        selectedIndices.Add(index);
+                    }
+                }
+            }
+
+            if (selectedIndices.Count > 0)
+            {
+                foreach (var idx in selectedIndices)
+                {
+                    var s = Subtitles[idx];
+                    s.StartTime = TimeSpan.FromMilliseconds(s.StartTime.TotalMilliseconds * ratio);
+                    s.EndTime = TimeSpan.FromMilliseconds(s.EndTime.TotalMilliseconds * ratio);
+                }
+
+                appliedToSelected = true;
+            }
+        }
+
+        if (!appliedToSelected)
+        {
+            // Apply to all subtitles
+            foreach (var s in Subtitles)
+            {
+                s.StartTime = TimeSpan.FromMilliseconds(s.StartTime.TotalMilliseconds * ratio);
+                s.EndTime = TimeSpan.FromMilliseconds(s.EndTime.TotalMilliseconds * ratio);
+            }
+        }
     }
 
     [RelayCommand]
-    private void ChangeSpeed()
+    private async Task ChangeSpeed()
     {
-        // TODO: Implement change speed
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(Window, vm => { });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // result.SpeedPercent is percentage; factor is 100 / percent as used elsewhere
+        var factor = 100.0 / result.SpeedPercent;
+
+        var appliedToSelected = false;
+        if (SubtitleGrid?.SelectedItems != null && SubtitleGrid.SelectedItems.Count > 0)
+        {
+            var selectedIndices = new List<int>();
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    var index = Subtitles.IndexOf(binaryItem);
+                    if (index >= 0)
+                    {
+                        selectedIndices.Add(index);
+                    }
+                }
+            }
+
+            if (selectedIndices.Count > 0)
+            {
+                foreach (var idx in selectedIndices)
+                {
+                    var s = Subtitles[idx];
+                    s.StartTime = TimeSpan.FromMilliseconds(s.StartTime.TotalMilliseconds * factor);
+                    s.EndTime = TimeSpan.FromMilliseconds(s.EndTime.TotalMilliseconds * factor);
+                }
+
+                appliedToSelected = true;
+            }
+        }
+
+        if (!appliedToSelected)
+        {
+            foreach (var s in Subtitles)
+            {
+                s.StartTime = TimeSpan.FromMilliseconds(s.StartTime.TotalMilliseconds * factor);
+                s.EndTime = TimeSpan.FromMilliseconds(s.EndTime.TotalMilliseconds * factor);
+            }
+        }
     }
 
     [RelayCommand]
