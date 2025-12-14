@@ -11,6 +11,11 @@ public partial class BinarySubtitleItem : ObservableObject
 {
     [ObservableProperty] private int _x;
     [ObservableProperty] private int _y;
+    [ObservableProperty] private TimeSpan _startTime;
+    [ObservableProperty] private TimeSpan _endTime;
+    [ObservableProperty] private TimeSpan _duration;
+    
+    private bool _isUpdating;
 
     public BinarySubtitleItem(OcrSubtitleItem item)
     {
@@ -21,9 +26,9 @@ public partial class BinarySubtitleItem : ObservableObject
         Text = item.Text;
 
         // Store times as TimeSpan for use with TimeCodeUpDown and SecondsUpDown controls
-        StartTime = item.StartTime;
-        EndTime = item.EndTime;
-        Duration = item.Duration;
+        _startTime = item.StartTime;
+        _endTime = item.EndTime;
+        _duration = item.Duration;
 
         ScreenSize = item.GetScreenSize();
         
@@ -54,9 +59,39 @@ public partial class BinarySubtitleItem : ObservableObject
     public int Number { get; set; }
     public bool IsForced { get; set; }
     public Bitmap? Bitmap { get; set; }
-    public TimeSpan StartTime { get; set; }
-    public TimeSpan EndTime { get; set; }
-    public TimeSpan Duration { get; set; }
     public string Text { get; set; }
     public SKSizeI ScreenSize { get; set; }
+
+    // When StartTime changes, update EndTime to maintain Duration
+    partial void OnStartTimeChanged(TimeSpan value)
+    {
+        if (_isUpdating) return;
+        
+        _isUpdating = true;
+        _endTime = value + _duration;
+        OnPropertyChanged(nameof(EndTime));
+        _isUpdating = false;
+    }
+
+    // When Duration changes, update EndTime to maintain StartTime
+    partial void OnDurationChanged(TimeSpan value)
+    {
+        if (_isUpdating) return;
+        
+        _isUpdating = true;
+        _endTime = _startTime + value;
+        OnPropertyChanged(nameof(EndTime));
+        _isUpdating = false;
+    }
+
+    // When EndTime changes, update Duration to maintain StartTime
+    partial void OnEndTimeChanged(TimeSpan value)
+    {
+        if (_isUpdating) return;
+        
+        _isUpdating = true;
+        _duration = value - _startTime;
+        OnPropertyChanged(nameof(Duration));
+        _isUpdating = false;
+    }
 }

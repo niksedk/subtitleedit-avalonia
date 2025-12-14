@@ -109,7 +109,7 @@ public class BinaryEditWindow : Window
                 },
                 new MenuItem
                 {
-                    Header = l.Save,
+                    Header = l.SaveAs,
                     Command = vm.FileSaveCommand,
                     Icon = new Icon { Value = IconNames.ContentSave },
                 },
@@ -382,22 +382,6 @@ public class BinaryEditWindow : Window
         durationPanel.Children.Add(durationUpDown);
         firstRowPanel.Children.Add(durationPanel);
 
-        // Forced
-        var forcedPanel = new StackPanel { Orientation = Orientation.Vertical };
-        forcedPanel.Children.Add(new TextBlock
-        {
-            Text = Se.Language.General.Forced,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 0, 0, 2),
-        });
-        var forcedCheckBox = new CheckBox
-        {
-            [!CheckBox.IsCheckedProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.IsForced)}") { Mode = BindingMode.TwoWay },
-            VerticalAlignment = VerticalAlignment.Center,
-        };
-        forcedPanel.Children.Add(forcedCheckBox);
-        firstRowPanel.Children.Add(forcedPanel);
-
         controlsPanel.Children.Add(firstRowPanel);
 
         // Second row - X, Y, Buttons
@@ -464,12 +448,15 @@ public class BinaryEditWindow : Window
         };
 
         var exportImageButton = UiUtil.MakeButton(vm.ExportImageCommand, IconNames.Export);
+        ToolTip.SetTip(exportImageButton, Se.Language.General.Export);
         buttonsPanel.Children.Add(exportImageButton);
 
         var importImageButton = UiUtil.MakeButton(vm.ImportImageCommand, IconNames.Import);
+        ToolTip.SetTip(importImageButton, Se.Language.General.Import);
         buttonsPanel.Children.Add(importImageButton);
 
         var setTextButton = UiUtil.MakeButton(vm.SetTextCommand, IconNames.NewText);
+        ToolTip.SetTip(setTextButton, "Set text for subtitle");
         buttonsPanel.Children.Add(setTextButton);
 
         secondRowPanel.Children.Add(buttonsPanel);
