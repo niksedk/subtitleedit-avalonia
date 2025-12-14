@@ -347,6 +347,7 @@ namespace Nikse.SubtitleEdit.Controls
 
             _isUpdatingFromValue = true;
             SetValue(ValueProperty, newVal);
+            UpdateText();
             _isUpdatingFromValue = false;
         }
 

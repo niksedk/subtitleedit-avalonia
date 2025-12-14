@@ -68,8 +68,7 @@ public partial class BinarySubtitleItem : ObservableObject
         if (_isUpdating) return;
         
         _isUpdating = true;
-        _endTime = value + _duration;
-        OnPropertyChanged(nameof(EndTime));
+        EndTime = value + _duration;
         _isUpdating = false;
     }
 
@@ -79,8 +78,7 @@ public partial class BinarySubtitleItem : ObservableObject
         if (_isUpdating) return;
         
         _isUpdating = true;
-        _endTime = _startTime + value;
-        OnPropertyChanged(nameof(EndTime));
+        EndTime = _startTime + value;
         _isUpdating = false;
     }
 
@@ -90,8 +88,7 @@ public partial class BinarySubtitleItem : ObservableObject
         if (_isUpdating) return;
         
         _isUpdating = true;
-        _duration = value - _startTime;
-        OnPropertyChanged(nameof(Duration));
+        Duration = value - _startTime;
         _isUpdating = false;
     }
 }

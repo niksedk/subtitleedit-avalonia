@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -269,7 +270,7 @@ public class BinaryEditWindow : Window
             CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<BinarySubtitleItem>((_, _) =>
                 new Border
                 {
-                    Background = Avalonia.Media.Brushes.Transparent, // Prevents highlighting
+                    Background = Brushes.Transparent, // Prevents highlighting
                     Padding = new Thickness(4),
                     Child = new CheckBox
                     {
@@ -320,7 +321,7 @@ public class BinaryEditWindow : Window
                 var image = new Image
                 {
                     MaxHeight = 22,
-                    Stretch = Avalonia.Media.Stretch.Uniform,
+                    Stretch = Stretch.Uniform,
                     [!Image.SourceProperty] = new Binding(nameof(BinarySubtitleItem.Bitmap)),
                 };
                 return image;
@@ -350,15 +351,15 @@ public class BinaryEditWindow : Window
         startTimePanel.Children.Add(new TextBlock
         {
             Text = Se.Language.General.Show,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 2),
         });
-        var startTimeUpDown = new Nikse.SubtitleEdit.Controls.TimeCodeUpDown
+        var startTimeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
-            [!Nikse.SubtitleEdit.Controls.TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}") 
-            { 
-                Mode = BindingMode.TwoWay 
+            [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}")
+            {
+                Mode = BindingMode.TwoWay,
             },
         };
         startTimePanel.Children.Add(startTimeUpDown);
@@ -369,7 +370,7 @@ public class BinaryEditWindow : Window
         durationPanel.Children.Add(new TextBlock
         {
             Text = Se.Language.General.Duration,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 2),
         });
         var durationUpDown = new Nikse.SubtitleEdit.Controls.SecondsUpDown
@@ -397,7 +398,7 @@ public class BinaryEditWindow : Window
         xPanel.Children.Add(new TextBlock
         {
             Text = "X",
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             VerticalAlignment = VerticalAlignment.Center,
         });
         var xUpDown = new NumericUpDown
@@ -421,7 +422,7 @@ public class BinaryEditWindow : Window
         yPanel.Children.Add(new TextBlock
         {
             Text = "Y",
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
             VerticalAlignment = VerticalAlignment.Center,
         });
         var yUpDown = new NumericUpDown
@@ -490,7 +491,7 @@ public class BinaryEditWindow : Window
         // Create overlay image for subtitle bitmap
         var overlayImage = new Image
         {
-            Stretch = Avalonia.Media.Stretch.None,
+            Stretch = Stretch.None,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
@@ -502,9 +503,9 @@ public class BinaryEditWindow : Window
         };
 
         // Set up transform group for scaling and positioning
-        var scaleTransform = new Avalonia.Media.ScaleTransform();
+        var scaleTransform = new ScaleTransform();
         var translateTransform = new TranslateTransform();
-        var transformGroup = new Avalonia.Media.TransformGroup();
+        var transformGroup = new TransformGroup();
         transformGroup.Children.Add(scaleTransform);
         transformGroup.Children.Add(translateTransform);
         overlayImage.RenderTransform = transformGroup;
