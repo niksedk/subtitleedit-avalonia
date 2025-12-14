@@ -50,11 +50,6 @@ public partial class BinaryEditViewModel : ObservableObject
 
     private string _loadFileName = string.Empty;
 
-    private int _marginLeft;
-    private int _marginTop;
-    private int _marginRight;
-    private int _marginBottom;
-
     public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _windowService = windowService;
@@ -64,10 +59,6 @@ public partial class BinaryEditViewModel : ObservableObject
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
         StatusText = string.Empty;
         CurrentPositionAndSize = string.Empty;
-        _marginLeft = 10;
-        _marginTop = 10;
-        _marginRight = 10;
-        _marginBottom = 10;
     }
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
@@ -260,7 +251,7 @@ public partial class BinaryEditViewModel : ObservableObject
             ScreenWidth = Subtitles[0].ScreenSize.Width;
             ScreenHeight = Subtitles[0].ScreenSize.Height;
             UpdateStatusText();
-            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, System.IO.Path.GetFileName(fileName));
+            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, fileName);
         }
     }
 
@@ -529,6 +520,11 @@ public partial class BinaryEditViewModel : ObservableObject
 
     private void ApplyAlignmentToSubtitles(List<BinarySubtitleItem> subtitles, string alignment)
     {
+        var marginLeft = Se.Settings.Tools.BinEditLeftMargin;
+        var marginTop = Se.Settings.Tools.BinEditTopMargin;
+        var marginRight = Se.Settings.Tools.BinEditRightMargin;
+        var marginBottom = Se.Settings.Tools.BinEditBottomMargin;
+
         foreach (var subtitle in subtitles)
         {
             if (subtitle.Bitmap == null)
@@ -541,23 +537,23 @@ public partial class BinaryEditViewModel : ObservableObject
             var imageWidth = (int)subtitle.Bitmap.Size.Width;
             var imageHeight = (int)subtitle.Bitmap.Size.Height;
 
-            // Calculate new position based on alignment
+            // Calculate new position based on alignment with margins
             switch (alignment)
             {
                 case "an1": // Bottom Left
-                    subtitle.X = 0;
-                    subtitle.Y = screenHeight - imageHeight;
+                    subtitle.X = marginLeft;
+                    subtitle.Y = screenHeight - imageHeight - marginBottom;
                     break;
                 case "an2": // Bottom Center
                     subtitle.X = (screenWidth - imageWidth) / 2;
-                    subtitle.Y = screenHeight - imageHeight;
+                    subtitle.Y = screenHeight - imageHeight - marginBottom;
                     break;
                 case "an3": // Bottom Right
-                    subtitle.X = screenWidth - imageWidth;
-                    subtitle.Y = screenHeight - imageHeight;
+                    subtitle.X = screenWidth - imageWidth - marginRight;
+                    subtitle.Y = screenHeight - imageHeight - marginBottom;
                     break;
                 case "an4": // Middle Left
-                    subtitle.X = 0;
+                    subtitle.X = marginLeft;
                     subtitle.Y = (screenHeight - imageHeight) / 2;
                     break;
                 case "an5": // Middle Center
@@ -565,20 +561,20 @@ public partial class BinaryEditViewModel : ObservableObject
                     subtitle.Y = (screenHeight - imageHeight) / 2;
                     break;
                 case "an6": // Middle Right
-                    subtitle.X = screenWidth - imageWidth;
+                    subtitle.X = screenWidth - imageWidth - marginRight;
                     subtitle.Y = (screenHeight - imageHeight) / 2;
                     break;
                 case "an7": // Top Left
-                    subtitle.X = 0;
-                    subtitle.Y = 0;
+                    subtitle.X = marginLeft;
+                    subtitle.Y = marginTop;
                     break;
                 case "an8": // Top Center
                     subtitle.X = (screenWidth - imageWidth) / 2;
-                    subtitle.Y = 0;
+                    subtitle.Y = marginTop;
                     break;
                 case "an9": // Top Right
-                    subtitle.X = screenWidth - imageWidth;
-                    subtitle.Y = 0;
+                    subtitle.X = screenWidth - imageWidth - marginRight;
+                    subtitle.Y = marginTop;
                     break;
             }
         }
@@ -934,12 +930,6 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             return;
         }
-
-        // Update margin values from settings
-        _marginLeft = Se.Settings.Tools.BinEditLeftMargin;
-        _marginTop = Se.Settings.Tools.BinEditTopMargin;
-        _marginRight = Se.Settings.Tools.BinEditRightMargin;
-        _marginBottom = Se.Settings.Tools.BinEditBottomMargin;
     }
 
     [RelayCommand]
