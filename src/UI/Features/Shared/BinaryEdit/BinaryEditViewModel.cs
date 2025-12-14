@@ -8,9 +8,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -23,10 +25,10 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private BinarySubtitleItem? _selectedSubtitle;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
-    
-    
-    private IWindowService _windowService;
-    
+
+
+    private readonly IWindowService _windowService;
+
 
     public Window? Window { get; set; }
     public DataGrid? SubtitleGrid { get; set; }
@@ -44,7 +46,7 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public void UpdateOverlayPosition()
     {
-        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null || 
+        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null ||
             SelectedSubtitle == null || VideoPlayerControl == null)
         {
             return;
@@ -63,7 +65,7 @@ public partial class BinaryEditViewModel : ObservableObject
         // The video content is in row 0 of the VideoPlayerControl's internal grid
         const double controlsHeight = 55; // Approximate height of controls panel
         var videoDisplayHeight = videoPlayerHeight - controlsHeight;
-        
+
         if (videoDisplayHeight <= 0)
         {
             return;
@@ -118,7 +120,7 @@ public partial class BinaryEditViewModel : ObservableObject
         SubtitleOverlayTransform.Y = y;
     }
 
-    IFileHelper _fileHelper;
+    private readonly IFileHelper _fileHelper;
 
     public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
@@ -133,7 +135,7 @@ public partial class BinaryEditViewModel : ObservableObject
     {
         FileName = fileName;
         OcrSubtitle = subtitle;
-        
+
         Subtitles.Clear();
         foreach (var s in subtitle.MakeOcrSubtitleItems())
         {
@@ -148,9 +150,95 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FileSave()
+    private async Task FileSave()
     {
-        // TODO: Implement file save
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".sup", "export.sup", Se.Language.General.SaveFileAsTitle);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var targetFormat = BatchConverter.FormatBluRaySup;
+        IExportHandler? exportHandler = null;
+        string extension = string.Empty;
+        if (targetFormat == BatchConverter.FormatBluRaySup)
+        {
+            exportHandler = new ExportHandlerBluRaySup();
+            extension = ".sup";
+        }
+
+        if (targetFormat == BatchConverter.FormatBdnXml)
+        {
+            exportHandler = new ExportHandlerBdnXml();
+            extension = string.Empty; // folder
+        }
+
+        if (targetFormat == BatchConverter.FormatVobSub)
+        {
+            exportHandler = new ExportHandlerVobSub();
+            extension = ".sub";
+        }
+
+        if (targetFormat == BatchConverter.FormatImagesWithTimeCodesInFileName)
+        {
+            exportHandler = new ExportHandlerImagesWithTimeCode();
+            extension = string.Empty; // folder
+        }
+
+        if (targetFormat == BatchConverter.FormatDostImage)
+        {
+            exportHandler = new ExportHandlerDost();
+            extension = string.Empty; // folder
+        }
+
+        if (targetFormat == BatchConverter.FormatFcpImage)
+        {
+            exportHandler = new ExportHandlerFcp();
+            extension = string.Empty; // folder
+        }
+
+        if (targetFormat == BatchConverter.FormatDCinemaInterop)
+        {
+            exportHandler = new ExportHandlerDCinemaInteropPng();
+            extension = string.Empty; // folder
+        }
+
+        if (targetFormat == BatchConverter.FormatDCinemaSmpte2014)
+        {
+            exportHandler = new ExportHandlerDCinemaSmpte2014Png();
+            extension = string.Empty; // folder
+        }
+
+        if (exportHandler == null)
+        {
+            var message = Se.Language.General.UnknownSubtitleFormat;
+            return;
+        }
+
+        var imageParameter = new ImageParameter()
+        {
+            ScreenWidth = Subtitles.First().ScreenSize.Width,
+            ScreenHeight = Subtitles.First().ScreenSize.Height,
+        };
+
+        exportHandler.WriteHeader(fileName, imageParameter);
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            exportHandler.CreateParagraph(imageParameter);
+            exportHandler.WriteParagraph(imageParameter);
+        }
+
+        exportHandler.WriteFooter();
     }
 
     [RelayCommand]
@@ -172,10 +260,8 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             return;
         }
-        
-       var result = await _windowService.ShowDialogAsync<BinaryApplyDurationLimitsWindow, BinaryApplyDurationLimitsViewModel>(Window, vm =>
-       {
-       });
+
+        var result = await _windowService.ShowDialogAsync<BinaryApplyDurationLimitsWindow, BinaryApplyDurationLimitsViewModel>(Window, vm => { });
 
         if (!result.OkPressed)
         {
@@ -234,9 +320,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BinaryAdjustAllTimesWindow, BinaryAdjustAllTimesViewModel>(Window, vm =>
-        {
-        });
+        var result = await _windowService.ShowDialogAsync<BinaryAdjustAllTimesWindow, BinaryAdjustAllTimesViewModel>(Window, vm => { });
 
         if (!result.OkPressed)
         {
