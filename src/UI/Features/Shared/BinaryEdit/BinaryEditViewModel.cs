@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Google.Protobuf.WellKnownTypes;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
@@ -11,7 +10,6 @@ using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
-using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
@@ -31,6 +29,9 @@ public partial class BinaryEditViewModel : ObservableObject
 {
     [ObservableProperty] private string _fileName;
     [ObservableProperty] private BinarySubtitleItem? _selectedSubtitle;
+    [ObservableProperty] private int _screenWidth;
+    [ObservableProperty] private int _screenHeight;
+    [ObservableProperty] private string _statusText;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
@@ -55,6 +56,7 @@ public partial class BinaryEditViewModel : ObservableObject
         _fileHelper = fileHelper;
         _fileName = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
+        StatusText = string.Empty;
     }
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
@@ -195,7 +197,12 @@ public partial class BinaryEditViewModel : ObservableObject
             Subtitles.Add(new BinarySubtitleItem(s));
         }
 
-        SelectAndScrollToRow(0);
+        if (Subtitles.Count > 0)
+        {
+            SelectAndScrollToRow(0);
+            ScreenWidth = Subtitles[0].ScreenSize.Width;
+            ScreenHeight = Subtitles[0].ScreenSize.Height;
+        }
     }
 
     [RelayCommand]
@@ -276,8 +283,8 @@ public partial class BinaryEditViewModel : ObservableObject
 
         var imageParameter = new ImageParameter()
         {
-            ScreenWidth = Subtitles.First().ScreenSize.Width,
-            ScreenHeight = Subtitles.First().ScreenSize.Height,
+            ScreenWidth = ScreenWidth,
+            ScreenHeight = ScreenHeight,
         };
 
         exportHandler.WriteHeader(fileName, imageParameter);
