@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
+using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
@@ -346,9 +347,38 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AdjustDurations()
+    private async Task AdjustDurations()
     {
-        // TODO: Implement adjust durations
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryAdjustDuration.BinaryAdjustDurationWindow, BinaryAdjustDuration.BinaryAdjustDurationViewModel>(Window, vm => { });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Get selected indices from the grid
+        var selectedIndices = new List<int>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    var index = Subtitles.IndexOf(binaryItem);
+                    if (index >= 0)
+                    {
+                        selectedIndices.Add(index);
+                    }
+                }
+            }
+        }
+
+        result.AdjustDuration(Subtitles.ToList(), selectedIndices.Count > 0 ? selectedIndices : null);
     }
 
     [RelayCommand]
@@ -387,27 +417,262 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Alignment()
+    private async Task Alignment()
     {
-        // TODO: Implement alignment adjustment
+        if (Window == null)
+        {
+            return;
+        }
+
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, nothing to do
+        if (selectedItems.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Information, 
+                "Please select one or more subtitles to adjust alignment.", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        // Show alignment picker
+        var result = await _windowService.ShowDialogAsync<PickAlignment.PickAlignmentWindow, PickAlignment.PickAlignmentViewModel>(
+            Window, vm => vm.Initialize(null, selectedItems.Count));
+
+        if (!result.OkPressed || string.IsNullOrEmpty(result.Alignment))
+        {
+            return;
+        }
+
+        // Apply alignment to selected subtitles
+        ApplyAlignmentToSubtitles(selectedItems, result.Alignment);
+    }
+
+    private void ApplyAlignmentToSubtitles(List<BinarySubtitleItem> subtitles, string alignment)
+    {
+        foreach (var subtitle in subtitles)
+        {
+            if (subtitle.Bitmap == null)
+            {
+                continue;
+            }
+
+            var screenWidth = subtitle.ScreenSize.Width;
+            var screenHeight = subtitle.ScreenSize.Height;
+            var imageWidth = (int)subtitle.Bitmap.Size.Width;
+            var imageHeight = (int)subtitle.Bitmap.Size.Height;
+
+            // Calculate new position based on alignment
+            switch (alignment)
+            {
+                case "an1": // Bottom Left
+                    subtitle.X = 0;
+                    subtitle.Y = screenHeight - imageHeight;
+                    break;
+                case "an2": // Bottom Center
+                    subtitle.X = (screenWidth - imageWidth) / 2;
+                    subtitle.Y = screenHeight - imageHeight;
+                    break;
+                case "an3": // Bottom Right
+                    subtitle.X = screenWidth - imageWidth;
+                    subtitle.Y = screenHeight - imageHeight;
+                    break;
+                case "an4": // Middle Left
+                    subtitle.X = 0;
+                    subtitle.Y = (screenHeight - imageHeight) / 2;
+                    break;
+                case "an5": // Middle Center
+                    subtitle.X = (screenWidth - imageWidth) / 2;
+                    subtitle.Y = (screenHeight - imageHeight) / 2;
+                    break;
+                case "an6": // Middle Right
+                    subtitle.X = screenWidth - imageWidth;
+                    subtitle.Y = (screenHeight - imageHeight) / 2;
+                    break;
+                case "an7": // Top Left
+                    subtitle.X = 0;
+                    subtitle.Y = 0;
+                    break;
+                case "an8": // Top Center
+                    subtitle.X = (screenWidth - imageWidth) / 2;
+                    subtitle.Y = 0;
+                    break;
+                case "an9": // Top Right
+                    subtitle.X = screenWidth - imageWidth;
+                    subtitle.Y = 0;
+                    break;
+            }
+        }
+
+        // Update overlay position if the selected subtitle was adjusted
+        UpdateOverlayPosition();
     }
 
     [RelayCommand]
-    private void ResizeImages()
+    private async Task ResizeImages()
     {
-        // TODO: Implement resize images
+        if (Window == null)
+        {
+            return;
+        }
+
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, work on all subtitles
+        var itemsToResize = selectedItems.Count > 0 ? selectedItems : Subtitles.ToList();
+
+        if (itemsToResize.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Information, 
+                "No subtitles to resize.", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryResizeImages.BinaryResizeImagesWindow, BinaryResizeImages.BinaryResizeImagesViewModel>(
+            Window, vm => vm.Initialize(itemsToResize));
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Refresh grid to show updated bitmaps
+        if (SubtitleGrid != null)
+        {
+            var currentIndex = SubtitleGrid.SelectedIndex;
+            SubtitleGrid.ItemsSource = null;
+            SubtitleGrid.ItemsSource = Subtitles;
+            SubtitleGrid.SelectedIndex = currentIndex;
+        }
+
+        UpdateOverlayPosition();
     }
 
     [RelayCommand]
-    private void AdjustBrightness()
+    private async Task AdjustBrightness()
     {
-        // TODO: Implement adjust brightness
+        if (Window == null)
+        {
+            return;
+        }
+
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, work on all subtitles
+        var itemsToAdjust = selectedItems.Count > 0 ? selectedItems : Subtitles.ToList();
+
+        if (itemsToAdjust.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Information, 
+                "No subtitles to adjust.", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryAdjustBrightness.BinaryAdjustBrightnessWindow, BinaryAdjustBrightness.BinaryAdjustBrightnessViewModel>(
+            Window, vm => vm.Initialize(itemsToAdjust));
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Refresh grid to show updated bitmaps
+        if (SubtitleGrid != null)
+        {
+            var currentIndex = SubtitleGrid.SelectedIndex;
+            SubtitleGrid.ItemsSource = null;
+            SubtitleGrid.ItemsSource = Subtitles;
+            SubtitleGrid.SelectedIndex = currentIndex;
+        }
+
+        UpdateOverlayPosition();
     }
 
     [RelayCommand]
-    private void AdjustAlpha()
+    private async Task AdjustAlpha()
     {
-        // TODO: Implement adjust alpha
+        if (Window == null)
+        {
+            return;
+        }
+
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, work on all subtitles
+        var itemsToAdjust = selectedItems.Count > 0 ? selectedItems : Subtitles.ToList();
+
+        if (itemsToAdjust.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Information, 
+                "No subtitles to adjust.", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryAdjustAlpha.BinaryAdjustAlphaWindow, BinaryAdjustAlpha.BinaryAdjustAlphaViewModel>(
+            Window, vm => vm.Initialize(itemsToAdjust));
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Refresh grid to show updated bitmaps
+        if (SubtitleGrid != null)
+        {
+            var currentIndex = SubtitleGrid.SelectedIndex;
+            SubtitleGrid.ItemsSource = null;
+            SubtitleGrid.ItemsSource = Subtitles;
+            SubtitleGrid.SelectedIndex = currentIndex;
+        }
+
+        UpdateOverlayPosition();
     }
 
     [RelayCommand]
