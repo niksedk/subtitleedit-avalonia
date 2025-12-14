@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
@@ -26,9 +30,8 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
-
     private readonly IWindowService _windowService;
-
+    private string _loadFileName = string.Empty;
 
     public Window? Window { get; set; }
     public DataGrid? SubtitleGrid { get; set; }
@@ -133,20 +136,60 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
     {
-        FileName = fileName;
-        OcrSubtitle = subtitle;
-
-        Subtitles.Clear();
-        foreach (var s in subtitle.MakeOcrSubtitleItems())
-        {
-            Subtitles.Add(new BinarySubtitleItem(s));
-        }
+        _loadFileName = fileName;
     }
 
     [RelayCommand]
-    private void FileOpen()
+    private async Task FileOpen()
     {
-        // TODO: Implement file open
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".sup", "export.sup", Se.Language.General.SaveFileAsTitle);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+        
+        await DoFileOpen(fileName);
+    }
+
+    private async Task DoFileOpen(string fileName)
+    {
+        if (Window == null)
+        {
+            return;
+        }
+        
+        IOcrSubtitle? imageSubtitle = null;
+        if (FileUtil.IsBluRaySup((fileName)))
+        {
+            var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
+            if (subtitles.Count > 0)
+            { 
+                imageSubtitle = new  OcrSubtitleBluRay(subtitles); 
+            }
+        }
+        
+        //TODO: other image based formats
+        
+        if (imageSubtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+        
+        FileName = fileName;
+        OcrSubtitle = imageSubtitle;
+
+        Subtitles.Clear();
+        foreach (var s in imageSubtitle.MakeOcrSubtitleItems())
+        {
+            Subtitles.Add(new BinarySubtitleItem(s));
+        }
     }
 
     [RelayCommand]
@@ -450,5 +493,18 @@ public partial class BinaryEditViewModel : ObservableObject
         }
 
         VideoPlayerControl.VideoPlayerInstance.CloseFile();
+    }
+
+    public void Loaded()
+    {
+        if (string.IsNullOrEmpty(_loadFileName))
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.InvokeAsync(async() =>
+        {
+            await DoFileOpen(_loadFileName);
+        });
     }
 }
