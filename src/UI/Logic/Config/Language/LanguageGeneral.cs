@@ -556,6 +556,7 @@ public class LanguageGeneral
     public string SetEndAndOffsetTheRest { get; set; }
     public string Change { get; set; }
     public string EditImagedBaseSubtitle { get; set; }
+    public string EditImagedBaseSubtitleX { get; set; }
     public string OpenImageBasedSubtitle { get; set; }
 
     public LanguageGeneral()
@@ -1112,6 +1113,7 @@ public class LanguageGeneral
         SetEndAndOffsetTheRest = "Set end and offset the rest";
         Change = "Change";
         EditImagedBaseSubtitle = "Edit imaged-based subtitle";
+        EditImagedBaseSubtitleX = "Edit imaged-based subtitle: {0}";
         OpenImageBasedSubtitle = "Open image-based subtitle";
     }
 }

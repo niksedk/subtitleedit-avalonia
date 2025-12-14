@@ -50,6 +50,11 @@ public partial class BinaryEditViewModel : ObservableObject
 
     private string _loadFileName = string.Empty;
 
+    private int _marginLeft;
+    private int _marginTop;
+    private int _marginRight;
+    private int _marginBottom;
+
     public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _windowService = windowService;
@@ -59,6 +64,10 @@ public partial class BinaryEditViewModel : ObservableObject
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
         StatusText = string.Empty;
         CurrentPositionAndSize = string.Empty;
+        _marginLeft = 10;
+        _marginTop = 10;
+        _marginRight = 10;
+        _marginBottom = 10;
     }
 
     public void Initialize(string fileName, IOcrSubtitle subtitle)
@@ -201,7 +210,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup",  "All files", ".*");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", "All files", ".*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -251,6 +260,7 @@ public partial class BinaryEditViewModel : ObservableObject
             ScreenWidth = Subtitles[0].ScreenSize.Width;
             ScreenHeight = Subtitles[0].ScreenSize.Height;
             UpdateStatusText();
+            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, System.IO.Path.GetFileName(fileName));
         }
     }
 
@@ -498,8 +508,8 @@ public partial class BinaryEditViewModel : ObservableObject
         // If no selection, nothing to do
         if (selectedItems.Count == 0)
         {
-            await MessageBox.Show(Window, Se.Language.General.Information, 
-                "Please select one or more subtitles to adjust alignment.", 
+            await MessageBox.Show(Window, Se.Language.General.Information,
+                "Please select one or more subtitles to adjust alignment.",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -603,8 +613,8 @@ public partial class BinaryEditViewModel : ObservableObject
 
         if (itemsToResize.Count == 0)
         {
-            await MessageBox.Show(Window, Se.Language.General.Information, 
-                "No subtitles to resize.", 
+            await MessageBox.Show(Window, Se.Language.General.Information,
+                "No subtitles to resize.",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -655,8 +665,8 @@ public partial class BinaryEditViewModel : ObservableObject
 
         if (itemsToAdjust.Count == 0)
         {
-            await MessageBox.Show(Window, Se.Language.General.Information, 
-                "No subtitles to adjust.", 
+            await MessageBox.Show(Window, Se.Language.General.Information,
+                "No subtitles to adjust.",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -707,8 +717,8 @@ public partial class BinaryEditViewModel : ObservableObject
 
         if (itemsToAdjust.Count == 0)
         {
-            await MessageBox.Show(Window, Se.Language.General.Information, 
-                "No subtitles to adjust.", 
+            await MessageBox.Show(Window, Se.Language.General.Information,
+                "No subtitles to adjust.",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
@@ -911,21 +921,102 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Settings()
+    private async Task Settings()
     {
-        // TODO: Implement settings
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinarySettings.BinarySettingsWindow, BinarySettings.BinarySettingsViewModel>(Window, vm => { });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Update margin values from settings
+        _marginLeft = Se.Settings.Tools.BinEditLeftMargin;
+        _marginTop = Se.Settings.Tools.BinEditTopMargin;
+        _marginRight = Se.Settings.Tools.BinEditRightMargin;
+        _marginBottom = Se.Settings.Tools.BinEditBottomMargin;
     }
 
     [RelayCommand]
-    private void ExportImage()
+    private async Task ExportImage()
     {
-        // TODO: Implement export image
+        if (Window == null)
+        {
+            return;
+        }
+
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem == null || selectedItem.Bitmap == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(Window, ".png", "export.png", Se.Language.General.SaveImageAs);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var skBitmap = selectedItem.Bitmap.ToSkBitmap();
+        var pngBytes = skBitmap.ToPngArray();
+        System.IO.File.WriteAllBytes(fileName, pngBytes);
     }
 
     [RelayCommand]
-    private void ImportImage()
+    private async Task ImportImage()
     {
-        // TODO: Implement import image
+        if (Window == null)
+        {
+            return;
+        }
+
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenImageFile(Window, Se.Language.General.OpenImageFile);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        try
+        {
+            using var stream = System.IO.File.OpenRead(fileName);
+            var skBitmap = SkiaSharp.SKBitmap.Decode(stream);
+            if (skBitmap == null)
+            {
+                await MessageBox.Show(Window, Se.Language.General.Error, "Unable to load image file.",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            selectedItem.Bitmap = skBitmap.ToAvaloniaBitmap();
+
+            // Refresh the grid to show the updated bitmap
+            if (SubtitleGrid != null)
+            {
+                var currentIndex = SubtitleGrid.SelectedIndex;
+                SubtitleGrid.ItemsSource = null;
+                SubtitleGrid.ItemsSource = Subtitles;
+                SubtitleGrid.SelectedIndex = currentIndex;
+            }
+
+            UpdateOverlayPosition();
+            UpdateStatusText();
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, $"Failed to import image: {ex.Message}",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     [RelayCommand]
