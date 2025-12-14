@@ -1,11 +1,17 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 
@@ -18,9 +24,9 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
     
-    public BinaryEditViewModel()
-    {
-    }
+    
+    private IWindowService _windowService;
+    
 
     public Window? Window { get; set; }
     public DataGrid? SubtitleGrid { get; set; }
@@ -114,8 +120,10 @@ public partial class BinaryEditViewModel : ObservableObject
 
     IFileHelper _fileHelper;
 
-    public BinaryEditViewModel(IFileHelper fileHelper)
+    public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
+        _windowService = windowService;
+        _fileHelper = fileHelper;
         _fileHelper = fileHelper;
         _fileName = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
@@ -158,9 +166,40 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ApplyDurationLimits()
+    private async Task ApplyDurationLimits()
     {
-        // TODO: Implement apply duration limits
+        if (Window == null)
+        {
+            return;
+        }
+        
+       var result = await _windowService.ShowDialogAsync<BinaryApplyDurationLimitsWindow, BinaryApplyDurationLimitsViewModel>(Window, vm =>
+       {
+       });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Get selected indices from the grid
+        var selectedIndices = new List<int>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    var index = Subtitles.IndexOf(binaryItem);
+                    if (index >= 0)
+                    {
+                        selectedIndices.Add(index);
+                    }
+                }
+            }
+        }
+
+        result.ApplyLimits(Subtitles.ToList(), selectedIndices.Count > 0 ? selectedIndices : null);
     }
 
     [RelayCommand]
@@ -188,9 +227,40 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AdjustAllTimes()
+    private async Task AdjustAllTimes()
     {
-        // TODO: Implement adjust all times
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryAdjustAllTimesWindow, BinaryAdjustAllTimesViewModel>(Window, vm =>
+        {
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        // Get selected indices from the grid
+        var selectedIndices = new List<int>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    var index = Subtitles.IndexOf(binaryItem);
+                    if (index >= 0)
+                    {
+                        selectedIndices.Add(index);
+                    }
+                }
+            }
+        }
+
+        result.AdjustTimes(Subtitles.ToList(), selectedIndices.Count > 0 ? selectedIndices : null);
     }
 
     [RelayCommand]

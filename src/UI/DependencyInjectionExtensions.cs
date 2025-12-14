@@ -34,6 +34,8 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
 using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
@@ -181,6 +183,8 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertFixCommonErrorsSettingsViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
+        collection.AddTransient<BinaryAdjustAllTimesViewModel>();
+        collection.AddTransient<BinaryApplyDurationLimitsViewModel>();
         collection.AddTransient<BinaryEditViewModel>();
         collection.AddTransient<BinaryOcrCharacterAddViewModel>();
         collection.AddTransient<BinaryOcrCharacterHistoryViewModel>();
