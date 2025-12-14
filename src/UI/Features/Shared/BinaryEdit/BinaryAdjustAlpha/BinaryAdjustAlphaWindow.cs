@@ -103,38 +103,6 @@ public class BinaryAdjustAlphaWindow : Window
         };
         panel.Children.Add(alphaValueLabel);
 
-        // Alpha multiplier slider
-        var multiplierLabel = new TextBlock
-        {
-            Text = "Alpha multiplier:",
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-            Margin = new Thickness(0, 20, 0, 5),
-        };
-        panel.Children.Add(multiplierLabel);
-
-        var multiplierSlider = new Slider
-        {
-            Minimum = 0,
-            Maximum = 200,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            TickFrequency = 10,
-            IsSnapToTickEnabled = false,
-            [!Slider.ValueProperty] = new Binding(nameof(vm.AlphaMultiplier))
-            {
-                Mode = BindingMode.TwoWay,
-            },
-        };
-        panel.Children.Add(multiplierSlider);
-
-        var multiplierValueLabel = new TextBlock
-        {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(0, 5, 0, 0),
-            [!TextBlock.TextProperty] = new Binding(nameof(vm.AlphaMultiplierDisplay)),
-        };
-        panel.Children.Add(multiplierValueLabel);
-
         // Threshold slider
         var thresholdLabel = new TextBlock
         {
@@ -183,18 +151,11 @@ public class BinaryAdjustAlphaWindow : Window
         resetButton.HorizontalAlignment = HorizontalAlignment.Stretch;
         panel.Children.Add(resetButton);
 
-        // Preview button
-        var previewButton = UiUtil.MakeButton("Update preview", vm.UpdatePreviewCommand);
-        previewButton.Margin = new Thickness(0, 10, 0, 0);
-        previewButton.HorizontalAlignment = HorizontalAlignment.Stretch;
-        panel.Children.Add(previewButton);
-
         // Info text
         var infoText = new TextBlock
         {
             Text = "Alpha adjustment: Add/subtract from alpha channel.\n" +
-                   "Alpha multiplier: Multiply alpha by percentage (100% = no change).\n" +
-                   "Preview shows with checkered background to visualize transparency.",
+                   "Preview updates automatically and shows with checkered background to visualize transparency.",
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             Margin = new Thickness(0, 20, 0, 0),
             FontSize = 11,

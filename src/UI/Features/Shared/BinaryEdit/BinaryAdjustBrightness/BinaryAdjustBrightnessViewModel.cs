@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
@@ -29,12 +30,32 @@ public partial class BinaryAdjustBrightnessViewModel : ObservableObject
     public string GammaDisplay => $"{Gamma / 100.0:F2}";
 
     private List<BinarySubtitleItem> _subtitles = new();
+    private DispatcherTimer? _previewUpdateTimer;
+    private bool _isDirty;
 
     public BinaryAdjustBrightnessViewModel()
     {
         _brightness = 0;
         _contrast = 0;
         _gamma = 100; // 1.0 gamma
+        InitializeTimer();
+    }
+
+    private void InitializeTimer()
+    {
+        _previewUpdateTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(300)
+        };
+        _previewUpdateTimer.Tick += (_, _) =>
+        {
+            _previewUpdateTimer.Stop();
+            if (_isDirty)
+            {
+                _isDirty = false;
+                UpdatePreview();
+            }
+        };
     }
 
     public void Initialize(List<BinarySubtitleItem> subtitles)
@@ -46,16 +67,31 @@ public partial class BinaryAdjustBrightnessViewModel : ObservableObject
     partial void OnBrightnessChanged(double value)
     {
         OnPropertyChanged(nameof(BrightnessDisplay));
+        SchedulePreviewUpdate();
     }
 
     partial void OnContrastChanged(double value)
     {
         OnPropertyChanged(nameof(ContrastDisplay));
+        SchedulePreviewUpdate();
     }
 
     partial void OnGammaChanged(double value)
     {
         OnPropertyChanged(nameof(GammaDisplay));
+        SchedulePreviewUpdate();
+    }
+
+    private void SchedulePreviewUpdate()
+    {
+        if (_previewUpdateTimer == null)
+        {
+            return;
+        }
+
+        _isDirty = true;
+        _previewUpdateTimer.Stop();
+        _previewUpdateTimer.Start();
     }
 
     [RelayCommand]

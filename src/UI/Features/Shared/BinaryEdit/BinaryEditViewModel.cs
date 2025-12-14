@@ -194,6 +194,8 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             Subtitles.Add(new BinarySubtitleItem(s));
         }
+
+        SelectAndScrollToRow(0);
     }
 
     [RelayCommand]
@@ -928,6 +930,24 @@ public partial class BinaryEditViewModel : ObservableObject
         Dispatcher.UIThread.InvokeAsync(async () =>
         {
             await DoFileOpen(_loadFileName);
+        });
+    }
+
+    private void SelectAndScrollToRow(int index)
+    {
+        if (index < 0 || SubtitleGrid == null)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (SubtitleGrid.SelectedIndex != index)
+            {
+                SubtitleGrid.SelectedIndex = index;
+            }
+
+            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
         });
     }
 }

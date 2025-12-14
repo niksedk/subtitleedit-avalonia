@@ -193,6 +193,11 @@ internal static class SkBitmapExtensions
 
     public static Bitmap ToAvaloniaBitmap(this SKBitmap skBitmap)
     {
+        if (skBitmap.Width == 0 || skBitmap.Height == 0)
+        {
+            skBitmap = new SKBitmap(1, 1, true);
+        }
+
         using var image = SKImage.FromBitmap(skBitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
         using var stream = new MemoryStream(data.ToArray());

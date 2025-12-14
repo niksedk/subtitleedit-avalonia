@@ -174,17 +174,11 @@ public class BinaryAdjustBrightnessWindow : Window
         resetButton.HorizontalAlignment = HorizontalAlignment.Stretch;
         panel.Children.Add(resetButton);
 
-        // Preview button
-        var previewButton = UiUtil.MakeButton("Update preview", vm.UpdatePreviewCommand);
-        previewButton.Margin = new Thickness(0, 10, 0, 0);
-        previewButton.HorizontalAlignment = HorizontalAlignment.Stretch;
-        panel.Children.Add(previewButton);
-
         // Info text
         var infoText = new TextBlock
         {
             Text = "Adjust the sliders to modify brightness, contrast, and gamma. " +
-                   "Preview shows the first selected subtitle.",
+                   "Preview updates automatically and shows the first selected subtitle.",
             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
             Margin = new Thickness(0, 20, 0, 0),
             FontSize = 11,

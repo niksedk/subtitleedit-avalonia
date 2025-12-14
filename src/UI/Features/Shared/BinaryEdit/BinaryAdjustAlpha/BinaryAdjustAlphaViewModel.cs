@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
@@ -16,7 +17,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAlpha;
 public partial class BinaryAdjustAlphaViewModel : ObservableObject
 {
     [ObservableProperty] private double _alphaAdjustment;
-    [ObservableProperty] private double _alphaMultiplier;
     [ObservableProperty] private double _transparencyThreshold;
     [ObservableProperty] private Bitmap? _previewBitmap;
     [ObservableProperty] private Bitmap? _checkeredBackgroundBitmap;
@@ -27,16 +27,34 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     public string AlphaAdjustmentDisplay => $"{AlphaAdjustment:F0}";
-    public string AlphaMultiplierDisplay => $"{AlphaMultiplier:F0}%";
     public string TransparencyThresholdDisplay => $"{TransparencyThreshold:F0}";
 
     private List<BinarySubtitleItem> _subtitles = new();
+    private DispatcherTimer? _previewUpdateTimer;
+    private bool _isDirty;
 
     public BinaryAdjustAlphaViewModel()
     {
         _alphaAdjustment = 0;
-        _alphaMultiplier = 100; // 100% = no change
         _transparencyThreshold = 0;
+        InitializeTimer();
+    }
+
+    private void InitializeTimer()
+    {
+        _previewUpdateTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(300)
+        };
+        _previewUpdateTimer.Tick += (_, _) =>
+        {
+            _previewUpdateTimer.Stop();
+            if (_isDirty)
+            {
+                _isDirty = false;
+                UpdatePreview();
+            }
+        };
     }
 
     public void Initialize(List<BinarySubtitleItem> subtitles)
@@ -48,23 +66,31 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
     partial void OnAlphaAdjustmentChanged(double value)
     {
         OnPropertyChanged(nameof(AlphaAdjustmentDisplay));
-    }
-
-    partial void OnAlphaMultiplierChanged(double value)
-    {
-        OnPropertyChanged(nameof(AlphaMultiplierDisplay));
+        SchedulePreviewUpdate();
     }
 
     partial void OnTransparencyThresholdChanged(double value)
     {
         OnPropertyChanged(nameof(TransparencyThresholdDisplay));
+        SchedulePreviewUpdate();
+    }
+
+    private void SchedulePreviewUpdate()
+    {
+        if (_previewUpdateTimer == null)
+        {
+            return;
+        }
+
+        _isDirty = true;
+        _previewUpdateTimer.Stop();
+        _previewUpdateTimer.Start();
     }
 
     [RelayCommand]
     private void Reset()
     {
         AlphaAdjustment = 0;
-        AlphaMultiplier = 100;
         TransparencyThreshold = 0;
         UpdatePreview();
     }
@@ -84,7 +110,7 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
         CheckeredBackgroundBitmap = CreateCheckeredBackground(originalBitmap.Width, originalBitmap.Height);
         
         // Apply alpha adjustments
-        var adjustedBitmap = AdjustAlpha(originalBitmap, (float)AlphaAdjustment, (float)(AlphaMultiplier / 100.0), (byte)TransparencyThreshold);
+        var adjustedBitmap = AdjustAlpha(originalBitmap, (float)AlphaAdjustment, (byte)TransparencyThreshold);
         PreviewBitmap = adjustedBitmap.ToAvaloniaBitmap();
     }
 
@@ -98,12 +124,12 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
             }
 
             using var originalBitmap = subtitle.Bitmap.ToSkBitmap();
-            var adjustedBitmap = AdjustAlpha(originalBitmap, (float)AlphaAdjustment, (float)(AlphaMultiplier / 100.0), (byte)TransparencyThreshold);
+            var adjustedBitmap = AdjustAlpha(originalBitmap, (float)AlphaAdjustment, (byte)TransparencyThreshold);
             subtitle.Bitmap = adjustedBitmap.ToAvaloniaBitmap();
         }
     }
 
-    private static SKBitmap AdjustAlpha(SKBitmap originalBitmap, float alphaAdjustment, float alphaMultiplier, byte transparencyThreshold)
+    private static SKBitmap AdjustAlpha(SKBitmap originalBitmap, float alphaAdjustment, byte transparencyThreshold)
     {
         var adjustedBitmap = new SKBitmap(originalBitmap.Width, originalBitmap.Height);
 
@@ -133,9 +159,6 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
                     
                     // Apply alpha adjustment (additive)
                     float newAlpha = a + alphaAdjustment;
-                    
-                    // Apply alpha multiplier
-                    newAlpha *= alphaMultiplier;
                     
                     // Clamp to valid range
                     newAlpha = Math.Clamp(newAlpha, 0, 255);
