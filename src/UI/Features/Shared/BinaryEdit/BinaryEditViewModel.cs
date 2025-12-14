@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
+using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
@@ -19,6 +21,7 @@ using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -218,6 +221,8 @@ public partial class BinaryEditViewModel : ObservableObject
         }
 
         IOcrSubtitle? imageSubtitle = null;
+
+        // Blu-ray SUP
         if (FileUtil.IsBluRaySup(fileName))
         {
             var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
@@ -227,7 +232,41 @@ public partial class BinaryEditViewModel : ObservableObject
             }
         }
 
-        //TODO: other image based formats
+        // VobSub (.sub + .idx)
+        else if (FileUtil.IsVobSub(fileName))
+        {
+            var vobSub = new VobSubParser(true);
+            vobSub.Open(fileName);
+            var mergedPacks = vobSub.MergeVobSubPacks();
+            if (mergedPacks.Count > 0)
+            {
+                imageSubtitle = new OcrSubtitleVobSub(mergedPacks, vobSub.IdxPalette);
+            }
+        }
+
+        // Transport Stream (.ts)
+        else if (FileUtil.IsTransportStream(fileName))
+        {
+            var tsParser = new TransportStreamParser();
+            tsParser.Parse(fileName, null);
+            var subtitles = tsParser.GetDvbSubtitles(0);
+            if (subtitles.Count > 0)
+            {
+                imageSubtitle = new OcrSubtitleTransportStream(tsParser, subtitles, fileName);
+            }
+        }
+
+        // BDN XML
+        else if (fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+        {
+            var bdnXml = new Nikse.SubtitleEdit.Core.SubtitleFormats.BdnXml();
+            var subtitle = new Subtitle();
+            bdnXml.LoadSubtitle(subtitle, File.ReadAllLines(fileName).ToList(), fileName);
+            if (subtitle.Paragraphs.Count > 0)
+            {
+                imageSubtitle = new OcrSubtitleBdn(subtitle, fileName, false);
+            }
+        }
 
         if (imageSubtitle == null)
         {

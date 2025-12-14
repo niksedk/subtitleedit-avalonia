@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Threading.Tasks;
 
@@ -25,10 +24,10 @@ public partial class BinarySettingsViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        _marginLeft = Se.Settings.Tools.BinEditLeftMargin;
-        _marginTop = Se.Settings.Tools.BinEditTopMargin;
-        _marginRight = Se.Settings.Tools.BinEditRightMargin;
-        _marginBottom = Se.Settings.Tools.BinEditBottomMargin;
+        MarginLeft = Se.Settings.Tools.BinEditLeftMargin;
+        MarginTop = Se.Settings.Tools.BinEditTopMargin;
+        MarginRight = Se.Settings.Tools.BinEditRightMargin;
+        MarginBottom = Se.Settings.Tools.BinEditBottomMargin;
     }
 
     private void SaveSettings()
