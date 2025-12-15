@@ -491,8 +491,18 @@ public class AudioVisualizer : Control
         {
             nsp = null;
         }
+        
+        var showContextMenu = false;
+        if (e.InitialPressMouseButton == MouseButton.Left && OperatingSystem.IsMacOS() && _isCtrlDown)
+        {
+            showContextMenu = true;
+        }
+        else if (e.InitialPressMouseButton == MouseButton.Right)
+        {
+            showContextMenu = true;
+        }
 
-        if (e.InitialPressMouseButton == MouseButton.Right)
+        if (showContextMenu)
         {
             _isAltDown = false;
             _isCtrlDown = false;
@@ -545,7 +555,13 @@ public class AudioVisualizer : Control
                     _activeParagraph != null &&
                     Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
             {
-                if (_isCtrlDown && _activeParagraph != null && OnToggleSelection != null)
+                if (_isCtrlDown && !OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
+                {
+                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    _audioVisualizerLastScroll = 0;
+                    OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
+                }
+                else if (_isShiftDown && OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
                 {
                     var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;
