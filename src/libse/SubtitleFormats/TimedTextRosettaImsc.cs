@@ -47,7 +47,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 </tt>";
         }
 
-        public override string Extension => Configuration.Settings.SubtitleSettings.TimedTextImsc11FileExtension;
+        public override string Extension => ".imscr";
+        public override List<string> AlternateExtensions => new List<string> { ".xml" };
 
         public override bool IsMine(List<string> lines, string fileName)
         {
