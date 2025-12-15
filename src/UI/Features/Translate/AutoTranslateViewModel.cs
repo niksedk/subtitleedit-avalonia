@@ -113,8 +113,246 @@ public partial class AutoTranslateViewModel : ObservableObject
     private void LoadSettings()
     {
         Configuration.Settings.Tools.OllamaApiUrl = Se.Settings.AutoTranslate.OllamaUrl;
-        Configuration.Settings.Tools.OllamaModel = Se.Settings.AutoTranslate.OllamaUrl;
+        Configuration.Settings.Tools.OllamaModel = Se.Settings.AutoTranslate.OllamaModel;
         Configuration.Settings.Tools.OllamaPrompt = Se.Settings.AutoTranslate.OllamaPrompt;
+
+        Configuration.Settings.Tools.OpenRouterApiKey = Se.Settings.AutoTranslate.OpenRouterApiKey;
+        Configuration.Settings.Tools.OpenRouterModel = Se.Settings.AutoTranslate.OpenRouterModel;
+        Configuration.Settings.Tools.OpenRouterPrompt = Se.Settings.AutoTranslate.OpenRouterPrompt;
+
+        Configuration.Settings.Tools.ChatGptApiKey = Se.Settings.AutoTranslate.ChatGptApiKey;
+        Configuration.Settings.Tools.ChatGptModel = Se.Settings.AutoTranslate.ChatGptModel;
+        Configuration.Settings.Tools.ChatGptPrompt = Se.Settings.AutoTranslate.ChatGptPrompt;
+
+        Configuration.Settings.Tools.LmStudioApiUrl = Se.Settings.AutoTranslate.LmStudioApiUrl;
+        Configuration.Settings.Tools.LmStudioModel = Se.Settings.AutoTranslate.LmStudioModel;
+        Configuration.Settings.Tools.LmStudioPrompt = Se.Settings.AutoTranslate.LmStudioPrompt;
+
+        Configuration.Settings.Tools.GroqApiKey = Se.Settings.AutoTranslate.GroqApiKey;
+        Configuration.Settings.Tools.GroqModel = Se.Settings.AutoTranslate.GroqModel;
+        Configuration.Settings.Tools.GroqPrompt = Se.Settings.AutoTranslate.GroqPrompt;
+
+        Configuration.Settings.Tools.GoogleApiV2Key = Se.Settings.AutoTranslate.GoogleApiV2Key;
+
+        Configuration.Settings.Tools.MicrosoftTranslatorApiKey = Se.Settings.AutoTranslate.MicrosoftTranslatorApiKey;
+        Configuration.Settings.Tools.MicrosoftBingApiId = Se.Settings.AutoTranslate.MicrosoftBingApiId;
+        Configuration.Settings.Tools.MicrosoftTranslatorCategory = Se.Settings.AutoTranslate.MicrosoftTranslatorCategory;
+        Configuration.Settings.Tools.MicrosoftTranslatorTokenEndpoint = Se.Settings.AutoTranslate.MicrosoftTranslatorTokenEndpoint;
+
+        Configuration.Settings.Tools.AutoTranslateDeepLApiKey = Se.Settings.AutoTranslate.DeepLApiKey;
+        Configuration.Settings.Tools.AutoTranslateDeepLUrl = Se.Settings.AutoTranslate.DeepLUrl;
+        Configuration.Settings.Tools.AutoTranslateDeepLFormality = Se.Settings.AutoTranslate.DeepLFormality;
+        Configuration.Settings.Tools.AutoTranslateDeepLXUrl = Se.Settings.AutoTranslate.DeepLXUrl;
+
+        Configuration.Settings.Tools.AutoTranslateLibreUrl = Se.Settings.AutoTranslate.LibreTranslateUrl;
+
+        Configuration.Settings.Tools.AutoTranslateMyMemoryApiKey = Se.Settings.AutoTranslate.MyMemoryApiKey;
+
+        Configuration.Settings.Tools.AutoTranslateLibreApiKey = Se.Settings.AutoTranslate.LibreTranslateApiKey;
+        Configuration.Settings.Tools.AutoTranslateLibreUrl = Se.Settings.AutoTranslate.LibreTranslateUrl;
+        
+        Configuration.Settings.Tools.AutoTranslateNllbApiUrl = Se.Settings.AutoTranslate.NllbApiUrl;
+        Configuration.Settings.Tools.AutoTranslateNllbServeUrl = Se.Settings.AutoTranslate.NllbServeUrl;
+        Configuration.Settings.Tools.AutoTranslateNllbServeModel = Se.Settings.AutoTranslate.NllbServeModel;
+
+        Configuration.Settings.Tools.DeepSeekApiKey = Se.Settings.AutoTranslate.DeepSeekApiKey;
+        Configuration.Settings.Tools.DeepSeekUrl = Se.Settings.AutoTranslate.DeepSeekUrl;
+        Configuration.Settings.Tools.DeepSeekModel = Se.Settings.AutoTranslate.DeepSeekModel;
+        Configuration.Settings.Tools.DeepSeekPrompt = Se.Settings.AutoTranslate.DeepSeekPrompt;
+
+        Configuration.Settings.Tools.AvalAiApiKey = Se.Settings.AutoTranslate.AvalAiApiKey;
+        Configuration.Settings.Tools.AvalAiUrl = Se.Settings.AutoTranslate.AvalAiUrl;
+        Configuration.Settings.Tools.AvalAiModel = Se.Settings.AutoTranslate.AvalAiModel;
+        Configuration.Settings.Tools.AvalAiPrompt = Se.Settings.AutoTranslate.AvalAiPrompt;
+
+        Configuration.Settings.Tools.KoboldCppPrompt = Se.Settings.AutoTranslate.KoboldCppPrompt;
+        Configuration.Settings.Tools.KoboldCppUrl = Se.Settings.AutoTranslate.KoboldCppUrl;
+        Configuration.Settings.Tools.KoboldCppTemperature = Se.Settings.AutoTranslate.KoboldCppTemperature;
+
+        Configuration.Settings.Tools.AnthropicApiKey = Se.Settings.AutoTranslate.AnthropicApiKey;
+        Configuration.Settings.Tools.AnthropicApiModel = Se.Settings.AutoTranslate.AnthropicApiModel;
+        Configuration.Settings.Tools.AnthropicApiUrl = Se.Settings.AutoTranslate.AnthropicApiUrl;
+        Configuration.Settings.Tools.AnthropicPrompt = Se.Settings.AutoTranslate.AnthropicPrompt;
+
+        Configuration.Settings.Tools.BaiduUrl = Se.Settings.AutoTranslate.BaiduUrl;
+        Configuration.Settings.Tools.BaiduApiKey = Se.Settings.AutoTranslate.BaiduApiKey;
+
+        Configuration.Settings.Tools.GeminiModel = Se.Settings.AutoTranslate.GeminiModel;
+        Configuration.Settings.Tools.GeminiProApiKey = Se.Settings.AutoTranslate.GeminiProApiKey;
+        Configuration.Settings.Tools.GeminiPrompt = Se.Settings.AutoTranslate.GeminiPrompt;
+
+        Configuration.Settings.Tools.AutoTranslateSeamlessM4TUrl = Se.Settings.AutoTranslate.SeamlessM4TUrl;
+    }
+
+    public void SaveSettings()
+    {
+        var translator = SelectedAutoTranslator;
+        if (translator == null)
+        {
+            return;
+        }
+
+        var engineType = translator.GetType();
+        var apiKey = ApiKeyText ?? string.Empty;
+        var apiUrl = ApiUrlText ?? string.Empty;
+        var apiModel = ModelText ?? string.Empty;
+
+        if (engineType == typeof(GoogleTranslateV2))
+        {
+            Configuration.Settings.Tools.GoogleApiV2Key = apiKey.Trim();
+        }
+
+        if (engineType == typeof(MicrosoftTranslator))
+        {
+            Configuration.Settings.Tools.MicrosoftTranslatorApiKey = apiKey.Trim();
+        }
+
+        if (engineType == typeof(DeepLTranslate))
+        {
+            Configuration.Settings.Tools.AutoTranslateDeepLUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.AutoTranslateDeepLApiKey = apiKey.Trim();
+        }
+
+        if (engineType == typeof(LibreTranslate))
+        {
+            Configuration.Settings.Tools.AutoTranslateLibreUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.AutoTranslateLibreApiKey = apiKey.Trim();
+        }
+
+        if (engineType == typeof(MyMemoryApi))
+        {
+            Configuration.Settings.Tools.AutoTranslateMyMemoryApiKey = apiKey.Trim();
+        }
+
+        if (engineType == typeof(ChatGptTranslate))
+        {
+            Configuration.Settings.Tools.ChatGptApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.ChatGptUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.ChatGptModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(LmStudioTranslate))
+        {
+            Configuration.Settings.Tools.LmStudioApiUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.LmStudioModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(OllamaTranslate))
+        {
+            Configuration.Settings.Tools.OllamaApiUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.OllamaModel = apiModel.Trim();
+            Se.Settings.AutoTranslate.OllamaUrl = apiUrl.Trim();
+            Se.Settings.AutoTranslate.OllamaModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(AnthropicTranslate))
+        {
+            Configuration.Settings.Tools.AnthropicApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.AnthropicApiModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(GroqTranslate))
+        {
+            Configuration.Settings.Tools.GroqApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.GroqModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(OpenRouterTranslate))
+        {
+            Configuration.Settings.Tools.OpenRouterApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.OpenRouterModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(GeminiTranslate))
+        {
+            Configuration.Settings.Tools.GeminiProApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.GeminiModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(PapagoTranslate))
+        {
+            Configuration.Settings.Tools.AutoTranslatePapagoApiKeyId = apiUrl.Trim();
+            Configuration.Settings.Tools.AutoTranslatePapagoApiKey = apiKey.Trim();
+        }
+
+        Configuration.Settings.Tools.AutoTranslateLastName = SelectedAutoTranslator.Name;
+
+        Se.Settings.AutoTranslate.AutoTranslateLastName = SelectedAutoTranslator.Name;
+        Se.Settings.AutoTranslate.AutoTranslateLastSource = SelectedSourceLanguage?.Code ?? string.Empty;
+        Se.Settings.AutoTranslate.AutoTranslateLastTarget = SelectedTargetLanguage?.Code ?? string.Empty;
+
+        Se.Settings.AutoTranslate.OllamaUrl = Configuration.Settings.Tools.OllamaApiUrl;
+        Se.Settings.AutoTranslate.OllamaModel = Configuration.Settings.Tools.OllamaModel;
+        Se.Settings.AutoTranslate.OllamaPrompt = Configuration.Settings.Tools.OllamaPrompt;
+
+        Se.Settings.AutoTranslate.OpenRouterApiKey = Configuration.Settings.Tools.OpenRouterApiKey;
+        Se.Settings.AutoTranslate.OpenRouterModel = Configuration.Settings.Tools.OpenRouterModel;
+        Se.Settings.AutoTranslate.OpenRouterPrompt = Configuration.Settings.Tools.OpenRouterPrompt;
+
+        Se.Settings.AutoTranslate.ChatGptApiKey = Configuration.Settings.Tools.ChatGptApiKey;
+        Se.Settings.AutoTranslate.ChatGptModel = Configuration.Settings.Tools.ChatGptModel;
+        Se.Settings.AutoTranslate.ChatGptPrompt = Configuration.Settings.Tools.ChatGptPrompt;
+
+        Se.Settings.AutoTranslate.LmStudioApiUrl = Configuration.Settings.Tools.LmStudioApiUrl;
+        Se.Settings.AutoTranslate.LmStudioModel = Configuration.Settings.Tools.LmStudioModel;
+        Se.Settings.AutoTranslate.LmStudioPrompt = Configuration.Settings.Tools.LmStudioPrompt;
+
+        Se.Settings.AutoTranslate.GroqApiKey = Configuration.Settings.Tools.GroqApiKey;
+        Se.Settings.AutoTranslate.GroqModel = Configuration.Settings.Tools.GroqModel;
+        Se.Settings.AutoTranslate.GroqPrompt = Configuration.Settings.Tools.GroqPrompt;
+
+        Se.Settings.AutoTranslate.GoogleApiV2Key = Configuration.Settings.Tools.GoogleApiV2Key;
+
+        Se.Settings.AutoTranslate.MicrosoftTranslatorApiKey = Configuration.Settings.Tools.MicrosoftTranslatorApiKey;
+        Se.Settings.AutoTranslate.MicrosoftBingApiId = Configuration.Settings.Tools.MicrosoftBingApiId;
+        Se.Settings.AutoTranslate.MicrosoftTranslatorCategory = Configuration.Settings.Tools.MicrosoftTranslatorCategory;
+        Se.Settings.AutoTranslate.MicrosoftTranslatorTokenEndpoint = Configuration.Settings.Tools.MicrosoftTranslatorTokenEndpoint;
+
+        Se.Settings.AutoTranslate.DeepLApiKey = Configuration.Settings.Tools.AutoTranslateDeepLApiKey;
+        Se.Settings.AutoTranslate.DeepLUrl = Configuration.Settings.Tools.AutoTranslateDeepLUrl;
+        Se.Settings.AutoTranslate.DeepLFormality = Configuration.Settings.Tools.AutoTranslateDeepLFormality;
+        Se.Settings.AutoTranslate.DeepLXUrl = Configuration.Settings.Tools.AutoTranslateDeepLXUrl;
+
+        Se.Settings.AutoTranslate.LibreTranslateUrl = Configuration.Settings.Tools.AutoTranslateLibreUrl;
+
+        Se.Settings.AutoTranslate.MyMemoryApiKey = Configuration.Settings.Tools.AutoTranslateMyMemoryApiKey;
+
+        Se.Settings.AutoTranslate.LibreTranslateApiKey = Configuration.Settings.Tools.AutoTranslateLibreApiKey;
+        Se.Settings.AutoTranslate.LibreTranslateUrl = Configuration.Settings.Tools.AutoTranslateLibreUrl;
+
+        Se.Settings.AutoTranslate.NllbApiUrl = Configuration.Settings.Tools.AutoTranslateNllbApiUrl;
+        Se.Settings.AutoTranslate.NllbServeUrl = Configuration.Settings.Tools.AutoTranslateNllbServeUrl;
+        Se.Settings.AutoTranslate.NllbServeModel = Configuration.Settings.Tools.AutoTranslateNllbServeModel;
+
+        Se.Settings.AutoTranslate.DeepSeekApiKey = Configuration.Settings.Tools.DeepSeekApiKey;
+        Se.Settings.AutoTranslate.DeepSeekUrl = Configuration.Settings.Tools.DeepSeekUrl;
+        Se.Settings.AutoTranslate.DeepSeekModel = Configuration.Settings.Tools.DeepSeekModel;
+        Se.Settings.AutoTranslate.DeepSeekPrompt = Configuration.Settings.Tools.DeepSeekPrompt;
+
+        Se.Settings.AutoTranslate.AvalAiApiKey = Configuration.Settings.Tools.AvalAiApiKey;
+        Se.Settings.AutoTranslate.AvalAiUrl = Configuration.Settings.Tools.AvalAiUrl;
+        Se.Settings.AutoTranslate.AvalAiModel = Configuration.Settings.Tools.AvalAiModel;
+        Se.Settings.AutoTranslate.AvalAiPrompt = Configuration.Settings.Tools.AvalAiPrompt;
+
+        Se.Settings.AutoTranslate.KoboldCppPrompt = Configuration.Settings.Tools.KoboldCppPrompt;
+        Se.Settings.AutoTranslate.KoboldCppUrl = Configuration.Settings.Tools.KoboldCppUrl;
+        Se.Settings.AutoTranslate.KoboldCppTemperature = Configuration.Settings.Tools.KoboldCppTemperature;
+
+        Se.Settings.AutoTranslate.AnthropicApiKey = Configuration.Settings.Tools.AnthropicApiKey;
+        Se.Settings.AutoTranslate.AnthropicApiModel = Configuration.Settings.Tools.AnthropicApiModel;
+        Se.Settings.AutoTranslate.AnthropicApiUrl = Configuration.Settings.Tools.AnthropicApiUrl;
+        Se.Settings.AutoTranslate.AnthropicPrompt = Configuration.Settings.Tools.AnthropicPrompt;
+
+        Se.Settings.AutoTranslate.BaiduUrl = Configuration.Settings.Tools.BaiduUrl;
+        Se.Settings.AutoTranslate.BaiduApiKey = Configuration.Settings.Tools.BaiduApiKey;
+
+        Se.Settings.AutoTranslate.GeminiModel = Configuration.Settings.Tools.GeminiModel;
+        Se.Settings.AutoTranslate.GeminiProApiKey = Configuration.Settings.Tools.GeminiProApiKey;
+        Se.Settings.AutoTranslate.GeminiPrompt = Configuration.Settings.Tools.GeminiPrompt;
+
+        Se.Settings.AutoTranslate.SeamlessM4TUrl = Configuration.Settings.Tools.AutoTranslateSeamlessM4TUrl;
+
+        Se.SaveSettings();
     }
 
     private void UpdateSourceLanguages(IAutoTranslator autoTranslator)
@@ -535,105 +773,6 @@ public partial class AutoTranslateViewModel : ObservableObject
             await Task.Delay(5);
             RowGrid.ScrollIntoView(Rows[scrollIndex], null);
         });
-    }
-
-    public void SaveSettings()
-    {
-        var translator = SelectedAutoTranslator;
-        if (translator == null)
-        {
-            return;
-        }
-
-        var engineType = translator.GetType();
-        var apiKey = ApiKeyText ?? string.Empty;
-        var apiUrl = ApiUrlText ?? string.Empty;
-        var apiModel = ModelText ?? string.Empty;
-
-        if (engineType == typeof(GoogleTranslateV2))
-        {
-            Configuration.Settings.Tools.GoogleApiV2Key = apiKey.Trim();
-        }
-
-        if (engineType == typeof(MicrosoftTranslator))
-        {
-            Configuration.Settings.Tools.MicrosoftTranslatorApiKey = apiKey.Trim();
-        }
-
-        if (engineType == typeof(DeepLTranslate))
-        {
-            Configuration.Settings.Tools.AutoTranslateDeepLUrl = apiUrl.Trim();
-            Configuration.Settings.Tools.AutoTranslateDeepLApiKey = apiKey.Trim();
-        }
-
-        if (engineType == typeof(LibreTranslate))
-        {
-            Configuration.Settings.Tools.AutoTranslateLibreUrl = apiUrl.Trim();
-            Configuration.Settings.Tools.AutoTranslateLibreApiKey = apiKey.Trim();
-        }
-
-        if (engineType == typeof(MyMemoryApi))
-        {
-            Configuration.Settings.Tools.AutoTranslateMyMemoryApiKey = apiKey.Trim();
-        }
-
-        if (engineType == typeof(ChatGptTranslate))
-        {
-            Configuration.Settings.Tools.ChatGptApiKey = apiKey.Trim();
-            Configuration.Settings.Tools.ChatGptUrl = apiUrl.Trim();
-            Configuration.Settings.Tools.ChatGptModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(LmStudioTranslate))
-        {
-            Configuration.Settings.Tools.LmStudioApiUrl = apiUrl.Trim();
-            Configuration.Settings.Tools.LmStudioModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(OllamaTranslate))
-        {
-            Configuration.Settings.Tools.OllamaApiUrl = apiUrl.Trim();
-            Configuration.Settings.Tools.OllamaModel = apiModel.Trim();
-            Se.Settings.AutoTranslate.OllamaUrl = apiUrl.Trim();
-            Se.Settings.AutoTranslate.OllamaModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(AnthropicTranslate))
-        {
-            Configuration.Settings.Tools.AnthropicApiKey = apiKey.Trim();
-            Configuration.Settings.Tools.AnthropicApiModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(GroqTranslate))
-        {
-            Configuration.Settings.Tools.GroqApiKey = apiKey.Trim();
-            Configuration.Settings.Tools.GroqModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(OpenRouterTranslate))
-        {
-            Configuration.Settings.Tools.OpenRouterApiKey = apiKey.Trim();
-            Configuration.Settings.Tools.OpenRouterModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(GeminiTranslate))
-        {
-            Configuration.Settings.Tools.GeminiProApiKey = apiKey.Trim();
-            Configuration.Settings.Tools.GeminiModel = apiModel.Trim();
-        }
-
-        if (engineType == typeof(PapagoTranslate))
-        {
-            Configuration.Settings.Tools.AutoTranslatePapagoApiKeyId = apiUrl.Trim();
-            Configuration.Settings.Tools.AutoTranslatePapagoApiKey = apiKey.Trim();
-        }
-
-        Configuration.Settings.Tools.AutoTranslateLastName = SelectedAutoTranslator.Name;
-        Se.Settings.AutoTranslate.AutoTranslateLastName = SelectedAutoTranslator.Name;
-        Se.Settings.AutoTranslate.AutoTranslateLastSource = SelectedSourceLanguage?.Code ?? string.Empty;
-        Se.Settings.AutoTranslate.AutoTranslateLastTarget = SelectedTargetLanguage?.Code ?? string.Empty;
-
-        Se.SaveSettings();
     }
 
     internal void AutoTranslatorChanged(AvaloniaObject sender)

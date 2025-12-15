@@ -1227,13 +1227,13 @@ public partial class BatchConvertViewModel : ObservableObject
         if (engineType == typeof(NoLanguageLeftBehindServe))
         {
             Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.NnlServeUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.NnlbServeUrl = AutoTranslateUrl.Trim();
         }
 
         if (engineType == typeof(NoLanguageLeftBehindApi))
         {
             Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.NnlApiUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.NnlbApiUrl = AutoTranslateUrl.Trim();
         }
     }
 
@@ -1354,7 +1354,7 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateModel = string.Empty;
             AutoTranslateModelBrowseIsVisible = false;
             AutoTranslateModelIsVisible = false;
-            AutoTranslateUrl = Se.Settings.AutoTranslate.LmStudioUrl;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.LmStudioApiUrl;
             AutoTranslateUrlIsVisible = true;
             AutoTranslateApiKey = string.Empty;
             AutoTranslateApiKeyIsVisible = false;
@@ -1364,7 +1364,7 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateModel = string.Empty;
             AutoTranslateModelBrowseIsVisible = false;
             AutoTranslateModelIsVisible = false;
-            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlServeUrl;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlbServeUrl;
             AutoTranslateUrlIsVisible = true;
             AutoTranslateApiKey = string.Empty;
             AutoTranslateApiKeyIsVisible = false;
@@ -1374,7 +1374,7 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateModel = string.Empty;
             AutoTranslateModelBrowseIsVisible = false;
             AutoTranslateModelIsVisible = false;
-            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlApiUrl;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.NnlbApiUrl;
             AutoTranslateUrlIsVisible = true;
             AutoTranslateApiKey = string.Empty;
             AutoTranslateApiKeyIsVisible = false;

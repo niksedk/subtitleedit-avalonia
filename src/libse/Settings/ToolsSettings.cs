@@ -81,11 +81,11 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string GroqApiKey { get; set; }
         public string GroqModel { get; set; }
         public string DeepSeekUrl { get; set; }
-        public string AvalAiUrl { get; set; }
         public string DeepSeekPrompt { get; set; }
-        public string AvalAiPrompt { get; set; }
         public string DeepSeekApiKey { get; set; }
         public string DeepSeekModel { get; set; }
+        public string AvalAiUrl { get; set; }
+        public string AvalAiPrompt { get; set; }
         public string AvalAiApiKey { get; set; }
         public string AvalAiModel { get; set; }
         public string OpenRouterUrl { get; set; }
