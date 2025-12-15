@@ -16,6 +16,7 @@ public partial class BinarySubtitleItem : ObservableObject
     [ObservableProperty] private TimeSpan _duration;
     [ObservableProperty] private int _screenWidth;
     [ObservableProperty] private int _screenHeight;
+    [ObservableProperty] private Bitmap? _bitmap;
     
     private bool _isUpdating;
 
@@ -39,11 +40,11 @@ public partial class BinarySubtitleItem : ObservableObject
         // Get bitmap (cropped to remove transparent borders)
         try
         {
-            Bitmap = item.GetBitmapCropped();
+            _bitmap = item.GetBitmapCropped();
         }
         catch
         {
-            Bitmap = null;
+            _bitmap = null;
         }
 
         // Position (x,y) from OcrSubtitleItem
@@ -62,7 +63,6 @@ public partial class BinarySubtitleItem : ObservableObject
     
     public int Number { get; set; }
     public bool IsForced { get; set; }
-    public Bitmap? Bitmap { get; set; }
     public string Text { get; set; }
     public SKSizeI ScreenSize => new SKSizeI(ScreenWidth, ScreenHeight);
 
