@@ -41,6 +41,7 @@ using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustDuration;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryResizeImages;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinarySettings;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.SetText;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
@@ -302,6 +303,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ReviewSpeechHistoryViewModel>();
         collection.AddTransient<ReviewSpeechViewModel>();
         collection.AddTransient<SelectVideoPositionViewModel>();
+        collection.AddTransient<SetTextViewModel>();
         collection.AddTransient<SetSyncPointViewModel>();
         collection.AddTransient<SettingsResetViewModel>();
         collection.AddTransient<SettingsViewModel>();

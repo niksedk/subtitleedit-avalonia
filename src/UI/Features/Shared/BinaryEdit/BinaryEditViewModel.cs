@@ -1049,9 +1049,32 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SetText()
+    private async Task SetText()
     {
-        // TODO: Implement set text
+        // Only allow if exactly one subtitle is selected
+        if (SelectedSubtitle == null)
+        {
+            await MessageBox.Show(Window, "No subtitle selected", "Please select exactly one subtitle.",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        // Show the SetText dialog
+        var result = await _windowService.ShowDialogAsync<SetText.SetTextWindow, SetText.SetTextViewModel>(Window!);
+
+        if (result.OkPressed && result.ResultBitmap != null)
+        {
+            // Replace the selected subtitle's bitmap
+            SelectedSubtitle.Bitmap?.Dispose();
+            SelectedSubtitle.Bitmap = result.ResultBitmap.ToAvaloniaBitmap();
+            
+            // Update the overlay
+            UpdateOverlayPosition();
+            UpdateStatusText();
+            
+            // Clean up
+            result.ResultBitmap.Dispose();
+        }
     }
 
     [RelayCommand]
