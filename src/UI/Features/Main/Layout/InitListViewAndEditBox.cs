@@ -66,7 +66,6 @@ public static class InitListViewAndEditBox
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
         var doubleRoundedConverter = new DoubleToOneDecimalConverter();
         var cpsWmpConverter = new DoubleToOneDecimalHideMaxConverter();
-        IValueConverter? textToSingleLineConverter = MakeGridTextConverter();
         var notNullConverter = new NotNullConverter();
         var syntaxHighlightingConverter = new TextWithSubtitleSyntaxHighlightingConverter();
         var gapConverter = new DoubleToNoDecimalHideMaxConverter();
@@ -1246,16 +1245,16 @@ public static class InitListViewAndEditBox
             }
 
             textBox.TextChanged += vm.SubtitleTextChanged;
-            textBox.GotFocus += (_,_) => vm.SubtitleTextBoxGotFocus();
+            textBox.GotFocus += (_, _) => vm.SubtitleTextBoxGotFocus();
 
-            vm.EditTextBox = new TextBoxWrapper(textBox); 
+            vm.EditTextBox = new TextBoxWrapper(textBox);
             return textBox;
         }
     }
 
     private static Border MakeTextEditor(MainViewModel vm)
     {
-        var textEditor  = MakeTextEditor();
+        var textEditor = MakeTextEditor();
 
         var defaultBorderBrush = UiUtil.GetBorderBrush();
         var focusedBorderBrush = new SolidColorBrush(Colors.DodgerBlue);
@@ -1589,15 +1588,5 @@ public static class InitListViewAndEditBox
         textEditor.Tapped += (_, _) => vm.SubtitleTextBoxGotFocus();
 
         return textEditorBorder;
-    }
-
-    public static IValueConverter? MakeGridTextConverter()
-    {
-        if (Se.Settings.Appearance.SubtitleGridTextSingleLine)
-        {
-            return new TextToSingleLineConverter();
-        }
-
-        return null;
     }
 }
