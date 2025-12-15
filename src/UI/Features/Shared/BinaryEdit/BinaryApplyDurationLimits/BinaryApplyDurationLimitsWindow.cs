@@ -12,7 +12,7 @@ public class BinaryApplyDurationLimitsWindow : Window
     public BinaryApplyDurationLimitsWindow(BinaryApplyDurationLimitsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Apply Duration Limits"; // TODO: Add to language resources
+        Title = Se.Language.Tools.ApplyDurationLimits.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         vm.Window = this;
@@ -111,15 +111,13 @@ public class BinaryApplyDurationLimitsWindow : Window
         };
         radioPanel.Children.Add(applyToSelectedRadio);
 
-        grid.Add(radioPanel, 0, 2);
-        Grid.SetColumnSpan(radioPanel, 2);
+        grid.Add(radioPanel, 2, 0, 1, 2);
 
         // Button panel
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        grid.Add(buttonPanel, 0, 3);
-        Grid.SetColumnSpan(buttonPanel, 2);
+        grid.Add(buttonPanel, 3, 0, 1, 2);
 
         Content = grid;
 
