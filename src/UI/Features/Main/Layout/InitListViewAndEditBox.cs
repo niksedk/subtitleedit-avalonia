@@ -67,6 +67,12 @@ public static class InitListViewAndEditBox
         var doubleRoundedConverter = new DoubleToOneDecimalConverter();
         var cpsWmpConverter = new DoubleToOneDecimalHideMaxConverter();
         IValueConverter? textToSingleLineConverter = MakeGridTextConverter();
+        var notNullConverter = new NotNullConverter();
+        var syntaxHighlightingConverter = new TextWithSubtitleSyntaxHighlightingConverter();
+        var gapConverter = new DoubleToNoDecimalHideMaxConverter();
+        var inverseBooleanConverter = new InverseBooleanConverter();
+        var textOneLineShortConverter = new TextOneLineShortConverter();
+        var booleanToGridLengthConverter = new BooleanToGridLengthConverter();
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -87,7 +93,7 @@ public static class InitListViewAndEditBox
                             Value = IconNames.Bookmark,
                             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
                             VerticalAlignment = VerticalAlignment.Center,
-                            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
+                            [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = notNullConverter },
                          },
                          UiUtil.MakeLabel().WithBindText(value, new Binding(nameof(SubtitleLineViewModel.Number)))
                     }
@@ -168,7 +174,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = new TextWithSubtitleSyntaxHighlightingConverter() },
+                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = syntaxHighlightingConverter },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -199,7 +205,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = new TextWithSubtitleSyntaxHighlightingConverter() },
+                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = syntaxHighlightingConverter },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -249,7 +255,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Gap)) { Converter = new DoubleToNoDecimalHideMaxConverter() },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Gap)) { Converter = gapConverter },
                 };
 
                 border.Child = textBlock;
@@ -509,17 +515,17 @@ public static class InitListViewAndEditBox
 
 
         var deleteMenuItem = new MenuItem { Header = Se.Language.General.Delete, DataContext = vm };
-        deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        deleteMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         deleteMenuItem.Command = vm.DeleteSelectedLinesCommand;
         flyout.Items.Add(deleteMenuItem);
 
         var insertBeforeMenuItem = new MenuItem { Header = Se.Language.General.InsertBefore, DataContext = vm };
-        insertBeforeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        insertBeforeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         insertBeforeMenuItem.Command = vm.InsertLineBeforeCommand;
         flyout.Items.Add(insertBeforeMenuItem);
 
         var insertAfterMenuItem = new MenuItem { Header = Se.Language.General.InsertAfter, DataContext = vm };
-        insertAfterMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        insertAfterMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         insertAfterMenuItem.Command = vm.InsertLineAfterCommand;
         flyout.Items.Add(insertAfterMenuItem);
 
@@ -538,15 +544,15 @@ public static class InitListViewAndEditBox
                 new MenuItem { Header = Se.Language.Main.TextDown, Command = vm.ColumnTextDownCommand },
             }
         };
-        columnMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        columnMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(columnMenuItem);
 
         var sep1 = new Separator { DataContext = vm };
-        sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        sep1.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(sep1);
 
         var splitMenuItem = new MenuItem { Header = Se.Language.General.SplitLine, DataContext = vm };
-        splitMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        splitMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         splitMenuItem.Command = vm.SplitCommand;
         flyout.Items.Add(splitMenuItem);
 
@@ -561,19 +567,19 @@ public static class InitListViewAndEditBox
         flyout.Items.Add(mergeNextMenuItem);
 
         var mergeSelectedMenuItem = new MenuItem { Header = Se.Language.General.MergeSelected, DataContext = vm };
-        mergeSelectedMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergeSelectedMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         mergeSelectedMenuItem.Command = vm.MergeSelectedLinesCommand;
         flyout.Items.Add(mergeSelectedMenuItem);
         vm.MenuItemMerge = mergeSelectedMenuItem;
 
         var mergeSelectedAsDialogMenuItem = new MenuItem { Header = Se.Language.General.MergeSelectedAsDialog, DataContext = vm };
-        mergeSelectedAsDialogMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        mergeSelectedAsDialogMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         mergeSelectedAsDialogMenuItem.Command = vm.MergeSelectedLinesDialogCommand;
         flyout.Items.Add(mergeSelectedAsDialogMenuItem);
         vm.MenuItemMergeAsDialog = mergeSelectedAsDialogMenuItem;
 
         var sep2 = new Separator { DataContext = vm };
-        sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        sep2.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(sep2);
 
         var RemoveFormattingMenuItem = new MenuItem
@@ -626,7 +632,7 @@ public static class InitListViewAndEditBox
                 },
             }
         };
-        RemoveFormattingMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        RemoveFormattingMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(RemoveFormattingMenuItem);
 
 
@@ -636,7 +642,7 @@ public static class InitListViewAndEditBox
             Command = vm.ToggleLinesItalicCommand,
             DataContext = vm,
         };
-        italicMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        italicMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(italicMenuItem);
 
         var boldMenuItem = new MenuItem
@@ -645,7 +651,7 @@ public static class InitListViewAndEditBox
             Command = vm.ToggleLinesBoldCommand,
             DataContext = vm,
         };
-        boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        boldMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(boldMenuItem);
 
         var colorMenuItem = new MenuItem
@@ -654,7 +660,7 @@ public static class InitListViewAndEditBox
             Command = vm.ShowColorPickerCommand,
             DataContext = vm,
         };
-        colorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        colorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(colorMenuItem);
 
         var fontNameMenuItem = new MenuItem
@@ -663,7 +669,7 @@ public static class InitListViewAndEditBox
             Command = vm.ShowFontNamePickerCommand,
             DataContext = vm,
         };
-        fontNameMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        fontNameMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(fontNameMenuItem);
 
 
@@ -673,7 +679,7 @@ public static class InitListViewAndEditBox
             Command = vm.ShowAlignmentPickerCommand,
             DataContext = vm,
         };
-        alignmentMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        alignmentMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(alignmentMenuItem);
 
         var bookmarkMenuItem = new MenuItem
@@ -682,7 +688,7 @@ public static class InitListViewAndEditBox
             Command = vm.AddOrEditBookmarkCommand,
             DataContext = vm,
         };
-        bookmarkMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        bookmarkMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(bookmarkMenuItem);
 
         var menuItemSelectedLines = new MenuItem
@@ -724,7 +730,7 @@ public static class InitListViewAndEditBox
                 },
             }
         };
-        menuItemSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = new InverseBooleanConverter() });
+        menuItemSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Converter = inverseBooleanConverter });
         flyout.Items.Add(menuItemSelectedLines);
 
 
@@ -775,7 +781,7 @@ public static class InitListViewAndEditBox
         {
             ToolTip.SetTip(timeCodeUpDown, Se.Language.General.Show);
         }
-        timeCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
+        timeCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = inverseBooleanConverter });
         startTimePanel.Children.Add(timeCodeUpDown);
         timeCodeUpDown.ValueChanged += vm.StartTimeChanged;
         timeControlsPanel.Children.Add(startTimePanel);
@@ -806,7 +812,7 @@ public static class InitListViewAndEditBox
         {
             ToolTip.SetTip(endCodeUpDown, Se.Language.General.Hide);
         }
-        endCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
+        endCodeUpDown.Bind(TimeCodeUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = inverseBooleanConverter });
         endTimePanel.Children.Add(endCodeUpDown);
         endCodeUpDown.ValueChanged += vm.EndTimeChanged;
         timeControlsPanel.Children.Add(endTimePanel);
@@ -837,7 +843,7 @@ public static class InitListViewAndEditBox
         {
             ToolTip.SetTip(durationUpDown, Se.Language.General.Duration);
         }
-        durationUpDown.Bind(SecondsUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = new InverseBooleanConverter() });
+        durationUpDown.Bind(SecondsUpDown.IsEnabledProperty, new Binding(nameof(vm.LockTimeCodes)) { Mode = BindingMode.TwoWay, Converter = inverseBooleanConverter });
         durationUpDown.ValueChanged += (_, _) => vm.DurationChanged();
         durationPanel.Children.Add(durationUpDown);
         timeControlsPanel.Children.Add(durationPanel);
@@ -898,7 +904,7 @@ public static class InitListViewAndEditBox
             DataContext = vm,
             Value = IconNames.Bookmark,
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
-            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = notNullConverter },
             Margin = new Thickness(6, 0, 0, 1),
             VerticalAlignment = VerticalAlignment.Center,
         };
@@ -915,8 +921,8 @@ public static class InitListViewAndEditBox
             VerticalAlignment = VerticalAlignment.Center,
             DataContext = vm,
             Foreground = new SolidColorBrush(Se.Settings.Appearance.BookmarkColor.FromHexToColor()),
-            [!Label.ContentProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new TextOneLineShortConverter() },
-            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = new NotNullConverter() },
+            [!Label.ContentProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = textOneLineShortConverter },
+            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle) + "." + nameof(SubtitleLineViewModel.Bookmark)) { Converter = notNullConverter },
         };
         bookmarkLabel.PointerPressed += (_, __) =>
         {
@@ -930,7 +936,7 @@ public static class InitListViewAndEditBox
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center,
-            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle)) { Converter = new NotNullConverter() },
+            [!Label.IsVisibleProperty] = new Binding(nameof(vm.SelectedSubtitle)) { Converter = notNullConverter },
             Children =
             {
                 bookmarkIcon,
@@ -1201,7 +1207,7 @@ public static class InitListViewAndEditBox
         {
             Mode = BindingMode.OneWay,
             Source = vm,
-            Converter = new BooleanToGridLengthConverter()
+            Converter = booleanToGridLengthConverter
         });
 
         return mainGrid;
