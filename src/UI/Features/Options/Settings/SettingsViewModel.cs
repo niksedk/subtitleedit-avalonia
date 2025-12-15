@@ -162,7 +162,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _selectedFontName;
     [ObservableProperty] private double _subtitleGridFontSize;
     [ObservableProperty] private bool _subtitleGridTextSingleLine;
-    [ObservableProperty] private bool _subtitleGridColorTags;
+    [ObservableProperty] private ObservableCollection<string> _subtitleGridFormattings;
+    [ObservableProperty] private string _subtitleGridFormatting;
     [ObservableProperty] private string _subtitleTextBoxAndGridFontName;
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
@@ -255,6 +256,14 @@ public partial class SettingsViewModel : ObservableObject
 
         VideoPlayers = new ObservableCollection<VideoPlayerItem>(VideoPlayerItem.ListVideoPlayerItem());
         SelectedVideoPlayer = VideoPlayers[0];
+
+        SubtitleGridFormattings = new ObservableCollection<string>
+        {
+            Se.Language.Options.Settings.SubtitleGridFormattingNone,
+            Se.Language.Options.Settings.SubtitleGridFormattingShowFormatting,
+            Se.Language.Options.Settings.SubtitleGridFormattingShowTags,
+        };
+        SubtitleGridFormatting = SubtitleGridFormattings[0];
 
         WaveformDrawStyles = new ObservableCollection<string>
         {
@@ -431,7 +440,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowToolbarEncoding = appearance.ToolbarShowEncoding;
         SubtitleGridFontSize = appearance.SubtitleGridFontSize;
         SubtitleGridTextSingleLine = appearance.SubtitleGridTextSingleLine;
-        SubtitleGridColorTags = appearance.SubtitleGridColorTags;
+        SubtitleGridFormatting = MapGridFormattingToText(appearance.SubtitleGridFormattingType);
         SubtitleTextBoxAndGridFontName = appearance.SubtitleTextBoxAndGridFontName;
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
@@ -566,6 +575,37 @@ public partial class SettingsViewModel : ObservableObject
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
+    private static string MapGridFormattingToText(int subtitleGridFormattingType)
+    {
+        if (subtitleGridFormattingType == (int)SubtitleGridFormattingTypes.ShowFormatting)
+        {
+            return Se.Language.Options.Settings.SubtitleGridFormattingShowFormatting;
+        }
+        else if (subtitleGridFormattingType == (int)SubtitleGridFormattingTypes.ShowTags)
+        {
+            return Se.Language.Options.Settings.SubtitleGridFormattingShowTags;
+        }
+        else
+        {
+            return Se.Language.Options.Settings.SubtitleGridFormattingNone;
+        }
+    }
+
+    private static int MapGridFormattingToCode(string translation)
+    {
+        if (translation == Se.Language.Options.Settings.SubtitleGridFormattingShowFormatting)
+        {
+            return (int)SubtitleGridFormattingTypes.ShowFormatting;
+        }
+        else if (translation == Se.Language.Options.Settings.SubtitleGridFormattingShowTags)
+        {
+            return (int)SubtitleGridFormattingTypes.ShowTags;
+        }
+        else
+        {
+            return (int)SubtitleGridFormattingTypes.NoFormatting;
+        }
+    }
 
     private static readonly Dictionary<string, string> _actionToTextMap = new Dictionary<string, string>
     {
@@ -575,7 +615,6 @@ public partial class SettingsViewModel : ObservableObject
         { SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
     };
     private static Dictionary<string, string> TextToActionMap => _actionToTextMap.ToDictionary(x => x.Value, x => x.Key);
-
 
     private static string MapFromSelectedSubtitleDoubleClickAction(string action)
     {
@@ -654,7 +693,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.ToolbarShowEncoding = ShowToolbarEncoding;
         appearance.SubtitleGridFontSize = SubtitleGridFontSize;
         appearance.SubtitleGridTextSingleLine = SubtitleGridTextSingleLine;
-        appearance.SubtitleGridColorTags = SubtitleGridColorTags;
+        appearance.SubtitleGridFormattingType = MapGridFormattingToCode(SubtitleGridFormatting);
         appearance.SubtitleTextBoxAndGridFontName = string.IsNullOrEmpty(SubtitleTextBoxAndGridFontName) ? new Label().FontFamily.Name : SubtitleTextBoxAndGridFontName;
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;

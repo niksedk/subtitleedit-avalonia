@@ -73,7 +73,7 @@ public class LanguageSettings
     public string SubtitleTextBoxAndGridFontName { get; set; }
     public string SubtitleGridFontSize { get; set; }
     public string SubtitleGridTextSingleLine { get; set; }
-    public string SubtitleGridColorTags { get; set; }
+    public string SubtitleGridShowFormatting { get; set; }
     public string ShowUpDownStartTime { get; set; }
     public string ShowUpDownEndTime { get; set; }
     public string ShowUpDownDuration { get; set; }
@@ -205,7 +205,10 @@ public class LanguageSettings
     public string GridGoToSubtitleAndPause { get; set; }
     public string GridGoToSubtitleAndPlay { get; set; }
     public string GridGoToSubtitleOnly { get; set; }
-    public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }    
+    public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }
+    public string SubtitleGridFormattingNone { get; set; }
+    public string SubtitleGridFormattingShowFormatting { get; set; }
+    public string SubtitleGridFormattingShowTags { get; set; }
 
     public LanguageSettings()
     {
@@ -276,7 +279,7 @@ public class LanguageSettings
         SubtitleTextBoxAndGridFontName = "UI font in subtitle text box and grid";
         SubtitleGridFontSize = "Font size in subtitle grid";
         SubtitleGridTextSingleLine = "Show subtitle text as single line in grid";
-        SubtitleGridColorTags = "Color tags (HTML/ASSA) in subtitle grid";
+        SubtitleGridShowFormatting = "Show formatted (HTML/ASSA) text in subtitle grid";
         ShowUpDownStartTime = "Show up/down control for \"Show\"";
         ShowUpDownEndTime = "Show up/down control for \"Hide\"";
         ShowUpDownDuration = "Show up/down control for \"Duration\"";
@@ -408,6 +411,9 @@ public class LanguageSettings
         GridGoToSubtitleAndPlay = "Go to subtitle and play";
         GridGoToSubtitleOnly = "Go to subtitle only";
         GridGoToSubtitleAndPauseAndFocusTextBox = "Go to subtitle and pause and focus text box";
+        SubtitleGridFormattingNone = "No formatting";
+        SubtitleGridFormattingShowFormatting = "Show formatting";
+        SubtitleGridFormattingShowTags = "Show tags";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

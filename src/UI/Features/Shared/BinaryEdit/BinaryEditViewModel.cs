@@ -1051,6 +1051,12 @@ public partial class BinaryEditViewModel : ObservableObject
     [RelayCommand]
     private async Task SetText()
     {
+
+        if (Window == null)
+        {
+            return;
+        }
+
         // Only allow if exactly one subtitle is selected
         if (SelectedSubtitle == null)
         {

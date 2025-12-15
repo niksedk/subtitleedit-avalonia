@@ -452,7 +452,7 @@ public class SettingsPage : UserControl
                 () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SubtitleTextBoxAndGridFontName))),
             MakeNumericSetting(Se.Language.Options.Settings.SubtitleGridFontSize, nameof(_vm.SubtitleGridFontSize)),
             MakeCheckboxSetting(Se.Language.Options.Settings.SubtitleGridTextSingleLine, nameof(_vm.SubtitleGridTextSingleLine)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.SubtitleGridColorTags, nameof(_vm.SubtitleGridColorTags)),
+            new SettingsItem(Se.Language.Options.Settings.SubtitleGridShowFormatting, () => UiUtil.MakeComboBox(_vm.SubtitleGridFormattings, _vm, nameof(_vm.SubtitleGridFormatting))),
             MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxColorTags, nameof(_vm.TextBoxColorTags)),
