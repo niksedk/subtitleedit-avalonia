@@ -12,8 +12,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit.SetText;
 
 public class SetTextWindow : Window
 {
-    private readonly SetTextViewModel _vm;
-
     public SetTextWindow(SetTextViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +20,6 @@ public class SetTextWindow : Window
         CanResize = true;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -63,6 +59,7 @@ public class SetTextWindow : Window
                 e.Handled = true;
             }
         };
+        Closing += (_, _) => vm.Closing();
     }
 
     private static Border MakeTextView(SetTextViewModel vm)

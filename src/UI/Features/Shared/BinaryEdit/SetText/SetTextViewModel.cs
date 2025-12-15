@@ -28,7 +28,7 @@ public partial class SetTextViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<BoxTypeItem> _boxTypes;
     [ObservableProperty] private BoxTypeItem _selectedBoxType;
     [ObservableProperty] private Bitmap? _previewBitmap;
-
+   
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public SKBitmap? ResultBitmap { get; private set; }
@@ -47,13 +47,42 @@ public partial class SetTextViewModel : ObservableObject
         OutlineWidth = 2;
         ShadowWidth = 1;
 
-        BoxTypes = new ObservableCollection<BoxTypeItem>
-        {
+        BoxTypes =
+        [
             new BoxTypeItem(BoxType.None, Se.Language.General.None),
             new BoxTypeItem(BoxType.OneBox, "One box"),
-            new BoxTypeItem(BoxType.BoxPerLine, "Box per line"),
-        };
+            new BoxTypeItem(BoxType.BoxPerLine, "Box per line")
+        ];
         SelectedBoxType = BoxTypes[0];
+
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        SelectedFontName = FontNames.FirstOrDefault(p => p == Se.Settings.Tools.BinEditFontName) ?? FontNames[0];
+        FontSize = Se.Settings.Tools.BinEditFontSize > 0 ? Se.Settings.Tools.BinEditFontSize : 48;
+        FontIsBold = Se.Settings.Tools.BinEditIsBold;
+        FontColor = Se.Settings.Tools.BinEditFontColor.FromHexToColor();
+        OutlineColor = Se.Settings.Tools.BinEditOutlineColor.FromHexToColor();
+        ShadowColor = Se.Settings.Tools.BinEditShadowColor.FromHexToColor();
+        BackgroundColor = Se.Settings.Tools.BinEditBackgroundColor.FromHexToColor();
+        OutlineWidth = Se.Settings.Tools.BinEditOutlineWidth;
+        ShadowWidth = Se.Settings.Tools.BinEditShadowWidth;
+    }
+
+    private void SaveSettings()
+    {
+        Se.Settings.Tools.BinEditFontName = SelectedFontName;
+        Se.Settings.Tools.BinEditFontSize = FontSize != null ? (int)FontSize.Value : 48;
+        Se.Settings.Tools.BinEditIsBold = FontIsBold;
+        Se.Settings.Tools.BinEditFontColor = FontColor.FromColorToHex();
+        Se.Settings.Tools.BinEditOutlineColor = OutlineColor.FromColorToHex();
+        Se.Settings.Tools.BinEditShadowColor = ShadowColor.FromColorToHex();
+        Se.Settings.Tools.BinEditBackgroundColor = BackgroundColor.FromColorToHex();
+        Se.Settings.Tools.BinEditOutlineWidth = OutlineWidth ?? 0;
+        Se.Settings.Tools.BinEditShadowWidth = ShadowWidth ?? 0;
+        Se.SaveSettings();
     }
 
     partial void OnTextChanged(string value)
@@ -205,6 +234,11 @@ public partial class SetTextViewModel : ObservableObject
     private void Cancel()
     {
         Window?.Close();
+    }
+
+    public void Closing()
+    {
+        SaveSettings();
     }
 }
 

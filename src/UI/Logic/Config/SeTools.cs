@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.SubtitleFormats;
+﻿using Avalonia.Media;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -36,6 +37,15 @@ public class SeTools
     public int BinEditTopMargin { get; set; }
     public int BinEditRightMargin { get; set; }
     public int BinEditBottomMargin { get; set; }
+    public string BinEditFontName { get; set; }
+    public int BinEditFontSize { get; set; }
+    public bool BinEditIsBold { get; set; }
+    public string BinEditFontColor { get; set; }
+    public string BinEditOutlineColor { get; set; }
+    public string BinEditShadowColor { get; set; }
+    public string BinEditBackgroundColor { get; set; }
+    public decimal BinEditOutlineWidth { get; set; }
+    public decimal BinEditShadowWidth { get; set; }
 
     public SeTools()
     {
@@ -52,9 +62,19 @@ public class SeTools
         GoToLineNumberAlsoSetVideoPosition = true;
         SplitRebalanceLongLinesSplit = true;
         SplitRebalanceLongLinesRebalance = true;
+
         BinEditLeftMargin = 10;
         BinEditTopMargin = 10;
         BinEditRightMargin = 10;
         BinEditBottomMargin = 10;
+        BinEditFontName = "Arial";
+        BinEditFontSize = 48;
+        BinEditIsBold = false;
+        BinEditFontColor = Colors.White.FromColorToHex();
+        BinEditOutlineColor = Colors.White.FromColorToHex();
+        BinEditShadowColor = Colors.Black.FromColorToHex();
+        BinEditBackgroundColor = Colors.Transparent.FromColorToHex();
+        BinEditOutlineWidth = 2;
+        BinEditShadowWidth = 1;
     }
 }
