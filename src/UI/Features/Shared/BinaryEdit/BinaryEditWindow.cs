@@ -128,7 +128,7 @@ public class BinaryEditWindow : Window
                     Command = vm.FileOpenCommand,
                     Icon = new Icon { Value = IconNames.FolderOpen },
                 },
-                  new MenuItem
+                new MenuItem
                 {
                     Header = l.Export,
                     Items =
@@ -142,31 +142,6 @@ public class BinaryEditWindow : Window
                         {
                             Header = Se.Language.General.BdnXml,
                             Command = vm.ExportBdnXmlCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = new CapMakerPlus().Name,
-                            Command = vm.ExportCapMakerPlusCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Cavena890.NameOfFormat,
-                            Command = vm.ExportCavena890Command,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.File.Export.TitleExportDCinemaInteropPng,
-                            Command = vm.ExportDCinemaInteropPngCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.File.Export.TitleExportDCinemaSmpte2014Png,
-                            Command = vm.ExportDCinemaSmpte2014PngCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Ebu.NameOfFormat,
-                            Command = vm.ExportEbuStlCommand,
                         },
                         new MenuItem
                         {
@@ -185,34 +160,13 @@ public class BinaryEditWindow : Window
                         },
                         new MenuItem
                         {
-                            Header = Pac.NameOfFormat,
-                            Command = vm.ExportPacCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = new PacUnicode().Name,
-                            Command = vm.ExportPacUnicodeCommand,
-                        },
-                        new MenuItem
-                        {
                             Header = Se.Language.File.Export.TitleExportVobSub,
                             Command = vm.ExportVobSubCommand,
                         },
                         new MenuItem
                         {
                             Header = "WebVTT png",
-                            Command = vm.ExportWebVttThumbnailsCommand,
-                        },
-                        new Separator(),
-                        new MenuItem
-                        {
-                            Header = Se.Language.File.Export.CustomTextFormatsDotDotDot,
-                            Command = vm.ShowExportCustomTextFormatCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.File.Export.PlainTextDotDotDot,
-                            Command = vm.ShowExportPlainTextCommand,
+                            Command = vm.ExportWebVttThumbnailCommand,
                         },
                     }
                 },

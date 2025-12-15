@@ -14,7 +14,6 @@ using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
-using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -49,15 +48,16 @@ public partial class BinaryEditViewModel : ObservableObject
     public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
 
     private readonly IFileHelper _fileHelper;
+    private readonly IFolderHelper _folderHelper;
     private readonly IWindowService _windowService;
 
     private string _loadFileName = string.Empty;
 
-    public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService)
+    public BinaryEditViewModel(IFileHelper fileHelper, IWindowService windowService, IFolderHelper folderHelper)
     {
         _windowService = windowService;
         _fileHelper = fileHelper;
-        _fileHelper = fileHelper;
+        _folderHelper = folderHelper;
         _fileName = string.Empty;
         Subtitles = new ObservableCollection<BinarySubtitleItem>();
         StatusText = string.Empty;
@@ -204,7 +204,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", "All files", ".*");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", "All files", "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -295,79 +295,72 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task FileSave()
+    private async Task ExportBluRaySup()
+    {
+        await DoExport(new ExportHandlerBluRaySup(), ".sup");
+    }
+
+    [RelayCommand]
+    private async Task ExportBdnXml()
+    {
+        await DoExport(new ExportHandlerBdnXml(), string.Empty, false);
+    }
+
+    [RelayCommand]
+    private async Task ExportVobSub()
+    {
+        await DoExport(new ExportHandlerVobSub(), ".sub");
+    }
+
+    [RelayCommand]
+    private async Task ExportImagesWithTimeCode()
+    {
+        await DoExport(new ExportHandlerImagesWithTimeCode(), string.Empty, false);
+    }
+
+    [RelayCommand]
+    private async Task ExportWebVttThumbnail()
+    {
+        await DoExport(new ExportHandlerWebVttThumbnail(), string.Empty, false);
+    }
+
+    [RelayCommand]
+    private async Task ExportDostPng()
+    {
+        await DoExport(new ExportHandlerDost(), string.Empty, false);
+    }
+
+    [RelayCommand]
+    private async Task ExportFcpPng()
+    {
+        await DoExport(new ExportHandlerFcp(), string.Empty, false);
+    }
+
+    private async Task<bool> DoExport(IExportHandler exportHandler, string extension, bool isTargetFile = true)
     {
         if (Window == null)
         {
-            return;
+            return false;
         }
 
         if (Subtitles.Count == 0)
         {
-            return;
+            return false;
         }
 
-        var fileName = await _fileHelper.PickSaveFile(Window, ".sup", "export.sup", Se.Language.General.SaveFileAsTitle);
-        if (string.IsNullOrEmpty(fileName))
+        var fileOrFolderName = string.Empty;
+        if (isTargetFile)
         {
-            return;
+            fileOrFolderName = await _fileHelper.PickSaveFile(Window, extension, "export", Se.Language.General.SaveFileAsTitle);
+        }
+        else
+        {
+            fileOrFolderName = await _folderHelper.PickFolderAsync(Window, "Select folder");
         }
 
-        var targetFormat = BatchConverter.FormatBluRaySup;
-        IExportHandler? exportHandler = null;
-        string extension = string.Empty;
-        if (targetFormat == BatchConverter.FormatBluRaySup)
+        if (string.IsNullOrEmpty(fileOrFolderName))
         {
-            exportHandler = new ExportHandlerBluRaySup();
-            extension = ".sup";
-        }
-
-        if (targetFormat == BatchConverter.FormatBdnXml)
-        {
-            exportHandler = new ExportHandlerBdnXml();
-            extension = string.Empty; // folder
-        }
-
-        if (targetFormat == BatchConverter.FormatVobSub)
-        {
-            exportHandler = new ExportHandlerVobSub();
-            extension = ".sub";
-        }
-
-        if (targetFormat == BatchConverter.FormatImagesWithTimeCodesInFileName)
-        {
-            exportHandler = new ExportHandlerImagesWithTimeCode();
-            extension = string.Empty; // folder
-        }
-
-        if (targetFormat == BatchConverter.FormatDostImage)
-        {
-            exportHandler = new ExportHandlerDost();
-            extension = string.Empty; // folder
-        }
-
-        if (targetFormat == BatchConverter.FormatFcpImage)
-        {
-            exportHandler = new ExportHandlerFcp();
-            extension = string.Empty; // folder
-        }
-
-        if (targetFormat == BatchConverter.FormatDCinemaInterop)
-        {
-            exportHandler = new ExportHandlerDCinemaInteropPng();
-            extension = string.Empty; // folder
-        }
-
-        if (targetFormat == BatchConverter.FormatDCinemaSmpte2014)
-        {
-            exportHandler = new ExportHandlerDCinemaSmpte2014Png();
-            extension = string.Empty; // folder
-        }
-
-        if (exportHandler == null)
-        {
-            var message = Se.Language.General.UnknownSubtitleFormat;
-            return;
+            return false;
         }
 
         var imageParameter = new ImageParameter()
@@ -376,7 +369,7 @@ public partial class BinaryEditViewModel : ObservableObject
             ScreenHeight = ScreenHeight,
         };
 
-        exportHandler.WriteHeader(fileName, imageParameter);
+        exportHandler.WriteHeader(fileOrFolderName, imageParameter);
         for (var i = 0; i < Subtitles.Count; i++)
         {
             imageParameter.Bitmap = Subtitles[i].Bitmap!.ToSkBitmap();
@@ -390,6 +383,7 @@ public partial class BinaryEditViewModel : ObservableObject
         }
 
         exportHandler.WriteFooter();
+        return true;
     }
 
     [RelayCommand]
@@ -1073,11 +1067,11 @@ public partial class BinaryEditViewModel : ObservableObject
             // Replace the selected subtitle's bitmap
             SelectedSubtitle.Bitmap?.Dispose();
             SelectedSubtitle.Bitmap = result.ResultBitmap.ToAvaloniaBitmap();
-            
+
             // Update the overlay
             UpdateOverlayPosition();
             UpdateStatusText();
-            
+
             // Clean up
             result.ResultBitmap.Dispose();
         }

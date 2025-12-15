@@ -115,8 +115,15 @@ public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
 
                     // Find element name end
                     var elementStart = i + 1;
+                    if (elementStart >= text.Length)
+                    {
+                        continue;
+                    }
+
                     if (text[elementStart] == '/')
+                    {
                         elementStart++;
+                    }
 
                     var elementEnd = elementStart;
                     while (elementEnd < text.Length && !char.IsWhiteSpace(text[elementEnd]) &&
@@ -191,9 +198,13 @@ public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
                     var valueStart = i;
                     var valueEnd = text.IndexOf(quoteChar, i + 1);
                     if (valueEnd == -1)
+                    {
                         valueEnd = text.Length;
+                    }
                     else
+                    {
                         valueEnd++;
+                    }
 
                     // Color the quotes
                     ChangeLinePart(lineStartOffset + valueStart, lineStartOffset + valueStart + 1, element =>
