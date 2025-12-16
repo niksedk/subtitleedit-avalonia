@@ -27,6 +27,7 @@ internal class IconNames
     public const string DotsHorizontal = "mdi-dots-horizontal";
     public const string DotsVertical = "mdi-dots-vertical";
     public const string Duplicate = "mdi-content-duplicate";
+    public const string Electron = "mdi-electron-framework";
     public const string Export = "mdi-export";
     public const string EyeSettings = "mdi-eye-settings";
     public const string FileCog = "mdi-file-cog";

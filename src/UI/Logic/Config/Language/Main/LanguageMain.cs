@@ -76,6 +76,7 @@ public class LanguageMain
     public string RemovedXBlankLines { get; set; }
     public string XLinesSelectedOfY { get; set; }
     public string EndTimeMustBeAfterStartTime { get; set; }
+    public string GeneratingWaveformDotDotDot { get; set; }
 
     public LanguageMain()
     {
@@ -147,5 +148,6 @@ public class LanguageMain
         RemovedXBlankLines = "Removed {0} blank lines";
         XLinesSelectedOfY = "{0} lines selected of {1}";
         EndTimeMustBeAfterStartTime = "End time must be after start time.";
+        GeneratingWaveformDotDotDot = "Generating waveform...";
     }
 }

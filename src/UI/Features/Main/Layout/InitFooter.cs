@@ -14,12 +14,39 @@ public static class InitFooter
     {
         var grid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*"),
-            RowDefinitions = new RowDefinitions("Auto"),
+            ColumnDefinitions = new ColumnDefinitions
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            RowDefinitions = new RowDefinitions
+            {
+                new RowDefinition { Height = GridLength.Auto },
+            },
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(5, 0, 5, 0),
         };
+
+        var waveformBusyIcon = new Icon
+        {
+            Value = IconNames.Electron,
+            FontSize = 18,
+            Margin = new Thickness(0, 0, 5, 0),
+            Animation = IconAnimation.Spin,
+            // [ToolTip.TipProperty] = Se.Language.General.GeneratingWaveform,
+        };
+        waveformBusyIcon.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsWaveformGenerating)));
+        grid.Add(waveformBusyIcon, 0);
+
+        var labelWaveFormText = UiUtil.MakeLabel()
+            .WithBindText(vm, nameof(vm.WaveformGeneratingText))
+            .WithBindVisible(vm, nameof(vm.IsWaveformGenerating))
+            .WithMarginRight(15);
+        labelWaveFormText.Opacity = 0.5;
+        grid.Add(labelWaveFormText, 0, 1);
 
         vm.StatusTextLeftLabel = new TextBlock
         {
@@ -28,7 +55,7 @@ public static class InitFooter
             VerticalAlignment = VerticalAlignment.Center,
             DataContext = vm,
         };
-        grid.Add(vm.StatusTextLeftLabel, 0);
+        grid.Add(vm.StatusTextLeftLabel, 0, 2);
         vm.StatusTextLeftLabel.Bind(TextBlock.TextProperty, new Binding(nameof(vm.StatusTextLeft)));
 
         var right = new TextBlock
@@ -117,7 +144,7 @@ public static class InitFooter
             },
         };
 
-        grid.Add(panelRight, 0, 1);
+        grid.Add(panelRight, 0, 3);
 
         return grid;
     }

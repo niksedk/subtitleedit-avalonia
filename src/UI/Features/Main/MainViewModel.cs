@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.Cea708.Commands;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -111,7 +110,6 @@ using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -209,6 +207,8 @@ public partial class MainViewModel :
     [ObservableProperty] private string _videoOffsetText;
     [ObservableProperty] private string _setVideoOffsetText;
     [ObservableProperty] private bool _isVideoOffsetVisible;
+    [ObservableProperty] private bool _isWaveformGenerating;
+    [ObservableProperty] private string _waveformGeneratingText;
 
     public DataGrid SubtitleGrid { get; set; }
     public Window? Window { get; set; }
@@ -410,6 +410,7 @@ public partial class MainViewModel :
         SelectedSpeed = "1.0x";
         VideoOffsetText = string.Empty;
         SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
+        WaveformGeneratingText = string.Empty;
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
@@ -4261,6 +4262,10 @@ public partial class MainViewModel :
             AudioVisualizer.WaveformDrawStyle = InitWaveform.GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle);
             AudioVisualizer.MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
 
+            InitializeLibMpv();
+            InitializeFfmpeg();
+            LoadShortcuts();
+
             if (!string.IsNullOrEmpty(_videoFileName))
             {
                 if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram ||
@@ -4272,6 +4277,8 @@ public partial class MainViewModel :
                     var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
                     if (!File.Exists(peakWaveFileName))
                     {
+
+
                         if (FfmpegHelper.IsFfmpegInstalled())
                         {
                             var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
@@ -9475,74 +9482,89 @@ public partial class MainViewModel :
         string peakWaveFileName,
         string videoFileName)
     {
-        ShowStatus(Se.Language.Main.ExtractingWaveInfo);
-        process.Start();
+        IsWaveformGenerating = true;
+        WaveformGeneratingText = Se.Language.Main.ExtractingWaveInfo;
 
-        _videoOpenTokenSource = new CancellationTokenSource();
-        while (!process.HasExited)
+        try
         {
-            await Task.Delay(100, _videoOpenTokenSource.Token);
-        }
+            process.Start();
 
-        if (process.ExitCode != 0)
-        {
-            ShowStatus(Se.Language.Main.FailedToExtractWaveInfo);
-            return;
-        }
-
-        if (_videoOpenTokenSource.IsCancellationRequested)
-        {
-            DeleteTempFile(tempWaveFileName);
-            return;
-        }
-
-        if (File.Exists(tempWaveFileName))
-        {
-            using var waveFile = new WavePeakGenerator2(tempWaveFileName);
-            var wavePeaks = waveFile.GeneratePeaks(0, peakWaveFileName);
-
-            if (Se.Settings.Waveform.GenerateSpectrogram)
+            _videoOpenTokenSource = new CancellationTokenSource();
+            while (!process.HasExited)
             {
-                ShowStatus(Se.Language.Main.GeneratingSpectrogramDotDotDot, 10000);
-                var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
-                AudioVisualizer?.SetSpectrogram(spectrogram);
+                await Task.Delay(100, _videoOpenTokenSource.Token);
             }
 
-            Dispatcher.UIThread.Post(() =>
+            if (process.ExitCode != 0)
             {
-                ShowWaveformOnlyWaveform = false;
-                ShowWaveformOnlySpectrogram = false;
-                ShowWaveformWaveformAndSpectrogram = false;
-
-                if (AudioVisualizer != null)
-                {
-                    AudioVisualizer.WavePeaks = wavePeaks;
-                    if (IsSmpteTimingEnabled)
-                    {
-                        AudioVisualizer.UseSmpteDropFrameTime();
-                    }
-
-                    InitializeWaveformDisplayMode();
-                }
-
-                _updateAudioVisualizer = true;
-            }, DispatcherPriority.Background);
-
+                ShowStatus(Se.Language.Main.FailedToExtractWaveInfo);
+                return;
+            }
 
             if (_videoOpenTokenSource.IsCancellationRequested)
             {
                 DeleteTempFile(tempWaveFileName);
                 return;
             }
-        }
 
-        ExtractShotChanges(videoFileName);
+            if (File.Exists(tempWaveFileName))
+            {
+                WaveformGeneratingText = Se.Language.Main.GeneratingWaveformDotDotDot;
+                using var waveFile = new WavePeakGenerator2(tempWaveFileName);
+                var wavePeaks = waveFile.GeneratePeaks(0, peakWaveFileName);
+
+                if (Se.Settings.Waveform.GenerateSpectrogram)
+                {
+                    WaveformGeneratingText = Se.Language.Main.GeneratingSpectrogramDotDotDot;
+                    var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
+                    AudioVisualizer?.SetSpectrogram(spectrogram);
+                }
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ShowWaveformOnlyWaveform = false;
+                    ShowWaveformOnlySpectrogram = false;
+                    ShowWaveformWaveformAndSpectrogram = false;
+
+                    if (AudioVisualizer != null)
+                    {
+                        AudioVisualizer.WavePeaks = wavePeaks;
+                        if (IsSmpteTimingEnabled)
+                        {
+                            AudioVisualizer.UseSmpteDropFrameTime();
+                        }
+
+                        InitializeWaveformDisplayMode();
+                    }
+
+                    _updateAudioVisualizer = true;
+                }, DispatcherPriority.Background);
+
+
+                if (_videoOpenTokenSource.IsCancellationRequested)
+                {
+                    DeleteTempFile(tempWaveFileName);
+                    return;
+                }
+            }
+
+            ExtractShotChanges(videoFileName);
+
+        }
+        finally
+        {
+            IsWaveformGenerating = false;
+            WaveformGeneratingText = string.Empty;
+            DeleteTempFile(tempWaveFileName);
+        }
     }
 
     private void ExtractShotChanges(string videoFileName)
     {
         if (Se.Settings.Waveform.ShotChangesAutoGenerate)
         {
+            WaveformGeneratingText = "Extracting shot changse...";
+
             var threshold = Se.Settings.Waveform.ShotChangesSensitivity.ToString(CultureInfo.InvariantCulture);
             var argumentsFormat = Se.Settings.Video.ShowChangesFFmpegArguments;
             var arguments = string.Format(argumentsFormat, videoFileName, threshold);
