@@ -21,6 +21,8 @@ public class BinaryEditWindow : Window
         Title = Se.Language.General.EditImagedBaseSubtitle;
         Width = 1200;
         Height = 700;
+        MinWidth = 1000;
+        MinHeight = 600;
         CanResize = true;
         vm.Window = this;
         DataContext = vm;
@@ -626,7 +628,7 @@ public class BinaryEditWindow : Window
         // Create overlay image for subtitle bitmap
         var overlayImage = new Image
         {
-            Stretch = Stretch.None,
+            Stretch = Stretch.Fill,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
@@ -637,16 +639,11 @@ public class BinaryEditWindow : Window
             [!Image.SourceProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}"),
         };
 
-        // Set up scale transform for scaling the image
-        var scaleTransform = new ScaleTransform();
-        overlayImage.RenderTransform = scaleTransform;
-
         videoGrid.Children.Add(overlayImage);
 
         // Store references
         vm.VideoPlayerControl = vp;
         vm.SubtitleOverlayImage = overlayImage;
-        vm.SubtitleOverlayScaleTransform = scaleTransform;
 
         // Update position when video player size changes
         vp.SizeChanged += (_, _) => vm.UpdateOverlayPosition();
@@ -675,10 +672,13 @@ public class BinaryEditWindow : Window
                 var delta = currentPoint - dragStartPoint.Value;
 
                 // Convert screen delta to subtitle coordinate delta (inverse of scale)
-                if (vm.SubtitleOverlayScaleTransform != null)
+                var imageWidth = overlayImage.Width;
+                var bitmapWidth = vm.SelectedSubtitle.Bitmap?.Size.Width ?? 1;
+                if (!double.IsNaN(imageWidth) && imageWidth > 0 && bitmapWidth > 0)
                 {
-                    var deltaX = (int)(delta.X / vm.SubtitleOverlayScaleTransform.ScaleX);
-                    var deltaY = (int)(delta.Y / vm.SubtitleOverlayScaleTransform.ScaleY);
+                    var scale = imageWidth / bitmapWidth;
+                    var deltaX = (int)(delta.X / scale);
+                    var deltaY = (int)(delta.Y / scale);
 
                     vm.SelectedSubtitle.X = originalX + deltaX;
                     vm.SelectedSubtitle.Y = originalY + deltaY;

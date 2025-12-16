@@ -42,7 +42,6 @@ public partial class BinaryEditViewModel : ObservableObject
     public DataGrid? SubtitleGrid { get; set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }
     public Image? SubtitleOverlayImage { get; set; }
-    public Avalonia.Media.ScaleTransform? SubtitleOverlayScaleTransform { get; set; }
     public Border? VideoContentBorder { get; set; }
     public bool OkPressed { get; private set; }
     public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
@@ -86,7 +85,7 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(SelectedSubtitle);
             StatusText = $"Subtitle {index + 1} of {Subtitles.Count}";
-            CurrentPositionAndSize = $"Position: {SelectedSubtitle.X}, {SelectedSubtitle.Y}   Size: {SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}";
+            CurrentPositionAndSize = $"Position: {SelectedSubtitle.X},{SelectedSubtitle.Y}{Environment.NewLine}Size: {SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}";
         }
     }
 
@@ -168,7 +167,7 @@ public partial class BinaryEditViewModel : ObservableObject
         VideoContentBorder.Margin = new Avalonia.Thickness(rectX, rectY, 0, 0);
 
         // Update subtitle overlay
-        if (SubtitleOverlayImage == null || SubtitleOverlayScaleTransform == null || SelectedSubtitle == null)
+        if (SubtitleOverlayImage == null || SelectedSubtitle == null || SelectedSubtitle.Bitmap == null)
         {
             return;
         }
@@ -185,8 +184,11 @@ public partial class BinaryEditViewModel : ObservableObject
         var scaleX = rectWidth / subtitleScreenWidth;
         var scaleY = rectHeight / subtitleScreenHeight;
 
-        SubtitleOverlayScaleTransform.ScaleX = scaleX;
-        SubtitleOverlayScaleTransform.ScaleY = scaleY;
+        // Get original bitmap dimensions and set scaled size on image
+        var bitmapWidth = SelectedSubtitle.Bitmap.Size.Width;
+        var bitmapHeight = SelectedSubtitle.Bitmap.Size.Height;
+        SubtitleOverlayImage.Width = bitmapWidth * scaleX;
+        SubtitleOverlayImage.Height = bitmapHeight * scaleY;
 
         // Position: rectangle position + scaled subtitle position
         var overlayX = rectX + (SelectedSubtitle.X * scaleX);
