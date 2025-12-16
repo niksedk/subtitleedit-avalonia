@@ -2264,10 +2264,10 @@ public partial class OcrViewModel : ObservableObject
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
-    public void Initialize(List<VobSubMergedPack> mergedVobSubPacks, MatroskaTrackInfo matroskaSubtitleInfo, string fileName)
+    public void Initialize(List<VobSubMergedPack> mergedVobSubPacks, List<SKColor> palette, MatroskaTrackInfo matroskaSubtitleInfo, string fileName)
     {
         Title = string.Format(Se.Language.Ocr.OcrX, fileName);
-        _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks);
+        _ocrSubtitle = new OcrSubtitleVobSub(mergedVobSubPacks, palette);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 
