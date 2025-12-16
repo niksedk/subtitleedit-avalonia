@@ -174,6 +174,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         private readonly Grid _gridProgress; // Reference to the controls grid
         private DispatcherTimer? _autoHideTimer;
         private DateTime _lastActivityTime;
+        private ContentPresenter? _contentPresenter;
 
         private void NotifyPositionChanged(double newPosition)
         {
@@ -202,6 +203,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             Position = seconds;
         }
 
+        public int ContentWidth => _contentPresenter?.Bounds.Width > 0 ? (int)_contentPresenter.Bounds.Width : 0;
+        public int ContentHeight => _contentPresenter?.Bounds.Height > 0 ? (int)_contentPresenter.Bounds.Height : 0;
+
         public VideoPlayerControl(IVideoPlayerInstance videoPlayerInstance)
         {
             _videoPlayerInstance = videoPlayerInstance;
@@ -220,6 +224,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 [!ContentPresenter.ContentProperty] = this[!PlayerContentProperty],
                 Background = new SolidColorBrush(Colors.Black),
             };
+            _contentPresenter = contentPresenter;
             mainGrid.Children.Add(contentPresenter);
             Grid.SetRow(contentPresenter, 0);
 

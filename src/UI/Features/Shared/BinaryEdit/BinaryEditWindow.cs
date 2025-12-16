@@ -611,6 +611,18 @@ public class BinaryEditWindow : Window
         // Add video player as background
         videoGrid.Children.Add(vp);
 
+        // Create a green rectangle border to show the actual video content area
+        var videoContentBorder = new Border
+        {
+            BorderBrush = Brushes.Green,
+            BorderThickness = new Thickness(2),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            IsHitTestVisible = false,
+        };
+        videoGrid.Children.Add(videoContentBorder);
+        vm.VideoContentBorder = videoContentBorder;
+
         // Create overlay image for subtitle bitmap
         var overlayImage = new Image
         {

@@ -44,6 +44,7 @@ public partial class BinaryEditViewModel : ObservableObject
     public Image? SubtitleOverlayImage { get; set; }
     public Avalonia.Media.TranslateTransform? SubtitleOverlayTransform { get; set; }
     public Avalonia.Media.ScaleTransform? SubtitleOverlayScaleTransform { get; set; }
+    public Border? VideoContentBorder { get; set; }
     public bool OkPressed { get; private set; }
     public ObservableCollection<BinarySubtitleItem> Subtitles { get; set; }
 
@@ -122,8 +123,7 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public void UpdateOverlayPosition()
     {
-        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null ||
-            SelectedSubtitle == null || VideoPlayerControl == null)
+        if (VideoPlayerControl == null)
         {
             return;
         }
@@ -133,6 +133,21 @@ public partial class BinaryEditViewModel : ObservableObject
         var videoPlayerHeight = VideoPlayerControl.Bounds.Height;
 
         if (videoPlayerWidth <= 0 || videoPlayerHeight <= 0)
+        {
+            return;
+        }
+
+        // Use actual content dimensions from VideoPlayerControl
+        var contentWidth = VideoPlayerControl.ContentWidth;
+        var contentHeight = VideoPlayerControl.ContentHeight;
+
+        if (contentWidth <= 0 || contentHeight <= 0)
+        {
+            return;
+        }
+
+        // Get screen dimensions (the subtitle coordinate system)
+        if (ScreenWidth <= 0 || ScreenHeight <= 0)
         {
             return;
         }
@@ -147,6 +162,44 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
+        // Calculate aspect ratios
+        var screenAspect = (double)ScreenWidth / ScreenHeight;
+        var contentAspect = (double)contentWidth / contentHeight;
+
+        // Calculate actual video display area (scale ScreenWidth/ScreenHeight to fit within contentWidth/contentHeight)
+        double actualVideoWidth, actualVideoHeight, offsetX, offsetY;
+
+        if (contentAspect > screenAspect)
+        {
+            // Content area is wider than screen aspect - fit to height, center horizontally
+            actualVideoHeight = contentHeight;
+            actualVideoWidth = contentHeight * screenAspect;
+            offsetX = (contentWidth - actualVideoWidth) / 2;
+            offsetY = 0;
+        }
+        else
+        {
+            // Content area is taller than screen aspect - fit to width, center vertically
+            actualVideoWidth = contentWidth;
+            actualVideoHeight = contentWidth / screenAspect;
+            offsetX = 0;
+            offsetY = (contentHeight - actualVideoHeight) / 2;
+        }
+
+        // Update the video content border (green rectangle)
+        if (VideoContentBorder != null)
+        {
+            VideoContentBorder.Width = actualVideoWidth;
+            VideoContentBorder.Height = actualVideoHeight;
+            VideoContentBorder.Margin = new Avalonia.Thickness(offsetX, offsetY, 0, 0);
+        }
+
+        // Update subtitle overlay if present
+        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null || SelectedSubtitle == null)
+        {
+            return;
+        }
+
         // Get screen size from subtitle
         var screenWidth = SelectedSubtitle.ScreenSize.Width;
         var screenHeight = SelectedSubtitle.ScreenSize.Height;
@@ -154,30 +207,6 @@ public partial class BinaryEditViewModel : ObservableObject
         if (screenWidth <= 0 || screenHeight <= 0)
         {
             return;
-        }
-
-        // Calculate video aspect ratio and screen aspect ratio
-        var videoAspect = videoPlayerWidth / videoDisplayHeight;
-        var screenAspect = (double)screenWidth / screenHeight;
-
-        // Calculate actual video display area (accounting for letterboxing/pillarboxing)
-        double actualVideoWidth, actualVideoHeight, offsetX, offsetY;
-
-        if (videoAspect > screenAspect)
-        {
-            // Video is wider than screen aspect - will have letterboxing (black bars top/bottom)
-            actualVideoWidth = videoPlayerWidth;
-            actualVideoHeight = videoPlayerWidth / screenAspect;
-            offsetX = 0;
-            offsetY = (videoDisplayHeight - actualVideoHeight) / 2;
-        }
-        else
-        {
-            // Video is taller than screen aspect - will have pillarboxing (black bars left/right)
-            actualVideoHeight = videoDisplayHeight;
-            actualVideoWidth = videoDisplayHeight * screenAspect;
-            offsetX = (videoPlayerWidth - actualVideoWidth) / 2;
-            offsetY = 0;
         }
 
         // Calculate scale factor
@@ -946,7 +975,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        await VideoPlayerControl.Open(videoFileName);
+        await VideoPlayerControl.Open(videoFileName);        
     }
 
     [RelayCommand]
