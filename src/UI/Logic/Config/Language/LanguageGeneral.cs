@@ -558,6 +558,10 @@ public class LanguageGeneral
     public string EditImagedBaseSubtitle { get; set; }
     public string EditImagedBaseSubtitleX { get; set; }
     public string OpenImageBasedSubtitle { get; set; }
+    public string XSubtitles { get; set; }
+    public string SubtitleXOfY { get; set; }
+    public string PositionX { get; internal set; }
+    public string SizeX { get; internal set; }
 
     public LanguageGeneral()
     {
@@ -1115,5 +1119,9 @@ public class LanguageGeneral
         EditImagedBaseSubtitle = "Edit imaged-based subtitle";
         EditImagedBaseSubtitleX = "Edit imaged-based subtitle: {0}";
         OpenImageBasedSubtitle = "Open image-based subtitle";
+        XSubtitles = "{0:#,###,##0} subtitles";
+        SubtitleXOfY = "Subtitle {0} of {1}";
+        PositionX = "Position: {0}";
+        SizeX = "Size: {0}";
     }
 }

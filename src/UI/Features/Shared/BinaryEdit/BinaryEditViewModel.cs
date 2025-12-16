@@ -78,14 +78,15 @@ public partial class BinaryEditViewModel : ObservableObject
     {
         if (SelectedSubtitle == null)
         {
-            StatusText = $"{Subtitles.Count} subtitles";
+            StatusText = string.Format(Se.Language.General.XSubtitles, Subtitles.Count);
             CurrentPositionAndSize = string.Empty;
         }
         else
         {
             var index = Subtitles.IndexOf(SelectedSubtitle);
-            StatusText = $"Subtitle {index + 1} of {Subtitles.Count}";
-            CurrentPositionAndSize = $"Position: {SelectedSubtitle.X},{SelectedSubtitle.Y}{Environment.NewLine}Size: {SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}";
+            StatusText = string.Format(Se.Language.General.SubtitleXOfY, index + 1, Subtitles.Count);
+            CurrentPositionAndSize = string.Format(Se.Language.General.PositionX, $"{SelectedSubtitle.X},{SelectedSubtitle.Y}") + Environment.NewLine + 
+                                     string.Format(Se.Language.General.SizeX, $"{SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}");
         }
     }
 
@@ -292,6 +293,31 @@ public partial class BinaryEditViewModel : ObservableObject
             UpdateStatusText();
             Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, fileName);
         }
+
+        var videoFileName = TryGetVideoFileName(fileName);
+        if (!string.IsNullOrEmpty(videoFileName) && VideoPlayerControl != null)
+        {
+            await VideoPlayerControl.Open(videoFileName);
+        }
+    }
+
+    private string? TryGetVideoFileName(string fileName)
+    {
+        var videoExtensions = new[] { ".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".ts", ".mpg", ".mpeg" };
+        var baseName = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, Path.GetFileNameWithoutExtension(fileName));
+        var baseName2 = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(fileName)));
+
+        var baseNamesToTry = new[] { baseName, baseName2 };
+        foreach (var ext in videoExtensions)
+        {
+            var testFileName = baseName + ext;
+            if (File.Exists(testFileName))
+            {
+                return testFileName;
+            }
+        }
+
+        return null;
     }
 
     [RelayCommand]
@@ -355,7 +381,7 @@ public partial class BinaryEditViewModel : ObservableObject
         }
         else
         {
-            fileOrFolderName = await _folderHelper.PickFolderAsync(Window, "Select folder");
+            fileOrFolderName = await _folderHelper.PickFolderAsync(Window, Se.Language.General.SelectedAFolderToSaveTo);
         }
 
         if (string.IsNullOrEmpty(fileOrFolderName))
@@ -946,7 +972,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        await VideoPlayerControl.Open(videoFileName);        
+        await VideoPlayerControl.Open(videoFileName);
     }
 
     [RelayCommand]
@@ -1012,7 +1038,7 @@ public partial class BinaryEditViewModel : ObservableObject
 
         try
         {
-            using var stream = System.IO.File.OpenRead(fileName);
+            using var stream = File.OpenRead(fileName);
             var skBitmap = SkiaSharp.SKBitmap.Decode(stream);
             if (skBitmap == null)
             {
@@ -1045,7 +1071,6 @@ public partial class BinaryEditViewModel : ObservableObject
     [RelayCommand]
     private async Task SetText()
     {
-
         if (Window == null)
         {
             return;
