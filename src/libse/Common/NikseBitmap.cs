@@ -943,6 +943,20 @@ namespace Nikse.SubtitleEdit.Core.Common
             return x;
         }
 
+        public int CalcLeftCroppingTransparent()
+        {
+            var x = 0;
+            for (; x < Width; x++)
+            {
+                if (!IsVerticalLineTransparent(x))
+                {
+                    break;
+                }
+            }
+
+            return x;
+        }
+
         public int CalcRightCropping(SKColor color)
         {
             var x = Width - 1;

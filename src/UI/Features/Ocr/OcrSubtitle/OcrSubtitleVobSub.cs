@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.VobSub;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.VobSub;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -58,8 +59,25 @@ public class OcrSubtitleVobSub : IOcrSubtitle
 
     public SKPointI GetPosition(int index)
     {
-        var position = _vobSubMergedPack[index].GetPosition();  
-        return new SKPointI(position.Left, position.Top);
+        var item = _vobSubMergedPack[index];
+        var left = item.SubPicture.ImageDisplayArea.Left;
+        var top = item.SubPicture.ImageDisplayArea.Top;
+        var bmp = item.SubPicture.GetBitmap(_palette, SKColors.Transparent, SKColors.Black, SKColors.White, SKColors.Black, false, false);
+        var nbmp = new NikseBitmap(bmp);
+        var topCropped = nbmp.CropTopTransparent(0);
+        top += topCropped;
+        var bottomCropped = nbmp.CalcBottomTransparent();
+        var width = bmp.Width;
+        var height = bmp.Height;
+        height -= topCropped;
+        height -= bottomCropped;
+
+        left += nbmp.CalcLeftCroppingTransparent();
+
+        return new SKPointI(left, top);
+
+        //var position = _vobSubMergedPack[index].GetPosition();  
+        //return new SKPointI(position.Left, position.Top);
     }
 
     public SKSizeI GetScreenSize(int index)

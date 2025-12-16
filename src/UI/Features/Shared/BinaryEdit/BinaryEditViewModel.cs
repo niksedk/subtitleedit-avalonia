@@ -237,11 +237,16 @@ public partial class BinaryEditViewModel : ObservableObject
         else if (FileUtil.IsVobSub(fileName))
         {
             var vobSub = new VobSubParser(true);
-            vobSub.Open(fileName);
-            var mergedPacks = vobSub.MergeVobSubPacks();
+
+
+            var vobSubParser = new VobSubParser(true);
+            string idxFileName = Path.ChangeExtension(fileName, ".idx");
+            vobSubParser.OpenSubIdx(fileName, idxFileName);
+            var mergedPacks = vobSubParser.MergeVobSubPacks();
+            var palette = vobSubParser.IdxPalette;
             if (mergedPacks.Count > 0)
             {
-                imageSubtitle = new OcrSubtitleVobSub(mergedPacks, vobSub.IdxPalette);
+                imageSubtitle = new OcrSubtitleVobSub(mergedPacks, palette);
             }
         }
 
