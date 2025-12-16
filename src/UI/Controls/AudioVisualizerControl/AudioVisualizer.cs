@@ -260,6 +260,7 @@ public class AudioVisualizer : Control
     private Point _startPointerPosition;
     private double _originalStartSeconds;
     private double _originalEndSeconds;
+    private double _originalDurationSeconds;
     private double _originalPreviousEndSeconds;
     private double _originalNextStartSeconds;
     private long _audioVisualizerLastScroll;
@@ -620,6 +621,7 @@ public class AudioVisualizer : Control
         _activeParagraph = p;
         _originalStartSeconds = p.StartTime.TotalSeconds;
         _originalEndSeconds = p.EndTime.TotalSeconds;
+        _originalDurationSeconds = p.Duration.TotalSeconds;
 
         var displayableParagraphs = _displayableParagraphs;
         if (displayableParagraphs == null || displayableParagraphs.Count == 0)
@@ -799,7 +801,6 @@ public class AudioVisualizer : Control
             case InteractionMode.Moving:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
-                var durationSeconds = _activeParagraph.Duration.TotalSeconds;
 
                 // Clamp so it doesn't overlap previous or next
                 if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds)
@@ -809,7 +810,7 @@ public class AudioVisualizer : Control
 
                 if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001 - MinGapSeconds)
                 {
-                    newStart = next.StartTime.TotalSeconds - 0.001 - MinGapSeconds - durationSeconds;
+                    newStart = next.StartTime.TotalSeconds - 0.001 - MinGapSeconds - _originalDurationSeconds;
                 }
 
                 if (newStart < 0)
@@ -818,7 +819,7 @@ public class AudioVisualizer : Control
                 }
 
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
-                _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + durationSeconds);
+                _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + _originalDurationSeconds);
                 break;
             case InteractionMode.ResizeLeftAnd:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
