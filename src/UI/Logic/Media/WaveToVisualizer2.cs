@@ -338,7 +338,7 @@ public class SpectrogramData2 : IDisposable
             if (Images.Count == 0)
             {
                 Se.LogError($"No spectrogram images found in {directory}");
-            }   
+            }
         }
         catch (Exception exception)
         {
@@ -948,7 +948,7 @@ public class WavePeakGenerator2 : IDisposable
         private readonly int _nfft;
         private readonly MagnitudeToIndexMapper _mapper;
         private readonly RealFFT _fft;
-        private readonly FastBitmap.PixelData[] _palette;
+        private readonly SKColor[] _palette;
         private readonly double[] _segment;
         private readonly double[] _window;
         private readonly double[] _magnitude1;
@@ -1004,28 +1004,37 @@ public class WavePeakGenerator2 : IDisposable
             }
         }
 
-        public SKBitmap Draw(double[] samples)
+        public unsafe SKBitmap Draw(double[] samples)
         {
             int width = samples.Length / _nfft;
             int height = _nfft / 2;
-            var bmp = new FastBitmap(new SKBitmap(width, height));
-            bmp.LockImage();
+            var bmp = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
+
+            IntPtr pixelsPtr = bmp.GetPixels();
+            byte* pixels = (byte*)pixelsPtr.ToPointer();
+            int stride = bmp.RowBytes;
+
             for (int x = 0; x < width; x++)
             {
-                // process 2 segments offset by -1/4 and 1/4 fft size, resulting in 1/2 fft size
-                // window spacing (the minimum overlap to avoid discarding parts of the signal)
                 ProcessSegment(samples, (x * _nfft) - (x > 0 ? _nfft / 4 : 0), _magnitude1);
                 ProcessSegment(samples, (x * _nfft) + (x < width - 1 ? _nfft / 4 : 0), _magnitude2);
 
-                // draw
                 for (int y = 0; y < height; y++)
                 {
                     int colorIndex = _mapper.Map((_magnitude1[y] + _magnitude2[y]) / 2.0);
-                    bmp.SetPixel(x, height - y - 1, _palette[colorIndex]);
+                    SKColor color = _palette[colorIndex];
+
+                    int pixelY = height - y - 1;
+                    byte* pixel = pixels + (pixelY * stride) + (x * 4);
+                    pixel[0] = color.Red;
+                    pixel[1] = color.Green;
+                    pixel[2] = color.Blue;
+                    pixel[3] = color.Alpha;
                 }
             }
-            bmp.UnlockImage();
-            return bmp.GetBitmap();
+
+            bmp.NotifyPixelsChanged();
+            return bmp;
         }
 
         private void ProcessSegment(double[] samples, int offset, double[] magnitude)
@@ -1069,42 +1078,42 @@ public class WavePeakGenerator2 : IDisposable
             return a * a + b * b;
         }
 
-        private static FastBitmap.PixelData[] GeneratePalette()
+        private static SKColor[] GeneratePalette()
         {
-            var palette = new FastBitmap.PixelData[MagnitudeIndexRange];
+            var palette = new SKColor[MagnitudeIndexRange];
             if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicViridis.ToString())
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
-                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueViridis(colorIndex, MagnitudeIndexRange));
+                    palette[colorIndex] = PaletteValueViridis(colorIndex, MagnitudeIndexRange);
                 }
             }
             else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
-                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValuePlasma(colorIndex, MagnitudeIndexRange));
+                    palette[colorIndex] = PaletteValuePlasma(colorIndex, MagnitudeIndexRange);
                 }
             }
             else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicInferno.ToString())
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
-                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueInferno(colorIndex, MagnitudeIndexRange));
+                    palette[colorIndex] = PaletteValueInferno(colorIndex, MagnitudeIndexRange);
                 }
             }
             else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicTurbo.ToString())
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
-                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValueTurbo(colorIndex, MagnitudeIndexRange));
+                    palette[colorIndex] = PaletteValueTurbo(colorIndex, MagnitudeIndexRange);
                 }
             }
             else // Classic
             {
                 for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
                 {
-                    palette[colorIndex] = new FastBitmap.PixelData(PaletteValue(colorIndex, MagnitudeIndexRange));
+                    palette[colorIndex] = PaletteValue(colorIndex, MagnitudeIndexRange);
                 }
             }
 
