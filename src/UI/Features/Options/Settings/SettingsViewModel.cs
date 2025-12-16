@@ -83,6 +83,7 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _defaultEncoding;
+    [ObservableProperty] private bool _autoConvertToUtf8;
 
     [ObservableProperty] private ObservableCollection<string> _subtitleDoubleClickActionTypes;
     [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
@@ -416,6 +417,7 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
         SelectedSubtitleDoubleClickActionType = MapFromSelectedSubtitleDoubleClickAction(Se.Settings.General.SubtitleDoubleClickAction);
+        AutoConvertToUtf8 = general.AutoConvertToUtf8;
 
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
         if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
@@ -671,6 +673,7 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.SubtitleDoubleClickAction = MapToSelectedSubtitleDoubleClickAction(SelectedSubtitleDoubleClickActionType);
+        general.AutoConvertToUtf8 = AutoConvertToUtf8;
 
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 

@@ -1566,11 +1566,11 @@ public partial class MainViewModel :
         {
             var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
             if (subtitles.Count > 0)
-            { 
-                imageSubtitle = new  OcrSubtitleBluRay(subtitles); 
+            {
+                imageSubtitle = new OcrSubtitleBluRay(subtitles);
             }
         }
-        
+
         if (imageSubtitle == null)
         {
             await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
@@ -1579,8 +1579,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => 
-        { 
+        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm =>
+        {
             vm.Initialize(fileName, imageSubtitle);
         });
     }
@@ -7873,8 +7873,17 @@ public partial class MainViewModel :
             }
 
             ResetSubtitle();
+
             SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
                                      SelectedSubtitleFormat;
+
+            SelectedEncoding = Encodings.FirstOrDefault(p => p.Encoding.WebName == subtitle.OriginalEncoding.WebName) ??
+                               SelectedEncoding;
+            if (Se.Settings.General.AutoConvertToUtf8 && !SelectedEncoding.DisplayName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
+            {
+                SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase)) ?? SelectedEncoding;
+            }
+
             _subtitleFileName = fileName;
             _subtitle = subtitle;
             _lastOpenSaveFormat = subtitle.OriginalFormat;
