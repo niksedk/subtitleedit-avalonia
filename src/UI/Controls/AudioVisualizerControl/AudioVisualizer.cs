@@ -161,6 +161,8 @@ public class AudioVisualizer : Control
 
     public SubtitleLineViewModel? SelectedParagraph { get; set; }
 
+    public double MinGapSeconds { get; set; } = 0.1;
+
     public double ShotChangeSnapSeconds { get; set; } = 0.05;
     public WaveformDrawStyle WaveformDrawStyle { get; set; } = WaveformDrawStyle.Classic;
 
@@ -797,17 +799,17 @@ public class AudioVisualizer : Control
             case InteractionMode.Moving:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
-                var durationMs = _activeParagraph.Duration.TotalMilliseconds;
+                var durationSeconds = _activeParagraph.Duration.TotalSeconds;
 
                 // Clamp so it doesn't overlap previous or next
-                if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001)
+                if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds)
                 {
-                    newStart = previous.EndTime.TotalSeconds + 0.001;
+                    newStart = previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds;
                 }
 
-                if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001)
+                if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001 - MinGapSeconds)
                 {
-                    newStart = (next.StartTime.TotalSeconds - 0.001) - (_originalEndSeconds - _originalStartSeconds);
+                    newStart = next.StartTime.TotalSeconds - 0.001 - MinGapSeconds - durationSeconds;
                 }
 
                 if (newStart < 0)
@@ -816,7 +818,7 @@ public class AudioVisualizer : Control
                 }
 
                 _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
-                _activeParagraph.EndTime = TimeSpan.FromMilliseconds(newStart * 1000.0 + durationMs);
+                _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + durationSeconds);
                 break;
             case InteractionMode.ResizeLeftAnd:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
@@ -857,9 +859,9 @@ public class AudioVisualizer : Control
                     }
                 }
 
-                if (previous != null && newStart < previous.EndTime.TotalSeconds)
+                if (previous != null && newStart < previous.EndTime.TotalSeconds + MinGapSeconds)
                 {
-                    newStart = previous.EndTime.TotalSeconds + 0.001;
+                    newStart = previous.EndTime.TotalSeconds + MinGapSeconds + 0.001;
                 }
 
                 if (newStart < _activeParagraph.EndTime.TotalSeconds - 0.1)
@@ -885,9 +887,9 @@ public class AudioVisualizer : Control
                     }
                 }
 
-                if (next != null && newEnd > next.StartTime.TotalSeconds)
+                if (next != null && newEnd > next.StartTime.TotalSeconds - MinGapSeconds)
                 {
-                    newEnd = next.StartTime.TotalSeconds - 0.001;
+                    newEnd = next.StartTime.TotalSeconds - 0.001 - MinGapSeconds;
                 }
 
                 if (newEnd > _activeParagraph.StartTime.TotalSeconds + 0.1)

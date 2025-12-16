@@ -4259,6 +4259,7 @@ public partial class MainViewModel :
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;
             AudioVisualizer.WaveformDrawStyle = InitWaveform.GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle);
+            AudioVisualizer.MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
 
             if (!string.IsNullOrEmpty(_videoFileName))
             {

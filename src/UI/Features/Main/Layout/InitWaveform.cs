@@ -44,6 +44,7 @@ public class InitWaveform
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Height = double.NaN, // Auto height
                 WaveformDrawStyle = GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle),
+                MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0,
             };
             vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
             vm.AudioVisualizer.Height = double.NaN; // Auto height
