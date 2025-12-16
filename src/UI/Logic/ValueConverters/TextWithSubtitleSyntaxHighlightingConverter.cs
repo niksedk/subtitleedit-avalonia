@@ -238,20 +238,19 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is not string str)
+        if (value is not string str || string.IsNullOrEmpty(str))
         {
             return new InlineCollection();
-        }
-
-        var inlines = new InlineCollection();
-        if (string.IsNullOrEmpty(str))
-        {
-            return inlines;
         }
 
         if (Se.Settings.Appearance.SubtitleGridTextSingleLine)
         {
             var separator = Se.Settings.Appearance.SubtitleGridTextSingleLineSeparator;
+            if (string.IsNullOrEmpty(separator))
+            {
+                separator = " ";
+            }
+
             str = str
                 .Replace("\r\n", separator)
                 .Replace("\n", separator);
@@ -265,22 +264,24 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
 
         if (Se.Settings.Appearance.SubtitleGridFormattingType == (int)SubtitleGridFormattingTypes.ShowFormatting)
         {
-            return MakeShowFormatting(inlines, str);
+            return MakeShowFormatting(str);
         }
 
         if (Se.Settings.Appearance.SubtitleGridFormattingType == (int)SubtitleGridFormattingTypes.ShowTags)
         {
-            return MakeShowTags(str, inlines);
+            return MakeShowTags(str);
         }
 
         // No formatting (default)
+        var inlines = new InlineCollection();
         inlines.Add(new Run(str));
         return inlines;
     }
 
-    private static InlineCollection MakeShowTags(string str, InlineCollection inlines)
+    private static InlineCollection MakeShowTags(string str)
     {
-        int i = 0;
+        var inlines = new InlineCollection();
+        var i = 0;
         while (i < str.Length)
         {
             var c = str[i];
@@ -399,18 +400,13 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
         return inlines;
     }
 
-    private static InlineCollection MakeShowFormatting(InlineCollection inlines, string str)
+    private static InlineCollection MakeShowFormatting(string str)
     {
-        // Truncate long strings for performance
-        if (str.Length > 500)
-        {
-            str = str.Substring(0, 100).TrimEnd() + "...";
-        }
-
         // Track current formatting state
         var state = new FormattingState();
         var stateStack = new Stack<FormattingState>();
 
+        var inlines = new InlineCollection();
         int i = 0;
         while (i < str.Length)
         {
