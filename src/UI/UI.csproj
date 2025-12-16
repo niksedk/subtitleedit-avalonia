@@ -163,4 +163,8 @@
 	    <CopyToOutputDirectory></CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Logic\SubtitleFormats\" />
+	</ItemGroup>
 </Project>

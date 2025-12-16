@@ -479,7 +479,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
             }
 
-            return pText.ToString().TrimEnd();
+            return pText.ToString().TrimEnd(' ');
         }
     }
 }

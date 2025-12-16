@@ -1,5 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic.SubtitleFormats;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
