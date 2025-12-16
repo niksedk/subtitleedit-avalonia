@@ -637,20 +637,15 @@ public class BinaryEditWindow : Window
             [!Image.SourceProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.Bitmap)}"),
         };
 
-        // Set up transform group for scaling and positioning
+        // Set up scale transform for scaling the image
         var scaleTransform = new ScaleTransform();
-        var translateTransform = new TranslateTransform();
-        var transformGroup = new TransformGroup();
-        transformGroup.Children.Add(scaleTransform);
-        transformGroup.Children.Add(translateTransform);
-        overlayImage.RenderTransform = transformGroup;
+        overlayImage.RenderTransform = scaleTransform;
 
         videoGrid.Children.Add(overlayImage);
 
         // Store references
         vm.VideoPlayerControl = vp;
         vm.SubtitleOverlayImage = overlayImage;
-        vm.SubtitleOverlayTransform = translateTransform;
         vm.SubtitleOverlayScaleTransform = scaleTransform;
 
         // Update position when video player size changes

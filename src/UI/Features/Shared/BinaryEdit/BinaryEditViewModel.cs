@@ -42,7 +42,6 @@ public partial class BinaryEditViewModel : ObservableObject
     public DataGrid? SubtitleGrid { get; set; }
     public VideoPlayerControl? VideoPlayerControl { get; set; }
     public Image? SubtitleOverlayImage { get; set; }
-    public Avalonia.Media.TranslateTransform? SubtitleOverlayTransform { get; set; }
     public Avalonia.Media.ScaleTransform? SubtitleOverlayScaleTransform { get; set; }
     public Border? VideoContentBorder { get; set; }
     public bool OkPressed { get; private set; }
@@ -123,12 +122,12 @@ public partial class BinaryEditViewModel : ObservableObject
 
     public void UpdateOverlayPosition()
     {
-        if (VideoPlayerControl == null)
+        if (VideoContentBorder == null || VideoPlayerControl == null || ScreenWidth <= 0 || ScreenHeight <= 0)
         {
             return;
         }
 
-        // Get video player bounds (total including controls)
+        // Calculate and update the green rectangle
         var videoPlayerWidth = VideoPlayerControl.Bounds.Width;
         var videoPlayerHeight = VideoPlayerControl.Bounds.Height;
 
@@ -137,92 +136,62 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        // Use actual content dimensions from VideoPlayerControl
-        var contentWidth = VideoPlayerControl.ContentWidth;
-        var contentHeight = VideoPlayerControl.ContentHeight;
-
-        if (contentWidth <= 0 || contentHeight <= 0)
+        const double controlsHeight = 55;
+        var availableHeight = videoPlayerHeight - controlsHeight;
+        if (availableHeight <= 0)
         {
             return;
         }
 
-        // Get screen dimensions (the subtitle coordinate system)
-        if (ScreenWidth <= 0 || ScreenHeight <= 0)
-        {
-            return;
-        }
-
-        // Account for video player controls at bottom (approximately 50-60 pixels)
-        // The video content is in row 0 of the VideoPlayerControl's internal grid
-        const double controlsHeight = 55; // Approximate height of controls panel
-        var videoDisplayHeight = videoPlayerHeight - controlsHeight;
-
-        if (videoDisplayHeight <= 0)
-        {
-            return;
-        }
-
-        // Calculate aspect ratios
         var screenAspect = (double)ScreenWidth / ScreenHeight;
-        var contentAspect = (double)contentWidth / contentHeight;
+        var availableAspect = videoPlayerWidth / availableHeight;
 
-        // Calculate actual video display area (scale ScreenWidth/ScreenHeight to fit within contentWidth/contentHeight)
-        double actualVideoWidth, actualVideoHeight, offsetX, offsetY;
+        double rectWidth, rectHeight, rectX, rectY;
 
-        if (contentAspect > screenAspect)
+        if (availableAspect > screenAspect)
         {
-            // Content area is wider than screen aspect - fit to height, center horizontally
-            actualVideoHeight = contentHeight;
-            actualVideoWidth = contentHeight * screenAspect;
-            offsetX = (contentWidth - actualVideoWidth) / 2;
-            offsetY = 0;
+            rectHeight = availableHeight;
+            rectWidth = availableHeight * screenAspect;
+            rectX = (videoPlayerWidth - rectWidth) / 2;
+            rectY = 0;
         }
         else
         {
-            // Content area is taller than screen aspect - fit to width, center vertically
-            actualVideoWidth = contentWidth;
-            actualVideoHeight = contentWidth / screenAspect;
-            offsetX = 0;
-            offsetY = (contentHeight - actualVideoHeight) / 2;
+            rectWidth = videoPlayerWidth;
+            rectHeight = videoPlayerWidth / screenAspect;
+            rectX = 0;
+            rectY = (availableHeight - rectHeight) / 2;
         }
 
-        // Update the video content border (green rectangle)
-        if (VideoContentBorder != null)
-        {
-            VideoContentBorder.Width = actualVideoWidth;
-            VideoContentBorder.Height = actualVideoHeight;
-            VideoContentBorder.Margin = new Avalonia.Thickness(offsetX, offsetY, 0, 0);
-        }
+        VideoContentBorder.Width = rectWidth;
+        VideoContentBorder.Height = rectHeight;
+        VideoContentBorder.Margin = new Avalonia.Thickness(rectX, rectY, 0, 0);
 
-        // Update subtitle overlay if present
-        if (SubtitleOverlayTransform == null || SubtitleOverlayScaleTransform == null || SelectedSubtitle == null)
+        // Update subtitle overlay
+        if (SubtitleOverlayImage == null || SubtitleOverlayScaleTransform == null || SelectedSubtitle == null)
         {
             return;
         }
 
-        // Get screen size from subtitle
-        var screenWidth = SelectedSubtitle.ScreenSize.Width;
-        var screenHeight = SelectedSubtitle.ScreenSize.Height;
+        var subtitleScreenWidth = SelectedSubtitle.ScreenSize.Width;
+        var subtitleScreenHeight = SelectedSubtitle.ScreenSize.Height;
 
-        if (screenWidth <= 0 || screenHeight <= 0)
+        if (subtitleScreenWidth <= 0 || subtitleScreenHeight <= 0)
         {
             return;
         }
 
-        // Calculate scale factor
-        var scaleX = actualVideoWidth / screenWidth;
-        var scaleY = actualVideoHeight / screenHeight;
+        // Calculate scale based on rectangle
+        var scaleX = rectWidth / subtitleScreenWidth;
+        var scaleY = rectHeight / subtitleScreenHeight;
 
-        // Update scale transform
         SubtitleOverlayScaleTransform.ScaleX = scaleX;
         SubtitleOverlayScaleTransform.ScaleY = scaleY;
 
-        // Calculate and update position
-        var x = offsetX + (SelectedSubtitle.X * scaleX);
-        var y = offsetY + (SelectedSubtitle.Y * scaleY);
-
-        SubtitleOverlayTransform.X = x;
-        SubtitleOverlayTransform.Y = y;
+        // Position: rectangle position + scaled subtitle position
+        var overlayX = rectX + (SelectedSubtitle.X * scaleX);
+        var overlayY = rectY + (SelectedSubtitle.Y * scaleY);
+        SubtitleOverlayImage.Margin = new Avalonia.Thickness(overlayX, overlayY, 0, 0);
     }
 
     [RelayCommand]
