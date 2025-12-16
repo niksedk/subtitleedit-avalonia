@@ -9387,7 +9387,7 @@ public partial class MainViewModel :
 
         var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName);
         var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, 0);
-        if (!File.Exists(peakWaveFileName))
+        if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !Directory.Exists(spectrogramFolder)))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
             {

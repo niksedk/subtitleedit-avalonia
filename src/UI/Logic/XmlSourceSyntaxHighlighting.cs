@@ -122,7 +122,6 @@ public partial class XmlSourceSyntaxHighlighting : DocumentColorizingTransformer
             if (c == '<')
             {
                 bool isClosing = i + 1 < xml.Length && xml[i + 1] == '/';
-                bool isSelfClosing = false;
 
                 // Check if self-closing
                 int tagEnd = i;
@@ -130,7 +129,6 @@ public partial class XmlSourceSyntaxHighlighting : DocumentColorizingTransformer
                 {
                     if (tagEnd > i && xml[tagEnd] == '/' && tagEnd + 1 < xml.Length && xml[tagEnd + 1] == '>')
                     {
-                        isSelfClosing = true;
                         break;
                     }
                     tagEnd++;

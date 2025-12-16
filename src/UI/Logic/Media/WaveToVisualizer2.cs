@@ -66,51 +66,59 @@ public class WaveHeader2
     public WaveHeader2(Stream stream)
     {
         stream.Position = 0;
-        var buffer = new byte[ConstantHeaderSize];
-        int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+        // Read constant header
+        Span<byte> buffer = stackalloc byte[ConstantHeaderSize];
+        int bytesRead = stream.Read(buffer);
         if (bytesRead < buffer.Length)
         {
             throw new ArgumentException("Stream is too small");
         }
 
-        // constant header
-        ChunkId = Encoding.UTF8.GetString(buffer, 0, 4); // Chunk ID: "RIFF" (Resource Interchange File Format), RF64 = new 64-bit format - see http://tech.ebu.ch/docs/tech/tech3306-2009.pdf
-        ChunkSize = BitConverter.ToUInt32(buffer, 4); // Chunk size: 16 or 18 or 40
-        Format = Encoding.UTF8.GetString(buffer, 8, 4); // Format code - "WAVE"
-        FmtId = Encoding.UTF8.GetString(buffer, 12, 4); // Contains the letters "fmt "
-        FmtChunkSize = BitConverter.ToInt32(buffer, 16); // 16 for PCM.  This is the size of the rest of the Subchunk which follows this number.
+        // Parse constant header - use Span slicing to avoid array indexing
+        ChunkId = Encoding.UTF8.GetString(buffer.Slice(0, 4));
+        ChunkSize = BitConverter.ToUInt32(buffer.Slice(4));
+        Format = Encoding.UTF8.GetString(buffer.Slice(8, 4));
+        FmtId = Encoding.UTF8.GetString(buffer.Slice(12, 4));
+        FmtChunkSize = BitConverter.ToInt32(buffer.Slice(16));
 
-        // fmt data
-        buffer = new byte[FmtChunkSize];
-        _ = stream.Read(buffer, 0, buffer.Length);
-        AudioFormat = BitConverter.ToInt16(buffer, 0); // PCM = 1
-        NumberOfChannels = BitConverter.ToInt16(buffer, 2);
-        SampleRate = BitConverter.ToInt32(buffer, 4); // 8000, 44100, etc.
-        ByteRate = BitConverter.ToInt32(buffer, 8); // SampleRate * NumChannels * BitsPerSample/8
-        BlockAlign = BitConverter.ToInt16(buffer, 12);
-        BitsPerSample = BitConverter.ToInt16(buffer, 14); // 8 bits = 8, 16 bits = 16, etc.
+        // Read fmt chunk - allocate only if needed (usually 16-18 bytes, max ~40)
+        Span<byte> fmtBuffer = FmtChunkSize <= 128
+            ? stackalloc byte[FmtChunkSize]
+            : new byte[FmtChunkSize];
+        _ = stream.Read(fmtBuffer);
 
-        // data
-        buffer = new byte[8];
+        // Parse fmt chunk
+        AudioFormat = BitConverter.ToInt16(fmtBuffer);
+        NumberOfChannels = BitConverter.ToInt16(fmtBuffer.Slice(2));
+        SampleRate = BitConverter.ToInt32(fmtBuffer.Slice(4));
+        ByteRate = BitConverter.ToInt32(fmtBuffer.Slice(8));
+        BlockAlign = BitConverter.ToInt16(fmtBuffer.Slice(12));
+        BitsPerSample = BitConverter.ToInt16(fmtBuffer.Slice(14));
+
+        // Read data chunk header
+        Span<byte> dataHeader = stackalloc byte[8];
         stream.Position = ConstantHeaderSize + FmtChunkSize;
-        _ = stream.Read(buffer, 0, buffer.Length);
-        DataId = Encoding.UTF8.GetString(buffer, 0, 4);
-        DataChunkSize = BitConverter.ToUInt32(buffer, 4);
+        _ = stream.Read(dataHeader);
+
+        DataId = Encoding.UTF8.GetString(dataHeader.Slice(0, 4));
+        DataChunkSize = BitConverter.ToUInt32(dataHeader.Slice(4));
         DataStartPosition = ConstantHeaderSize + FmtChunkSize + 8;
 
-        // if some other ChunckId than 'data' (e.g. LIST) we search for 'data'
-        long oldPos = ConstantHeaderSize + FmtChunkSize;
-        while (DataId != "data" && oldPos + DataChunkSize + 16 < stream.Length)
+        // Search for 'data' chunk if not found immediately
+        long currentPos = ConstantHeaderSize + FmtChunkSize;
+        while (DataId != "data" && currentPos + DataChunkSize + 16 < stream.Length)
         {
-            oldPos = oldPos + DataChunkSize + 8;
-            stream.Position = oldPos;
-            _ = stream.Read(buffer, 0, buffer.Length);
-            DataId = Encoding.UTF8.GetString(buffer, 0, 4);
-            DataChunkSize = BitConverter.ToUInt32(buffer, 4);
-            DataStartPosition = (int)oldPos + 8;
+            currentPos += DataChunkSize + 8;
+            stream.Position = currentPos;
+            _ = stream.Read(dataHeader);
+
+            DataId = Encoding.UTF8.GetString(dataHeader.Slice(0, 4));
+            DataChunkSize = BitConverter.ToUInt32(dataHeader.Slice(4));
+            DataStartPosition = (int)currentPos + 8;
         }
 
-        // recalculate BlockAlign (older versions wrote incorrect values)
+        // Recalculate BlockAlign (older versions wrote incorrect values)
         BlockAlign = BytesPerSample * NumberOfChannels;
     }
 
@@ -270,7 +278,7 @@ public class SpectrogramData2 : IDisposable
     private SpectrogramData2(string loadFromDirectory)
     {
         _loadFromDirectory = loadFromDirectory;
-        Images = new SKBitmap[0];
+        Images = [];
     }
 
     public int FftSize { get; private set; }
@@ -294,11 +302,11 @@ public class SpectrogramData2 : IDisposable
         }
 
         string directory = _loadFromDirectory;
+        string xmlInfoFileName = Path.Combine(directory, "Info.xml");
         _loadFromDirectory = null;
 
         try
         {
-            string xmlInfoFileName = Path.Combine(directory, "Info.xml");
             if (!File.Exists(xmlInfoFileName))
             {
                 return;
@@ -311,24 +319,30 @@ public class SpectrogramData2 : IDisposable
             ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
             SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
-            var images = new List<SKBitmap>();
-            var fileNames = Enumerable.Range(0, int.MaxValue)
-                .Select(n => Path.Combine(directory, n + ".png"))
-                .TakeWhile(p => File.Exists(p));
+            var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
+                .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
+                .ToList();
+
+            var images = new List<SKBitmap>(fileNames.Count);
+
             foreach (string fileName in fileNames)
             {
-                // important that this does not lock file (do NOT use Image.FromFile(fileName) or alike!!!)
-                using (var ms = new MemoryStream(File.ReadAllBytes(fileName)))
+                using (var fileStream = File.OpenRead(fileName))
                 {
-                    var skBitmap = SKBitmap.Decode(ms);
+                    var skBitmap = SKBitmap.Decode(fileStream);
                     images.Add(skBitmap);
                 }
             }
             Images = images;
+
+            if (Images.Count == 0)
+            {
+                Se.LogError($"No spectrogram images found in {directory}");
+            }   
         }
-        catch
+        catch (Exception exception)
         {
-            // ignore
+            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
         }
     }
 
