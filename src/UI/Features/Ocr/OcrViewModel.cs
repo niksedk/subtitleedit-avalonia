@@ -44,6 +44,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using static Nikse.SubtitleEdit.Core.AudioToText.AudioToTextPostProcessor;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
@@ -115,6 +116,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private GuessUsedItem? _selectedAllGuess;
     [ObservableProperty] private bool _hasPreProcessingSettings;
     [ObservableProperty] private bool _hasCaptureTopAlign;
+    [ObservableProperty] private string _textBoxFontName;
+    [ObservableProperty] private int _textBoxFontSize;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -131,7 +134,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IOcrFixEngine2 _ocrFixEngine;
     private readonly IBinaryOcrMatcher _binaryOcrMatcher;
     private PreProcessingSettings? _preProcessingSettings;
-
+    private bool _isControlPressed;
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
@@ -190,6 +193,8 @@ public partial class OcrViewModel : ObservableObject
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
         _binaryOcrAddHistoryManager = new BinaryOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
+        TextBoxFontName = string.Empty;
+        TextBoxFontSize = 12;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
@@ -223,7 +228,8 @@ public partial class OcrViewModel : ObservableObject
             SelectedGoogleVisionLanguage = GoogleVisionLanguages.FirstOrDefault(p => p.Code == ocr.GoogleVisionLanguage);
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
             SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.GoogleLensOcrLastLanguage) ?? GoogleLensLanguages.First();
-
+            TextBoxFontSize = ocr.TextBoxFontSize;
+            TextBoxFontName = ocr.TextBoxFontName;
             DoFixOcrErrors = ocr.DoFixOcrErrors;
             DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
             DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
@@ -251,6 +257,8 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoPromptForUnknownWords = DoPromptForUnknownWords;
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
+        ocr.TextBoxFontSize = TextBoxFontSize;
+        ocr.TextBoxFontName = TextBoxFontName;
 
         if (SelectedDictionary != null)
         {
@@ -304,6 +312,25 @@ public partial class OcrViewModel : ObservableObject
     private void Close()
     {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
+    }
+
+    [RelayCommand]
+    private async Task PickFont()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result =
+            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window,vm => { vm.Initialize(); });
+
+        if (!result.OkPressed || result.SelectedFontName == null)
+        {
+            return;
+        }
+        
+        TextBoxFontName = result.SelectedFontName;
     }
 
     [RelayCommand]
@@ -2494,5 +2521,17 @@ public partial class OcrViewModel : ObservableObject
         }
 
         SelectAndScrollToRow(selection.LineIndex);
+    }
+
+    public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (OperatingSystem.IsMacOS() &&
+          //  _isControlPressed &&
+            sender is Control control)
+        {
+            var args = new ContextRequestedEventArgs(e);
+            control.RaiseEvent(args);
+            e.Handled = args.Handled;
+        }
     }
 }

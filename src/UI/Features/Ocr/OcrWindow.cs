@@ -457,6 +457,22 @@ public class OcrWindow : Window
         {
             textBoxText.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
         }
+        textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontName), BindingMode.OneWay));
+        textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize), BindingMode.OneWay));
+        
+        // Create a Flyout for the TextBox
+        var flyout = new MenuFlyout();
+        var menuItemSetFont = new MenuItem
+        {
+            Header = Se.Language.General.SetFontDotDotDot,
+            DataContext = vm,
+            Command = vm.PickFontCommand,
+        };
+        menuItemSetFont.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        flyout.Items.Add(menuItemSetFont);
+        textBoxText.ContextFlyout = flyout;
+        textBoxText.PointerReleased += vm.TextBoxPointerReleased;
+        
         textBoxText.TextChanged += vm.TextBoxTextChanged;
         var panelText = new StackPanel
         {

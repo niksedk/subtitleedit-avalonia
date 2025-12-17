@@ -562,6 +562,7 @@ public class LanguageGeneral
     public string SubtitleXOfY { get; set; }
     public string PositionX { get; internal set; }
     public string SizeX { get; internal set; }
+    public string SetFontDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -1123,5 +1124,6 @@ public class LanguageGeneral
         SubtitleXOfY = "Subtitle {0} of {1}";
         PositionX = "Position: {0}";
         SizeX = "Size: {0}";
+        SetFontDotDotDot =  "Set font...";
     }
 }

@@ -32,6 +32,8 @@ public class SeOcr
     public bool DoAutoBreak { get; set; }
     public bool DoFixOcrErrors { get; set; }
     public string LastLanguageDictionaryFile { get; set; }
+    public int TextBoxFontSize { get; set; }
+    public string TextBoxFontName { get; set; }
 
     public SeOcr()
     {
@@ -66,5 +68,8 @@ public class SeOcr
         MistralApiKey = string.Empty;
         
         LastLanguageDictionaryFile = string.Empty;
+
+        TextBoxFontSize = 12;
+        TextBoxFontName = string.Empty;
     }
 }
