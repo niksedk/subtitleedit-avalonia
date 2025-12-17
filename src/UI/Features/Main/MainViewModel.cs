@@ -7763,7 +7763,8 @@ public partial class MainViewModel :
                 }
             }
 
-            var subtitle = Subtitle.Parse(fileName, textEncoding?.Encoding);
+            var fileEncoding = LanguageAutoDetect.GetEncodingFromFile(fileName);
+            var subtitle = Subtitle.Parse(fileName, fileEncoding);
             if (subtitle != null && subtitle.OriginalFormat.Name == new WebVTT().Name)
             {
                 var lines = FileUtil.ReadAllLinesShared(fileName, Encoding.UTF8);
@@ -7884,8 +7885,23 @@ public partial class MainViewModel :
             SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
                                      SelectedSubtitleFormat;
 
-            SelectedEncoding = Encodings.FirstOrDefault(p => p.Encoding.WebName == subtitle.OriginalEncoding.WebName) ??
-                               SelectedEncoding;
+            if (fileEncoding.WebName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
+            {
+                if (FileUtil.HasUtf8Bom(fileName))
+                {
+                    SelectedEncoding = Encodings.First(p => p.DisplayName == TextEncoding.Utf8WithBom);
+                }
+                else
+                {
+                    SelectedEncoding = Encodings.First(p => p.DisplayName == TextEncoding.Utf8WithoutBom);
+                }
+            }
+            else
+            {
+                var otherEncoding = Encodings.FirstOrDefault(p => p.Encoding.WebName == fileEncoding.WebName);
+                SelectedEncoding = otherEncoding ?? Encodings.First(p => p.DisplayName == TextEncoding.Utf8WithBom); 
+            }
+
             if (Se.Settings.General.AutoConvertToUtf8 && !SelectedEncoding.DisplayName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
             {
                 SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase)) ?? SelectedEncoding;
@@ -8874,24 +8890,30 @@ public partial class MainViewModel :
         }
 
         var text = GetUpdateSubtitleOriginal(true).ToText(SelectedSubtitleFormat);
-        await File.WriteAllTextAsync(_subtitleFileNameOriginal, text);
+
+        if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithBom)
+        {
+            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(true));
+        }
+        else if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithoutBom)
+        {
+            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(false));
+        }
+        else
+        {
+            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, SelectedEncoding.Encoding);
+        }
+
         _changeSubtitleHashOriginal = GetFastHashOriginal();
         _lastOpenSaveFormat = SelectedSubtitleFormat;
     }
 
     public Subtitle GetUpdateSubtitle(bool subtractVideoOffset = false)
     {
-        //var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitle.Paragraphs.Clear();
         foreach (var line in Subtitles)
         {
             var p = line.ToParagraph(SelectedSubtitleFormat);
-            //if (subtractVideoOffset && videoOffsetMs != 0)
-            //{
-            //    p.StartTime.TotalMilliseconds -= videoOffsetMs;
-            //    p.EndTime.TotalMilliseconds -= videoOffsetMs;
-            //}
-
             _subtitle.Paragraphs.Add(p);
         }
 
@@ -8900,7 +8922,6 @@ public partial class MainViewModel :
 
     public Subtitle GetUpdateSubtitleOriginal(bool subtractVideoOffset = false)
     {
-        //  var videoOffsetMs = Se.Settings.General.CurrentVideoOffsetInMs;
         _subtitleOriginal ??= new Subtitle();
         _subtitleOriginal.OriginalFormat ??= SelectedSubtitleFormat;
 
@@ -8908,12 +8929,6 @@ public partial class MainViewModel :
         foreach (var line in Subtitles)
         {
             var p = line.ToParagraphOriginal(SelectedSubtitleFormat);
-            //if (subtractVideoOffset && videoOffsetMs != 0)
-            //{
-            //    p.StartTime.TotalMilliseconds -= videoOffsetMs;
-            //    p.EndTime.TotalMilliseconds -= videoOffsetMs;
-            //}
-
             _subtitleOriginal.Paragraphs.Add(p);
         }
 
