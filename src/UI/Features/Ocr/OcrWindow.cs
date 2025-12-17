@@ -5,8 +5,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -20,11 +18,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr;
 
 public class OcrWindow : Window
 {
-    private readonly OcrViewModel _vm;
-
     public OcrWindow(OcrViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = vm.Title;
@@ -67,10 +62,10 @@ public class OcrWindow : Window
 
         Content = grid;
 
-        Activated += delegate
-        {
-            Focus(); // hack to make OnKeyDown work
-        };
+        Activated += (_, _) => Focus();
+        Loaded += (s, e) => vm.OnLoaded();
+        Closing += (s, e) => vm.OnClosing(e);
+        KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
     private static Grid MakeTopControlsView(OcrViewModel vm)
@@ -771,24 +766,5 @@ public class OcrWindow : Window
         grid.Add(buttonCancel, 0, 7);
 
         return grid;
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.SelectAndScrollToRow(0);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        _vm.OnClosing(e);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
-    }
+    }   
 }
