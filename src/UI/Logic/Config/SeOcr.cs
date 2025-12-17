@@ -69,7 +69,7 @@ public class SeOcr
         
         LastLanguageDictionaryFile = string.Empty;
 
-        TextBoxFontSize = 12;
+        TextBoxFontSize = 14;
         TextBoxFontName = string.Empty;
     }
 }

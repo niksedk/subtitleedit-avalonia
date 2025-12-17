@@ -6,7 +6,6 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -454,9 +453,10 @@ public class OcrWindow : Window
         {
             textBoxText.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
         }
-        textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontName), BindingMode.OneWay));
-        textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize), BindingMode.OneWay));
-        
+
+        textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontFamily), BindingMode.TwoWay));
+        textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize), BindingMode.TwoWay));
+
         // Create a Flyout for the TextBox
         var flyout = new MenuFlyout();
         var menuItemSetFont = new MenuItem
@@ -465,11 +465,18 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.PickFontCommand,
         };
-        menuItemSetFont.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
         flyout.Items.Add(menuItemSetFont);
         textBoxText.ContextFlyout = flyout;
         textBoxText.PointerReleased += vm.TextBoxPointerReleased;
-        
+        // textBoxText.ContextRequested += (sender, e) =>
+        // {
+        //     if (sender is Control control && control.ContextFlyout != null)
+        //     {
+        //         control.ContextFlyout.ShowAt(control);
+        //         e.Handled = true;
+        //     }
+        // };
+
         textBoxText.TextChanged += vm.TextBoxTextChanged;
         var panelText = new StackPanel
         {
@@ -594,7 +601,7 @@ public class OcrWindow : Window
             Setters =
             {
                 new Setter(ListBoxItem.PaddingProperty, new Thickness(2)),
-                new Setter(ListBoxItem.MarginProperty,  new Thickness(0)),
+                new Setter(ListBoxItem.MarginProperty, new Thickness(0)),
             }
         });
 
@@ -778,5 +785,5 @@ public class OcrWindow : Window
         grid.Add(buttonCancel, 0, 7);
 
         return grid;
-    }   
+    }
 }

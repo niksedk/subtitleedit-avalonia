@@ -44,6 +44,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using static Nikse.SubtitleEdit.Core.AudioToText.AudioToTextPostProcessor;
 
@@ -116,7 +117,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private GuessUsedItem? _selectedAllGuess;
     [ObservableProperty] private bool _hasPreProcessingSettings;
     [ObservableProperty] private bool _hasCaptureTopAlign;
-    [ObservableProperty] private string _textBoxFontName;
+    [ObservableProperty] private FontFamily _textBoxFontFamily;
     [ObservableProperty] private int _textBoxFontSize;
 
     public Window? Window { get; set; }
@@ -193,8 +194,8 @@ public partial class OcrViewModel : ObservableObject
         _nOcrAddHistoryManager = new NOcrAddHistoryManager();
         _binaryOcrAddHistoryManager = new BinaryOcrAddHistoryManager();
         _cancellationTokenSource = new CancellationTokenSource();
-        TextBoxFontName = string.Empty;
-        TextBoxFontSize = 12;
+        TextBoxFontFamily = new FontFamily(FontHelper.GetSystemFonts().First());
+        TextBoxFontSize = 14;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
@@ -229,7 +230,7 @@ public partial class OcrViewModel : ObservableObject
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
             SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.GoogleLensOcrLastLanguage) ?? GoogleLensLanguages.First();
             TextBoxFontSize = ocr.TextBoxFontSize;
-            TextBoxFontName = ocr.TextBoxFontName;
+            TextBoxFontFamily = new FontFamily(ocr.TextBoxFontName);
             DoFixOcrErrors = ocr.DoFixOcrErrors;
             DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
             DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
@@ -258,7 +259,7 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
         ocr.TextBoxFontSize = TextBoxFontSize;
-        ocr.TextBoxFontName = TextBoxFontName;
+        ocr.TextBoxFontName = TextBoxFontFamily.Name;
 
         if (SelectedDictionary != null)
         {
@@ -330,7 +331,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        TextBoxFontName = result.SelectedFontName;
+        TextBoxFontFamily = new FontFamily(result.SelectedFontName);
     }
 
     [RelayCommand]
@@ -2222,7 +2223,7 @@ public partial class OcrViewModel : ObservableObject
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
         }
-        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        else if (e.Key is Key.LeftCtrl or Key.RightCtrl)
         {
             _isCtrlDown = true;
         }
