@@ -134,7 +134,7 @@ public partial class OcrViewModel : ObservableObject
     private readonly IOcrFixEngine2 _ocrFixEngine;
     private readonly IBinaryOcrMatcher _binaryOcrMatcher;
     private PreProcessingSettings? _preProcessingSettings;
-    private bool _isControlPressed;
+    private bool _isCtrlDown;
     private CancellationTokenSource _cancellationTokenSource;
     private NOcrDb? _nOcrDb;
     private readonly List<SkipOnceChar> _runOnceChars;
@@ -378,10 +378,8 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window, vm =>
-        {
-            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
-        });
+        var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window,
+            vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
     }
 
     [RelayCommand]
@@ -393,10 +391,8 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AddToUserDictionaryWindow, AddToUserDictionaryViewModel>(Window!, vm =>
-        {
-            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
-        });
+        var result = await _windowService.ShowDialogAsync<AddToUserDictionaryWindow, AddToUserDictionaryViewModel>(Window!,
+            vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
     }
 
     [RelayCommand]
@@ -408,10 +404,8 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<AddToOcrReplaceListWindow, AddToOcrReplaceListViewModel>(Window!, vm =>
-        {
-            vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary);
-        });
+        var result = await _windowService.ShowDialogAsync<AddToOcrReplaceListWindow, AddToOcrReplaceListViewModel>(Window!,
+            vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
     }
 
     [RelayCommand]
@@ -858,10 +852,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         var result = await _windowService
-            .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window, vm =>
-            {
-                vm.Initialize(_preProcessingSettings, selectedItem.GetSkBitmapClean());
-            });
+            .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window, vm => { vm.Initialize(_preProcessingSettings, selectedItem.GetSkBitmapClean()); });
 
         if (result.OkPressed)
         {
@@ -1021,6 +1012,7 @@ public partial class OcrViewModel : ObservableObject
                 toRemove.Add(unknownWord);
             }
         }
+
         foreach (var item in toRemove)
         {
             UnknownWords.Remove(item);
@@ -1385,7 +1377,10 @@ public partial class OcrViewModel : ObservableObject
         }
 
         _skipOnceChars.Clear();
-        _ = Task.Run(() => { using var _ = RunNOcrLoop(selectedIndices); });
+        _ = Task.Run(() =>
+        {
+            using var _ = RunNOcrLoop(selectedIndices);
+        });
     }
 
     private async Task RunNOcrLoop(List<int> selectedIndices)
@@ -1527,10 +1522,7 @@ public partial class OcrViewModel : ObservableObject
                     {
                         var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
                         var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
-                            vm =>
-                            {
-                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
-                            });
+                            vm => { vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions); });
 
                         if (result.ChangeWholeTextPressed)
                         {
@@ -1571,6 +1563,7 @@ public partial class OcrViewModel : ObservableObject
                             break;
                         }
                     }
+
                     tcs.SetResult(true);
                 });
                 await tcs.Task;
@@ -1593,7 +1586,10 @@ public partial class OcrViewModel : ObservableObject
         }
 
         _skipOnceChars.Clear();
-        _ = Task.Run(() => { using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices); });
+        _ = Task.Run(() =>
+        {
+            using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices);
+        });
     }
 
     private BinaryOcrDb? InitImageComparOcrDb()
@@ -1693,6 +1689,7 @@ public partial class OcrViewModel : ObservableObject
                                     db.Add(result.BinaryOcrBitmap);
                                     _ = Task.Run(() => db.Save());
                                 }
+
                                 _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
                             }
                             else if (result.AbortPressed)
@@ -1754,10 +1751,7 @@ public partial class OcrViewModel : ObservableObject
                     {
                         var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
                         var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
-                            vm =>
-                            {
-                                vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions);
-                            });
+                            vm => { vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions); });
 
                         if (result.ChangeWholeTextPressed)
                         {
@@ -1798,6 +1792,7 @@ public partial class OcrViewModel : ObservableObject
                             break;
                         }
                     }
+
                     tcs.SetResult(true);
                 });
                 await tcs.Task;
@@ -1843,6 +1838,7 @@ public partial class OcrViewModel : ObservableObject
             {
                 result.Words.Insert(0, new OcrFixLinePartResult { Word = alignment, IsSpellCheckedOk = null });
             }
+
             var resultText = result.GetText();
 
             Dispatcher.UIThread.Post(() =>
@@ -2211,10 +2207,7 @@ public partial class OcrViewModel : ObservableObject
 
         if (engine != null && engine.EngineType == OcrEngineType.nOcr)
         {
-            Dispatcher.UIThread.Post(async void () =>
-            {
-                await InspectLine();
-            });
+            Dispatcher.UIThread.Post(async void () => { await InspectLine(); });
         }
     }
 
@@ -2228,6 +2221,10 @@ public partial class OcrViewModel : ObservableObject
         {
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
+        }
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = true;
         }
     }
 
@@ -2525,8 +2522,8 @@ public partial class OcrViewModel : ObservableObject
 
     public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (OperatingSystem.IsMacOS() &&
-            //  _isControlPressed &&
+        if (OperatingSystem.IsMacOS() && 
+            _isCtrlDown &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);
@@ -2541,6 +2538,14 @@ public partial class OcrViewModel : ObservableObject
         {
             e.Handled = true; // prevent further handling if needed
             UnknownWordSelectionTapped();
+        }
+    }
+
+    public void OnWindowKeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = false;
         }
     }
 }

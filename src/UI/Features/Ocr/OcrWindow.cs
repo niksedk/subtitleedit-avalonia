@@ -6,6 +6,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
+using Avalonia.Markup.Declarative;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
@@ -66,6 +67,7 @@ public class OcrWindow : Window
         Loaded += (s, e) => vm.OnLoaded();
         Closing += (s, e) => vm.OnClosing(e);
         KeyDown += (s, e) => vm.OnKeyDown(e);
+        KeyUp += (s, e) => vm.OnWindowKeyUp(e);
     }
 
     private static Grid MakeTopControlsView(OcrViewModel vm)
