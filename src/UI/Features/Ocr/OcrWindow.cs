@@ -587,8 +587,18 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.Styles.Add(new Style(x => x.OfType<ListBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(ListBoxItem.PaddingProperty, new Thickness(2)),
+                new Setter(ListBoxItem.MarginProperty,  new Thickness(0)),
+            }
+        });
+
         listBox.SelectionChanged += (s, e) => vm.UnknownWordSelectionChanged();
         listBox.Tapped += (s, e) => vm.UnknownWordSelectionTapped();
+        listBox.KeyDown += (s, e) => vm.UnknownWordListKeyDown(e);
 
         var buttonAddToNamesList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddUnknownWordToNamesCommand)
             .WithBindEnabled(nameof(vm.IsUnknownWordSelected))

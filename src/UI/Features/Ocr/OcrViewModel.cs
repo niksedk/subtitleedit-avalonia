@@ -323,13 +323,13 @@ public partial class OcrViewModel : ObservableObject
         }
 
         var result =
-            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window,vm => { vm.Initialize(); });
+            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window, vm => { vm.Initialize(); });
 
         if (!result.OkPressed || result.SelectedFontName == null)
         {
             return;
         }
-        
+
         TextBoxFontName = result.SelectedFontName;
     }
 
@@ -2526,12 +2526,21 @@ public partial class OcrViewModel : ObservableObject
     public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
-          //  _isControlPressed &&
+            //  _isControlPressed &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);
             control.RaiseEvent(args);
             e.Handled = args.Handled;
+        }
+    }
+
+    internal void UnknownWordListKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true; // prevent further handling if needed
+            UnknownWordSelectionTapped();
         }
     }
 }
