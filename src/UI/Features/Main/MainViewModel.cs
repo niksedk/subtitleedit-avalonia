@@ -249,6 +249,7 @@ public partial class MainViewModel :
     private VideoPlayerControl? _fullScreenVideoPlayerControl;
     private static SolidColorBrush _transparentBrush = new SolidColorBrush(Colors.Transparent);
     private static SolidColorBrush _errorBrush = new SolidColorBrush(_errorColor);
+    private SpellCheckDictionaryDisplay? _currentSpellCheckDictionary;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -758,6 +759,7 @@ public partial class MainViewModel :
         Se.Settings.General.CurrentVideoIsSmpte = false;
         Se.Settings.General.CurrentVideoOffsetInMs = 0;
         UpdateVideoOffsetStatus();
+        _currentSpellCheckDictionary = null;
 
         if (format != null)
         {
@@ -3083,11 +3085,16 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this); });
+        var dictionaryFileName = _currentSpellCheckDictionary?.DictionaryFileName ?? null;
+        var result = await ShowDialogAsync<SpellCheckWindow, SpellCheckViewModel>(vm => { vm.Initialize(Subtitles, SelectedSubtitleIndex, this, dictionaryFileName); });
 
-        if (result.OkPressed && result.TotalChangedWords > 0)
+        if (result.OkPressed)
         {
-            ShowStatus($"{result.TotalChangedWords} words corrected in spell check");
+            _currentSpellCheckDictionary = result.SelectedDictionary;
+            if (result.TotalChangedWords > 0)
+            {
+                ShowStatus($"{result.TotalChangedWords} words corrected in spell check");
+            }
         }
     }
 

@@ -109,12 +109,12 @@ public partial class SpellCheckViewModel : ObservableObject
         }
     }
 
-    public void Initialize(ObservableCollection<SubtitleLineViewModel> paragraphs, int? selectedSubtitleIndex, IFocusSubtitleLine focusSubtitleLine)
+    public void Initialize(ObservableCollection<SubtitleLineViewModel> paragraphs, int? selectedSubtitleIndex, IFocusSubtitleLine focusSubtitleLine, string? dictionaryFileName)
     {
         _focusSubtitleLine = focusSubtitleLine;
         Paragraphs.Clear();
         Paragraphs.AddRange(paragraphs);
-        SetLanguage(null);
+        SetLanguage(dictionaryFileName);
         Dispatcher.UIThread.Post(DoSpellCheck, DispatcherPriority.Background);
     }
 
@@ -133,6 +133,8 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(subtitle);
+        var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(languageCode);
+        SelectedDictionary = Dictionaries.FirstOrDefault(p => p.GetThreeLetterCode().Equals(threeLetterCode, StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(dictionaryFileName))
         {
@@ -152,12 +154,15 @@ public partial class SpellCheckViewModel : ObservableObject
             }
         }
 
-        if (SelectedDictionary == null)
+        if (SelectedDictionary == null && Dictionaries.Count > 0)
         {
             SelectedDictionary = Dictionaries[0];
         }
 
-        _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, SpellCheckDictionaryDisplay.GetTwoLetterLanguageCode(SelectedDictionary));
+        if (SelectedDictionary != null)
+        {
+            _spellCheckManager.Initialize(SelectedDictionary.DictionaryFileName, SpellCheckDictionaryDisplay.GetTwoLetterLanguageCode(SelectedDictionary));
+        }
     }
 
     [RelayCommand]
@@ -326,7 +331,7 @@ public partial class SpellCheckViewModel : ObservableObject
     {
         if (Dictionaries.Count == 0)
         {
-            Dispatcher.UIThread.Post(async() =>
+            Dispatcher.UIThread.Post(async () =>
             {
                 var result = await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!, vm => { });
                 if (result.OkPressed)
