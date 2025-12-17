@@ -74,17 +74,61 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             var xml = new XmlDocument { XmlResolver = null };
             var xmlStructure = GetXmlStructure();
-            xmlStructure = xmlStructure.Replace("[frameRate]", ((int)Math.Round(Configuration.Settings.General.CurrentFrameRate, MidpointRounding.AwayFromZero)).ToString());
 
-            var frameDiff = Configuration.Settings.General.CurrentFrameRate % 1.0;
-            if (frameDiff < 0.001)
+            var currentFrameRate = Configuration.Settings.General.CurrentFrameRate;
+            string frameRate;
+            string frameRateMultiplier;
+
+            // Handle specific frame rates according to IMSC Rosetta specification
+            if (Math.Abs(currentFrameRate - 23.976) < 0.01)
             {
-                xmlStructure = xmlStructure.Replace("[frameRateMultiplier]", "1 1");
+                frameRate = "24";
+                frameRateMultiplier = "1000 1001";
+            }
+            else if (Math.Abs(currentFrameRate - 24) < 0.01)
+            {
+                frameRate = "24";
+                frameRateMultiplier = "1 1";
+            }
+            else if (Math.Abs(currentFrameRate - 25) < 0.01)
+            {
+                frameRate = "25";
+                frameRateMultiplier = "1 1";
+            }
+            else if (Math.Abs(currentFrameRate - 29.97) < 0.01)
+            {
+                frameRate = "30";
+                frameRateMultiplier = "1000 1001";
+            }
+            else if (Math.Abs(currentFrameRate - 30) < 0.01)
+            {
+                frameRate = "30";
+                frameRateMultiplier = "1 1";
+            }
+            else if (Math.Abs(currentFrameRate - 50) < 0.01)
+            {
+                frameRate = "50";
+                frameRateMultiplier = "1 1";
+            }
+            else if (Math.Abs(currentFrameRate - 59.94) < 0.01)
+            {
+                frameRate = "60";
+                frameRateMultiplier = "1000 1001";
+            }
+            else if (Math.Abs(currentFrameRate - 60) < 0.01)
+            {
+                frameRate = "60";
+                frameRateMultiplier = "1 1";
             }
             else
             {
-                xmlStructure = xmlStructure.Replace("[frameRateMultiplier]", "1000 1001");
+                // For non-standard frame rates, round to nearest integer and use 1:1 multiplier
+                frameRate = ((int)Math.Round(currentFrameRate, MidpointRounding.AwayFromZero)).ToString();
+                frameRateMultiplier = "1 1";
             }
+
+            xmlStructure = xmlStructure.Replace("[frameRate]", frameRate);
+            xmlStructure = xmlStructure.Replace("[frameRateMultiplier]", frameRateMultiplier);
 
             var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
             xmlStructure = xmlStructure.Replace("[language]", language);
@@ -136,7 +180,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             // Determine region based on alignment
             var alignment = GetAlignmentFromText(p.Text);
             var regionId = GetRegionIdForAlignment(alignment);
-            
+
             XmlAttribute region = xml.CreateAttribute("region");
             region.InnerText = regionId;
             div.Attributes.Append(region);
@@ -339,7 +383,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
 
             var trimmedText = text.TrimStart();
-            
+
             // Check for ASS alignment tags
             if (trimmedText.StartsWith("{\\an1}", StringComparison.Ordinal)) return "an1";
             if (trimmedText.StartsWith("{\\an2}", StringComparison.Ordinal)) return "an2";
