@@ -30,6 +30,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
       <style xml:id=""_r_quantisationregion"" tts:fontSize=""6.182rh"" tts:lineHeight=""125%"" tts:origin=""10% 10%"" tts:extent=""80% 85%"" />
       <style xml:id=""_r_default"" style=""s_fg_white p_al_center"" tts:fontSize=""5.1rh"" tts:lineHeight=""125%"" tts:luminanceGain=""1.0"" itts:fillLineGap=""false"" ebutts:linePadding=""0.25c"" />
       <style xml:id=""p_al_center"" tts:textAlign=""center"" ebutts:multiRowAlign=""center"" />
+      <style xml:id=""p_al_start"" tts:textAlign=""start"" ebutts:multiRowAlign=""start"" />
+      <style xml:id=""p_al_end"" tts:textAlign=""end"" ebutts:multiRowAlign=""end"" />
       <style xml:id=""s_fg_white"" tts:color=""#FFFFFF"" />
       <style xml:id=""s_outlineblack"" tts:textOutline=""#000000 0.05em"" />
       <style xml:id=""d_outline"" style=""s_outlineblack"" />
@@ -39,7 +41,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
       <style xml:id=""s_underline"" tts:textDecoration=""underline"" />
     </styling>
     <layout>
-      <region xml:id=""R0"" style=""r_default"" tts:displayAlign=""after"" tts:origin=""10% 10%"" tts:extent=""80% 85%"" />
+      [REGIONS]
     </layout>
   </head>
   <body>
@@ -87,6 +89,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
             xmlStructure = xmlStructure.Replace("[language]", language);
 
+            // Determine which regions are needed
+            var usedAlignments = new HashSet<string>();
+            foreach (var p in subtitle.Paragraphs)
+            {
+                var alignment = GetAlignmentFromText(p.Text);
+                usedAlignments.Add(alignment);
+            }
+
+            // Generate regions XML
+            var regionsXml = GenerateRegionsXml(usedAlignments);
+            xmlStructure = xmlStructure.Replace("[REGIONS]", regionsXml);
+
             xml.LoadXml(xmlStructure);
             var namespaceManager = new XmlNamespaceManager(xml.NameTable);
             namespaceManager.AddNamespace("ttml", "http://www.w3.org/ns/ttml");
@@ -119,8 +133,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             id.InnerText = $"e_{divCounter}";
             div.Attributes.Append(id);
 
+            // Determine region based on alignment
+            var alignment = GetAlignmentFromText(p.Text);
+            var regionId = GetRegionIdForAlignment(alignment);
+            
             XmlAttribute region = xml.CreateAttribute("region");
-            region.InnerText = "R0";
+            region.InnerText = regionId;
             div.Attributes.Append(region);
 
             XmlAttribute style = xml.CreateAttribute("style");
@@ -311,6 +329,84 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
 
             subtitle.Renumber();
+        }
+
+        private static string GetAlignmentFromText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return "an2"; // default: bottom-center
+            }
+
+            var trimmedText = text.TrimStart();
+            
+            // Check for ASS alignment tags
+            if (trimmedText.StartsWith("{\\an1}", StringComparison.Ordinal)) return "an1";
+            if (trimmedText.StartsWith("{\\an2}", StringComparison.Ordinal)) return "an2";
+            if (trimmedText.StartsWith("{\\an3}", StringComparison.Ordinal)) return "an3";
+            if (trimmedText.StartsWith("{\\an4}", StringComparison.Ordinal)) return "an4";
+            if (trimmedText.StartsWith("{\\an5}", StringComparison.Ordinal)) return "an5";
+            if (trimmedText.StartsWith("{\\an6}", StringComparison.Ordinal)) return "an6";
+            if (trimmedText.StartsWith("{\\an7}", StringComparison.Ordinal)) return "an7";
+            if (trimmedText.StartsWith("{\\an8}", StringComparison.Ordinal)) return "an8";
+            if (trimmedText.StartsWith("{\\an9}", StringComparison.Ordinal)) return "an9";
+
+            return "an2"; // default: bottom-center
+        }
+
+        private static string GetRegionIdForAlignment(string alignment)
+        {
+            return alignment switch
+            {
+                "an1" => "R_BottomLeft",
+                "an2" => "R_BottomCenter",
+                "an3" => "R_BottomRight",
+                "an4" => "R_MiddleLeft",
+                "an5" => "R_MiddleCenter",
+                "an6" => "R_MiddleRight",
+                "an7" => "R_TopLeft",
+                "an8" => "R_TopCenter",
+                "an9" => "R_TopRight",
+                _ => "R_BottomCenter"
+            };
+        }
+
+        private static string GenerateRegionsXml(HashSet<string> usedAlignments)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var alignment in usedAlignments)
+            {
+                var regionId = GetRegionIdForAlignment(alignment);
+                var (displayAlign, origin, extent, styleRef) = GetRegionProperties(alignment);
+
+                sb.AppendLine($"      <region xml:id=\"{regionId}\" style=\"r_default\" tts:displayAlign=\"{displayAlign}\" tts:origin=\"{origin}\" tts:extent=\"{extent}\" />");
+            }
+
+            // Ensure we always have at least the default region
+            if (!usedAlignments.Contains("an2"))
+            {
+                sb.AppendLine("      <region xml:id=\"R_BottomCenter\" style=\"r_default\" tts:displayAlign=\"after\" tts:origin=\"10% 10%\" tts:extent=\"80% 85%\" />");
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
+        private static (string displayAlign, string origin, string extent, string styleRef) GetRegionProperties(string alignment)
+        {
+            return alignment switch
+            {
+                "an1" => ("after", "10% 10%", "30% 85%", "p_al_start"),    // bottom-left
+                "an2" => ("after", "10% 10%", "80% 85%", "p_al_center"),   // bottom-center (default)
+                "an3" => ("after", "60% 10%", "30% 85%", "p_al_end"),      // bottom-right
+                "an4" => ("center", "10% 10%", "30% 80%", "p_al_start"),   // middle-left
+                "an5" => ("center", "10% 10%", "80% 80%", "p_al_center"),  // middle-center
+                "an6" => ("center", "60% 10%", "30% 80%", "p_al_end"),     // middle-right
+                "an7" => ("before", "10% 10%", "30% 85%", "p_al_start"),   // top-left
+                "an8" => ("before", "10% 10%", "80% 85%", "p_al_center"),  // top-center
+                "an9" => ("before", "60% 10%", "30% 85%", "p_al_end"),     // top-right
+                _ => ("after", "10% 10%", "80% 85%", "p_al_center")         // default: bottom-center
+            };
         }
 
         private static string ReadParagraph(XmlNode node, XmlDocument xml)
