@@ -17,6 +17,6 @@ public class UnknownWordItem
 
     public override string ToString()
     {
-        return Word.Word;   
+        return $"#{Item.Number}: {Word.Word}";
     }
 }

@@ -6,7 +6,6 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -449,13 +448,10 @@ public class OcrWindow : Window
                 Mode = BindingMode.TwoWay
             }
         };
-        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
-        {
-            textBoxText.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
-        }
 
         textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontFamily), BindingMode.TwoWay));
         textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize), BindingMode.TwoWay));
+        textBoxText.Bind(TextBox.FontWeightProperty, new Binding(nameof(vm.TextBoxFontWeight), BindingMode.TwoWay));
 
         // Create a Flyout for the TextBox
         var flyout = new MenuFlyout();
@@ -468,14 +464,6 @@ public class OcrWindow : Window
         flyout.Items.Add(menuItemSetFont);
         textBoxText.ContextFlyout = flyout;
         textBoxText.PointerReleased += vm.TextBoxPointerReleased;
-        // textBoxText.ContextRequested += (sender, e) =>
-        // {
-        //     if (sender is Control control && control.ContextFlyout != null)
-        //     {
-        //         control.ContextFlyout.ShowAt(control);
-        //         e.Handled = true;
-        //     }
-        // };
 
         textBoxText.TextChanged += vm.TextBoxTextChanged;
         var panelText = new StackPanel
@@ -661,6 +649,15 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.Styles.Add(new Style(x => x.OfType<ListBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(ListBoxItem.PaddingProperty, new Thickness(2)),
+                new Setter(ListBoxItem.MarginProperty, new Thickness(0)),
+            }
+        });
+
         listBox.Tapped += (s, e) => vm.AllFixesTapped();
 
         grid.Add(listBox, 0, 0);
@@ -694,6 +691,14 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBox.Styles.Add(new Style(x => x.OfType<ListBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(ListBoxItem.PaddingProperty, new Thickness(2)),
+                new Setter(ListBoxItem.MarginProperty, new Thickness(0)),
+            }
+        });
         listBox.Tapped += (s, e) => vm.GuessUsedTapped();
 
         grid.Add(listBox, 0, 0);

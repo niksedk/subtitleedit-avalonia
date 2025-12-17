@@ -5,7 +5,6 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using SkiaSharp;
 using System;
@@ -20,6 +19,10 @@ public partial class PickFontNameViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _fontNames;
     [ObservableProperty] private string? _selectedFontName;
     [ObservableProperty] private Bitmap _imagePreview;
+    [ObservableProperty] private decimal _fontSize;
+    [ObservableProperty] private bool _isFontSizeVisible;
+    [ObservableProperty] private bool _isFontBold;
+    [ObservableProperty] private bool _isFontBoldVisible;
 
     public Window? Window { get; set; }
 
@@ -56,8 +59,10 @@ public partial class PickFontNameViewModel : ObservableObject
         };
     }
 
-    internal void Initialize()
+    internal void Initialize(bool isFontSizeVisible = false, bool isFontBoldVisible = false)
     {
+        IsFontSizeVisible = isFontSizeVisible;
+        IsFontBoldVisible = isFontBoldVisible;
         _timerUpdate.Start();
         _dirtyPreview = true;
     }

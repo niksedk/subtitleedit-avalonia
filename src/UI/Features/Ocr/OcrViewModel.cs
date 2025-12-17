@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -25,6 +26,7 @@ using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
 using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
+using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
@@ -44,9 +46,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Shared.PickFontName;
-using static Nikse.SubtitleEdit.Core.AudioToText.AudioToTextPostProcessor;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -118,7 +117,8 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private bool _hasPreProcessingSettings;
     [ObservableProperty] private bool _hasCaptureTopAlign;
     [ObservableProperty] private FontFamily _textBoxFontFamily;
-    [ObservableProperty] private int _textBoxFontSize;
+    [ObservableProperty] private decimal _textBoxFontSize;
+    [ObservableProperty] private FontWeight _textBoxFontWeight;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -196,6 +196,7 @@ public partial class OcrViewModel : ObservableObject
         _cancellationTokenSource = new CancellationTokenSource();
         TextBoxFontFamily = new FontFamily(FontHelper.GetSystemFonts().First());
         TextBoxFontSize = 14;
+        TextBoxFontWeight = FontWeight.Regular;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
@@ -230,7 +231,19 @@ public partial class OcrViewModel : ObservableObject
             SelectedPaddleOcrLanguage = PaddleOcrLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.PaddleOcrLastLanguage) ?? PaddleOcrLanguages.First();
             SelectedGoogleLensLanguage = GoogleLensLanguages.FirstOrDefault(p => p.Code == Se.Settings.Ocr.GoogleLensOcrLastLanguage) ?? GoogleLensLanguages.First();
             TextBoxFontSize = ocr.TextBoxFontSize;
-            TextBoxFontFamily = new FontFamily(ocr.TextBoxFontName);
+            if (Se.Settings.Ocr.TextBoxFontBold)
+            {
+                TextBoxFontWeight = FontWeight.Bold;
+            }
+
+            try
+            {
+                TextBoxFontFamily = new FontFamily(ocr.TextBoxFontName);
+            }
+            catch
+            {
+                // ignored
+            }
             DoFixOcrErrors = ocr.DoFixOcrErrors;
             DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
             DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
@@ -259,6 +272,7 @@ public partial class OcrViewModel : ObservableObject
         ocr.DoTryToGuessUnknownWords = DoTryToGuessUnknownWords;
         ocr.DoAutoBreak = DoAutoBreak;
         ocr.TextBoxFontSize = TextBoxFontSize;
+        ocr.TextBoxFontBold = TextBoxFontWeight == FontWeight.Bold;
         ocr.TextBoxFontName = TextBoxFontFamily.Name;
 
         if (SelectedDictionary != null)
@@ -323,8 +337,12 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var result =
-            await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window, vm => { vm.Initialize(); });
+        var result = await _windowService.ShowDialogAsync<PickFontNameWindow, PickFontNameViewModel>(Window, vm =>
+        {
+            vm.Initialize(true, true);
+            vm.FontSize = TextBoxFontSize;
+            vm.IsFontBold = TextBoxFontWeight == FontWeight.Bold;
+        });
 
         if (!result.OkPressed || result.SelectedFontName == null)
         {
@@ -332,6 +350,8 @@ public partial class OcrViewModel : ObservableObject
         }
 
         TextBoxFontFamily = new FontFamily(result.SelectedFontName);
+        TextBoxFontSize = result.FontSize;
+        TextBoxFontWeight = result.IsFontBold ? FontWeight.Bold : FontWeight.Regular;
     }
 
     [RelayCommand]
@@ -2523,7 +2543,7 @@ public partial class OcrViewModel : ObservableObject
 
     public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (OperatingSystem.IsMacOS() && 
+        if (OperatingSystem.IsMacOS() &&
             _isCtrlDown &&
             sender is Control control)
         {

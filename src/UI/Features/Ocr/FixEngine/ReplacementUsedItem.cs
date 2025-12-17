@@ -12,7 +12,7 @@ public class ReplacementUsedItem
         To = string.Empty;
         LineIndex = -1;
     }
-    
+
     public ReplacementUsedItem(string from, string to, int lineLineIndex)
     {
         From = from;
@@ -22,6 +22,6 @@ public class ReplacementUsedItem
 
     public override string ToString()
     {
-        return $"#{LineIndex}: {From} -> {To}";
+        return $"#{LineIndex + 1}: {From} -> {To}";
     }
 }

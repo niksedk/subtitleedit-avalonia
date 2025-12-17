@@ -32,7 +32,8 @@ public class SeOcr
     public bool DoAutoBreak { get; set; }
     public bool DoFixOcrErrors { get; set; }
     public string LastLanguageDictionaryFile { get; set; }
-    public int TextBoxFontSize { get; set; }
+    public decimal TextBoxFontSize { get; set; }
+    public bool TextBoxFontBold { get; set; }
     public string TextBoxFontName { get; set; }
 
     public SeOcr()

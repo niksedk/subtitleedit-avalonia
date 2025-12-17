@@ -48,6 +48,33 @@ public class PickFontNameWindow : Window
             }
         };
 
+        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(5, 1000, 200, vm, nameof(vm.FontSize));
+        var panelFontSize = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelFontSize,
+                numericUpDownFontSize,
+            }
+        }.WithBindVisible(vm, nameof(vm.IsFontSizeVisible));
+
+        var labelFontBold = UiUtil.MakeLabel(Se.Language.General.Bold);
+        var checkBoxFontBold = UiUtil.MakeCheckBox(string.Empty, vm, nameof(vm.IsFontBold));
+        var panelFontBold = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelFontBold,
+                checkBoxFontBold,
+            }
+        }.WithBindVisible(vm, nameof(vm.IsFontBoldVisible));
+
+
         var fontsView = MakeFontsView(vm);
         var previewView = MakePreviewView(vm);
 
@@ -59,6 +86,8 @@ public class PickFontNameWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
@@ -76,9 +105,11 @@ public class PickFontNameWindow : Window
         };
 
         grid.Add(panelSearch, 0);
-        grid.Add(fontsView, 1);
-        grid.Add(previewView, 2);
-        grid.Add(buttonPanel, 3);
+        grid.Add(panelFontSize, 1);
+        grid.Add(panelFontBold, 2);
+        grid.Add(fontsView, 3);
+        grid.Add(previewView, 4);
+        grid.Add(buttonPanel, 5);
 
         Content = grid;
 
