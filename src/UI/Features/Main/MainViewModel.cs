@@ -9432,7 +9432,7 @@ public partial class MainViewModel :
         IsVideoLoaded = true;
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        Task.Run(async () => { GetMediaInformation(videoFileName); });
+        Task.Run(() => { GetMediaInformation(videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
