@@ -8826,7 +8826,18 @@ public partial class MainViewModel :
 
         try
         {
-            await File.WriteAllTextAsync(_subtitleFileName, text);
+            if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithBom)
+            {
+                await File.WriteAllTextAsync(_subtitleFileName, text, new UTF8Encoding(true));
+            }
+            else if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithoutBom)
+            {
+                await File.WriteAllTextAsync(_subtitleFileName, text, new UTF8Encoding(false));
+            }
+            else
+            {
+                await File.WriteAllTextAsync(_subtitleFileName, text, SelectedEncoding.Encoding);
+            }
         }
         catch (Exception ex)
         {
