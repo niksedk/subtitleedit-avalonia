@@ -158,13 +158,14 @@ public class FfmpegMediaInfo2
             23.976, 24.0, 25.0, 29.97, 30.0, 48.0, 50.0, 59.94, 60.0, 120.0
         };
 
-        const double tolerance = 0.05; // Allowed difference in fps
-
-        foreach (var known in knownRates)
+        for (double tolerance = 0.05; tolerance < 2; tolerance += 0.5)
         {
-            if (Math.Abs(frameRate - known) < tolerance)
+            foreach (var known in knownRates)
             {
-                return (decimal)known;
+                if (Math.Abs(frameRate - known) < tolerance)
+                {
+                    return (decimal)known;
+                }
             }
         }
 

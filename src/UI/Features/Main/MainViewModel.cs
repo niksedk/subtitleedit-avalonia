@@ -9430,6 +9430,25 @@ public partial class MainViewModel :
         }
 
         IsVideoLoaded = true;
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        Task.Run(async () => { GetMediaInformation(videoFileName); });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+    }
+
+    private void GetMediaInformation(string videoFileName)
+    {
+        try
+        {
+            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
+            Se.Settings.General.CurrentFrameRate = (double)mediaInfo.FramesRate;
+            Configuration.Settings.General.CurrentFrameRate = (double)mediaInfo.FramesRate;
+            //TODO: save video info for show in UI
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     private void InitializeWaveformDisplayMode()
