@@ -46,7 +46,6 @@ using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
 using Nikse.SubtitleEdit.Features.Shared.FindText;
-using Nikse.SubtitleEdit.Features.Shared.FormatProperties.RosettaProperties;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
@@ -120,6 +119,7 @@ using DownloadWhisperEngineViewModel = Nikse.SubtitleEdit.Features.Video.SpeechT
 using DownloadWhisperModelsViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.DownloadWhisperModelsViewModel;
 using GetAudioClipsViewModel = Nikse.SubtitleEdit.Features.Shared.GetAudioClips.GetAudioClipsViewModel;
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
+using RosettaPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties.RosettaPropertiesViewModel;
 using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 using WhisperAdvancedViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperAdvancedViewModel;
