@@ -23,7 +23,7 @@ public class RosettaPropertiesWindow : Window
         DataContext = vm;
         
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
-        var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(5, 1000, 200, vm, nameof(vm.FontSize));
+       // var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(5, 1000, 200, vm, nameof(vm.FontSize));
         var panelFontSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -31,7 +31,7 @@ public class RosettaPropertiesWindow : Window
             Children =
             {
                 labelFontSize,
-                numericUpDownFontSize,
+                //numericUpDownFontSize,
             }
         };
 

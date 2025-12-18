@@ -94,6 +94,13 @@ public static class InitMenu
                 new Separator(),
                 new MenuItem
                 {
+                    [!MenuItem.HeaderProperty] = new Binding(nameof(vm.FilePropertiesText)),
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFilePropertiesVisible)),
+                    Command = vm.FilePropertiesShowCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
                     Header = l.OpenContainingFolder,
                     Command = vm.OpenContainingFolderCommand,
                 },

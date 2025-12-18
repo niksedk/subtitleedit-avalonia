@@ -122,6 +122,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -208,6 +209,8 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _isVideoOffsetVisible;
     [ObservableProperty] private bool _isWaveformGenerating;
     [ObservableProperty] private string _waveformGeneratingText;
+    [ObservableProperty] private bool _isFilePropertiesVisible;
+    [ObservableProperty] private string _filePropertiesText;
 
     public DataGrid SubtitleGrid { get; set; }
     public Window? Window { get; set; }
@@ -367,6 +370,7 @@ public partial class MainViewModel :
         _videoFileName = string.Empty;
         _subtitleFileName = string.Empty;
         Subtitles = [];
+        FilePropertiesText = string.Empty;
 
         SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
         var defaultFormat =
@@ -1014,6 +1018,25 @@ public partial class MainViewModel :
         }
 
         await SaveSubtitleAs();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task FilePropertiesShow()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var format = SelectedSubtitleFormat;
+        if (format is TimedTextRosettaImsc)
+        {
+            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
+            {
+            });
+        }       
+
         _shortcutManager.ClearKeys();
     }
 
@@ -3730,7 +3753,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task ShowSyncAdjustAllTimes()
+    private void ShowSyncAdjustAllTimes()
     {
         if (Window == null)
         {
@@ -7921,7 +7944,7 @@ public partial class MainViewModel :
             else
             {
                 var otherEncoding = Encodings.FirstOrDefault(p => p.Encoding.WebName == fileEncoding.WebName);
-                SelectedEncoding = otherEncoding ?? Encodings.First(p => p.DisplayName == TextEncoding.Utf8WithBom); 
+                SelectedEncoding = otherEncoding ?? Encodings.First(p => p.DisplayName == TextEncoding.Utf8WithBom);
             }
 
             if (Se.Settings.General.AutoConvertToUtf8 && !SelectedEncoding.DisplayName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
@@ -11461,10 +11484,11 @@ public partial class MainViewModel :
 
         AutoFitColumns();
 
+
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)
         {
-            var oldFormat = e.RemovedItems[0] as SubtitleFormat;
             var format = e.AddedItems[0] as SubtitleFormat;
+            var oldFormat = e.RemovedItems[0] as SubtitleFormat;
 
             if (oldFormat != null && format != null)
             {
@@ -11508,6 +11532,17 @@ public partial class MainViewModel :
                 }
 
                 SetSubtitles(_subtitle);
+            }
+        }
+
+        IsFilePropertiesVisible = false;
+        if (e.AddedItems.Count == 1)
+        {
+            var format = e.AddedItems[0] as SubtitleFormat;
+            if (format is TimedTextRosettaImsc)
+            {
+                IsFilePropertiesVisible = true;
+                FilePropertiesText = Se.Language.Main.TimedTextRosettaPropertiesDotDotDot;
             }
         }
     }
