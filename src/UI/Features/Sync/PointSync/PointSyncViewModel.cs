@@ -52,7 +52,12 @@ public partial class PointSyncViewModel : ObservableObject
         SyncedSubtitles = new List<SubtitleLineViewModel>();
     }
 
-    public void Initialize(List<SubtitleLineViewModel> subtitles, string videoFileName, string fileName, AudioVisualizer? audioVisualizer)
+    public void Initialize(
+        List<SubtitleLineViewModel> subtitles,
+        List<SubtitleLineViewModel> selectedSubtitles,
+        string videoFileName, 
+        string fileName, 
+        AudioVisualizer? audioVisualizer)
     {
         Subtitles.Clear();
         Subtitles.AddRange(subtitles);

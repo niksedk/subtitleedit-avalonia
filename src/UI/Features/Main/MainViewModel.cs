@@ -3739,7 +3739,8 @@ public partial class MainViewModel :
 
         var result = await ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(vm =>
         {
-            vm.Initialize(this); // uses call from IAdjustCallback: Adjust
+            var selectedCount = SubtitleGrid.SelectedItems.Count;
+            vm.Initialize(this, selectedCount); // uses call from IAdjustCallback: Adjust
         });
     }
 
@@ -3835,8 +3836,9 @@ public partial class MainViewModel :
 
         var result = await ShowDialogAsync<PointSyncWindow, PointSyncViewModel>(vm =>
         {
+            var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty, AudioVisualizer);
+            vm.Initialize(paragraphs, selectedItems, _videoFileName ?? string.Empty, _subtitleFileName ?? string.Empty, AudioVisualizer);
         });
 
         if (result.OkPressed)

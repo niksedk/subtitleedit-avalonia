@@ -27,6 +27,7 @@ public class AdjustAllTimesWindow : Window
 
         var timeCodeUpDown = new TimeCodeUpDown
         {
+            MinWidth = 165,
             DataContext = vm,
             [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.Adjustment))
             {

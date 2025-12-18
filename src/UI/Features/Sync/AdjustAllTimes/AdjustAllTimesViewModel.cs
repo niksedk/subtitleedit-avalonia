@@ -27,13 +27,21 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     public AdjustAllTimesViewModel()
     {
         TotalAdjustmentInfo = string.Empty;
-
         LoadSettings();
     }
 
-    public void Initialize(IAdjustCallback adjustCallback)
+    public void Initialize(IAdjustCallback adjustCallback, int selectedLinesCount)
     {
         _adjustCallback = adjustCallback;
+        if (selectedLinesCount > 1)
+        {
+            AdjustSelectedLines = true;
+        }
+        else if (selectedLinesCount == 1 && AdjustSelectedLines)
+        {
+            AdjustSelectedLines = false;
+            AdjustAll = true;
+        }
     }
 
     private void LoadSettings()

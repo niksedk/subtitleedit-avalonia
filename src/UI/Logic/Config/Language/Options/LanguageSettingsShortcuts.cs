@@ -231,6 +231,8 @@ public class LanguageSettingsShortcuts
     public string XShortcutsImportedFromY { get; set; }
     public string XShortcutsExportedToY { get; set; }
     public string ImportImageSubtitleForEdit { get; set; }
+    public string ShowPointSyncViaOther { get; set; }
+    public string ShowPointSync { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -465,5 +467,7 @@ public class LanguageSettingsShortcuts
         XShortcutsImportedFromY = "{0} shortcuts imported from {1}";
         XShortcutsExportedToY = "{0} shortcuts exported to {1}";
         ImportImageSubtitleForEdit = "Import image-based subtitle for edit";
+        ShowPointSyncViaOther = "Show point sync via other subtitle";
+        ShowPointSync = "Show point sync";
     }
 }

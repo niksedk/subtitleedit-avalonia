@@ -139,6 +139,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowVisualSyncCommand),  Se.Language.Options.Shortcuts.VisualSync },
         { nameof(MainViewModel.ShowSyncChangeFrameRateCommand),  Se.Language.Options.Shortcuts.ChangeFrameRate },
         { nameof(MainViewModel.ShowSyncChangeSpeedCommand),  Se.Language.Options.Shortcuts.ChangeSpeed },
+        { nameof(MainViewModel.ShowPointSyncCommand),  Se.Language.Options.Shortcuts.ShowPointSync },
+        { nameof(MainViewModel.ShowPointSyncViaOtherCommand),  Se.Language.Options.Shortcuts.ShowPointSyncViaOther },
 
         // Translate
         { nameof(MainViewModel.ShowAutoTranslateCommand), Se.Language.General.AutoTranslate },
@@ -399,6 +401,13 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.VideoCutCommand, nameof(vm.VideoCutCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoFullScreenCommand, nameof(vm.VideoFullScreenCommand), ShortcutCategory.General);
 
+        AddShortcut(shortcuts, vm.ShowSyncAdjustAllTimesCommand, nameof(vm.ShowSyncAdjustAllTimesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowVisualSyncCommand, nameof(vm.ShowVisualSyncCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowSyncChangeFrameRateCommand, nameof(vm.ShowSyncChangeFrameRateCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowSyncChangeSpeedCommand, nameof(vm.ShowSyncChangeSpeedCommand), ShortcutCategory.General); 
+        AddShortcut(shortcuts, vm.ShowPointSyncCommand, nameof(vm.ShowPointSyncCommand), ShortcutCategory.General); 
+        AddShortcut(shortcuts, vm.ShowPointSyncViaOtherCommand, nameof(vm.ShowPointSyncViaOtherCommand), ShortcutCategory.General); 
+
         AddShortcut(shortcuts, vm.VideoOneFrameBackCommand, nameof(vm.VideoOneFrameBackCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoOneFrameForwardCommand, nameof(vm.VideoOneFrameForwardCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.Video100MsBackCommand, nameof(vm.Video100MsBackCommand), ShortcutCategory.General);
@@ -492,50 +501,51 @@ public static class ShortcutsMain
 
     public static List<SeShortCut> GetDefaultShortcuts(MainViewModel vm)
     {
-        var commandOrWin = GetCommandOrWin();
+        var cmd = GetCommandOrWin();
 
         return
         [
-            new(nameof(vm.UndoCommand), [commandOrWin, "Z"]),
-            new(nameof(vm.RedoCommand), [commandOrWin, "Y"]),
-            new(nameof(vm.ShowGoToLineCommand), [commandOrWin, "G"]),
-            new(nameof(vm.AddOrEditBookmarkCommand), [commandOrWin, "Shift", "B"]),
+            new(nameof(vm.UndoCommand), [cmd, "Z"]),
+            new(nameof(vm.RedoCommand), [cmd, "Y"]),
+            new(nameof(vm.ShowGoToLineCommand), [cmd, "G"]),
+            new(nameof(vm.AddOrEditBookmarkCommand), [cmd, "Shift", "B"]),
             new(nameof(vm.GoToPreviousLineCommand), ["Alt", "Up"]),
             new(nameof(vm.GoToNextLineCommand), ["Alt", "Down"]),
-            new(nameof(vm.SelectAllLinesCommand), [commandOrWin, "A"], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.InverseSelectionCommand), [commandOrWin, "Shift", "I"], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ToggleLinesItalicCommand), [commandOrWin, "I"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.SelectAllLinesCommand), [cmd, "A"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.InverseSelectionCommand), [cmd, "Shift", "I"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicCommand), [cmd, "I"], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.DeleteSelectedLinesCommand), ["Delete"], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ShowFindCommand), [commandOrWin, "F"], ShortcutCategory.General),
+            new(nameof(vm.ShowFindCommand), [cmd, "F"], ShortcutCategory.General),
             new(nameof(vm.FindNextCommand), [nameof(Avalonia.Input.Key.F3)], ShortcutCategory.General),
             new(nameof(vm.FindPreviousCommand), ["Shift", nameof(Avalonia.Input.Key.F3)], ShortcutCategory.General),
-            new(nameof(vm.ShowReplaceCommand), [commandOrWin, "R"], ShortcutCategory.General),
-            new(nameof(vm.ShowMultipleReplaceCommand), [commandOrWin, "Shift", "R"], ShortcutCategory.General),
-            new(nameof(vm.OpenDataFolderCommand), [commandOrWin, "Alt", "Shift", "D"], ShortcutCategory.General),
-            new(nameof(vm.CommandFileNewCommand), [commandOrWin, "N"], ShortcutCategory.General),
-            new(nameof(vm.CommandFileOpenCommand), [commandOrWin, "O"], ShortcutCategory.General),
-            new(nameof(vm.CommandFileSaveCommand), [commandOrWin, "S"], ShortcutCategory.General),
+            new(nameof(vm.ShowReplaceCommand), [cmd, "R"], ShortcutCategory.General),
+            new(nameof(vm.ShowMultipleReplaceCommand), [cmd, "Shift", "R"], ShortcutCategory.General),
+            new(nameof(vm.OpenDataFolderCommand), [cmd, "Alt", "Shift", "D"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileNewCommand), [cmd, "N"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileOpenCommand), [cmd, "O"], ShortcutCategory.General),
+            new(nameof(vm.CommandFileSaveCommand), [cmd, "S"], ShortcutCategory.General),
             new(nameof(vm.TogglePlayPauseCommand), [nameof(Avalonia.Input.Key.Space)], ShortcutCategory.General),
-            new(nameof(vm.TogglePlayPause2Command), [commandOrWin, nameof(Avalonia.Input.Key.Space)], ShortcutCategory.General),
+            new(nameof(vm.TogglePlayPause2Command), [cmd, nameof(Avalonia.Input.Key.Space)], ShortcutCategory.General),
             new(nameof(vm.VideoOneSecondBackCommand), [nameof(Avalonia.Input.Key.Left)], ShortcutCategory.General),
             new(nameof(vm.VideoOneSecondForwardCommand), [nameof(Avalonia.Input.Key.Right)], ShortcutCategory.General),
             new(nameof(vm.ShowHelpCommand), [nameof(Avalonia.Input.Key.F1)], ShortcutCategory.General),
             new(nameof(vm.ShowSourceViewCommand), [nameof(Avalonia.Input.Key.F2)], ShortcutCategory.General),
             new(nameof(vm.TextBoxDeleteSelectionCommand), ["Shift", nameof(Avalonia.Input.Key.Back)], ShortcutCategory.TextBox),
             new(nameof(vm.TextBoxCut2Command), ["Shift", nameof(Avalonia.Input.Key.Delete) ], ShortcutCategory.TextBox),
-            new(nameof(vm.TextBoxCutCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.X)], ShortcutCategory.TextBox),
-            new(nameof(vm.TextBoxPasteCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.V)], ShortcutCategory.TextBox),
-            new(nameof(vm.TextBoxCopyCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.C)], ShortcutCategory.TextBox),
-            new(nameof(vm.TextBoxSelectAllCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.A)], ShortcutCategory.TextBox),
-            new(nameof(vm.SubtitleGridCutCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.X)], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.SubtitleGridPasteCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.V)], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.SubtitleGridCopyCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.C)], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ListErrorsCommand), [GetCommandOrWin(), nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.TextBoxCutCommand), [cmd, nameof(Avalonia.Input.Key.X)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxPasteCommand), [cmd, nameof(Avalonia.Input.Key.V)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxCopyCommand), [cmd, nameof(Avalonia.Input.Key.C)], ShortcutCategory.TextBox),
+            new(nameof(vm.TextBoxSelectAllCommand), [cmd, nameof(Avalonia.Input.Key.A)], ShortcutCategory.TextBox),
+            new(nameof(vm.SubtitleGridCutCommand), [cmd, nameof(Avalonia.Input.Key.X)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.SubtitleGridPasteCommand), [cmd, nameof(Avalonia.Input.Key.V)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.SubtitleGridCopyCommand), [cmd, nameof(Avalonia.Input.Key.C)], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ListErrorsCommand), [cmd, nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.GoToPreviousErrorCommand), ["Shift", nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.GoToNextErrorCommand), [nameof(Avalonia.Input.Key.F8)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.ShowSpellCheckCommand), ["Alt", nameof(Avalonia.Input.Key.F7)], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ShowToolsChangeCasingCommand), [GetCommandOrWin(), "Shift", nameof(Avalonia.Input.Key.C)], ShortcutCategory.General),
-            new(nameof(vm.ShowToolsRemoveTextForHearingImpairedCommand), [GetCommandOrWin(), "Shift", nameof(Avalonia.Input.Key.H)], ShortcutCategory.General),
+            new(nameof(vm.ShowToolsChangeCasingCommand), [cmd, "Shift", nameof(Avalonia.Input.Key.C)], ShortcutCategory.General),
+            new(nameof(vm.ShowToolsRemoveTextForHearingImpairedCommand), [cmd, "Shift", nameof(Avalonia.Input.Key.H)], ShortcutCategory.General),
+            new(nameof(vm.ShowSyncAdjustAllTimesCommand), ["Alt", "Shift", nameof(Avalonia.Input.Key.A)], ShortcutCategory.General),
         ];
     }
 
