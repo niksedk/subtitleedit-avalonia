@@ -122,7 +122,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
-using BinaryEditViewModel = Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryEditViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -222,6 +221,7 @@ public partial class MainViewModel :
     AudioVisualizerUndockedViewModel? _audioVisualizerUndockedViewModel;
     FindViewModel? _findViewModel;
     ReplaceViewModel? _replaceViewModel;
+    AdjustAllTimesViewModel? _adjustAllTimesViewModel;
 
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
 
@@ -801,6 +801,12 @@ public partial class MainViewModel :
         {
             _replaceViewModel.Window?.Close();
             _replaceViewModel = null;
+        }
+
+        if (_adjustAllTimesViewModel != null)
+        {
+            _adjustAllTimesViewModel.Window?.Close();
+            _adjustAllTimesViewModel = null;
         }
 
         _undoRedoManager.Reset();
@@ -3737,7 +3743,14 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<AdjustAllTimesWindow, AdjustAllTimesViewModel>(vm =>
+
+        if (_adjustAllTimesViewModel != null && _adjustAllTimesViewModel.Window != null && _adjustAllTimesViewModel.Window.IsVisible)
+        {
+            _adjustAllTimesViewModel.Window.Activate();
+            return;
+        }
+
+        var result = _windowService.ShowWindow<AdjustAllTimesWindow, AdjustAllTimesViewModel>(Window, (window, vm) =>
         {
             var selectedCount = SubtitleGrid.SelectedItems.Count;
             vm.Initialize(this, selectedCount); // uses call from IAdjustCallback: Adjust
