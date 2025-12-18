@@ -42,6 +42,7 @@ public class Se
     public SeAssa Assa { get; set; } = new();
     public SeVideo Video { get; set; } = new();
     public SeWaveform Waveform { get; set; } = new();
+    public SeFormats Formats { get; set; } = new();
     public SeOcr Ocr { get; set; } = new();
     public static SeLanguage Language { get; set; } = new();
     public static Se Settings { get; set; } = new();
@@ -306,6 +307,11 @@ public class Se
         if (Settings.Ocr == null)
         {
             Settings.Ocr = new();
+        }
+
+        if (Settings.Formats == null)
+        {
+            Settings.Formats = new SeFormats();
         }
 
         if (Settings.Tools.FixCommonErrors.Profiles.Count == 0)
