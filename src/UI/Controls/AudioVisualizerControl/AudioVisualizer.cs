@@ -580,6 +580,18 @@ public class AudioVisualizer : Control
                 return;
             }
         }
+        else if ((_interactionMode == InteractionMode.ResizingLeft || _interactionMode == InteractionMode.ResizingRight) && _activeParagraph != null && _activeParagraph.Duration.TotalMilliseconds < 10)
+        {
+            if (OnVideoPositionChanged != null)
+            {
+                var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                _audioVisualizerLastScroll = 0;
+                OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
+            }
+            _interactionMode = InteractionMode.None;
+            _activeParagraph = null;
+            return;
+        }
 
         _interactionMode = InteractionMode.None;
         _activeParagraph = null;
