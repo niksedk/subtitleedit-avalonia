@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -8,16 +7,12 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportCavena890;
 
 public class ExportCavena890Window : Window
 {
-    private readonly ExportCavena890ViewModel _vm;
-
     public ExportCavena890Window(ExportCavena890ViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Export Cavena 890";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 

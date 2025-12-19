@@ -2,7 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -12,8 +11,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public class ImageBasedProfileWindow : Window
 {
-    private readonly ImageBasedProfileViewModel _vm;
-
     public ImageBasedProfileWindow(ImageBasedProfileViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,6 @@ public class ImageBasedProfileWindow : Window
         Width = 800;
         Height = 440;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -133,11 +128,6 @@ public class ImageBasedProfileWindow : Window
         Content = grid;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

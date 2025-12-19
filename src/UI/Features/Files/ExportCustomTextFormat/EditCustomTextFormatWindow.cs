@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 
 public class EditCustomTextFormatWindow : Window
 {
-    private readonly EditCustomTextFormatViewModel _vm;
-
     public EditCustomTextFormatWindow(EditCustomTextFormatViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,7 @@ public class EditCustomTextFormatWindow : Window
         Height = 800;
         MinWidth = 700;
         MinHeight = 500;
-        Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));  
-        _vm = vm;
+        Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));
         vm.Window = this;
         DataContext = vm;
 
@@ -91,7 +87,7 @@ public class EditCustomTextFormatWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelName = UiUtil.MakeLabel(Se.Language.General.Name).WithMinWidth(100); 
+        var labelName = UiUtil.MakeLabel(Se.Language.General.Name).WithMinWidth(100);
         var textBoxName = UiUtil.MakeTextBox(200, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.Name));
         var panelName = UiUtil.MakeHorizontalPanel(labelName, textBoxName);
         grid.Add(panelName, 0);
@@ -105,7 +101,7 @@ public class EditCustomTextFormatWindow : Window
         var textBoxHeader = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatHeader));
         textBoxHeader.HorizontalAlignment = HorizontalAlignment.Stretch;
         textBoxHeader.VerticalAlignment = VerticalAlignment.Stretch;
-        textBoxHeader.AcceptsReturn = true; 
+        textBoxHeader.AcceptsReturn = true;
         vm.TextBoxHeader = textBoxHeader;
         grid.Add(labelHeader, 2);
         grid.Add(textBoxHeader, 3);
@@ -119,7 +115,7 @@ public class EditCustomTextFormatWindow : Window
         grid.Add(labelText, 4);
         grid.Add(textBoxParagraph, 5);
 
-        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.File.Export.TimeCodeFormat).WithMinWidth(120);    
+        var labelTimeCodeFormat = UiUtil.MakeLabel(Se.Language.File.Export.TimeCodeFormat).WithMinWidth(120);
         var textBoxTimeCode = new AutoCompleteBox
         {
             DataContext = vm,
@@ -130,7 +126,7 @@ public class EditCustomTextFormatWindow : Window
             ItemsSource = vm.TimeCodeList,
             [!AutoCompleteBox.TextProperty] = new Binding(nameof(vm.SelectedCustomFormat) + "." + nameof(CustomFormatItem.FormatTimeCode)),
             MinimumPrefixLength = 0,
-        };       
+        };
 
         var panelTimeCode = UiUtil.MakeHorizontalPanel(labelTimeCodeFormat, textBoxTimeCode).WithMarginTop(4);
         grid.Add(panelTimeCode, 6);

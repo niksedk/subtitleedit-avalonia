@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,11 +9,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
 public class BinaryOcrCharacterHistoryWindow : Window
 {
-    private readonly BinaryOcrCharacterHistoryViewModel _vm;
-
     public BinaryOcrCharacterHistoryWindow(BinaryOcrCharacterHistoryViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = string.Empty;
@@ -65,6 +60,9 @@ public class BinaryOcrCharacterHistoryWindow : Window
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
         PointerWheelChanged += vm.PointerWheelChanged;
+        KeyDown += (_, e) => vm.KeyDown(e);
+        KeyUp += (_, e) => vm.KeyUp(e);
+        Loaded += (_, e) => { Title = vm.Title; }
     }
 
     private static Border MakeListView(BinaryOcrCharacterHistoryViewModel vm)
@@ -143,23 +141,5 @@ public class BinaryOcrCharacterHistoryWindow : Window
         grid.Add(panelCurrent, 0, 0);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
     }
 }

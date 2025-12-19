@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -9,15 +8,11 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class EditCategoryWindow : Window
 {
-    private readonly EditCategoryViewModel _vm;
-    
     public EditCategoryWindow(EditCategoryViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -35,7 +30,7 @@ public class EditCategoryWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -61,14 +56,9 @@ public class EditCategoryWindow : Window
         grid.Add(buttonPanel, 4, 0, 1, 2);
 
         Content = grid;
-        
+
         Activated += delegate { textBoxCategoryName.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.OnKeyDown;
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
+        Loaded += (_, _) => { Title = vm.Title; };
     }
 }

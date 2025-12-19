@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -14,8 +13,6 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class MultipleReplaceWindow : Window
 {
-    private readonly MultipleReplaceViewModel _vm;
-
     public MultipleReplaceWindow(MultipleReplaceViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -25,7 +22,6 @@ public class MultipleReplaceWindow : Window
         MinWidth = 850;
         MinHeight = 400;
         CanResize = true;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -413,11 +409,5 @@ public class MultipleReplaceWindow : Window
         };
 
         return border;
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded(e);
     }
 }

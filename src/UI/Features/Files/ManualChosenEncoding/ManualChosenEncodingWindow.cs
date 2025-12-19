@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic;
@@ -11,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 
 public class ManualChosenEncodingWindow : Window
 {
-    private readonly ManualChosenEncodingViewModel _vm;
-
     public ManualChosenEncodingWindow(ManualChosenEncodingViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +19,6 @@ public class ManualChosenEncodingWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -46,7 +41,7 @@ public class ManualChosenEncodingWindow : Window
                 labelSearch,
                 searchBox,
             }
-        };  
+        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -80,6 +75,7 @@ public class ManualChosenEncodingWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static Border MakeEncodingsView(ManualChosenEncodingViewModel vm)
@@ -146,7 +142,7 @@ public class ManualChosenEncodingWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var label = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.CurrentEncodingText));    
+        var label = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.CurrentEncodingText));
         var textBox = new TextBox
         {
             AcceptsReturn = true,
@@ -157,18 +153,12 @@ public class ManualChosenEncodingWindow : Window
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-        };  
+        };
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PreviewText)) { Source = vm, Mode = BindingMode.OneWay });
 
         grid.Add(label, 0);
         grid.Add(textBox, 1);
 
         return UiUtil.MakeBorderForControl(grid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

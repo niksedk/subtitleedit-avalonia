@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Edit.ShowHistory;
 
 public class ShowHistoryWindow : Window
 {
-    private readonly ShowHistoryViewModel _vm;
-
     public ShowHistoryWindow(ShowHistoryViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -19,8 +16,6 @@ public class ShowHistoryWindow : Window
         Width = 810;
         Height = 640;
         CanResize = true;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 

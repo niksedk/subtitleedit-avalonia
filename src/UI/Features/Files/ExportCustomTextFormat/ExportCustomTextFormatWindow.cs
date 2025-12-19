@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 
 public class ExportCustomTextFormatWindow : Window
 {
-    private readonly ExportCustomTextFormatViewModel _vm;
-
     public ExportCustomTextFormatWindow(ExportCustomTextFormatViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,6 @@ public class ExportCustomTextFormatWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -35,7 +30,7 @@ public class ExportCustomTextFormatWindow : Window
 
         var buttonSaveAs = UiUtil.MakeButton(Se.Language.General.SaveDotDotDot, vm.SaveAsCommand)
             .WithBindIsVisible(vm, nameof(vm.IsSaveButtonVisible));
-        
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonSaveAs, buttonOk, buttonCancel);

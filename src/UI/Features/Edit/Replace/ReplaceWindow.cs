@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,16 +9,12 @@ namespace Nikse.SubtitleEdit.Features.Edit.Replace;
 
 public class ReplaceWindow : Window
 {
-    private readonly ReplaceViewModel _vm;
-
     public ReplaceWindow(ReplaceViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Edit.Find.ReplaceTitle;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 

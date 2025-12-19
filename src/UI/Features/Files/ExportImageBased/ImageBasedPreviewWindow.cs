@@ -1,14 +1,11 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public class ImageBasedPreviewWindow : Window
 {
-    private readonly ImageBasedPreviewViewModel _vm;
-
     public ImageBasedPreviewWindow(ImageBasedPreviewViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -18,8 +15,6 @@ public class ImageBasedPreviewWindow : Window
         CanResize = true;
         MinWidth = 720;
         MinHeight = 480;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -32,11 +27,6 @@ public class ImageBasedPreviewWindow : Window
         Content = image;
 
         Activated += delegate { Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

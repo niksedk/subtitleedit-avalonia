@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -9,8 +8,6 @@ namespace Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 
 public class RestoreAutoBackupWindow : Window
 {
-    private readonly RestoreAutoBackupViewModel _vm;
-
     public RestoreAutoBackupWindow(RestoreAutoBackupViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -20,8 +17,6 @@ public class RestoreAutoBackupWindow : Window
         MinWidth = 800;
         MinHeight = 600;
         CanResize = true;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -31,7 +26,7 @@ public class RestoreAutoBackupWindow : Window
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            ItemsSource = _vm.Files,
+            ItemsSource = vm.Files,
             SelectionMode = DataGridSelectionMode.Single,
             IsReadOnly = true,
             AutoGenerateColumns = false,
@@ -107,11 +102,6 @@ public class RestoreAutoBackupWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

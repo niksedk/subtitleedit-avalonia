@@ -1,7 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -9,15 +7,11 @@ namespace Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 
 public class EditRuleWindow : Window
 {
-    private readonly EditRuleViewModel _vm;
-    
     public EditRuleWindow(EditRuleViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -88,11 +82,6 @@ public class EditRuleWindow : Window
         
         Activated += delegate { textBoxFindWhat.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.OnKeyDown;
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
+        Loaded += (s, e) => { Title = vm.Title; };
     }
 }

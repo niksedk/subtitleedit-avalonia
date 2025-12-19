@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
@@ -11,16 +10,12 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 
 public class ExportEbuStlWindow : Window
 {
-    private readonly ExportEbuStlViewModel _vm;
-
     public ExportEbuStlWindow(ExportEbuStlViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Export EBU STL";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -48,7 +43,7 @@ public class ExportEbuStlWindow : Window
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar( buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var grid = new Grid
         {
@@ -241,7 +236,7 @@ public class ExportEbuStlWindow : Window
         grid.Add(labelTotalNumberOfDisks, 9, 2);
         grid.Add(comboBoxTotalNumberOfDisks, 9, 3);
 
-        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand); 
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.ImportCommand);
         grid.Add(buttonImport, 0, 4);
 
         return UiUtil.MakeBorderForControl(grid);
@@ -280,11 +275,11 @@ public class ExportEbuStlWindow : Window
         var labelJustification = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.JustificationCode);
         var comboBoxJustifications = UiUtil.MakeComboBox(vm.Justifications, vm, nameof(vm.SelectedJustification)).WithMinWidth(textBoxWidth);
 
-        
+
         var labelVerticalPosition = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.VerticalPosition);
-        
+
         var labelMarginTop = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MarginTop);
-        var comboBoxMarginTops= UiUtil.MakeComboBox(vm.TopAlignments, vm, nameof(vm.SelectedTopAlignment)).WithMinWidth(textBoxWidth);
+        var comboBoxMarginTops = UiUtil.MakeComboBox(vm.TopAlignments, vm, nameof(vm.SelectedTopAlignment)).WithMinWidth(textBoxWidth);
 
         var labelMarginBottom = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.MarginBottom);
         var comboBoxMarginBottoms = UiUtil.MakeComboBox(vm.BottomAlignments, vm, nameof(vm.SelectedBottomAlignment)).WithMinWidth(textBoxWidth);
@@ -292,7 +287,7 @@ public class ExportEbuStlWindow : Window
         var labelRowsAddedByNewLine = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.NewLineRows);
         var comboBoxRowsAddedByNewLine = UiUtil.MakeComboBox(vm.RowsAddByNewLine, vm, nameof(vm.SelectedRowsAddByNewLine)).WithMinWidth(textBoxWidth);
 
-        
+
         var labelTeletext = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.Teletext);
 
         var labelUseBox = UiUtil.MakeLabel(Se.Language.File.EbuSaveOptions.UseBox);
@@ -316,7 +311,7 @@ public class ExportEbuStlWindow : Window
         grid.Add(labelRowsAddedByNewLine, 5, 0);
         grid.Add(comboBoxRowsAddedByNewLine, 5, 1);
 
-        
+
         grid.Add(labelTeletext, 7, 0);
 
         grid.Add(labelUseBox, 8, 0);
@@ -327,7 +322,7 @@ public class ExportEbuStlWindow : Window
 
         return UiUtil.MakeBorderForControl(grid).WithMinWidth(944).WithMinHeight(465);
     }
-    
+
     private Border MakeErrorsView(ExportEbuStlViewModel vm)
     {
         var label = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ErrorLog)).WithAlignmentTop();

@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 
@@ -8,16 +7,12 @@ namespace Nikse.SubtitleEdit.Features.Video.TransparentSubtitles;
 
 public class TransparentSettingsWindow : Window
 {
-    private readonly TransparentSettingsViewModel _vm;
-    
     public TransparentSettingsWindow(TransparentSettingsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Output settings";
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-        
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -26,7 +21,7 @@ public class TransparentSettingsWindow : Window
             Content = "Use source folder",
             IsChecked = vm.UseSourceFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseSourceFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
         };
 
         var checkBoxUseOutputFolder = new RadioButton
@@ -34,14 +29,14 @@ public class TransparentSettingsWindow : Window
             Content = "Use output folder",
             IsChecked = vm.UseOutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!Avalonia.Controls.Primitives.ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.UseOutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
         };
 
         var textBoxOutputFolder = new TextBox
         {
             Text = vm.OutputFolder,
             VerticalAlignment = VerticalAlignment.Center,
-            [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },  
+            [!TextBox.TextProperty] = new Binding(nameof(vm.OutputFolder)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
             IsEnabled = vm.UseOutputFolder,
             Width = 400,
         };
@@ -58,12 +53,12 @@ public class TransparentSettingsWindow : Window
                 textBoxOutputFolder,
                 buttonBrowse
             }
-        };  
+        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -90,13 +85,8 @@ public class TransparentSettingsWindow : Window
         grid.Add(panelButtons, 3, 0);
 
         Content = grid;
-        
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

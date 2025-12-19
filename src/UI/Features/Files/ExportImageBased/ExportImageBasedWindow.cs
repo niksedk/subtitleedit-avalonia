@@ -3,8 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -17,8 +15,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
 public class ExportImageBasedWindow : Window
 {
-    private readonly ExportImageBasedViewModel _vm;
-
     public ExportImageBasedWindow(ExportImageBasedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -28,8 +24,6 @@ public class ExportImageBasedWindow : Window
         Height = 800;
         MinWidth = 900;
         MinHeight = 700;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -106,6 +100,10 @@ public class ExportImageBasedWindow : Window
         Content = grid;
 
         Activated += delegate { buttonExport.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
+        KeyUp += (_, e) => vm.OnKeyUp(e);
+        Loaded += (_, e) => vm.OnLoaded();
+        Closing += (_, e) => vm.OnClosing();
     }
 
     private Border MakeSubtitlesView(ExportImageBasedViewModel vm)
@@ -344,9 +342,9 @@ public class ExportImageBasedWindow : Window
             IsAccentColorsVisible = false,
             IsColorSpectrumVisible = true,
             IsComponentTextInputVisible = true,
-            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.FontColor))
+            [!ColorPicker.ColorProperty] = new Binding(nameof(vm.FontColor))
             {
-                Source = _vm,
+                Source = vm,
                 Mode = BindingMode.TwoWay
             },
         };
@@ -367,9 +365,9 @@ public class ExportImageBasedWindow : Window
             IsAccentColorsVisible = false,
             IsColorSpectrumVisible = true,
             IsComponentTextInputVisible = true,
-            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.OutlineColor))
+            [!ColorPicker.ColorProperty] = new Binding(nameof(vm.OutlineColor))
             {
-                Source = _vm,
+                Source = vm,
                 Mode = BindingMode.TwoWay
             },
         };
@@ -390,9 +388,9 @@ public class ExportImageBasedWindow : Window
             IsAccentColorsVisible = false,
             IsColorSpectrumVisible = true,
             IsComponentTextInputVisible = true,
-            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ShadowColor))
+            [!ColorPicker.ColorProperty] = new Binding(nameof(vm.ShadowColor))
             {
-                Source = _vm,
+                Source = vm,
                 Mode = BindingMode.TwoWay
             },
         };
@@ -413,9 +411,9 @@ public class ExportImageBasedWindow : Window
             IsAccentColorsVisible = false,
             IsColorSpectrumVisible = true,
             IsComponentTextInputVisible = true,
-            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.BoxColor))
+            [!ColorPicker.ColorProperty] = new Binding(nameof(vm.BoxColor))
             {
-                Source = _vm,
+                Source = vm,
                 Mode = BindingMode.TwoWay
             },
         };
@@ -605,29 +603,5 @@ public class ExportImageBasedWindow : Window
         grid.Add(statusText, 0, 0);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.OnKeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnClosing(WindowClosingEventArgs e)
-    {
-        base.OnClosing(e);
-        _vm.OnClosing();
     }
 }

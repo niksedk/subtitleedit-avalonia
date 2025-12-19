@@ -8,8 +8,6 @@ namespace Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 
 public class ExportPlainTextWindow : Window
 {
-    private readonly ExportPlainTextViewModel _vm;
-
     public ExportPlainTextWindow(ExportPlainTextViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -19,8 +17,6 @@ public class ExportPlainTextWindow : Window
         Height = 800;
         MinWidth = 600;
         MinHeight = 400;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
