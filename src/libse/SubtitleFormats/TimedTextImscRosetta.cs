@@ -14,6 +14,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         public override string Name => "Timed Text IMSC Rosetta";
 
+        public static string LineHeight = "125%";
+        public static string FontSize = "100%";
+        public static string Language = string.Empty;
+
+
         private static string GetXmlStructure()
         {
             return @"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes"" ?>
@@ -27,15 +32,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
       <style xml:id=""d_default"" style=""_d_default"" />
       <style xml:id=""r_default"" style=""_r_default"" tts:backgroundColor=""#00000000"" tts:fontFamily=""proportionalSansSerif"" tts:fontStyle=""normal"" tts:fontWeight=""normal"" tts:overflow=""visible"" tts:showBackground=""whenActive"" tts:wrapOption=""noWrap"" />
       <style xml:id=""_d_default"" style=""d_outline"" />
-      <style xml:id=""_r_quantisationregion"" tts:fontSize=""6.182rh"" tts:lineHeight=""125%"" tts:origin=""10% 10%"" tts:extent=""80% 85%"" />
-      <style xml:id=""_r_default"" style=""s_fg_white p_al_center"" tts:fontSize=""5.1rh"" tts:lineHeight=""125%"" tts:luminanceGain=""1.0"" itts:fillLineGap=""false"" ebutts:linePadding=""0.25c"" />
+      <style xml:id=""_r_quantisationregion"" tts:fontSize=""6.182rh"" tts:lineHeight=""[LINE_HEIGHT]"" tts:origin=""10% 10%"" tts:extent=""80% 85%"" />
+      <style xml:id=""_r_default"" style=""s_fg_white p_al_center"" tts:fontSize=""5.1rh"" tts:lineHeight=""[LINE_HEIGHT]"" tts:luminanceGain=""1.0"" itts:fillLineGap=""false"" ebutts:linePadding=""0.25c"" />
       <style xml:id=""p_al_center"" tts:textAlign=""center"" ebutts:multiRowAlign=""center"" />
       <style xml:id=""p_al_start"" tts:textAlign=""start"" ebutts:multiRowAlign=""start"" />
       <style xml:id=""p_al_end"" tts:textAlign=""end"" ebutts:multiRowAlign=""end"" />
       <style xml:id=""s_fg_white"" tts:color=""#FFFFFF"" />
       <style xml:id=""s_outlineblack"" tts:textOutline=""#000000 0.05em"" />
       <style xml:id=""d_outline"" style=""s_outlineblack"" />
-      <style xml:id=""p_font1"" tts:fontFamily=""proportionalSansSerif"" tts:fontSize=""100%"" tts:lineHeight=""125%"" />
+      <style xml:id=""p_font1"" tts:fontFamily=""proportionalSansSerif"" tts:fontSize=""[FONT_SIZE]"" tts:lineHeight=""[LINE_HEIGHT]"" />
       <style xml:id=""s_italic"" tts:fontStyle=""italic"" />
       <style xml:id=""s_bold"" tts:fontWeight=""bold"" />
       <style xml:id=""s_underline"" tts:textDecoration=""underline"" />
@@ -74,6 +79,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             var xml = new XmlDocument { XmlResolver = null };
             var xmlStructure = GetXmlStructure();
+
+            xmlStructure = xmlStructure.Replace("[LINE_HEIGHT]", LineHeight);
+            xmlStructure = xmlStructure.Replace("[FONT_SIZE]", FontSize);
 
             var currentFrameRate = Configuration.Settings.General.CurrentFrameRate;
             string frameRate;
@@ -130,7 +138,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             xmlStructure = xmlStructure.Replace("[frameRate]", frameRate);
             xmlStructure = xmlStructure.Replace("[frameRateMultiplier]", frameRateMultiplier);
 
-            var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
+            var language = Language;
+            if (language.Length != 2)
+            {
+                language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
+            }
+
             xmlStructure = xmlStructure.Replace("[language]", language);
 
             // Determine which regions are needed

@@ -21,7 +21,7 @@ public class RosettaPropertiesWindow : Window
         var labelWidth = 200;
         
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName).WithMinWidth(labelWidth);
-        var comboBoxFontName = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedFontName)).WithMinWidth(200);
+        var comboBoxFontName = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
         var panelFontName = new StackPanel
         {
             Orientation = Orientation.Horizontal,

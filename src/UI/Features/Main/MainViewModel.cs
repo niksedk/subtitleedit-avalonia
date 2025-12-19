@@ -463,6 +463,17 @@ public partial class MainViewModel :
         }
 
         Configuration.Settings.General.CpsLineLengthStrategy = Se.Settings.General.CpsLineLengthStrategy;
+
+        TimedTextImscRosetta.LineHeight = Se.Settings.Formats.RosettaLineHeight;
+        TimedTextImscRosetta.FontSize = Se.Settings.Formats.RosettaFontSize;
+        if (Se.Settings.Formats.RosettaLanguageAutoDetect)
+        { 
+            TimedTextImscRosetta.Language = string.Empty;
+        }
+        else
+        {
+            TimedTextImscRosetta.Language = Se.Settings.Formats.RosettaLanguage;
+        }
     }
 
     private static void InitializeFfmpeg()
@@ -1032,6 +1043,7 @@ public partial class MainViewModel :
             var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
             {
             });
+            SetLibSeSettings();
         }       
 
         _shortcutManager.ClearKeys();

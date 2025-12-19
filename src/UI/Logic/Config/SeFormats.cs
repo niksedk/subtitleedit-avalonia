@@ -2,17 +2,17 @@
 
 public class SeFormats
 {
-    public string Language { get; set; }
-    public bool LanguageAutoDetect { get; set; }
+    public string RosettaLanguage { get; set; }
+    public bool RosettaLanguageAutoDetect { get; set; }
     
-    public string FontSize { get; set; }
-    public string LineHEight { get; set; }
+    public string RosettaFontSize { get; set; }
+    public string RosettaLineHeight { get; set; }
 
     public SeFormats()
     {
-        Language = "en";
-        LanguageAutoDetect = true;
-        FontSize = string.Empty;
-        LineHEight = string.Empty;
+        RosettaLanguage = "en";
+        RosettaLanguageAutoDetect = true;
+        RosettaFontSize = "100%";
+        RosettaLineHeight = "125%";
     }
 }

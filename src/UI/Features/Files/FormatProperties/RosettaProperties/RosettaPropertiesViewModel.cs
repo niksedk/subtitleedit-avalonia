@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
@@ -22,12 +23,14 @@ public partial class RosettaPropertiesViewModel : ObservableObject
 
     public RosettaPropertiesViewModel()
     {
-        Languages = new ObservableCollection<string>();
-        Languages.Add(Se.Language.General.Autodetect);
-        foreach (CultureInfo ci in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
-        {
-            Languages.Add(ci.EnglishName);
-        }
+        Languages =
+        [
+            Se.Language.General.Autodetect,
+            .. CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                .Select(p => p.TwoLetterISOLanguageName)
+                .Distinct()
+                .OrderBy(p => p),
+        ];
         SelectedLanguage = Languages[0];
 
         SelectedLanguage = string.Empty;
@@ -39,17 +42,42 @@ public partial class RosettaPropertiesViewModel : ObservableObject
 
     private void LoadSettings()
     {
-
+        SelectedLineHeight = Se.Settings.Formats.RosettaLineHeight;
+        SelectedFontSize = Se.Settings.Formats.RosettaFontSize;
+        if (Se.Settings.Formats.RosettaLanguageAutoDetect)
+        {
+            SelectedLanguage = Languages[0];
+        }
+        else
+        {
+            var ci = new CultureInfo(Se.Settings.Formats.RosettaLanguage);
+            SelectedLanguage = ci.TwoLetterISOLanguageName.ToLowerInvariant();
+        }
     }
 
     private void SaveSettings()
     {
+        Se.Settings.Formats.RosettaLineHeight = SelectedLineHeight;
+        Se.Settings.Formats.RosettaFontSize = SelectedFontSize;
+
+        if (SelectedLanguage == Languages[0])
+        {
+            Se.Settings.Formats.RosettaLanguageAutoDetect = true;
+            Se.Settings.Formats.RosettaLanguage = "en";
+        }
+        else
+        {
+            Se.Settings.Formats.RosettaLanguageAutoDetect = false;
+            Se.Settings.Formats.RosettaLanguage = SelectedLanguage;
+        }   
+
         Se.SaveSettings();
     }
 
     [RelayCommand]
     private void Ok()
     {
+        SaveSettings();
         OkPressed = true;
         Window?.Close();
     }
