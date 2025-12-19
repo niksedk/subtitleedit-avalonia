@@ -372,6 +372,11 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
             return false;
         }
 
+        if (_spellCheckWordLists.HasName(word))
+        {
+            return true;
+        }
+
         return _spellCheckWordLists.HasNameExtended(word, text);
     }
 
