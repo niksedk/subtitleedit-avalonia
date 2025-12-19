@@ -132,7 +132,7 @@ public partial class SourceViewViewModel : ObservableObject
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ShowLineNumbers = true,
-            WordWrap = true,
+            WordWrap = true,         
         };
 
         // Add syntax highlighting for subtitle source formats

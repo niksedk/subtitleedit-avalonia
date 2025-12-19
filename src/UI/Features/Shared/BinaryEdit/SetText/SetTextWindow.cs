@@ -99,7 +99,7 @@ public class SetTextWindow : Window
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.Size);
         labelFontSize.Margin = new Thickness(5);
         
-        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(8, 200, 48, 100, vm, nameof(vm.FontSize));
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(8, 200, 48, 120, vm, nameof(vm.FontSize));
         numericUpDownFontSize.Margin = new Thickness(5);
 
         var checkBoxBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.FontIsBold));
@@ -120,7 +120,7 @@ public class SetTextWindow : Window
         var labelOutlineWidth = UiUtil.MakeLabel(Se.Language.General.Width);
         labelOutlineWidth.Margin = new Thickness(5);
         
-        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 100, vm, nameof(vm.OutlineWidth));
+        var numericUpDownOutlineWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 120, vm, nameof(vm.OutlineWidth));
         numericUpDownOutlineWidth.Margin = new Thickness(5);
 
         var labelShadowColor = UiUtil.MakeLabel(Se.Language.General.Shadow);
@@ -132,7 +132,7 @@ public class SetTextWindow : Window
         var labelShadowWidth = UiUtil.MakeLabel(Se.Language.General.Width);
         labelShadowWidth.Margin = new Thickness(5);
         
-        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 100, vm, nameof(vm.ShadowWidth));
+        var numericUpDownShadowWidth = UiUtil.MakeNumericUpDownOneDecimal(0, 50, 120, vm, nameof(vm.ShadowWidth));
         numericUpDownShadowWidth.Margin = new Thickness(5);
 
         var labelBoxType = UiUtil.MakeLabel("Box type:");

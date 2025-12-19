@@ -35,6 +35,9 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private int _screenHeight;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _currentPositionAndSize;
+    [ObservableProperty] private bool _isDeleteVisible;
+    [ObservableProperty] private bool _isInsertBeforeVisible;
+    [ObservableProperty] private bool _isInsertAfterVisible;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
@@ -1024,6 +1027,60 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void InsertBefore()
+    {
+        if (Window == null || SubtitleGrid?.SelectedItems.Count != 1)
+        {
+            return;
+        }
+
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem == null || selectedItem.Bitmap == null)
+        {
+            return;
+        }        
+
+        var newItem = new BinarySubtitleItem(selectedItem);
+        newItem.EndTime = TimeSpan.FromMicroseconds(selectedItem.StartTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines);
+        newItem.StartTime = TimeSpan.FromMilliseconds(newItem.EndTime.TotalMilliseconds - Se.Settings.General.NewEmptyDefaultMs);
+        var selectedIndex = SubtitleGrid.SelectedIndex;
+        Subtitles.Insert(selectedIndex, newItem);
+        Renumber();
+        SelectAndScrollToRow(selectedIndex);
+    }
+
+    [RelayCommand]
+    private void InsertAfter()
+    {
+        if (Window == null || SubtitleGrid?.SelectedItems.Count != 1)
+        {
+            return;
+        }
+
+        var selectedItem = SelectedSubtitle;
+        if (selectedItem == null || selectedItem.Bitmap == null)
+        {
+            return;
+        }
+
+        var newItem = new BinarySubtitleItem(selectedItem);
+        newItem.StartTime = TimeSpan.FromMilliseconds(selectedItem.EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines);
+        newItem.EndTime = TimeSpan.FromMilliseconds(newItem.StartTime.TotalMilliseconds + Se.Settings.General.NewEmptyDefaultMs);
+        var selectedIndex = SubtitleGrid.SelectedIndex;
+        Subtitles.Insert(selectedIndex + 1, newItem);
+        Renumber();
+        SelectAndScrollToRow(selectedIndex + 1);
+    }
+
+    private void Renumber()
+    {
+        for (int i = 0; i < Subtitles.Count; i++)
+        {
+            Subtitles[i].Number = i + 1;
+        }
+    }
+
+    [RelayCommand]
     private async Task ImportImage()
     {
         if (Window == null)
@@ -1250,5 +1307,13 @@ public partial class BinaryEditViewModel : ObservableObject
 
             return;
         });
+    }
+
+    internal void OnContextMenuOpening()
+    {
+        var selectedCount = SubtitleGrid?.SelectedItems?.Count ?? 0;
+        IsDeleteVisible = selectedCount > 0;
+        IsInsertAfterVisible = selectedCount == 1;
+        IsInsertBeforeVisible = selectedCount == 1;
     }
 }

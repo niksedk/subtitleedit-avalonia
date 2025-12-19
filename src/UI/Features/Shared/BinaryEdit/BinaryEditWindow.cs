@@ -316,6 +316,7 @@ public class BinaryEditWindow : Window
 
         var flyout = new MenuFlyout();
         dataGrid.ContextFlyout = flyout;
+        flyout.Opening += (_, _) => vm.OnContextMenuOpening();  
 
         var menuItemDelete = new MenuItem
         {
@@ -324,6 +325,25 @@ public class BinaryEditWindow : Window
             Command = vm.DeleteSectedLinesCommand,
         };
         flyout.Items.Add(menuItemDelete);
+        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)));
+
+        var menuItemInsertBefore = new MenuItem
+        {
+            Header = Se.Language.General.InsertBefore,
+            DataContext = vm,
+            Command = vm.InsertBeforeCommand,
+        };
+        flyout.Items.Add(menuItemInsertBefore);
+        menuItemInsertBefore.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsInsertBeforeVisible)));
+
+        var menuItemInsertAfter = new MenuItem
+        {
+            Header = Se.Language.General.InsertAfter,
+            DataContext = vm,
+            Command = vm.InsertAfterCommand,
+        };
+        flyout.Items.Add(menuItemInsertAfter);
+        menuItemInsertAfter.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsInsertAfterVisible)));
 
         vm.SubtitleGrid = dataGrid;
 
