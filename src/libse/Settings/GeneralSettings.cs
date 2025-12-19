@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Common.TextLengthCalculator;
 using Nikse.SubtitleEdit.Core.Enums;
 using SkiaSharp;
+using System;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Core.Settings
 {

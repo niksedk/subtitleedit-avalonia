@@ -312,6 +312,19 @@ public class BinaryEditWindow : Window
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Subtitles)));
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Mode = BindingMode.Default });
 
+        dataGrid.KeyDown += (_, e) => vm.OnDataGridKeyDown(e);
+
+        var flyout = new MenuFlyout();
+        dataGrid.ContextFlyout = flyout;
+
+        var menuItemDelete = new MenuItem
+        {
+            Header = Se.Language.General.Delete,
+            DataContext = vm,
+            Command = vm.DeleteSectedLinesCommand,
+        };
+        flyout.Items.Add(menuItemDelete);
+
         vm.SubtitleGrid = dataGrid;
 
         var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);

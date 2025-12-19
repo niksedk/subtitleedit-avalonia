@@ -85,7 +85,7 @@ public partial class BinaryEditViewModel : ObservableObject
         {
             var index = Subtitles.IndexOf(SelectedSubtitle);
             StatusText = string.Format(Se.Language.General.SubtitleXOfY, index + 1, Subtitles.Count);
-            CurrentPositionAndSize = string.Format(Se.Language.General.PositionX, $"{SelectedSubtitle.X},{SelectedSubtitle.Y}") + Environment.NewLine + 
+            CurrentPositionAndSize = string.Format(Se.Language.General.PositionX, $"{SelectedSubtitle.X},{SelectedSubtitle.Y}") + Environment.NewLine +
                                      string.Format(Se.Language.General.SizeX, $"{SelectedSubtitle.Bitmap?.Size.Width}x{SelectedSubtitle.Bitmap?.Size.Height}");
         }
     }
@@ -285,9 +285,11 @@ public partial class BinaryEditViewModel : ObservableObject
         OcrSubtitle = imageSubtitle;
 
         Subtitles.Clear();
-        foreach (var s in imageSubtitle.MakeOcrSubtitleItems())
+        List<Ocr.OcrSubtitleItem> list = imageSubtitle.MakeOcrSubtitleItems();
+        for (int i = 0; i < list.Count; i++)
         {
-            Subtitles.Add(new BinarySubtitleItem(s));
+            Ocr.OcrSubtitleItem? s = list[i];
+            Subtitles.Add(new BinarySubtitleItem(s, i));
         }
 
         if (Subtitles.Count > 0)
@@ -1177,6 +1179,76 @@ public partial class BinaryEditViewModel : ObservableObject
             }
 
             SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+        });
+    }
+
+    internal void OnDataGridKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            e.Handled = true;
+            DeleteSectedLines();
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteSectedLines()
+    {
+        var selectedItems = SubtitleGrid?.SelectedItems;
+        if (selectedItems == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            var answer = MessageBoxResult.Yes;
+
+            if (Se.Settings.General.PromptDeleteLines)
+            {
+                if (selectedItems.Count == 1)
+                {
+                    answer = await MessageBox.Show(
+                        Window!,
+                        Se.Language.General.DeleteLines,
+                        $"Do you want to delete one line?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+                }
+                else
+                {
+                    answer = await MessageBox.Show(
+                        Window!,
+                        Se.Language.General.DeleteLines,
+                        $"Do you want to delete {selectedItems.Count} lines?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+                }
+            }
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            var itemsToRemove = new List<BinarySubtitleItem>();
+            foreach (var item in selectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    itemsToRemove.Add(binaryItem);
+                }
+            }
+
+            foreach (var item in itemsToRemove)
+            {
+                Subtitles.Remove(item);
+                item.Bitmap?.Dispose();
+            }
+
+            UpdateStatusText();
+
+            return;
         });
     }
 }

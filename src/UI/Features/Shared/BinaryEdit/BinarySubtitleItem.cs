@@ -1,9 +1,8 @@
 using Avalonia.Media.Imaging;
-using Nikse.SubtitleEdit.Features.Ocr;
-using Nikse.SubtitleEdit.Core.Common;
-using System;
-using SkiaSharp;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Nikse.SubtitleEdit.Features.Ocr;
+using SkiaSharp;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 
@@ -20,7 +19,7 @@ public partial class BinarySubtitleItem : ObservableObject
     
     private bool _isUpdating;
 
-    public BinarySubtitleItem(OcrSubtitleItem item)
+    public BinarySubtitleItem(OcrSubtitleItem item, int ocrSubtitleIndex)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
 
@@ -59,8 +58,11 @@ public partial class BinarySubtitleItem : ObservableObject
             _x = 0;
             _y = 0;
         }
+
+        OcrSubtitleIndex = ocrSubtitleIndex;
     }
     
+    public int OcrSubtitleIndex { get; set; }
     public int Number { get; set; }
     public bool IsForced { get; set; }
     public string Text { get; set; }

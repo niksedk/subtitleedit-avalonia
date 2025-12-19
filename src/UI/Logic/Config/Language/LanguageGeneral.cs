@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -1125,7 +1123,7 @@ public class LanguageGeneral
         SubtitleXOfY = "Subtitle {0} of {1}";
         PositionX = "Position: {0}";
         SizeX = "Size: {0}";
-        SetFontDotDotDot =  "Set font...";
+        SetFontDotDotDot = "Set font...";
         LineHeigth = "Line height";
     }
 }
