@@ -269,8 +269,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 else if (child.Name == "i")
                 {
                     XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                    XmlAttribute attr = ttmlXml.CreateAttribute("tts", "fontStyle", "http://www.w3.org/ns/ttml#styling");
-                    attr.InnerText = "italic";
+                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                    attr.InnerText = "s_italic";
                     span.Attributes.Append(attr);
                     ttmlNode.AppendChild(span);
                     ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
@@ -278,8 +278,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 else if (child.Name == "b")
                 {
                     XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                    XmlAttribute attr = ttmlXml.CreateAttribute("tts", "fontWeight", "http://www.w3.org/ns/ttml#styling");
-                    attr.InnerText = "bold";
+                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                    attr.InnerText = "s_bold";
                     span.Attributes.Append(attr);
                     ttmlNode.AppendChild(span);
                     ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
@@ -287,8 +287,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 else if (child.Name == "u")
                 {
                     XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                    XmlAttribute attr = ttmlXml.CreateAttribute("tts", "textDecoration", "http://www.w3.org/ns/ttml#styling");
-                    attr.InnerText = "underline";
+                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                    attr.InnerText = "s_underline";
                     span.Attributes.Append(attr);
                     ttmlNode.AppendChild(span);
                     ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
@@ -496,7 +496,19 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         var styleName = child.Attributes["style"].Value;
 
-                        if (styles.Contains(styleName))
+                        if (styleName == "s_italic")
+                        {
+                            isItalic = true;
+                        }
+                        else if (styleName == "s_bold")
+                        {
+                            isBold = true;
+                        }
+                        else if (styleName == "s_underline")
+                        {
+                            isUnderlined = true;
+                        }
+                        else if (styles.Contains(styleName))
                         {
                             try
                             {
