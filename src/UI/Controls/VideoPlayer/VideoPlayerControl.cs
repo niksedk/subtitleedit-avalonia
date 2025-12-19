@@ -54,7 +54,6 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public static readonly StyledProperty<bool> FullScreenIsVisibleProperty =
             AvaloniaProperty.Register<VideoPlayerControl, bool>(nameof(FullScreenIsVisible));
 
-
         public Control? PlayerContent
         {
             get => GetValue(PlayerContentProperty);
@@ -101,6 +100,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             set => SetValue(ProgressTextProperty, value);
         }
 
+        private readonly TextBlock _textBlockVideoFileName;
         private readonly TextBlock _textBlockPlayerName;
 
         public ICommand PlayCommand
@@ -417,6 +417,18 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _gridProgress.Children.Add(_textBlockPlayerName);
             Grid.SetColumn(_textBlockPlayerName, 3);
 
+            _textBlockVideoFileName = new TextBlock
+            {
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                FontSize = 8,
+                FontWeight = FontWeight.Bold,
+                Opacity = 0.4,
+            };
+            _gridProgress.Children.Add(_textBlockVideoFileName);
+            Grid.SetColumn(_textBlockVideoFileName, 3);
+
+
             Content = mainGrid;
 
             sliderPosition.Maximum = 1;
@@ -516,6 +528,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance.Pause();
             _textBlockPlayerName.Text = _videoPlayerInstance.Name;
             _videoFileName = videoFileName;
+            _textBlockVideoFileName.Text = System.IO.Path.GetFileName(videoFileName);
         }
 
         internal void Close()
@@ -525,6 +538,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance.CloseFile();
             ProgressText = string.Empty;
             _videoFileName = string.Empty;
+            _textBlockVideoFileName.Text = string.Empty;
         }
 
         internal async Task WaitForPlayersReadyAsync(int timeoutMs = 2500)
