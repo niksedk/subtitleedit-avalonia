@@ -95,6 +95,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             new PapagoTranslate(),
             new NoLanguageLeftBehindServe(),
             new NoLanguageLeftBehindApi(),
+            new BaiduTranslate(),
         };
         SelectedAutoTranslator = AutoTranslators[0];
         AutoTranslatorLinkText = SelectedAutoTranslator.Name;
@@ -870,6 +871,19 @@ public partial class AutoTranslateViewModel : ObservableObject
                 "http://localhost:7860/api/v2/",
                 "https://winstxnhdw-nllb-api.hf.space/api/v2/",
             });
+
+            return;
+        }
+
+        if (engineType == typeof(BaiduTranslate))
+        {
+            FillUrls(new List<string>
+            {
+                Configuration.Settings.Tools.BaiduUrl,
+            });
+
+            ApiKeyText = Configuration.Settings.Tools.BaiduApiKey;
+            ApiKeyIsVisible = true;
 
             return;
         }
