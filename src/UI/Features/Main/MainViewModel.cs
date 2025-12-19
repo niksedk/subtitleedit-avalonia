@@ -467,7 +467,7 @@ public partial class MainViewModel :
         TimedTextImscRosetta.LineHeight = Se.Settings.Formats.RosettaLineHeight;
         TimedTextImscRosetta.FontSize = Se.Settings.Formats.RosettaFontSize;
         if (Se.Settings.Formats.RosettaLanguageAutoDetect)
-        { 
+        {
             TimedTextImscRosetta.Language = string.Empty;
         }
         else
@@ -1026,7 +1026,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SaveSubtitleAs();        
+        await SaveSubtitleAs();
     }
 
     [RelayCommand]
@@ -1044,7 +1044,7 @@ public partial class MainViewModel :
             {
             });
             SetLibSeSettings();
-        }       
+        }
 
         _shortcutManager.ClearKeys();
     }
@@ -9258,6 +9258,7 @@ public partial class MainViewModel :
                 {
                     Se.LogError(e);
                 }
+
             }, DispatcherPriority.Background);
         }
 
@@ -9386,7 +9387,17 @@ public partial class MainViewModel :
 
             _undoRedoManager.StartChangeDetection();
             _loading = false;
+
+            Dispatcher.UIThread.Post(void () =>
+            {
+                if (Window != null)
+                {
+                    Window.Activate();
+                    SubtitleGrid.Focus();
+                }
+            });
         });
+
     }
 
     private static void CheckAndRenameDamagedFiles()
