@@ -62,7 +62,7 @@ public class BinaryOcrCharacterHistoryWindow : Window
         PointerWheelChanged += vm.PointerWheelChanged;
         KeyDown += (_, e) => vm.KeyDown(e);
         KeyUp += (_, e) => vm.KeyUp(e);
-        Loaded += (_, e) => { Title = vm.Title; }
+        Loaded += (_, e) => { Title = vm.Title; };
     }
 
     private static Border MakeListView(BinaryOcrCharacterHistoryViewModel vm)
