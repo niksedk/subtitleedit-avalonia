@@ -8979,14 +8979,14 @@ public partial class MainViewModel :
 
     private async Task<bool> SaveSubtitleAs()
     {
-        var newFileName = "New" + SelectedSubtitleFormat.Extension;
+        var newFileName = "New";
         if (!string.IsNullOrEmpty(_subtitleFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName) + SelectedSubtitleFormat.Extension;
+            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
         }
         else if (!string.IsNullOrEmpty(_videoFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_videoFileName) + SelectedSubtitleFormat.Extension;
+            newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
         }
 
         var title = Se.Language.General.SaveFileAsTitle;
