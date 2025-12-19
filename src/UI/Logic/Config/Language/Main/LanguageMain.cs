@@ -150,6 +150,6 @@ public class LanguageMain
         XLinesSelectedOfY = "{0} lines selected of {1}";
         EndTimeMustBeAfterStartTime = "End time must be after start time.";
         GeneratingWaveformDotDotDot = "Generating waveform...";
-        TimedTextRosettaPropertiesDotDotDot = "Timed Text Rosetta properties...";
+        TimedTextRosettaPropertiesDotDotDot = "Timed Text IMSC Rosetta properties...";
     }
 }

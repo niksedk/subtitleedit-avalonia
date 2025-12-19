@@ -10,9 +10,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     /// <summary>
     /// https://github.com/imsc-rosetta/imsc-rosetta-specification
     /// </summary>
-    public class TimedTextRosettaImsc : SubtitleFormat
+    public class TimedTextImscRosetta : SubtitleFormat
     {
-        public override string Name => "Timed Text Rosetta IMSC";
+        public override string Name => "Timed Text IMSC Rosetta";
 
         private static string GetXmlStructure()
         {
@@ -67,7 +67,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 return false;
             }
 
-            return text.Contains("<rosetta:format>imsc-rosetta</rosetta:format>") && base.IsMine(lines, fileName);
+            return text.Contains("<rosetta:format>imsc-rosetta</rosetta:format>", StringComparison.Ordinal) && base.IsMine(lines, fileName);
         }
 
         public override string ToText(Subtitle subtitle, string title)

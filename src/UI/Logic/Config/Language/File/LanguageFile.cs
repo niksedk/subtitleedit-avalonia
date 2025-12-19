@@ -26,10 +26,11 @@ public class LanguageFile
     public string LoadXFromFile { get; set; }
     public string SaveCompareHtmlTitle { get; set; }
     public string PickMatroskaTrackX { get; set; }
+    public string RosettaProperties { get; set; }
 
     public LanguageFile()
     {
-        StatisticsTitle = "Statistics"; 
+        StatisticsTitle = "Statistics";
         Compare = "Compare";
         PreviousDifference = "Previous difference";
         NextDifference = "Next difference";
@@ -47,5 +48,6 @@ public class LanguageFile
         LoadXFromFile = "Load \"{0}\" from file";
         SaveCompareHtmlTitle = "Save compare HTML file";
         PickMatroskaTrackX = "Pick Matroska track - {0}";
+        RosettaProperties = "Timed Text Rosetta IMSC properties";
     }
 }

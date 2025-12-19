@@ -1030,7 +1030,7 @@ public partial class MainViewModel :
         }
 
         var format = SelectedSubtitleFormat;
-        if (format is TimedTextRosettaImsc)
+        if (format is TimedTextImscRosetta)
         {
             var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
             {
@@ -11539,7 +11539,7 @@ public partial class MainViewModel :
         if (e.AddedItems.Count == 1)
         {
             var format = e.AddedItems[0] as SubtitleFormat;
-            if (format is TimedTextRosettaImsc)
+            if (format is TimedTextImscRosetta)
             {
                 IsFilePropertiesVisible = true;
                 FilePropertiesText = Se.Language.Main.TimedTextRosettaPropertiesDotDotDot;

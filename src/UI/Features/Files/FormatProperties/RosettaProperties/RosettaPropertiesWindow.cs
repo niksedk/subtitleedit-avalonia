@@ -1,8 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -10,20 +7,47 @@ namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
 public class RosettaPropertiesWindow : Window
 {
-    public RosettaPropertiesWindow(Files.FormatProperties.RosettaProperties.RosettaPropertiesViewModel vm)
+    public RosettaPropertiesWindow(RosettaPropertiesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Tools.PickFontNameTitle;
-        CanResize = true;
-        Width = 800;
-        Height = 700;
-        MinWidth = 500;
-        MinHeight = 400;
+        Title = Se.Language.File.RosettaProperties;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
+        MinWidth = 400;
+        MinHeight = 200;
         vm.Window = this;
         DataContext = vm;
+
+        var labelWidth = 200;
         
-        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize);
-       // var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(5, 1000, 200, vm, nameof(vm.FontSize));
+        var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName).WithMinWidth(labelWidth);
+        var comboBoxFontName = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedFontName)).WithMinWidth(200);
+        var panelFontName = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelFontName,
+                comboBoxFontName,
+            }
+        };
+
+        var labelLineHeight = UiUtil.MakeLabel(Se.Language.General.LineHeigth).WithMinWidth(labelWidth);
+        var textBoxLineHeight = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedLineHeight));
+        var panelLineHeight = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelLineHeight,
+                textBoxLineHeight,
+            }
+        };
+
+        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize).WithMinWidth(labelWidth);
+        var textBoxFontSize = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontSize)); 
         var panelFontSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -31,7 +55,7 @@ public class RosettaPropertiesWindow : Window
             Children =
             {
                 labelFontSize,
-                //numericUpDownFontSize,
+                textBoxFontSize,
             }
         };
 
@@ -46,8 +70,6 @@ public class RosettaPropertiesWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -61,7 +83,9 @@ public class RosettaPropertiesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelFontSize, 1);
+        grid.Add(panelFontName, 0);
+        grid.Add(panelLineHeight, 1);
+        grid.Add(panelFontSize, 2);
         grid.Add(buttonPanel, 5);
 
         Content = grid;
