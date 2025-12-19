@@ -999,8 +999,6 @@ public partial class MainViewModel :
         {
             await SaveSubtitleOriginal();
         }
-
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1017,8 +1015,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SaveSubtitleAs();
-        _shortcutManager.ClearKeys();
+        await SaveSubtitleAs();        
     }
 
     [RelayCommand]
@@ -9003,6 +9000,8 @@ public partial class MainViewModel :
             SelectedSubtitleFormat,
             newFileName,
             title);
+
+        _shortcutManager.ClearKeys();
 
         if (string.IsNullOrEmpty(fileName))
         {
