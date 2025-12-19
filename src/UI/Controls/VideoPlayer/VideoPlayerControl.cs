@@ -427,7 +427,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             };
             _gridProgress.Children.Add(_textBlockVideoFileName);
             Grid.SetColumn(_textBlockVideoFileName, 3);
-
+            _textBlockVideoFileName.PointerPressed += (_, e) => { VideoFileNamePointerPressed?.Invoke(e); };
 
             Content = mainGrid;
 
@@ -501,6 +501,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         public event Action<double>? PositionChanged;
         public event Action<double>? VolumeChanged;
         public event Action? ToggleDisplayProgressTextModeRequested;
+        public event Action<PointerPressedEventArgs>? VideoFileNamePointerPressed;
 
         public void SetPlayPauseIcon(bool isPlaying)
         {

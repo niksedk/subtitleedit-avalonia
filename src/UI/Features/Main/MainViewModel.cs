@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -253,6 +254,7 @@ public partial class MainViewModel :
     private static SolidColorBrush _transparentBrush = new SolidColorBrush(Colors.Transparent);
     private static SolidColorBrush _errorBrush = new SolidColorBrush(_errorColor);
     private SpellCheckDictionaryDisplay? _currentSpellCheckDictionary;
+    FfmpegMediaInfo2? _mediaInfo;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -9532,14 +9534,13 @@ public partial class MainViewModel :
     {
         try
         {
-            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
-            Se.Settings.General.CurrentFrameRate = (double)mediaInfo.FramesRate;
-            Configuration.Settings.General.CurrentFrameRate = (double)mediaInfo.FramesRate;
-            //TODO: save video info for show in UI
+            _mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
+            Se.Settings.General.CurrentFrameRate = (double)_mediaInfo.FramesRate;
+            Configuration.Settings.General.CurrentFrameRate = (double)_mediaInfo.FramesRate;
         }
         catch
         {
-            // ignore
+            _mediaInfo = null; ;
         }
     }
 
@@ -9760,6 +9761,7 @@ public partial class MainViewModel :
         GetVideoPlayerControl()?.Close();
         _videoFileName = string.Empty;
         IsVideoLoaded = false;
+        _mediaInfo = null;
 
         if (AudioVisualizer != null)
         {
@@ -11716,5 +11718,22 @@ public partial class MainViewModel :
             e.Handled = args.Handled;
             _shortcutManager.ClearKeys();
         }
+    }
+
+    internal void VideoPlayerControlPointerPressed(PointerPressedEventArgs args)
+    {
+        var mediaInfo = _mediaInfo;
+        if (mediaInfo == null || Window == null || args.Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            var result = await ShowDialogAsync<MediaInfoViewWindow, MediaInfoViewViewModel>(vm => 
+            {
+                vm.Initialize(_videoFileName ?? string.Empty, mediaInfo); 
+            });
+        });
     }
 }

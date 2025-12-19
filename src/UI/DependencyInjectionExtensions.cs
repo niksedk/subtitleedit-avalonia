@@ -265,6 +265,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<MainView>();
         collection.AddTransient<MainViewModel>();
         collection.AddTransient<ManualChosenEncodingViewModel>();
+        collection.AddTransient<MediaInfoViewViewModel>();
         collection.AddTransient<MergeSameTextViewModel>();
         collection.AddTransient<MergeSameTimeCodesViewModel>();
         collection.AddTransient<MergeShortLinesViewModel>();
