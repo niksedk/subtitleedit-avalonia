@@ -38,6 +38,7 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isInsertBeforeVisible;
     [ObservableProperty] private bool _isInsertAfterVisible;
+    [ObservableProperty] private bool _isToggleForcedVisible;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
@@ -1072,6 +1073,21 @@ public partial class BinaryEditViewModel : ObservableObject
         SelectAndScrollToRow(selectedIndex + 1);
     }
 
+    [RelayCommand]
+    private void ToggleForced()
+    {
+        if (Window == null || SubtitleGrid == null || SubtitleGrid.SelectedItems.Count <= 0)
+        {
+            return;
+        }
+
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<BinarySubtitleItem>().ToList(); 
+        foreach (var item in selectedItems)
+        {
+            item.IsForced = !item.IsForced;
+        }
+    }
+
     private void Renumber()
     {
         for (int i = 0; i < Subtitles.Count; i++)
@@ -1313,6 +1329,7 @@ public partial class BinaryEditViewModel : ObservableObject
     {
         var selectedCount = SubtitleGrid?.SelectedItems?.Count ?? 0;
         IsDeleteVisible = selectedCount > 0;
+        IsToggleForcedVisible = selectedCount > 0;
         IsInsertAfterVisible = selectedCount == 1;
         IsInsertBeforeVisible = selectedCount == 1;
     }

@@ -71,7 +71,7 @@ public class SeTools
         BinEditFontSize = 48;
         BinEditIsBold = false;
         BinEditFontColor = Colors.White.FromColorToHex();
-        BinEditOutlineColor = Colors.White.FromColorToHex();
+        BinEditOutlineColor = Colors.Black.FromColorToHex();
         BinEditShadowColor = Colors.Black.FromColorToHex();
         BinEditBackgroundColor = Colors.Transparent.FromColorToHex();
         BinEditOutlineWidth = 2;

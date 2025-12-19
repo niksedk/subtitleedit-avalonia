@@ -562,6 +562,7 @@ public class LanguageGeneral
     public string SizeX { get; internal set; }
     public string SetFontDotDotDot { get; set; }
     public string LineHeigth { get; set; }
+    public string ToggleForced { get; set; }
 
     public LanguageGeneral()
     {
@@ -1125,5 +1126,6 @@ public class LanguageGeneral
         SizeX = "Size: {0}";
         SetFontDotDotDot = "Set font...";
         LineHeigth = "Line height";
+        ToggleForced = "Toggle forced";
     }
 }
