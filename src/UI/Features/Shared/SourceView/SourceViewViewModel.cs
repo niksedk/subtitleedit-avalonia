@@ -132,8 +132,11 @@ public partial class SourceViewViewModel : ObservableObject
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ShowLineNumbers = true,
-            WordWrap = true,         
+            WordWrap = true,
         };
+
+        // Override the built-in link color with our softer pastel color
+        textBox.TextArea.TextView.LinkTextForegroundBrush = UiUtil.MakeLinkForeground();
 
         // Add syntax highlighting for subtitle source formats
         var lineTransformer = GetLineTransformer(text, subtitleFormat);
