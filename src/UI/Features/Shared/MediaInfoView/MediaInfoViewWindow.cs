@@ -3,17 +3,17 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.SourceView;
+namespace Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 
 public class MediaInfoViewWindow : Window
 {
     public MediaInfoViewWindow(MediaInfoViewViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Video information";
-        Width = 1200;
-        Height = 800;
-        MinWidth = 700;
+        Title = Se.Language.General.MediaInformation;
+        Width = 900;
+        Height = 500;
+        MinWidth = 500;
         MinHeight = 400;
         CanResize = true;
         vm.Window = this;

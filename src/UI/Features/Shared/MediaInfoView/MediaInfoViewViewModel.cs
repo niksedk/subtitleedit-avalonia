@@ -1,3 +1,6 @@
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -14,11 +17,8 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Shared.SourceView;
+namespace Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 
 public partial class MediaInfoViewViewModel : ObservableObject
 {
@@ -34,12 +34,10 @@ public partial class MediaInfoViewViewModel : ObservableObject
 
     private string _videoFileName = string.Empty;
 
-
     public MediaInfoViewViewModel(IFolderHelper folderHelper)
     {
         _folderHelper = folderHelper;
         SourceViewTextBox = new TextBoxWrapper(new TextBox());
-        Title = string.Empty;
         Text = string.Empty;
         TextBoxContainer = new Border();
     }
@@ -115,7 +113,6 @@ public partial class MediaInfoViewViewModel : ObservableObject
         {
             Task.Delay(50).Wait(); // Slight delay to ensure control is ready  
 
-
             SourceViewTextBox = CreateAdvancedTextBoxWrapper(Text);
 
             TextBoxContainer.Child = SourceViewTextBox.ContentControl;
@@ -135,6 +132,7 @@ public partial class MediaInfoViewViewModel : ObservableObject
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ShowLineNumbers = false,
             WordWrap = true,
+            IsReadOnly =  true,
         };
 
         // Override the built-in link color with our softer pastel color

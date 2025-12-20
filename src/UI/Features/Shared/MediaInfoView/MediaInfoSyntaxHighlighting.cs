@@ -1,9 +1,9 @@
+using System.Text.RegularExpressions;
 using Avalonia.Media;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Rendering;
-using System.Text.RegularExpressions;
 
-namespace Nikse.SubtitleEdit.Logic;
+namespace Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 
 /// <summary>
 /// Syntax highlighting for media file information output

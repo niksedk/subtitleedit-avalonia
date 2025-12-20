@@ -124,6 +124,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
+using MediaInfoViewViewModel = Nikse.SubtitleEdit.Features.Shared.MediaInfoView.MediaInfoViewViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -11724,6 +11726,18 @@ public partial class MainViewModel :
     {
         var mediaInfo = _mediaInfo;
         if (mediaInfo == null || Window == null || args.Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+        
+        ShowMediaInformation();
+    }
+
+    [RelayCommand]
+    private void ShowMediaInformation()
+    {
+        var mediaInfo = _mediaInfo;
+        if (mediaInfo == null || Window == null)
         {
             return;
         }

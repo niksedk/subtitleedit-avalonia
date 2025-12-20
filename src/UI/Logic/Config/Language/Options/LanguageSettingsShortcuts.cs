@@ -233,6 +233,7 @@ public class LanguageSettingsShortcuts
     public string ImportImageSubtitleForEdit { get; set; }
     public string ShowPointSyncViaOther { get; set; }
     public string ShowPointSync { get; set; }
+    public string ShowMediaInformation { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -469,5 +470,6 @@ public class LanguageSettingsShortcuts
         ImportImageSubtitleForEdit = "Import image-based subtitle for edit";
         ShowPointSyncViaOther = "Show point sync via other subtitle";
         ShowPointSync = "Show point sync";
+        ShowMediaInformation = "Show media information";
     }
 }
