@@ -157,6 +157,7 @@ public class LanguageSettings
     public string DownloadMpv { get; set; }
     public string DownloadVlc { get; set; }
     public string GoToLineNumberSetsVideoPosition { get; set; }
+    public string AdjustAllTimesRememberLineSelectionChoice { get; set; }
     public string FilesAndLogs { get; set; }
     public string ShowErrorLogFile { get; set; }
     public string ShowWhisperLogFile { get; set; }
@@ -362,6 +363,7 @@ public class LanguageSettings
         DownloadMpv = "Download mpv";
         DownloadVlc = "Download VLC";
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
+        AdjustAllTimesRememberLineSelectionChoice = "Adjust all times remember line selection choice";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default 'Save as' format";
         FilesAndLogs = "Files and logs";

@@ -442,6 +442,7 @@ public class SettingsPage : UserControl
         sections.Add(new SettingsSection(Se.Language.General.Tools,
         [
             MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.AdjustAllTimesRememberLineSelectionChoice, nameof(_vm.AdjustAllTimesRememberLineSelectionChoice)),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Appearance,

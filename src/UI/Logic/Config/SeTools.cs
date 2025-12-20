@@ -15,7 +15,7 @@ public class SeTools
     public SeRemoveTextForHi RemoveTextForHi { get; set; } = new();
     public SeMergeSameTimeCode MergeSameTimeCode { get; set; } = new();
     public SeMergeSameText MergeSameText { get; set; } = new();
-    
+
     public string OllamaPrompt { get; set; }
     public string LmStudioPrompt { get; set; }
     public string AnthropicPrompt { get; set; }

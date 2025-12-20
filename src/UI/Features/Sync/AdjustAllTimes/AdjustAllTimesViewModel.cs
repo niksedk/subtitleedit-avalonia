@@ -19,9 +19,9 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private double _totalAdjustment;
 
     private IAdjustCallback? _adjustCallback;
-    
+
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
 
     public AdjustAllTimesViewModel()
@@ -41,6 +41,14 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         {
             AdjustSelectedLines = false;
             AdjustAll = true;
+        }
+
+        string choice = Se.Settings.Synchronization.AdjustAllTimesLineSelectionChoice;
+        if (Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice && !string.IsNullOrEmpty(choice))
+        {
+            AdjustAll = choice == "All";
+            AdjustSelectedLines = choice == "Selected";
+            AdjustSelectedLinesAndForward = choice == "SelectedAndForward";
         }
     }
 
@@ -67,11 +75,11 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         Se.Settings.Synchronization.AdjustAllTimes.IsSelectedLinesAndForwardSelected = AdjustSelectedLinesAndForward;
         Se.Settings.Synchronization.AdjustAllTimes.IsSelectedLinesSelected = AdjustSelectedLines;
         Se.Settings.Synchronization.AdjustAllTimes.IsAllSelected = AdjustAll;
-        
+
         Se.SaveSettings();
     }
-    
-    [RelayCommand]                   
+
+    [RelayCommand]
     private void ShowEarlier()
     {
         _totalAdjustment -= Adjustment.TotalSeconds;
@@ -84,35 +92,51 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         TotalAdjustmentInfo = $"Total adjustment: {new TimeCode(_totalAdjustment * 1000.0).ToShortDisplayString()}";
     }
 
-    [RelayCommand]                   
-    private void ShowLater() 
+    [RelayCommand]
+    private void ShowLater()
     {
         _totalAdjustment += Adjustment.TotalSeconds;
         Apply();
         ShowTotalAdjustmentInfo();
     }
-    
+
     private void Apply()
     {
         SaveSettings();
         InvokeAdjustCallback();
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
+        if (Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice)
+        {
+            if (AdjustAll)
+            {
+                Se.Settings.Synchronization.AdjustAllTimesLineSelectionChoice = "All";
+            }
+            else if (AdjustSelectedLines)
+            {
+                Se.Settings.Synchronization.AdjustAllTimesLineSelectionChoice = "Selected";
+            }
+            else if (AdjustSelectedLinesAndForward)
+            {
+                Se.Settings.Synchronization.AdjustAllTimesLineSelectionChoice = "SelectedAndForward";
+            }
+        }
+
         OkPressed = true;
         Window?.Close();
     }
-    
+
     private void InvokeAdjustCallback()
     {
         _adjustCallback?.Adjust(
-            TimeSpan.FromSeconds(_totalAdjustment), 
-            AdjustAll, 
-            AdjustSelectedLines, 
+            TimeSpan.FromSeconds(_totalAdjustment),
+            AdjustAll,
+            AdjustSelectedLines,
             AdjustSelectedLinesAndForward);
-        
+
         TotalAdjustmentInfo = string.Empty;
         _totalAdjustment = 0; // Reset after applying
     }

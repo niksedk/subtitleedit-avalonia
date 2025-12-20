@@ -89,6 +89,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
 
     [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
+    [ObservableProperty] private bool _adjustAllTimesRememberLineSelectionChoice;
 
     [ObservableProperty] private bool _showUpDownStartTime;
     [ObservableProperty] private bool _showUpDownEndTime;
@@ -426,6 +427,7 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
+        AdjustAllTimesRememberLineSelectionChoice = Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice;
 
         SelectedTheme = appearance.Theme;
         SelectedFontName = FontNames.FirstOrDefault(p => p == appearance.FontName) ?? FontNames.First();
@@ -678,6 +680,7 @@ public partial class SettingsViewModel : ObservableObject
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
 
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
+        Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;
 
         appearance.Theme = SelectedTheme;
         appearance.FontName = SelectedFontName == FontNames.First()
