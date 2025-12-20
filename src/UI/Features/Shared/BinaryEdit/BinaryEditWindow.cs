@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -32,14 +33,14 @@ public class BinaryEditWindow : Window
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Auto), // Menu
-                new RowDefinition(GridLength.Star),  // Content
-                new RowDefinition(GridLength.Auto),  // Button panel
+                new RowDefinition(GridLength.Star), // Content
+                new RowDefinition(GridLength.Auto), // Button panel
             },
         };
 
         // Top menu bar
         var menu = MakeTopMenu(vm);
-        mainGrid.Add(menu, 0, 0);
+        mainGrid.Add(menu, 0);
 
         // Content area (grid + video)
         var contentGrid = new Grid
@@ -54,7 +55,7 @@ public class BinaryEditWindow : Window
 
         // Left section - grid with subtitles lines + controls
         var leftContent = MakeLayoutListViewAndEditBox(vm);
-        contentGrid.Add(leftContent, 0, 0);
+        contentGrid.Add(leftContent, 0);
 
         // Vertical splitter
         var splitter = new GridSplitter
@@ -75,7 +76,7 @@ public class BinaryEditWindow : Window
         };
         contentGrid.Add(rightContent, 0, 2);
 
-        mainGrid.Add(contentGrid, 1, 0);
+        mainGrid.Add(contentGrid, 1);
 
         // Status bar and button panel
         var bottomPanel = new Grid
@@ -94,18 +95,18 @@ public class BinaryEditWindow : Window
             Margin = new Thickness(5, 0, 0, 0),
             [!TextBlock.TextProperty] = new Binding(nameof(vm.StatusText)),
         };
-        bottomPanel.Add(statusTextBlock, 0, 0);
+        bottomPanel.Add(statusTextBlock, 0);
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButtonOk(vm.OkCommand),
             UiUtil.MakeButtonCancel(vm.CancelCommand));
-        bottomPanel.Add(buttonPanel, 1, 0);
+        bottomPanel.Add(buttonPanel, 1);
 
-        mainGrid.Add(bottomPanel, 2, 0);
+        mainGrid.Add(bottomPanel, 2);
 
         Content = mainGrid;
         KeyDown += (_, args) => vm.OnKeyDown(args);
-        Loaded += (_, args) => vm.Loaded();
+        Loaded += (_, _) => vm.Loaded();
         Closing += (_, _) => vm.Closing();
     }
 
@@ -289,8 +290,8 @@ public class BinaryEditWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition(GridLength.Star),  // DataGrid
-                new RowDefinition(GridLength.Auto),   // Controls
+                new RowDefinition(GridLength.Star), // DataGrid
+                new RowDefinition(GridLength.Auto), // Controls
             },
             Margin = new Thickness(5),
         };
@@ -373,7 +374,7 @@ public class BinaryEditWindow : Window
                     Padding = new Thickness(4),
                     Child = new CheckBox
                     {
-                        [!CheckBox.IsCheckedProperty] = new Binding(nameof(BinarySubtitleItem.IsForced)),
+                        [!ToggleButton.IsCheckedProperty] = new Binding(nameof(BinarySubtitleItem.IsForced)),
                         HorizontalAlignment = HorizontalAlignment.Center
                     }
                 }),
@@ -428,11 +429,10 @@ public class BinaryEditWindow : Window
             CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
         });
 
-        mainGrid.Add(dataGridBorder, 0, 0);
+        mainGrid.Add(dataGridBorder, 0);
 
         var controlsPanel = MakeControls(vm);
-        mainGrid.Add(UiUtil.MakeBorderForControl(controlsPanel), 1, 0);
-
+        mainGrid.Add(UiUtil.MakeBorderForControl(controlsPanel), 1);
 
         return mainGrid;
     }

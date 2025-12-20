@@ -1222,10 +1222,13 @@ public partial class BinaryEditViewModel : ObservableObject
         }
 
         VideoPlayerControl.VideoPlayerInstance.CloseFile();
+        UiUtil.SaveWindowPosition(Window);
     }
 
     public void Loaded()
     {
+        UiUtil.RestoreWindowPosition(Window);
+        
         if (string.IsNullOrEmpty(_loadFileName))
         {
             return;
