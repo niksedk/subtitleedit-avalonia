@@ -41,12 +41,12 @@ public class LibVlcDownloadService(HttpClient httpClient) : ILibVlcDownloadServi
             switch (RuntimeInformation.ProcessArchitecture)
             {
                 // case Architecture.Arm64:
-                //     return MacArmUrl; // e.g., for M1, M2, M3, M4 chips
+                //     return MacArmUrl; // e.g., for M1, M2, M3, M4, M5 chips
                 case Architecture.X64:
                     return MacX64Url;
             }
         }
 
-        throw new PlatformNotSupportedException("LibVLC download is only supported on Windows.");
+        throw new PlatformNotSupportedException("LibVLC download is not supported on this platform");
     }
 }

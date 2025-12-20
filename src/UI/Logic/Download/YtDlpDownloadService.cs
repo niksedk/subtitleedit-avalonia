@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Download;
 
+public interface IYtDlpDownloadService
+{
+    Task DownloadYtDlp(IProgress<float>? progress, CancellationToken cancellationToken);
+}
+
 public class YtDlpDownloadService : IYtDlpDownloadService
 {
     private readonly HttpClient _httpClient;

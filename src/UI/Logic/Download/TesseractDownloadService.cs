@@ -8,6 +8,12 @@ using Nikse.SubtitleEdit.Logic.Compression;
 
 namespace Nikse.SubtitleEdit.Logic.Download;
 
+public interface ITesseractDownloadService
+{
+    Task DownloadTesseract(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadTesseractModel(string modelUrl, Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+}
+
 public class TesseractDownloadService : ITesseractDownloadService
 {
     private readonly HttpClient _httpClient;
