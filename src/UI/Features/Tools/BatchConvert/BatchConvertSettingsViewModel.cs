@@ -125,6 +125,7 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         OutputFolder = Se.Settings.Tools.BatchConvert.OutputFolder;
         Overwrite = Se.Settings.Tools.BatchConvert.Overwrite;
         SelectedTargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding;
+        SelectedOcrEngine = OcrEngines.FirstOrDefault(p => p == Se.Settings.Tools.BatchConvert.OcrEngine) ?? OcrEngines.First();    
     }
 
     private void SaveSettings()

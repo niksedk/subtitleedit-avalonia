@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
+using Nikse.SubtitleEdit.Features.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
@@ -31,7 +32,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Ocr.Engines;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -675,6 +676,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var language = string.IsNullOrEmpty(Se.Settings.Tools.BatchConvert.PaddleLanguage) ? "en" : Se.Settings.Tools.BatchConvert.PaddleLanguage;
         var mode = Se.Settings.Ocr.PaddleOcrMode;
         var ocrCount = 0;
+        item.Subtitle = new Subtitle();
 
         var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
         item.Status = "Preparing OCR...";
@@ -705,10 +707,15 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 var number = p.Index;
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 item.Status = string.Format(Se.Language.General.OcrPercentX, percentage);
+
+                var paragraph = new Paragraph(p.Text, imageSubtitles.GetStartTime(number).TotalMilliseconds, imageSubtitles.GetEndTime(number).TotalMilliseconds);
+                item.Subtitle.Paragraphs.Add(paragraph);
+
                 ocrCount++;
             }
         });
 
+        item.Status = "OCR...";
         await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, true, mode, ocrProgress, cancellationToken);
         var checkCount = 0;
         while (ocrCount < numberOfImages && checkCount < 100)
