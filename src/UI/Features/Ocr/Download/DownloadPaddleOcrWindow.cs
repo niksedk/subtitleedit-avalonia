@@ -72,7 +72,7 @@ public class DownloadPaddleOcrWindow : Window
             }
         };
 
-        Activated += delegate
+        Loaded += delegate
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
             vm.StartDownload();

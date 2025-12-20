@@ -107,7 +107,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 }
                 else
                 {
-                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.0");
+                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.2");
                 }
 
                 OkPressed = true;

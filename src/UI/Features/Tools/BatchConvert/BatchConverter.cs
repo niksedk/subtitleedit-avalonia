@@ -266,13 +266,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         if (imageSubtitle != null && !_config.IsTargetFormatImageBased)
         {
             item.Status = Se.Language.General.OcrDotDotDot;
-            if (Se.Settings.Ocr.Engine.Equals("nOcr", StringComparison.OrdinalIgnoreCase))
+            if (Se.Settings.Tools.BatchConvert.OcrEngine.Equals("nOcr", StringComparison.OrdinalIgnoreCase))
             {
                 RunNOcr(imageSubtitle, item, cancellationToken);
             }
-            else if (Se.Settings.Ocr.Engine.Equals("PaddleOCR", StringComparison.OrdinalIgnoreCase))
+            else if (Se.Settings.Tools.BatchConvert.OcrEngine.Equals("PaddleOCR", StringComparison.OrdinalIgnoreCase))
             {
-                RunPaddleOcr(imageSubtitle, item, cancellationToken);
+                await RunPaddleOcr(imageSubtitle, item, cancellationToken);
             }
             else
             {
@@ -587,7 +587,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     private static async Task RunOcrTesseract(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
         var tesseractOcr = new TesseractOcr();
-        var language = "eng";
+        var language = string.IsNullOrEmpty(Se.Settings.Tools.BatchConvert.TesseractLanguage) ? "eng" : Se.Settings.Tools.BatchConvert.TesseractLanguage; 
         item.Subtitle = new Subtitle();
         for (var i = 0; i < imageSubtitles.Count; i++)
         {
@@ -668,13 +668,13 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     
     private readonly Lock _paddleLock = new Lock();
     
-    private void RunPaddleOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
+    private async Task RunPaddleOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
         var numberOfImages = imageSubtitles.Count;
         var ocrEngine = new PaddleOcr();
-        var language = "en";
+        var language = string.IsNullOrEmpty(Se.Settings.Tools.BatchConvert.PaddleLanguage) ? "en" : Se.Settings.Tools.BatchConvert.PaddleLanguage;
         var mode = Se.Settings.Ocr.PaddleOcrMode;
-        Se.Settings.Ocr.PaddleOcrLastLanguage = language;
+        var ocrCount = 0;
 
         var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
         item.Status = "Preparing OCR...";
@@ -704,14 +704,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             {
                 var number = p.Index;
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
-                var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+                item.Status = string.Format(Se.Language.General.OcrPercentX, percentage);
+                ocrCount++;
             }
         });
 
-        _ = Task.Run(async () =>
+        await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, true, mode, ocrProgress, cancellationToken);
+        var checkCount = 0;
+        while (ocrCount < numberOfImages && checkCount < 100)
         {
-            await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, true, mode, ocrProgress, cancellationToken);
-        }, cancellationToken);
+            await Task.Delay(100);
+            checkCount++;
+        }
     }
 
     private void WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)

@@ -9,6 +9,9 @@ public class SeBatchConvert
     public bool Overwrite { get; set; }
     public string TargetFormat { get; set; }
     public string TargetEncoding { get; set; }
+    public string OcrEngine { get; set; }
+    public string TesseractLanguage { get; set; }
+    public string PaddleLanguage { get; set; }
 
     public bool FormattingRemoveAll { get; set; }
     public bool FormattingRemoveItalic { get; set; }
@@ -50,6 +53,9 @@ public class SeBatchConvert
         SaveInSourceFolder = true;
         TargetFormat = string.Empty;
         TargetEncoding = string.Empty;
+        OcrEngine = "Tesseract";
+        TesseractLanguage = "eng";
+        PaddleLanguage = "en";
         OffsetTimeCodesForward = true;
         AdjustVia = "Seconds"; 
         AdjustDurationSeconds = 0.1;

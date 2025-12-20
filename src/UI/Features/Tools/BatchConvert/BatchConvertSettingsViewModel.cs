@@ -1,12 +1,15 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -29,6 +32,16 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _languagePostFixes;
     [ObservableProperty] private string? _selectedLanguagePostFix;
 
+    [ObservableProperty] private ObservableCollection<TesseractDictionary> _tesseractDictionaryItems;
+    [ObservableProperty] private TesseractDictionary? _selectedTesseractDictionaryItem;
+
+    [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
+    [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
+
+    [ObservableProperty] bool _isOcrLanguageVisible;
+    [ObservableProperty] bool _isTesseractOcrVisible;
+    [ObservableProperty] bool _isPaddleOCrVisible;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -41,11 +54,11 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         TargetEncodings = new ObservableCollection<string>(encodings);
 
         OcrEngines = new ObservableCollection<string> { "nOcr", "Tesseract" };
-        if (OperatingSystem.IsWindows() && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        if (OperatingSystem.IsWindows() && File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
         {
             OcrEngines.Add("PaddleOCR");
         }
-        
+
         SelectedOcrEngine = Se.Settings.Ocr.Engine == "nOcr" ? OcrEngines.First() : OcrEngines.Last();
 
         LanguagePostFixes = new ObservableCollection<string>()
@@ -60,10 +73,49 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
             SelectedLanguagePostFix = LanguagePostFixes[1];
         }
 
+        PaddleOcrLanguages = new ObservableCollection<OcrLanguage2>(PaddleOcr.GetLanguages().OrderBy(p => p.ToString()));
+        TesseractDictionaryItems = new ObservableCollection<TesseractDictionary>();
+
         _folderHelper = folderHelper;
 
         OutputFolder = string.Empty;
+        LoadActiveTesseractDictionaries();
         LoadSettings();
+        OnOcrEngineChanged();
+    }
+
+    private void LoadActiveTesseractDictionaries()
+    {
+        TesseractDictionaryItems.Clear();
+
+        var folder = Se.TesseractModelFolder;
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        var allDictionaries = TesseractDictionary.List();
+        var items = new List<TesseractDictionary>();
+        foreach (var file in Directory.GetFiles(folder, "*.traineddata"))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            if (name == "osd")
+            {
+                continue;
+            }
+
+            var dictionary = allDictionaries.FirstOrDefault(p => p.Code == name);
+            if (dictionary != null)
+            {
+                items.Add(dictionary);
+            }
+            else
+            {
+                items.Add(new TesseractDictionary { Code = name, Name = name, Url = string.Empty });
+            }
+        }
+
+        TesseractDictionaryItems.AddRange(items.OrderBy(p => p.ToString()));
     }
 
     private void LoadSettings()
@@ -81,9 +133,19 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.OutputFolder = OutputFolder;
         Se.Settings.Tools.BatchConvert.Overwrite = Overwrite;
         Se.Settings.Tools.BatchConvert.TargetEncoding = SelectedTargetEncoding ?? TargetEncodings.First();
-
         Se.Settings.Tools.BatchConvert.LanguagePostFix = SelectedLanguagePostFix ?? Se.Language.General.TwoLetterLanguageCode;
-        Se.Settings.Ocr.Engine = SelectedOcrEngine ?? "nOcr";
+        Se.Settings.Tools.BatchConvert.OcrEngine = SelectedOcrEngine ?? "nOcr";
+
+        var ocrEngine = SelectedOcrEngine;
+        if (ocrEngine == "Tesseract")
+        {
+            Se.Settings.Tools.BatchConvert.TesseractLanguage = SelectedTesseractDictionaryItem?.Code ?? "eng";
+        }
+
+        if (ocrEngine == "PaddleOCR")
+        {
+            Se.Settings.Tools.BatchConvert.PaddleLanguage = SelectedPaddleOcrLanguage?.Code ?? "en";
+        }
 
         Se.SaveSettings();
     }
@@ -127,6 +189,34 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+    }
+
+    internal void OnOcrEngineChanged()
+    {
+        var ocrEngine = SelectedOcrEngine;
+        if (string.IsNullOrEmpty(ocrEngine))
+        {
+            IsOcrLanguageVisible = false;
+            IsTesseractOcrVisible = false;
+            IsPaddleOCrVisible = false;
+            return;
+        }
+
+        IsOcrLanguageVisible = ocrEngine != "nOcr";
+        IsTesseractOcrVisible = ocrEngine == "Tesseract";
+        IsPaddleOCrVisible = ocrEngine == "PaddleOCR";
+
+        if (ocrEngine == "Tesseract")
+        {
+            SelectedTesseractDictionaryItem = TesseractDictionaryItems
+                .FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.TesseractLanguage) ?? TesseractDictionaryItems.FirstOrDefault();
+        }
+
+        if (ocrEngine == "PaddleOCR")
+        {
+            SelectedPaddleOcrLanguage = PaddleOcrLanguages
+                .FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.PaddleLanguage) ?? PaddleOcrLanguages.FirstOrDefault();
         }
     }
 }

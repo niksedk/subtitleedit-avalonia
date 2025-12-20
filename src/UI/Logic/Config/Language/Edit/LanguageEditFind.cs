@@ -10,7 +10,7 @@ public class LanguageEditFind
     public string FindNext { get; set; }
     public string ReplaceNext { get; set; }
     public string ReplaceAll { get; set; }
-    public string? ReplaceTitle { get; set; }
+    public string ReplaceTitle { get; set; }
     public string ReplaceWith { get; set; }
     public string ReplaceTextWatermark { get; set; }
 

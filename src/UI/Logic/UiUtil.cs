@@ -909,6 +909,17 @@ public static class UiUtil
         return control;
     }
 
+    public static ComboBox WithBindVisible(this ComboBox control, string isVisiblePropertyPath)
+    {
+        control.Bind(ComboBox.IsVisibleProperty, new Binding
+        {
+            Path = isVisiblePropertyPath,
+            Mode = BindingMode.TwoWay,
+        });
+
+        return control;
+    }
+
     public static Button WithHorizontalAlignmentStretch(this Button control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Stretch;

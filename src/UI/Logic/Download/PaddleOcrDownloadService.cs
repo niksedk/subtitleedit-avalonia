@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -11,9 +10,9 @@ public class PaddleOcrDownloadService : IPaddleOcrDownloadService
 {
     private readonly HttpClient _httpClient;
     public const string DownloadModelsUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.0/PaddleOCR.PP-OCRv5.support.files.VideOCR.7z";
-    public const string DownloadWindowsEngineCpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.0/PaddleOCR-CPU-v1.3.0.7z";
-    public const string DownloadWindowsEngineGpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.0/PaddleOCR-GPU-v1.3.0-CUDA-11.8.7z";
-    public const string DownloadLinuxEngineCpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.0/PaddleOCR-CPU-v1.3.0-Linux.tar.xz";
+    public const string DownloadWindowsEngineCpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.2/PaddleOCR-CPU-v1.3.2.7z";
+    public const string DownloadWindowsEngineGpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.2/PaddleOCR-GPU-v1.3.2-CUDA-11.8.7z";
+    public const string DownloadLinuxEngineCpuUrl = "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.3.2/PaddleOCR-CPU-v1.3.2-Linux.7z";
 
     public PaddleOcrDownloadService(HttpClient httpClient)
     {

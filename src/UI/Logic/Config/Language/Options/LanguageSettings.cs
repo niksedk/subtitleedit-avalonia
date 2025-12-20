@@ -363,7 +363,7 @@ public class LanguageSettings
         DownloadMpv = "Download mpv";
         DownloadVlc = "Download VLC";
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
-        AdjustAllTimesRememberLineSelectionChoice = "Adjust all times remember line selection choice";
+        AdjustAllTimesRememberLineSelectionChoice = "Adjust all times, remember line selection choice";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default 'Save as' format";
         FilesAndLogs = "Files and logs";
