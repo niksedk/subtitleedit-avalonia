@@ -8,4 +8,5 @@ public interface IMpvReloader
 {
     void RefreshMpv(LibMpvDynamicPlayer mpv, Subtitle subtitle, SubtitleFormat uiFormat);
     void Reset();
+    bool SmpteMode { get; set; }
 }

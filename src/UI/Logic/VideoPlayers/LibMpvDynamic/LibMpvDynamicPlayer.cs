@@ -619,6 +619,9 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         SetOptionString("keep-open", "always");
         SetOptionString("sid", "no");
 
+        SetOptionString("hr-seek", "yes");
+        SetOptionString("rebase-start-time", "no");
+
         _fileName = path;
     }
 
@@ -727,7 +730,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
     {
         get
         {
-            if (_pausedValue.HasValue && IsPaused)
+            if (_pausedValue.HasValue && IsPaused && !Se.Settings.General.UseFrameMode)
             {
                 return _pausedValue.Value;
             }

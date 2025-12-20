@@ -827,6 +827,17 @@ public partial class MainViewModel :
             _adjustAllTimesViewModel = null;
         }
 
+        var vp = GetVideoPlayerControl();
+        if (vp != null)
+        {
+            vp.IsSmpteTimingEnabled = IsSmpteTimingEnabled;
+        }
+
+        if (_mpvReloader != null)
+        {
+            _mpvReloader.SmpteMode = IsSmpteTimingEnabled;
+        }
+
         _undoRedoManager.Reset();
         _shortcutManager.ClearKeys();
     }
@@ -986,6 +997,7 @@ public partial class MainViewModel :
         if (recentFile.VideoIsSmpte)
         {
             IsSmpteTimingEnabled = false;
+            ToggleSmpteTiming();
         }
         else
         {
@@ -3545,9 +3557,15 @@ public partial class MainViewModel :
             }
         }
 
-        if (VideoPlayerControl != null)
+        var vp = GetVideoPlayerControl();
+        if (vp != null)
         {
-            VideoPlayerControl.IsSmpteTimingEnabled = IsSmpteTimingEnabled;
+            vp.IsSmpteTimingEnabled = IsSmpteTimingEnabled;
+        }
+
+        if (_mpvReloader != null)
+        {
+            _mpvReloader.SmpteMode = IsSmpteTimingEnabled;
         }
     }
 

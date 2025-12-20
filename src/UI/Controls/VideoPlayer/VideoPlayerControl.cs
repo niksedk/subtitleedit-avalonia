@@ -577,29 +577,35 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
             _positionTimer.Tick += (s, e) =>
             {
+                var postFix = IsSmpteTimingEnabled ? " (SMPTE)" : string.Empty;
                 var pos = _videoPlayerInstance.Position;
+                if (IsSmpteTimingEnabled)
+                {
+                     pos = pos * 1000.0 / 1001.0; // SMPTE timing adjustment 
+                }
+
                 SetPositionDisplayOnly(pos);
 
                 if (VideoPlayerDisplayTimeLeft)
                 {
                     var left = Duration - pos;
+
                     if (left > 0.001)
                     {
                         ProgressText =
-                            $"-{TimeCode.FromSeconds(left).ToShortDisplayString()}";
+                            $"-{TimeCode.FromSeconds(left).ToShortDisplayString()}{postFix}";
                     }
                     else
                     {
                         ProgressText =
-                            $"{TimeCode.FromSeconds(0).ToShortDisplayString()}";
+                            $"{TimeCode.FromSeconds(0).ToShortDisplayString()}{postFix}";
                     }
                 }
                 else
                 {
                     ProgressText =
-                        $"{TimeCode.FromSeconds(pos + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()}";
+                        $"{TimeCode.FromSeconds(pos + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()} / {TimeCode.FromSeconds(Duration + Se.Settings.General.CurrentVideoOffsetInMs / 1000.0).ToShortDisplayString()}{postFix}";
                 }
-
 
                 //TODO: move to a slower timer or events
                 Duration = _videoPlayerInstance.Duration;

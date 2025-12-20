@@ -1,6 +1,5 @@
 ﻿using Avalonia.Skia;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
