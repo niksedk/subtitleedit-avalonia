@@ -328,6 +328,10 @@ public class BinaryEditWindow : Window
         flyout.Items.Add(menuItemDelete);
         menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)));
 
+        var separatorInsert = new Separator() { DataContext = vm };
+        flyout.Items.Add(separatorInsert);
+        separatorInsert.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsInsertBeforeVisible)));
+
         var menuItemInsertBefore = new MenuItem
         {
             Header = Se.Language.General.InsertBefore,
@@ -354,6 +358,19 @@ public class BinaryEditWindow : Window
         };
         flyout.Items.Add(menuItemToggleForced);
         menuItemToggleForced.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsToggleForcedVisible)));
+
+        var separatorInsertSubtitle = new Separator() { DataContext = vm };
+        flyout.Items.Add(separatorInsertSubtitle);
+        separatorInsertSubtitle.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsInsertSubtitleVisible)));
+
+        var menuItemInsertSubtitle = new MenuItem
+        {
+            Header = Se.Language.General.InsertSubtitleAfterCurrentLine,
+            DataContext = vm,
+            Command = vm.InsertSubtitleCommand,
+        };
+        flyout.Items.Add(menuItemInsertSubtitle);
+        menuItemInsertSubtitle.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsInsertSubtitleVisible)));
 
         vm.SubtitleGrid = dataGrid;
 

@@ -39,6 +39,7 @@ public partial class BinaryEditViewModel : ObservableObject
     [ObservableProperty] private bool _isInsertBeforeVisible;
     [ObservableProperty] private bool _isInsertAfterVisible;
     [ObservableProperty] private bool _isToggleForcedVisible;
+    [ObservableProperty] private bool _isInsertSubtitleVisible;
 
     public IOcrSubtitle? OcrSubtitle { get; set; }
 
@@ -225,6 +226,44 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
+        IOcrSubtitle? imageSubtitle = LoadImageSubtitle(fileName);
+
+        if (imageSubtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        FileName = fileName;
+        OcrSubtitle = imageSubtitle;
+
+        Subtitles.Clear();
+        List<Ocr.OcrSubtitleItem> list = imageSubtitle.MakeOcrSubtitleItems();
+        for (int i = 0; i < list.Count; i++)
+        {
+            Ocr.OcrSubtitleItem? s = list[i];
+            Subtitles.Add(new BinarySubtitleItem(s, i));
+        }
+
+        if (Subtitles.Count > 0)
+        {
+            SelectAndScrollToRow(0);
+            ScreenWidth = Subtitles[0].ScreenSize.Width;
+            ScreenHeight = Subtitles[0].ScreenSize.Height;
+            UpdateStatusText();
+            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, fileName);
+        }
+
+        var videoFileName = TryGetVideoFileName(fileName);
+        if (!string.IsNullOrEmpty(videoFileName) && VideoPlayerControl != null)
+        {
+            await VideoPlayerControl.Open(videoFileName);
+        }
+    }
+
+    private static IOcrSubtitle? LoadImageSubtitle(string fileName)
+    {
         IOcrSubtitle? imageSubtitle = null;
 
         // Blu-ray SUP
@@ -278,38 +317,7 @@ public partial class BinaryEditViewModel : ObservableObject
             }
         }
 
-        if (imageSubtitle == null)
-        {
-            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
-        }
-
-        FileName = fileName;
-        OcrSubtitle = imageSubtitle;
-
-        Subtitles.Clear();
-        List<Ocr.OcrSubtitleItem> list = imageSubtitle.MakeOcrSubtitleItems();
-        for (int i = 0; i < list.Count; i++)
-        {
-            Ocr.OcrSubtitleItem? s = list[i];
-            Subtitles.Add(new BinarySubtitleItem(s, i));
-        }
-
-        if (Subtitles.Count > 0)
-        {
-            SelectAndScrollToRow(0);
-            ScreenWidth = Subtitles[0].ScreenSize.Width;
-            ScreenHeight = Subtitles[0].ScreenSize.Height;
-            UpdateStatusText();
-            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, fileName);
-        }
-
-        var videoFileName = TryGetVideoFileName(fileName);
-        if (!string.IsNullOrEmpty(videoFileName) && VideoPlayerControl != null)
-        {
-            await VideoPlayerControl.Open(videoFileName);
-        }
+        return imageSubtitle;
     }
 
     private string? TryGetVideoFileName(string fileName)
@@ -1039,7 +1047,7 @@ public partial class BinaryEditViewModel : ObservableObject
         if (selectedItem == null || selectedItem.Bitmap == null)
         {
             return;
-        }        
+        }
 
         var newItem = new BinarySubtitleItem(selectedItem);
         newItem.EndTime = TimeSpan.FromMicroseconds(selectedItem.StartTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines);
@@ -1081,7 +1089,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var selectedItems = SubtitleGrid.SelectedItems.Cast<BinarySubtitleItem>().ToList(); 
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<BinarySubtitleItem>().ToList();
         foreach (var item in selectedItems)
         {
             item.IsForced = !item.IsForced;
@@ -1195,6 +1203,50 @@ public partial class BinaryEditViewModel : ObservableObject
         Window?.Close();
     }
 
+    [RelayCommand]
+    private async Task InsertSubtitle()
+    {
+        var selectedItem = SelectedSubtitle;
+        if (Window == null || selectedItem == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", "All files", "*.*");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var imageSubtitle = LoadImageSubtitle(fileName);
+        if (imageSubtitle == null)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var ocrItems = imageSubtitle.MakeOcrSubtitleItems();
+        if (ocrItems.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, "No subtitles found in the file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        var oldLastTime = selectedItem.EndTime.TotalMilliseconds;
+        var newFirstTime = ocrItems.First().StartTime.TotalMilliseconds;
+        var timeOffset = oldLastTime - newFirstTime + 1000;
+        foreach (var ocrItem in ocrItems)
+        {
+            var newItem = new BinarySubtitleItem(ocrItem, -1);
+            newItem.StartTime = TimeSpan.FromMilliseconds(ocrItem.StartTime.TotalMilliseconds + timeOffset);
+            newItem.EndTime = TimeSpan.FromMilliseconds(ocrItem.EndTime.TotalMilliseconds + timeOffset);
+            Subtitles.Add(newItem);
+        }
+
+        Renumber();
+        UpdateStatusText();
+    }
+
     public void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -1228,7 +1280,7 @@ public partial class BinaryEditViewModel : ObservableObject
     public void Loaded()
     {
         UiUtil.RestoreWindowPosition(Window);
-        
+
         if (string.IsNullOrEmpty(_loadFileName))
         {
             return;
@@ -1331,9 +1383,11 @@ public partial class BinaryEditViewModel : ObservableObject
     internal void OnContextMenuOpening()
     {
         var selectedCount = SubtitleGrid?.SelectedItems?.Count ?? 0;
+        var selectedIndex = SubtitleGrid?.SelectedIndex ?? -1;
         IsDeleteVisible = selectedCount > 0;
         IsToggleForcedVisible = selectedCount > 0;
         IsInsertAfterVisible = selectedCount == 1;
         IsInsertBeforeVisible = selectedCount == 1;
+        IsInsertSubtitleVisible = selectedCount == 1 && selectedIndex == Subtitles.Count - 1;
     }
 }

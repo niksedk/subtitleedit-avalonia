@@ -558,12 +558,13 @@ public class LanguageGeneral
     public string OpenImageBasedSubtitle { get; set; }
     public string XSubtitles { get; set; }
     public string SubtitleXOfY { get; set; }
-    public string PositionX { get; internal set; }
-    public string SizeX { get; internal set; }
+    public string PositionX { get; set; }
+    public string SizeX { get; set; }
     public string SetFontDotDotDot { get; set; }
     public string LineHeigth { get; set; }
     public string ToggleForced { get; set; }
     public string MediaInformation { get; set; }
+    public string InsertSubtitleAfterCurrentLine { get; set; }
 
     public LanguageGeneral()
     {
@@ -1129,5 +1130,6 @@ public class LanguageGeneral
         LineHeigth = "Line height";
         ToggleForced = "Toggle forced";
         MediaInformation = "Media information";
+        InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
     }
 }
