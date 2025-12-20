@@ -765,7 +765,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                 return;
             }
 
-            //var err = DoMpvCommand("seek", value.ToString(CultureInfo.InvariantCulture), "absolute");
+            var err = DoMpvCommand("seek", value.ToString(CultureInfo.InvariantCulture), "absolute");
             //if (err < 0)
             //{
             //    Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Position set");
