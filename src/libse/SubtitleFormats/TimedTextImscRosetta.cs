@@ -212,7 +212,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             XmlNode paragraph = xml.CreateElement("p", "http://www.w3.org/ns/ttml");
             XmlAttribute pStyle = xml.CreateAttribute("style");
-            pStyle.InnerText = "p_font1";
+            
+            // Combine horizontal alignment style with font style
+            var horizontalAlignment = GetHorizontalAlignmentStyle(alignment);
+            pStyle.InnerText = horizontalAlignment == "p_al_center" ? "p_font1" : $"{horizontalAlignment} p_font1";
             paragraph.Attributes.Append(pStyle);
 
             var text = p.Text.RemoveControlCharactersButWhiteSpace();
@@ -249,7 +252,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return div;
         }
 
-        internal static void ConvertParagraphNodeToTtmlNode(XmlNode node, XmlDocument ttmlXml, XmlNode ttmlNode)
+        private static void ConvertParagraphNodeToTtmlNode(XmlNode node, XmlDocument ttmlXml, XmlNode ttmlNode)
         {
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -379,7 +382,23 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 var pNode = divNode.SelectSingleNode("ttml:p", namespaceManager);
                 if (pNode != null)
                 {
+                    // Extract region ID from div
+                    var regionId = divNode.Attributes?["region"]?.Value ?? "R2"; // default to bottom
+                    
+                    // Extract paragraph style
+                    var paragraphStyle = pNode.Attributes?["style"]?.Value ?? string.Empty;
+                    
+                    // Get the alignment tag
+                    var alignmentTag = GetAlignmentTagFromRegionAndStyle(regionId, paragraphStyle);
+                    
                     var text = ReadParagraph(pNode, xml);
+                    
+                    // Prepend alignment tag if not default
+                    if (!string.IsNullOrEmpty(alignmentTag))
+                    {
+                        text = alignmentTag + text;
+                    }
+                    
                     var p = new Paragraph(begin, end, text);
                     subtitle.Paragraphs.Add(p);
                 }
@@ -411,60 +430,121 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return "an2"; // default: bottom-center
         }
 
+        private static string GetAlignmentTagFromRegionAndStyle(string regionId, string paragraphStyle)
+        {
+            // Determine vertical position from region
+            var verticalPosition = regionId switch
+            {
+                "R0" => "top",
+                "R1" => "middle",
+                "R2" => "bottom",
+                _ => "bottom" // default
+            };
+
+            // Determine horizontal position from paragraph style
+            var horizontalPosition = "center"; // default
+            if (!string.IsNullOrEmpty(paragraphStyle))
+            {
+                if (paragraphStyle.Contains("p_al_start"))
+                {
+                    horizontalPosition = "left";
+                }
+                else if (paragraphStyle.Contains("p_al_end"))
+                {
+                    horizontalPosition = "right";
+                }
+            }
+
+            // Convert to an1-9 tag
+            var alignmentTag = (verticalPosition, horizontalPosition) switch
+            {
+                ("bottom", "left") => "{\\an1}",
+                ("bottom", "center") => "{\\an2}",
+                ("bottom", "right") => "{\\an3}",
+                ("middle", "left") => "{\\an4}",
+                ("middle", "center") => "{\\an5}",
+                ("middle", "right") => "{\\an6}",
+                ("top", "left") => "{\\an7}",
+                ("top", "center") => "{\\an8}",
+                ("top", "right") => "{\\an9}",
+                _ => "{\\an2}" // default: bottom-center
+            };
+
+            // Only return non-default alignment tags
+            return alignmentTag == "{\\an2}" ? string.Empty : alignmentTag;
+        }
+
         private static string GetRegionIdForAlignment(string alignment)
         {
             return alignment switch
             {
-                "an1" => "R_BottomLeft",
-                "an2" => "R_BottomCenter",
-                "an3" => "R_BottomRight",
-                "an4" => "R_MiddleLeft",
-                "an5" => "R_MiddleCenter",
-                "an6" => "R_MiddleRight",
-                "an7" => "R_TopLeft",
-                "an8" => "R_TopCenter",
-                "an9" => "R_TopRight",
-                _ => "R_BottomCenter"
+                "an1" => "R2",  // bottom-left
+                "an2" => "R2",  // bottom-center
+                "an3" => "R2",  // bottom-right
+                "an4" => "R1",  // middle-left
+                "an5" => "R1",  // middle-center
+                "an6" => "R1",  // middle-right
+                "an7" => "R0",  // top-left
+                "an8" => "R0",  // top-center
+                "an9" => "R0",  // top-right
+                _ => "R2"       // default: bottom
+            };
+        }
+
+        private static string GetHorizontalAlignmentStyle(string alignment)
+        {
+            return alignment switch
+            {
+                "an1" => "p_al_start",   // left
+                "an2" => "p_al_center",  // center
+                "an3" => "p_al_end",     // right
+                "an4" => "p_al_start",   // left
+                "an5" => "p_al_center",  // center
+                "an6" => "p_al_end",     // right
+                "an7" => "p_al_start",   // left
+                "an8" => "p_al_center",  // center
+                "an9" => "p_al_end",     // right
+                _ => "p_al_center"       // default: center
             };
         }
 
         private static string GenerateRegionsXml(HashSet<string> usedAlignments)
         {
             var sb = new StringBuilder();
+            var regionsNeeded = new HashSet<string>();
 
+            // Determine which of the 3 vertical regions are needed
             foreach (var alignment in usedAlignments)
             {
                 var regionId = GetRegionIdForAlignment(alignment);
-                var (displayAlign, origin, extent, styleRef) = GetRegionProperties(alignment);
-
-                sb.AppendLine($"      <region xml:id=\"{regionId}\" style=\"r_default\" tts:displayAlign=\"{displayAlign}\" tts:origin=\"{origin}\" tts:extent=\"{extent}\" />");
+                regionsNeeded.Add(regionId);
             }
 
-            // Ensure we always have at least the default region
-            if (!usedAlignments.Contains("an2"))
+            // Generate only the needed regions
+            if (regionsNeeded.Contains("R0"))
             {
-                sb.AppendLine("      <region xml:id=\"R_BottomCenter\" style=\"r_default\" tts:displayAlign=\"after\" tts:origin=\"10% 10%\" tts:extent=\"80% 85%\" />");
+                sb.AppendLine("      <region xml:id=\"R0\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"before\" style=\"r_default\" />");
+            }
+
+            if (regionsNeeded.Contains("R1"))
+            {
+                sb.AppendLine("      <region xml:id=\"R1\" tts:origin=\"10% 43.3%\" tts:extent=\"80% 46.7%\" tts:displayAlign=\"before\" style=\"r_default\" />");
+            }
+
+            if (regionsNeeded.Contains("R2"))
+            {
+                sb.AppendLine("      <region xml:id=\"R2\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
+            }
+
+            // Ensure we always have at least the default region (R2 - bottom)
+            if (regionsNeeded.Count == 0)
+            {
+                sb.AppendLine("      <region xml:id=\"R2\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
             }
 
             return sb.ToString().TrimEnd();
         }
 
-        private static (string displayAlign, string origin, string extent, string styleRef) GetRegionProperties(string alignment)
-        {
-            return alignment switch
-            {
-                "an1" => ("after", "10% 10%", "30% 85%", "p_al_start"),    // bottom-left
-                "an2" => ("after", "10% 10%", "80% 85%", "p_al_center"),   // bottom-center (default)
-                "an3" => ("after", "60% 10%", "30% 85%", "p_al_end"),      // bottom-right
-                "an4" => ("center", "10% 10%", "30% 80%", "p_al_start"),   // middle-left
-                "an5" => ("center", "10% 10%", "80% 80%", "p_al_center"),  // middle-center
-                "an6" => ("center", "60% 10%", "30% 80%", "p_al_end"),     // middle-right
-                "an7" => ("before", "10% 10%", "30% 85%", "p_al_start"),   // top-left
-                "an8" => ("before", "10% 10%", "80% 85%", "p_al_center"),  // top-center
-                "an9" => ("before", "60% 10%", "30% 85%", "p_al_end"),     // top-right
-                _ => ("after", "10% 10%", "80% 85%", "p_al_center")         // default: bottom-center
-            };
-        }
 
         private static string ReadParagraph(XmlNode node, XmlDocument xml)
         {
