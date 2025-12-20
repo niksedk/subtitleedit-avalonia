@@ -31,6 +31,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Features.Ocr.Engines;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -268,6 +269,10 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             if (Se.Settings.Ocr.Engine.Equals("nOcr", StringComparison.OrdinalIgnoreCase))
             {
                 RunNOcr(imageSubtitle, item, cancellationToken);
+            }
+            else if (Se.Settings.Ocr.Engine.Equals("PaddleOcr", StringComparison.OrdinalIgnoreCase))
+            {
+                RunPaddleOcr(imageSubtitle, item, cancellationToken);
             }
             else
             {
@@ -659,6 +664,54 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 break;
             }
         }
+    }
+    
+    private readonly Lock _paddleLock = new Lock();
+    
+    private void RunPaddleOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        var numberOfImages = imageSubtitles.Count;
+        var ocrEngine = new PaddleOcr();
+        var language = "en";
+        var mode = Se.Settings.Ocr.PaddleOcrMode;
+        Se.Settings.Ocr.PaddleOcrLastLanguage = language;
+
+        var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
+        item.Status = "Preparing OCR...";
+        for (var i = 0; i < imageSubtitles.Count; i++)
+        {
+            batchImages.Add(new PaddleOcrBatchInput
+            {
+                Bitmap = imageSubtitles.GetBitmap(i),
+                Index = i,
+                Text = $"{i+1} / {numberOfImages}: {imageSubtitles.GetStartTime(i)} - {imageSubtitles.GetEndTime(i)}"
+            });
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+        }
+
+        var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            lock (_paddleLock)
+            {
+                var number = p.Index;
+                var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+                var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+            }
+        });
+
+        _ = Task.Run(async () =>
+        {
+            await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, true, mode, ocrProgress, cancellationToken);
+        }, cancellationToken);
     }
 
     private void WriteToImageBasedFormat(BatchConvertItem item, IOcrSubtitle? imageSubtitle, CancellationToken cancellationToken)
