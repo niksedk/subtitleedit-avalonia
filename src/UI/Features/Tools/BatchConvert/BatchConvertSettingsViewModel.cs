@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,6 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -39,6 +41,11 @@ public partial class BatchConvertSettingsViewModel : ObservableObject
         TargetEncodings = new ObservableCollection<string>(encodings);
 
         OcrEngines = new ObservableCollection<string> { "nOcr", "Tesseract" };
+        if (OperatingSystem.IsWindows() && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        {
+            OcrEngines.Add("PaddleOCR");
+        }
+        
         SelectedOcrEngine = Se.Settings.Ocr.Engine == "nOcr" ? OcrEngines.First() : OcrEngines.Last();
 
         LanguagePostFixes = new ObservableCollection<string>()

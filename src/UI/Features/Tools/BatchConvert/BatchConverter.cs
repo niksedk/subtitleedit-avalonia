@@ -270,7 +270,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             {
                 RunNOcr(imageSubtitle, item, cancellationToken);
             }
-            else if (Se.Settings.Ocr.Engine.Equals("PaddleOcr", StringComparison.OrdinalIgnoreCase))
+            else if (Se.Settings.Ocr.Engine.Equals("PaddleOCR", StringComparison.OrdinalIgnoreCase))
             {
                 RunPaddleOcr(imageSubtitle, item, cancellationToken);
             }
