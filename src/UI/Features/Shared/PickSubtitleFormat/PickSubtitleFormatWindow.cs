@@ -15,10 +15,10 @@ public class PickSubtitleFormatWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.PickSubtitleFormat;
         CanResize = true;
-        Width = 800;
+        Width = 900;
         Height = 700;
-        MinWidth = 500;
-        MinHeight = 400;
+        MinWidth = 600;
+        MinHeight = 500;
         vm.Window = this;
         DataContext = vm;
 
@@ -26,16 +26,17 @@ public class PickSubtitleFormatWindow : Window
         var textBoxSearch = new TextBox
         {
             Watermark = Se.Language.General.SearchSubtitleFormats,
-            Margin = new Thickness(10),
-            Width = 200,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(5, 0, 0, 0),
+            Width = 250,
         };
         textBoxSearch.Bind(TextBox.TextProperty, new Binding(nameof(vm.SearchText)) { Source = vm });
-        textBoxSearch.TextChanged += (s, e) => vm.SearchTextChanged();
+        textBoxSearch.TextChanged += (_, _) => vm.SearchTextChanged();
+        
         var panelSearch = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 0, 0, 10),
             Children =
             {
                 labelSearch,
@@ -43,7 +44,37 @@ public class PickSubtitleFormatWindow : Window
             }
         };
 
+        var listBoxFormats = new ListBox
+        {
+            Height = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+        listBoxFormats.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.SubtitleFormatNames)));
+        listBoxFormats.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitleFormatName)) { Mode = BindingMode.TwoWay });
+        listBoxFormats.SelectionChanged += (_, _) => vm.SelectedSubtitleFormatNameChanged();
+        listBoxFormats.DoubleTapped += (_, _) => vm.OkCommand.Execute(null);
         
+        var listBoxBorder = UiUtil.MakeBorderForControl(listBoxFormats);
+        
+        var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
+        labelPreview.Margin = new Thickness(0, 10, 0, 5);
+        
+        var textBoxPreview = new TextBox
+        {
+            AcceptsReturn = true,
+            AcceptsTab = true,
+            IsReadOnly = true,
+            Height = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            FontFamily = new FontFamily("Courier New, Consolas, monospace"),
+            FontSize = 12,
+        };
+        textBoxPreview.Bind(TextBox.TextProperty, new Binding(nameof(vm.PreviewText)));
+        
+        var previewBorder = UiUtil.MakeBorderForControl(textBoxPreview);
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
@@ -52,12 +83,11 @@ public class PickSubtitleFormatWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },  // Search
+                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },  // ListBox
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },  // Preview label
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },  // Preview
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },  // Buttons
             },
             ColumnDefinitions =
             {
@@ -65,17 +95,24 @@ public class PickSubtitleFormatWindow : Window
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
-            RowSpacing = 10,
+            RowSpacing = 0,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
         grid.Add(panelSearch, 0);
-        grid.Add(buttonPanel, 5);
+        grid.Add(listBoxBorder, 1);
+        grid.Add(labelPreview, 2);
+        grid.Add(previewBorder, 3);
+        grid.Add(buttonPanel, 4);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Activated += delegate
+        {
+            textBoxSearch.Focus();
+        };
+        
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }
