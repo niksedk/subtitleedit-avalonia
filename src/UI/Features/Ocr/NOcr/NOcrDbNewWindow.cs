@@ -1,6 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -11,7 +9,6 @@ public class NOcrDbNewWindow : Window
     public NOcrDbNewWindow(NOcrDbNewViewModel vm)
     {
         Title = "New/rename nOCR database";
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;

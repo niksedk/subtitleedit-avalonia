@@ -119,6 +119,9 @@ public class SeAutoTranslate
         LibreTranslateApiKey = string.Empty;
         LibreTranslateUrl = "http://localhost:5000/";
         LibreTranslateUrl = "http://localhost:5000/";
+        LlamaCppApiUrl = "http://localhost:8080/v1/chat/completions";
+        LlamaCppModel = string.Empty;
+        LlamaCppPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
         LmStudioApiUrl = "http://localhost:1234/v1/chat/completions/";
         LmStudioModel = string.Empty;
         LmStudioPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";

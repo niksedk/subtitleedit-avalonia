@@ -2929,7 +2929,7 @@ public partial class MainViewModel :
         if (viewModel.OkPressed)
         {
             var selectedFormat = viewModel.GetSelectedFormat();
-            if (selectedFormat != SelectedSubtitleFormat)
+            if (selectedFormat != null && selectedFormat != SelectedSubtitleFormat)
             {
                 SelectedSubtitleFormat = selectedFormat;
             }
