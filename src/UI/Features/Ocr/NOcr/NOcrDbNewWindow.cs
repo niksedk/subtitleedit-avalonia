@@ -8,8 +8,6 @@ namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
 public class NOcrDbNewWindow : Window
 {
-    private readonly NOcrDbNewViewModel _vm;
-
     public NOcrDbNewWindow(NOcrDbNewViewModel vm)
     {
         Title = "New/rename nOCR database";
@@ -59,18 +57,7 @@ public class NOcrDbNewWindow : Window
         };
 
         textBoxDatabaseName.KeyDown += vm.TextBoxDatabaseNameKeyDown;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-            
-        base.OnLoaded(e);
-        Title = _vm.Title;
+        KeyDown += (_, e) => vm.KeyDown(e);
+        Loaded += (_, _) => Title = vm.Title;
     }
 }

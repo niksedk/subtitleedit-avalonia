@@ -10,16 +10,12 @@ namespace Nikse.SubtitleEdit.Features.Options.Language;
 
 public class LanguageWindow : Window
 {
-    private readonly LanguageViewModel _vm;
-    
     public LanguageWindow(LanguageViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Options.ChooseLanguage.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -68,17 +64,7 @@ public class LanguageWindow : Window
         Content = grid;
         
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        _vm.OnLoaded();
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        Loaded += (_, _) => vm.OnLoaded();
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

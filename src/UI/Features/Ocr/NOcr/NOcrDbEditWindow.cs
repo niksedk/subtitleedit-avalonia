@@ -2,8 +2,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -12,12 +10,9 @@ namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
 public class NOcrDbEditWindow : Window
 {
-    private readonly NOcrDbEditViewModel _vm;
-
     public NOcrDbEditWindow(NOcrDbEditViewModel vm)
     {
         Title = Se.Language.Ocr.EditNOcrDatabase;
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         CanResize = true;
@@ -65,6 +60,9 @@ public class NOcrDbEditWindow : Window
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
         PointerWheelChanged += vm.PointerWheelChanged;
+        KeyDown += (_, e) => vm.KeyDown(e);
+        KeyUp += (_, e) => vm.KeyUp(e);
+        Loaded += (_,_) => Title = vm.Title;    
     }
 
     private static Border MakeCharacterControlsView(NOcrDbEditViewModel vm)
@@ -215,24 +213,5 @@ public class NOcrDbEditWindow : Window
         grid.Add(panelImage, 0, 2);
 
         return UiUtil.MakeBorderForControl(grid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-
-        base.OnLoaded(e);
-        Title = _vm.Title;
     }
 }

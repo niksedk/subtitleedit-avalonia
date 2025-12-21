@@ -152,7 +152,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         Configuration.Settings.Tools.AutoTranslateLibreApiKey = Se.Settings.AutoTranslate.LibreTranslateApiKey;
         Configuration.Settings.Tools.AutoTranslateLibreUrl = Se.Settings.AutoTranslate.LibreTranslateUrl;
-        
+
         Configuration.Settings.Tools.AutoTranslateNllbApiUrl = Se.Settings.AutoTranslate.NllbApiUrl;
         Configuration.Settings.Tools.AutoTranslateNllbServeUrl = Se.Settings.AutoTranslate.NllbServeUrl;
         Configuration.Settings.Tools.AutoTranslateNllbServeModel = Se.Settings.AutoTranslate.NllbServeModel;
