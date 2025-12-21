@@ -212,26 +212,26 @@ public partial class AdjustDurationViewModel : ObservableObject
         {
             if (AdjustPercent <= 0)
             {
-                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Percent");
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, Se.Language.General.Percent);
             }
         }
         else if (SelectedAdjustType.Type == AdjustDurationType.Fixed)
         {
             if (AdjustFixed <= 0)
             {
-                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Fixed value");
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, Se.Language.General.FixedValue);
             }
         }
         else if (SelectedAdjustType.Type == AdjustDurationType.Recalculate)
         {
             if (AdjustRecalculateMaxCharacterPerSecond <= 1)
             {
-                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Max character per second");
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, Se.Language.General.MaxCharactersPerSecond);
             }
 
             if (AdjustRecalculateOptimalCharacterPerSecond <= 1)
             {
-                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, "Optimal character per second");
+                return string.Format(Se.Language.General.PleaseEnterAValidValueForX, Se.Language.General.OptimalCharactersPerSecond);
             }
         }
 

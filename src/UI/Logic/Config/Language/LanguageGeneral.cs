@@ -566,6 +566,8 @@ public class LanguageGeneral
     public string MediaInformation { get; set; }
     public string InsertSubtitleAfterCurrentLine { get; set; }
     public string? SearchSubtitleFormats { get; set; }
+    public string PoweredBy { get; set; }
+    public string FixedValue { get; set; }
 
     public LanguageGeneral()
     {
@@ -1133,5 +1135,7 @@ public class LanguageGeneral
         MediaInformation = "Media information";
         InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
         SearchSubtitleFormats = "Search subtitle formats";
+        PoweredBy = "Powered by";
+        FixedValue = "Fixed value";
     }
 }

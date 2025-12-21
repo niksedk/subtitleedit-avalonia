@@ -37,7 +37,7 @@ public class AutoTranslateWindow : Window
             Spacing = 10,
             Children =
             {
-                UiUtil.MakeTextBlock("Powered by"),
+                UiUtil.MakeTextBlock(Se.Language.General.PoweredBy),
                 UiUtil.MakeLink("Google Translate V1", vm.GoToAutoTranslatorUriCommand, vm, nameof(vm.AutoTranslatorLinkText))
                     .WithMarginRight(UiUtil.WindowMarginWidth),
             }

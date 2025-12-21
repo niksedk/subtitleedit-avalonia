@@ -177,7 +177,7 @@ public partial class SpellCheckViewModel : ObservableObject
         var result = await _windowService.ShowDialogAsync<EditWholeTextWindow, EditWholeTextViewModel>(Window!, vm =>
         {
             vm.WholeText = selectedParagraph.Text;
-            vm.LineInfo = $"Spell checker - line {Paragraphs.IndexOf(selectedParagraph) + 1} of {Paragraphs.Count}";
+            vm.LineInfo = string.Format(Se.Language.SpellCheck.LineXofY, Paragraphs.IndexOf(selectedParagraph) + 1, Paragraphs.Count);
         });
 
         if (!result.OkPressed)
@@ -199,7 +199,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.ChangeWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, SelectedParagraph!);
-        ShowStatus($"Change word from \"{WordNotFoundOriginal}\" to \"{CurrentWord}\"");
+        ShowStatus(string.Format(Se.Language.SpellCheck.ChangeWordFromXToY, WordNotFoundOriginal, CurrentWord));        
         DoSpellCheck();
     }
 

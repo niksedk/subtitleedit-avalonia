@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
 
 public class LanguageSpellCheck
 {
@@ -9,6 +11,8 @@ public class LanguageSpellCheck
     public string AddNameToNamesList { get; set; }
     public string NoDictionariesFound { get; set; }
     public string WordNotFound { get; set; }
+    public string LineXofY { get; set; }
+    public string ChangeWordFromXToY { get; set; }
 
     public LanguageSpellCheck()
     {
@@ -19,5 +23,7 @@ public class LanguageSpellCheck
         AddNameToNamesList = "Add name to names list";
         NoDictionariesFound = "No dictionaries found";
         WordNotFound = "Word not found";
+        LineXofY = "Spell checker - line {0} of {1}";
+        ChangeWordFromXToY = "Change word from '{0}' to '{1}'";
     }
 }
