@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -60,20 +59,9 @@ public class PickSubtitleFormatWindow : Window
         var labelPreview = UiUtil.MakeLabel(Se.Language.General.Preview);
         labelPreview.Margin = new Thickness(0, 10, 0, 5);
         
-        var textBoxPreview = new TextBox
-        {
-            AcceptsReturn = true,
-            AcceptsTab = true,
-            IsReadOnly = true,
-            Height = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            FontFamily = new FontFamily("Courier New, Consolas, monospace"),
-            FontSize = 12,
-        };
-        textBoxPreview.Bind(TextBox.TextProperty, new Binding(nameof(vm.PreviewText)));
-        
-        var previewBorder = UiUtil.MakeBorderForControl(textBoxPreview);
+        // Use the PreviewContainer from ViewModel (no border wrapper needed)
+        vm.PreviewContainer.VerticalAlignment = VerticalAlignment.Stretch;
+        vm.PreviewContainer.HorizontalAlignment = HorizontalAlignment.Stretch;
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -103,7 +91,7 @@ public class PickSubtitleFormatWindow : Window
         grid.Add(panelSearch, 0);
         grid.Add(listBoxBorder, 1);
         grid.Add(labelPreview, 2);
-        grid.Add(previewBorder, 3);
+        grid.Add(vm.PreviewContainer, 3);
         grid.Add(buttonPanel, 4);
 
         Content = grid;

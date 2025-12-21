@@ -1056,9 +1056,7 @@ public partial class MainViewModel :
         var format = SelectedSubtitleFormat;
         if (format is TimedTextImscRosetta)
         {
-            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
-            {
-            });
+            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm => { });
             SetLibSeSettings();
         }
 
@@ -1635,10 +1633,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm =>
-        {
-            vm.Initialize(fileName, imageSubtitle);
-        });
+        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => { vm.Initialize(fileName, imageSubtitle); });
     }
 
     [RelayCommand]
@@ -2920,7 +2915,7 @@ public partial class MainViewModel :
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
         }
     }
-    
+
     [RelayCommand]
     private async Task ShowSubtitleFormatPicker()
     {
@@ -2933,6 +2928,11 @@ public partial class MainViewModel :
 
         if (viewModel.OkPressed)
         {
+            var selectedFormat = viewModel.GetSelectedFormat();
+            if (selectedFormat != SelectedSubtitleFormat)
+            {
+                SelectedSubtitleFormat = selectedFormat;
+            }
         }
     }
 
@@ -4368,8 +4368,6 @@ public partial class MainViewModel :
                     var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
                     if (!File.Exists(peakWaveFileName))
                     {
-
-
                         if (FfmpegHelper.IsFfmpegInstalled())
                         {
                             var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
@@ -9295,7 +9293,6 @@ public partial class MainViewModel :
                 {
                     Se.LogError(e);
                 }
-
             }, DispatcherPriority.Background);
         }
 
@@ -9575,7 +9572,8 @@ public partial class MainViewModel :
         }
         catch
         {
-            _mediaInfo = null; ;
+            _mediaInfo = null;
+            ;
         }
     }
 
@@ -9696,7 +9694,6 @@ public partial class MainViewModel :
             }
 
             ExtractShotChanges(videoFileName);
-
         }
         finally
         {
@@ -11762,7 +11759,7 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         ShowMediaInformation();
     }
 
@@ -11777,10 +11774,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(async void () =>
         {
-            var result = await ShowDialogAsync<MediaInfoViewWindow, MediaInfoViewViewModel>(vm => 
-            {
-                vm.Initialize(_videoFileName ?? string.Empty, mediaInfo); 
-            });
+            var result = await ShowDialogAsync<MediaInfoViewWindow, MediaInfoViewViewModel>(vm => { vm.Initialize(_videoFileName ?? string.Empty, mediaInfo); });
         });
     }
 }

@@ -4,7 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
+using AvaloniaEdit;
+using AvaloniaEdit.Rendering;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
@@ -21,6 +25,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
     [ObservableProperty] private string _previewText;
 
     public Window? Window { get; set; }
+    public Border PreviewContainer { get; set; }
 
     public bool OkPressed { get; private set; }
     
@@ -36,6 +41,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
         SubtitleFormatNames = new ObservableCollection<string>(_allSubtitleFormatNames);
         SearchText = string.Empty;
         PreviewText = string.Empty;
+        PreviewContainer = new Border();
         
         // Create a sample subtitle for preview
         _sampleSubtitle = new Subtitle();
@@ -95,6 +101,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
         if (string.IsNullOrEmpty(SelectedSubtitleFormatName))
         {
             PreviewText = string.Empty;
+            PreviewContainer.Child = null;
             return;
         }
 
@@ -103,23 +110,97 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
             var format = SubtitleFormat.AllSubtitleFormats.FirstOrDefault(x => x.FriendlyName == SelectedSubtitleFormatName);
             if (format != null)
             {
-                PreviewText = format.ToText(_sampleSubtitle, "Sample");
+                var text = format.ToText(_sampleSubtitle, "Sample");
+                PreviewText = text;
                 
                 // Limit preview to first 1000 characters for better display
-                if (PreviewText.Length > 1000)
+                if (text.Length > 1000)
                 {
-                    PreviewText = PreviewText.Substring(0, 1000) + "\n\n... (truncated)";
+                    text = text.Substring(0, 1000) + "\n\n... (truncated)";
+                    PreviewText = text;
                 }
+
+                // Create TextEditor with syntax highlighting
+                var textEditor = new TextEditor
+                {
+                    Text = text,
+                    IsReadOnly = true,
+                    ShowLineNumbers = true,
+                    WordWrap = false,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    FontFamily = new FontFamily("Courier New, Consolas, monospace"),
+                    FontSize = 12,
+                };
+
+                // Override the built-in link color with our softer pastel color
+                textEditor.TextArea.TextView.LinkTextForegroundBrush = UiUtil.MakeLinkForeground();
+
+                // Add syntax highlighting for subtitle source formats
+                var lineTransformer = GetLineTransformer(text, format);
+                if (lineTransformer != null)
+                {
+                    textEditor.TextArea.TextView.LineTransformers.Add(lineTransformer);
+                }
+
+                PreviewContainer.Child = textEditor;
             }
             else
             {
                 PreviewText = string.Empty;
+                PreviewContainer.Child = null;
             }
         }
         catch (Exception ex)
         {
             PreviewText = $"Error generating preview:\n{ex.Message}";
+            var textBox = new TextBox
+            {
+                Text = PreviewText,
+                IsReadOnly = true,
+                AcceptsReturn = true,
+            };
+            PreviewContainer.Child = textBox;
         }
+    }
+
+    private static DocumentColorizingTransformer? GetLineTransformer(string text, SubtitleFormat subtitleFormat)
+    {
+        // SubRip (.srt) and WebVTT (.vtt) use similar time code formats
+        if (subtitleFormat is SubRip ||
+            subtitleFormat is WebVTT ||
+            subtitleFormat is WebVTTFileWithLineNumber)
+        {
+            return new SubRipSourceSyntaxHighlighting();
+        }
+
+        // Advanced SubStation Alpha (.ass) and SubStation Alpha (.ssa) formats
+        if (subtitleFormat is AdvancedSubStationAlpha || subtitleFormat is SubStationAlpha)
+        {
+            return new AssaSourceSyntaxHighlighting();
+        }
+
+        // XML-based formats (e.g., TTML, Netflix DFXP, etc.)
+        if (subtitleFormat.Extension == ".xml" ||
+            subtitleFormat.AlternateExtensions.Contains(".xml") ||
+            text.Contains("<?xml version=") ||
+            subtitleFormat is Sami ||
+            subtitleFormat is SamiModern ||
+            subtitleFormat is SamiYouTube ||
+            subtitleFormat is SamiAvDicPlayer)
+        {
+            return new XmlSourceSyntaxHighlighting();
+        }
+
+        // Json-based formats
+        if (subtitleFormat.Extension == ".json" ||
+            subtitleFormat.AlternateExtensions.Contains(".json"))
+        {
+            return new JsonSourceSyntaxHighlighting();
+        }
+
+        // No syntax highlighting for other formats
+        return null;
     }
 
     [RelayCommand]
