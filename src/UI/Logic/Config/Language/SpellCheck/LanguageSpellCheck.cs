@@ -13,6 +13,13 @@ public class LanguageSpellCheck
     public string WordNotFound { get; set; }
     public string LineXofY { get; set; }
     public string ChangeWordFromXToY { get; set; }
+    public string ChangeAllWordsFromXToY { get; set; }
+    public string IgnoreWordXOnce { get; set; }
+    public string IgnoreWordXAlways { get; set; }
+    public string WordXAddedToNamesList { get; set; }
+    public string WordXAddedToUserDictionary { get; set; }
+    public string UseSuggestionX { get; set; }
+    public string UseSuggestionXAlways { get; set; }
 
     public LanguageSpellCheck()
     {
@@ -25,5 +32,12 @@ public class LanguageSpellCheck
         WordNotFound = "Word not found";
         LineXofY = "Spell checker - line {0} of {1}";
         ChangeWordFromXToY = "Change word from '{0}' to '{1}'";
+        ChangeAllWordsFromXToY = "Change all words from '{0}' to '{1}'";
+        IgnoreWordXOnce = "Ignore word '{0}' once";
+        IgnoreWordXAlways = "Ignore word '{0}' always";
+        WordXAddedToNamesList = "Word '{0}' added to names list";
+        WordXAddedToUserDictionary = "Word '{0}' added to user dictionary";
+        UseSuggestionX = "Use suggestion '{0}'";
+        UseSuggestionXAlways = "Use suggestion '{0}' always";
     }
 }

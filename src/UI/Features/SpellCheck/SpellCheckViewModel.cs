@@ -50,6 +50,7 @@ public partial class SpellCheckViewModel : ObservableObject
 
     private SpellCheckWord _currentSpellCheckWord;
     private SpellCheckResult? _lastSpellCheckResult;
+    private System.Timers.Timer? _statusTimer;
 
     public SpellCheckViewModel(ISpellCheckManager spellCheckManager, IWindowService windowService)
     {
@@ -199,7 +200,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.ChangeWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, SelectedParagraph!);
-        ShowStatus(string.Format(Se.Language.SpellCheck.ChangeWordFromXToY, WordNotFoundOriginal, CurrentWord));        
+        ShowStatus(string.Format(Se.Language.SpellCheck.ChangeWordFromXToY, WordNotFoundOriginal, CurrentWord));
         DoSpellCheck();
     }
 
@@ -214,14 +215,14 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, CurrentWord, _currentSpellCheckWord, selectedParagraph);
-        ShowStatus($"Change all words from \"{WordNotFoundOriginal}\" to \"{CurrentWord}\"");
+        ShowStatus(string.Format(Se.Language.SpellCheck.ChangeAllWordsFromXToY, WordNotFoundOriginal, CurrentWord));
         DoSpellCheck();
     }
 
     [RelayCommand]
     private void SkipWord()
     {
-        ShowStatus($"Ignore word \"{WordNotFoundOriginal}\" once");
+        ShowStatus(string.Format(Se.Language.SpellCheck.IgnoreWordXOnce, WordNotFoundOriginal));
         DoSpellCheck();
     }
 
@@ -229,7 +230,7 @@ public partial class SpellCheckViewModel : ObservableObject
     private void SkipWordAll()
     {
         _spellCheckManager.AddIgnoreWord(WordNotFoundOriginal);
-        ShowStatus($"Ignore word \"{WordNotFoundOriginal}\" always");
+        ShowStatus(string.Format(Se.Language.SpellCheck.IgnoreWordXAlways, WordNotFoundOriginal));
         DoSpellCheck();
     }
 
@@ -243,7 +244,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.AddToNames(CurrentWord);
-        ShowStatus($"Word \"{CurrentWord}\" added to names list");
+        ShowStatus(string.Format(Se.Language.SpellCheck.WordXAddedToNamesList, CurrentWord));
         DoSpellCheck();
     }
 
@@ -257,7 +258,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.AdToUserDictionary(CurrentWord);
-        ShowStatus($"Word \"{CurrentWord}\" added to user dictionary");
+        ShowStatus(string.Format(Se.Language.SpellCheck.WordXAddedToUserDictionary, CurrentWord));
         DoSpellCheck();
     }
 
@@ -292,7 +293,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.ChangeWord(WordNotFoundOriginal, SelectedSuggestion, _currentSpellCheckWord, SelectedParagraph);
-        ShowStatus($"Use suggestion \"{CurrentWord}\"");
+        ShowStatus(string.Format(Se.Language.SpellCheck.UseSuggestionX, SelectedSuggestion));
         DoSpellCheck();
     }
 
@@ -305,7 +306,7 @@ public partial class SpellCheckViewModel : ObservableObject
         }
 
         _spellCheckManager.ChangeAllWord(WordNotFoundOriginal, SelectedSuggestion, _currentSpellCheckWord, SelectedParagraph);
-        ShowStatus($"Use suggestion \"{CurrentWord}\" always");
+        ShowStatus(string.Format(Se.Language.SpellCheck.UseSuggestionXAlways, SelectedSuggestion));
         DoSpellCheck();
     }
 
@@ -365,7 +366,7 @@ public partial class SpellCheckViewModel : ObservableObject
             }
 
             var lineIndex = Paragraphs.IndexOf(results[0].Paragraph) + 1;
-            LineText = $"Spell checker - line {lineIndex} of {Paragraphs.Count}";
+            LineText = string.Format(Se.Language.SpellCheck.LineXofY, lineIndex, Paragraphs.Count);
 
             _focusSubtitleLine?.GoToAndFocusLine(SelectedParagraph);
         }
@@ -405,9 +406,30 @@ public partial class SpellCheckViewModel : ObservableObject
     private void ShowStatus(string statusText)
     {
         StatusText = statusText;
-        //TODO: remove this info text after a few seconds
-    }
 
+        _statusTimer?.Stop();
+        _statusTimer?.Dispose();
+
+        _statusTimer = new System.Timers.Timer(3000);
+        _statusTimer.Elapsed += (sender, e) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                try
+                {
+                    StatusText = string.Empty;
+                    _statusTimer?.Dispose();
+                    _statusTimer = null;
+                }
+                catch
+                {
+                    // ignore
+                }
+            });
+        };
+        _statusTimer.AutoReset = false;
+        _statusTimer.Start();
+    }
 
     internal void ListBoxSuggestionsDoubleTapped(object? sender, TappedEventArgs e)
     {
