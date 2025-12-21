@@ -168,6 +168,7 @@ public class AudioVisualizer : Control
 
     public bool SnapToShotChanges { get; set; } = true;
     public bool FocusOnMouseOver { get; set; } = true;
+    public int WaveformHeightPercentage { get; set; } = 50;
 
     private List<double> _shotChanges = new List<double>();
 
@@ -494,7 +495,7 @@ public class AudioVisualizer : Control
         {
             nsp = null;
         }
-        
+
         var showContextMenu = false;
         if (e.InitialPressMouseButton == MouseButton.Left && OperatingSystem.IsMacOS() && _isCtrlDown)
         {
@@ -700,7 +701,7 @@ public class AudioVisualizer : Control
         InvalidateVisual();
     }
 
-    public bool SkipNextPointerEntered { get; set; }    
+    public bool SkipNextPointerEntered { get; set; }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
@@ -714,7 +715,7 @@ public class AudioVisualizer : Control
         if (!IsFocused)
         {
             if (SkipNextPointerEntered)
-            { 
+            {
                 SkipNextPointerEntered = false;
                 return;
             }
@@ -1073,6 +1074,9 @@ public class AudioVisualizer : Control
         public int SampleRate;
         public double HighestPeak;
         public Rect BoundsRect;
+
+        public double WaveformHeight { get; internal set; }
+        public double SpectrogramHeight { get; internal set; }
     }
 
     public override void Render(DrawingContext context)
@@ -1087,10 +1091,11 @@ public class AudioVisualizer : Control
 
         var boundsRect = new Rect(0, 0, width, height);
         context.DrawRectangle(_paintBackground, null, new Rect(Bounds.Size));
-        
+
         //var ticks = DateTime.UtcNow.Ticks;
-        
+
         // Pre-calculate commonly used values
+        var waveformHeight = height * (WaveformHeightPercentage / 100.0);
         var renderCtx = new RenderContext
         {
             Width = width,
@@ -1101,11 +1106,14 @@ public class AudioVisualizer : Control
             CurrentVideoPositionSeconds = CurrentVideoPositionSeconds,
             SampleRate = WavePeaks?.SampleRate ?? 0,
             HighestPeak = WavePeaks?.HighestPeak ?? 1.0,
-            BoundsRect = boundsRect
+            BoundsRect = boundsRect,
+            WaveformHeight = waveformHeight,
+            SpectrogramHeight = height - waveformHeight,
         };
 
         using (context.PushClip(boundsRect))
         {
+
             DrawAllGridLines(context, ref renderCtx);
             DrawWaveForm(context, ref renderCtx);
             DrawSpectrogram(context, ref renderCtx);
@@ -1145,7 +1153,7 @@ public class AudioVisualizer : Control
         var height = renderCtx.Height;
         if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
         {
-            height = renderCtx.Height / 2;
+            height = renderCtx.SpectrogramHeight;
         }
 
         var endPositionSeconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
@@ -1331,7 +1339,7 @@ public class AudioVisualizer : Control
         var waveformHeight = renderCtx.Height;
         if (_displayMode == WaveformDisplayMode.WaveformAndSpectrogram)
         {
-            waveformHeight = renderCtx.Height / 2;
+            waveformHeight = renderCtx.WaveformHeight;
         }
 
         if (WaveformDrawStyle == WaveformDrawStyle.Classic)

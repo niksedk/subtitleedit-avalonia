@@ -117,6 +117,7 @@ public class LanguageSettings
     public string WaveformDrawGridLines { get; set; }
     public string WaveformCenterVideoPosition { get; set; }
     public string WaveformShowToolbar { get; set; }
+    public string WaveformSpectrogramCombinedWaveformHeight { get; set; }
     public string ShowWaveformHorizontalZoom { get; set; }
     public string ShowWaveformVerticalZoom { get; set; }
     public string ShowWaveformVideoPositionSlider { get; set; }
@@ -326,6 +327,7 @@ public class LanguageSettings
         WaveformFocusOnMouseOver = "Focus on mouse over";
         WaveformCenterVideoPosition = "Center video position";
         WaveformShowToolbar = "Show toolbar";
+        WaveformSpectrogramCombinedWaveformHeight = "Waveform/spectrogram combined, waveform height %";
         ShowWaveformHorizontalZoom = "Toolbar: show horizontal zoom slider";
         ShowWaveformVerticalZoom = "Toolbar: show vertical zoom slider";
         ShowWaveformVideoPositionSlider = "Toolbar: show video position slider";

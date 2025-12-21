@@ -377,6 +377,7 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformGenerateSpectrogram, nameof(_vm.WaveformGenerateSpectrogram)),
             new SettingsItem(Se.Language.Options.Settings.WaveformSpectrogramMode,
                 () => UiUtil.MakeComboBox(_vm.WaveformSpectrogramStyles, _vm, nameof(_vm.SelectedWaveformSpectrogramStyle))),
+            MakeNumericSettingInt(Se.Language.Options.Settings.WaveformSpectrogramCombinedWaveformHeight, nameof(_vm.WaveformSpectrogramCombinedWaveformHeight), 10, 90),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterOnSingleClick, nameof(_vm.WaveformCenterOnSingleClick)),
@@ -760,12 +761,12 @@ public class SettingsPage : UserControl
         };
     }
 
-    private SettingsItem MakeNumericSettingInt(string label, string bindingProperty, int? minValue = null)
+    private SettingsItem MakeNumericSettingInt(string label, string bindingProperty, int? minValue = null, int? maxValue = null)
     {
-        return new SettingsItem(label, () => MakeNumericUpDownInt(bindingProperty, minValue));
+        return new SettingsItem(label, () => MakeNumericUpDownInt(bindingProperty, minValue, maxValue));
     }
 
-    private NumericUpDown MakeNumericUpDownInt(string bindingProperty, int? minValue = null)
+    private NumericUpDown MakeNumericUpDownInt(string bindingProperty, int? minValue = null, int? maxValue = null)
     {
         var nud = new NumericUpDown
         {
@@ -776,7 +777,12 @@ public class SettingsPage : UserControl
 
         if (minValue.HasValue)
         {
-            nud.Minimum = (decimal)minValue;
+            nud.Minimum = (decimal)minValue.Value;
+        }
+
+        if (maxValue.HasValue)
+        {
+            nud.Maximum = (decimal)maxValue.Value;
         }
 
         return nud;

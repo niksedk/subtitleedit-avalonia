@@ -9,6 +9,7 @@ public class SeWaveform
     public bool CenterVideoPosition { get; set; }
     public bool DrawGridLines { get; set; }
     public bool FocusTextBoxAfterInsertNew { get; set; }
+    public int SpectrogramCombinedWaveformHeight { get; set; }
     public bool ShowWaveformVerticalZoom { get; set; }
     public bool ShowWaveformHorizontalZoom { get; set; }
     public bool ShowWaveformVideoPositionSlider { get; set; }
@@ -44,6 +45,7 @@ public class SeWaveform
         ShowToolbar = true;
         DrawGridLines = false;
         FocusTextBoxAfterInsertNew = true;
+        SpectrogramCombinedWaveformHeight = 50;
         WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
         WaveformBackgroundColor = Color.FromArgb(255, 0, 0, 0).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();

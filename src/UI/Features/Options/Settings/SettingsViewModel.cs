@@ -134,6 +134,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _waveformSpectrogramStyles;
     [ObservableProperty] private string _selectedWaveformSpectrogramStyle;
 
+    [ObservableProperty] private int _waveformSpectrogramCombinedWaveformHeight;
+
     [ObservableProperty] private bool _waveformShowToolbar;
     [ObservableProperty] private bool _showWaveformVerticalZoom;
     [ObservableProperty] private bool _showWaveformHorizontalZoom;
@@ -507,6 +509,8 @@ public partial class SettingsViewModel : ObservableObject
             SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
         }
 
+        WaveformSpectrogramCombinedWaveformHeight = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
+
         ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
         ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
         ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
@@ -754,6 +758,8 @@ public partial class SettingsViewModel : ObservableObject
         {
             Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicTurbo.ToString();
         }
+
+         Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = WaveformSpectrogramCombinedWaveformHeight;
 
         Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
         Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;

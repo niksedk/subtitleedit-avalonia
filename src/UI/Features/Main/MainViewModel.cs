@@ -4355,6 +4355,7 @@ public partial class MainViewModel :
             AudioVisualizer.IsReadOnly = LockTimeCodes;
             AudioVisualizer.WaveformDrawStyle = InitWaveform.GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle);
             AudioVisualizer.MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
+            AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
 
             InitializeLibMpv();
             InitializeFfmpeg();

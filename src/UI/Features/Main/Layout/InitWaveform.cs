@@ -56,6 +56,7 @@ public class InitWaveform
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
             vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
+            vm.AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
