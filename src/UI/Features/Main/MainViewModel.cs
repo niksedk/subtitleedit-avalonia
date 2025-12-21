@@ -256,7 +256,9 @@ public partial class MainViewModel :
     private static SolidColorBrush _transparentBrush = new SolidColorBrush(Colors.Transparent);
     private static SolidColorBrush _errorBrush = new SolidColorBrush(_errorColor);
     private SpellCheckDictionaryDisplay? _currentSpellCheckDictionary;
-    FfmpegMediaInfo2? _mediaInfo;
+    private FfmpegMediaInfo2? _mediaInfo;
+    string _dropDownFormatsSearchText = string.Empty;
+    private System.Timers.Timer _dropDownFormatsSearchTimer = new System.Timers.Timer(1000);
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -444,6 +446,7 @@ public partial class MainViewModel :
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
         LockTimeCodes = Se.Settings.General.LockTimeCodes;
         SetLibSeSettings();
+        _dropDownFormatsSearchTimer.Elapsed += (s, e) => { _dropDownFormatsSearchText = string.Empty; _dropDownFormatsSearchTimer.Stop(); };
     }
 
     private static void SetLibSeSettings()
@@ -11776,5 +11779,27 @@ public partial class MainViewModel :
         {
             var result = await ShowDialogAsync<MediaInfoViewWindow, MediaInfoViewViewModel>(vm => { vm.Initialize(_videoFileName ?? string.Empty, mediaInfo); });
         });
+    }
+
+    internal void ComboBoxSubtitleFormatKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key >= Key.A && e.Key <= Key.Z)
+        {
+            _dropDownFormatsSearchTimer.Stop();
+            _dropDownFormatsSearchText += e.Key.ToString();
+            _dropDownFormatsSearchTimer.Start();
+
+            var items = SubtitleFormats;
+            if (items != null)
+            {
+                var match = items.FirstOrDefault(item =>
+                    item.Name?.StartsWith(_dropDownFormatsSearchText, StringComparison.OrdinalIgnoreCase) == true);
+
+                if (match != null && sender is ComboBox cb)
+                {
+                    cb.SelectedItem = match;
+                }
+            }
+        }
     }
 }
