@@ -565,6 +565,7 @@ public class LanguageGeneral
     public string ToggleForced { get; set; }
     public string MediaInformation { get; set; }
     public string InsertSubtitleAfterCurrentLine { get; set; }
+    public string? SearchSubtitleFormats { get; set; }
 
     public LanguageGeneral()
     {
@@ -1131,5 +1132,6 @@ public class LanguageGeneral
         ToggleForced = "Toggle forced";
         MediaInformation = "Media information";
         InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
+        SearchSubtitleFormats = "Search subtitle formats";
     }
 }

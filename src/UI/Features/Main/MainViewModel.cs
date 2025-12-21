@@ -124,6 +124,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using MediaInfoViewViewModel = Nikse.SubtitleEdit.Features.Shared.MediaInfoView.MediaInfoViewViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -2917,6 +2918,21 @@ public partial class MainViewModel :
             SetSubtitles(viewModel.FixedSubtitle);
             SelectAndScrollToRow(0);
             ShowStatus($"Fixed {viewModel.FixedSubtitle.Paragraphs.Count} lines");
+        }
+    }
+    
+    [RelayCommand]
+    private async Task ShowSubtitleFormatPicker()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm => { vm.Initialize(SelectedSubtitleFormat); });
+
+        if (viewModel.OkPressed)
+        {
         }
     }
 

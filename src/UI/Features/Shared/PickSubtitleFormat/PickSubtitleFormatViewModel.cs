@@ -1,151 +1,78 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 
 public partial class PickSubtitleFormatViewModel : ObservableObject
 {
     [ObservableProperty] private string _searchText;
-    [ObservableProperty] private ObservableCollection<string> _fontNames;
-    [ObservableProperty] private string? _selectedFontName;
-    [ObservableProperty] private Bitmap _imagePreview;
-    [ObservableProperty] private decimal _fontSize;
-    [ObservableProperty] private bool _isFontSizeVisible;
-    [ObservableProperty] private bool _isFontBold;
-    [ObservableProperty] private bool _isFontBoldVisible;
+    [ObservableProperty] private ObservableCollection<string> _subtitleFormatNames;
+    [ObservableProperty] private string? _selectedSubtitleFormatName;
 
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
-
-    private List<string> _allFontNames;
-    private readonly System.Timers.Timer _timerUpdate;
-    private bool _dirtySearch;
-    private bool _dirtyPreview;
+    
+    private readonly List<string> _allSubtitleFormatNames;
 
     public PickSubtitleFormatViewModel()
     {
-        _allFontNames = FontHelper.GetSystemFonts();
+       _allSubtitleFormatNames = SubtitleFormat.AllSubtitleFormats
+           .Select(x => x.FriendlyName)
+           .ToList();
+        
+        SubtitleFormatNames = new ObservableCollection<string>(_allSubtitleFormatNames);
         SearchText = string.Empty;
-        FontNames = new ObservableCollection<string>(_allFontNames);
-        SelectedFontName = FontNames.Count > 0 ? FontNames[0] : null;
-        ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
-
-        _timerUpdate = new System.Timers.Timer(500);
-        _timerUpdate.Elapsed += (s, e) =>
-        {
-            _timerUpdate.Stop();
-            if (_dirtySearch)
-            {
-                _dirtySearch = false;
-                UpdateSearch();
-            }
-            if (_dirtyPreview)
-            {
-                _dirtyPreview = false;
-                UpdatePreview();
-            }
-            _timerUpdate.Start();
-        };
     }
 
-    internal void Initialize(bool isFontSizeVisible = false, bool isFontBoldVisible = false)
+    internal void Initialize(SubtitleFormat subtitleFormat)
     {
-        IsFontSizeVisible = isFontSizeVisible;
-        IsFontBoldVisible = isFontBoldVisible;
-        _timerUpdate.Start();
-        _dirtyPreview = true;
+        SelectedSubtitleFormatName = subtitleFormat.FriendlyName;
     }
 
     private void UpdateSearch()
     {
-        if (string.IsNullOrWhiteSpace(SearchText) && FontNames.Count == _allFontNames.Count)
+        if (string.IsNullOrWhiteSpace(SearchText) && SubtitleFormatNames.Count == _allSubtitleFormatNames.Count)
         {
             return;
         }
 
         Dispatcher.UIThread.Invoke(() =>
         {
-            FontNames.Clear();
+            SubtitleFormatNames.Clear();
             if (string.IsNullOrWhiteSpace(SearchText))
             {
-                ObservableCollectionExtensions.AddRange(FontNames, _allFontNames);
+                ObservableCollectionExtensions.AddRange(SubtitleFormatNames, _allSubtitleFormatNames);
                 return;
             }
 
-            foreach (var encoding in _allFontNames)
+            foreach (var encoding in _allSubtitleFormatNames)
             {
                 if (encoding.Contains((string)SearchText, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    FontNames.Add(encoding);
+                    SubtitleFormatNames.Add(encoding);
                 }
             }
 
-            if (FontNames.Count > 0)
+            if (SubtitleFormatNames.Count > 0)
             {
-                SelectedFontName = FontNames[0];
+                SelectedSubtitleFormatName = SubtitleFormatNames[0];
             }
         });
     }
 
     private void UpdatePreview()
     {
-        if (string.IsNullOrWhiteSpace(SelectedFontName))
-        {
-            ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
-            return;
-        }
-
-        var previewWidth = 650; 
-        var previewHeight = 200; 
-
-        //using var skTypeface = SKTypeface.FromData(SKData.CreateCopy(fontBytes));
-        var skTypeface = SKTypeface.FromFamilyName(SelectedFontName);
-        if (skTypeface == null)
-        {
-            ImagePreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
-            return;
-        }
-
-        ImagePreview?.Dispose();
-
-        var imageInfo = new SKImageInfo(previewWidth, previewHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
-        using var surface = SKSurface.Create(imageInfo);
-        var canvas = surface.Canvas;
-        canvas.Clear(SKColors.Transparent);
-        using var font = new SKFont(skTypeface, 32);
-        using var paint = new SKPaint
-        {
-            Color = SKColors.Orange,
-            IsAntialias = true
-        };
-
-        var text = $"{SelectedFontName}\nThe quick brown fox jumps over the lazy dog.\n0123456789";
-        var lines = text.SplitToLines() ?? [];
-        float y = 25;
-        foreach (var line in lines)
-        {
-            if (!string.IsNullOrEmpty(line))
-            {
-                canvas.DrawText(line, 12, y, font, paint);
-            }
-            y += font.Size + 5; // Line spacing using font.Size instead of paint.TextSize
-        }
-
-        // Convert to Avalonia bitmap
-        using var skImage = surface.Snapshot();
-        var skBitmap = SKBitmap.FromImage(skImage);
-        ImagePreview = skBitmap.ToAvaloniaBitmap();
+        
     }
 
     [RelayCommand]
@@ -170,13 +97,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
         }
     }
 
-    internal void DataGridFontNameSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    public void SearchTextChanged()
     {
-        _dirtyPreview = true;
-    }
-
-    internal void SearchTextChanged()
-    {
-        _dirtySearch = true;
     }
 }

@@ -234,6 +234,7 @@ public class LanguageSettingsShortcuts
     public string ShowPointSyncViaOther { get; set; }
     public string ShowPointSync { get; set; }
     public string ShowMediaInformation { get; set; }
+    public string ChooseSubtitleFormat { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -471,5 +472,6 @@ public class LanguageSettingsShortcuts
         ShowPointSyncViaOther = "Show point sync via other subtitle";
         ShowPointSync = "Show point sync";
         ShowMediaInformation = "Show media information";
+        ChooseSubtitleFormat = "Choose subtitle format";
     }
 }
