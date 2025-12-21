@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,11 +9,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
 public class NOcrCharacterHistoryWindow : Window
 {
-    private readonly NOcrCharacterHistoryViewModel _vm;
-
     public NOcrCharacterHistoryWindow(NOcrCharacterHistoryViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = string.Empty;
@@ -52,7 +47,7 @@ public class NOcrCharacterHistoryWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk);
 
-        grid.Add(listView, 0, 0);
+        grid.Add(listView, 0);
         grid.Add(detailsView, 0, 1);
         grid.Add(buttonBar, 1, 0, 1, 2);
 
@@ -65,6 +60,9 @@ public class NOcrCharacterHistoryWindow : Window
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
         PointerWheelChanged += vm.PointerWheelChanged;
+        KeyDown += (_, e) => vm.KeyDown(e);
+        KeyUp += (_, e) => vm.KeyUp(e);
+        Loaded += (_, _) => Title = vm.Title;
     }
 
     private static Border MakeListView(NOcrCharacterHistoryViewModel vm)
@@ -172,27 +170,9 @@ public class NOcrCharacterHistoryWindow : Window
             }
         };
 
-        grid.Add(panelCurrent, 0, 0);
+        grid.Add(panelCurrent, 0);
         grid.Add(panelImage, 0, 1);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
     }
 }

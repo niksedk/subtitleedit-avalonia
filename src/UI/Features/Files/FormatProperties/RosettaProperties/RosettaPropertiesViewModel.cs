@@ -27,7 +27,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         Languages =
         [
             Se.Language.General.Autodetect,
-            .. Iso639Dash2LanguageCode.List.Select(p=>p.TwoLetterCode)
+            .. Iso639Dash2LanguageCode.List.Select(p => p.TwoLetterCode)
                 .Distinct()
                 .OrderBy(p => p),
         ];
@@ -69,7 +69,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         {
             Se.Settings.Formats.RosettaLanguageAutoDetect = false;
             Se.Settings.Formats.RosettaLanguage = SelectedLanguage;
-        }   
+        }
 
         Se.SaveSettings();
     }

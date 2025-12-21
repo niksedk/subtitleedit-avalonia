@@ -269,6 +269,11 @@ public partial class BinaryOcrInspectViewModel : ObservableObject
 
     internal void OnLoaded()
     {
+        if (Window != null)
+        {
+            Window.Title = Title;
+        }
+
         WrapPanel currentLine = new WrapPanel
         {
             Orientation = Orientation.Horizontal,

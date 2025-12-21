@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,11 +9,8 @@ namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
 public class BinaryOcrInspectWindow : Window
 {
-    private readonly BinaryOcrInspectViewModel _vm;
-
     public BinaryOcrInspectWindow(BinaryOcrInspectViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Ocr.NOcrInspectImageMatches;
@@ -52,9 +47,9 @@ public class BinaryOcrInspectWindow : Window
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk);
 
-        grid.Add(linesView, 0, 0);
-        grid.Add(controlsView, 1, 0);
-        grid.Add(buttonBar, 2, 0);
+        grid.Add(linesView, 0);
+        grid.Add(controlsView, 1);
+        grid.Add(buttonBar, 2);
 
         Content = grid;
 
@@ -64,8 +59,10 @@ public class BinaryOcrInspectWindow : Window
         {
             vm.TextBoxNew.Focus(); // hack to make OnKeyDown work
         };
-
         PointerWheelChanged += vm.PointerWheelChanged;
+        KeyDown += (_, e) => vm.KeyDown(e);
+        KeyUp += (_, e) => vm.KeyUp(e);
+        Loaded += (_, _) => vm.OnLoaded();
     }
 
     private static Border MakeLinesView(BinaryOcrInspectViewModel vm)
@@ -102,7 +99,7 @@ public class BinaryOcrInspectWindow : Window
         };
 
         grid.Add(vm.PanelLines, 0);
-        grid.Add(image, 0, 1, 1);
+        grid.Add(image, 0, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(10);
     }
@@ -178,28 +175,11 @@ public class BinaryOcrInspectWindow : Window
             },
         };
 
-        grid.Add(panelCurrent, 0, 0);
+        grid.Add(panelCurrent, 0);
         grid.Add(panelMatch, 0, 1);
 
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
-    }
-
-    protected override void OnKeyUp(KeyEventArgs e)
-    {
-        base.OnKeyUp(e);
-        _vm.KeyUp(e);
-    }
-
-    protected override void OnLoaded(RoutedEventArgs e)
-    {
-        base.OnLoaded(e);
-        Title = _vm.Title;
-        _vm.OnLoaded();
-    }
+   
 }

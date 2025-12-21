@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -7,12 +6,9 @@ namespace Nikse.SubtitleEdit.Features.Ocr.NOcr;
 
 public class NOcrSettingsWindow : Window
 {
-    private readonly NOcrSettingsViewModel _vm;
-
     public NOcrSettingsWindow(NOcrSettingsViewModel vm)
     {
         Title = Se.Language.Ocr.NOcrDatabase;
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
@@ -47,8 +43,8 @@ public class NOcrSettingsWindow : Window
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonEdit, buttonDelete, buttonRename, buttonNew, buttonCancel);
 
-        grid.Add(labelTitle, 0, 0);
-        grid.Add(buttonBar, 1, 0);
+        grid.Add(labelTitle, 0);
+        grid.Add(buttonBar, 1);
 
         Content = grid;
 
@@ -56,11 +52,6 @@ public class NOcrSettingsWindow : Window
         {
             buttonEdit.Focus(); // hack to make OnKeyDown work
         };
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.KeyDown(e);
+        KeyDown += (_, e) => vm.KeyDown(e);
     }
 }
