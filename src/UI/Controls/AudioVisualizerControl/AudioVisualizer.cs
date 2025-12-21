@@ -814,6 +814,15 @@ public class AudioVisualizer : Control
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
+                // check if we have room to move active paragraph
+                double availableStart = previous != null ? previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds : 0;
+                double availableEnd = next != null ? next.StartTime.TotalSeconds - 0.001 - MinGapSeconds : double.MaxValue;
+                double availableSpace = availableEnd - availableStart;
+                if (availableSpace < _originalDurationSeconds)
+                {
+                    break;
+                }
+
                 // Clamp so it doesn't overlap previous or next
                 if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds)
                 {
