@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -10,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 
 public class ApplyMinGapWindow : Window
 {
-    private readonly ApplyMinGapViewModel _vm;
-
     public ApplyMinGapWindow(ApplyMinGapViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -21,8 +18,6 @@ public class ApplyMinGapWindow : Window
         Height = 800;
         MinWidth = 900;
         MinHeight = 500;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -67,6 +62,7 @@ public class ApplyMinGapWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static Border MakeSubtitleView(ApplyMinGapViewModel vm)
@@ -128,11 +124,5 @@ public class ApplyMinGapWindow : Window
         };
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

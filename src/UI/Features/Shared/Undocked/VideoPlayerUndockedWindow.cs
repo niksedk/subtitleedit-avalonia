@@ -6,11 +6,8 @@ namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public class VideoPlayerUndockedWindow : Window
 {
-    private readonly Undocked.VideoPlayerUndockedViewModel _vm;
-
-    public VideoPlayerUndockedWindow(Undocked.VideoPlayerUndockedViewModel vm)
+    public VideoPlayerUndockedWindow(VideoPlayerUndockedViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.VideoPlayer;

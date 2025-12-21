@@ -1,7 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
@@ -11,8 +8,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.Bookmarks;
 
 public class BookmarkEditWindow : Window
 {
-    private readonly BookmarkEditViewModel _vm;
-
     public BookmarkEditWindow(BookmarkEditViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +17,6 @@ public class BookmarkEditWindow : Window
         Height = 400;
         MinWidth = 500;
         MinHeight = 300;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -66,11 +59,6 @@ public class BookmarkEditWindow : Window
         Content = grid;
 
         Activated += delegate { textBox.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

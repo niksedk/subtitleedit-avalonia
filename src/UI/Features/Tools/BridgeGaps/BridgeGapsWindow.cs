@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -11,8 +9,6 @@ namespace Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 
 public class BridgeGapsWindow : Window
 {
-    private readonly BridgeGapsViewModel _vm;
-
     public BridgeGapsWindow(BridgeGapsViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -22,8 +18,6 @@ public class BridgeGapsWindow : Window
         Height = 800;
         MinWidth = 900;
         MinHeight = 500;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -82,6 +76,7 @@ public class BridgeGapsWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private Border MakeSubtitleView(BridgeGapsViewModel vm)
@@ -143,12 +138,5 @@ public class BridgeGapsWindow : Window
         };
 
         return UiUtil.MakeBorderForControlNoPadding(dataGridSubtitle);
-    }
-
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

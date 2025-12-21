@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -9,16 +8,12 @@ namespace Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 
 public class PickAlignmentWindow : Window
 {
-    private readonly PickAlignmentViewModel _vm;
-
     public PickAlignmentWindow(PickAlignmentViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.PickAlignmentTitle;
         CanResize = false;
         SizeToContent = SizeToContent.WidthAndHeight;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -75,12 +70,6 @@ public class PickAlignmentWindow : Window
         Content = grid;
 
         Activated += delegate { buttonAn2.Focus(); }; // hack to make OnKeyDown work
-    }
-
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

@@ -6,11 +6,8 @@ namespace Nikse.SubtitleEdit.Features.Shared.Undocked;
 
 public class AudioVisualizerUndockedWindow : Window
 {
-    private readonly Undocked.AudioVisualizerUndockedViewModel _vm;
-
-    public AudioVisualizerUndockedWindow(Undocked.AudioVisualizerUndockedViewModel vm)
+    public AudioVisualizerUndockedWindow(AudioVisualizerUndockedViewModel vm)
     {
-        _vm = vm;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.AudioVisualizer; 

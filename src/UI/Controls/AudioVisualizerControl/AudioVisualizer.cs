@@ -305,16 +305,7 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnToggleSelection;
     public event PositionEventHandler? OnHorizontalScroll;
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
-    //public event ParagraphEventHandler? OnPositionSelected;
-    //public event ParagraphEventHandler? OnTimeChanged;
-    //public event ParagraphEventHandler? OnStartTimeChanged;
-    //public event ParagraphEventHandler? OnTimeChangedAndOffsetRest;
-    //public event ParagraphEventHandler? OnNewSelectionRightClicked;
     public event ParagraphEventHandler? OnNewSelectionInsert;
-    //public event ParagraphEventHandler? OnParagraphRightClicked;
-    //public event ParagraphEventHandler? OnNonParagraphRightClicked;
-    //public event ParagraphEventHandler? OnSingleClick;
-    //public event ParagraphEventHandler? OnStatus;
     public event ParagraphEventHandler? OnDeletePressed;
 
     public AudioVisualizer()

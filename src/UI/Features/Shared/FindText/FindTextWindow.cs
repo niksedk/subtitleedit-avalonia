@@ -1,11 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Templates;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.Markup.Declarative;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -15,8 +11,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.FindText;
 
 public class FindTextWindow : Window
 {
-    private readonly FindTextViewModel _vm;
-    
     public FindTextWindow(FindTextViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -26,7 +20,6 @@ public class FindTextWindow : Window
         Height = 600;
         MinWidth = 600;
         MinHeight = 400;
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -71,6 +64,7 @@ public class FindTextWindow : Window
         Content = grid;
         
         Activated += delegate { textBoxSearch.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static Border MakeSubtitlesView(FindTextViewModel vm)
@@ -135,11 +129,5 @@ public class FindTextWindow : Window
         vm.SubtitleGrid.KeyDown += vm.SubtitleGridKeyDown;
 
         return UiUtil.MakeBorderForControl(vm.SubtitleGrid);
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }

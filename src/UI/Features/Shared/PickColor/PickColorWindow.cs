@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,8 +10,6 @@ namespace Nikse.SubtitleEdit.Features.Shared.PickColor;
 public class PickColorWindow : Window
 {
 
-    private readonly PickColorViewModel _vm;
-
     public PickColorWindow(PickColorViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -20,8 +17,6 @@ public class PickColorWindow : Window
         CanResize = false;
         SizeToContent = SizeToContent.WidthAndHeight;   
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -59,11 +54,6 @@ public class PickColorWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }
