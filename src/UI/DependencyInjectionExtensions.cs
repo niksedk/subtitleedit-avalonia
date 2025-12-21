@@ -54,6 +54,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
+using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -171,6 +172,7 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<ITesseractDownloadService, TesseractDownloadService>();
         collection.AddHttpClient<IWhisperDownloadService, WhisperDownloadService>();
         collection.AddHttpClient<IYtDlpDownloadService, YtDlpDownloadService>();
+        collection.AddHttpClient<ILlamaCppDownloadService, LlamaCppDownloadService>();
 
         // Window view models
         collection.AddTransient<AddToNamesListViewModel>();
@@ -290,6 +292,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<PickOllamaModelViewModel>();
         collection.AddTransient<PickMp4TrackViewModel>();
         collection.AddTransient<PickRuleProfileViewModel>();
+        collection.AddTransient<PickSubtitleFormatViewModel>();
         collection.AddTransient<PickTsTrackViewModel>();
         collection.AddTransient<PointSyncViaOtherViewModel>();
         collection.AddTransient<PointSyncViewModel>();

@@ -6,11 +6,11 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.PickFontName;
+namespace Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 
-public class PickFontNameWindow : Window
+public class PickSubtitleFormatWindow : Window
 {
-    public PickFontNameWindow(PickFontNameViewModel vm)
+    public PickSubtitleFormatWindow(PickSubtitleFormatViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.PickFontNameTitle;
@@ -69,6 +69,7 @@ public class PickFontNameWindow : Window
             }
         }.WithBindVisible(vm, nameof(vm.IsFontBoldVisible));
 
+
         var fontsView = MakeFontsView(vm);
         var previewView = MakePreviewView(vm);
 
@@ -110,8 +111,8 @@ public class PickFontNameWindow : Window
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
-
-    private Border MakeFontsView(PickFontNameViewModel vm)
+    
+    private Border MakeFontsView(PickSubtitleFormatViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -143,7 +144,7 @@ public class PickFontNameWindow : Window
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }
 
-    private static Border MakePreviewView(PickFontNameViewModel vm)
+    private static Border MakePreviewView(PickSubtitleFormatViewModel vm)
     {
         var grid = new Grid
         {
