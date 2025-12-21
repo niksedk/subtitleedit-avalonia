@@ -6,6 +6,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
@@ -26,8 +27,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         Languages =
         [
             Se.Language.General.Autodetect,
-            .. CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-                .Select(p => p.TwoLetterISOLanguageName)
+            .. Iso639Dash2LanguageCode.List.Select(p=>p.TwoLetterCode)
                 .Distinct()
                 .OrderBy(p => p),
         ];

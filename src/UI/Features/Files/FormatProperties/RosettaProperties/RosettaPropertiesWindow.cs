@@ -20,16 +20,16 @@ public class RosettaPropertiesWindow : Window
 
         var labelWidth = 200;
         
-        var labelFontName = UiUtil.MakeLabel(Se.Language.General.FontName).WithMinWidth(labelWidth);
-        var comboBoxFontName = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
-        var panelFontName = new StackPanel
+        var labelLanguage = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(labelWidth);
+        var comboBoxLanguage = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
+        var panelLangyage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
-                labelFontName,
-                comboBoxFontName,
+                labelLanguage,
+                comboBoxLanguage,
             }
         };
 
@@ -83,7 +83,7 @@ public class RosettaPropertiesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelFontName, 0);
+        grid.Add(panelLangyage, 0);
         grid.Add(panelLineHeight, 1);
         grid.Add(panelFontSize, 2);
         grid.Add(buttonPanel, 5);
