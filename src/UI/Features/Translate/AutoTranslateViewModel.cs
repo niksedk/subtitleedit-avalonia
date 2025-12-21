@@ -88,6 +88,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             new ChatGptTranslate(),
             new LmStudioTranslate(),
             new OllamaTranslate(),
+            new LlamaCppTranslate(),
             new AnthropicTranslate(),
             new GroqTranslate(),
             new OpenRouterTranslate(),
@@ -236,6 +237,12 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Configuration.Settings.Tools.LmStudioApiUrl = apiUrl.Trim();
             Configuration.Settings.Tools.LmStudioModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(LlamaCppTranslate))
+        {
+            Configuration.Settings.Tools.LlamaCppApiUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.LlamaCppModel = apiModel.Trim();
         }
 
         if (engineType == typeof(OllamaTranslate))
@@ -963,6 +970,28 @@ public partial class AutoTranslateViewModel : ObservableObject
             {
                 Configuration.Settings.Tools.LmStudioApiUrl.TrimEnd('/'),
             });
+
+            return;
+        }
+
+        if (engineType == typeof(LlamaCppTranslate))
+        {
+            ModelBrowseIsVisible = true;
+
+            if (string.IsNullOrEmpty(Se.Settings.AutoTranslate.LlamaCppApiUrl))
+            {
+                Se.Settings.AutoTranslate.LlamaCppApiUrl = "http://localhost:8080/v1/chat/completions";
+            }
+
+            FillUrls(new List<string>
+            {
+                Se.Settings.AutoTranslate.LlamaCppApiUrl.TrimEnd('/'),
+            });
+
+            _apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList(); //TODO: fix this to get LlamaCpp models
+            ModelIsVisible = true;
+            ButtonModelIsVisible = true;
+            ModelText = Se.Settings.AutoTranslate.LlamaCppModel;
 
             return;
         }

@@ -95,6 +95,10 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string LmStudioApiUrl { get; set; }
         public string LmStudioModel { get; set; }
         public string LmStudioPrompt { get; set; }
+        public string LlamaCppApiUrl { get; set; }
+        public string LlamaCppModel { get; set; }
+        public string LlamaCppPrompt { get; set; }
+
         public string OllamaApiUrl { get; set; }
         public string OllamaModels { get; set; }
         public string OllamaModel { get; set; }

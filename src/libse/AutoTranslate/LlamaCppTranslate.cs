@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using System;
@@ -8,18 +9,17 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.Settings;
 
 namespace Nikse.SubtitleEdit.Core.AutoTranslate
 {
-    public class LmStudioTranslate : IAutoTranslator, IDisposable
+    public class LlamaCppTranslate : IAutoTranslator, IDisposable
     {
         private HttpClient _httpClient;
 
-        public static string StaticName { get; set; } = "LM Studio (local LLM)";
+        public static string StaticName { get; set; } = "llama.cpp(local LLM)";
         public override string ToString() => StaticName;
         public string Name => StaticName;
-        public string Url => "https://lmstudio.ai/";
+        public string Url => "https://github.com/ggml-org/llama.cpp";
         public string Error { get; set; }
         public int MaxCharacters => 1000;
 
@@ -29,7 +29,7 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
             _httpClient = HttpClientFactoryWithProxy.CreateHttpClientWithProxy();
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
-            _httpClient.BaseAddress = new Uri(Configuration.Settings.Tools.LmStudioApiUrl.TrimEnd('/'));
+            _httpClient.BaseAddress = new Uri(Configuration.Settings.Tools.LlamaCppApiUrl.TrimEnd('/'));
             _httpClient.Timeout = TimeSpan.FromMinutes(15);
         }
 
@@ -53,11 +53,11 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
                 Configuration.Settings.Tools.LmStudioModel = model;
             }
 
-            if (string.IsNullOrWhiteSpace(Configuration.Settings.Tools.LmStudioPrompt))
+            if (string.IsNullOrWhiteSpace(Configuration.Settings.Tools.LlamaCppPrompt))
             {
-                Configuration.Settings.Tools.LmStudioPrompt = new ToolsSettings().LmStudioPrompt;
+                Configuration.Settings.Tools.LlamaCppPrompt = new ToolsSettings().LlamaCppPrompt;
             }
-            var prompt = string.Format(Configuration.Settings.Tools.LmStudioPrompt, sourceLanguageCode, targetLanguageCode);
+            var prompt = string.Format(Configuration.Settings.Tools.LlamaCppPrompt, sourceLanguageCode, targetLanguageCode);
             var input = "{ " + modelJson + " \"messages\": [{ \"role\": \"user\", \"content\": \"" + Json.EncodeJsonText(prompt) + "\\n\\n" + Json.EncodeJsonText(text.Trim()) + "\" }]}";
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");

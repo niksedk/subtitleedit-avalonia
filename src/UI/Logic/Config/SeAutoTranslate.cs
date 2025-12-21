@@ -19,6 +19,9 @@ public class SeAutoTranslate
     public string LmStudioApiUrl { get; set; }
     public string LmStudioModel { get; set; }
     public string LmStudioPrompt { get; set; }
+    public string LlamaCppApiUrl { get; set; }
+    public string LlamaCppModel { get; set; }
+    public string LlamaCppPrompt { get; set; }
     public string GroqUrl { get; set; }
     public string GroqPrompt { get; set; }
     public string GroqApiKey { get; set; }
