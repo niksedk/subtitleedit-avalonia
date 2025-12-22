@@ -14,6 +14,42 @@ public interface ILanguageInitializer
 
 public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitializer
 {
+    // List of available language files in Assets/Languages folder
+    private static readonly string[] LanguageFiles =
+    [
+        "Arabic",
+        "Basque",
+        "Bulgarian",
+        "ChineseSimplified",
+        "ChineseTraditional",
+        "Czech",
+        "Danish",
+        "Dutch",
+        "English",
+        "Estonian",
+        "Farsi",
+        "Finnish",
+        "French",
+        "German",
+        "Hebrew",
+        "Hungarian",
+        "Italian",
+        "Japanese",
+        "Korean",
+        "Norwegian",
+        "Polish",
+        "Portuguese",
+        "Romanian",
+        "Russian",
+        "Slovak",
+        "Spanish",
+        "Swedish",
+        "Thai",
+        "Turkish",
+        "Ukrainian",
+        "Vietnamese",
+    ];
+
     public async Task UpdateLanguagesIfNeeded()
     {
         if (await NeedsUpdate())
@@ -72,8 +108,26 @@ public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitialize
 
     private async Task Unpack()
     {
-        var zipUri = new Uri("avares://SubtitleEdit/Assets/Languages.zip");
-        await using var zipStream = AssetLoader.Open(zipUri);
-        zipUnpacker.UnpackZipStream(zipStream, Se.TranslationFolder);
+        var outputDir = Se.TranslationFolder;
+        if (!Directory.Exists(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
+        foreach (var languageFile in LanguageFiles)
+        {
+            try
+            {
+                var uri = new Uri($"avares://SubtitleEdit/Assets/Languages/{languageFile}.json");
+                await using var stream = AssetLoader.Open(uri);
+                var outputPath = Path.Combine(outputDir, languageFile);
+                await using var fileStream = File.Create(outputPath);
+                await stream.CopyToAsync(fileStream);
+            }
+            catch 
+            {
+                // Ignore
+            }
+        }
     }
 }
