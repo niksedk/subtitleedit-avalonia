@@ -102,9 +102,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedFontSize = 26;
         Resolutions = new ObservableCollection<ResolutionItem>(ResolutionItem.GetResolutions());
         SelectedResolution = Resolutions.FirstOrDefault(r => r.Width == 1920);
-        TopBottomMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
+        TopBottomMargins = new ObservableCollection<int>(Enumerable.Range(0, 501));
         SelectedTopBottomMargin = 10;
-        LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 101));
+        LeftRightMargins = new ObservableCollection<int>(Enumerable.Range(0, 501));
         SelectedLeftRightMargin = 10;
         OutlineWidths = new ObservableCollection<double>(Enumerable.Range(0, 16).Select(i => (double)i));
         SelectedOutlineWidth = OutlineWidths.First();
@@ -119,7 +119,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ContentAlignments =
             new ObservableCollection<ExportContentAlignmentDisplay>(ExportContentAlignmentDisplay.GetAlignments());
         SelectedContentAlignment = ContentAlignments[0];
-        LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 151));
+        LineSpacings = new ObservableCollection<int>(Enumerable.Range(-50, 501));
         SelectedLineSpacing = 0;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
@@ -129,9 +129,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         ProgressValue = 0;
         Profiles = new ObservableCollection<SeExportImagesProfile>();
         ImageInfo = string.Empty;
-        PaddingsLeftRight = new ObservableCollection<int>(Enumerable.Range(0, 101));
+        PaddingsLeftRight = new ObservableCollection<int>(Enumerable.Range(0, 501));
         SelectedPaddingLeftRight = 10;
-        PaddingsTopBottom = new ObservableCollection<int>(Enumerable.Range(0, 101));
+        PaddingsTopBottom = new ObservableCollection<int>(Enumerable.Range(0, 501));
         SelectedPaddingTopBottom = 10;
 
         _generateLock = new Lock();
