@@ -51,43 +51,41 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
          */
         public static int[] YCbCr2Rgb(int y, int cb, int cr, bool useBt601)
         {
-            var rgb = new int[3];
-            double r, g, b;
-
+            // Studio range → center/offset removal
             y -= 16;
             cb -= 128;
             cr -= 128;
 
-            var y1 = y * 1.164383562;
+            // Y scaling factor (219/255 ≈ 1.164383562)
+            double y1 = y * 1.164383562;
+
+            double r, g, b;
+
             if (useBt601)
             {
-                /* BT.601 for YCbCr 16..235 -> RGB 0..255 (PC) */
-                r = y1 + cr * 1.596026317;
-                g = y1 - cr * 0.8129674985 - cb * 0.3917615979;
-                b = y1 + cb * 2.017232218;
+                // BT.601 inverse
+                r = y1 + 1.596026317 * cr;
+                g = y1 - 0.8129674985 * cr - 0.3917615979 * cb;
+                b = y1 + 2.017232218 * cb;
             }
             else
             {
-                /* BT.709 for YCbCr 16..235 -> RGB 0..255 (PC) */
-                r = y1 + cr * 1.792741071;
-                g = y1 - cr * 0.5329093286 - cb * 0.2132486143;
-                b = y1 + cb * 2.112401786;
+                // BT.709 inverse
+                r = y1 + 1.792741071 * cr;
+                g = y1 - 0.5329093286 * cr - 0.2132486143 * cb;
+                b = y1 + 2.112401786 * cb;
             }
-            rgb[0] = (int)(r + 0.5);
-            rgb[1] = (int)(g + 0.5);
-            rgb[2] = (int)(b + 0.5);
-            for (var i = 0; i < 3; i++)
-            {
-                if (rgb[i] < 0)
-                {
-                    rgb[i] = 0;
-                }
-                else if (rgb[i] > 255)
-                {
-                    rgb[i] = 255;
-                }
-            }
-            return rgb;
+
+            // Round & clamp
+            int ir = (int)Math.Round(r);
+            int ig = (int)Math.Round(g);
+            int ib = (int)Math.Round(b);
+
+            if (ir < 0) ir = 0; else if (ir > 255) ir = 255;
+            if (ig < 0) ig = 0; else if (ig > 255) ig = 255;
+            if (ib < 0) ib = 0; else if (ib > 255) ib = 255;
+
+            return new[] { ir, ig, ib };
         }
 
         /**
