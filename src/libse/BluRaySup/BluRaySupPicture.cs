@@ -249,6 +249,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             var lookup = new HashSet<SKColor>(250);
 
             // Add font color as first entry
+            pal.Add(fontColor);
             lookup.Add(fontColor);
             
             // first we try with exact colors
@@ -291,6 +292,8 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             // get close colors (image has probably been processed in SE)
             pal = new List<SKColor>();
             lookup = new HashSet<SKColor>();
+            pal.Add(fontColor);
+            lookup.Add(fontColor);
             for (var y = 0; y < bitmap.Height; y++)
             {
                 for (var x = 0; x < bitmap.Width; x++)

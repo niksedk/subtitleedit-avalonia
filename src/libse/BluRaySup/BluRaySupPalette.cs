@@ -17,6 +17,7 @@
  */
 
 using SkiaSharp;
+using System;
 
 namespace Nikse.SubtitleEdit.Core.BluRaySup
 {
@@ -104,45 +105,30 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             if (useBt601)
             {
                 /* BT.601 for RGB 0..255 (PC) -> YCbCr 16..235 */
-                y = r * 0.299 * 219 / 255 + g * 0.587 * 219 / 255 + b * 0.114 * 219 / 255;
-                cb = -r * 0.168736 * 224 / 255 - g * 0.331264 * 224 / 255 + b * 0.5 * 224 / 255;
-                cr = r * 0.5 * 224 / 255 - g * 0.418688 * 224 / 255 - b * 0.081312 * 224 / 255;
+                y = 16 + (0.299 * r + 0.587 * g + 0.114 * b) * 219.0 / 255.0;
+                cb = 128 + (-0.168736 * r - 0.331264 * g + 0.500000 * b) * 224.0 / 255.0;
+                cr = 128 + (0.500000 * r - 0.418688 * g - 0.081312 * b) * 224.0 / 255.0;
+
+                return new[]
+                {
+                    (int)Math.Round(y),
+                    (int)Math.Round(cb),
+                    (int)Math.Round(cr)
+                };
             }
             else
             {
-                /* BT.709 for RGB 0..255 (PC) -> YCbCr 16..235 */
-                y = r * 0.2126 * 219 / 255 + g * 0.7152 * 219 / 255 + b * 0.0722 * 219 / 255;
-                cb = -r * 0.2126 / 1.8556 * 224 / 255 - g * 0.7152 / 1.8556 * 224 / 255 + b * 0.5 * 224 / 255;
-                cr = r * 0.5 * 224 / 255 - g * 0.7152 / 1.5748 * 224 / 255 - b * 0.0722 / 1.5748 * 224 / 255;
-            }
-            yCbCr[0] = 16 + (int)(y + 0.5);
-            yCbCr[1] = 128 + (int)(cb + 0.5);
-            yCbCr[2] = 128 + (int)(cr + 0.5);
-            for (var i = 0; i < 3; i++)
-            {
-                if (yCbCr[i] < 16)
+                y = 16 + (0.2126 * r + 0.7152 * g + 0.0722 * b) * 219.0 / 255.0;
+                cb = 128 + (-0.1146 * r - 0.3854 * g + 0.5000 * b) * 224.0 / 255.0;
+                cr = 128 + (0.5000 * r - 0.4542 * g - 0.0458 * b) * 224.0 / 255.0;
+
+                return new[]
                 {
-                    yCbCr[i] = 16;
-                }
-                else
-                {
-                    if (i == 0)
-                    {
-                        if (yCbCr[i] > 235)
-                        {
-                            yCbCr[i] = 235;
-                        }
-                    }
-                    else
-                    {
-                        if (yCbCr[i] > 240)
-                        {
-                            yCbCr[i] = 240;
-                        }
-                    }
-                }
+                    (int)Math.Round(y),
+                    (int)Math.Round(cb),
+                    (int)Math.Round(cr)
+                };
             }
-            return yCbCr;
         }
 
         /**
