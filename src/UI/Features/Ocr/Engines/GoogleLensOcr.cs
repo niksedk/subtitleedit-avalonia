@@ -22,6 +22,9 @@ public class GoogleLensOcr
     private StringBuilder _log = new StringBuilder();
     public const string ExeFileName = "chrome-lens-cli.exe";
     private IProgress<PaddleOcrBatchProgress>? _batchProgress;
+    
+    /// Contains the file names of bitmaps that have OCR errors.
+    private HashSet<string> _bitmapsWithErrors = [];
 
     public GoogleLensOcr()
     {
@@ -83,6 +86,7 @@ public class GoogleLensOcr
                 process.StartInfo.EnvironmentVariables["PYTHONUTF8"] = "1";
 
                 var results = new Dictionary<string, string>();
+                _bitmapsWithErrors = [];
                 string? currentFileName = null;
                 bool canCollectText = false;
 
@@ -140,10 +144,7 @@ public class GoogleLensOcr
 
                     if (canCollectText && currentFileName != null)
                     {
-                        if (!outLine.Data.Equals("No OCR text found.", StringComparison.OrdinalIgnoreCase))
-                        {
-                            results[currentFileName] += outLine.Data + Environment.NewLine;
-                        }
+                        AddLineToResult(results, currentFileName, outLine.Data);
                     }
 
                     if (cancellationToken.IsCancellationRequested)
@@ -227,6 +228,27 @@ public class GoogleLensOcr
                 Error = $"An unexpected error occurred during cleanup: {ex.Message}";
             }
         }
+    }
+    
+    private void AddLineToResult(in Dictionary<string, string> results, string fileName, string line)
+    {
+        if (_bitmapsWithErrors.Contains(fileName))
+        {
+            return;
+        }
+
+        if (line.Equals("No OCR text found.", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (line.Contains("Request error (possibly proxy-related)", StringComparison.OrdinalIgnoreCase))
+        {
+            _bitmapsWithErrors.Add(fileName);
+            return;
+        }
+
+        results[fileName] += line + Environment.NewLine;
     }
 
     public static List<OcrLanguage2> GetLanguages()
