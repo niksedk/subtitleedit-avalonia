@@ -6,8 +6,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
@@ -23,8 +21,8 @@ public partial class RosettaPropertiesViewModel : ObservableObject
 
     public bool OkPressed { get; private set; }
 
-    private List<string> bcp47LanguageTags = new List<string>()
-    {
+    private readonly List<string> _bcp47LanguageTags =
+    [
         "af-NA",
         "af-ZA",
         "am-ET",
@@ -332,7 +330,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         "zh-Hant-MO",
         "zh-Hant-TW",
         "zu-ZA"
-    };
+    ];
 
 
     public RosettaPropertiesViewModel()
@@ -340,7 +338,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         Languages =
         [
             Se.Language.General.Autodetect,
-            .. bcp47LanguageTags,
+            .. _bcp47LanguageTags,
         ];
         SelectedLanguage = Languages[0];
 
