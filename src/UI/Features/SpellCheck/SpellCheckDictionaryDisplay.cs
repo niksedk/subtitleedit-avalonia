@@ -196,12 +196,22 @@ public class SpellCheckDictionaryDisplay
 
         if (fileName == "es_ANY")
         {
-            fileName = "es_ES";
+            return "es_ES";
+        }
+
+        if (fileName == "russian_aot")
+        {
+            return "ru_RU";
         }
 
         if (fileName == "fr_classique" || fileName == "fr_toutesvariantes")
         {
-            fileName = "fr_FR";
+            return "fr_FR";
+        }
+
+        if (fileName == "eu")
+        {
+            return "eu-ES";
         }
 
         if (fileName.Length == 2)
@@ -218,6 +228,11 @@ public class SpellCheckDictionaryDisplay
         if (!fileName.Contains('_'))
         {
             return null;
+        }
+
+        if (fileName.Length > 5)
+        {
+            fileName = fileName.Substring(0, 5);
         }
 
         return fileName;
