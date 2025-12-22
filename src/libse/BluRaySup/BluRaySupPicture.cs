@@ -243,11 +243,14 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             return false;
         }
 
-        private static List<SKColor> GetBitmapPalette(SKBitmap bitmap)
+        private static List<SKColor> GetBitmapPalette(SKBitmap bitmap, SKColor fontColor)
         {
             var pal = new List<SKColor>(250);
             var lookup = new HashSet<SKColor>(250);
 
+            // Add font color as first entry
+            lookup.Add(fontColor);
+            
             // first we try with exact colors
             for (var y = 0; y < bitmap.Height; y++)
             {
@@ -381,11 +384,11 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
         /// <param name="alignment">Alignment of image</param>
         /// <param name="overridePosition">Position that overrides alignment</param>
         /// <returns>Byte buffer containing the binary stream representation of one caption</returns>
-        public static byte[] CreateSupFrame(BluRaySupPicture pic, SKBitmap bmp, double fps, int bottomMargin, int leftOrRightMargin, BluRayContentAlignment alignment, BluRayPoint overridePosition = null)
+        public static byte[] CreateSupFrame(BluRaySupPicture pic, SKBitmap bmp, SKColor fontColor, double fps, int bottomMargin, int leftOrRightMargin, BluRayContentAlignment alignment, BluRayPoint overridePosition = null)
         {
             var bm = bmp.Copy();
             // bm.SetTransparentTo(SKColors.FromArgb(0, 0, 0, 0));
-            var colorPalette = GetBitmapPalette(bm);
+            var colorPalette = GetBitmapPalette(bm, fontColor);
             var pal = new BluRaySupPalette(colorPalette.Count);
             for (var i = 0; i < colorPalette.Count; i++)
             {

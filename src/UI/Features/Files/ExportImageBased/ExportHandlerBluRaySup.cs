@@ -96,7 +96,7 @@ public class ExportHandlerBluRaySup : IExportHandler
                         //    g.DrawImage(bmp, left, top);
                         //    g.Dispose();
                         //}
-                        param.Buffer = BluRaySupPicture.CreateSupFrame(brSub, fullSize, param.FramesPerSecond, 0, 0, BluRayContentAlignment.BottomCenter);
+                        param.Buffer = BluRaySupPicture.CreateSupFrame(brSub, fullSize, param.FontColor, param.FramesPerSecond, 0, 0, BluRayContentAlignment.BottomCenter);
                     }
                 }
             }
@@ -116,6 +116,7 @@ public class ExportHandlerBluRaySup : IExportHandler
             param.Buffer = BluRaySupPicture.CreateSupFrame(
                 brSub,
                 param.Bitmap,
+                param.FontColor,
                 param.FramesPerSecond,
                 param.BottomTopMargin,
                 margin,
