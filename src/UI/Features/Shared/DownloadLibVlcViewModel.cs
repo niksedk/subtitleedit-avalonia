@@ -30,7 +30,7 @@ public partial class DownloadLibVlcViewModel : ObservableObject
     public bool OkPressed { get; internal set; }
 
     private string _tempFileName;
-    private ILibVlcDownloadService _libVlcDownloadService;
+    private readonly ILibVlcDownloadService _libVlcDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private bool _done;
@@ -84,11 +84,16 @@ public partial class DownloadLibVlcViewModel : ObservableObject
                     Error = "No data received";
                     return;
                 }
+                
+                if (!Directory.Exists(Se.VlcFolder))
+                {
+                    Directory.CreateDirectory(Se.VlcFolder);
+                }
 
                 StartIndeterminateProgress();
-                Extract7Zip(_tempFileName, Se.VlcFolder, "vlc-3.0.21");
+                Extract7Zip(_tempFileName, Se.VlcFolder, string.Empty);
                 StopIndeterminateProgress();
-
+                
                 OkPressed = true;
                 Close();
             }

@@ -74,7 +74,7 @@ public class DownloadYtDlpWindow : Window
             }
         };
 
-        Activated += delegate
+        Loaded += delegate
         {
             buttonCancel.Focus(); // hack to make OnKeyDown work
             vm.StartDownload();
