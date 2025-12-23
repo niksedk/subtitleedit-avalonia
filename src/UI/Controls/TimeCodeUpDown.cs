@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Controls
 {
@@ -40,6 +41,54 @@ namespace Nikse.SubtitleEdit.Controls
         {
             Template = CreateTemplate();
             _textBuffer = FormatTime(Value);
+        }
+
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+
+            // Measure text and set MinWidth
+            var sampleText = "00:00:00:000";
+            var formattedText = new FormattedText(
+                sampleText,
+                System.Globalization.CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(FontFamily),
+                FontSize,
+                Brushes.Black);
+
+            MinWidth = formattedText.Width + Padding.Left + Padding.Right + 85; // Extra space for two spinner buttons
+
+            // Unsubscribe from old events
+            if (_spinner != null)
+            {
+                _spinner.Spin -= OnSpin;
+            }
+
+            if (_textBox != null)
+            {
+                _textBox.RemoveHandler(TextInputEvent, OnTextInput);
+                _textBox.RemoveHandler(KeyDownEvent, OnTextBoxKeyDown);
+                _textBox.GotFocus -= OnTextBoxGotFocus;
+            }
+
+            _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
+            _spinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
+
+            if (_spinner != null)
+            {
+                _spinner.Spin += OnSpin;
+            }
+
+            if (_textBox != null)
+            {
+                _textBuffer = FormatTime(Value);
+                _textBox.Text = _textBuffer;
+
+                _textBox.AddHandler(TextInputEvent, OnTextInput, RoutingStrategies.Tunnel);
+                _textBox.AddHandler(KeyDownEvent, OnTextBoxKeyDown, RoutingStrategies.Tunnel);
+                _textBox.GotFocus += OnTextBoxGotFocus;
+            }
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -116,41 +165,6 @@ namespace Nikse.SubtitleEdit.Controls
         }
 
 
-        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
-        {
-            base.OnApplyTemplate(e);
-
-            // Unsubscribe from old events
-            if (_spinner != null)
-            {
-                _spinner.Spin -= OnSpin;
-            }
-
-            if (_textBox != null)
-            {
-                _textBox.RemoveHandler(TextInputEvent, OnTextInput);
-                _textBox.RemoveHandler(KeyDownEvent, OnTextBoxKeyDown);
-                _textBox.GotFocus -= OnTextBoxGotFocus;
-            }
-
-            _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
-            _spinner = e.NameScope.Find<ButtonSpinner>("PART_Spinner");
-
-            if (_spinner != null)
-            {
-                _spinner.Spin += OnSpin;
-            }
-
-            if (_textBox != null)
-            {
-                _textBuffer = FormatTime(Value);
-                _textBox.Text = _textBuffer;
-
-                _textBox.AddHandler(TextInputEvent, OnTextInput, RoutingStrategies.Tunnel);
-                _textBox.AddHandler(KeyDownEvent, OnTextBoxKeyDown, RoutingStrategies.Tunnel);
-                _textBox.GotFocus += OnTextBoxGotFocus;
-            }
-        }
 
         private void OnTextBoxGotFocus(object? sender, GotFocusEventArgs e)
         {

@@ -768,7 +768,7 @@ public static class InitListViewAndEditBox
         startTimePanel.Children.Add(startTimeLabel);
         var timeCodeUpDown = new TimeCodeUpDown
         {
-            MinWidth = 162,
+            //MinWidth = 162,
             DataContext = vm,
             UseVideoOffset = true,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
