@@ -2332,4 +2332,11 @@ public class AudioVisualizer : Control
     {
         return _displayMode;
     }
+
+    internal void ResetCache()
+    {
+        _fancyWaveformPenCache.Clear();
+        _fancyWaveformGlowPenCache.Clear();
+        _fancyWaveformGradientCache.Clear();
+    }
 }
