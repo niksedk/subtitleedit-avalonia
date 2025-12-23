@@ -482,7 +482,6 @@ public class BinaryEditWindow : Window
         var startTimeUpDown = new TimeCodeUpDown
         {
             DataContext = vm,
-            MinWidth = 165,
             [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(BinarySubtitleItem.StartTime)}")
             {
                 Mode = BindingMode.TwoWay,

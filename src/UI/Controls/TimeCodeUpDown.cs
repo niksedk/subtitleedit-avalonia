@@ -10,7 +10,6 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Controls
 {
@@ -47,22 +46,11 @@ namespace Nikse.SubtitleEdit.Controls
         {
             base.OnApplyTemplate(e);
 
-            // Measure text and set MinWidth
-            var sampleText = "00:00:00:000";
-            var formattedText = new FormattedText(
-                sampleText,
-                System.Globalization.CultureInfo.CurrentCulture,
-                FlowDirection.LeftToRight,
-                new Typeface(FontFamily),
-                FontSize,
-                Brushes.Black);
-
-            MinWidth = formattedText.Width + Padding.Left + Padding.Right + 85; // Extra space for two spinner buttons
-
             // Unsubscribe from old events
             if (_spinner != null)
             {
                 _spinner.Spin -= OnSpin;
+                _spinner.LayoutUpdated -= OnSpinnerLayoutUpdated;
             }
 
             if (_textBox != null)
@@ -78,6 +66,7 @@ namespace Nikse.SubtitleEdit.Controls
             if (_spinner != null)
             {
                 _spinner.Spin += OnSpin;
+                _spinner.LayoutUpdated += OnSpinnerLayoutUpdated;
             }
 
             if (_textBox != null)
@@ -89,6 +78,54 @@ namespace Nikse.SubtitleEdit.Controls
                 _textBox.AddHandler(KeyDownEvent, OnTextBoxKeyDown, RoutingStrategies.Tunnel);
                 _textBox.GotFocus += OnTextBoxGotFocus;
             }
+
+            // Initial MinWidth calculation with text measurement
+            UpdateMinWidth();
+        }
+
+        private void OnSpinnerLayoutUpdated(object? sender, EventArgs e)
+        {
+            // After first layout, recalculate with actual spinner button width
+            if (_spinner != null)
+            {
+                _spinner.LayoutUpdated -= OnSpinnerLayoutUpdated;
+                UpdateMinWidth();
+            }
+        }
+
+        private void UpdateMinWidth()
+        {
+            // Measure the sample text
+            var sampleText = "00:00:00:000";
+            var formattedText = new FormattedText(
+                sampleText,
+                System.Globalization.CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(FontFamily),
+                FontSize,
+                Brushes.Black);
+
+            double spinnerButtonsWidth = 0;
+
+            // Try to get actual spinner button width if available after layout
+            if (_spinner?.Bounds.Width > 0 && _textBox?.Bounds.Width > 0)
+            {
+                // Spinner contains textbox + buttons, so difference gives us button width
+                spinnerButtonsWidth = _spinner.Bounds.Width - _textBox.Bounds.Width;
+            }
+
+            // Fallback to reasonable estimate if layout hasn't completed yet
+            if (spinnerButtonsWidth <= 0)
+            {
+                // Conservative estimate for spinner buttons (varies by platform)
+                // macOS: ~84px, Windows/Linux: ~50-60px
+                spinnerButtonsWidth = 84;
+            }
+
+            // Account for textbox internal padding (9 left, 2 right from template)
+            var textBoxInternalPadding = 11;
+
+            MinWidth = formattedText.Width + Padding.Left + Padding.Right + textBoxInternalPadding + spinnerButtonsWidth + 3; // +3 for safety margin
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -165,7 +202,6 @@ namespace Nikse.SubtitleEdit.Controls
         }
 
 
-
         private void OnTextBoxGotFocus(object? sender, GotFocusEventArgs e)
         {
             if (_textBox != null)
@@ -216,6 +252,7 @@ namespace Nikse.SubtitleEdit.Controls
             {
                 nextPos++;
             }
+
             _textBox.CaretIndex = Math.Min(nextPos, _textBuffer.Length);
 
             // Update the bound value
@@ -296,10 +333,12 @@ namespace Nikse.SubtitleEdit.Controls
                 {
                     newPos--;
                 }
+
                 if (newPos >= 0)
                 {
                     _textBox.CaretIndex = newPos;
                 }
+
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
@@ -309,10 +348,12 @@ namespace Nikse.SubtitleEdit.Controls
                 {
                     newPos++;
                 }
+
                 if (newPos < _textBuffer.Length)
                 {
                     _textBox.CaretIndex = newPos;
                 }
+
                 e.Handled = true;
             }
             else if (e.Key == Key.Back || e.Key == Key.Delete)

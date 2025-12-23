@@ -21,10 +21,7 @@ public static class ViewOffsetTimeCodes
             Content = Se.Language.General.Offset,
         };
 
-        var timeUpDown = new TimeCodeUpDown()
-        {
-
-        };
+        var timeUpDown = new TimeCodeUpDown();
 
         var panelTimeCode = new StackPanel
         {
