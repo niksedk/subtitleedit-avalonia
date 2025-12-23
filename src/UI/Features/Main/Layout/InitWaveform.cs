@@ -40,6 +40,7 @@ public class InitWaveform
                 WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor(),
                 WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
                 WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor(),
+                WaveformFancyHighColor = Se.Settings.Waveform.WaveformFancyHighColor.FromHexToColor(),
                 InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Height = double.NaN, // Auto height

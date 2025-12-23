@@ -391,6 +391,7 @@ public class SettingsPage : UserControl
             new SettingsItem(Se.Language.Options.Settings.WaveformBackgroundColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformBackgroundColor))),
             new SettingsItem(Se.Language.Options.Settings.WaveformSelectedColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformSelectedColor))),
             new SettingsItem(Se.Language.Options.Settings.WaveformCursorColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformCursorColor))),
+            new SettingsItem(Se.Language.Options.Settings.WaveformFancyHighColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.WaveformFancyHighColor))),
             new SettingsItem(Se.Language.Options.Settings.DownloadFfmpeg, () => new StackPanel
             {
                 Children =

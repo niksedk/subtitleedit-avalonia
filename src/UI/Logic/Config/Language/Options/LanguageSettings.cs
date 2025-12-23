@@ -165,6 +165,7 @@ public class LanguageSettings
     public string ShowSettingsFile { get; set; }
     public string ShowAssaLayer { get; set; }
     public string WaveformCursorColor { get; set; }
+    public string WaveformFancyHighColor { get; set; }
     public string WaveformFocusOnMouseOver { get; set; }
 
     public string ResetAllSettings { get; set; }
@@ -374,6 +375,7 @@ public class LanguageSettings
         ShowSettingsFile = "Show settings file";
         ShowAssaLayer = "Show ASSA layer box";
         WaveformCursorColor = "Waveform cursor/head color";
+        WaveformFancyHighColor = "Waveform fancy high color";
 
         ResetAllSettings = "Reset all settings";
         ResetShortcuts = "Reset shortcuts";

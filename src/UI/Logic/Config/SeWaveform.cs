@@ -18,6 +18,7 @@ public class SeWaveform
     public string WaveformBackgroundColor { get; set; }
     public string WaveformSelectedColor { get; set; }
     public string WaveformCursorColor { get; set; }
+    public string WaveformFancyHighColor { get; set; }
     public bool InvertMouseWheel { get; set; }
     public double ShotChangesSensitivity { get; set; }
     public string ShotChangesImportTimeCodeFormat { get; set; }
@@ -50,6 +51,7 @@ public class SeWaveform
         WaveformBackgroundColor = Color.FromArgb(255, 0, 0, 0).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
         WaveformCursorColor = Colors.Cyan.FromColorToHex();
+        WaveformFancyHighColor = Colors.Orange.FromColorToHex();
         ShotChangesSensitivity = 0.4;
         ShotChangesImportTimeCodeFormat = "Seconds";
         SnapToShotChangesPixels = 8;
