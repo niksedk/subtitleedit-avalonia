@@ -191,7 +191,7 @@ public class AudioVisualizer : Control
         set
         {
             _paragraphSelectedBackground = value;
-            _paintParagraphSelectedBackground = new SolidColorBrush(_paragraphBackground);
+            _paintParagraphSelectedBackground = new SolidColorBrush(_paragraphSelectedBackground);
         }
     }
 

@@ -10,7 +10,7 @@ public static class WaveFileExtractor
 {
     public static Process GetCommandLineProcess(string inputVideoFile, int audioTrackNumber, string outWaveFile, string encodeParamters, out string encoderName)
     {
-        var settings = Configuration.Settings;
+        var settings = Se.Settings;
 
         encoderName = "VLC";
         var parameters = "\"" + inputVideoFile + "\" -I dummy -vvv --no-random --no-repeat --no-loop --no-sout-video --audio-track-id=" + audioTrackNumber + " --sout=\"#transcode{acodec=s16l,channels=1,ab=128,audio-track-id=" + audioTrackNumber + "}:std{access=file,mux=wav,dst=" + outWaveFile + "}\" vlc://quit";
@@ -24,25 +24,9 @@ public static class WaveFileExtractor
         {
             exeFilePath = "VLC.app/Contents/MacOS/VLC";
         }
-        else // windows
-        {
-            //exeFilePath = Logic.VideoPlayers.LibVlcDynamic.GetVlcPath("vlc.exe");
-            //if (!File.Exists(exeFilePath))
-            {
-                if (File.Exists(settings.General.FFmpegLocation))
-                {
-                    // We will run FFmpeg
-                }
-                else
-                {
-                    throw new DllNotFoundException("NO_FFMPEG");
-                }
-            }
-        }
 
         var ffmpegFileName = Se.Settings.General.FfmpegPath;
-
-        if (settings.General.UseFFmpegForWaveExtraction && File.Exists(settings.General.FFmpegLocation) || !Configuration.IsRunningOnWindows)
+        if (File.Exists(settings.General.FfmpegPath) || !Configuration.IsRunningOnWindows)
         {
             encoderName = "FFmpeg";
             string audioParameter = string.Empty;
@@ -52,7 +36,7 @@ public static class WaveFileExtractor
             }
 
             var fFmpegWaveTranscodeSettings = "-i \"{0}\" -vn -ar 24000 -ac 2 -ab 128 -af volume=1.75 -f wav {2} \"{1}\"";
-            if (settings.General.FFmpegUseCenterChannelOnly &&
+            if (settings.General.FfmpegUseCenterChannelOnly &&
                 FfmpegMediaInfo.Parse(inputVideoFile).HasFrontCenterAudio(audioTrackNumber))
             {
                 fFmpegWaveTranscodeSettings = "-i \"{0}\" -vn -ar 24000 -ab 128 -af volume=1.75 -af \"pan=mono|c0=FC\" -f wav {2} \"{1}\"";

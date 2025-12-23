@@ -83,6 +83,7 @@ public class SeGeneral
     public string ErrorColor { get; set; }
 
     public string FfmpegPath { get; set; }
+    public bool FfmpegUseCenterChannelOnly { get; set; }
     public string LibMpvPath { get; set; }
     public bool AutoOpenVideo { get; set; }
     public bool ShowColumnEndTime { get; set; }
