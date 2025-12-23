@@ -152,7 +152,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _ffmpegStatus;
     [ObservableProperty] private Color _waveformColor;
     [ObservableProperty] private Color _waveformBackgroundColor;
+    [ObservableProperty] private Color _waveformParagraphBackgroundColor;
     [ObservableProperty] private Color _waveformSelectedColor;
+    [ObservableProperty] private Color _waveformParagraphSelectedBackgroundColor;
     [ObservableProperty] private Color _waveformCursorColor;
     [ObservableProperty] private Color _waveformFancyHighColor;
     [ObservableProperty] private bool _waveformInvertMouseWheel;
@@ -519,7 +521,9 @@ public partial class SettingsViewModel : ObservableObject
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor();
+        WaveformParagraphBackgroundColor = Se.Settings.Waveform.ParagraphBackground.FromHexToColor();
         WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
+        WaveformParagraphSelectedBackgroundColor = Se.Settings.Waveform.ParagraphSelectedBackground.FromHexToColor();
         WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
         WaveformFancyHighColor = Se.Settings.Waveform.WaveformFancyHighColor.FromHexToColor();
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
@@ -769,6 +773,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.ShowWaveformPlaybackSpeed = ShowWaveformPlaybackSpeed;
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
         Se.Settings.Waveform.WaveformBackgroundColor = WaveformBackgroundColor.FromColorToHex();
+        Se.Settings.Waveform.ParagraphBackground = WaveformParagraphBackgroundColor.FromColorToHex();
+        Se.Settings.Waveform.ParagraphSelectedBackground = WaveformParagraphSelectedBackgroundColor.FromColorToHex();
         Se.Settings.Waveform.WaveformSelectedColor = WaveformSelectedColor.FromColorToHex();
         Se.Settings.Waveform.WaveformCursorColor = WaveformCursorColor.FromColorToHex();
         Se.Settings.Waveform.WaveformFancyHighColor = WaveformFancyHighColor.FromColorToHex();

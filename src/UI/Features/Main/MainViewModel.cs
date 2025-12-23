@@ -4351,6 +4351,8 @@ public partial class MainViewModel :
             AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
             AudioVisualizer.WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor();
             AudioVisualizer.WaveformFancyHighColor = Se.Settings.Waveform.WaveformFancyHighColor.FromHexToColor();
+            AudioVisualizer.ParagraphBackground = Se.Settings.Waveform.ParagraphBackground.FromHexToColor();
+            AudioVisualizer.ParagraphSelectedBackground = Se.Settings.Waveform.ParagraphSelectedBackground.FromHexToColor();
             AudioVisualizer.InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
             AudioVisualizer.UpdateTheme();
             AudioVisualizer.IsReadOnly = LockTimeCodes;

@@ -170,6 +170,30 @@ public class AudioVisualizer : Control
     public bool FocusOnMouseOver { get; set; } = true;
     public int WaveformHeightPercentage { get; set; } = 50;
     public Color WaveformFancyHighColor { get; set; } = Colors.Orange;
+    
+    private Color _paragraphBackground = Color.FromArgb(90, 70, 70, 70);
+
+    public Color ParagraphBackground
+    {
+        get => _paragraphBackground;
+        set
+        {
+            _paragraphBackground = value;
+            _paintParagraphBackground = new SolidColorBrush(_paragraphBackground);
+        }
+    }
+    
+    private Color _paragraphSelectedBackground = Color.FromArgb(90, 70, 70, 70);
+
+    public Color ParagraphSelectedBackground
+    {
+        get => _paragraphSelectedBackground;
+        set
+        {
+            _paragraphSelectedBackground = value;
+            _paintParagraphSelectedBackground = new SolidColorBrush(_paragraphBackground);
+        }
+    }
 
     private List<double> _shotChanges = new List<double>();
 
@@ -242,6 +266,7 @@ public class AudioVisualizer : Control
     // Paragraph painting
     private IBrush _paintBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
     private IBrush _paintParagraphBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
+    private IBrush _paintParagraphSelectedBackground = new SolidColorBrush(Color.FromArgb(90, 70, 70, 70));
     private readonly Pen _paintLeft = new Pen(new SolidColorBrush(Color.FromArgb(60, 0, 255, 0)), 2);
     private readonly Pen _paintRight = new Pen(new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)), 2);
     private readonly IBrush _paintText = Brushes.White;
@@ -1588,7 +1613,8 @@ public class AudioVisualizer : Control
         var height = renderCtx.Height;
 
         // Draw background rectangle
-        context.FillRectangle(_paintParagraphBackground, new Rect(currentRegionLeft, 0, currentRegionWidth, height));
+        context.FillRectangle(AllSelectedParagraphs.Contains(paragraph) ? _paintParagraphSelectedBackground : _paintParagraphBackground,
+            new Rect(currentRegionLeft, 0, currentRegionWidth, height));
 
         // Draw left and right borders
         context.DrawLine(_paintLeft, new Point(currentRegionLeft, 0), new Point(currentRegionLeft, height));

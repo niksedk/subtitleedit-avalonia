@@ -213,6 +213,8 @@ public class LanguageSettings
     public string SubtitleGridFormattingNone { get; set; }
     public string SubtitleGridFormattingShowFormatting { get; set; }
     public string SubtitleGridFormattingShowTags { get; set; }
+    public string WaveformParagraphBackgroundColor { get; set; }
+    public string WaveformParagraphSelectedBackgroundColor { get; set; }
 
     public LanguageSettings()
     {
@@ -422,6 +424,8 @@ public class LanguageSettings
         SubtitleGridFormattingNone = "No formatting";
         SubtitleGridFormattingShowFormatting = "Show formatting";
         SubtitleGridFormattingShowTags = "Show tags";
+        WaveformParagraphBackgroundColor = "Waveform subtitle background color";
+        WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
