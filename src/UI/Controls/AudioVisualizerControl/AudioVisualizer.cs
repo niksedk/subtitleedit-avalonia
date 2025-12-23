@@ -1448,46 +1448,41 @@ public class AudioVisualizer : Control
             // Determine color based on amplitude and create a cache key
             Color color;
             int colorKey;
-            if (isSelected)
+
+            // Determine base color (selected or normal)
+            var baseColor = isSelected ? WaveformSelectedColor : WaveformColor;
+            var baseColorKeyOffset = isSelected ? 10000 : 0; // Use different cache key range for selected
+
+            // Dynamic coloring based on amplitude - quantize to reduce cache variations
+            if (amplitude < lowThreshold)
             {
-                // Selected always uses the selected color
-                color = WaveformSelectedColor;
-                colorKey = -1; // Special key for selected
+                // Low amplitude - use base color
+                color = baseColor;
+                colorKey = baseColorKeyOffset + 0;
+            }
+            else if (amplitude < mediumThreshold)
+            {
+                // Medium amplitude - blend from base to high color
+                var blend = (amplitude - lowThreshold) / (mediumThreshold - lowThreshold);
+                var lowColor = baseColor;
+                var highColor = WaveformFancyHighColor;
+                var r = (byte)(lowColor.R + blend * (highColor.R - lowColor.R));
+                var g = (byte)(lowColor.G + blend * (highColor.G - lowColor.G));
+                var b = (byte)(lowColor.B + blend * (highColor.B - lowColor.B));
+                var a = (byte)(lowColor.A + blend * (highColor.A - lowColor.A));
+                color = Color.FromArgb(a, r, g, b);
+                // Quantize blend to 10 steps for caching
+                colorKey = baseColorKeyOffset + 1 + (int)(blend * 10);
             }
             else
             {
-                // Dynamic coloring based on amplitude - quantize to reduce cache variations
-                if (amplitude < lowThreshold)
-                {
-                    // Low amplitude - greenish/blue
-                    color = WaveformColor;
-                    //color = Color.FromArgb(200, 100, 200, 150);
-                    colorKey = 0;
-                }
-                else if (amplitude < mediumThreshold)
-                {
-                    // Medium amplitude - blend from low to high color
-                    var blend = (amplitude - lowThreshold) / (mediumThreshold - lowThreshold);
-                    var lowColor = WaveformColor;
-                    var highColor = WaveformFancyHighColor;
-                    var r = (byte)(lowColor.R + blend * (highColor.R - lowColor.R));
-                    var g = (byte)(lowColor.G + blend * (highColor.G - lowColor.G));
-                    var b = (byte)(lowColor.B + blend * (highColor.B - lowColor.B));
-                    var a = (byte)(lowColor.A + blend * (highColor.A - lowColor.A));
-                    color = Color.FromArgb(a, r, g, b);
-                    // Quantize blend to 10 steps for caching
-                    colorKey = 1 + (int)(blend * 10);
-                }
-                else
-                {
-                    // High amplitude - use high color with increased opacity
-                    var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (highestPeak - mediumThreshold));
-                    var highColor = WaveformFancyHighColor;
-                    var a = (byte)Math.Min(255, highColor.A + blend * (255 - highColor.A));
-                    color = Color.FromArgb(a, highColor.R, highColor.G, highColor.B);
-                    // Quantize blend to 10 steps for caching
-                    colorKey = 12 + (int)(blend * 10);
-                }
+                // High amplitude - use high color with increased opacity
+                var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (highestPeak - mediumThreshold));
+                var highColor = WaveformFancyHighColor;
+                var a = (byte)Math.Min(255, highColor.A + blend * (255 - highColor.A));
+                color = Color.FromArgb(a, highColor.R, highColor.G, highColor.B);
+                // Quantize blend to 10 steps for caching
+                colorKey = baseColorKeyOffset + 12 + (int)(blend * 10);
             }
 
             // Get cached pen with gradient
