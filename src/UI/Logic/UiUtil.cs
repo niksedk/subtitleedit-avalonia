@@ -27,6 +27,7 @@ public static class UiUtil
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
     private static IStyle? _lighterDarkStyle;
+    private static object? _themeChangeSubscription;
     public static FluentTheme? FluentTheme { get; set; }
 
     public static ControlTheme DataGridNoBorderCellTheme => GetDataGridNoBorderCellTheme();
@@ -1969,6 +1970,13 @@ public static class UiUtil
     {
         var themeSetting = Se.Settings.Appearance.Theme;
 
+        // Unsubscribe from any previous theme change event
+        if (_themeChangeSubscription != null)
+        {
+            Application.Current!.ActualThemeVariantChanged -= OnActualThemeVariantChanged;
+            _themeChangeSubscription = null;
+        }
+
         RemoveLighterDark();
 
         if (themeSetting == "System")
@@ -1979,6 +1987,10 @@ public static class UiUtil
             {
                 ApplyLighterDark();
             }
+
+            // Subscribe to theme changes
+            Application.Current.ActualThemeVariantChanged += OnActualThemeVariantChanged;
+            _themeChangeSubscription = new object(); // Mark as subscribed
         }
         else if (themeSetting == "Dark")
         {
@@ -1988,6 +2000,18 @@ public static class UiUtil
         else
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
+        }
+    }
+
+    private static void OnActualThemeVariantChanged(object? sender, EventArgs e)
+    {
+        if (Se.Settings.Appearance.Theme == "System" && Application.Current != null)
+        {
+            RemoveLighterDark();
+            if (Application.Current.ActualThemeVariant == ThemeVariant.Dark)
+            {
+                ApplyLighterDark();
+            }
         }
     }
 
