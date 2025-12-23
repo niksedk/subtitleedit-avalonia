@@ -169,6 +169,7 @@ public class AudioVisualizer : Control
     public bool SnapToShotChanges { get; set; } = true;
     public bool FocusOnMouseOver { get; set; } = true;
     public int WaveformHeightPercentage { get; set; } = 50;
+    public Color WaveformFancyHighColor { get; set; } = Colors.Orange;
 
     private List<double> _shotChanges = new List<double>();
 
@@ -1459,28 +1460,31 @@ public class AudioVisualizer : Control
                 if (amplitude < lowThreshold)
                 {
                     // Low amplitude - greenish/blue
-                    color = Color.FromArgb(200, 100, 200, 150);
+                    color = WaveformColor;
+                    //color = Color.FromArgb(200, 100, 200, 150);
                     colorKey = 0;
                 }
                 else if (amplitude < mediumThreshold)
                 {
-                    // Medium amplitude - yellow/orange blend
+                    // Medium amplitude - blend from low to high color
                     var blend = (amplitude - lowThreshold) / (mediumThreshold - lowThreshold);
-                    var r = (byte)(100 + blend * 155);
-                    var g = (byte)(200 - blend * 50);
-                    var b = (byte)(150 - blend * 150);
-                    color = Color.FromArgb(200, r, g, b);
+                    var lowColor = WaveformColor;
+                    var highColor = WaveformFancyHighColor;
+                    var r = (byte)(lowColor.R + blend * (highColor.R - lowColor.R));
+                    var g = (byte)(lowColor.G + blend * (highColor.G - lowColor.G));
+                    var b = (byte)(lowColor.B + blend * (highColor.B - lowColor.B));
+                    var a = (byte)(lowColor.A + blend * (highColor.A - lowColor.A));
+                    color = Color.FromArgb(a, r, g, b);
                     // Quantize blend to 10 steps for caching
                     colorKey = 1 + (int)(blend * 10);
                 }
                 else
                 {
-                    // High amplitude - red/orange
+                    // High amplitude - use high color with increased opacity
                     var blend = Math.Min(1.0, (amplitude - mediumThreshold) / (highestPeak - mediumThreshold));
-                    var r = (byte)255;
-                    var g = (byte)(150 - blend * 100);
-                    var b = (byte)(0);
-                    color = Color.FromArgb(220, r, g, b);
+                    var highColor = WaveformFancyHighColor;
+                    var a = (byte)Math.Min(255, highColor.A + blend * (255 - highColor.A));
+                    color = Color.FromArgb(a, highColor.R, highColor.G, highColor.B);
                     // Quantize blend to 10 steps for caching
                     colorKey = 12 + (int)(blend * 10);
                 }
