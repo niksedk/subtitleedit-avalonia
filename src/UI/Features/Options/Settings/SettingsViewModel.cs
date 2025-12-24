@@ -251,7 +251,7 @@ public partial class SettingsViewModel : ObservableObject
         MpvPreviewBorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
         LibVlcStatus = string.Empty;
 
-        Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark, "Windows Classic Gray", "Pastel"];
+        Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark, Se.Language.General.Classic, "Pastel"];
         SelectedTheme = Themes[0];
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
@@ -434,7 +434,7 @@ public partial class SettingsViewModel : ObservableObject
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
         AdjustAllTimesRememberLineSelectionChoice = Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice;
 
-        SelectedTheme = appearance.Theme;
+        SelectedTheme = MapThemeToTranslation(appearance.Theme);
         SelectedFontName = FontNames.FirstOrDefault(p => p == appearance.FontName) ?? FontNames.First();
         ShowToolbarNew = appearance.ToolbarShowFileNew;
         ShowToolbarOpen = appearance.ToolbarShowFileOpen;
@@ -589,6 +589,63 @@ public partial class SettingsViewModel : ObservableObject
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
+    private string MapThemeFromTranslation(string translation)
+    {
+        if (translation == Se.Language.General.System)
+        {
+            return UiTheme.ThemeNameSystem;
+        }
+        else if (translation == Se.Language.General.Light)
+        {
+            return UiTheme.ThemeNameLight;
+        }
+        else if (translation == Se.Language.General.Dark)
+        {
+            return UiTheme.ThemeNameDark;
+        }
+        else if (translation == Se.Language.General.Classic)
+        {
+            return UiTheme.ThemeNameClassic;
+        }
+        else if (translation == "Pastel")
+        {
+            return UiTheme.ThemeNamePastel;
+        }
+        else
+        {
+            return UiTheme.ThemeNameSystem;
+        }
+    }
+
+    private string MapThemeToTranslation(string theme)
+    {
+        if (theme == UiTheme.ThemeNameSystem)
+        {
+            return Se.Language.General.System;
+        }
+        else if (theme == UiTheme.ThemeNameLight)
+        {
+            return Se.Language.General.Light;
+        }
+        else if (theme == UiTheme.ThemeNameDark)
+        {
+            return Se.Language.General.Dark;
+        }
+        else if (theme == UiTheme.ThemeNameClassic)
+        {
+            return Se.Language.General.Classic;
+        }
+        else if (theme == UiTheme.ThemeNamePastel)
+        {
+            return "Pastel";
+        }
+        else
+        {
+            return Se.Language.General.System;
+        }
+
+    }
+
     private static string MapGridFormattingToText(int subtitleGridFormattingType)
     {
         if (subtitleGridFormattingType == (int)SubtitleGridFormattingTypes.ShowFormatting)
@@ -692,7 +749,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
         Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;
 
-        appearance.Theme = SelectedTheme;
+        appearance.Theme = MapThemeFromTranslation(SelectedTheme);
         appearance.FontName = SelectedFontName == FontNames.First()
                                 ? new Label().FontFamily.Name
                                 : SelectedFontName;

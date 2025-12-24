@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System.IO;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
@@ -26,7 +27,11 @@ public static class InitToolbar
 
     private static Grid CreateToolbar(MainViewModel vm)
     {
-        var path = System.IO.Path.Combine(Se.ThemesFolder, UiTheme.ThemeName);
+        var path = Path.Combine(Se.ThemesFolder, UiTheme.ThemeName);
+        if (!Directory.Exists(path))
+        {
+            path = Path.Combine(Se.ThemesFolder, "Black");
+        }
 
         var stackPanelLeft = new StackPanel
         {

@@ -43,13 +43,13 @@ public class SecondsUpDown : TemplatedControl
 
         if (change.Property == ValueProperty)
         {
-  UpdateText();
-   
-      if (change.OldValue is TimeSpan oldValue && change.NewValue is TimeSpan newValue && oldValue != newValue)
+            UpdateText();
+
+            if (change.OldValue is TimeSpan oldValue && change.NewValue is TimeSpan newValue && oldValue != newValue)
             {
-         ValueChanged?.Invoke(this, newValue);
+                ValueChanged?.Invoke(this, newValue);
+            }
         }
- }
     }
 
     private static TimeSpan CoerceValue(AvaloniaObject sender, TimeSpan value)
@@ -96,13 +96,6 @@ public class SecondsUpDown : TemplatedControl
                 Margin = new Thickness(0),
                 Padding = new Thickness(0),
             };
-
-            // Bind spinner background to templated parent's Background so external bindings (e.g. duration color) work
-            spinner.Bind(ButtonSpinner.BackgroundProperty, new Avalonia.Data.Binding
-            {
-                RelativeSource = new Avalonia.Data.RelativeSource(Avalonia.Data.RelativeSourceMode.TemplatedParent),
-                Path = nameof(TemplatedControl.Background)
-            });
 
             scope.Register("PART_Spinner", spinner);
             scope.Register("PART_TextBox", textBox);
@@ -162,18 +155,18 @@ public class SecondsUpDown : TemplatedControl
 
     private void ParseAndUpdate()
     {
-    if (_textBox == null)
+        if (_textBox == null)
         {
-         return;
+            return;
         }
 
         var parsed = ParseTime(_textBox.Text ?? string.Empty);
         if (parsed != Value)
         {
-    Value = parsed;
+            Value = parsed;
         }
         else
-     {
+        {
             UpdateText();
         }
     }
@@ -182,10 +175,10 @@ public class SecondsUpDown : TemplatedControl
     {
         var val = Value;
 
-    if (Se.Settings.General.UseFrameMode)
+        if (Se.Settings.General.UseFrameMode)
         {
             var ms = SubtitleFormat.FramesToMilliseconds(delta);
-        val = val.Add(TimeSpan.FromMilliseconds(ms));
+            val = val.Add(TimeSpan.FromMilliseconds(ms));
         }
         else
         {
@@ -217,21 +210,21 @@ public class SecondsUpDown : TemplatedControl
         {
             // Expect "seconds:frames"
             var parts = text.Split(':');
-         if (parts.Length == 2 &&
-     double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds) &&
-                int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
-     {
-       var totalMs = seconds * 1000 + SubtitleFormat.FramesToMilliseconds(frames);
-    return TimeSpan.FromMilliseconds(totalMs);
+            if (parts.Length == 2 &&
+               double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds) &&
+               int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var frames))
+            {
+                var totalMs = seconds * 1000 + SubtitleFormat.FramesToMilliseconds(frames);
+                return TimeSpan.FromMilliseconds(totalMs);
             }
         }
         else
         {
-    // Expect "seconds.ms" or "seconds,ms"
-            if (double.TryParse(text.Replace(',', '.') , NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
-    {
-   return TimeSpan.FromSeconds(seconds);
-     }
+            // Expect "seconds.ms" or "seconds,ms"
+            if (double.TryParse(text.Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
+            {
+                return TimeSpan.FromSeconds(seconds);
+            }
         }
 
         return TimeSpan.Zero;
@@ -239,12 +232,12 @@ public class SecondsUpDown : TemplatedControl
 
     private static string FormatTime(TimeSpan ts)
     {
-     if (Se.Settings.General.UseFrameMode)
+        if (Se.Settings.General.UseFrameMode)
         {
-      var seconds = Math.Floor(ts.TotalSeconds);
-    var frames = SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds);
-         return $"{seconds:0}:{frames:00}";
-   }
+            var seconds = Math.Floor(ts.TotalSeconds);
+            var frames = SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds);
+            return $"{seconds:0}:{frames:00}";
+        }
 
         return ts.TotalSeconds.ToString("0.000");
     }

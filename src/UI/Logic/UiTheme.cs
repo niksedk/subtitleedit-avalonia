@@ -15,6 +15,12 @@ public static class UiTheme
     private static IStyle? _lighterDarkStyle;
     private static object? _themeChangeSubscription;
 
+    public const string ThemeNameSystem = "System";
+    public const string ThemeNameLight = "Light";
+    public const string ThemeNameDark = "Dark";
+    public const string ThemeNameClassic = "Classic";
+    public const string ThemeNamePastel = "Pastel";
+
     public static FluentTheme? FluentTheme { get; set; }
 
     public static string ThemeName
@@ -22,14 +28,14 @@ public static class UiTheme
         get
         {
             var themeSetting = Se.Settings.Appearance.Theme;
-            if (themeSetting == "System")
+            if (themeSetting == ThemeNameSystem)
             {
                 if (Application.Current!.ActualThemeVariant == ThemeVariant.Dark)
                 {
-                    return "Dark";
+                    return ThemeNameDark;
                 }
 
-                return "Light";
+                return ThemeNameLight;
             }
 
             return themeSetting;
@@ -49,11 +55,11 @@ public static class UiTheme
 
         RemoveLighterDark();
 
-        if (themeSetting == "System")
+        if (themeSetting == ThemeNameSystem)
         {
             // Let Avalonia track system theme automatically
             Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
-            if (ThemeName == "Dark")
+            if (ThemeName == ThemeNameDark)
             {
                 ApplyLighterDark();
             }
@@ -62,17 +68,17 @@ public static class UiTheme
             Application.Current.ActualThemeVariantChanged += OnActualThemeVariantChanged;
             _themeChangeSubscription = new object(); // Mark as subscribed
         }
-        else if (themeSetting == "Dark")
+        else if (themeSetting == ThemeNameDark)
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
             ApplyLighterDark();
         }
-        else if (themeSetting == "Windows Classic Gray")
+        else if (themeSetting == ThemeNameClassic)
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
             ApplyWindowsClassicGray();
         }
-        else if (themeSetting == "Pastel")
+        else if (themeSetting == ThemeNamePastel)
         {
             Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
             ApplyPastel();
@@ -85,7 +91,7 @@ public static class UiTheme
 
     private static void OnActualThemeVariantChanged(object? sender, EventArgs e)
     {
-        if (Se.Settings.Appearance.Theme == "System" && Application.Current != null)
+        if (Se.Settings.Appearance.Theme == ThemeNameSystem && Application.Current != null)
         {
             RemoveLighterDark();
             if (Application.Current.ActualThemeVariant == ThemeVariant.Dark)

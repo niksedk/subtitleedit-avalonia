@@ -97,6 +97,7 @@ public class LanguageGeneral
     public string CurrentVideoPosition { get; set; }
     public string Cut { get; set; }
     public string Dark { get; set; }
+    public string Classic { get; set; }
     public string DateAndTime { get; set; }
     public string Default { get; set; }
     public string Delete { get; set; }
@@ -666,6 +667,7 @@ public class LanguageGeneral
         CurrentVideoPosition = "Current video position";
         Cut = "Cut";
         Dark = "Dark";
+        Classic = "Classic";
         DateAndTime = "Date and time";
         Default = "Default";
         Delete = "Delete";
