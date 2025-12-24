@@ -62,6 +62,7 @@ public class LanguageGeneral
     public string CaseInsensitive { get; set; }
     public string CaseSensitive { get; set; }
     public string Category { get; set; }
+    public string Change { get; set; }
     public string ChangeAll { get; set; }
     public string ChangeCasing { get; set; }
     public string ChangeFrameRate { get; set; }
@@ -72,7 +73,9 @@ public class LanguageGeneral
     public string Characters { get; set; }
     public string CharsPerSec { get; set; }
     public string ChooseColorDotDotDot { get; set; }
+    public string ChooseImageFiles { get; set; }
     public string Class { get; set; }
+    public string Classic { get; set; }
     public string Clear { get; set; }
     public string Close { get; set; }
     public string Codec { get; set; }
@@ -97,7 +100,6 @@ public class LanguageGeneral
     public string CurrentVideoPosition { get; set; }
     public string Cut { get; set; }
     public string Dark { get; set; }
-    public string Classic { get; set; }
     public string DateAndTime { get; set; }
     public string Default { get; set; }
     public string Delete { get; set; }
@@ -117,7 +119,6 @@ public class LanguageGeneral
     public string DoubleWords { get; set; }
     public string Download { get; set; }
     public string DownloadX { get; set; }
-    public string ReDownloadX { get; set; }
     public string DownloadingX { get; set; }
     public string DownloadingXPercent { get; set; }
     public string Duplicate { get; set; }
@@ -125,6 +126,8 @@ public class LanguageGeneral
     public string DurationMinutes { get; set; }
     public string Edit { get; set; }
     public string EditDotDotDot { get; set; }
+    public string EditImagedBaseSubtitle { get; set; }
+    public string EditImagedBaseSubtitleX { get; set; }
     public string Editing { get; set; }
     public string Effect { get; set; }
     public string Enabled { get; set; }
@@ -142,6 +145,7 @@ public class LanguageGeneral
     public string ExportToX { get; set; }
     public string ExtendSelectedToNext { get; set; }
     public string ExtendSelectedToPrevious { get; set; }
+    public string ExtractingAudioClips { get; set; }
     public string FileAlreadyExists { get; set; }
     public string FileExtension { get; set; }
     public string FileName { get; set; }
@@ -149,6 +153,7 @@ public class LanguageGeneral
     public string FileNameXAndSize { get; set; }
     public string FileSaved { get; set; }
     public string FileXAlreadyExists { get; set; }
+    public string FileXOfY { get; set; }
     public string Filter { get; set; }
     public string FilterByLayer { get; set; }
     public string Find { get; set; }
@@ -158,6 +163,8 @@ public class LanguageGeneral
     public string FixCommonErrors { get; set; }
     public string FixRightToLeft { get; set; }
     public string FixRightToLeftViaUnicodeTags { get; set; }
+    public string FixedValue { get; set; }
+    public string FocusSelectedLine { get; set; }
     public string Font { get; set; }
     public string FontColor { get; set; }
     public string FontName { get; set; }
@@ -186,6 +193,7 @@ public class LanguageGeneral
     public string Generating { get; set; }
     public string GeneratingImageXofY { get; set; }
     public string GeneratingWavFile { get; set; }
+    public string GetAudioClips { get; set; }
     public string GoTo { get; set; }
     public string GoToLineNumber { get; set; }
     public string GoogleIt { get; set; }
@@ -212,6 +220,7 @@ public class LanguageGeneral
     public string InsertAtPositionNoFocusTextBox { get; set; }
     public string InsertBefore { get; set; }
     public string InsertNewSelection { get; set; }
+    public string InsertSubtitleAfterCurrentLine { get; set; }
     public string InspectAdditions { get; set; }
     public string InvertSelection { get; set; }
     public string IsDefault { get; set; }
@@ -224,6 +233,7 @@ public class LanguageGeneral
     public string LayerFilterOn { get; set; }
     public string Left { get; set; }
     public string Light { get; set; }
+    public string LineHeigth { get; set; }
     public string LineNumber { get; set; }
     public string LineXColumnY { get; set; }
     public string Lines { get; set; }
@@ -235,6 +245,7 @@ public class LanguageGeneral
     public string Margin { get; set; }
     public string Match { get; set; }
     public string MaxCharactersPerSecond { get; set; }
+    public string MediaInformation { get; set; }
     public string MergeAfter { get; set; }
     public string MergeBefore { get; set; }
     public string MergeLines { get; set; }
@@ -263,15 +274,16 @@ public class LanguageGeneral
     public string New { get; set; }
     public string NewDotDotDot { get; set; }
     public string NewProfile { get; set; }
+    public string NewSubtitleStartKeyDownSetEndKeyUp { get; set; }
     public string No { get; set; }
     public string NoFilesToConvert { get; set; }
     public string NoLanguageCode { get; set; }
-    public string NormalCasing { get; set; }
     public string NoSubtitleLoaded { get; set; }
     public string NoSubtitlesFound { get; set; }
     public string NoSymbolLines { get; set; }
     public string NoVideoLoaded { get; set; }
     public string None { get; set; }
+    public string NormalCasing { get; set; }
     public string NotAvailable { get; set; }
     public string NotInstalled { get; set; }
     public string Number { get; set; }
@@ -288,6 +300,7 @@ public class LanguageGeneral
     public string OpenContainingFolder { get; set; }
     public string OpenDictionaryFolder { get; set; }
     public string OpenFile { get; set; }
+    public string OpenImageBasedSubtitle { get; set; }
     public string OpenImageFile { get; set; }
     public string OpenOriginalSubtitleFile { get; set; }
     public string OpenOriginalSubtitleFileTitle { get; set; }
@@ -325,14 +338,20 @@ public class LanguageGeneral
     public string PickSubtitleFile { get; set; }
     public string PickVideoFile { get; set; }
     public string PickVideoPosition { get; set; }
+    public string PlayFromStartOfVideo { get; set; }
+    public string PlaySelectedLines { get; set; }
+    public string PlaySelectedLinesWithLoop { get; set; }
     public string PleaseEnterAValidValueForX { get; set; }
     public string PleaseWait { get; set; }
+    public string PositionX { get; set; }
     public string PostProcessing { get; set; }
+    public string PoweredBy { get; set; }
     public string Prefix { get; set; }
     public string Preview { get; set; }
     public string Profile { get; set; }
     public string ProfileName { get; set; }
     public string Profiles { get; set; }
+    public string ReDownloadX { get; set; }
     public string Reason { get; set; }
     public string Redo { get; set; }
     public string Refresh { get; set; }
@@ -343,6 +362,7 @@ public class LanguageGeneral
     public string Remove { get; set; }
     public string RemoveAlignment { get; set; }
     public string RemoveAllFormatting { get; set; }
+    public string RemoveBlankLines { get; set; }
     public string RemoveBold { get; set; }
     public string RemoveColor { get; set; }
     public string RemoveFilter { get; set; }
@@ -356,6 +376,7 @@ public class LanguageGeneral
     public string RemoveUnderline { get; set; }
     public string Rename { get; set; }
     public string ReplaceWith { get; set; }
+    public string RequiresRestart { get; set; }
     public string Reset { get; set; }
     public string Resolution { get; set; }
     public string ResolutionX { get; set; }
@@ -379,6 +400,7 @@ public class LanguageGeneral
     public string Search { get; set; }
     public string SearchDirection { get; set; }
     public string SearchFontNames { get; set; }
+    public string SearchSubtitleFormats { get; set; }
     public string Seconds { get; set; }
     public string SelectAll { get; set; }
     public string SelectFilesToConvert { get; set; }
@@ -392,6 +414,8 @@ public class LanguageGeneral
     public string SessionKeyGenerate { get; set; }
     public string SetEnd { get; set; }
     public string SetEndAndGoToNext { get; set; }
+    public string SetEndAndOffsetTheRest { get; set; }
+    public string SetFontDotDotDot { get; set; }
     public string SetStart { get; set; }
     public string SetStartAndOffsetTheRest { get; set; }
     public string SetVideoOffset { get; set; }
@@ -418,12 +442,14 @@ public class LanguageGeneral
     public string SingleLineLengths { get; set; }
     public string SingleMode { get; set; }
     public string Size { get; set; }
+    public string SizeX { get; set; }
     public string Skip { get; set; }
     public string SkipAll { get; set; }
     public string SkipOnce { get; set; }
     public string SolidColor { get; set; }
     public string SourceViewX { get; set; }
     public string Spacing { get; set; }
+    public string SpeechToTextSelectedLines { get; set; }
     public string Speed { get; set; }
     public string SplitAtTextBoxCursorPosition { get; set; }
     public string SplitLine { get; set; }
@@ -448,6 +474,7 @@ public class LanguageGeneral
     public string SubtitleFiles { get; set; }
     public string SubtitleFormats { get; set; }
     public string SubtitleLoadedX { get; set; }
+    public string SubtitleXOfY { get; set; }
     public string Suffix { get; set; }
     public string Suggestions { get; set; }
     public string Sync { get; set; }
@@ -465,6 +492,8 @@ public class LanguageGeneral
     public string Timing { get; set; }
     public string Title { get; set; }
     public string To { get; set; }
+    public string ToggleCasing { get; set; }
+    public string ToggleForced { get; set; }
     public string ToggleShotChangesAtVideoPosition { get; set; }
     public string Toolbar { get; set; }
     public string Tools { get; set; }
@@ -539,37 +568,8 @@ public class LanguageGeneral
     public string XNotFound { get; set; }
     public string XRequiresAnApiKey { get; set; }
     public string XSeconds { get; set; }
-    public string Yes { get; set; }
-    public string ChooseImageFiles { get; set; }
-    public string FocusSelectedLine { get; set; }
-    public string PlayFromStartOfVideo { get; set; }
-    public string RemoveBlankLines { get; set; }
-    public string NewSubtitleStartKeyDownSetEndKeyUp { get; set; }
-    public string SpeechToTextSelectedLines { get; set; }
-    public string GetAudioClips { get; set; }
-    public string ExtractingAudioClips { get; set; }
-    public string FileXOfY { get; set; }
-    public string PlaySelectedLines { get; set; }
-    public string PlaySelectedLinesWithLoop { get; set; }
-    public string ToggleCasing { get; set; }
-    public string SetEndAndOffsetTheRest { get; set; }
-    public string Change { get; set; }
-    public string EditImagedBaseSubtitle { get; set; }
-    public string EditImagedBaseSubtitleX { get; set; }
-    public string OpenImageBasedSubtitle { get; set; }
     public string XSubtitles { get; set; }
-    public string SubtitleXOfY { get; set; }
-    public string PositionX { get; set; }
-    public string SizeX { get; set; }
-    public string SetFontDotDotDot { get; set; }
-    public string LineHeigth { get; set; }
-    public string ToggleForced { get; set; }
-    public string MediaInformation { get; set; }
-    public string InsertSubtitleAfterCurrentLine { get; set; }
-    public string? SearchSubtitleFormats { get; set; }
-    public string PoweredBy { get; set; }
-    public string FixedValue { get; set; }
-    public string RequiresRestart { get; set; }
+    public string Yes { get; set; }
 
     public LanguageGeneral()
     {
@@ -606,7 +606,7 @@ public class LanguageGeneral
         BatchMode = "Batch mode";
         BdnXml = "BDN/xml";
         Before = "Before";
-        BeforeX = "Before '{0}'";
+        BeforeX = "Before \"{0}\"";
         Beginning = "Beginning";
         BluRaySup = "Blu-ray (sup)";
         Bold = "Bold";
@@ -633,6 +633,7 @@ public class LanguageGeneral
         CaseInsensitive = "Case insensitive";
         CaseSensitive = "Case sensitive";
         Category = "Category";
+        Change = "Change";
         ChangeAll = "Change all";
         ChangeCasing = "Change casing";
         ChangeFrameRate = "Change frame rate";
@@ -643,7 +644,9 @@ public class LanguageGeneral
         Characters = "Characters";
         CharsPerSec = "Chars/sec";
         ChooseColorDotDotDot = "Choose color...";
+        ChooseImageFiles = "Choose image files";
         Class = "Class";
+        Classic = "Classic";
         Clear = "Clear";
         Close = "Close";
         Codec = "Codec";
@@ -668,7 +671,6 @@ public class LanguageGeneral
         CurrentVideoPosition = "Current video position";
         Cut = "Cut";
         Dark = "Dark";
-        Classic = "Classic";
         DateAndTime = "Date and time";
         Default = "Default";
         Delete = "Delete";
@@ -688,7 +690,6 @@ public class LanguageGeneral
         DoubleWords = "Double words";
         Download = "Download";
         DownloadX = "Download {0}";
-        ReDownloadX = "Re-download {0}";
         DownloadingX = "Downloading {0}";
         DownloadingXPercent = "Downloading {0}%";
         Duplicate = "Duplicate";
@@ -696,6 +697,8 @@ public class LanguageGeneral
         DurationMinutes = "Duration in minutes";
         Edit = "Edit";
         EditDotDotDot = "Edit...";
+        EditImagedBaseSubtitle = "Edit imaged-based subtitle";
+        EditImagedBaseSubtitleX = "Edit imaged-based subtitle: {0}";
         Editing = "Editing";
         Effect = "Effect";
         Enabled = "Enabled";
@@ -713,13 +716,15 @@ public class LanguageGeneral
         ExportToX = "Export to {0}";
         ExtendSelectedToNext = "Extend selected to next";
         ExtendSelectedToPrevious = "Extend selected to previous";
+        ExtractingAudioClips = "Extracting audio clips...";
         FileAlreadyExists = "File already exists";
         FileExtension = "File extension";
         FileName = "File name";
         FileNameX = "File name: {0}";
         FileNameXAndSize = "File name: {0} ({1})";
         FileSaved = "File saved";
-        FileXAlreadyExists = "File '{0}' already exists.";
+        FileXAlreadyExists = "File \"{0}\" already exists.";
+        FileXOfY = "File {0} of {1}";
         Filter = "Filter";
         FilterByLayer = "Filter by layer";
         Find = "Find";
@@ -729,6 +734,8 @@ public class LanguageGeneral
         FixCommonErrors = "Fix common errors";
         FixRightToLeft = "Fix right-to-left";
         FixRightToLeftViaUnicodeTags = "Fix RTL via Unicode tags";
+        FixedValue = "Fixed value";
+        FocusSelectedLine = "Focus selected line (scroll into view in grid)";
         Font = "Font";
         FontColor = "Font color";
         FontName = "Font name";
@@ -757,6 +764,7 @@ public class LanguageGeneral
         Generating = "Generating...";
         GeneratingImageXofY = "Generating image {0:#,##0} of {1:#,##0}...";
         GeneratingWavFile = "Generating wav file...";
+        GetAudioClips = "Get audio clips";
         GoTo = "Go to";
         GoToLineNumber = "Go to line number";
         GoogleIt = "Google it ";
@@ -783,6 +791,7 @@ public class LanguageGeneral
         InsertAtPositionNoFocusTextBox = "Insert subtitle at video position (no focus text box)";
         InsertBefore = "Insert before";
         InsertNewSelection = "Insert new selection";
+        InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
         InspectAdditions = "Inspect additions...";
         InvertSelection = "Invert selection";
         IsDefault = "Is default";
@@ -795,6 +804,7 @@ public class LanguageGeneral
         LayerFilterOn = "Layer filter on";
         Left = "Left";
         Light = "Light";
+        LineHeigth = "Line height";
         LineNumber = "Line#";
         LineXColumnY = "Line {0}, Column {1}";
         Lines = "Lines";
@@ -806,6 +816,7 @@ public class LanguageGeneral
         Margin = "Margin";
         Match = "Match";
         MaxCharactersPerSecond = "Max characters per second";
+        MediaInformation = "Media information";
         MergeAfter = "Merge with line after";
         MergeBefore = "Merge with line before";
         MergeLines = "Merge lines";
@@ -834,6 +845,7 @@ public class LanguageGeneral
         New = "New";
         NewDotDotDot = "New...";
         NewProfile = "New profile";
+        NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
         No = "No";
         NoFilesToConvert = "No files to convert";
         NoLanguageCode = "No language code";
@@ -859,6 +871,7 @@ public class LanguageGeneral
         OpenContainingFolder = "Open containing folder";
         OpenDictionaryFolder = "Open dictionary folder";
         OpenFile = "Open file";
+        OpenImageBasedSubtitle = "Open image-based subtitle";
         OpenImageFile = "Open image file";
         OpenOriginalSubtitleFile = "Open original subtitle file...";
         OpenOriginalSubtitleFileTitle = "Open original subtitle file";
@@ -896,14 +909,20 @@ public class LanguageGeneral
         PickSubtitleFile = "Pick subtitle file...";
         PickVideoFile = "Pick video file...";
         PickVideoPosition = "Pick video position";
+        PlayFromStartOfVideo = "Play from start of video";
+        PlaySelectedLines = "Play selected lines";
+        PlaySelectedLinesWithLoop = "Play selected lines with loop";
         PleaseEnterAValidValueForX = "Please enter a valid value for \"{0}\"";
         PleaseWait = "Please wait...";
+        PositionX = "Position: {0}";
         PostProcessing = "Post processing";
+        PoweredBy = "Powered by";
         Prefix = "Prefix";
         Preview = "Preview";
         Profile = "Profile";
         ProfileName = "Profile name";
         Profiles = "Profiles";
+        ReDownloadX = "Re-download {0}";
         Reason = "Reason";
         Redo = "Redo";
         Refresh = "Refresh";
@@ -914,6 +933,7 @@ public class LanguageGeneral
         Remove = "Remove";
         RemoveAlignment = "Remove alignment";
         RemoveAllFormatting = "Remove all formatting";
+        RemoveBlankLines = "Remove blank lines";
         RemoveBold = "Remove bold";
         RemoveColor = "Remove color";
         RemoveFilter = "Remove filter";
@@ -927,6 +947,7 @@ public class LanguageGeneral
         RemoveUnderline = "Remove underline";
         Rename = "Rename";
         ReplaceWith = "Replace with";
+        RequiresRestart = "Requires restart";
         Reset = "Reset";
         Resolution = "Resolution";
         ResolutionX = "Resolution: {0}";
@@ -950,6 +971,7 @@ public class LanguageGeneral
         Search = "Search";
         SearchDirection = "Search direction";
         SearchFontNames = "Search font names...";
+        SearchSubtitleFormats = "Search subtitle formats";
         Seconds = "Seconds";
         SelectAll = "Select all";
         SelectFilesToConvert = "Select files to convert";
@@ -963,6 +985,8 @@ public class LanguageGeneral
         SessionKeyGenerate = "Generate new key";
         SetEnd = "Set end";
         SetEndAndGoToNext = "Set end and go to next";
+        SetEndAndOffsetTheRest = "Set end and offset the rest";
+        SetFontDotDotDot = "Set font...";
         SetStart = "Set start";
         SetStartAndOffsetTheRest = "Set start and offset the rest";
         SetVideoOffset = "Set video offset";
@@ -973,28 +997,30 @@ public class LanguageGeneral
         Shortcut = "Shortcut";
         ShortcutX = "Shortcut: {0}";
         Show = "Show";
-        ShowActorColumn = "Show 'Actor' column";
-        ShowCpsColumn = "Show 'Chars/sec' column";
-        ShowDurationColumn = "Show 'Duration' column";
-        ShowGapColumn = "Show 'Gap' column";
-        ShowHideColumn = "Show 'Hide' column";
+        ShowActorColumn = "Show \"Actor\" column";
+        ShowCpsColumn = "Show \"Chars/sec\" column";
+        ShowDurationColumn = "Show \"Duration\" column";
+        ShowGapColumn = "Show \"Gap\" column";
+        ShowHideColumn = "Show \"Hide\" column";
         ShowHistory = "Show history";
-        ShowLayerColumn = "Show 'Layer' column";
+        ShowLayerColumn = "Show \"Layer\" column";
         ShowPreview = "Show preview";
         ShowShotChangesList = "Show shot changes list";
         ShowTimeCodes = "Show time codes";
-        ShowWpmColumn = "Show 'Words/min' column";
+        ShowWpmColumn = "Show \"Words/min\" column";
         Shrink = "Shrink";
         SingleBox = "Single box";
         SingleLineLengths = "Single line length:";
         SingleMode = "Single mode";
         Size = "Size";
+        SizeX = "Size: {0}";
         Skip = "Skip";
         SkipAll = "Skip all";
         SkipOnce = "Skip once";
         SolidColor = "Solid color";
         SourceViewX = "Source view - {0}";
         Spacing = "Spacing";
+        SpeechToTextSelectedLines = "Speech-to-text selected lines";
         Speed = "Speed";
         SplitAtTextBoxCursorPosition = "Split at text cursor position";
         SplitLine = "Split line";
@@ -1019,6 +1045,7 @@ public class LanguageGeneral
         SubtitleFiles = "Subtitle files";
         SubtitleFormats = "Subtitle formats";
         SubtitleLoadedX = "Subtitle loaded: {0}";
+        SubtitleXOfY = "Subtitle {0} of {1}";
         Suffix = "Suffix";
         Suggestions = "Suggestions";
         Sync = "Sync";
@@ -1036,6 +1063,8 @@ public class LanguageGeneral
         Timing = "Timing";
         Title = "Title";
         To = "To";
+        ToggleCasing = "Toggle casing";
+        ToggleForced = "Toggle forced";
         ToggleShotChangesAtVideoPosition = "Toggle shot changes at video position";
         Toolbar = "Toolbar";
         Tools = "Tools";
@@ -1110,36 +1139,7 @@ public class LanguageGeneral
         XNotFound = "\"{0}\" not found";
         XRequiresAnApiKey = "{0} requires an API key";
         XSeconds = "{0:0.0##} seconds";
-        Yes = "Yes";
-        ChooseImageFiles = "Choose image files";
-        FocusSelectedLine = "Focus selected line (scroll into view in grid)";
-        PlayFromStartOfVideo = "Play from start of video";
-        RemoveBlankLines = "Remove blank lines";
-        NewSubtitleStartKeyDownSetEndKeyUp = "Insert subtitle: Start on key down, set end on key up";
-        SpeechToTextSelectedLines = "Speech-to-text selected lines";
-        GetAudioClips = "Get audio clips";
-        ExtractingAudioClips = "Extracting audio clips...";
-        FileXOfY = "File {0} of {1}";
-        PlaySelectedLines = "Play selected lines";
-        PlaySelectedLinesWithLoop = "Play selected lines with loop";
-        ToggleCasing = "Toggle casing";
-        SetEndAndOffsetTheRest = "Set end and offset the rest";
-        Change = "Change";
-        EditImagedBaseSubtitle = "Edit imaged-based subtitle";
-        EditImagedBaseSubtitleX = "Edit imaged-based subtitle: {0}";
-        OpenImageBasedSubtitle = "Open image-based subtitle";
         XSubtitles = "{0:#,###,##0} subtitles";
-        SubtitleXOfY = "Subtitle {0} of {1}";
-        PositionX = "Position: {0}";
-        SizeX = "Size: {0}";
-        SetFontDotDotDot = "Set font...";
-        LineHeigth = "Line height";
-        ToggleForced = "Toggle forced";
-        MediaInformation = "Media information";
-        InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
-        SearchSubtitleFormats = "Search subtitle formats";
-        PoweredBy = "Powered by";
-        FixedValue = "Fixed value";
-        RequiresRestart = "Requires restart";
+        Yes = "Yes";
     }
 }

@@ -481,7 +481,6 @@ public class SettingsPage : UserControl
             new SettingsItem(Se.Language.Options.Settings.BookmarkColor, () => UiUtil.MakeColorPicker(_vm, nameof(_vm.BookmarkColor))),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowAssaLayer, nameof(_vm.ShowAssaLayer)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineAboveToolbar, nameof(_vm.ShowHorizontalLineAboveToolbar)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.ShowHorizontalLineBelowToolbar, nameof(_vm.ShowHorizontalLineBelowToolbar)),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Toolbar,

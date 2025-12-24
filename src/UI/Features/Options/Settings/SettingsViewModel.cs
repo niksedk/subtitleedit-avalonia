@@ -180,7 +180,6 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _gridCompactMode;
     [ObservableProperty] private bool _showAssaLayer;
     [ObservableProperty] private bool _showHorizontalLineAboveToolbar;
-    [ObservableProperty] private bool _showHorizontalLineBelowToolbar;
     [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
     [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
     [ObservableProperty] private Color _darkModeBackgroundColor;
@@ -459,7 +458,6 @@ public partial class SettingsViewModel : ObservableObject
         GridCompactMode = appearance.GridCompactMode;
         ShowAssaLayer = appearance.ShowLayer;
         ShowHorizontalLineAboveToolbar = appearance.ShowHorizontalLineAboveToolbar;
-        ShowHorizontalLineBelowToolbar = appearance.ShowHorizontalLineBelowToolbar;
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
         DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
         BookmarkColor = appearance.BookmarkColor.FromHexToColor();
@@ -783,7 +781,6 @@ public partial class SettingsViewModel : ObservableObject
         appearance.GridLinesAppearance = SelectedGridLinesVisibility.Type.ToString();
         appearance.ShowLayer = ShowAssaLayer;
         appearance.ShowHorizontalLineAboveToolbar = ShowHorizontalLineAboveToolbar;
-        appearance.ShowHorizontalLineBelowToolbar = ShowHorizontalLineBelowToolbar;
 
         Se.Settings.Waveform.DrawGridLines = WaveformDrawGridLines;
         Se.Settings.Waveform.FocusOnMouseOver = WaveformFocusOnMouseOver;

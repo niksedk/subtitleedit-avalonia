@@ -87,7 +87,6 @@ public class LanguageSettings
     public string ResetSettings { get; set; }
     public string ResetSettingsDetail { get; set; }
     public string ShowHorizontalLineAboveToolbar { get; set; }
-    public string ShowHorizontalLineBelowToolbar { get; set; }
     public string BookmarkColor { get; set; }
     public string SingleLineMaxLength { get; set; }
     public string OptimalCharsPerSec { get; set; }
@@ -299,7 +298,6 @@ public class LanguageSettings
         ResetSettings = "Reset settings?";
         ResetSettingsDetail = "This will reset all settings to their default values.\n\nContinue?";
         ShowHorizontalLineAboveToolbar = "Show horizontal line above toolbar";
-        ShowHorizontalLineBelowToolbar = "Show horizontal line below toolbar";
         BookmarkColor = "Bookmark color";
         SingleLineMaxLength = "Single line max length";
         OptimalCharsPerSec = "Optimal chars/sec";
@@ -370,7 +368,7 @@ public class LanguageSettings
         GoToLineNumberSetsVideoPosition = "Go-to-line-number also sets video position";
         AdjustAllTimesRememberLineSelectionChoice = "Adjust all times, remember line selection choice";
         DefaultFormat = "Default format";
-        DefaultSaveAsFormat = "Default 'Save as' format";
+        DefaultSaveAsFormat = "Default \"Save as\" format";
         FilesAndLogs = "Files and logs";
         ShowErrorLogFile = "Show error log file";
         ShowWhisperLogFile = "Show Whisper log file";
@@ -409,8 +407,8 @@ public class LanguageSettings
         MpvWidRendering = "libmpv - Native Window ID rendering";
         MpvSoftwareRendering = "libmpv - Software rendering (slow)";
         VlcWidRendering = "libVLC - Native Window ID rendering";
-        WaveFormsAndSpectrogramFoldersContainsX = "'Waveforms' and 'spectrogram' folders contains {0}";
-        DeleteWaveformAndSpectrogramFoldersQuestion = "Delete 'Waveforms' and 'Spectrogram' files?";
+        WaveFormsAndSpectrogramFoldersContainsX = "\"Waveforms\" and \"spectrogram\" folders contains {0}";
+        DeleteWaveformAndSpectrogramFoldersQuestion = "Delete \"Waveforms\" and \"Spectrogram\" files?";
         WaveformGenerateSpectrogram = "Generate spectrogram";
         WaveformSpectrogramMode = "Spectrogram mode (works at generate time)";
         WaveformCenterOnSingleClick = "Center on single click";

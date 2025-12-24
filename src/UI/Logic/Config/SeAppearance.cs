@@ -24,7 +24,6 @@ public class SeAppearance
     public string DarkModeBackgroundColor { get; set; }
     public string GridLinesAppearance { get; set; }
     public bool ShowHorizontalLineAboveToolbar { get; set; }
-    public bool ShowHorizontalLineBelowToolbar { get; set; }
 
     public bool ToolbarShowFileNew { get; set; }
     public bool ToolbarShowFileOpen { get; set; }

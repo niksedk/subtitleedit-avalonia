@@ -83,11 +83,6 @@ public class MainView : ViewBase
         _vm.Toolbar = InitToolbar.Make(_vm);
         root.Children.Add(_vm.Toolbar.Dock(Dock.Top));
 
-        if (Se.Settings.Appearance.ShowHorizontalLineBelowToolbar)
-        {
-            root.Children.Add(UiUtil.MakeVerticalSeperator(0.5, 0.5, new Thickness(0, 0, 0, 0)).Dock(Dock.Top));
-        }
-
         // Footer
         root.Children.Add(InitFooter.Make(_vm).Dock(Dock.Bottom));
 
