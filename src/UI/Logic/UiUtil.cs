@@ -1199,6 +1199,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithOpacity(this Label control, double opacity)
+    {
+        control.Opacity = opacity;
+        return control;
+    }
+
     public static Label WithMinWidth(this Label control, int minWidth)
     {
         control.MinWidth = minWidth;

@@ -1,5 +1,4 @@
 ﻿using Avalonia.Platform;
-using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.IO;
@@ -12,7 +11,7 @@ public interface ILanguageInitializer
     Task UpdateLanguagesIfNeeded();
 }
 
-public class LanguageInitializer(IZipUnpacker zipUnpacker) : ILanguageInitializer
+public class LanguageInitializer() : ILanguageInitializer
 {
     // List of available language files in Assets/Languages folder
     private static readonly string[] LanguageFiles =

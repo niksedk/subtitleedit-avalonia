@@ -569,6 +569,7 @@ public class LanguageGeneral
     public string? SearchSubtitleFormats { get; set; }
     public string PoweredBy { get; set; }
     public string FixedValue { get; set; }
+    public string RequiresRestart { get; set; }
 
     public LanguageGeneral()
     {
@@ -1139,5 +1140,6 @@ public class LanguageGeneral
         SearchSubtitleFormats = "Search subtitle formats";
         PoweredBy = "Powered by";
         FixedValue = "Fixed value";
+        RequiresRestart = "Requires restart";
     }
 }

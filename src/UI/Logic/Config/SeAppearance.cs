@@ -60,7 +60,7 @@ public class SeAppearance
         SubtitleTextBoxFontBold = true;
         ShowHints = true;
         SubtitleTextBoxCenterText = false;
-        SubtitleGridFormattingType = (int)SubtitleGridFormattingTypes.NoFormatting;
+        SubtitleGridFormattingType = (int)SubtitleGridFormattingTypes.ShowFormatting;
         GridLinesAppearance = DataGridGridLinesVisibility.None.ToString();
         DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();
         BookmarkColor = Colors.Gold.FromColorToHex();
