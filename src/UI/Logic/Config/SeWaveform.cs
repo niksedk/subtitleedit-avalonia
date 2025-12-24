@@ -49,7 +49,7 @@ public class SeWaveform
         DrawGridLines = false;
         FocusTextBoxAfterInsertNew = true;
         SpectrogramCombinedWaveformHeight = 50;
-        WaveformColor = Color.FromArgb(150, 100, 100, 100).FromColorToHex();
+        WaveformColor = Color.FromArgb(255, 0, 70, 0).FromColorToHex();
         WaveformBackgroundColor = Color.FromArgb(255, 0, 0, 0).FromColorToHex();
         WaveformSelectedColor = Color.FromArgb(150, 0, 120, 255).FromColorToHex();
         WaveformCursorColor = Colors.Cyan.FromColorToHex();
@@ -67,7 +67,7 @@ public class SeWaveform
         ShowWaveformPlaybackSpeed = true;
         SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
         LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();
-        WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Classic.ToString();
+        WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Fancy.ToString();
         PauseOnSingleClick = true;
         CenterOnSingleClick = false;
 

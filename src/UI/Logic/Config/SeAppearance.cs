@@ -54,9 +54,10 @@ public class SeAppearance
         FontName = "Default";
         SubtitleTextBoxAndGridFontName = "Default";
         SubtitleGridFontSize = 13d;
-        SubtitleGridTextSingleLineSeparator = "<br />";
+        SubtitleGridTextSingleLineSeparator = " ⏎ "; // "<br />";
         SubtitleTextBoxFontSize = 15d;
         SubtitleTextBoxFontBold = true;
+        SubtitleTextBoxColorTags = true;
         ShowHints = true;
         SubtitleTextBoxCenterText = false;
         SubtitleGridFormattingType = (int)SubtitleGridFormattingTypes.ShowFormatting;

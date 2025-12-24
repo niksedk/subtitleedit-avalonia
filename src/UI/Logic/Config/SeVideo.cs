@@ -39,7 +39,7 @@ public class SeVideo
         BurnIn = new();
         Transparent = new();
         TextToSpeech = new();
-        VideoPlayer = OperatingSystem.IsWindows() ? "mpv-wid" : "mpv-opengl";
+        VideoPlayer = "mpv-opengl";
         Volume = 60;
         ShowStopButton = true;
         ShowFullscreenButton = true;
