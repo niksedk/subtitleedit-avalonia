@@ -47,6 +47,11 @@ public class MainView : ViewBase
             {
                 _vm.OnLoaded();
             });
+
+            _vm.Window.Activated += (s, e) =>
+            {
+                _vm.OnActivated();
+            };
         }
 
         // load language

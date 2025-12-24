@@ -154,7 +154,7 @@ public static class ShortcutsMain
 
 
         { nameof(MainViewModel.ShowGoToVideoPositionCommand), Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
-        { nameof(MainViewModel.ToggleLinesItalicCommand), Se.Language.Options.Shortcuts.GeneralToggleItalic },
+        { nameof(MainViewModel.ToggleLinesItalicOrSelectedTextCommand), Se.Language.Options.Shortcuts.GeneralToggleItalic },
         { nameof(MainViewModel.ToggleLinesBoldCommand), Se.Language.Options.Shortcuts.GeneralToggleBold },
 
         { nameof(MainViewModel.TogglePlayPauseCommand), Se.Language.Options.Shortcuts.TogglePlayPause },
@@ -331,7 +331,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowModifySelectionCommand, nameof(vm.ShowModifySelectionCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.ShowGoToVideoPositionCommand, nameof(vm.ShowGoToVideoPositionCommand), ShortcutCategory.General);
-        AddShortcut(shortcuts, vm.ToggleLinesItalicCommand, nameof(vm.ToggleLinesItalicCommand), ShortcutCategory.SubtitleGridAndTextBox);
+        AddShortcut(shortcuts, vm.ToggleLinesItalicOrSelectedTextCommand, nameof(vm.ToggleLinesItalicOrSelectedTextCommand), ShortcutCategory.SubtitleGridAndTextBox);
         AddShortcut(shortcuts, vm.ToggleLinesBoldCommand, nameof(vm.ToggleLinesBoldCommand), ShortcutCategory.SubtitleGridAndTextBox);
 
         AddShortcut(shortcuts, vm.TogglePlayPauseCommand, nameof(vm.TogglePlayPauseCommand), ShortcutCategory.General);
@@ -518,7 +518,7 @@ public static class ShortcutsMain
             new(nameof(vm.GoToNextLineCommand), ["Alt", "Down"]),
             new(nameof(vm.SelectAllLinesCommand), [cmd, "A"], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.InverseSelectionCommand), [cmd, "Shift", "I"], ShortcutCategory.SubtitleGrid),
-            new(nameof(vm.ToggleLinesItalicCommand), [cmd, "I"], ShortcutCategory.SubtitleGrid),
+            new(nameof(vm.ToggleLinesItalicOrSelectedTextCommand), [cmd, "I"], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.DeleteSelectedLinesCommand), ["Delete"], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.ShowFindCommand), [cmd, "F"], ShortcutCategory.General),
             new(nameof(vm.FindNextCommand), [nameof(Avalonia.Input.Key.F3)], ShortcutCategory.General),

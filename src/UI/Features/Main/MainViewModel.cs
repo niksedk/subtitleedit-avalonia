@@ -4907,7 +4907,6 @@ public partial class MainViewModel :
     private void ToggleLinesItalic()
     {
         ToggleItalic();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -4926,7 +4925,6 @@ public partial class MainViewModel :
         }
 
         ToggleItalic();
-        _shortcutManager.ClearKeys();
     }
 
 
@@ -4934,7 +4932,6 @@ public partial class MainViewModel :
     private void ToggleLinesBold()
     {
         ToggleBold();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -11814,5 +11811,9 @@ public partial class MainViewModel :
                 }
             }
         }
+    }
+
+    internal void OnActivated()
+    {
     }
 }
