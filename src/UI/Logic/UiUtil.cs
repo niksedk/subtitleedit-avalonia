@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
@@ -8,7 +7,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
-using Avalonia.Themes.Fluent;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -26,9 +24,6 @@ public static class UiUtil
     public const int WindowMarginWidth = 12;
     public const int CornerRadius = 4;
     public const int SplitterWidthOrHeight = 4;
-    private static IStyle? _lighterDarkStyle;
-    private static object? _themeChangeSubscription;
-    public static FluentTheme? FluentTheme { get; set; }
 
     public static ControlTheme DataGridNoBorderCellTheme => GetDataGridNoBorderCellTheme();
 
@@ -1817,7 +1812,6 @@ public static class UiUtil
         return control;
     }
 
-
     public static Grid WithBindVisible(this Grid control, object viewModel, string visiblePropertyPath)
     {
         control.DataContext = viewModel;
@@ -1944,184 +1938,6 @@ public static class UiUtil
                     canvas.DrawRect(rect, paint);
                 }
             }
-        }
-    }
-
-    public static string ThemeName
-    {
-        get
-        {
-            var themeSetting = Se.Settings.Appearance.Theme;
-            if (themeSetting == "System")
-            {
-                if (Application.Current!.ActualThemeVariant == ThemeVariant.Dark)
-                {
-                    return "Dark";
-                }
-
-                return "Light";
-            }
-
-            return themeSetting;
-        }
-    }
-
-    public static void SetCurrentTheme()
-    {
-        var themeSetting = Se.Settings.Appearance.Theme;
-
-        // Unsubscribe from any previous theme change event
-        if (_themeChangeSubscription != null)
-        {
-            Application.Current!.ActualThemeVariantChanged -= OnActualThemeVariantChanged;
-            _themeChangeSubscription = null;
-        }
-
-        RemoveLighterDark();
-
-        if (themeSetting == "System")
-        {
-            // Let Avalonia track system theme automatically
-            Application.Current!.RequestedThemeVariant = ThemeVariant.Default;
-            if (ThemeName == "Dark")
-            {
-                ApplyLighterDark();
-            }
-
-            // Subscribe to theme changes
-            Application.Current.ActualThemeVariantChanged += OnActualThemeVariantChanged;
-            _themeChangeSubscription = new object(); // Mark as subscribed
-        }
-        else if (themeSetting == "Dark")
-        {
-            Application.Current!.RequestedThemeVariant = ThemeVariant.Dark;
-            ApplyLighterDark();
-        }
-        else
-        {
-            Application.Current!.RequestedThemeVariant = ThemeVariant.Light;
-        }
-    }
-
-    private static void OnActualThemeVariantChanged(object? sender, EventArgs e)
-    {
-        if (Se.Settings.Appearance.Theme == "System" && Application.Current != null)
-        {
-            RemoveLighterDark();
-            if (Application.Current.ActualThemeVariant == ThemeVariant.Dark)
-            {
-                ApplyLighterDark();
-            }
-        }
-    }
-
-    public static void UpdateRegionColor()
-    {
-        if (FluentTheme == null)
-        {
-            return;
-        }
-
-        if (FluentTheme.Palettes.TryGetValue(ThemeVariant.Dark, out var palette))
-        {
-            palette.RegionColor = GetDarkThemeBackgroundColor();
-        }
-    }
-
-    private static void ApplyLighterDark()
-    {
-        if (Application.Current == null)
-        {
-            return;
-        }
-
-        UpdateRegionColor();
-
-        var bgColor = GetDarkThemeBackgroundColor();
-        var bgColorLighter = LightenColor(bgColor, 5);
-        var bgColorHeader = LightenColor(bgColor, 15);
-
-        _lighterDarkStyle = new Styles
-        {
-            // TextBox
-            new Style(x => x.OfType<TextBox>())
-            {
-                Setters =
-                {
-                    new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor))
-                }
-            },
-            new Style(x => x.OfType<TextBox>().Class(":focus").Template().OfType<Border>().Name("PART_BorderElement"))
-            {
-                Setters =
-                {
-                    new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColor)) // focused color
-                }
-            },
-            new Style(x =>
-                x.OfType<TextBox>().Class(":pointerover").Template().OfType<Border>().Name("PART_BorderElement"))
-            {
-                Setters =
-                {
-                    new Setter(Border.BackgroundProperty, new SolidColorBrush(bgColorLighter)) // mouse over color
-                }
-            },
-
-            // NumericUpDown
-            new Style(x => x.OfType<NumericUpDown>())
-            {
-                Setters =
-                {
-                    new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor))
-                }
-            },
-
-            // Menu / ContextMenu
-            new Style(x => x.OfType<ContextMenu>())
-            {
-                Setters =
-                {
-                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
-                }
-            },
-
-            // Flyout
-            new Style(x => x.OfType<FlyoutPresenter>())
-            {
-                Setters =
-                {
-                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
-                }
-            },
-
-            // DataGrid header
-            new Style(x => x.OfType<DataGridColumnHeader>())
-            {
-                Setters =
-                {
-                    new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader))
-                }
-            },
-
-            // DataGrid header
-            new Style(x => x.OfType<ButtonSpinner>())
-            {
-                Setters =
-                {
-                    new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor))
-                }
-            },
-        };
-
-        Application.Current.Styles.Add(_lighterDarkStyle);
-    }
-
-    private static void RemoveLighterDark()
-    {
-        if (_lighterDarkStyle != null)
-        {
-            Application.Current!.Styles.Remove(_lighterDarkStyle);
-            _lighterDarkStyle = null;
         }
     }
 

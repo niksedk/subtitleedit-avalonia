@@ -26,7 +26,7 @@ public static class InitToolbar
 
     private static Grid CreateToolbar(MainViewModel vm)
     {
-        var path = System.IO.Path.Combine(Se.ThemesFolder, UiUtil.ThemeName);
+        var path = System.IO.Path.Combine(Se.ThemesFolder, UiTheme.ThemeName);
 
         var stackPanelLeft = new StackPanel
         {

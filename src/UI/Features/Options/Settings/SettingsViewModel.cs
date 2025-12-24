@@ -251,7 +251,7 @@ public partial class SettingsViewModel : ObservableObject
         MpvPreviewBorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
         LibVlcStatus = string.Empty;
 
-        Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark];
+        Themes = [Se.Language.General.System, Se.Language.General.Light, Se.Language.General.Dark, "Windows Classic Gray", "Pastel"];
         SelectedTheme = Themes[0];
 
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());

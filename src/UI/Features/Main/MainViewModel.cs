@@ -4323,7 +4323,7 @@ public partial class MainViewModel :
     public void ApplySettings()
     {
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
-        UiUtil.SetCurrentTheme();
+        UiTheme.SetCurrentTheme();
 
         InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
         UiUtil.ReplaceControl(_oldSubtitleGrid, SubtitleGrid);

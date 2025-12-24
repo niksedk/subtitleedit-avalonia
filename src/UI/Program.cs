@@ -64,7 +64,7 @@ namespace Nikse.SubtitleEdit
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
                 // Set current theme
-                UiUtil.SetCurrentTheme();
+                UiTheme.SetCurrentTheme();
 
                 // Setup main window
                 SetupMainWindow(lifetime);
@@ -89,15 +89,15 @@ namespace Nikse.SubtitleEdit
         private static void ConfigureApplication(AppBuilder b, ClassicDesktopStyleApplicationLifetime lifetime)
         {
             // Setup Fluent theme
-            UiUtil.FluentTheme = new FluentTheme();
-            UiUtil.FluentTheme.Palettes.Add(ThemeVariant.Dark, new ColorPaletteResources()
+            UiTheme.FluentTheme = new FluentTheme();
+            UiTheme.FluentTheme.Palettes.Add(ThemeVariant.Dark, new ColorPaletteResources()
             {
                 RegionColor = UiUtil.GetDarkThemeBackgroundColor(),
             });
 
             if (b.Instance != null)
             {
-                b.Instance.Styles.Add(UiUtil.FluentTheme);
+                b.Instance.Styles.Add(UiTheme.FluentTheme);
             }
 
             // Add DataGrid styles
