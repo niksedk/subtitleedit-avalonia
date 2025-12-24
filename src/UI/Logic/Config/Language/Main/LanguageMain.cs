@@ -78,6 +78,7 @@ public class LanguageMain
     public string EndTimeMustBeAfterStartTime { get; set; }
     public string GeneratingWaveformDotDotDot { get; set; }
     public string TimedTextRosettaPropertiesDotDotDot { get; set; }
+    public string SpellCheckResult { get; internal set; }
 
     public LanguageMain()
     {
@@ -151,5 +152,6 @@ public class LanguageMain
         EndTimeMustBeAfterStartTime = "End time must be after start time.";
         GeneratingWaveformDotDotDot = "Generating waveform...";
         TimedTextRosettaPropertiesDotDotDot = "Timed Text IMSC Rosetta properties...";
+        SpellCheckResult = "Spell check completed. \n\n• Changed words: {0}\n• Skipped words: {1}";
     }
 }

@@ -3163,10 +3163,18 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             _currentSpellCheckDictionary = result.SelectedDictionary;
-            if (result.TotalChangedWords > 0)
-            {
-                ShowStatus($"{result.TotalChangedWords} words corrected in spell check");
-            }
+
+            var msg = string.Format(
+                Se.Language.Main.SpellCheckResult,
+                result.TotalChangedWords, 
+                result.TotalSkippedWords);
+
+            await MessageBox.Show(
+                Window,
+                Se.Language.SpellCheck.SpellCheck,
+                msg,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 
