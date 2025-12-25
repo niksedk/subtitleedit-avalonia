@@ -630,7 +630,7 @@ public partial class BatchConvertViewModel : ObservableObject
         IsConverting = true;
         AreControlsEnabled = false;
         ProgressMaxValue = BatchItems.Count;
-        var unused = Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             var count = 1;
             foreach (var batchItem in BatchItems)

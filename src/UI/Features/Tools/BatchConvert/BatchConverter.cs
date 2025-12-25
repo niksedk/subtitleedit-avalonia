@@ -412,7 +412,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 {
                     subtitleImages.Add(pes);
                     subtitle.Paragraphs.Add(new Paragraph(string.Empty, msub.Start, msub.End));
-                    subtitles.Add(new TransportStreamSubtitle { Pes = pes });
+                    subtitles.Add(new TransportStreamSubtitle { Pes = pes, StartMilliseconds = (ulong)msub.Start, EndMilliseconds = (ulong)msub.End });
                 }
             }
             catch
@@ -588,7 +588,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     private static async Task RunOcrTesseract(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
         var tesseractOcr = new TesseractOcr();
-        var language = string.IsNullOrEmpty(Se.Settings.Tools.BatchConvert.TesseractLanguage) ? "eng" : Se.Settings.Tools.BatchConvert.TesseractLanguage; 
+        var language = string.IsNullOrEmpty(Se.Settings.Tools.BatchConvert.TesseractLanguage) ? "eng" : Se.Settings.Tools.BatchConvert.TesseractLanguage;
         item.Subtitle = new Subtitle();
         for (var i = 0; i < imageSubtitles.Count; i++)
         {
@@ -666,9 +666,9 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
         }
     }
-    
+
     private readonly Lock _paddleLock = new Lock();
-    
+
     private async Task RunPaddleOcr(IOcrSubtitle imageSubtitles, BatchConvertItem item, CancellationToken cancellationToken)
     {
         var numberOfImages = imageSubtitles.Count;
@@ -686,7 +686,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             {
                 Bitmap = imageSubtitles.GetBitmap(i),
                 Index = i,
-                Text = $"{i+1} / {numberOfImages}: {imageSubtitles.GetStartTime(i)} - {imageSubtitles.GetEndTime(i)}"
+                Text = $"{i + 1} / {numberOfImages}: {imageSubtitles.GetStartTime(i)} - {imageSubtitles.GetEndTime(i)}"
             });
 
             if (cancellationToken.IsCancellationRequested)
@@ -1492,7 +1492,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         Configuration.Settings.Tools.AutoTranslateLibreApiKey = Se.Settings.AutoTranslate.LibreTranslateApiKey;
 
         Configuration.Settings.Tools.AutoTranslateNllbApiUrl = Se.Settings.AutoTranslate.NnlbApiUrl;
-        
+
         Configuration.Settings.Tools.AutoTranslateNllbServeUrl = Se.Settings.AutoTranslate.NnlbServeUrl;
 
         var doAutoTranslate = new DoAutoTranslate();
