@@ -612,10 +612,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var fileName = Path.Combine(Se.OcrFolder, Se.Settings.Ocr.NOcrDatabase + ".nocr");
         var nOcrDb = new NOcrDb(fileName);
         item.Subtitle = new Subtitle();
-        for (var i = 0; i < imageSubtitles.Count; i++)
+        
+        var totalCount = imageSubtitles.Count;
+        var results = new Paragraph[totalCount];
+        var processedCount = 0;
+        var lockObj = new object();
+
+        Parallel.For(0, totalCount, new ParallelOptions
         {
-            var pct = (i + 1) * 100 / imageSubtitles.Count;
-            item.Status = string.Format(Se.Language.General.OcrPercentX, pct);
+            CancellationToken = cancellationToken,
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        }, i =>
+        {
             var bitmap = imageSubtitles.GetBitmap(i);
             var parentBitmap = new NikseBitmap2(bitmap);
             parentBitmap.MakeTwoColor(200);
@@ -656,14 +664,25 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
 
             var text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
-            var p = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
-            item.Subtitle.Paragraphs.Add(p);
+            results[i] = new Paragraph(text, imageSubtitles.GetStartTime(i).TotalMilliseconds, imageSubtitles.GetEndTime(i).TotalMilliseconds);
 
-            if (cancellationToken.IsCancellationRequested)
+            lock (lockObj)
             {
-                item.Status = Se.Language.General.Cancelled;
-                break;
+                processedCount++;
+                var pct = processedCount * 100 / totalCount;
+                item.Status = string.Format(Se.Language.General.OcrPercentX, pct);
             }
+        });
+
+        if (cancellationToken.IsCancellationRequested)
+        {
+            item.Status = Se.Language.General.Cancelled;
+            return;
+        }
+
+        foreach (var paragraph in results)
+        {
+            item.Subtitle.Paragraphs.Add(paragraph);
         }
     }
 
