@@ -13,7 +13,7 @@ public class BinaryAdjustAlphaWindow : Window
     public BinaryAdjustAlphaWindow(BinaryAdjustAlphaViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = "Adjust alpha/transparency";
+        Title = Se.Language.General.AdjustAlpha;
         Width = 800;
         Height = 600;
         CanResize = true;
@@ -74,7 +74,7 @@ public class BinaryAdjustAlphaWindow : Window
         // Alpha adjustment slider
         var alphaLabel = new TextBlock
         {
-            Text = "Alpha adjustment:",
+            Text = Se.Language.General.AlphaAdjustment,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5),
         };
@@ -106,7 +106,7 @@ public class BinaryAdjustAlphaWindow : Window
         // Threshold slider
         var thresholdLabel = new TextBlock
         {
-            Text = "Transparency threshold:",
+            Text = Se.Language.General.AphaThreshold,
             FontWeight = Avalonia.Media.FontWeight.Bold,
             Margin = new Thickness(0, 20, 0, 5),
         };

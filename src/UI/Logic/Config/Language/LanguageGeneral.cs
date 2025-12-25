@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageGeneral
 {
@@ -570,6 +572,10 @@ public class LanguageGeneral
     public string XSeconds { get; set; }
     public string XSubtitles { get; set; }
     public string Yes { get; set; }
+    public string TotalAdjustmentX { get; set; }
+    public string AdjustAlpha { get; set; }
+    public string AlphaAdjustment { get; set; }
+    public string AphaThreshold { get; set; }
 
     public LanguageGeneral()
     {
@@ -806,7 +812,7 @@ public class LanguageGeneral
         Light = "Light";
         LineHeigth = "Line height";
         LineNumber = "Line#";
-        LineXColumnY = "Line {0}, Column {1}";
+        LineXColumnY = "Line {0}, column {1}";
         Lines = "Lines";
         LinesAddedX = "Lines added: {0}";
         LinesDeletedX = "Lines deleted: {0}";
@@ -1141,5 +1147,9 @@ public class LanguageGeneral
         XSeconds = "{0:0.0##} seconds";
         XSubtitles = "{0:#,###,##0} subtitles";
         Yes = "Yes";
+        TotalAdjustmentX = "Total adjustment: {0}";
+        AdjustAlpha = "Adjust alpha (transparency)";
+        AlphaAdjustment = "Alpha adjustment";
+        AphaThreshold = "Alpha threshold";
     }
 }

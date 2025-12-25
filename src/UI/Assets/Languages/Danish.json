@@ -826,7 +826,7 @@
       "TextCenteredText": "Centered text",
       "TextRightJustifiedText": "Right justified text",
       "UseBoxForOneNewLine": "Check \u0027Use box around text\u0027 for only one new-line",
-      "DiscSequenceNumber": ""
+      "DiscSequenceNumber": "Diskens sekvensnummer"
     },
     "Import": {
       "ImportTimeCodes": "Importer tidskoder...",
@@ -939,8 +939,8 @@
     }
   },
   "Edit": {
-    "ShowHistory": "",
-    "RestoreSelected": "",
+    "ShowHistory": "Historik til fortryd",
+    "RestoreSelected": "Gendan valgt",
     "ModifySelection": {
       "Title": "Rediger valg",
       "Contains": "Indeholder",
@@ -991,11 +991,11 @@
     }
   },
   "Tools": {
-    "PickAlignmentTitle": "",
-    "PickFontNameTitle": "",
-    "ColorPickerTitle": "",
-    "PickLayersTitle": "",
-    "PickSubtitleFormat": "",
+    "PickAlignmentTitle": "V\u00E6lg justering",
+    "PickFontNameTitle": "V\u00E6lg skrifttypenavn",
+    "ColorPickerTitle": "V\u00E6lg farve",
+    "PickLayersTitle": "V\u00E6lg lag, der skal vises i lydb\u00F8lgeform/spektrogram",
+    "PickSubtitleFormat": "V\u00E6lg undertekstformat",
     "FixCommonErrors": {
       "Title": "Fix almindelige fejl",
       "Step1": "Step 1/2 - Choose which errors to fix",
@@ -1713,7 +1713,7 @@
       "OpenSeDataFolder": "Open Subtitle Edit folder",
       "EditFind": "Find",
       "EditFindNext": "Find next",
-      "EditFindPrevious": "",
+      "EditFindPrevious": "Find forrige",
       "EditReplace": "Replace",
       "EditMultipleReplace": "Multiple replace",
       "EditModifySelection": "Modify selection",
@@ -1873,7 +1873,7 @@
     }
   },
   "Help": {
-    "AboutSubtitleEdit": ""
+    "AboutSubtitleEdit": "Om Subtitle Edit"
   },
   "Ocr": {
     "LinesToDraw": "Linjer at tegne",

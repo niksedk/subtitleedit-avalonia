@@ -89,7 +89,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
 
     private void ShowTotalAdjustmentInfo()
     {
-        TotalAdjustmentInfo = $"Total adjustment: {new TimeCode(_totalAdjustment * 1000.0).ToShortDisplayString()}";
+        TotalAdjustmentInfo = string.Format(Se.Language.General.TotalAdjustmentX, new TimeCode(_totalAdjustment * 1000.0).ToShortDisplayString());
     }
 
     [RelayCommand]
