@@ -12,9 +12,9 @@ namespace Nikse.SubtitleEdit.Logic;
 public partial class SubRipSourceSyntaxHighlighting : DocumentColorizingTransformer
 {
     // SubRip-specific colors
-    private static readonly IBrush NumberBrush = new SolidColorBrush(Color.Parse("#B5CEA8")); // Light green for numbers
-    private static readonly IBrush TimeBrush = new SolidColorBrush(Color.Parse("#9CDCFE"), 0.4); // Soft pastel cyan for timecodes
-    private static readonly IBrush TimeSeparatorBrush = new SolidColorBrush(Color.Parse("#C586C0")); // Purple/magenta for "-->" separator
+    private static readonly IBrush NumberBrush =  new SolidColorBrush(Color.FromRgb(140, 170, 0));
+    private static readonly IBrush TimeBrush = new SolidColorBrush(Color.FromRgb(80, 160, 210), 0.5);
+    private static readonly IBrush TimeSeparatorBrush = new SolidColorBrush(Color.FromRgb(170, 110, 180));
     private static readonly Typeface BoldTypeface = new(FontFamily.Default, weight: FontWeight.Bold);
 
     // HTML/ASS syntax highlighting colors (matching SubtitleSyntaxHighlighting.cs)
