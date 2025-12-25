@@ -1504,6 +1504,7 @@ public partial class BatchConvertViewModel : ObservableObject
     internal void Onloaded(object? sender, RoutedEventArgs e)
     {
         UiUtil.RestoreWindowPosition(Window);
+        ComboBoxSubtitleFormatChanged();
     }
 
     internal void OnClosing(object? sender, WindowClosingEventArgs e)
