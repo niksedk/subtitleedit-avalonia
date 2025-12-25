@@ -91,7 +91,7 @@ public partial class SubtitleLineViewModel : ObservableObject
     }
 
     public SubtitleLineViewModel(Paragraph paragraph, SubtitleFormat subtitleFormat)
-    {        
+    {
         Text = paragraph.Text;
         OriginalText = string.Empty;
         Extra = paragraph.Extra;
@@ -401,8 +401,8 @@ public partial class SubtitleLineViewModel : ObservableObject
 
     public string GetErrors()
     {
-        var errors = new StringBuilder(); 
-        
+        var errors = new StringBuilder();
+
         var general = Se.Settings.General;
         var lines = Text.SplitToLines();
         var lineCount = lines.Count;

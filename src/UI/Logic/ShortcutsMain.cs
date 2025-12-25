@@ -407,9 +407,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowSyncAdjustAllTimesCommand, nameof(vm.ShowSyncAdjustAllTimesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowVisualSyncCommand, nameof(vm.ShowVisualSyncCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowSyncChangeFrameRateCommand, nameof(vm.ShowSyncChangeFrameRateCommand), ShortcutCategory.General);
-        AddShortcut(shortcuts, vm.ShowSyncChangeSpeedCommand, nameof(vm.ShowSyncChangeSpeedCommand), ShortcutCategory.General); 
-        AddShortcut(shortcuts, vm.ShowPointSyncCommand, nameof(vm.ShowPointSyncCommand), ShortcutCategory.General); 
-        AddShortcut(shortcuts, vm.ShowPointSyncViaOtherCommand, nameof(vm.ShowPointSyncViaOtherCommand), ShortcutCategory.General); 
+        AddShortcut(shortcuts, vm.ShowSyncChangeSpeedCommand, nameof(vm.ShowSyncChangeSpeedCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowPointSyncCommand, nameof(vm.ShowPointSyncCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowPointSyncViaOtherCommand, nameof(vm.ShowPointSyncViaOtherCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.VideoOneFrameBackCommand, nameof(vm.VideoOneFrameBackCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoOneFrameForwardCommand, nameof(vm.VideoOneFrameForwardCommand), ShortcutCategory.General);

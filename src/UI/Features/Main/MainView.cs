@@ -47,11 +47,6 @@ public class MainView : ViewBase
             {
                 _vm.OnLoaded();
             });
-
-            _vm.Window.Activated += (s, e) =>
-            {
-                _vm.OnActivated();
-            };
         }
 
         // load language
@@ -99,10 +94,10 @@ public class MainView : ViewBase
         {
             Dispatcher.UIThread.Post(() =>
             {
-                 InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
-                 _vm.ContentGrid.InvalidateMeasure();
-                 _vm.ContentGrid.InvalidateArrange();
-             }, DispatcherPriority.Loaded);
+                InitLayout.MakeLayout(this, _vm, Se.Settings.General.LayoutNumber);
+                _vm.ContentGrid.InvalidateMeasure();
+                _vm.ContentGrid.InvalidateArrange();
+            }, DispatcherPriority.Loaded);
         };
 
         root.Children.Add(_vm.ContentGrid);

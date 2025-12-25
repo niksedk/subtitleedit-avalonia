@@ -3166,7 +3166,7 @@ public partial class MainViewModel :
 
             var msg = string.Format(
                 Se.Language.Main.SpellCheckResult,
-                result.TotalChangedWords, 
+                result.TotalChangedWords,
                 result.TotalSkippedWords);
 
             await MessageBox.Show(
@@ -11811,9 +11811,5 @@ public partial class MainViewModel :
                 }
             }
         }
-    }
-
-    internal void OnActivated()
-    {
     }
 }
