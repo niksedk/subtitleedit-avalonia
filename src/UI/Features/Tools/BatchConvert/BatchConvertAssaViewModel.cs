@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ public partial class BatchConvertAssaViewModel : ObservableObject
     }   
 
     [RelayCommand]
-    private async Task Ok()
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
@@ -55,5 +56,9 @@ public partial class BatchConvertAssaViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void BorderTypeChanged(object? sender, SelectionChangedEventArgs e)
+    {
     }
 }
