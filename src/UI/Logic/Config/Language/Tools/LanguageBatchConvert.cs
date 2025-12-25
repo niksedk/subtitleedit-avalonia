@@ -21,6 +21,7 @@ public class LanguageBatchConvert
     public string AddAlignment { get; set; }
     public string AddColor { get; set; }
     public string DeleteLinesWithSpecificActorsOrStyles { get; set; }
+    public string UseSourceStylesIfPossible { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -41,5 +42,6 @@ public class LanguageBatchConvert
         AddAlignment = "Add alignment";
         AddColor = "Add color";
         DeleteLinesWithSpecificActorsOrStyles = "Delete lines with actors or styles (separate multiple by comma)";
+        UseSourceStylesIfPossible = "Use source styles if possible";
     }
 }

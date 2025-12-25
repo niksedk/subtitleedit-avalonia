@@ -6,6 +6,6 @@ public class LanguageChooseLanguage
 
     public LanguageChooseLanguage()
     {
-        Title = "Choose language";
+        Title = "Choose UI language";
     }
 }

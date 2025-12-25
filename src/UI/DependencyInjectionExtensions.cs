@@ -190,6 +190,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AudioToTextWhisperViewModel>();
         collection.AddTransient<AudioVisualizerUndockedViewModel>();
         collection.AddTransient<AutoTranslateViewModel>();
+        collection.AddTransient<BatchConvertAssaViewModel>();
         collection.AddTransient<BatchConvertFixCommonErrorsSettingsViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();

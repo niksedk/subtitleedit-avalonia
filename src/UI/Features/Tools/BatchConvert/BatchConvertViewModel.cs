@@ -745,6 +745,16 @@ public partial class BatchConvertViewModel : ObservableObject
             return;
         }
 
+        // check for Advadvanced SubStation Alpha
+        if (targetFormat == AdvancedSubStationAlpha.NameOfFormat)
+        {
+            var result = await _windowService.ShowDialogAsync<BatchConvertAssaWindow, BatchConvertAssaViewModel>(Window,
+                vm => 
+                { 
+                });
+            return;
+        }
+
         IExportHandler? exportHandler = null;
 
         if (targetFormat == BatchConverter.FormatBdnXml)

@@ -199,7 +199,7 @@ public class LanguageSettingsShortcuts
     public string TranslateViaCopyPaste { get; set; }
     public string Shortcuts { get; set; }
     public string WordLists { get; set; }
-    public string ChooseLanguage { get; set; }
+    public string ChooseUiLanguage { get; set; }
     public string ChooseRuleProfile { get; set; }
     public string VideoFullScreen { get; set; }
     public string CopyTextFromOriginalSelectedLines { get; set; }
@@ -437,7 +437,7 @@ public class LanguageSettingsShortcuts
         TranslateViaCopyPaste = "Translate via copy-paste";
         Shortcuts = "Shortcuts";
         WordLists = "Word lists";
-        ChooseLanguage = "Choose language";
+        ChooseUiLanguage = "Choose UI language";
         ChooseRuleProfile = "Choose rule profile";
         VideoFullScreen = "Video full screen";
         CopyTextFromOriginalSelectedLines = "Copy text from original (selected lines)";

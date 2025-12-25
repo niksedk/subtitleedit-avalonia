@@ -187,7 +187,7 @@ public class LanguageMainMenu
         Settings = "_Settings...";
         Shortcuts = "S_hortcuts...";
         WordLists = "_Word lists...";
-        ChooseLanguage = "_Choose language...";
+        ChooseLanguage = "_Choose UI language...";
 
         Translate = "Tr_anslate";
         AutoTranslate = "_Auto-translate...";

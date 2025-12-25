@@ -150,7 +150,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.CommandShowSettingsCommand), Se.Language.Options.Shortcuts.Settings },
         { nameof(MainViewModel.CommandShowSettingsShortcutsCommand), Se.Language.Options.Shortcuts.Shortcuts },
         { nameof(MainViewModel.ShowWordListsCommand), Se.Language.Options.Shortcuts.WordLists },
-        { nameof(MainViewModel.CommandShowSettingsLanguageCommand), Se.Language.Options.Shortcuts.ChooseLanguage },
+        { nameof(MainViewModel.CommandShowSettingsLanguageCommand), Se.Language.Options.Shortcuts.ChooseUiLanguage },
 
 
         { nameof(MainViewModel.ShowGoToVideoPositionCommand), Se.Language.Options.Shortcuts.GeneralGoToVideoPosition },
