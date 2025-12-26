@@ -1054,9 +1054,11 @@ public class NikseBitmap2
 
     public bool IsHorizontalLineTransparent(int y)
     {
-        for (var x = 0; x < Width; x++)
+        var yOffset = y * _widthX4 + 3;
+        var max = yOffset + _widthX4;
+        for (var pos = yOffset; pos < max; pos += 4)
         {
-            if (GetAlpha(x, y) > 1)
+            if (_bitmapData[pos] > 1)
             {
                 return false;
             }
@@ -1517,9 +1519,10 @@ public class NikseBitmap2
 
     public bool IsVerticalLineTransparent(int x)
     {
+        var xOffset = x * 4 + 3;
         for (var y = 0; y < Height; y++)
         {
-            if (GetAlpha(x, y) > 0)
+            if (_bitmapData[xOffset + y * _widthX4] > 0)
             {
                 return false;
             }
