@@ -107,7 +107,7 @@ internal static class SkBitmapExtensions
 
         return bitmap;
     }
-
+    
     public static SKBitmap MakeImageBrighter(byte[] originalBitmap, float brightnessIncrease = 0.25f)
     {
         using var ms = new MemoryStream(originalBitmap);
@@ -115,66 +115,103 @@ internal static class SkBitmapExtensions
         return MakeImageBrighter(bitmap, brightnessIncrease);
     }
 
-    public static SKBitmap CropTransparentColors(this SKBitmap originalBitmap, byte alphaThreshold = 0)
+    public static unsafe SKBitmap CropTransparentColors(this SKBitmap originalBitmap, byte alphaThreshold = 0)
     {
         if (originalBitmap.Width == 0 || originalBitmap.Height == 0)
         {
             return originalBitmap;
         }
 
-        var left = originalBitmap.Width;
-        var top = originalBitmap.Height;
-        var right = 0;
-        var bottom = 0;
+        int width = originalBitmap.Width;
+        int height = originalBitmap.Height;
+        int bytesPerPixel = originalBitmap.BytesPerPixel;
 
-        // Find the bounds of non-transparent pixels
-        for (var y = 0; y < originalBitmap.Height; y++)
+        // Get pointer to the pixel data
+        byte* ptr = (byte*)originalBitmap.GetPixels().ToPointer();
+        int rowBytes = originalBitmap.RowBytes;
+
+        // We assume standard 32-bit (RGBA/BGRA) where Alpha is usually at index 3
+        // However, to be safe across color types, we use Skia's Alpha Type.
+        int alphaOffset = originalBitmap.ColorType == SKColorType.Bgra8888 ||
+                          originalBitmap.ColorType == SKColorType.Rgba8888 ? 3 : 0;
+
+        int top = 0, bottom = height - 1, left = 0, right = width - 1;
+
+        // 1. Find Top
+        bool found = false;
+        for (int y = 0; y < height && !found; y++)
         {
-            for (var x = 0; x < originalBitmap.Width; x++)
+            byte* row = ptr + (y * rowBytes);
+            for (int x = 0; x < width; x++)
             {
-                var pixel = originalBitmap.GetPixel(x, y);
-                if (pixel.Alpha > alphaThreshold)
+                if (row[x * bytesPerPixel + alphaOffset] > alphaThreshold)
                 {
-                    if (x < left)
-                    {
-                        left = x;
-                    }
-
-                    if (x > right)
-                    {
-                        right = x;
-                    }
-
-                    if (y < top)
-                    {
-                        top = y;
-                    }
-
-                    if (y > bottom)
-                    {
-                        bottom = y;
-                    }
+                    top = y;
+                    found = true;
+                    break;
                 }
             }
         }
 
-        // If no non-transparent pixels found, return a 1x1 transparent bitmap
-        if (left > right || top > bottom)
+        if (!found)
         {
-            return new SKBitmap(1, 1);
+            return new SKBitmap(1, 1); // Entirely transparent
         }
 
-        var width = right - left + 1;
-        var height = bottom - top + 1;
+        // 2. Find Bottom
+        found = false;
+        for (int y = height - 1; y >= top && !found; y--)
+        {
+            byte* row = ptr + (y * rowBytes);
+            for (int x = 0; x < width; x++)
+            {
+                if (row[x * bytesPerPixel + alphaOffset] > alphaThreshold)
+                {
+                    bottom = y;
+                    found = true;
+                    break;
+                }
+            }
+        }
 
-        // Create the cropped bitmap
-        var croppedBitmap = new SKBitmap(width, height);
-        using var canvas = new SKCanvas(croppedBitmap);
-        var sourceRect = new SKRect(left, top, right + 1, bottom + 1);
-        var destRect = new SKRect(0, 0, width, height);
-        canvas.DrawBitmap(originalBitmap, sourceRect, destRect);
+        // 3. Find Left
+        found = false;
+        for (int x = 0; x < width && !found; x++)
+        {
+            for (int y = top; y <= bottom; y++)
+            {
+                byte* pixel = ptr + (y * rowBytes) + (x * bytesPerPixel);
+                if (pixel[alphaOffset] > alphaThreshold)
+                {
+                    left = x;
+                    found = true;
+                    break;
+                }
+            }
+        }
 
-        return croppedBitmap;
+        // 4. Find Right
+        found = false;
+        for (int x = width - 1; x >= left && !found; x--)
+        {
+            for (int y = top; y <= bottom; y++)
+            {
+                byte* pixel = ptr + (y * rowBytes) + (x * bytesPerPixel);
+                if (pixel[alphaOffset] > alphaThreshold)
+                {
+                    right = x;
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        // Create the cropped bitmap using ExtractSubset for better performance
+        var subset = new SKRectI(left, top, right + 1, bottom + 1);
+        var destination = new SKBitmap();
+        originalBitmap.ExtractSubset(destination, subset);
+
+        return destination;
     }
 
     public static string ToBase64String(this SKBitmap bitmap)

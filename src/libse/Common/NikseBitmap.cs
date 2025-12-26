@@ -1456,9 +1456,10 @@ namespace Nikse.SubtitleEdit.Core.Common
 
         public bool IsVerticalLineTransparent(int x)
         {
+            int xOffset = x * 4 + 3;
             for (int y = 0; y < Height; y++)
             {
-                if (GetAlpha(x, y) > 0)
+                if (_bitmapData[xOffset + (y * _widthX4)] > 0)
                 {
                     return false;
                 }
