@@ -185,6 +185,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AlignmentPickerViewModel>();
         collection.AddTransient<AssaAttachmentsViewModel>();
         collection.AddTransient<AssaPropertiesViewModel>();
+        collection.AddTransient<AssaSingleStyleViewModel>();
         collection.AddTransient<AssaStylePickerViewModel>();
         collection.AddTransient<AssaStylesViewModel>();
         collection.AddTransient<AudioToTextWhisperViewModel>();
