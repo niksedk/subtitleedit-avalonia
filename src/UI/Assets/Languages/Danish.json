@@ -1184,7 +1184,11 @@
       "AddUnderline": "Tilf\u00F8j understregning",
       "AddAlignment": "Tilf\u00F8j justering",
       "AddColor": "Tilf\u00F8j farve",
-      "DeleteLinesWithSpecificActorsOrStyles": "Slet linjer med skuespillere eller stilarter (adskil flere med komma)"
+      "DeleteLinesWithSpecificActorsOrStyles": "Slet linjer med skuespillere eller stilarter (adskil flere med komma)",
+      "UseSourceStylesIfPossible": "Brug kilde stilarter, hvis muligt",
+      "EditStyles": "Rediger stilarter",
+      "EditProperties": "Rediger egenskaber",
+      "EditAttachments": "Rediger vedh\u00E6ftede filer"
     },
     "ChangeCasing": {
       "Title": "Change casing",
@@ -1829,7 +1833,7 @@
       "TranslateViaCopyPaste": "Overs\u00E6t via copy-paste",
       "Shortcuts": "Genveje",
       "WordLists": "Ordlister",
-      "ChooseLanguage": "V\u00E6lg sprog",
+      "ChooseUiLanguage": "V\u00E6lg UI-sprog",
       "ChooseRuleProfile": "V\u00E6lg regelprofil",
       "VideoFullScreen": "Video i fuld sk\u00E6rm",
       "CopyTextFromOriginalSelectedLines": "Kopier tekst fra originalen (valgte linjer)",
