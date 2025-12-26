@@ -654,7 +654,7 @@
       "settings": "_Settings...",
       "shortcuts": "S_hortcuts...",
       "wordLists": "_Word lists...",
-      "chooseLanguage": "_Choose language...",
+      "chooseLanguage": "_Choose UI language...",
       "translate": "Tr_anslate",
       "autoTranslate": "_Auto-translate...",
       "translateViaCopyPaste": "Auto-translate via _copy-paste...",
@@ -1180,7 +1180,11 @@
       "addUnderline": "Add underline",
       "addAlignment": "Add alignment",
       "addColor": "Add color",
-      "deleteLinesWithSpecificActorsOrStyles": "Delete lines with actors or styles (separate multiple by comma)"
+      "deleteLinesWithSpecificActorsOrStyles": "Delete lines with actors or styles (separate multiple by comma)",
+      "useSourceStylesIfPossible": "Use source styles if possible",
+      "editStyles": "Edit styles",
+      "editProperties": "Edit properties",
+      "editAttachments": "Edit attachments"
     },
     "changeCasing": {
       "title": "Change casing",
@@ -1830,7 +1834,7 @@
       "translateViaCopyPaste": "Translate via copy-paste",
       "shortcuts": "Shortcuts",
       "wordLists": "Word lists",
-      "chooseLanguage": "Choose language",
+      "chooseUiLanguage": "Choose UI language",
       "chooseRuleProfile": "Choose rule profile",
       "videoFullScreen": "Video full screen",
       "copyTextFromOriginalSelectedLines": "Copy text from original (selected lines)",
@@ -1879,7 +1883,7 @@
       "unableToRemoveItem": "Unable to remove item!"
     },
     "chooseLanguage": {
-      "title": "Choose language"
+      "title": "Choose UI language"
     }
   },
   "help": {
