@@ -612,7 +612,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         var fileName = Path.Combine(Se.OcrFolder, Se.Settings.Ocr.NOcrDatabase + ".nocr");
         var nOcrDb = new NOcrDb(fileName);
         item.Subtitle = new Subtitle();
-        
+
         var totalCount = imageSubtitles.Count;
         var results = new Paragraph[totalCount];
         var processedCount = 0;
@@ -862,17 +862,31 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         item.Status = Se.Language.General.Converted;
     }
 
-    private async Task SaveSubtitleFormat(BatchConvertItem item, SubtitleFormat format, CancellationToken cancellationToken)
+    private async Task SaveSubtitleFormat(BatchConvertItem item, SubtitleFormat targetFormat, CancellationToken cancellationToken)
     {
         try
         {
-            if (item.Subtitle != null && item.Subtitle.OriginalFormat != null && item.Subtitle.OriginalFormat.Name != format.Name)
+            var s = new Subtitle(item.Subtitle);
+
+            if (s.OriginalFormat != null && s.OriginalFormat.Name != targetFormat.Name)
             {
-                item.Subtitle.OriginalFormat.RemoveNativeFormatting(item.Subtitle, format);
+                s.OriginalFormat.RemoveNativeFormatting(item.Subtitle, targetFormat);
             }
 
-            var converted = format.ToText(item.Subtitle, _config.TargetEncoding);
-            var path = MakeOutputFileName(item, format.Extension);
+            if (targetFormat.Name == AdvancedSubStationAlpha.NameOfFormat)
+            {
+                if (!_config.AssaUseSourceStylesIfPossible || s.OriginalFormat?.Name != AdvancedSubStationAlpha.NameOfFormat)
+                {
+                    if (!string.IsNullOrEmpty(_config.AssaHeader))
+                    {
+                        s.Header = _config.AssaHeader;
+                        s.Footer = _config.AssaFooter;
+                    }
+                }
+            }
+
+            var converted = targetFormat.ToText(s, _config.TargetEncoding);
+            var path = MakeOutputFileName(item, targetFormat.Extension);
             await File.WriteAllTextAsync(path, converted, cancellationToken);
             item.Status = Se.Language.General.Converted;
         }

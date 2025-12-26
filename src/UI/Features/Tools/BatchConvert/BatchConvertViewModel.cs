@@ -748,10 +748,7 @@ public partial class BatchConvertViewModel : ObservableObject
         // check for Advadvanced SubStation Alpha
         if (targetFormat == AdvancedSubStationAlpha.NameOfFormat)
         {
-            var result = await _windowService.ShowDialogAsync<BatchConvertAssaWindow, BatchConvertAssaViewModel>(Window,
-                vm => 
-                { 
-                });
+            var result = await _windowService.ShowDialogAsync<BatchConvertAssaWindow, BatchConvertAssaViewModel>(Window);
             return;
         }
 
@@ -1071,6 +1068,9 @@ public partial class BatchConvertViewModel : ObservableObject
             Overwrite = Se.Settings.Tools.BatchConvert.Overwrite,
             TargetFormatName = SelectedTargetFormat ?? string.Empty,
             TargetEncoding = Se.Settings.Tools.BatchConvert.TargetEncoding,
+            AssaUseSourceStylesIfPossible = Se.Settings.Tools.BatchConvert.AssaUseSourceStylesIfPossible,
+            AssaHeader = Se.Settings.Tools.BatchConvert.AssaHeader,
+            AssaFooter = Se.Settings.Tools.BatchConvert.AssaFooter,
 
             AdjustDuration = new BatchConvertConfig.AdjustDurationSettings
             {

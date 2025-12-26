@@ -13,6 +13,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -50,7 +51,10 @@ public partial class BatchConvertAssaViewModel : ObservableObject
         _subtitle = new Subtitle();
         _subtitle.Paragraphs.Add(new Paragraph("Sample subtitle", 0, 2000));
         Text = _subtitle.ToText(new AdvancedSubStationAlpha());
-        UseSourceStylesIfPossible = true;
+
+        UseSourceStylesIfPossible = Se.Settings.Tools.BatchConvert.AssaUseSourceStylesIfPossible;
+        _subtitle.Header = Se.Settings.Tools.BatchConvert.AssaHeader;
+        _subtitle.Footer = Se.Settings.Tools.BatchConvert.AssaFooter;
     }
 
     [RelayCommand]
@@ -65,6 +69,12 @@ public partial class BatchConvertAssaViewModel : ObservableObject
         {
             vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty, string.Empty);
         });
+
+        if (result.OkPressed)
+        {
+            _subtitle.Header = result.Header;
+            Text = _subtitle.ToText(new AdvancedSubStationAlpha());
+        }
     }
 
     [RelayCommand]
@@ -82,6 +92,7 @@ public partial class BatchConvertAssaViewModel : ObservableObject
 
         if (result.OkPressed)
         {
+            _subtitle.Footer = result.Footer;
             Text = _subtitle.ToText(new AdvancedSubStationAlpha());
         }
     }
@@ -101,6 +112,7 @@ public partial class BatchConvertAssaViewModel : ObservableObject
 
         if (result.OkPressed)
         {
+            _subtitle.Header = result.Header;
             Text = _subtitle.ToText(new AdvancedSubStationAlpha());
         }
     }
@@ -109,6 +121,9 @@ public partial class BatchConvertAssaViewModel : ObservableObject
     private void Ok()
     {
         OkPressed = true;
+        Se.Settings.Tools.BatchConvert.AssaUseSourceStylesIfPossible = UseSourceStylesIfPossible;
+        Se.Settings.Tools.BatchConvert.AssaHeader = _subtitle.Header;
+        Se.Settings.Tools.BatchConvert.AssaFooter = _subtitle.Footer;
         Window?.Close();
     }
 

@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -15,7 +16,9 @@ public class BatchConvertConfig
     public bool Overwrite { get; set; }
     public string TargetFormatName { get; set; }
     public string TargetEncoding { get; set; }
-
+    public bool AssaUseSourceStylesIfPossible { get; set; }
+    public string AssaHeader { get; set; }
+    public string AssaFooter { get; set; }
     public AddFormattingSettings AddFormatting { get; set; }
     public RemoveFormattingSettings RemoveFormatting { get; set; }
     public OffsetTimeCodesSettings OffsetTimeCodes { get; set; }
@@ -39,6 +42,10 @@ public class BatchConvertConfig
     {
         OutputFolder = string.Empty;
         SaveInSourceFolder = true;
+        Overwrite = false;
+        AssaUseSourceStylesIfPossible = false;
+        AssaHeader = string.Empty;
+        AssaFooter = string.Empty;
         TargetFormatName = SubRip.NameOfFormat;
         TargetEncoding = TextEncoding.Utf8WithBom;
         AddFormatting = new AddFormattingSettings();

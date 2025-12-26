@@ -46,6 +46,9 @@ public class SeBatchConvert
     public string FixRtlMode { get; set; }
     public string LastFilterItem { get; set; }
     public string LanguagePostFix { get; set; }
+    public bool AssaUseSourceStylesIfPossible { get; set; }
+    public string AssaHeader { get; set; }
+    public string AssaFooter { get; set; }
 
     public SeBatchConvert()
     {
@@ -71,5 +74,8 @@ public class SeBatchConvert
         FixRtlMode = "ReverseStartEnd";
         LastFilterItem = string.Empty;
         LanguagePostFix = Se.Language.General.TwoLetterLanguageCode;
+        AssaUseSourceStylesIfPossible = true;
+        AssaHeader = string.Empty;
+        AssaFooter = string.Empty;
     }
 }
