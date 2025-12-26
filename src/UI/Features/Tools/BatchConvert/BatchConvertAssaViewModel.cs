@@ -1,23 +1,20 @@
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Media.Imaging;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Features.Assa;
-using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Media;
-using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using AvaloniaEdit;
-using AvaloniaEdit.Rendering;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
-using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -29,7 +26,6 @@ public partial class BatchConvertAssaViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _fonts;
     [ObservableProperty] private ObservableCollection<BorderStyleItem> _borderTypes;
     [ObservableProperty] private BorderStyleItem _selectedBorderType;
-    [ObservableProperty] private Bitmap? _imagePreview;
 
     public Window? Window { get; set; }
 
@@ -37,57 +33,76 @@ public partial class BatchConvertAssaViewModel : ObservableObject
     public Border TextBoxContainer { get; set; }
     public ITextBoxWrapper SourceViewTextBox { get; set; }
 
-    private readonly IFolderHelper _folderHelper;
+    private readonly IWindowService _windowService;
 
-    public BatchConvertAssaViewModel(IFolderHelper folderHelper)
+    private Subtitle _subtitle;
+
+    public BatchConvertAssaViewModel(IWindowService windowService)
     {
-        _folderHelper = folderHelper;
+        _windowService = windowService;
 
-        TextBoxContainer = new Border();    
+        Text = string.Empty;
+        SourceViewTextBox = new TextEditorWrapper(new TextEditor(), new Border());
+        TextBoxContainer = new Border();
         Fonts = new ObservableCollection<string>(FontHelper.GetSystemFonts());
         BorderTypes = new ObservableCollection<BorderStyleItem>(BorderStyleItem.List());
         SelectedBorderType = BorderTypes[0];
-        
-        foreach (var style in Se.Settings.Assa.StoredStyles)
-        {
-            if (style.IsDefault)
-            {
-                CurrentStyle = new  StyleDisplay(style);
-                break;
-            }
-        }
-
-        if (CurrentStyle == null)
-        {
-            var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(AdvancedSubStationAlpha.DefaultHeader);
-            if (styles.Count > 0)
-            {
-                CurrentStyle = new StyleDisplay(styles[0]);
-            }
-        }
-
+        _subtitle = new Subtitle();
+        _subtitle.Paragraphs.Add(new Paragraph("Sample subtitle", 0, 2000));
+        Text = _subtitle.ToText(new AdvancedSubStationAlpha());
         UseSourceStylesIfPossible = true;
     }
-    
+
     [RelayCommand]
-    private void EditStyle()
+    private async Task EditStyles()
     {
-        OkPressed = true;
-        Window?.Close();
-    }
-    
-    [RelayCommand]
-    private void EditAttachment()
-    {
-        OkPressed = true;
-        Window?.Close();
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window, vm =>
+        {
+            vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty, string.Empty);
+        });
     }
 
     [RelayCommand]
-    private void EditProperties()
+    private async Task EditAttachment()
     {
-        OkPressed = true;
-        Window?.Close();
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(Window, vm =>
+        {
+            vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+            Text = _subtitle.ToText(new AdvancedSubStationAlpha());
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditProperties()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(Window, vm =>
+        {
+            vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty, string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+            Text = _subtitle.ToText(new AdvancedSubStationAlpha());
+        }
     }
 
     [RelayCommand]
@@ -102,8 +117,8 @@ public partial class BatchConvertAssaViewModel : ObservableObject
     {
         Window?.Close();
     }
-    
-        private TextBoxWrapper CreateSimpleTextBoxWrapper()
+
+    private TextBoxWrapper CreateSimpleTextBoxWrapper()
     {
         var textBox = new TextBox
         {
@@ -117,7 +132,7 @@ public partial class BatchConvertAssaViewModel : ObservableObject
         return new TextBoxWrapper(textBox);
     }
 
-    private TextEditorWrapper CreateAdvancedTextBoxWrapper(string text, SubtitleFormat subtitleFormat)
+    private TextEditorWrapper CreateAdvancedTextBoxWrapper(string text)
     {
         var textBox = new TextEditor
         {
@@ -125,14 +140,14 @@ public partial class BatchConvertAssaViewModel : ObservableObject
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ShowLineNumbers = true,
-            WordWrap = true,
+            WordWrap = false,
         };
 
         // Override the built-in link color with our softer pastel color
         textBox.TextArea.TextView.LinkTextForegroundBrush = UiUtil.MakeLinkForeground();
 
         // Add syntax highlighting for subtitle source formats
-        var lineTransformer = GetLineTransformer(text, subtitleFormat);
+        var lineTransformer = new AssaSourceSyntaxHighlighting();
         if (lineTransformer != null)
         {
             textBox.TextArea.TextView.LineTransformers.Add(lineTransformer);
@@ -212,46 +227,6 @@ public partial class BatchConvertAssaViewModel : ObservableObject
         return new TextEditorWrapper(textBox, textBoxBorder);
     }
 
-    private static DocumentColorizingTransformer? GetLineTransformer(string text, SubtitleFormat subtitleFormat)
-    {
-        // SubRip (.srt) and WebVTT (.vtt) use similar time code formats
-        if (subtitleFormat is SubRip ||
-            subtitleFormat is WebVTT ||
-            subtitleFormat is WebVTTFileWithLineNumber)
-        {
-            return new SubRipSourceSyntaxHighlighting();
-        }
-
-        // Advanced SubStation Alpha (.ass) and SubStation Alpha (.ssa) formats
-        if (subtitleFormat is AdvancedSubStationAlpha || subtitleFormat is SubStationAlpha)
-        {
-            return new AssaSourceSyntaxHighlighting();
-        }
-
-        // XML-based formats (e.g., TTML, Netflix DFXP, etc.)
-        if (subtitleFormat.Extension == ".xml" ||
-            subtitleFormat.AlternateExtensions.Contains(".xml") ||
-            text.Contains("<?xml version=") ||
-            subtitleFormat is Sami ||
-            subtitleFormat is SamiModern ||
-            subtitleFormat is SamiYouTube ||
-            subtitleFormat is SamiAvDicPlayer)
-        {
-            return new XmlSourceSyntaxHighlighting();
-        }
-
-        // Json-based formats
-        if (subtitleFormat.Extension == ".json" ||
-            subtitleFormat.AlternateExtensions.Contains(".json"))
-        {
-            return new JsonSourceSyntaxHighlighting();
-        }
-
-        // No syntax highlighting for other formats
-        return null;
-    }
-
-
     internal void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -261,7 +236,27 @@ public partial class BatchConvertAssaViewModel : ObservableObject
         }
     }
 
-    internal void BorderTypeChanged(object? sender, SelectionChangedEventArgs e)
+    internal void Loaded()
     {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Task.Delay(50).Wait(); // Slight delay to ensure control is ready  
+
+            var useSimpleTextBox = Text.Length > 2_000_000;
+            if (useSimpleTextBox)
+            {
+                SourceViewTextBox = CreateSimpleTextBoxWrapper();
+            }
+            else
+            {
+                SourceViewTextBox = CreateAdvancedTextBoxWrapper(Text);
+            }
+
+            TextBoxContainer.Child = SourceViewTextBox.ContentControl;
+
+            Task.Delay(50).Wait(); // Slight delay to ensure control is ready  
+            SourceViewTextBox.Focus();
+            SourceViewTextBox.CaretIndex = 0;
+        }, DispatcherPriority.Input);
     }
 }

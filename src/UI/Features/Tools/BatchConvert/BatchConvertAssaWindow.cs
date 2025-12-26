@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -14,8 +13,11 @@ public class BatchConvertAssaWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.BatchConvert.BatchConvertSettings;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        CanResize = false;
+        CanResize = true;
+        Width = 900;
+        Height = 700;
+        MinWidth = 600;
+        MinHeight = 400;
         vm.Window = this;
         DataContext = vm;
 
@@ -35,17 +37,12 @@ public class BatchConvertAssaWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -54,15 +51,17 @@ public class BatchConvertAssaWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(checkBoxOverwrite, 1, 0);
-        grid.Add(MakeEditView(vm), 2, 0);
-        grid.Add(MakePreviewView(vm), 3, 0);
-        grid.Add(panelButtons, 7, 0);
-
+        grid.Add(checkBoxOverwrite, 0);
+        grid.Add(MakeEditView(vm), 1);
+        grid.Add(panelButtons, 2);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += (_, _) =>
+        {
+            vm.Loaded();
+            buttonOk.Focus();
+        };
         KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
@@ -73,23 +72,22 @@ public class BatchConvertAssaWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Width = double.NaN,
+            Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             ColumnSpacing = 5,
             RowSpacing = 5,
         };
         
-        var labelAssaSource = UiUtil.MakeLabel("ASSA Source Style Settings").WithBold();
+        var labelAssaSource = UiUtil.MakeLabel("ASSA source").WithBold();
         var contentBorder = new Border
         {
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -99,56 +97,15 @@ public class BatchConvertAssaWindow : Window
         };
         vm.TextBoxContainer = contentBorder;
         
-        var buttonEditStyle = UiUtil.MakeButton("Edit style", vm.EditStyleCommand);
-        var buttonEditAttachment = UiUtil.MakeButton("Edit attachment", vm.EditAttachmentCommand);
-        var buttonEditProperties = UiUtil.MakeButton("Edit properties", vm.EditPropertiesCommand);
+        var buttonEditStyle = UiUtil.MakeButton(Se.Language.Tools.BatchConvert.EditStyles, vm.EditStylesCommand);
+        var buttonEditProperties = UiUtil.MakeButton(Se.Language.Tools.BatchConvert.EditProperties, vm.EditPropertiesCommand);
+        var buttonEditAttachment = UiUtil.MakeButton(Se.Language.Tools.BatchConvert.EditAttachments, vm.EditAttachmentCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonEditStyle, buttonEditProperties, buttonEditAttachment);
 
-        var panelButtons = new StackPanel()
-        {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Children = { buttonEditStyle, buttonEditAttachment, buttonEditProperties}
-        };
-
-        grid.Add(labelAssaSource, 0, 0);
-        grid.Add(contentBorder, 1, 0);
-        grid.Add(panelButtons, 1, 1);
+        grid.Add(labelAssaSource, 0);
+        grid.Add(contentBorder, 1);
+        grid.Add(panelButtons, 2);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
-    }
-
-    private static Border MakePreviewView(BatchConvertAssaViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        var label = UiUtil.MakeLabel(Se.Language.General.Preview).WithBold();
-
-        var image = new Image
-        {
-            [!Image.SourceProperty] = new Binding(nameof(vm.ImagePreview)),
-            DataContext = vm,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            Stretch = Stretch.None, // Prevents stretching of the image
-        };
-
-        grid.Add(label, 0);
-        grid.Add(image, 1);
-
-        return UiUtil.MakeBorderForControl(grid);
     }
 }
