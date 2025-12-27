@@ -17,6 +17,7 @@ public class SeTools
     public SeMergeSameText MergeSameText { get; set; } = new();
 
     public string OllamaPrompt { get; set; }
+    public string LlamaCppPrompt { get; set; }
     public string LmStudioPrompt { get; set; }
     public string AnthropicPrompt { get; set; }
     public string GroqPrompt { get; set; }
@@ -51,6 +52,7 @@ public class SeTools
     {
         OllamaPrompt = string.Empty;
         LmStudioPrompt = string.Empty;
+        LlamaCppPrompt = string.Empty;
         AnthropicPrompt = string.Empty;
         GroqPrompt = string.Empty;
         OpenRouterPrompt = string.Empty;

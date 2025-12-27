@@ -976,7 +976,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         if (engineType == typeof(LlamaCppTranslate))
         {
-            ModelBrowseIsVisible = true;
+            ModelBrowseIsVisible = false;
 
             if (string.IsNullOrEmpty(Se.Settings.AutoTranslate.LlamaCppApiUrl))
             {
@@ -989,8 +989,8 @@ public partial class AutoTranslateViewModel : ObservableObject
             });
 
             _apiModels = Configuration.Settings.Tools.OllamaModels.Split(',').ToList(); //TODO: fix this to get LlamaCpp models
-            ModelIsVisible = true;
-            ButtonModelIsVisible = true;
+            ModelIsVisible = false;
+            ButtonModelIsVisible = false;
             ModelText = Se.Settings.AutoTranslate.LlamaCppModel;
 
             return;

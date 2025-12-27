@@ -45,7 +45,7 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
 
         public async Task<string> Translate(string text, string sourceLanguageCode, string targetLanguageCode, CancellationToken cancellationToken)
         {
-            var model = Configuration.Settings.Tools.LmStudioModel;
+            var model = string.Empty;
             var modelJson = string.Empty;
             if (!string.IsNullOrEmpty(model))
             {

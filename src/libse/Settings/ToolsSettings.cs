@@ -524,6 +524,7 @@ namespace Nikse.SubtitleEdit.Core.Settings
             OpenRouterPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
             OpenRouterModel = OpenRouterTranslate.Models[0];
             LmStudioPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
+            LlamaCppPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
             OllamaApiUrl = "http://localhost:11434/api/generate";
             OllamaModels = "llama3.2,llama3.2:1b,phi3,gemma2,qwen2,mistral";
             OllamaModel = "llama3.2";

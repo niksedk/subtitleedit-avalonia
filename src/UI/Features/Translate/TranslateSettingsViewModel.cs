@@ -104,6 +104,10 @@ public partial class TranslateSettingsViewModel : ObservableObject
             {
                 Se.Settings.Tools.OpenRouterPrompt = PromptText;
             }
+            else if (engineType == typeof(LlamaCppTranslate))
+            {
+                Se.Settings.Tools.LlamaCppPrompt = PromptText;
+            }
         }
 
         Se.SaveSettings();
@@ -176,6 +180,14 @@ public partial class TranslateSettingsViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(PromptText))
             {
                 PromptText = new SeAutoTranslate().OpenRouterPrompt;
+            }
+        }
+        else if (engineType == typeof(LlamaCppTranslate))
+        {
+            PromptText = Se.Settings.Tools.LlamaCppPrompt;
+            if (string.IsNullOrWhiteSpace(PromptText))
+            {
+                PromptText = new SeAutoTranslate().LlamaCppPrompt;
             }
         }
         else
