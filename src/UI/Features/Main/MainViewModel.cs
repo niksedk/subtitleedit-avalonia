@@ -243,7 +243,7 @@ public partial class MainViewModel :
     private int _changeSubtitleHash = -1;
     private int _changeSubtitleHashOriginal = -1;
     private bool _subtitleGridSelectionChangedSkip;
-    private long _lastKeyPressedTicks;
+    private long _lastKeyPressedMs;
     private bool _loading;
     private bool _opening;
     private List<int>? _visibleLayers;
@@ -9829,14 +9829,14 @@ public partial class MainViewModel :
 
     public bool IsTyping()
     {
-        if (_lastKeyPressedTicks == 0)
+        if (_lastKeyPressedMs == 0)
         {
             return false;
         }
 
-        var ticks = DateTime.UtcNow.Ticks;
-        var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
-        if (timeSpan.Milliseconds < 500)
+        var ms = Environment.TickCount64;
+        var diff = ms - _lastKeyPressedMs;
+        if (diff < 500)
         {
             return true;
         }
@@ -10471,15 +10471,15 @@ public partial class MainViewModel :
                 _repeatSubtitle = null;
             }
 
-            var ticks = DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp(); GetTimestamp does not work on mac!?
-            var timeSpan = TimeSpan.FromTicks(ticks - _lastKeyPressedTicks);
+            var ms = Environment.TickCount64; // DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp(); GetTimestamp does not work on mac!?
+            var msDiff = ms - _lastKeyPressedMs;
             var k = keyEventArgs.Key;
-            if (timeSpan.Seconds > 5)
+            if (msDiff > 5000)
             {
                 _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
             }
 
-            _lastKeyPressedTicks = ticks;
+            _lastKeyPressedMs = ms;
 
             _shortcutManager.OnKeyPressed(this, keyEventArgs);
 

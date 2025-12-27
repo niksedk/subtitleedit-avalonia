@@ -213,7 +213,7 @@ public class AudioVisualizer : Control
     {
         if (WavePeaks != null)
         {
-            var list = new List<WavePeak2>();
+            var list = new List<WavePeak2>(WavePeaks.Peaks.Count);
             for (var i = 0; i < WavePeaks.Peaks.Count; i++)
             {
                 if (i % 1001 != 0)
@@ -364,7 +364,7 @@ public class AudioVisualizer : Control
                 var p = HitTestParagraph(point);
                 if (p != null)
                 {
-                    var position = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
                     OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
                 }
             }
@@ -443,7 +443,7 @@ public class AudioVisualizer : Control
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        _lastMouseWheelScroll = DateTime.UtcNow.Ticks;
+        _lastMouseWheelScroll = Environment.TickCount64;
 
         var point = e.GetPosition(this);
         var properties = e.GetCurrentPoint(this).Properties;
@@ -496,7 +496,7 @@ public class AudioVisualizer : Control
             newStart = 0;
         }
 
-        _audioVisualizerLastScroll = DateTime.UtcNow.Ticks; // Update the last scroll time
+        _audioVisualizerLastScroll = Environment.TickCount64; // Update the last scroll time
         StartPositionSeconds = newStart;
         if (OnHorizontalScroll != null)
         {
@@ -532,7 +532,7 @@ public class AudioVisualizer : Control
             nsp?.UpdateDuration();
             _audioVisualizerLastScroll = 0;
             e.Handled = true;
-            var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+            var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
             OnVideoPositionChanged?.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             FlyoutMenuOpening?.Invoke(this, new ContextEventArgs { PositionInSeconds = videoPosition, NewParagraph = nsp });
             InvalidateVisual();
@@ -560,7 +560,7 @@ public class AudioVisualizer : Control
         {
             if (OnVideoPositionChanged != null)
             {
-                var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
                 _audioVisualizerLastScroll = 0;
                 OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             }
@@ -570,27 +570,27 @@ public class AudioVisualizer : Control
 
         if (_interactionMode == InteractionMode.Moving)
         { // click on paragraph, but with no move
-            var ts = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _lastPointerPressed);
-            if (ts.TotalMilliseconds < 100 ||
+            var ms = Environment.TickCount64 - _lastPointerPressed;
+            if (ms < 100 ||
                 (
                     _activeParagraph != null &&
                     Math.Abs(_originalStartSeconds - _activeParagraph.StartTime.TotalSeconds) < 0.01))
             {
                 if (_isCtrlDown && !OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
                 {
-                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;
                     OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
                 }
                 else if (_isShiftDown && OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
                 {
-                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;
                     OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
                 }
                 else if (OnVideoPositionChanged != null)
                 {
-                    var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                    var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
                     _audioVisualizerLastScroll = 0;
                     OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
                 }
@@ -602,7 +602,7 @@ public class AudioVisualizer : Control
         {
             if (OnVideoPositionChanged != null)
             {
-                var videoPosition = RelativeXPositionToSeconds((int)e.GetPosition(this).X);
+                var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
                 _audioVisualizerLastScroll = 0;
                 OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             }
@@ -619,7 +619,7 @@ public class AudioVisualizer : Control
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _lastPointerPressed = DateTime.UtcNow.Ticks;
+        _lastPointerPressed = Environment.TickCount64;
         e.Handled = true;
         var point = e.GetPosition(this);
         _startPointerPosition = point;
@@ -636,7 +636,7 @@ public class AudioVisualizer : Control
             NewSelectionParagraph = new SubtitleLineViewModel();
 
             var deltaX = point.X; // - _startPointerPosition.X;
-            var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
+            var deltaSeconds = RelativeXPositionToSeconds(deltaX);
             _newSelectionSeconds = deltaSeconds;
 
             NewSelectionParagraph.StartTime = TimeSpan.FromSeconds(deltaSeconds);
@@ -755,7 +755,7 @@ public class AudioVisualizer : Control
         var newP = NewSelectionParagraph;
         if (_interactionMode == InteractionMode.New && newP != null && properties.IsLeftButtonPressed)
         {
-            var seconds = RelativeXPositionToSeconds((int)point.X);
+            var seconds = RelativeXPositionToSeconds(point.X);
             if (seconds > _newSelectionSeconds)
             {
                 newP.StartTime = TimeSpan.FromSeconds(_newSelectionSeconds);
@@ -778,7 +778,7 @@ public class AudioVisualizer : Control
         }
 
         var deltaX = point.X - _startPointerPosition.X;
-        var deltaSeconds = RelativeXPositionToSeconds((int)deltaX);
+        var deltaSeconds = RelativeXPositionToSeconds(deltaX);
 
         if (_interactionMode == InteractionMode.ResizingLeftOr && _activeParagraphPrevious != null)
         {
@@ -1173,7 +1173,7 @@ public class AudioVisualizer : Control
             height = renderCtx.SpectrogramHeight;
         }
 
-        var endPositionSeconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
+        var endPositionSeconds = RelativeXPositionToSecondsOptimized(renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
         var width = (int)Math.Round((endPositionSeconds - renderCtx.StartPositionSeconds) / _spectrogram.SampleDuration);
         if (width <= 0 || width > 4000)
         {
@@ -1296,7 +1296,7 @@ public class AudioVisualizer : Control
                 return 0;
             }
 
-            return RelativeXPositionToSeconds((int)Bounds.Width);
+            return RelativeXPositionToSeconds(Bounds.Width);
         }
     }
 
@@ -1588,7 +1588,7 @@ public class AudioVisualizer : Control
         }
 
         var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
-        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
+        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized(renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
 
         foreach (var p in paragraphs)
         {
@@ -1659,7 +1659,7 @@ public class AudioVisualizer : Control
         var currentPositionPos = SecondsToXPositionOptimized(renderCtx.CurrentVideoPositionSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
 
         var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
-        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized((int)renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
+        var endPositionMilliseconds = RelativeXPositionToSecondsOptimized(renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
         var paragraphStartList = new List<int>();
         var paragraphEndList = new List<int>();
         foreach (var p in _displayableParagraphs)
@@ -1810,16 +1810,29 @@ public class AudioVisualizer : Control
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static double RelativeXPositionToSecondsOptimized(int x, int sampleRate, double startPositionSeconds, double zoomFactor)
+    private double RelativeXPositionToSeconds(double x)
+    {
+        if (WavePeaks == null)
+        {
+            return 0;
+        }
+
+        return StartPositionSeconds + x / WavePeaks.SampleRate / ZoomFactor;
+    }   
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double RelativeXPositionToSecondsOptimized(double x, int sampleRate, double startPositionSeconds, double zoomFactor)
     {
         if (sampleRate == 0)
         {
             return 0;
         }
-        return startPositionSeconds + (double)x / sampleRate / zoomFactor;
+
+        return startPositionSeconds + x / sampleRate / zoomFactor;
     }
 
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int SecondsToXPosition(double seconds)
     {
         if (WavePeaks == null)
@@ -1865,7 +1878,7 @@ public class AudioVisualizer : Control
 
     public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex, List<SubtitleLineViewModel> selectedIndexes)
     {
-        if (TimeSpan.FromTicks(DateTime.UtcNow.Ticks - _lastMouseWheelScroll).TotalSeconds > 0.25)
+        if (TimeSpan.FromMilliseconds(Environment.TickCount64 - _lastMouseWheelScroll).TotalSeconds > 0.25)
         { // don't set start position when scrolling with mouse wheel as it will make a bad (jumping back) forward scrolling
             StartPositionSeconds = startPositionSeconds;
         }
