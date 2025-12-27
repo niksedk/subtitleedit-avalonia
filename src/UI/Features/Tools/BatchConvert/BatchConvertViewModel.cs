@@ -19,6 +19,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
+using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -29,10 +30,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -178,17 +177,24 @@ public partial class BatchConvertViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
     private readonly IBatchConverter _batchConverter;
+    private readonly IBatchConvertItemSplitter _batchConvertItemSplitter;
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
     private List<string> _encodings;
     private List<string> _targetFormatsWithSettings;
 
-    public BatchConvertViewModel(IWindowService windowService, IFileHelper fileHelper, IBatchConverter batchConverter, IFolderHelper folderHelper)
+    public BatchConvertViewModel(
+        IWindowService windowService,
+        IFileHelper fileHelper,
+        IBatchConverter batchConverter,
+        IFolderHelper folderHelper,
+        IBatchConvertItemSplitter batchConvertItemSplitter)
     {
         _windowService = windowService;
         _fileHelper = fileHelper;
         _batchConverter = batchConverter;
         _folderHelper = folderHelper;
+        _batchConvertItemSplitter = batchConvertItemSplitter;
 
         BatchItems = new ObservableCollection<BatchConvertItem>();
         _allBatchItems = new List<BatchConvertItem>();
@@ -638,7 +644,24 @@ public partial class BatchConvertViewModel : ObservableObject
                 var countDisplay = count;
                 ProgressText = string.Format(Se.Language.General.ConvertingXofYDotDoDot, countDisplay, BatchItems.Count);
                 ProgressValue = countDisplay / (double)BatchItems.Count;
-                await _batchConverter.Convert(batchItem, _cancellationToken);
+
+                if (batchItem.Format!.StartsWith("Transport Stream", StringComparison.Ordinal))
+                {
+                    var tsResult = _batchConvertItemSplitter.LoadTransportStream(batchItem, _cancellationToken);
+                    foreach (var bi in tsResult)
+                    {
+                        if (_cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        await _batchConverter.Convert(bi, _cancellationToken);
+                    }
+                }
+                else
+                {
+                    await _batchConverter.Convert(batchItem, _cancellationToken);
+                }
+
                 count++;
 
                 if (_cancellationToken.IsCancellationRequested)

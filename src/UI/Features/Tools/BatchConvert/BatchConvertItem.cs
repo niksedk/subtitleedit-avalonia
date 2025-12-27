@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -14,6 +15,7 @@ public partial class BatchConvertItem : ObservableObject
     public string OutputFileName { get; set; }
     public string LanguageCode { get; set; }
     public string TrackNumber { get; set; }
+    public IOcrSubtitle? ImageSubtitle { get; set; }
 
     public BatchConvertItem()
     {

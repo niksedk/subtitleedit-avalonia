@@ -139,6 +139,7 @@ public static class DependencyInjectionExtensions
         collection.AddSingleton<IFolderHelper, FolderHelper>();
         collection.AddTransient<IAutoBackupService, AutoBackupService>();
         collection.AddTransient<IBatchConverter, BatchConverter>();
+        collection.AddTransient<IBatchConvertItemSplitter, BatchConvertTransportStreamSplitter>();
         collection.AddTransient<IBluRayHelper, BluRayHelper>();
         collection.AddTransient<ICasingToggler, CasingToggler>();
         collection.AddTransient<IColorService, ColorService>();

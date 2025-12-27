@@ -32,7 +32,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 
@@ -209,7 +208,10 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                   item.FileName.EndsWith(".mpeg", StringComparison.OrdinalIgnoreCase)) &&
                   item.Format!.StartsWith("Transport Stream", StringComparison.Ordinal))
         {
-            imageSubtitle = LoadTransportStream(item, cancellationToken);
+            if (item.ImageSubtitle != null)
+            {
+                imageSubtitle = item.ImageSubtitle;
+            }
         }
         else if (item.Format == "MP4" &&
                  (item.FileName.EndsWith(".mp4") || item.FileName.EndsWith(".m4v") || item.FileName.EndsWith(".m4s")))
@@ -356,9 +358,49 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         WriteToImageBasedFormat(item, imageSubtitle, cancellationToken);
     }
 
-    private IOcrSubtitle? LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
+    public class TransportStreamResult
     {
-        return null;
+        public bool IsImage { get; set; }
+        public IOcrSubtitle? OcrSubtitle { get; set; }
+        public Subtitle? Subtitle { get; set; }
+    }
+
+    private List<TransportStreamResult> LoadTransportStream(BatchConvertItem item, CancellationToken cancellationToken)
+    {
+        var result = new List<TransportStreamResult>();
+
+        var tsParser = new TransportStreamParser();
+        tsParser.Parse(item.FileName, null);
+
+        var programMapTableParser = new ProgramMapTableParser();
+        programMapTableParser.Parse(item.FileName); // get languages
+
+        foreach (var packetId in tsParser.SubtitlePacketIds)
+        {
+            var language = string.Empty;
+            if (programMapTableParser.GetSubtitlePacketIds().Count > 0)
+            {
+                language = programMapTableParser.GetSubtitleLanguage(packetId);
+            }
+
+            var subtitles = tsParser.GetDvbSubtitles(packetId);
+            if (subtitles.Count > 0)
+            {
+                result.Add(new TransportStreamResult { IsImage = true, OcrSubtitle = new OcrSubtitleTransportStream(tsParser, subtitles, item.FileName) });
+            }
+        }
+
+        foreach (var i in tsParser.TeletextSubtitlesLookup.Keys)
+        {
+            var pid = tsParser.TeletextSubtitlesLookup[i];
+            var paragraphs = pid.Values.First();
+            if (paragraphs.Count > 0)
+            {
+                result.Add(new TransportStreamResult { IsImage = false, Subtitle = new Subtitle(paragraphs) });
+            }
+        }
+
+        return result;
     }
 
     public static List<IBinaryParagraphWithPosition> LoadDvbFromMatroska(MatroskaTrackInfo track, MatroskaFile matroska, ref Subtitle subtitle)
