@@ -1065,9 +1065,19 @@ public static class InitListViewAndEditBox
 
         flyoutTextBox.Items.Add(new Separator());
 
-        var selectAllMenuItem = new MenuItem { Header = Se.Language.General.SelectAll };
-        selectAllMenuItem.Command = vm.TextBoxSelectAllCommand;
-        flyoutTextBox.Items.Add(selectAllMenuItem);
+        var unicodeSymbols = Se.Settings.Tools.UnicodeSymbolsToInsert.Split(';', System.StringSplitOptions.RemoveEmptyEntries);
+        if (unicodeSymbols.Length > 0)
+        {
+            var unicodeMenuItem = new MenuItem { Header = Se.Language.Main.InsertUnicodeSymbol };
+            foreach (var symbol in unicodeSymbols)
+            {
+                var symbolItem = new MenuItem { Header = symbol };
+                symbolItem.Command = vm.TextBoxInsertUnicodeSymbolCommand;
+                symbolItem.CommandParameter = symbol;
+                unicodeMenuItem.Items.Add(symbolItem);
+            }
+            flyoutTextBox.Items.Add(unicodeMenuItem);
+        }
 
 
         // translation mode (original text)

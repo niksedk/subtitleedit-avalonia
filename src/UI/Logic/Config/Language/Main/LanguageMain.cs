@@ -77,6 +77,7 @@ public class LanguageMain
     public string XShotChangedLoaded { get; set; }
     public string YoutubeDlDownloadedSuccessfully { get; set; }
     public string YoutubeDlNotInstalledDownloadNow { get; set; }
+    public string InsertUnicodeSymbol { get; set; }
 
     public LanguageMain()
     {
@@ -151,5 +152,6 @@ public class LanguageMain
         XShotChangedLoaded = "{0} shot changes loaded";
         YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
         YoutubeDlNotInstalledDownloadNow = "\"yt-dlp\" is not installed and is required for playing online videos.\n\nDownload now?";
+        InsertUnicodeSymbol = "Insert Unicode symbol";
     }
 }

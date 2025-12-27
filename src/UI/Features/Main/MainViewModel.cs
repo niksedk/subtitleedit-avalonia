@@ -7188,6 +7188,17 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    
+    private void TextBoxInsertUnicodeSymbol(object? commandParameter)
+    {
+        if (commandParameter is string s)
+        {
+            EditTextBox.SelectedText = s;
+            EditTextBox.SelectionLength = 0;
+        }
+    }
+
+    [RelayCommand]
     private void TextBoxDeleteSelection()
     {
         EditTextBox.SelectedText = string.Empty;

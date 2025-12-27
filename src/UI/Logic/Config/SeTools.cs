@@ -34,6 +34,8 @@ public class SeTools
     public bool GoToLineNumberAlsoSetVideoPosition { get; set; }
     public bool SplitRebalanceLongLinesSplit { get; set; }
     public bool SplitRebalanceLongLinesRebalance { get; set; }
+    public string UnicodeSymbolsToInsert { get; set; }
+
     public int BinEditLeftMargin { get; set; }
     public int BinEditTopMargin { get; set; }
     public int BinEditRightMargin { get; set; }
@@ -64,6 +66,7 @@ public class SeTools
         GoToLineNumberAlsoSetVideoPosition = true;
         SplitRebalanceLongLinesSplit = true;
         SplitRebalanceLongLinesRebalance = true;
+        UnicodeSymbolsToInsert = "♪;♫;—;…;°;∙;©;®;☺;☹;♥;☮;☯;Σ;∞;≡;⇒;π";
 
         BinEditLeftMargin = 10;
         BinEditTopMargin = 10;
