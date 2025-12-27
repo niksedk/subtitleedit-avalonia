@@ -4367,6 +4367,7 @@ public partial class MainViewModel :
             AudioVisualizer.WaveformDrawStyle = InitWaveform.GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle);
             AudioVisualizer.MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
             AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
+            AudioVisualizer.FocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver;
             AudioVisualizer.ResetCache();
 
             InitializeLibMpv();
