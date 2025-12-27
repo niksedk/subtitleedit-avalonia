@@ -550,7 +550,7 @@ public static class ShortcutsMain
             new(nameof(vm.ShowSpellCheckCommand), ["Alt", nameof(Avalonia.Input.Key.F7)], ShortcutCategory.SubtitleGrid),
             new(nameof(vm.ShowToolsChangeCasingCommand), [cmd, "Shift", nameof(Avalonia.Input.Key.C)], ShortcutCategory.General),
             new(nameof(vm.ShowToolsRemoveTextForHearingImpairedCommand), [cmd, "Shift", nameof(Avalonia.Input.Key.H)], ShortcutCategory.General),
-            new(nameof(vm.ShowSyncAdjustAllTimesCommand), ["Alt", "Shift", nameof(Avalonia.Input.Key.A)], ShortcutCategory.General),
+            new(nameof(vm.ShowSyncAdjustAllTimesCommand), [cmd, "Shift", nameof(Avalonia.Input.Key.A)], ShortcutCategory.General),
         ];
     }
 
