@@ -236,6 +236,47 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
         return null;
     }
 
+    private static Color? TryParseAssColor(string colorValue)
+    {
+        if (string.IsNullOrWhiteSpace(colorValue))
+        {
+            return null;
+        }
+
+        colorValue = colorValue.Trim();
+
+        // ASS/SSA color format: &HBBGGRR& or &HAABBGGRR&
+        if (colorValue.StartsWith("&H", StringComparison.OrdinalIgnoreCase) && colorValue.EndsWith('&'))
+        {
+            var hex = colorValue.Substring(2, colorValue.Length - 3);
+            try
+            {
+                if (hex.Length == 6)
+                {
+                    // Format: &HBBGGRR& (BGR format)
+                    var b = System.Convert.ToByte(hex[..2], 16);
+                    var g = System.Convert.ToByte(hex[2..4], 16);
+                    var r = System.Convert.ToByte(hex[4..6], 16);
+                    return Color.FromRgb(r, g, b);
+                }
+                else if (hex.Length == 8)
+                {
+                    // Format: &HAABBGGRR& (ABGR format)
+                    var b = System.Convert.ToByte(hex[2..4], 16);
+                    var g = System.Convert.ToByte(hex[4..6], 16);
+                    var r = System.Convert.ToByte(hex[6..8], 16);
+                    return Color.FromRgb(r, g, b);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string str || string.IsNullOrEmpty(str))
@@ -287,40 +328,88 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             var c = str[i];
             var c2 = i + 1 < str.Length ? str[i + 1] : '\0';
 
-            // Handle ASS/SSA tags: {\tag} or {\tagValue}
+            // Handle ASS/SSA tags: {\tag} or {\tagValue} or {\tag1\tag2\tag3}
             if (c == '{' && c2 == '\\')
             {
                 var tagEnd = str.IndexOf('}', i + 2);
                 if (tagEnd != -1)
                 {
-                    // Add opening brace and backslash
-                    inlines.Add(new Run(str.Substring(i, 2)) { Foreground = CharsBrush });
-                    i += 2;
+                    // Add opening brace
+                    inlines.Add(new Run("{") { Foreground = CharsBrush });
 
-                    // Find where the tag name ends
-                    var tagNameStart = i;
-                    var tagNameEnd = tagNameStart;
-                    while (tagNameEnd < tagEnd && char.IsLetter(str[tagNameEnd]))
+                    // Process all tags within the braces (separated by backslashes)
+                    var currentPos = i + 1;
+                    while (currentPos < tagEnd)
                     {
-                        tagNameEnd++;
-                    }
-
-                    // Add tag name
-                    if (tagNameEnd > tagNameStart)
-                    {
-                        inlines.Add(new Run(str.Substring(tagNameStart, tagNameEnd - tagNameStart))
+                        if (str[currentPos] != '\\')
                         {
-                            Foreground = ElementBrush
-                        });
-                    }
+                            currentPos++;
+                            continue;
+                        }
 
-                    // Add tag value/parameters
-                    if (tagNameEnd < tagEnd)
-                    {
-                        inlines.Add(new Run(str.Substring(tagNameEnd, tagEnd - tagNameEnd))
+                        // Add the backslash
+                        inlines.Add(new Run("\\") { Foreground = CharsBrush });
+
+                        // Find where this tag ends (next backslash or closing brace)
+                        var nextBackslash = str.IndexOf('\\', currentPos + 1);
+                        var thisTagEnd = (nextBackslash != -1 && nextBackslash < tagEnd) ? nextBackslash : tagEnd;
+
+                        // Find where the tag name ends (before any numbers or special chars)
+                        var tagNameStart = currentPos + 1;
+                        var tagNameEnd = tagNameStart;
+                        while (tagNameEnd < thisTagEnd && char.IsLetter(str[tagNameEnd]))
                         {
-                            Foreground = ValuesBrush
-                        });
+                            tagNameEnd++;
+                        }
+
+                        // Add tag name
+                        if (tagNameEnd > tagNameStart)
+                        {
+                            inlines.Add(new Run(str.Substring(tagNameStart, tagNameEnd - tagNameStart))
+                            {
+                                Foreground = ElementBrush
+                            });
+                        }
+
+                        // Add tag value/parameters (e.g., "1", "Arial", "&HFFFFFF&")
+                        if (tagNameEnd < thisTagEnd)
+                        {
+                            var tagName = str.Substring(tagNameStart, tagNameEnd - tagNameStart);
+                            var tagValue = str.Substring(tagNameEnd, thisTagEnd - tagNameEnd);
+                            
+                            // Check if this is a color tag (c, 1c, 2c, 3c, 4c)
+                            if (tagName.Equals("c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("1c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("2c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("3c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("4c", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var assColor = TryParseAssColor(tagValue);
+                                if (assColor.HasValue)
+                                {
+                                    inlines.Add(new Run(tagValue)
+                                    {
+                                        Foreground = new SolidColorBrush(assColor.Value)
+                                    });
+                                }
+                                else
+                                {
+                                    inlines.Add(new Run(tagValue)
+                                    {
+                                        Foreground = ValuesBrush
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                inlines.Add(new Run(tagValue)
+                                {
+                                    Foreground = ValuesBrush
+                                });
+                            }
+                        }
+
+                        currentPos = thisTagEnd;
                     }
 
                     // Add closing brace
@@ -669,17 +758,34 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     state.FontSize = size;
                 }
             }
-            // Primary color: \c&HBBGGRR& or \1c&HBBGGRR&
-            else if ((trimmedTag.StartsWith("c&", StringComparison.OrdinalIgnoreCase) ||
-                      trimmedTag.StartsWith("1c&", StringComparison.OrdinalIgnoreCase)))
+            // Primary color: \c&HBBGGRR& or \1c&HBBGGRR& or \c (reset color)
+            else if (trimmedTag.StartsWith("c", StringComparison.OrdinalIgnoreCase) && 
+                     (trimmedTag.Length == 1 || !char.IsDigit(trimmedTag[1])))
             {
-                var colorStr = trimmedTag.StartsWith("1c") ? trimmedTag.Substring(2) : trimmedTag.Substring(1);
-                state.Color = ParseAssaColor(colorStr);
+                if (trimmedTag.Length == 1)
+                {
+                    // \c without value resets the color
+                    state.Color = null;
+                }
+                else
+                {
+                    var colorStr = trimmedTag.Substring(1);
+                    state.Color = ParseAssaColor(colorStr);
+                }
             }
-            // Primary color alternative: \c&H or just color value
-            else if (trimmedTag.Length > 1 && trimmedTag[0] == 'c' && !char.IsDigit(trimmedTag[1]))
+            // Numbered color tags: \1c&HBBGGRR& (primary), \2c, \3c, \4c
+            else if ((trimmedTag.StartsWith("1c", StringComparison.OrdinalIgnoreCase) ||
+                      trimmedTag.StartsWith("2c", StringComparison.OrdinalIgnoreCase) ||
+                      trimmedTag.StartsWith("3c", StringComparison.OrdinalIgnoreCase) ||
+                      trimmedTag.StartsWith("4c", StringComparison.OrdinalIgnoreCase)) &&
+                     trimmedTag.Length > 2)
             {
-                state.Color = ParseAssaColor(trimmedTag.Substring(1));
+                // For numbered color tags, we only handle primary (1c) for text color
+                if (trimmedTag.StartsWith("1c", StringComparison.OrdinalIgnoreCase))
+                {
+                    var colorStr = trimmedTag.Substring(2);
+                    state.Color = ParseAssaColor(colorStr);
+                }
             }
             // Reset: \r - reset all formatting
             else if (trimmedTag == "r" || trimmedTag.StartsWith("r", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length == 1)
