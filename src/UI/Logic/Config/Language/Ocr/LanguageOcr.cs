@@ -64,6 +64,7 @@ public class LanguageOcr
     public string OcrImage { get; set; }
     public string OneColor { get; set; }
     public string DarknessThreshold { get; set; }
+    public string EditExportDotDotDot { get; set; }
 
     public LanguageOcr()
     {
@@ -127,5 +128,6 @@ public class LanguageOcr
         OcrImage = "OCR image";
         OneColor = "One color (white)";
         DarknessThreshold = "Darkness threshold";
+        EditExportDotDotDot = "Edit/export...";
     }
 }

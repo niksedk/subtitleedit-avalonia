@@ -68,9 +68,24 @@ public partial class BinaryEditViewModel : ObservableObject
         CurrentPositionAndSize = string.Empty;
     }
 
-    public void Initialize(string fileName, IOcrSubtitle subtitle)
+    public void Initialize(string fileName, IOcrSubtitle? subtitle)
     {
         _loadFileName = fileName;
+
+        if (subtitle != null && string.IsNullOrEmpty(fileName) && subtitle.Count > 0)
+        {
+            ScreenWidth = subtitle.GetScreenSize(0).Width;
+            ScreenHeight = subtitle.GetScreenSize(0).Height;
+            var items = subtitle.MakeOcrSubtitleItems();
+            foreach (var ocrItem in items)
+            {
+                var newItem = new BinarySubtitleItem(ocrItem, -1);
+                newItem.StartTime = TimeSpan.FromMilliseconds(ocrItem.StartTime.TotalMilliseconds);
+                newItem.EndTime = TimeSpan.FromMilliseconds(ocrItem.EndTime.TotalMilliseconds);
+                Subtitles.Add(newItem);
+            }
+            Renumber();
+        }
     }
 
     partial void OnSelectedSubtitleChanged(BinarySubtitleItem? value)

@@ -25,6 +25,7 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.AddToOcrReplaceList;
 using Nikse.SubtitleEdit.Features.Shared.AddToUserDictionary;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.ShowImage;
@@ -443,8 +444,17 @@ public partial class OcrViewModel : ObservableObject
 
 
     [RelayCommand]
-    private void Export()
+    private async Task EditExport()
     {
+        if (Window == null || _ocrSubtitle == null || _ocrSubtitle.Count == 0)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(Window, vm =>
+        {
+            vm.Initialize(string.Empty, _ocrSubtitle);
+        });
     }
 
     [RelayCommand]

@@ -753,7 +753,7 @@ public class OcrWindow : Window
             .WithBindIsVisible(nameof(vm.IsInspectAdditionsVisible))
             .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter())
             .WithBottomAlignment();
-        var buttonExport = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand)
+        var buttonExport = UiUtil.MakeButton(Se.Language.Ocr.EditExportDotDotDot, vm.EditExportCommand)
             .WithBindIsEnabled(nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()).WithBottomAlignment();
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand).WithBottomAlignment();
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand).WithBottomAlignment();
