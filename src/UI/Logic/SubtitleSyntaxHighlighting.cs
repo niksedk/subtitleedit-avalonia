@@ -224,6 +224,47 @@ public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
         return null;
     }
 
+    private static Color? TryParseAssColor(string colorValue)
+    {
+        if (string.IsNullOrWhiteSpace(colorValue))
+        {
+            return null;
+        }
+
+        colorValue = colorValue.Trim();
+
+        // ASS/SSA color format: &HBBGGRR& or &HAABBGGRR&
+        if (colorValue.StartsWith("&H", StringComparison.OrdinalIgnoreCase) && colorValue.EndsWith('&'))
+        {
+            var hex = colorValue.Substring(2, colorValue.Length - 3);
+            try
+            {
+                if (hex.Length == 6)
+                {
+                    // Format: &HBBGGRR& (BGR format)
+                    var b = Convert.ToByte(hex[..2], 16);
+                    var g = Convert.ToByte(hex[2..4], 16);
+                    var r = Convert.ToByte(hex[4..6], 16);
+                    return Color.FromRgb(r, g, b);
+                }
+                else if (hex.Length == 8)
+                {
+                    // Format: &HAABBGGRR& (ABGR format)
+                    var b = Convert.ToByte(hex[2..4], 16);
+                    var g = Convert.ToByte(hex[4..6], 16);
+                    var r = Convert.ToByte(hex[6..8], 16);
+                    return Color.FromRgb(r, g, b);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     protected override void ColorizeLine(DocumentLine line)
     {
         var lineStartOffset = line.Offset;
@@ -240,42 +281,94 @@ public partial class SubtitleSyntaxHighlighting : DocumentColorizingTransformer
             var c = text[i];
             var c2 = i + 1 < text.Length ? text[i + 1] : '\0';
 
-            // Handle ASS/SSA tags: {\tag} or {\tagValue}
+            // Handle ASS/SSA tags: {\tag} or {\tagValue} or {\tag1\tag2\tag3}
             if (c == '{' && c2 == '\\')
             {
                 var tagEnd = text.IndexOf('}', i + 2);
                 if (tagEnd != -1)
                 {
-                    // Color opening brace and backslash
-                    ChangeLinePart(lineStartOffset + i, lineStartOffset + i + 2, element =>
+                    // Color opening brace
+                    ChangeLinePart(lineStartOffset + i, lineStartOffset + i + 1, element =>
                     {
                         element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(CharsColor));
                     });
 
-                    // Find where the tag name ends (before any numbers or special chars)
-                    var tagNameStart = i + 2;
-                    var tagNameEnd = tagNameStart;
-                    while (tagNameEnd < tagEnd && char.IsLetter(text[tagNameEnd]))
+                    // Process all tags within the braces (separated by backslashes)
+                    var currentPos = i + 1;
+                    while (currentPos < tagEnd)
                     {
-                        tagNameEnd++;
-                    }
-
-                    // Color tag name (e.g., "i", "b", "fn", "fs", "c", "1c", etc.)
-                    if (tagNameEnd > tagNameStart)
-                    {
-                        ChangeLinePart(lineStartOffset + tagNameStart, lineStartOffset + tagNameEnd, element =>
+                        if (text[currentPos] != '\\')
                         {
-                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ElementColor));
-                        });
-                    }
+                            currentPos++;
+                            continue;
+                        }
 
-                    // Color tag value/parameters (e.g., "1", "Arial", "&HFFFFFF&")
-                    if (tagNameEnd < tagEnd)
-                    {
-                        ChangeLinePart(lineStartOffset + tagNameEnd, lineStartOffset + tagEnd, element =>
+                        // Color the backslash
+                        ChangeLinePart(lineStartOffset + currentPos, lineStartOffset + currentPos + 1, element =>
                         {
-                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ValuesColor));
+                            element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(CharsColor));
                         });
+
+                        // Find where this tag ends (next backslash or closing brace)
+                        var nextBackslash = text.IndexOf('\\', currentPos + 1);
+                        var thisTagEnd = (nextBackslash != -1 && nextBackslash < tagEnd) ? nextBackslash : tagEnd;
+
+                        // Find where the tag name ends (before any numbers or special chars)
+                        var tagNameStart = currentPos + 1;
+                        var tagNameEnd = tagNameStart;
+                        while (tagNameEnd < thisTagEnd && char.IsLetter(text[tagNameEnd]))
+                        {
+                            tagNameEnd++;
+                        }
+
+                        // Color tag name (e.g., "i", "b", "fn", "fs", "c", "1c", etc.)
+                        if (tagNameEnd > tagNameStart)
+                        {
+                            ChangeLinePart(lineStartOffset + tagNameStart, lineStartOffset + tagNameEnd, element =>
+                            {
+                                element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ElementColor));
+                            });
+                        }
+
+                        // Color tag value/parameters (e.g., "1", "Arial", "&HFFFFFF&")
+                        if (tagNameEnd < thisTagEnd)
+                        {
+                            var tagName = text[tagNameStart..tagNameEnd];
+                            var tagValue = text[tagNameEnd..thisTagEnd];
+                            
+                            // Check if this is a color tag (c, 1c, 2c, 3c, 4c)
+                            if (tagName.Equals("c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("1c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("2c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("3c", StringComparison.OrdinalIgnoreCase) ||
+                                tagName.Equals("4c", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var assColor = TryParseAssColor(tagValue);
+                                if (assColor.HasValue)
+                                {
+                                    ChangeLinePart(lineStartOffset + tagNameEnd, lineStartOffset + thisTagEnd, element =>
+                                    {
+                                        element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(assColor.Value));
+                                    });
+                                }
+                                else
+                                {
+                                    ChangeLinePart(lineStartOffset + tagNameEnd, lineStartOffset + thisTagEnd, element =>
+                                    {
+                                        element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ValuesColor));
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                ChangeLinePart(lineStartOffset + tagNameEnd, lineStartOffset + thisTagEnd, element =>
+                                {
+                                    element.TextRunProperties.SetForegroundBrush(new SolidColorBrush(ValuesColor));
+                                });
+                            }
+                        }
+
+                        currentPos = thisTagEnd;
                     }
 
                     // Color closing brace
