@@ -36,6 +36,7 @@ public class BatchConvertConfig
     public MultipleReplaceSettings MultipleReplace { get; set; }
     public RightToLeftSettings RightToLeft { get; set; }
     public BridgeGapsSettings BridgeGaps { get; set; }
+    public ApplyMinGapSettings ApplyMinGap { get; set; }
     public SplitBreakLongLinesSettings SplitBreakLongLines { get; set; }
 
     public BatchConvertConfig()
@@ -65,6 +66,7 @@ public class BatchConvertConfig
         MultipleReplace = new MultipleReplaceSettings();
         RightToLeft = new RightToLeftSettings();
         BridgeGaps = new BridgeGapsSettings();
+        ApplyMinGap = new ApplyMinGapSettings();
         SplitBreakLongLines = new SplitBreakLongLinesSettings();
     }
 
@@ -243,6 +245,12 @@ public class BatchConvertConfig
         public int BridgeGapsSmallerThanMs { get; set; }
         public int MinGapMs { get; set; }
         public int PercentForLeft { get; set; }
+    }
+
+    public class ApplyMinGapSettings
+    {
+        public bool IsActive { get; set; }
+        public int MinGapMs { get; set; }
     }
 
     public class SplitBreakLongLinesSettings

@@ -17,7 +17,7 @@ public static class ViewAdjustDuration
     {
         var labelHeader = new Label
         {
-            Content = "Adjust duration by",
+            Content = Se.Language.Tools.AdjustDurations.AdjustVia,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 0, 0),
             FontWeight = Avalonia.Media.FontWeight.Bold
@@ -45,7 +45,7 @@ public static class ViewAdjustDuration
         {
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Left,
-            Text = "Note: Adjustments will not cause overlap",
+            Text = Se.Language.Tools.AdjustDurations.Note,
             Margin = new Thickness(10, 20, 10, 15),
         };
 
@@ -170,7 +170,7 @@ public static class ViewAdjustDuration
     {
         var textBlockSeconds = new TextBlock
         {
-            Text = "Fixed seconds",
+            Text = Se.Language.General.Seconds,
             VerticalAlignment = VerticalAlignment.Center,
             MinWidth = LabelMinWidth,
         };

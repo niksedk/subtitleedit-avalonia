@@ -12,7 +12,7 @@ public class ShortcutManager : IShortcutManager
     private readonly HashSet<Key> _activeKeys = [];
     private List<ShortCut> _shortcuts = [];
     private bool _sorted = false;
-    
+
     public static string GetKeyDisplayName(string key)
     {
         if (OperatingSystem.IsMacOS())
@@ -62,7 +62,7 @@ public class ShortcutManager : IShortcutManager
         if (!_sorted)
         {
             _sorted = true;
-            _shortcuts = _shortcuts.OrderByDescending(p=>p.Keys.Count ).ToList();
+            _shortcuts = _shortcuts.OrderByDescending(p => p.Keys.Count).ToList();
         }
 
         var keys = _activeKeys.Select(p => p.ToString()).ToList();
@@ -104,7 +104,7 @@ public class ShortcutManager : IShortcutManager
                 return true;
             }
         }
-        
+
         return false;
     }
 

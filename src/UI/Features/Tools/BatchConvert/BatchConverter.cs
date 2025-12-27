@@ -16,6 +16,7 @@ using Nikse.SubtitleEdit.Features.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Logic;
@@ -1027,6 +1028,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
             s = BridgeGaps(s);
+            s = ApplyMinGap(s);
         }
         else
         {
@@ -1041,6 +1043,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = ChangeFrameRate(s);
             s = ChangeSpeed(s);
             s = BridgeGaps(s);
+            s = ApplyMinGap(s);
             s = FixCommonErrors(s);
             s = MergeLinesWithSameText(s);
             s = MergeLinesWithSameTimeCodes(s, Language);
@@ -1397,6 +1400,34 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         {
             subtitle.Paragraphs[i].StartTime.TotalMilliseconds = subtitles[i].StartTime.TotalMilliseconds;
             subtitle.Paragraphs[i].EndTime.TotalMilliseconds = subtitles[i].EndTime.TotalMilliseconds;
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle ApplyMinGap(Subtitle subtitle)
+    {
+        if (!_config.ApplyMinGap.IsActive)
+        {
+            return subtitle;
+        }
+
+        var minMsBetweenLines = _config.ApplyMinGap.MinGapMs;
+        for (var index = 0; index < subtitle.Paragraphs.Count - 1; index++)
+        {
+            var current = subtitle.Paragraphs[index];
+            var next = subtitle.Paragraphs[index + 1];
+            var gapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
+            if (gapMs < minMsBetweenLines)
+            {
+                var newEndMs = next.StartTime.TotalMilliseconds - minMsBetweenLines;
+                var newDuration = newEndMs - current.StartTime.TotalMilliseconds;
+                if (newDuration > Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
+                {
+                    current.EndTime.TotalMilliseconds = newEndMs;
+                    var newGapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
+                }
+            }
         }
 
         return subtitle;

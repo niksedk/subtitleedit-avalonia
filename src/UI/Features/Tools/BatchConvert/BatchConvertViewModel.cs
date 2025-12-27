@@ -85,6 +85,9 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _offsetTimeCodesBack;
     [ObservableProperty] private TimeSpan _offsetTimeCodesTime;
 
+    // Adjust mininum gap between subtitles
+    [ObservableProperty] private int _minGapMs;
+
     // Adjust display duration
     [ObservableProperty] private ObservableCollection<AdjustDurationDisplay> _adjustTypes;
     [ObservableProperty] private AdjustDurationDisplay _selectedAdjustType;
@@ -1215,6 +1218,12 @@ public partial class BatchConvertViewModel : ObservableObject
                 MinGapMs = BridgeGapsMinGapMs,
                 PercentForLeft = BridgeGapsPercentForLeft,
             },
+
+            ApplyMinGap = new BatchConvertConfig.ApplyMinGapSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ApplyMinGap),
+                MinGapMs = MinGapMs,
+            },  
 
             SplitBreakLongLines = new BatchConvertConfig.SplitBreakLongLinesSettings
             {
