@@ -72,6 +72,7 @@ public static class InitVideoPlayer
             vm.ToggleVideoPlayerDisplayTimeLeftCommand.Execute(null);
         };
         control.VideoFileNamePointerPressed += vm.VideoPlayerControlPointerPressed;
+        control.SurfacePointerPressed += (_,_) => vm.VideoPlayerAreaPointerPressed();
 
         Grid.SetRow(control, 0);
         mainGrid.Children.Add(control);

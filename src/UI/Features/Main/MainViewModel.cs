@@ -11828,4 +11828,15 @@ public partial class MainViewModel :
             }
         }
     }
+
+    internal void VideoPlayerAreaPointerPressed()
+    {
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            Dispatcher.UIThread.Post(async () =>
+            {
+                await CommandFileOpenKeepVideo();
+            });
+        }
+    }
 }
