@@ -9067,9 +9067,12 @@ public partial class MainViewModel :
             title = Se.Language.General.SaveTranslationAsTitle;
         }
 
+        var subtitleFormat = SubtitleFormats.FirstOrDefault(p => p.FriendlyName == Se.Settings.General.DefaultSaveAsFormat)
+                             ?? SelectedSubtitleFormat;
+
         var saveAsResult = await _fileHelper.PickSaveSubtitleFileAs(
             Window!,
-            SelectedSubtitleFormat,
+            subtitleFormat,
             newFileName,
             title);
 

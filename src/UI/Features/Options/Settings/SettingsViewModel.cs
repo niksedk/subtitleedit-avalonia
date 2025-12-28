@@ -311,10 +311,10 @@ public partial class SettingsViewModel : ObservableObject
 
         SubtitleDoubleClickActionTypes = new ObservableCollection<string>()
         {
-                Se.Language.Options.Settings.GridGoToSubtitleAndPause,
-                Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
-                Se.Language.Options.Settings.GridGoToSubtitleOnly,
-                Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPause,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
+            Se.Language.Options.Settings.GridGoToSubtitleOnly,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox,
         };
         SelectedSubtitleDoubleClickActionType = SubtitleDoubleClickActionTypes[0];
 
@@ -388,10 +388,12 @@ public partial class SettingsViewModel : ObservableObject
         {
             Profiles.Add(profile.Name);
         }
+
         if (Profiles.Count == 0)
         {
             Profiles.Add("Default");
         }
+
         SelectedProfile = general.CurrentProfile;
         if (!Profiles.Contains(SelectedProfile))
         {
@@ -428,6 +430,12 @@ public partial class SettingsViewModel : ObservableObject
         if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
         {
             SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.FirstOrDefault() ?? string.Empty;
+        }
+
+        SelectedSaveSubtitleFormat = general.DefaultSaveAsFormat;
+        if (!SaveSubtitleFormats.Contains(SelectedSaveSubtitleFormat))
+        {
+            SelectedSaveSubtitleFormat = SaveSubtitleFormats.FirstOrDefault() ?? string.Empty;
         }
 
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
@@ -641,7 +649,6 @@ public partial class SettingsViewModel : ObservableObject
         {
             return Se.Language.General.System;
         }
-
     }
 
     private static string MapGridFormattingToText(int subtitleGridFormattingType)
@@ -683,6 +690,7 @@ public partial class SettingsViewModel : ObservableObject
         { SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
     };
+
     private static Dictionary<string, string> TextToActionMap => _actionToTextMap.ToDictionary(x => x.Value, x => x.Key);
 
     private static string MapFromSelectedSubtitleDoubleClickAction(string action)
@@ -743,14 +751,15 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoConvertToUtf8 = AutoConvertToUtf8;
 
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
+        general.DefaultSaveAsFormat = SelectedSaveSubtitleFormat;
 
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
         Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;
 
         appearance.Theme = MapThemeFromTranslation(SelectedTheme);
         appearance.FontName = SelectedFontName == FontNames.First()
-                                ? new Label().FontFamily.Name
-                                : SelectedFontName;
+            ? new Label().FontFamily.Name
+            : SelectedFontName;
         appearance.ToolbarShowFileNew = ShowToolbarNew;
         appearance.ToolbarShowFileOpen = ShowToolbarOpen;
         appearance.ToolbarShowSave = ShowToolbarSave;
@@ -819,7 +828,7 @@ public partial class SettingsViewModel : ObservableObject
             Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicTurbo.ToString();
         }
 
-         Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = WaveformSpectrogramCombinedWaveformHeight;
+        Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = WaveformSpectrogramCombinedWaveformHeight;
 
         Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
         Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;
@@ -983,7 +992,6 @@ public partial class SettingsViewModel : ObservableObject
 
             await Task.Yield(); // Ensures target has been laid out
             await RunFadeAnimation(ScrollView, from: 0, to: 1, TimeSpan.FromMilliseconds(200));
-
         }, DispatcherPriority.Background);
     }
 
@@ -1025,6 +1033,7 @@ public partial class SettingsViewModel : ObservableObject
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
         }
+
         if (answer != MessageBoxResult.Yes)
         {
             return;
@@ -1036,7 +1045,6 @@ public partial class SettingsViewModel : ObservableObject
 
     public static void DeleteWaveformAndSpectrogramFiles()
     {
-
         if (Directory.Exists(Se.WaveformsFolder))
         {
             foreach (var file in Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList())
@@ -1179,18 +1187,22 @@ public partial class SettingsViewModel : ObservableObject
             {
                 Se.Settings.File.RecentFiles = new List<RecentFile>();
             }
+
             if (result.ResetWindowPositionAndSize)
             {
                 Se.Settings.General.WindowPositions = new List<SeWindowPosition>();
             }
+
             if (result.ResetShortcuts)
             {
                 Se.Settings.Shortcuts = new List<SeShortCut>();
             }
+
             if (result.ResetMultipleReplaceRules)
             {
                 Se.Settings.Edit.MultipleReplace = new SeEditMultipleReplace();
             }
+
             if (result.ResetRules)
             {
                 var g = new SeGeneral();
@@ -1209,18 +1221,22 @@ public partial class SettingsViewModel : ObservableObject
                 Se.Settings.General.ContinuationStyle = g.ContinuationStyle;
                 Se.Settings.General.CpsLineLengthStrategy = g.CpsLineLengthStrategy;
             }
+
             if (result.ResetAppearance)
             {
                 Se.Settings.Appearance = new SeAppearance();
             }
+
             if (result.ResetAutoTranslate)
             {
                 Se.Settings.AutoTranslate = new SeAutoTranslate();
             }
+
             if (result.ResetWaveform)
             {
                 Se.Settings.Waveform = new SeWaveform();
             }
+
             if (result.ResetSyntaxColoring)
             {
                 var g = new SeGeneral();
@@ -1285,10 +1301,7 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         var result = await _windowService
-            .ShowDialogAsync<ProfilesWindow, ProfilesViewModel>(Window, vm =>
-            {
-                vm.Initialize(_profilesForEdit, SelectedProfile);
-            });
+            .ShowDialogAsync<ProfilesWindow, ProfilesViewModel>(Window, vm => { vm.Initialize(_profilesForEdit, SelectedProfile); });
 
 
         if (!result.OkPressed)
@@ -1332,6 +1345,7 @@ public partial class SettingsViewModel : ObservableObject
             profilesForEdit.Add(pd);
             Profiles.Add(profile.Name);
         }
+
         _profilesForEdit = profilesForEdit;
 
         SelectedProfile = Profiles.FirstOrDefault(p => p == oldProfileName) ?? Profiles.First();
@@ -1379,9 +1393,9 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         var result = await _windowService
-             .ShowDialogAsync<CustomContinuationStyleWindow, CustomContinuationStyleViewModel>(Window, vm =>
-             {
-                 vm.Initialize(
+            .ShowDialogAsync<CustomContinuationStyleWindow, CustomContinuationStyleViewModel>(Window, vm =>
+            {
+                vm.Initialize(
                     _continuationPause,
                     _customContinuationStyleSuffix,
                     _customContinuationStyleSuffixApplyIfComma,
@@ -1396,7 +1410,7 @@ public partial class SettingsViewModel : ObservableObject
                     _customContinuationStyleGapSuffixReplaceComma,
                     _customContinuationStyleGapPrefix,
                     _customContinuationStyleGapPrefixAddSpace);
-             });
+            });
 
         if (!result.OkPressed)
         {
@@ -1489,6 +1503,7 @@ public partial class SettingsViewModel : ObservableObject
                         Se.LogError(exception, "SaveFileTypeAssociations");
                     }
                 }
+
                 FileTypeAssociationsHelper.SetFileAssociationViaRegistry(ext, exeFileName, iconFileName, "SubtitleEdit5");
             }
             else
