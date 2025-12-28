@@ -9067,7 +9067,7 @@ public partial class MainViewModel :
             title = Se.Language.General.SaveTranslationAsTitle;
         }
 
-        var fileName = await _fileHelper.PickSaveSubtitleFile(
+        var saveAsResult = await _fileHelper.PickSaveSubtitleFileAs(
             Window!,
             SelectedSubtitleFormat,
             newFileName,
@@ -9075,14 +9075,15 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
 
-        if (string.IsNullOrEmpty(fileName))
+        if (saveAsResult == null)
         {
             return false;
         }
 
-        _subtitleFileName = fileName;
-        _subtitle.FileName = fileName;
-        _lastOpenSaveFormat = SelectedSubtitleFormat;
+        _subtitleFileName = saveAsResult.FileName;
+        _subtitle.FileName = saveAsResult.FileName;
+        _lastOpenSaveFormat = saveAsResult.SubtitleFormat;
+        SelectedSubtitleFormat = saveAsResult.SubtitleFormat;
         var result = await SaveSubtitle();
         AddToRecentFiles(true);
         return result;

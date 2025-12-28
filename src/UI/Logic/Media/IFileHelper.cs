@@ -18,6 +18,13 @@ public interface IFileHelper
         SubtitleFormat currentFormat,
         string suggestedFileName,
         string title);
+
+    Task<FileHelperSubtitleSavePickerResult?> PickSaveSubtitleFileAs(
+        Visual sender,
+        SubtitleFormat currentFormat,
+        string suggestedFileName,
+        string title);
+    
     Task<string> PickSaveSubtitleFile(
         Visual sender,
         string extension,

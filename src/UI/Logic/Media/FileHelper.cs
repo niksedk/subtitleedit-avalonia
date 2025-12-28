@@ -130,7 +130,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return files.Select(p => p.Path.LocalPath).ToArray();
         }
 
-        private static IReadOnlyList<FilePickerFileType> MakeOpenSubtitleFilter(bool includeVideoFiles)
+        private static List<FilePickerFileType> MakeOpenSubtitleFilter(bool includeVideoFiles)
         {
             var fileTypes = new List<FilePickerFileType>
             {
@@ -218,6 +218,40 @@ namespace Nikse.SubtitleEdit.Logic.Media
 
             return string.Empty;
         }
+        
+        public async Task<FileHelperSubtitleSavePickerResult?> PickSaveSubtitleFileAs(
+            Visual sender,
+            SubtitleFormat currentFormat,
+            string suggestedFileName,
+            string title)
+        {
+            var topLevel = TopLevel.GetTopLevel(sender)!;
+            var filePickerFileTypes = MakeSaveFilePickerAllFileTypes(currentFormat);
+            var defaultChoice = filePickerFileTypes
+                .FirstOrDefault(f => f.Name == currentFormat.Name);
+            var options = new FilePickerSaveOptions
+            {
+                Title = title,
+                SuggestedFileName = suggestedFileName,
+                FileTypeChoices = filePickerFileTypes,
+                SuggestedFileType = defaultChoice,
+            };
+
+            // Use SaveFilePickerWithResultAsync instead of SaveFilePickerAsync
+            var result = await topLevel.StorageProvider.SaveFilePickerWithResultAsync(options);
+
+            if (result.File == null)
+            {
+                return null;
+            }
+            
+            return new FileHelperSubtitleSavePickerResult
+            {
+                FileName = result.File.Path.LocalPath,
+                SubtitleFormat = SubtitleFormat.AllSubtitleFormats
+                    .FirstOrDefault(f => result.SelectedFileType?.Name == f.Name) ?? new SubRip(),
+            };
+        }
 
         public async Task<string> PickSaveSubtitleFile(
             Visual sender,
@@ -290,6 +324,33 @@ namespace Nikse.SubtitleEdit.Logic.Media
             //        });
             //    }
             //}            
+
+            return fileTypes;
+        }
+        
+        private static List<FilePickerFileType> MakeSaveFilePickerAllFileTypes(SubtitleFormat currentFormat)
+        {
+            var fileType = new FilePickerFileType(currentFormat.Name)
+            {
+                Patterns = new List<string> { "*" + currentFormat.Extension }
+            };
+            var fileTypes = new List<FilePickerFileType> { fileType };
+
+            foreach (var format in SubtitleFormat.AllSubtitleFormats)
+            {
+                if (format.IsTextBased && format.Name != currentFormat.Name)
+                {
+                    var patterns = new List<string>
+                    {
+                        "*" + format.Extension
+                    };
+
+                    fileTypes.Add(new FilePickerFileType(format.Name)
+                    {
+                        Patterns = patterns
+                    });
+                }
+            }            
 
             return fileTypes;
         }
