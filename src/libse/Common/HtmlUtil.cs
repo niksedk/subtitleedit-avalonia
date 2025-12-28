@@ -409,7 +409,7 @@ namespace Nikse.SubtitleEdit.Core.Common
                 return s;
             }
 
-            if (s.Contains("< "))
+            if (s.Contains("< ", StringComparison.Ordinal))
             {
                 s = FixInvalidItalicTags(s);
             }
@@ -457,94 +457,110 @@ namespace Nikse.SubtitleEdit.Core.Common
         /// <returns>Text stripped from common html tags</returns>
         private static string RemoveCommonHtmlTags(string s)
         {
-            char[] array = new char[s.Length];
-            int arrayIndex = 0;
-            bool inside = false;
-
-            for (int i = 0; i < s.Length; i++)
+            if (string.IsNullOrEmpty(s))
             {
-                char ch = s[i];
-                if (ch == '<' && i < s.Length - 2)
+                return s;
+            }
+
+            // Use stackalloc for strings up to 512 chars to avoid heap allocation
+            char[] poolArray = null;
+            Span<char> buffer = s.Length <= 512 ?
+                stackalloc char[s.Length] :
+                (poolArray = System.Buffers.ArrayPool<char>.Shared.Rent(s.Length));
+
+            try
+            {
+                int arrayIndex = 0;
+                ReadOnlySpan<char> span = s.AsSpan();
+
+                for (var i = 0; i < span.Length;)
                 {
-                    var next = s[i + 1];
-                    var nextNext = s[i + 2];
-                    if (nextNext == '>' &&
-                        (next == 'i' || // <i>
-                         next == 'I' || // <I>
-                         next == 'b' || // <b>
-                         next == 'B' || // <B>
-                         next == 'u' || // <u>
-                         next == 'U'))  // <U>
+                    // If we hit an opening bracket, check if it's a target tag
+                    if (span[i] == '<')
                     {
-                        inside = true;
-                        continue;
-                    }
-
-                    if (next == '/' && i < s.Length - 3)
-                    {
-                        var nextNextNext = s[i + 3];
-                        if (nextNextNext == '>' &&
-                            (nextNext == 'i' || // </i>
-                             nextNext == 'I' || // </I>
-                             nextNext == 'b' || // </b>
-                             nextNext == 'B' || // </B>
-                             nextNext == 'u' || // </u>
-                             nextNext == 'U'))  // </U>
+                        if (TryGetTagLength(span.Slice(i), out int tagLength))
                         {
-                            inside = true;
-                            continue;
-                        }
-
-                        if (nextNext == 'c' && nextNextNext == '.')
-                        {
-                            inside = true;
+                            i += tagLength;
                             continue;
                         }
                     }
 
-                    if (nextNext == '/' && i < s.Length - 3)
-                    { // some bad end tags sometimes seen
-                        var nextNextNext = s[i + 3];
-                        if (nextNextNext == '>' &&
-                            (next == 'i' || // <i/>
-                             next == 'I' || // <I/>
-                             next == 'b' || // <b/>
-                             next == 'B' || // <B/>
-                             next == 'u' || // <u/>
-                             next == 'U'))  // <U/>
-                        {
-                            inside = true;
-                            continue;
-                        }
-                    }
-
-                    if ((next == 'f' || next == 'F') && s.Substring(i).StartsWith("<font", StringComparison.OrdinalIgnoreCase) || // <font
-                        next == '/' && (nextNext == 'f' || nextNext == 'F') && s.Substring(i).StartsWith("</font>", StringComparison.OrdinalIgnoreCase) ||  // </font>                        
-                        next == ' ' && nextNext == '/' && s.Substring(i).StartsWith("< /font>", StringComparison.OrdinalIgnoreCase) ||  // < /font>
-                        next == '/' && nextNext == ' ' && s.Substring(i).StartsWith("</ font>", StringComparison.OrdinalIgnoreCase))  // </ font>
-                    {
-                        inside = true;
-                        continue;
-                    }
-
-                    if (next == 'c' && nextNext == '.')
-                    {
-                        inside = true;
-                        continue;
-                    }
+                    // Normal character processing
+                    buffer[arrayIndex++] = span[i];
+                    i++;
                 }
-                if (inside && ch == '>')
+
+                return new string(buffer.Slice(0, arrayIndex));
+            }
+            finally
+            {
+                if (poolArray != null)
                 {
-                    inside = false;
-                    continue;
-                }
-                if (!inside)
-                {
-                    array[arrayIndex] = ch;
-                    arrayIndex++;
+                    System.Buffers.ArrayPool<char>.Shared.Return(poolArray);
                 }
             }
-            return new string(array, 0, arrayIndex);
+        }
+
+        private static bool TryGetTagLength(ReadOnlySpan<char> slice, out int length)
+        {
+            length = 0;
+
+            // Ordered by most common/shortest for micro-optimization
+            // 3-character tags: <i>, <b>, <u>
+            if (slice.Length >= 3 && slice[2] == '>')
+            {
+                var c = slice[1];
+                if (c == 'i' || c == 'I' || c == 'b' || c == 'B' || c == 'u' || c == 'U')
+                {
+                    length = 3;
+                    return true;
+                }
+            }
+
+            // 4-character tags: </i>, <b/>, etc.
+            if (slice.Length >= 4 && slice[3] == '>')
+            {
+                // Case: </x>
+                if (slice[1] == '/')
+                {
+                    var c = slice[2];
+                    if (c == 'i' || c == 'I' || c == 'b' || c == 'B' || c == 'u' || c == 'U')
+                    {
+                        length = 4;
+                        return true;
+                    }
+                }
+                // Case: <x/>
+                if (slice[2] == '/')
+                {
+                    var c = slice[1];
+                    if (c == 'i' || c == 'I' || c == 'b' || c == 'B' || c == 'u' || c == 'U')
+                    {
+                        length = 4;
+                        return true;
+                    }
+                }
+            }
+
+            // Longer tags: <font>, </font>, and malformed variants
+            if (slice.StartsWith("<font", StringComparison.OrdinalIgnoreCase))
+            {
+                int endIdx = slice.IndexOf('>');
+                if (endIdx != -1) { length = endIdx + 1; return true; }
+            }
+
+            // Complex whitespace variants
+            string[] longTags = { "</font>", "< /font>", "</ font>" };
+            foreach (var tag in longTags)
+            {
+                if (slice.StartsWith(tag, StringComparison.OrdinalIgnoreCase))
+                {
+                    length = tag.Length;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

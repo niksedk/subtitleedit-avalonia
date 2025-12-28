@@ -4,6 +4,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using SkiaSharp;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -740,51 +741,133 @@ namespace Nikse.SubtitleEdit.Core.Common
 
         public static string RemoveSsaTags(string input, bool removeDrawingTags = false)
         {
-            var s = input;
-
-            if (removeDrawingTags && s.IndexOf('{') >= 0 && s.IndexOf('}') >= 0)
+            if (string.IsNullOrEmpty(input))
             {
-                s = AdvancedSubStationAlpha.RemoveDrawingTag(s);
+                return input;
             }
 
-            var k = s.IndexOf("{\\", StringComparison.Ordinal);
-            var karaokeStart = s.IndexOf("{Kara Effector", StringComparison.Ordinal);
-            if (k == -1 || karaokeStart >= 0 && karaokeStart < k)
-            {
-                k = karaokeStart;
-            }
+            // Fast check: if no tags or backslashes, return immediately
+            var firstBrace = input.IndexOf('{');
+            var firstSlash = input.IndexOf('\\');
+            if (firstBrace == -1 && firstSlash == -1) return input;
 
-            while (k >= 0)
+            // Use a pooled buffer to avoid allocations
+            char[] rented = ArrayPool<char>.Shared.Rent(input.Length * 2);
+            try
             {
-                var l = s.IndexOf('}', k + 1);
-                if (l < k)
+                var writeIdx = 0;
+                var currentIdx = 0;
+
+                while (currentIdx < input.Length)
                 {
-                    break;
+                    // Find the next interesting character
+                    var nextBrace = input.IndexOf('{', currentIdx);
+                    var nextSlash = input.IndexOf('\\', currentIdx);
+
+                    // Determine which one comes first
+                    var nextInterest = -1;
+                    if (nextBrace != -1 && nextSlash != -1)
+                    {
+                        nextInterest = Math.Min(nextBrace, nextSlash);
+                    }
+                    else if (nextBrace != -1)
+                    {
+                        nextInterest = nextBrace;
+                    }
+                    else if (nextSlash != -1)
+                    {
+                        nextInterest = nextSlash;
+                    }
+
+                    // If no more tags/slashes, copy the rest and break
+                    if (nextInterest == -1)
+                    {
+                        int remaining = input.Length - currentIdx;
+                        input.CopyTo(currentIdx, rented, writeIdx, remaining);
+                        writeIdx += remaining;
+                        break;
+                    }
+
+                    // Copy the clean text up to the point of interest
+                    var cleanLength = nextInterest - currentIdx;
+                    if (cleanLength > 0)
+                    {
+                        input.CopyTo(currentIdx, rented, writeIdx, cleanLength);
+                        writeIdx += cleanLength;
+                    }
+
+                    currentIdx = nextInterest;
+
+                    // Handle Tag {
+                    if (input[currentIdx] == '{')
+                    {
+                        var closingBrace = input.IndexOf('}', currentIdx + 1);
+                        if (closingBrace != -1)
+                        {
+                            ReadOnlySpan<char> tagContent = input.AsSpan(currentIdx, closingBrace - currentIdx + 1);
+                            if (tagContent.StartsWith("{\\") || tagContent.StartsWith("{Kara Effector"))
+                            {
+                                currentIdx = closingBrace + 1;
+                                continue;
+                            }
+                        }
+                    }
+                    // Handle Escape \
+                    else if (input[currentIdx] == '\\' && currentIdx + 1 < input.Length)
+                    {
+                        char next = input[currentIdx + 1];
+                        if (next == 'n' || next == 'N')
+                        {
+                            foreach (char c in Environment.NewLine)
+                            {
+                                rented[writeIdx++] = c;
+                            }
+
+                            currentIdx += 2;
+                            continue;
+                        }
+                        if (next == 'h')
+                        {
+                            rented[writeIdx++] = ' ';
+                            currentIdx += 2;
+                            continue;
+                        }
+                    }
+
+                    // If it wasn't a tag we care about, copy the char and move on
+                    rented[writeIdx++] = input[currentIdx++];
                 }
 
-                s = s.Remove(k, l - k + 1);
-                k = s.IndexOf('{', k);
-            }
+                var result = new string(rented, 0, writeIdx);
 
-            if (s.IndexOf('\\') >= 0)
-            {
-                s = s.Replace("\\n", Environment.NewLine); // Soft line break
-                s = s.Replace("\\N", Environment.NewLine); // Hard line break
-                s = s.Replace("\\h", " "); // Hard space
-            }
-
-            if (removeDrawingTags && s.StartsWith("m ", StringComparison.Ordinal))
-            {
-                var test = s.Remove(0, 2)
-                    .RemoveChar('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'l', 'm', ' ', '.');
-                if (test.Length == 0)
+                if (removeDrawingTags && result.StartsWith("m ", StringComparison.Ordinal))
                 {
-                    return string.Empty;
+                    if (IsOnlyDrawingCharacters(result.AsSpan(2)))
+                    {
+                        return string.Empty;
+                    }
                 }
-            }
 
-            return s;
+                return result;
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(rented);
+            }
         }
+
+        private static bool IsOnlyDrawingCharacters(ReadOnlySpan<char> span)
+        {
+            // Check if remaining string is just coordinates/commands
+            foreach (char c in span)
+            {
+                if (!char.IsDigit(c) && "-lm .".IndexOf(c) == -1)
+                    return false;
+            }
+
+            return true;
+        }
+
 
         public static string DictionaryFolder => Configuration.DictionariesDirectory;
 
