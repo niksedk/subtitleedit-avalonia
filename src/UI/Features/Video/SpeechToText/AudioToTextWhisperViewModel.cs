@@ -1474,10 +1474,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     public static string GetWhisperTranslateParameter(IWhisperEngine engine)
     {
-        return engine.Choice != WhisperEngineCpp.StaticName &&
-               engine.Choice != WhisperEngineConstMe.StaticName
-            ? "--task translate "
-            : "--translate ";
+        if (engine.Choice == new WhisperEnginePurfviewFasterWhisperXxl().Choice || engine.Choice == new WhisperEngineOpenAi().Choice)
+        {
+            return "--task translate ";
+        }
+
+        return "--translate ";
     }
 
     private bool GenerateWavFile(string videoFileName, int audioTrackNumber)
