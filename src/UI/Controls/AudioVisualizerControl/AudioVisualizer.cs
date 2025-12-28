@@ -659,7 +659,7 @@ public class AudioVisualizer : Control
         _originalDurationSeconds = p.Duration.TotalSeconds;
 
         var displayableParagraphs = _displayableParagraphs;
-        if (displayableParagraphs == null || displayableParagraphs.Count == 0)
+        if (displayableParagraphs.Count == 0)
         {
             return;
         }
@@ -830,6 +830,11 @@ public class AudioVisualizer : Control
         var currentIndex = _displayableParagraphs.IndexOf(_activeParagraph);
         var previous = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
+        if (NewSelectionParagraph == _activeParagraph)
+        {
+            previous = _displayableParagraphs.LastOrDefault(p=>p.StartTime < _activeParagraph.StartTime);
+            next = _displayableParagraphs.FirstOrDefault(p=>p.StartTime > _activeParagraph.EndTime);
+        }
 
         switch (_interactionMode)
         {
@@ -979,11 +984,6 @@ public class AudioVisualizer : Control
 
     private SubtitleLineViewModel? HitTestParagraph(Point point)
     {
-        if (_displayableParagraphs == null)
-        {
-            return null;
-        }
-
         foreach (var p in _displayableParagraphs)
         {
             double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
@@ -1587,11 +1587,6 @@ public class AudioVisualizer : Control
     private void DrawParagraphs(DrawingContext context, ref RenderContext renderCtx)
     {
         var paragraphs = _displayableParagraphs;
-        if (paragraphs == null)
-        {
-            return;
-        }
-
         var startPositionMilliseconds = renderCtx.StartPositionSeconds * 1000.0;
         var endPositionMilliseconds = RelativeXPositionToSecondsOptimized(renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor) * 1000.0;
 
