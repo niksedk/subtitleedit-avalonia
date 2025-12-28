@@ -645,6 +645,11 @@ public class AudioVisualizer : Control
             return;
         }
 
+        if (NewSelectionParagraph != null && NewSelectionParagraph != p)
+        {
+            NewSelectionParagraph = null;
+        }
+
         double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
         double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
 
