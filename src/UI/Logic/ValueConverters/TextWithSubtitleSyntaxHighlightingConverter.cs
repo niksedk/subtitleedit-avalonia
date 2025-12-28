@@ -493,12 +493,16 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
     {
         // Track current formatting state
         var state = new FormattingState();
-        var stateStack = new Stack<FormattingState>();
-
         var inlines = new InlineCollection();
+        
+        // Limit iterations to prevent infinite loops (should never exceed string length)
+        var maxIterations = str.Length * 2; // Safety margin
+        var iterations = 0;
+        
         int i = 0;
-        while (i < str.Length)
+        while (i < str.Length && iterations < maxIterations)
         {
+            iterations++;
             var c = str[i];
             var c2 = i + 1 < str.Length ? str[i + 1] : '\0';
 
@@ -506,20 +510,31 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             if (c == '{' && c2 == '\\')
             {
                 var tagEnd = str.IndexOf('}', i + 2);
-                if (tagEnd != -1)
+                if (tagEnd != -1 && tagEnd - i < 500) // Limit tag length to prevent malicious input
                 {
                     var tagContent = str.Substring(i + 1, tagEnd - i - 1); // Content between { and }
                     ParseAssaTags(tagContent, state);
                     i = tagEnd + 1;
                     continue;
                 }
+                // Malformed or overly long tag - treat as regular text
+                var run = CreateFormattedRun(c.ToString(), state);
+                inlines.Add(run);
+                i++;
+                continue;
             }
 
             // Handle HTML comments - skip them
             if (c == '<' && i + 3 < str.Length && c2 == '!' && str[i + 2] == '-' && str[i + 3] == '-')
             {
                 var commentEnd = str.IndexOf("-->", i + 4, StringComparison.Ordinal);
-                i = commentEnd != -1 ? commentEnd + 3 : str.Length;
+                if (commentEnd != -1 && commentEnd - i < 1000) // Limit comment length
+                {
+                    i = commentEnd + 3;
+                    continue;
+                }
+                // Malformed or overly long comment - skip to end
+                i = str.Length;
                 continue;
             }
 
@@ -527,16 +542,26 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             if (c == '<')
             {
                 var tagEnd = str.IndexOf('>', i + 1);
-                if (tagEnd != -1)
+                if (tagEnd != -1 && tagEnd - i < 500) // Limit tag length
                 {
                     var tagContent = str.Substring(i + 1, tagEnd - i - 1).Trim();
+                    if (string.IsNullOrEmpty(tagContent))
+                    {
+                        // Empty tag - treat as regular text
+                        var run = CreateFormattedRun(c.ToString(), state);
+                        inlines.Add(run);
+                        i++;
+                        continue;
+                    }
+
                     var isClosingTag = tagContent.StartsWith('/');
                     if (isClosingTag)
                     {
                         tagContent = tagContent.Substring(1).Trim();
                     }
 
-                    var tagName = tagContent.Split(' ')[0].ToLowerInvariant();
+                    var tagNameEnd = tagContent.IndexOfAny(new[] { ' ', '\t', '\r', '\n' });
+                    var tagName = (tagNameEnd > 0 ? tagContent.Substring(0, tagNameEnd) : tagContent).ToLowerInvariant();
 
                     if (isClosingTag)
                     {
@@ -581,6 +606,11 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     i = tagEnd + 1;
                     continue;
                 }
+                // Malformed or overly long tag - treat as regular text
+                var textRun = CreateFormattedRun(c.ToString(), state);
+                inlines.Add(textRun);
+                i++;
+                continue;
             }
 
             // Handle line breaks
@@ -593,33 +623,42 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
 
             // Regular text - collect characters until we hit special markup
             var textStart = i;
-            while (i < str.Length && str[i] != '<' && str[i] != '{' && str[i] != '\r' && str[i] != '\n')
+            var textLength = 0;
+            
+            // Scan ahead efficiently
+            while (i < str.Length)
             {
-                // Check for ASS tag start
-                if (str[i] == '{' && i + 1 < str.Length && str[i + 1] == '\\')
+                var ch = str[i];
+                
+                // Check for special characters that require immediate handling
+                if (ch == '<' || ch == '\r' || ch == '\n')
                 {
                     break;
                 }
-                if (str[i] == '{')
+                
+                // Check for ASS tag start
+                if (ch == '{' && i + 1 < str.Length && str[i + 1] == '\\')
+                {
+                    break;
+                }
+                
+                // Skip standalone '{' that are not ASS tags
+                if (ch == '{' && (i + 1 >= str.Length || str[i + 1] != '\\'))
                 {
                     i++;
+                    textLength++;
                     continue;
                 }
+                
                 i++;
+                textLength++;
             }
 
-            if (i > textStart)
+            if (textLength > 0)
             {
-                var text = str.Substring(textStart, i - textStart);
+                var text = str.Substring(textStart, textLength);
                 var run = CreateFormattedRun(text, state);
                 inlines.Add(run);
-            }
-            else if (i < str.Length && str[i] != '<' && str[i] != '{')
-            {
-                // Safety: add single character if we haven't advanced
-                var run = CreateFormattedRun(str[i].ToString(), state);
-                inlines.Add(run);
-                i++;
             }
         }
 
@@ -674,57 +713,104 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
 
     private static void ParseFontTag(string tagContent, FormattingState state)
     {
-        // Parse color attribute
-        var colorMatch = Regex.Match(tagContent, @"color\s*=\s*[""']?([^""'\s>]+)[""']?", RegexOptions.IgnoreCase);
-        if (colorMatch.Success)
+        if (string.IsNullOrEmpty(tagContent) || tagContent.Length > 500)
         {
-            var colorValue = colorMatch.Groups[1].Value;
-            try
-            {
-                var skColor = HtmlUtil.GetColorFromString(colorValue);
-                state.Color = Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
-            }
-            catch
-            {
-                // Ignore invalid colors
-            }
+            return; // Skip empty or excessively long tag content
         }
 
-        // Parse face (font name) attribute
-        var faceMatch = Regex.Match(tagContent, @"face\s*=\s*[""']?([^""'>]+)[""']?", RegexOptions.IgnoreCase);
-        if (faceMatch.Success)
+        try
         {
-            state.FontName = faceMatch.Groups[1].Value.Trim();
-        }
+            // Use regex with timeout to prevent hanging
+            var timeout = TimeSpan.FromMilliseconds(100);
 
-        // Parse size attribute
-        var sizeMatch = Regex.Match(tagContent, @"size\s*=\s*[""']?(\d+)[""']?", RegexOptions.IgnoreCase);
-        if (sizeMatch.Success && double.TryParse(sizeMatch.Groups[1].Value, out var size))
+            // Parse color attribute
+            var colorMatch = Regex.Match(tagContent, @"color\s*=\s*[""']?([^""'\s>]+)[""']?", RegexOptions.IgnoreCase, timeout);
+            if (colorMatch.Success)
+            {
+                var colorValue = colorMatch.Groups[1].Value;
+                if (colorValue.Length <= 100)
+                {
+                    try
+                    {
+                        var skColor = HtmlUtil.GetColorFromString(colorValue);
+                        state.Color = Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
+                    }
+                    catch
+                    {
+                        // Ignore invalid colors
+                    }
+                }
+            }
+
+            // Parse face (font name) attribute
+            var faceMatch = Regex.Match(tagContent, @"face\s*=\s*[""']?([^""'>]+)[""']?", RegexOptions.IgnoreCase, timeout);
+            if (faceMatch.Success)
+            {
+                var fontName = faceMatch.Groups[1].Value.Trim();
+                if (fontName.Length > 0 && fontName.Length <= 100)
+                {
+                    state.FontName = fontName;
+                }
+            }
+
+            // Parse size attribute
+            var sizeMatch = Regex.Match(tagContent, @"size\s*=\s*[""']?(\d+)[""']?", RegexOptions.IgnoreCase, timeout);
+            if (sizeMatch.Success && double.TryParse(sizeMatch.Groups[1].Value, out var size))
+            {
+                state.FontSize = size;
+            }
+        }
+        catch (RegexMatchTimeoutException)
         {
-            state.FontSize = size;
+            // Regex timed out - skip parsing this tag
+        }
+        catch
+        {
+            // Ignore any other parsing errors
         }
     }
 
     private static void ParseAssaTags(string tagContent, FormattingState state)
     {
+        if (string.IsNullOrEmpty(tagContent) || tagContent.Length > 500)
+        {
+            return; // Skip empty or excessively long tag content
+        }
+
         // Split by backslash to get individual tags
         var tags = tagContent.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+        
+        // Limit number of tags to prevent excessive processing
+        var maxTags = Math.Min(tags.Length, 50);
 
-        foreach (var tag in tags)
+        for (var i = 0; i < maxTags; i++)
         {
+            var tag = tags[i];
             var trimmedTag = tag.Trim();
-            if (string.IsNullOrEmpty(trimmedTag))
+            if (string.IsNullOrEmpty(trimmedTag) || trimmedTag.Length > 100)
             {
+                continue; // Skip empty or excessively long individual tags
+            }
+
+            var firstChar = trimmedTag[0];
+            var tagLen = trimmedTag.Length;
+
+            // Reset: \r - reset all formatting (check first for performance)
+            if (firstChar == 'r' && tagLen == 1)
+            {
+                state.Reset();
                 continue;
             }
 
             // Italic: \i1 or \i0
-            if (trimmedTag.StartsWith("i", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length >= 2)
+            if (firstChar == 'i' && tagLen >= 2 && char.IsDigit(trimmedTag[1]))
             {
                 state.Italic = trimmedTag[1] == '1';
+                continue;
             }
+
             // Bold: \b1 or \b0 (can also be \b700 for weight)
-            else if (trimmedTag.StartsWith("b", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length >= 2 && char.IsDigit(trimmedTag[1]))
+            if (firstChar == 'b' && tagLen >= 2 && char.IsDigit(trimmedTag[1]))
             {
                 var value = trimmedTag.Substring(1);
                 if (value == "0")
@@ -735,34 +821,46 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                 {
                     state.Bold = true;
                 }
-                else if (int.TryParse(value, out var weight))
+                else if (value.Length <= 4 && int.TryParse(value, out var weight))
                 {
                     state.Bold = weight >= 700;
                 }
+                continue;
             }
+
             // Underline: \u1 or \u0
-            else if (trimmedTag.StartsWith("u", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length >= 2 && char.IsDigit(trimmedTag[1]))
+            if (firstChar == 'u' && tagLen >= 2 && char.IsDigit(trimmedTag[1]))
             {
                 state.Underline = trimmedTag[1] == '1';
+                continue;
             }
+
             // Font name: \fnFontName
-            else if (trimmedTag.StartsWith("fn", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length > 2)
+            if (tagLen > 2 && firstChar == 'f' && trimmedTag[1] == 'n')
             {
-                state.FontName = trimmedTag.Substring(2).Trim();
+                var fontName = trimmedTag.Substring(2).Trim();
+                if (fontName.Length > 0 && fontName.Length <= 100)
+                {
+                    state.FontName = fontName;
+                }
+                continue;
             }
+
             // Font size: \fs20
-            else if (trimmedTag.StartsWith("fs", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length > 2)
+            if (tagLen > 2 && firstChar == 'f' && trimmedTag[1] == 's')
             {
-                if (double.TryParse(trimmedTag.Substring(2), NumberStyles.Any, CultureInfo.InvariantCulture, out var size))
+                var sizeStr = trimmedTag.Substring(2);
+                if (sizeStr.Length <= 4 && double.TryParse(sizeStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var size))
                 {
                     state.FontSize = size;
                 }
+                continue;
             }
+
             // Primary color: \c&HBBGGRR& or \1c&HBBGGRR& or \c (reset color)
-            else if (trimmedTag.StartsWith("c", StringComparison.OrdinalIgnoreCase) && 
-                     (trimmedTag.Length == 1 || !char.IsDigit(trimmedTag[1])))
+            if (firstChar == 'c' && (tagLen == 1 || !char.IsDigit(trimmedTag[1])))
             {
-                if (trimmedTag.Length == 1)
+                if (tagLen == 1)
                 {
                     // \c without value resets the color
                     state.Color = null;
@@ -772,61 +870,58 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
                     var colorStr = trimmedTag.Substring(1);
                     state.Color = ParseAssaColor(colorStr);
                 }
+                continue;
             }
+
             // Numbered color tags: \1c&HBBGGRR& (primary), \2c, \3c, \4c
-            else if ((trimmedTag.StartsWith("1c", StringComparison.OrdinalIgnoreCase) ||
-                      trimmedTag.StartsWith("2c", StringComparison.OrdinalIgnoreCase) ||
-                      trimmedTag.StartsWith("3c", StringComparison.OrdinalIgnoreCase) ||
-                      trimmedTag.StartsWith("4c", StringComparison.OrdinalIgnoreCase)) &&
-                     trimmedTag.Length > 2)
+            if (tagLen > 2 && char.IsDigit(firstChar) && trimmedTag[1] == 'c')
             {
                 // For numbered color tags, we only handle primary (1c) for text color
-                if (trimmedTag.StartsWith("1c", StringComparison.OrdinalIgnoreCase))
+                if (firstChar == '1')
                 {
                     var colorStr = trimmedTag.Substring(2);
                     state.Color = ParseAssaColor(colorStr);
                 }
-            }
-            // Reset: \r - reset all formatting
-            else if (trimmedTag == "r" || trimmedTag.StartsWith("r", StringComparison.OrdinalIgnoreCase) && trimmedTag.Length == 1)
-            {
-                state.Reset();
             }
         }
     }
 
     private static Color? ParseAssaColor(string colorStr)
     {
-        // ASSA colors are in format &HAABBGGRR& or &HBBGGRR& (BGR order, not RGB)
-        colorStr = colorStr.Trim('&', 'H', 'h');
-
-        if (string.IsNullOrEmpty(colorStr))
+        if (string.IsNullOrEmpty(colorStr) || colorStr.Length > 20)
         {
-            return null;
+            return null; // Skip empty or excessively long color strings
         }
 
         try
         {
+            // ASSA colors are in format &HAABBGGRR& or &HBBGGRR& (BGR order, not RGB)
+            colorStr = colorStr.Trim('&', 'H', 'h');
+
+            if (string.IsNullOrEmpty(colorStr) || colorStr.Length < 6 || colorStr.Length > 8)
+            {
+                return null; // Invalid length
+            }
+
             // Pad to 8 characters if needed (add alpha)
             if (colorStr.Length == 6)
             {
                 colorStr = "00" + colorStr; // Add alpha = 0 (fully opaque in ASSA)
             }
 
-            if (colorStr.Length >= 6)
+            // ASSA format: AABBGGRR
+            var blue = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 6, 2), 16);
+            var green = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 4, 2), 16);
+            var red = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 2, 2), 16);
+            byte alpha = 255;
+            
+            if (colorStr.Length >= 8)
             {
-                // ASSA format: AABBGGRR
-                var blue = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 6, 2), 16);
-                var green = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 4, 2), 16);
-                var red = System.Convert.ToByte(colorStr.Substring(colorStr.Length - 2, 2), 16);
-                byte alpha = 255;
-                if (colorStr.Length >= 8)
-                {
-                    var alphaValue = System.Convert.ToByte(colorStr.Substring(0, 2), 16);
-                    alpha = (byte)(255 - alphaValue); // ASSA alpha is inverted (0 = opaque, 255 = transparent)
-                }
-                return Color.FromArgb(alpha, red, green, blue);
+                var alphaValue = System.Convert.ToByte(colorStr.Substring(0, 2), 16);
+                alpha = (byte)(255 - alphaValue); // ASSA alpha is inverted (0 = opaque, 255 = transparent)
             }
+            
+            return Color.FromArgb(alpha, red, green, blue);
         }
         catch
         {
@@ -853,19 +948,6 @@ public class TextWithSubtitleSyntaxHighlightingConverter : IValueConverter
             Color = null;
             FontName = null;
             FontSize = null;
-        }
-
-        public FormattingState Clone()
-        {
-            return new FormattingState
-            {
-                Italic = Italic,
-                Bold = Bold,
-                Underline = Underline,
-                Color = Color,
-                FontName = FontName,
-                FontSize = FontSize
-            };
         }
     }
 
