@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using System.Collections.Generic;
@@ -11,8 +11,8 @@ public interface IFileHelper
     Task<string> PickOpenFile(Visual sender, string title, string extensionTitle, string extension, string extensionTitle2 = "", string extension2 = "");
     Task<string[]> PickOpenFiles(Visual sender, string title, string extensionTitle, List<string> extensions, string extensionTitle2, List<string> extensions2);
 
-    Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true);
-    Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true);
+    Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true, string? lastOpenedFilePath = null);
+    Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true, string? lastOpenedFilePath = null);
     Task<string> PickSaveSubtitleFile(
         Visual sender,
         SubtitleFormat currentFormat,

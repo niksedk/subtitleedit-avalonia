@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml.Styling;
@@ -20,6 +20,9 @@ namespace Nikse.SubtitleEdit
 {
     internal class Program
     {
+        private static string? _pendingFileToOpen;
+        public static bool FileOpenedViaActivation { get; set; }
+
         [STAThread]
         public static void Main(string[] args)
         {
@@ -177,20 +180,22 @@ namespace Nikse.SubtitleEdit
                         return;
                     }
 
-                    Se.LogError($"App activated with {args.Files.Count} files");
-
                     foreach (var storageItem in args.Files)
                     {
                         var filePath = storageItem.Path.LocalPath;
                         if (System.IO.File.Exists(filePath))
                         {
-                            Se.LogError($"File opened via macOS activation: {filePath}");
+                            FileOpenedViaActivation = true;
                             if (lifetime.MainWindow?.Content is MainView mainView)
                             {
                                 Dispatcher.UIThread.Post(async () =>
                                 {
                                     await mainView.OpenFile(filePath);
                                 });
+                            }
+                            else
+                            {
+                                _pendingFileToOpen = filePath;
                             }
 
                             break;
@@ -231,8 +236,22 @@ namespace Nikse.SubtitleEdit
             {
                 if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
                 {
-                    Se.LogError("lifetime.Startup parameter: " + e.Args[0]);
                     Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(e.Args[0]); });
+                }
+                
+                if (!string.IsNullOrEmpty(_pendingFileToOpen) || FileOpenedViaActivation)
+                {
+                    FileOpenedViaActivation = true;
+                }
+            };
+
+            lifetime.MainWindow.Opened += (_, _) =>
+            {
+                if (!string.IsNullOrEmpty(_pendingFileToOpen))
+                {
+                    var fileToOpen = _pendingFileToOpen;
+                    _pendingFileToOpen = null;
+                    Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(fileToOpen); });
                 }
             };
         }

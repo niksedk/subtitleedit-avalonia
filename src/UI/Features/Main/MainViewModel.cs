@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -940,7 +940,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, lastOpenedFilePath: _subtitleFileName);
         if (!string.IsNullOrEmpty(fileName))
         {
             VideoCloseFile();
@@ -959,7 +959,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle);
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window!, Se.Language.General.OpenSubtitleFileTitle, lastOpenedFilePath: _subtitleFileName);
         if (!string.IsNullOrEmpty(fileName))
         {
             await SubtitleOpen(fileName, skipLoadVideo: true);
@@ -9360,7 +9360,7 @@ public partial class MainViewModel :
             AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
 
-        if (!subtitleFileLoaded && Se.Settings.File.ShowRecentFiles)
+        if (!subtitleFileLoaded && !Program.FileOpenedViaActivation && Se.Settings.File.ShowRecentFiles)
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
@@ -9369,6 +9369,15 @@ public partial class MainViewModel :
                 {
                     try
                     {
+                        // Delay to allow Activated event to set FileOpenedViaActivation flag, the Activated event fires asynchronously during startup
+                        // and may not have completed by the time OnLoaded runs so wait and recheck the flag
+                        await Task.Delay(100);
+                        
+                        if (Program.FileOpenedViaActivation)
+                        {
+                            return;
+                        }
+                        
                         bool skipLoadVideo = false;
                         _videoFileName = first.VideoFileName;
                         await Task.Delay(25);
