@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
@@ -93,18 +93,37 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return files.Select(p => p.Path.LocalPath).ToArray();
         }
 
-        public async Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true)
+        public async Task<string> PickOpenSubtitleFile(Visual sender, string title, bool includeVideoFiles = true, string? lastOpenedFilePath = null)
         {
-            // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
 
-            // Start async operation to open the dialog.
-            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            var options = new FilePickerOpenOptions
             {
                 Title = title,
                 AllowMultiple = false,
                 FileTypeFilter = MakeOpenSubtitleFilter(includeVideoFiles),
-            });
+            };
+
+            if (!string.IsNullOrEmpty(lastOpenedFilePath))
+            {
+                var lastDir = Path.GetDirectoryName(lastOpenedFilePath);
+                if (!string.IsNullOrEmpty(lastDir))
+                {
+                    try
+                    {
+                        var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(lastDir);
+                        if (folder != null)
+                        {
+                            options.SuggestedStartLocation = folder;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(options);
 
             if (files.Count >= 1)
             {
@@ -114,18 +133,37 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return string.Empty;
         }
 
-        public async Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true)
+        public async Task<string[]> PickOpenSubtitleFiles(Visual sender, string title, bool includeVideoFiles = true, string? lastOpenedFilePath = null)
         {
-            // Get top level from the current control. Alternatively, you can use Window reference instead.
             var topLevel = TopLevel.GetTopLevel(sender)!;
 
-            // Start async operation to open the dialog.
-            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            var options = new FilePickerOpenOptions
             {
                 Title = title,
                 AllowMultiple = true,
                 FileTypeFilter = MakeOpenSubtitleFilter(includeVideoFiles),
-            });
+            };
+
+            if (!string.IsNullOrEmpty(lastOpenedFilePath))
+            {
+                var lastDir = Path.GetDirectoryName(lastOpenedFilePath);
+                if (!string.IsNullOrEmpty(lastDir))
+                {
+                    try
+                    {
+                        var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(lastDir);
+                        if (folder != null)
+                        {
+                            options.SuggestedStartLocation = folder;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(options);
 
             return files.Select(p => p.Path.LocalPath).ToArray();
         }
