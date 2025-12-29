@@ -3388,4 +3388,11 @@
 		<RegEx find="(3 )(rd\b)" replaceWith="3$2" />
 		<RegEx find="([456789])( th\b)" replaceWith="$1th" />
 	</RegularExpressions>
+	<RegularExpressionsIfSpelledCorrectly>
+		<RegEx find="\b([A-Z][a-z]+)'s\b" spellCheck="$1" replaceWith="$1's" /> <!-- David's -->
+		<RegEx find="\b(a-z]+)'s\b" spellCheck="$1" replaceWith="$1's" /> <!-- there's -->
+		<RegEx find="\bl([A-Z]+)\b" spellCheck="I$1" replaceWith="I$1" />
+    	<RegEx find="\b([A-Z]+)l\b" spellCheck="$1I" replaceWith="$1I" />
+    	<RegEx find="\b([A-Z]+)l([A-Z]+)\b" spellCheck="$1I$2" replaceWith="$1I$2" />
+	</RegularExpressionsIfSpelledCorrectly>
 </OCRFixReplaceList>
