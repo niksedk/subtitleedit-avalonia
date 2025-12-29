@@ -79,8 +79,9 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     public OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords)
     {
         var p = _subtitles[index];
+        var wordsToIgnore = new List<string>();
 
-        var replacedLine = ReplaceLineFixes(index);
+        var replacedLine = ReplaceLineFixes(index, wordsToIgnore);
         var splitLine = SplitLine(replacedLine, p, index);
         if (replacedLine != p.Text)
         {
@@ -93,6 +94,12 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             if (word.LinePartType != OcrFixLinePartType.Word)
             {
                 word.FixedWord = word.Word;
+                word.IsSpellCheckedOk = true;
+                continue;
+            }
+
+            if (wordsToIgnore.Contains(word.Word))
+            {
                 word.IsSpellCheckedOk = true;
                 continue;
             }
@@ -115,10 +122,10 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         return subtitle;
     }
 
-    private string ReplaceLineFixes(int index)
+    private string ReplaceLineFixes(int index, List<string> wordsToIgnore)
     {
         var line = _subtitles[index];
-        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(line.Text, _subtitle, index);
+        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(line.Text, _subtitle, index, _spellCheckManager, wordsToIgnore);
         return replacedLine;
     }
 

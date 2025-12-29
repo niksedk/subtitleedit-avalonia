@@ -1,4 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
+using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         private readonly Dictionary<string, string> _partialWordAlwaysReplaceList;
         private readonly Dictionary<string, string> _partialWordReplaceList;
         private readonly Dictionary<string, string> _regExList;
+        private readonly List<SpellCheckRegex> _regExSpellCheckList;
         private List<Regex>? _replaceRegExes;
         private readonly string _replaceListXmlFileName;
 
@@ -60,6 +63,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             _endLineReplaceList = LoadReplaceList(doc, "EndLines");
             _wholeLineReplaceList = LoadReplaceList(doc, "WholeLines");
             _regExList = LoadRegExList(doc, "RegularExpressions");
+            _regExSpellCheckList = SpellCheckRegex.LoadRegExList(doc, "RegularExpressionsIfSpelledCorrectly");
 
             foreach (var kp in LoadReplaceList(userDoc, "RemovedWholeWords"))
             {
@@ -258,7 +262,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             return false;
         }
 
-        public string FixOcrErrorViaLineReplaceList(string input, Subtitle subtitle, int index)
+        public string FixOcrErrorViaLineReplaceList(string input, Subtitle subtitle, int index, ISpellCheckManager spellCheckManager, List<string> wordsToIgnore)
         {
             // Whole fromLine
             foreach (var from in _wholeLineReplaceList.Keys)
@@ -371,6 +375,15 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                     var regex = _replaceRegExes[i];
                     newText = regex.Replace(newText, _regExList[findWhat]);
                     i++;
+                }
+            }
+
+            foreach (var spellCheckRegex in _regExSpellCheckList)
+            {
+                var x = spellCheckRegex.Apply(newText, wordsToIgnore, (word) => spellCheckManager.IsWordCorrect(word));
+                if (x != newText)
+                {
+                    newText = x;
                 }
             }
 
