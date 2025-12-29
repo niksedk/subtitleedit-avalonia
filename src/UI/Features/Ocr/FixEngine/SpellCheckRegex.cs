@@ -15,10 +15,10 @@ namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 
 public class SpellCheckRegex
 {
-    public string Find { get; set; }
-    public Regex FindRegEx { get; set; }
-    public string SpellCheckWord { get; set; }
-    public string ReplaceWith { get; set; }
+    public string Find { get; set; } = string.Empty;
+    public required Regex FindRegEx { get; set; }
+    public string SpellCheckWord { get; set; } = string.Empty;
+    public string ReplaceWith { get; set; } = string.Empty;
 
     /// <summary>
     /// Applies the regex rule to the input text.

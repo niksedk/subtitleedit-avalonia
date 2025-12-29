@@ -1,14 +1,11 @@
-﻿using Nikse.SubtitleEdit.Core.Cea708.Commands;
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Interfaces;
-using Nikse.SubtitleEdit.Core.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 
@@ -51,8 +48,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     public OcrFixEngine2(ISpellCheckManager spellCheckManager)
     {
         _spellCheckManager = spellCheckManager;
-        _wordSkipList = new HashSet<string>();  
-        _changeAllDictionary = new Dictionary<string, string>();    
+        _wordSkipList = new HashSet<string>();
+        _changeAllDictionary = new Dictionary<string, string>();
         _subtitle = new Subtitle();
         _subtitles = new List<OcrSubtitleItem>();
         _threeLetterIsoLanguageName = string.Empty;
@@ -418,7 +415,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         {
             var suggestions = _spellCheckManager.GetSuggestions(word);
 
-            if (suggestions.Count> 0 && HasMostlyUppercaseLetters(word))
+            if (suggestions.Count > 0 && HasMostlyUppercaseLetters(word))
             {
                 var uc = suggestions[0].ToUpperInvariant();
                 if (!suggestions.Contains(uc))
@@ -456,7 +453,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         if (!_changeAllDictionary.ContainsKey(from))
         {
             _changeAllDictionary[from] = to;
-        }   
+        }
     }
 
     public void SkipAll(string word)
