@@ -36,7 +36,7 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
     [GeneratedRegex(@"\([^)]+\)")]
     private static partial Regex ParenthesesRegex();
 
-    [GeneratedRegex(@"(?i)\b(kb/s|mb|fps|tbr|tbn|tbc|Hz|kHz|SAR|DAR|progressive|stereo|fltp|yuvj?420p|start|default|attached pic)\b")]
+    [GeneratedRegex(@"(?i)\b(kb/s|mb|fps|tbr|tbn|tbc|Hz|kHz|SAR|DAR|avc1|XVID|mp4a|progressive|stereo|fltp|yuvj?420p|start|default|attached pic)\b")]
     private static partial Regex TechnicalTermRegex();
 
     [GeneratedRegex(@"\b\d{2,5}x\d{2,5}\b")]

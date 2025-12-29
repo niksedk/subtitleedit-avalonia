@@ -1,6 +1,3 @@
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,7 +5,6 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
-using AvaloniaEdit.Rendering;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
@@ -17,6 +13,9 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Media;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 
@@ -65,17 +64,15 @@ public partial class MediaInfoViewViewModel : ObservableObject
             sb.AppendLine($"Framerate: {mediaInfo.FramesRate:0.###}");
         }
 
-        //if (string.IsNullOrEmpty(mediaInfo.VideoCodec) && FileUtil.IsWav(_videoFileName))
-        //{
-        //    mediaInfo.VideoCodec = "WAV";
-        //}
+        if (FileUtil.IsWav(_videoFileName))
+        {
+            sb.AppendLine($"Codec: WAVE");
+        }
 
-        //if (string.IsNullOrEmpty(mediaInfo.VideoCodec) && FileUtil.IsMp3(_videoFileName))
-        //{
-        //    mediaInfo.VideoCodec = "MP3";
-        //}
-
-        //sb.AppendLine($"Codec: {_videoInfo.VideoCodec}");
+        if (FileUtil.IsMp3(_videoFileName))
+        {
+            sb.AppendLine($"Codec: MP3");
+        }
 
         var mkvParser = new MatroskaFile(videoFileName);
         if (mkvParser.IsValid)
@@ -132,7 +129,7 @@ public partial class MediaInfoViewViewModel : ObservableObject
             HorizontalAlignment = HorizontalAlignment.Stretch,
             ShowLineNumbers = false,
             WordWrap = true,
-            IsReadOnly =  true,
+            IsReadOnly = true,
         };
 
         // Override the built-in link color with our softer pastel color
@@ -215,11 +212,6 @@ public partial class MediaInfoViewViewModel : ObservableObject
         return new TextEditorWrapper(textBox, textBoxBorder);
     }
 
-    private static DocumentColorizingTransformer? GetLineTransformer(string text)
-    {
-        return new SubRipSourceSyntaxHighlighting();
-    }
-
     [RelayCommand]
     private void Ok()
     {
@@ -256,5 +248,10 @@ public partial class MediaInfoViewViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void OnKeyDownHandler(object? sender, KeyEventArgs e)
+    {
+        OnKeyDown(e);
     }
 }

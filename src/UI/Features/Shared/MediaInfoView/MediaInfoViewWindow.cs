@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -30,8 +31,7 @@ public class MediaInfoViewWindow : Window
 
         var buttonOpenContainingFolder = UiUtil.MakeButton(Se.Language.General.OpenContainingFolder, vm.OpenContainingFolderCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOpenContainingFolder, buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOpenContainingFolder, buttonOk);
 
         var grid = new Grid
         {
@@ -55,6 +55,8 @@ public class MediaInfoViewWindow : Window
         grid.Add(buttonPanel, 1);
 
         Content = grid;
+
+        AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
 
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
