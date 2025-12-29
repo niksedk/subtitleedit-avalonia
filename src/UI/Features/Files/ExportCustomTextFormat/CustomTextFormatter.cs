@@ -210,11 +210,22 @@ public static class CustomTextFormatter
 
     private static string ReplaceSeconds(string template, TimeCode timeCode)
     {
+        var isPureSMode = Regex.IsMatch(template, @"^s+$");
+
         return Regex.Replace(template, @"s+", match =>
         {
             var length = match.Value.Length;
-            var seconds = Math.Abs(timeCode.Seconds);
-            return seconds.ToString().PadLeft(length, '0');
+            
+            if (isPureSMode)
+            {
+                var totalSeconds = (long)Math.Round(Math.Abs(timeCode.TotalSeconds), MidpointRounding.AwayFromZero);
+                return totalSeconds.ToString().PadLeft(length, '0');
+            }
+            else
+            {
+                var seconds = Math.Abs(timeCode.Seconds);
+                return seconds.ToString().PadLeft(length, '0');
+            }
         });
     }
 
