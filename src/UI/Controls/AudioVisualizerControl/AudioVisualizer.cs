@@ -170,7 +170,7 @@ public class AudioVisualizer : Control
     public bool FocusOnMouseOver { get; set; } = true;
     public int WaveformHeightPercentage { get; set; } = 50;
     public Color WaveformFancyHighColor { get; set; } = Colors.Orange;
-    
+
     private Color _paragraphBackground = Color.FromArgb(90, 70, 70, 70);
 
     public Color ParagraphBackground
@@ -182,7 +182,7 @@ public class AudioVisualizer : Control
             _paintParagraphBackground = new SolidColorBrush(_paragraphBackground);
         }
     }
-    
+
     private Color _paragraphSelectedBackground = Color.FromArgb(90, 70, 70, 70);
 
     public Color ParagraphSelectedBackground
@@ -832,8 +832,8 @@ public class AudioVisualizer : Control
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
         if (NewSelectionParagraph == _activeParagraph)
         {
-            previous = _displayableParagraphs.LastOrDefault(p=>p.StartTime < _activeParagraph.StartTime);
-            next = _displayableParagraphs.FirstOrDefault(p=>p.StartTime > _activeParagraph.EndTime);
+            previous = _displayableParagraphs.LastOrDefault(p => p.StartTime < _activeParagraph.StartTime);
+            next = _displayableParagraphs.FirstOrDefault(p => p.StartTime > _activeParagraph.EndTime);
         }
 
         switch (_interactionMode)
@@ -1818,7 +1818,7 @@ public class AudioVisualizer : Control
         }
 
         return StartPositionSeconds + x / WavePeaks.SampleRate / ZoomFactor;
-    }   
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double RelativeXPositionToSecondsOptimized(double x, int sampleRate, double startPositionSeconds, double zoomFactor)
@@ -1894,65 +1894,98 @@ public class AudioVisualizer : Control
             SelectedParagraph = null;
             AllSelectedParagraphs.Clear();
 
-            if (WavePeaks == null)
+            if (WavePeaks == null || subtitle.Count == 0)
             {
                 return;
             }
 
-            const double additionalSeconds = 15.0; // Helps when scrolling
-            var startThresholdMilliseconds = (StartPositionSeconds - additionalSeconds) * TimeCode.BaseUnit;
-            var endThresholdMilliseconds = (EndPositionSeconds + additionalSeconds) * TimeCode.BaseUnit;
-            var displayableParagraphs = new List<SubtitleLineViewModel>();
-            for (var i = 0; i < subtitle.Count; i++)
+            const double additionalSeconds = 15.0;
+            var startThreshold = (StartPositionSeconds - additionalSeconds) * TimeCode.BaseUnit;
+            var endThreshold = (EndPositionSeconds + additionalSeconds) * TimeCode.BaseUnit;
+            var maxTime = TimeCode.MaxTimeTotalMilliseconds;
+
+            // 1. Use Binary Search to find the first potential subtitle in the time range O(log N)
+            int startIndex = FindFirstIndexAfterTime(subtitle, startThreshold);
+
+            var lastStartTime = -1d;
+            int count = 0;
+
+            // 2. Linear scan only the relevant window
+            for (int i = startIndex; i < subtitle.Count; i++)
             {
                 var p = subtitle[i];
+                var pStart = p.StartTime.TotalMilliseconds;
 
-                if (p.StartTime.TotalMilliseconds >= TimeCode.MaxTimeTotalMilliseconds)
+                // Since it's sorted, if we exceed the end threshold or max time, we can stop entirely
+                if (pStart > endThreshold || pStart >= maxTime)
+                {
+                    break;
+                }
+
+                // Skip subtitles that end before our window starts
+                if (p.EndTime.TotalMilliseconds < startThreshold)
                 {
                     continue;
                 }
 
-                //_subtitle.Paragraphs.Add(p);
-                if (p.EndTime.TotalMilliseconds >= startThresholdMilliseconds && p.StartTime.TotalMilliseconds <= endThresholdMilliseconds)
+                // 3. Apply filtering logic immediately to avoid second loop
+                // Note: I've removed the .OrderBy() because the input is already sorted.
+                bool isTooShortOrDense = count > 30 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
+
+                if (!isTooShortOrDense)
                 {
-                    displayableParagraphs.Add(p);
-                    if (displayableParagraphs.Count > 99)
-                    {
-                        break;
-                    }
+                    _displayableParagraphs.Add(p);
+                    lastStartTime = pStart;
+                    count++;
+                }
+
+                if (count >= 100)
+                {
+                    break;
                 }
             }
 
-            displayableParagraphs = displayableParagraphs.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
-            var lastStartTime = -1d;
-            foreach (var p in displayableParagraphs)
-            {
-                if (displayableParagraphs.Count > 30 &&
-                    (p.Duration.TotalMilliseconds < 0.01 || p.StartTime.TotalMilliseconds - lastStartTime < 90))
-                {
-                    continue;
-                }
+            // 4. Optimized Selection Handling
+            var primaryParagraph = (primarySelectedIndex >= 0 && primarySelectedIndex < subtitle.Count)
+                ? subtitle[primarySelectedIndex] : null;
 
-                _displayableParagraphs.Add(p);
-                lastStartTime = p.StartTime.TotalMilliseconds;
-            }
-
-            var primaryParagraph = subtitle.GetOrNull(primarySelectedIndex);
             if (primaryParagraph != null && !primaryParagraph.StartTime.IsMaxTime())
             {
                 SelectedParagraph = primaryParagraph;
                 AllSelectedParagraphs.Add(primaryParagraph);
             }
 
-            foreach (var index in selectedIndexes)
+            foreach (var p in selectedIndexes)
             {
-                var p = subtitle.FirstOrDefault(p => p == index);
-                if (p != null && !p.StartTime.IsMaxTime())
+                if (p != null && !p.StartTime.IsMaxTime() && p != primaryParagraph)
                 {
                     AllSelectedParagraphs.Add(p);
                 }
             }
         }
+    }
+
+    // Helper for Binary Search
+    private static int FindFirstIndexAfterTime(ObservableCollection<SubtitleLineViewModel> subtitle, double timeMs)
+    {
+        int low = 0, high = subtitle.Count - 1;
+        var result = 0;
+
+        while (low <= high)
+        {
+            int mid = low + (high - low) / 2;
+            if (subtitle[mid].StartTime.TotalMilliseconds >= timeMs)
+            {
+                result = mid;
+                high = mid - 1;
+            }
+            else
+            {
+                low = mid + 1;
+            }
+        }
+
+        return result;
     }
 
     internal int GetShotChangeIndex(double seconds)

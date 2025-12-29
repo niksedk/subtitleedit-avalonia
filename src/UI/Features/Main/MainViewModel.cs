@@ -10982,15 +10982,9 @@ public partial class MainViewModel :
                     _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
                 }
 
-                //var offset = TimeSpan.FromMilliseconds(Se.Settings.General.CurrentVideoOffsetInMs);
-                //var hasOffset = Se.Settings.General.CurrentVideoOffsetInMs != 0;
-
                 var subtitle = new ObservableCollection<SubtitleLineViewModel>(
                     Subtitles
                         .OrderBy(p => p.StartTime.TotalMilliseconds)
-                        //.Select(dp => hasOffset
-                        //    ? new SubtitleLineViewModel(dp) { StartTime = dp.StartTime - offset }
-                        //    : dp)
                         .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
                 );
 
