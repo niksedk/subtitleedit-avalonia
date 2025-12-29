@@ -1,7 +1,7 @@
-using System.Text.RegularExpressions;
 using Avalonia.Media;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Rendering;
+using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 
@@ -25,7 +25,7 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
     private static partial Regex FieldHeaderRegex();
 
     // Pattern for track headers (e.g., "#1 - Video")
-    [GeneratedRegex(@"^#(\d+)\s*-\s*(Video|Audio|Other)", RegexOptions.Multiline)]
+    [GeneratedRegex(@"^#(\d+)\s*-\s*(Video|Audio|Subtitle|Other)", RegexOptions.Multiline)]
     private static partial Regex TrackHeaderRegex();
 
     // Pattern for numbers (file size, duration, resolution, framerate, bitrate, etc.)
@@ -36,9 +36,11 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
     [GeneratedRegex(@"\([^)]+\)")]
     private static partial Regex ParenthesesRegex();
 
-    // Pattern for technical terms (kb/s, fps, Hz, tbr, tbn, etc.)
-    [GeneratedRegex(@"\b(kb/s|mb|fps|tbr|tbn|Hz|SAR|DAR|progressive|stereo|fltp|start|default)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"(?i)\b(kb/s|mb|fps|tbr|tbn|tbc|Hz|kHz|SAR|DAR|progressive|stereo|fltp|yuvj?420p|start|default|attached pic)\b")]
     private static partial Regex TechnicalTermRegex();
+
+    [GeneratedRegex(@"\b\d{2,5}x\d{2,5}\b")]
+    private static partial Regex ResolutionRegex();
 
     protected override void ColorizeLine(DocumentLine line)
     {
@@ -48,11 +50,12 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
             return;
         }
 
-        // Check for field headers (File name:, Duration:, etc.)
+        var valueStartIndex = 0;
+
+        // 1. Handle Field Headers (File name, Resolution, etc.)
         var fieldHeaderMatch = FieldHeaderRegex().Match(lineText);
         if (fieldHeaderMatch.Success && fieldHeaderMatch.Index == 0)
         {
-            // Colorize the header part
             ChangeLinePart(
                 line.Offset,
                 line.Offset + fieldHeaderMatch.Length,
@@ -62,126 +65,82 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
                     element.TextRunProperties.SetTypeface(BoldTypeface);
                 });
 
-            // Colorize the value part (everything after the colon)
-            if (fieldHeaderMatch.Length < lineText.Length)
-            {
-                ChangeLinePart(
-                    line.Offset + fieldHeaderMatch.Length,
-                    line.Offset + line.Length,
-                    element =>
-                    {
-                        element.TextRunProperties.SetForegroundBrush(ValueBrush);
-                    });
-            }
+            valueStartIndex = fieldHeaderMatch.Length;
+
+            // Apply default value color to the rest of the header line
+            ChangeLinePart(
+                line.Offset + valueStartIndex,
+                line.Offset + line.Length,
+                element => element.TextRunProperties.SetForegroundBrush(ValueBrush));
+
             return;
         }
 
-        // Check for track headers (#1 - Video, #2 - Audio, etc.)
+        // 2. Handle Track Headers (#1 - Video)
         var trackHeaderMatch = TrackHeaderRegex().Match(lineText);
         if (trackHeaderMatch.Success && trackHeaderMatch.Index == 0)
         {
-            // Colorize track number (#1, #2, etc.)
+            // Colorize #1
             var numberGroup = trackHeaderMatch.Groups[1];
-            ChangeLinePart(
-                line.Offset,
-                line.Offset + numberGroup.Index + numberGroup.Length,
-                element =>
-                {
-                    element.TextRunProperties.SetForegroundBrush(TrackNumberBrush);
-                    element.TextRunProperties.SetTypeface(BoldTypeface);
-                });
+            ChangeLinePart(line.Offset, line.Offset + numberGroup.Index + numberGroup.Length, element =>
+            {
+                element.TextRunProperties.SetForegroundBrush(TrackNumberBrush);
+                element.TextRunProperties.SetTypeface(BoldTypeface);
+            });
 
-            // Colorize separator " - "
-            var separatorStart = numberGroup.Index + numberGroup.Length;
+            // Colorize " - Video"
             var typeGroup = trackHeaderMatch.Groups[2];
-            ChangeLinePart(
-                line.Offset + separatorStart,
-                line.Offset + typeGroup.Index,
-                element =>
-                {
-                    element.TextRunProperties.SetForegroundBrush(SeparatorBrush);
-                });
+            ChangeLinePart(line.Offset + trackHeaderMatch.Groups[0].Index + numberGroup.Length + 1, line.Offset + typeGroup.Index + typeGroup.Length, element =>
+            {
+                element.TextRunProperties.SetForegroundBrush(TrackTypeBrush);
+                element.TextRunProperties.SetTypeface(BoldTypeface);
+            });
 
-            // Colorize track type (Video, Audio, Other)
-            ChangeLinePart(
-                line.Offset + typeGroup.Index,
-                line.Offset + typeGroup.Index + typeGroup.Length,
-                element =>
-                {
-                    element.TextRunProperties.SetForegroundBrush(TrackTypeBrush);
-                    element.TextRunProperties.SetTypeface(BoldTypeface);
-                });
-
-            // Colorize the rest of the line (track details)
-            ColorizeTrackDetails(line, lineText, trackHeaderMatch.Length);
-            return;
+            valueStartIndex = trackHeaderMatch.Length;
         }
 
-        // If line starts with whitespace, it's likely a continuation of track info
-        if (lineText.Length > 0 && char.IsWhiteSpace(lineText[0]))
-        {
-            ColorizeTrackDetails(line, lineText, 0);
-        }
+        // 3. Always process the "Value" part of the line for technical details
+        // This allows 640x346 to be colored even if it's on a "Resolution:" line
+        ColorizeTrackDetails(line, lineText, valueStartIndex);
+        ColorizeHighPriorityTerms(line, lineText, valueStartIndex);
     }
 
     private void ColorizeTrackDetails(DocumentLine line, string lineText, int startOffset)
     {
         var lineStartOffset = line.Offset + startOffset;
-        var remainingText = lineText.Substring(startOffset);
+        var remainingText = startOffset < lineText.Length ? lineText.Substring(startOffset) : string.Empty;
 
-        // First, colorize codec names (first word on the line, typically)
-        if (startOffset < lineText.Length)
+        if (string.IsNullOrEmpty(remainingText))
         {
-            var firstWordStart = startOffset;
-            while (firstWordStart < lineText.Length && char.IsWhiteSpace(lineText[firstWordStart]))
-                firstWordStart++;
+            return;
+        }
 
-            if (firstWordStart < lineText.Length)
+        // First pass: colorize codec names (first word on the line, typically)
+        var firstWordStart = 0;
+        while (firstWordStart < remainingText.Length && char.IsWhiteSpace(remainingText[firstWordStart]))
+            firstWordStart++;
+
+        if (firstWordStart < remainingText.Length)
+        {
+            var firstWordEnd = firstWordStart;
+            while (firstWordEnd < remainingText.Length && !char.IsWhiteSpace(remainingText[firstWordEnd]) && remainingText[firstWordEnd] != '(')
+                firstWordEnd++;
+
+            if (firstWordEnd > firstWordStart)
             {
-                var firstWordEnd = firstWordStart;
-                while (firstWordEnd < lineText.Length && !char.IsWhiteSpace(lineText[firstWordEnd]) && lineText[firstWordEnd] != '(')
-                    firstWordEnd++;
-
-                if (firstWordEnd > firstWordStart)
-                {
-                    ChangeLinePart(
-                        line.Offset + firstWordStart,
-                        line.Offset + firstWordEnd,
-                        element =>
-                        {
-                            element.TextRunProperties.SetForegroundBrush(CodecBrush);
-                            element.TextRunProperties.SetTypeface(BoldTypeface);
-                        });
-                }
+                ChangeLinePart(
+                    lineStartOffset + firstWordStart,
+                    lineStartOffset + firstWordEnd,
+                    element =>
+                    {
+                        element.TextRunProperties.SetForegroundBrush(CodecBrush);
+                        element.TextRunProperties.SetTypeface(BoldTypeface);
+                    });
             }
         }
 
-        // Colorize parentheses content (codec details)
-        foreach (Match match in ParenthesesRegex().Matches(remainingText))
-        {
-            ChangeLinePart(
-                lineStartOffset + match.Index,
-                lineStartOffset + match.Index + match.Length,
-                element =>
-                {
-                    element.TextRunProperties.SetForegroundBrush(TechnicalBrush);
-                });
-        }
-
-        // Colorize technical terms
-        foreach (Match match in TechnicalTermRegex().Matches(remainingText))
-        {
-            ChangeLinePart(
-                lineStartOffset + match.Index,
-                lineStartOffset + match.Index + match.Length,
-                element =>
-                {
-                    element.TextRunProperties.SetForegroundBrush(TechnicalBrush);
-                });
-        }
-
         // Colorize square brackets content (SAR, DAR)
-        for (int i = 0; i < remainingText.Length; i++)
+        for (var i = 0; i < remainingText.Length; i++)
         {
             if (remainingText[i] == '[')
             {
@@ -200,8 +159,20 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
             }
         }
 
+        // Colorize parentheses content (codec details)
+        foreach (Match match in ParenthesesRegex().Matches(remainingText))
+        {
+            ChangeLinePart(
+                lineStartOffset + match.Index,
+                lineStartOffset + match.Index + match.Length,
+                element =>
+                {
+                    element.TextRunProperties.SetForegroundBrush(TechnicalBrush);
+                });
+        }
+
         // Colorize commas as separators
-        for (int i = 0; i < remainingText.Length; i++)
+        for (var i = 0; i < remainingText.Length; i++)
         {
             if (remainingText[i] == ',')
             {
@@ -213,6 +184,48 @@ public partial class MediaInfoSyntaxHighlighting : DocumentColorizingTransformer
                         element.TextRunProperties.SetForegroundBrush(SeparatorBrush);
                     });
             }
+        }
+    }
+
+    private void ColorizeHighPriorityTerms(DocumentLine line, string lineText, int startOffset)
+    {
+        var lineStartOffset = line.Offset + startOffset;
+        var remainingText = startOffset < lineText.Length ? lineText.Substring(startOffset) : string.Empty;
+
+        if (string.IsNullOrEmpty(remainingText))
+        {
+            return;
+        }
+
+        // We apply NumberRegex first so that Specific items can override them
+        foreach (Match match in NumberRegex().Matches(remainingText))
+        {
+            ChangeLinePart(
+                lineStartOffset + match.Index,
+                lineStartOffset + match.Index + match.Length,
+                element => element.TextRunProperties.SetForegroundBrush(ValueBrush));
+        }
+
+        // Now override numbers with Resolutions (e.g., 1920x1080)
+        foreach (Match match in ResolutionRegex().Matches(remainingText))
+        {
+            ChangeLinePart(
+                lineStartOffset + match.Index,
+                lineStartOffset + match.Index + match.Length,
+                element =>
+                {
+                    element.TextRunProperties.SetForegroundBrush(ValueBrush);
+                    element.TextRunProperties.SetTypeface(BoldTypeface);
+                });
+        }
+
+        // Finally, apply Technical Terms
+        foreach (Match match in TechnicalTermRegex().Matches(remainingText))
+        {
+            ChangeLinePart(
+                lineStartOffset + match.Index,
+                lineStartOffset + match.Index + match.Length,
+                element => element.TextRunProperties.SetForegroundBrush(TechnicalBrush));
         }
     }
 }
