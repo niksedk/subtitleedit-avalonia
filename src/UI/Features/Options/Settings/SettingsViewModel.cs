@@ -88,6 +88,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _subtitleDoubleClickActionTypes;
     [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
 
+    [ObservableProperty] private ObservableCollection<string> _saveAsBehaviorTypes;
+    [ObservableProperty] private string _selectedSaveAsBehaviorType;
+
+    [ObservableProperty] private ObservableCollection<string> _saveAsAppendLanguageCode;
+    [ObservableProperty] private string _selectedSaveAsAppendLanguageCode;
+
     [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
     [ObservableProperty] private bool _adjustAllTimesRememberLineSelectionChoice;
 
@@ -309,14 +315,30 @@ public partial class SettingsViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
 
-        SubtitleDoubleClickActionTypes = new ObservableCollection<string>()
-        {
+        SubtitleDoubleClickActionTypes =
+        [
             Se.Language.Options.Settings.GridGoToSubtitleAndPause,
             Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
             Se.Language.Options.Settings.GridGoToSubtitleOnly,
-            Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox,
-        };
+            Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox
+        ];
         SelectedSubtitleDoubleClickActionType = SubtitleDoubleClickActionTypes[0];
+
+        SaveAsBehaviorTypes =
+        [
+            Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder,
+            Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder,
+            Se.Language.General.Default,
+        ];
+        SelectedSaveAsBehaviorType = SaveAsBehaviorTypes[0];
+
+        SaveAsAppendLanguageCode =
+        [
+            Se.Language.General.None,
+            Se.Language.Options.Settings.SaveAsAppendLanguageCodeTwoLetter,
+            Se.Language.Options.Settings.SaveAsAppendLanguageCodeThreeLetter,
+            Se.Language.Options.Settings.SaveAsAppendLanguageCodeLanguageName,
+        ];
 
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
@@ -424,6 +446,8 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
         SelectedSubtitleDoubleClickActionType = MapFromSelectedSubtitleDoubleClickAction(Se.Settings.General.SubtitleDoubleClickAction);
+        SelectedSaveAsBehaviorType = MapFromSelectedSaveAsBehavior(Se.Settings.General.SaveAsBehavior);
+        SelectedSaveAsAppendLanguageCode = MapFromSelectedSaveAsAppendLanguageCode(Se.Settings.General.SaveAsAppendLanguageCode);
         AutoConvertToUtf8 = general.AutoConvertToUtf8;
 
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
@@ -595,7 +619,41 @@ public partial class SettingsViewModel : ObservableObject
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
-    private string MapThemeFromTranslation(string translation)
+    private string MapFromSelectedSaveAsBehavior(string saveAsBehavior)
+    {
+        if (saveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
+        {
+            return Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder;
+        }
+        else if (saveAsBehavior == nameof(SaveAsBehaviorType.RememberLastUsedFolder))
+        {
+            return Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder;
+        }
+
+        return Se.Language.General.Default;
+    }
+
+    private string MapFromSelectedSaveAsAppendLanguageCode(string languageAppendType)
+    {
+        if (languageAppendType == nameof(SaveAsLanguageAppendType.TwoLetterLanguageCode))
+        {
+            return Se.Language.Options.Settings.SaveAsAppendLanguageCodeTwoLetter;
+        }
+
+        if (languageAppendType == nameof(SaveAsLanguageAppendType.ThreeLEtterLanguageCode))
+        {
+            return Se.Language.Options.Settings.SaveAsAppendLanguageCodeThreeLetter;
+        }
+
+        if (languageAppendType == nameof(SaveAsLanguageAppendType.FullLanguageName))
+        {
+            return Se.Language.Options.Settings.SaveAsAppendLanguageCodeLanguageName;
+        }
+
+        return Se.Language.General.None;
+    }
+
+    private static string MapThemeFromTranslation(string translation)
     {
         if (translation == Se.Language.General.System)
         {
