@@ -18,39 +18,32 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private int _subtitleRipTrackNumber;
         private readonly List<MatroskaSubtitle> _subtitleRip = new List<MatroskaSubtitle>();
-        private List<MatroskaTrackInfo> _tracks;
-        private List<MatroskaChapter> _chapters;
+        private List<MatroskaTrackInfo> _tracks = new List<MatroskaTrackInfo>();
+        private List<MatroskaChapter> _chapters = new List<MatroskaChapter>();
 
         private readonly Element _segmentElement;
         private long _timeCodeScale = 1000000;
         private double _duration;
 
-        // For small seeks, it's faster to read and discard than to seek
         private const int SmallSeekThreshold = 256;
 
         public bool IsValid { get; }
-
         public string Path { get; }
 
         public MatroskaFile(string path)
         {
             Path = path;
-
-            // Use FileStream with BufferedStream for optimal performance
-            // Buffer size of 65536 (64KB) provides good balance between memory and performance
             var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 65536, FileOptions.SequentialScan);
             _stream = new BufferedStream(fileStream, 65536);
 
-            // read header
             var headerElement = ReadElement();
             if (headerElement != null && headerElement.Id == ElementId.Ebml)
             {
-                // read segment - skip header data efficiently
                 SkipBytes(headerElement.DataSize);
                 _segmentElement = ReadElement();
                 if (_segmentElement != null && _segmentElement.Id == ElementId.Segment)
                 {
-                    IsValid = true; // matroska file must start with ebml header and segment
+                    IsValid = true;
                 }
             }
         }
@@ -101,23 +94,44 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 : _tracks;
         }
 
-        /// <summary>
-        /// Get first time of track
-        /// </summary>
-        /// <param name="trackNumber">Track number</param>
-        /// <returns>Start time in milliseconds</returns>
+        public void GetInfo(out double fr, out int pw, out int ph, out double dur, out string vc)
+        {
+            ReadSegmentInfoAndTracks();
+            fr = _frameRate;
+            pw = _pixelWidth;
+            ph = _pixelHeight;
+            dur = _duration;
+            vc = _videoCodecId;
+        }
+
+        public List<MatroskaSubtitle> GetSubtitle(int trackNumber, LoadMatroskaCallback progressCallback)
+        {
+            _subtitleRip.Clear();
+            _subtitleRipTrackNumber = trackNumber;
+            ReadSegmentCluster(progressCallback);
+            return _subtitleRip;
+        }
+
+        public long GetAudioTrackDelayMilliseconds(int audioTrackNumber)
+        {
+            var tracks = GetTracks();
+            var videoTrack = tracks.Find(p => p.IsVideo && p.IsDefault) ?? tracks.Find(p => p.IsVideo);
+            long videoDelay = 0;
+            if (videoTrack != null)
+            {
+                videoDelay = GetTrackStartTime(videoTrack.TrackNumber);
+            }
+            return GetTrackStartTime(audioTrackNumber) - videoDelay;
+        }
+
         public long GetTrackStartTime(int trackNumber)
         {
-            // go to segment
             _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
-
             const int maxClustersToSeek = 100;
             var clusterNo = 0;
 
             Element element;
-            while (_stream.Position < _stream.Length &&
-                   clusterNo < maxClustersToSeek &&
-                   (element = ReadElement()) != null)
+            while (_stream.Position < _stream.Length && clusterNo < maxClustersToSeek && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -140,21 +154,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
                 _stream.Seek(element.EndPosition, SeekOrigin.Begin);
             }
-
             return 0;
-        }
-
-        public long GetAudioTrackDelayMilliseconds(int audioTrackNumber)
-        {
-            var tracks = GetTracks();
-            var videoTrack = tracks.Find(p => p.IsVideo && p.IsDefault) ?? tracks.Find(p => p.IsVideo);
-            long videoDelay = 0;
-            if (videoTrack != null)
-            {
-                videoDelay = GetTrackStartTime(videoTrack.TrackNumber);
-            }
-
-            return GetTrackStartTime(audioTrackNumber) - videoDelay;
         }
 
         private long FindTrackStartInCluster(Element cluster, int targetTrackNumber, out bool found)
@@ -169,21 +169,13 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             {
                 switch (element.Id)
                 {
-                    case ElementId.None:
-                        done = true;
-                        break;
-                    case ElementId.Timecode:
-                        // Absolute timestamp of the cluster (based on TimeCodeScale)
-                        clusterTimeCode = (long)ReadUInt((int)element.DataSize);
-                        break;
-                    case ElementId.BlockGroup:
-                        ReadBlockGroupElement(element, clusterTimeCode);
-                        break;
+                    case ElementId.None: done = true; break;
+                    case ElementId.Timecode: clusterTimeCode = (long)ReadUInt((int)element.DataSize); break;
+                    case ElementId.BlockGroup: ReadBlockGroupElement(element, clusterTimeCode); break;
                     case ElementId.SimpleBlock:
                         var trackNumber = ReadVariableLengthInt();
                         if (trackNumber == targetTrackNumber)
                         {
-                            // Timecode (relative to Cluster timecode, signed int16)
                             trackStartTime = ReadInt16();
                             done = true;
                             found = true;
@@ -192,26 +184,177 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 _stream.Seek(element.EndPosition, SeekOrigin.Begin);
             }
-
             return (long)Math.Round(GetTimeScaledToMilliseconds(clusterTimeCode + trackStartTime));
         }
 
-        private void ReadVideoElement(Element videoElement)
+        private void ReadSegmentCluster(LoadMatroskaCallback progressCallback)
         {
+            // go to segment
+            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
+
+            var segmentEndPosition = _segmentElement.EndPosition;
+            while (_stream.Position < segmentEndPosition)
+            {
+                var beforeReadElementIdPosition = _stream.Position;
+                var id = (ElementId)ReadVariableLengthUInt(false);
+                if (id == ElementId.None && beforeReadElementIdPosition + 1000 < _stream.Length)
+                {
+                    // Error mode: search for start of next cluster, will be very slow
+                    const int maxErrors = 5_000_000;
+                    var errors = 0;
+                    var max = _stream.Length;
+                    while (id != ElementId.Cluster && beforeReadElementIdPosition + 1000 < max)
+                    {
+                        errors++;
+                        if (errors > maxErrors)
+                        {
+                            return; // we give up
+                        }
+
+                        beforeReadElementIdPosition++;
+                        _stream.Seek(beforeReadElementIdPosition, SeekOrigin.Begin);
+                        id = (ElementId)ReadVariableLengthUInt(false);
+                    }
+                }
+
+                var size = (long)ReadVariableLengthUInt();
+                var element = new Element(id, _stream.Position, size);
+
+                if (element.Id == ElementId.Cluster)
+                {
+                    ReadCluster(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+
+                progressCallback?.Invoke(element.EndPosition, _stream.Length);
+            }
+        }
+
+        private void ReadCluster(Element clusterElement)
+        {
+            long clusterTimeCode = 0;
+
+            var endPosition = clusterElement.EndPosition;
             Element element;
-            while (_stream.Position < videoElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
-                    case ElementId.PixelWidth:
-                        _pixelWidth = (int)ReadUInt((int)element.DataSize);
+                    case ElementId.Timecode:
+                        clusterTimeCode = (long)ReadUInt((int)element.DataSize);
                         break;
-                    case ElementId.PixelHeight:
-                        _pixelHeight = (int)ReadUInt((int)element.DataSize);
+                    case ElementId.BlockGroup:
+                        ReadBlockGroupElement(element, clusterTimeCode);
+                        break;
+                    case ElementId.SimpleBlock:
+                        var subtitle = ReadSubtitleBlock(element, clusterTimeCode);
+                        if (subtitle != null)
+                        {
+                            _subtitleRip.Add(subtitle);
+                        }
                         break;
                     default:
                         SkipBytes(element.DataSize);
                         break;
+                }
+            }
+        }
+
+        private MatroskaSubtitle ReadSubtitleBlock(Element blockElement, long clusterTimeCode)
+        {
+            var trackNumber = ReadVariableLengthInt();
+            if (trackNumber != _subtitleRipTrackNumber)
+            {
+                _stream.Seek(blockElement.EndPosition, SeekOrigin.Begin);
+                return null;
+            }
+
+            var timeCode = ReadInt16();
+
+            // lacing
+            var flags = (byte)_stream.ReadByte();
+            int frames;
+            switch (flags & 6)
+            {
+                case 0: // 00000000 = No lacing
+                    System.Diagnostics.Debug.Print("No lacing");
+                    break;
+                case 2: // 00000010 = Xiph lacing
+                    frames = _stream.ReadByte() + 1;
+                    System.Diagnostics.Debug.Print("Xiph lacing ({0} frames)", frames);
+                    break;
+                case 4: // 00000100 = Fixed-size lacing
+                    frames = _stream.ReadByte() + 1;
+                    for (var i = 0; i < frames; i++)
+                    {
+                        _stream.ReadByte(); // frames
+                    }
+                    System.Diagnostics.Debug.Print("Fixed-size lacing ({0} frames)", frames);
+                    break;
+                case 6: // 00000110 = EMBL lacing
+                    frames = _stream.ReadByte() + 1;
+                    System.Diagnostics.Debug.Print("EBML lacing ({0} frames)", frames);
+                    break;
+            }
+
+            // save subtitle data
+            var dataLength = (int)(blockElement.EndPosition - _stream.Position);
+            var data = new byte[dataLength];
+            _stream.Read(data, 0, dataLength);
+
+            return new MatroskaSubtitle(data, (long)Math.Round(GetTimeScaledToMilliseconds(clusterTimeCode + timeCode)));
+        }
+
+        private void ReadBlockGroupElement(Element clusterElement, long clusterTimeCode)
+        {
+            MatroskaSubtitle subtitle = null;
+
+            var endPosition = clusterElement.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                switch (element.Id)
+                {
+                    case ElementId.Block:
+                        subtitle = ReadSubtitleBlock(element, clusterTimeCode);
+                        if (subtitle == null)
+                        {
+                            return;
+                        }
+                        _subtitleRip.Add(subtitle);
+                        break;
+                    case ElementId.BlockDuration:
+                        var duration = (long)ReadUInt((int)element.DataSize);
+                        if (subtitle != null)
+                        {
+                            subtitle.Duration = (long)Math.Round(GetTimeScaledToMilliseconds(duration));
+                        }
+                        break;
+                    default:
+                        SkipBytes(element.DataSize);
+                        break;
+                }
+            }
+        }
+
+        private void ReadTracksElement(Element tracksElement)
+        {
+            _tracks = new List<MatroskaTrackInfo>();
+
+            var endPosition = tracksElement.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.TrackEntry)
+                {
+                    ReadTrackEntryElement(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
                 }
             }
         }
@@ -327,6 +470,26 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             }
         }
 
+        private void ReadVideoElement(Element videoElement)
+        {
+            Element element;
+            while (_stream.Position < videoElement.EndPosition && (element = ReadElement()) != null)
+            {
+                switch (element.Id)
+                {
+                    case ElementId.PixelWidth:
+                        _pixelWidth = (int)ReadUInt((int)element.DataSize);
+                        break;
+                    case ElementId.PixelHeight:
+                        _pixelHeight = (int)ReadUInt((int)element.DataSize);
+                        break;
+                    default:
+                        SkipBytes(element.DataSize);
+                        break;
+                }
+            }
+        }
+
         private void ReadContentEncodingElement(Element contentEncodingElement, ref int contentCompressionAlgorithm, ref int contentEncodingType, ref uint contentEncodingScope)
         {
             var endPosition = contentEncodingElement.EndPosition;
@@ -395,401 +558,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         break;
                 }
             }
-        }
-
-        private double GetTimeScaledToMilliseconds(double time)
-        {
-            return time * _timeCodeScale / 1000000.0;
-        }
-
-        private void ReadTracksElement(Element tracksElement)
-        {
-            _tracks = new List<MatroskaTrackInfo>();
-
-            var endPosition = tracksElement.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.TrackEntry)
-                {
-                    ReadTrackEntryElement(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-            }
-        }
-
-        public List<MatroskaChapter> GetChapters()
-        {
-            ReadChapters();
-
-            if (_chapters == null)
-            {
-                return new List<MatroskaChapter>();
-            }
-
-            return _chapters.Distinct().ToList();
-        }
-
-        private void ReadChapters()
-        {
-            // go to segment
-            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
-
-            var segmentEndPosition = _segmentElement.EndPosition;
-            Element element;
-            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.Chapters)
-                {
-                    ReadChaptersElement(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-            }
-        }
-
-        private void ReadChaptersElement(Element chaptersElement)
-        {
-            _chapters = new List<MatroskaChapter>();
-
-            var endPosition = chaptersElement.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.EditionEntry)
-                {
-                    ReadEditionEntryElement(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-            }
-        }
-
-        private void ReadEditionEntryElement(Element editionEntryElement)
-        {
-            var endPosition = editionEntryElement.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.ChapterAtom)
-                {
-                    ReadChapterTimeStart(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-            }
-        }
-
-        private void ReadChapterTimeStart(Element chpaterAtom)
-        {
-            var chapter = new MatroskaChapter();
-
-            var endPosition = chpaterAtom.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.ChapterTimeStart)
-                {
-                    chapter.StartTime = ReadUInt((int)element.DataSize) / 1000000000.0;
-                }
-                else if (element.Id == ElementId.ChapterDisplay)
-                {
-                    chapter.Name = GetChapterName(element);
-                }
-                else if (element.Id == ElementId.ChapterAtom)
-                {
-                    ReadNestedChaptersTimeStart(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-
-                _chapters.Add(chapter);
-            }
-        }
-
-        private void ReadNestedChaptersTimeStart(Element nestedChpaterAtom)
-        {
-            var chapter = new MatroskaChapter
-            {
-                Nested = true
-            };
-
-            var endPosition = nestedChpaterAtom.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.ChapterTimeStart)
-                {
-                    chapter.StartTime = ReadUInt((int)element.DataSize) / 1000000000.0;
-                }
-                else if (element.Id == ElementId.ChapterDisplay)
-                {
-                    chapter.Name = GetChapterName(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-
-                _chapters.Add(chapter);
-            }
-        }
-
-        private string GetChapterName(Element chapterDisplay)
-        {
-            var endPosition = chapterDisplay.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                if (element.Id == ElementId.ChapString)
-                {
-                    return ReadString((int)element.DataSize, Encoding.UTF8);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-            }
-
-            return null;
-        }
-
-
-        /// <summary>
-        /// Get info about matroska file
-        /// </summary>
-        /// <param name="frameRate">Frame rate</param>
-        /// <param name="pixelWidth">Width in pixels</param>
-        /// <param name="pixelHeight">Height in pixels</param>
-        /// <param name="duration">Duration in milliseconds</param>
-        /// <param name="videoCodec">Codec</param>
-        public void GetInfo(out double frameRate, out int pixelWidth, out int pixelHeight, out double duration, out string videoCodec)
-        {
-            ReadSegmentInfoAndTracks();
-
-            pixelWidth = _pixelWidth;
-            pixelHeight = _pixelHeight;
-            frameRate = _frameRate;
-            duration = _duration;
-            videoCodec = _videoCodecId;
-        }
-
-        private void ReadCluster(Element clusterElement)
-        {
-            long clusterTimeCode = 0;
-
-            var endPosition = clusterElement.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                switch (element.Id)
-                {
-                    case ElementId.Timecode:
-                        clusterTimeCode = (long)ReadUInt((int)element.DataSize);
-                        break;
-                    case ElementId.BlockGroup:
-                        ReadBlockGroupElement(element, clusterTimeCode);
-                        break;
-                    case ElementId.SimpleBlock:
-                        var subtitle = ReadSubtitleBlock(element, clusterTimeCode);
-                        if (subtitle != null)
-                        {
-                            _subtitleRip.Add(subtitle);
-                        }
-                        break;
-                    default:
-                        SkipBytes(element.DataSize);
-                        break;
-                }
-            }
-        }
-
-        private void ReadBlockGroupElement(Element clusterElement, long clusterTimeCode)
-        {
-            MatroskaSubtitle subtitle = null;
-
-            var endPosition = clusterElement.EndPosition;
-            Element element;
-            while (_stream.Position < endPosition && (element = ReadElement()) != null)
-            {
-                switch (element.Id)
-                {
-                    case ElementId.Block:
-                        subtitle = ReadSubtitleBlock(element, clusterTimeCode);
-                        if (subtitle == null)
-                        {
-                            return;
-                        }
-                        _subtitleRip.Add(subtitle);
-                        break;
-                    case ElementId.BlockDuration:
-                        var duration = (long)ReadUInt((int)element.DataSize);
-                        if (subtitle != null)
-                        {
-                            subtitle.Duration = (long)Math.Round(GetTimeScaledToMilliseconds(duration));
-                        }
-                        break;
-                    default:
-                        SkipBytes(element.DataSize);
-                        break;
-                }
-            }
-        }
-
-        private MatroskaSubtitle ReadSubtitleBlock(Element blockElement, long clusterTimeCode)
-        {
-            var trackNumber = ReadVariableLengthInt();
-            if (trackNumber != _subtitleRipTrackNumber)
-            {
-                _stream.Seek(blockElement.EndPosition, SeekOrigin.Begin);
-                return null;
-            }
-
-            var timeCode = ReadInt16();
-
-            // lacing
-            var flags = (byte)_stream.ReadByte();
-            int frames;
-            switch (flags & 6)
-            {
-                case 0: // 00000000 = No lacing
-                    System.Diagnostics.Debug.Print("No lacing");
-                    break;
-                case 2: // 00000010 = Xiph lacing
-                    frames = _stream.ReadByte() + 1;
-                    System.Diagnostics.Debug.Print("Xiph lacing ({0} frames)", frames);
-                    break;
-                case 4: // 00000100 = Fixed-size lacing
-                    frames = _stream.ReadByte() + 1;
-                    for (var i = 0; i < frames; i++)
-                    {
-                        _stream.ReadByte(); // frames
-                    }
-                    System.Diagnostics.Debug.Print("Fixed-size lacing ({0} frames)", frames);
-                    break;
-                case 6: // 00000110 = EMBL lacing
-                    frames = _stream.ReadByte() + 1;
-                    System.Diagnostics.Debug.Print("EBML lacing ({0} frames)", frames);
-                    break;
-            }
-
-            // save subtitle data
-            var dataLength = (int)(blockElement.EndPosition - _stream.Position);
-            var data = new byte[dataLength];
-            _stream.Read(data, 0, dataLength);
-
-            return new MatroskaSubtitle(data, (long)Math.Round(GetTimeScaledToMilliseconds(clusterTimeCode + timeCode)));
-        }
-
-        public List<MatroskaSubtitle> GetSubtitle(int trackNumber, LoadMatroskaCallback progressCallback)
-        {
-            _subtitleRip.Clear();
-            _subtitleRipTrackNumber = trackNumber;
-            ReadSegmentCluster(progressCallback);
-            return _subtitleRip;
-        }
-
-        public void Dispose() => Dispose(true);
-
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _stream?.Dispose();
-            }
-        }
-
-        private void ReadSegmentInfoAndTracks()
-        {
-            // go to segment
-            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
-
-            var segmentEndPosition = _segmentElement.EndPosition;
-            Element element;
-            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
-            {
-                switch (element.Id)
-                {
-                    case ElementId.Info:
-                        ReadInfoElement(element);
-                        break;
-                    case ElementId.Tracks:
-                        ReadTracksElement(element);
-                        return;
-                    default:
-                        SkipBytes(element.DataSize);
-                        break;
-                }
-            }
-        }
-
-        private void ReadSegmentCluster(LoadMatroskaCallback progressCallback)
-        {
-            // go to segment
-            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
-
-            var segmentEndPosition = _segmentElement.EndPosition;
-            while (_stream.Position < segmentEndPosition)
-            {
-                var beforeReadElementIdPosition = _stream.Position;
-                var id = (ElementId)ReadVariableLengthUInt(false);
-                if (id == ElementId.None && beforeReadElementIdPosition + 1000 < _stream.Length)
-                {
-                    // Error mode: search for start of next cluster, will be very slow
-                    const int maxErrors = 5_000_000;
-                    var errors = 0;
-                    var max = _stream.Length;
-                    while (id != ElementId.Cluster && beforeReadElementIdPosition + 1000 < max)
-                    {
-                        errors++;
-                        if (errors > maxErrors)
-                        {
-                            return; // we give up
-                        }
-
-                        beforeReadElementIdPosition++;
-                        _stream.Seek(beforeReadElementIdPosition, SeekOrigin.Begin);
-                        id = (ElementId)ReadVariableLengthUInt(false);
-                    }
-                }
-
-                var size = (long)ReadVariableLengthUInt();
-                var element = new Element(id, _stream.Position, size);
-
-                if (element.Id == ElementId.Cluster)
-                {
-                    ReadCluster(element);
-                }
-                else
-                {
-                    SkipBytes(element.DataSize);
-                }
-
-                progressCallback?.Invoke(element.EndPosition, _stream.Length);
-            }
-        }
-
-        private Element ReadElement()
-        {
-            var id = (ElementId)ReadVariableLengthUInt(false);
-            if (id == ElementId.None)
-            {
-                return null;
-            }
-
-            var size = (long)ReadVariableLengthUInt();
-            return new Element(id, _stream.Position, size);
         }
 
         private ulong ReadVariableLengthUInt(bool unsetFirstBit = true)
@@ -949,6 +717,18 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             return BitConverter.ToDouble(data, 0);
         }
 
+        private Element ReadElement()
+        {
+            var id = (ElementId)ReadVariableLengthUInt(false);
+            if (id == ElementId.None)
+            {
+                return null;
+            }
+
+            var size = (long)ReadVariableLengthUInt();
+            return new Element(id, _stream.Position, size);
+        }
+
         /// <summary>
         /// Reads a fixed length string from the current stream using the specified encoding.
         /// </summary>
@@ -964,11 +744,193 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 _stream.Read(buffer);
                 return encoding.GetString(buffer);
             }
-            
+
             // For larger strings, fall back to heap allocation
             var largeBuffer = new byte[length];
             _stream.Read(largeBuffer, 0, length);
             return encoding.GetString(largeBuffer);
+        }
+
+        private void ReadSegmentInfoAndTracks()
+        {
+            // go to segment
+            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
+
+            var segmentEndPosition = _segmentElement.EndPosition;
+            Element element;
+            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
+            {
+                switch (element.Id)
+                {
+                    case ElementId.Info:
+                        ReadInfoElement(element);
+                        break;
+                    case ElementId.Tracks:
+                        ReadTracksElement(element);
+                        return;
+                    default:
+                        SkipBytes(element.DataSize);
+                        break;
+                }
+            }
+        }
+        private double GetTimeScaledToMilliseconds(double time)
+        {
+            return time * _timeCodeScale / 1000000.0;
+        }
+
+        public List<MatroskaChapter> GetChapters()
+        {
+            ReadChapters();
+
+            if (_chapters == null)
+            {
+                return new List<MatroskaChapter>();
+            }
+
+            return _chapters.Distinct().ToList();
+        }
+
+        private void ReadChapters()
+        {
+            // go to segment
+            _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
+
+            var segmentEndPosition = _segmentElement.EndPosition;
+            Element element;
+            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.Chapters)
+                {
+                    ReadChaptersElement(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+            }
+        }
+
+        private void ReadChaptersElement(Element chaptersElement)
+        {
+            _chapters = new List<MatroskaChapter>();
+
+            var endPosition = chaptersElement.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.EditionEntry)
+                {
+                    ReadEditionEntryElement(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+            }
+        }
+
+        private void ReadEditionEntryElement(Element editionEntryElement)
+        {
+            var endPosition = editionEntryElement.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.ChapterAtom)
+                {
+                    ReadChapterTimeStart(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+            }
+        }
+
+        private void ReadChapterTimeStart(Element chpaterAtom)
+        {
+            var chapter = new MatroskaChapter();
+
+            var endPosition = chpaterAtom.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.ChapterTimeStart)
+                {
+                    chapter.StartTime = ReadUInt((int)element.DataSize) / 1000000000.0;
+                }
+                else if (element.Id == ElementId.ChapterDisplay)
+                {
+                    chapter.Name = GetChapterName(element);
+                }
+                else if (element.Id == ElementId.ChapterAtom)
+                {
+                    ReadNestedChaptersTimeStart(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+
+                _chapters.Add(chapter);
+            }
+        }
+
+        private void ReadNestedChaptersTimeStart(Element nestedChpaterAtom)
+        {
+            var chapter = new MatroskaChapter
+            {
+                Nested = true
+            };
+
+            var endPosition = nestedChpaterAtom.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.ChapterTimeStart)
+                {
+                    chapter.StartTime = ReadUInt((int)element.DataSize) / 1000000000.0;
+                }
+                else if (element.Id == ElementId.ChapterDisplay)
+                {
+                    chapter.Name = GetChapterName(element);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+
+                _chapters.Add(chapter);
+            }
+        }
+
+        private string GetChapterName(Element chapterDisplay)
+        {
+            var endPosition = chapterDisplay.EndPosition;
+            Element element;
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
+            {
+                if (element.Id == ElementId.ChapString)
+                {
+                    return ReadString((int)element.DataSize, Encoding.UTF8);
+                }
+                else
+                {
+                    SkipBytes(element.DataSize);
+                }
+            }
+
+            return null;
+        }
+
+        public void Dispose() => Dispose(true);
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stream?.Dispose();
+            }
         }
     }
 }
