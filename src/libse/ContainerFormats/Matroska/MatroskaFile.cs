@@ -48,38 +48,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             }
         }
 
-        /// <summary>
-        /// Efficiently skip bytes - uses read for small amounts, seek for large amounts
-        /// </summary>
-        private void SkipBytes(long count)
-        {
-            if (count <= 0)
-            {
-                return;
-            }
-
-            if (count <= SmallSeekThreshold)
-            {
-                // For small amounts, reading is faster than seeking with BufferedStream
-                var buffer = new byte[Math.Min(count, 256)];
-                while (count > 0)
-                {
-                    var toRead = (int)Math.Min(count, buffer.Length);
-                    var read = _stream.Read(buffer, 0, toRead);
-                    if (read == 0)
-                    {
-                        break;
-                    }
-                    count -= read;
-                }
-            }
-            else
-            {
-                // For large amounts, seeking is better
-                _stream.Seek(count, SeekOrigin.Current);
-            }
-        }
-
         public List<MatroskaTrackInfo> GetTracks(bool subtitleOnly = false)
         {
             ReadSegmentInfoAndTracks();
@@ -155,6 +123,60 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 _stream.Seek(element.EndPosition, SeekOrigin.Begin);
             }
             return 0;
+        }
+
+        public List<MatroskaChapter> GetChapters()
+        {
+            ReadChapters();
+
+            if (_chapters == null)
+            {
+                return new List<MatroskaChapter>();
+            }
+
+            return _chapters.Distinct().ToList();
+        }
+
+        public void Dispose() => Dispose(true);
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _stream?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Efficiently skip bytes - uses read for small amounts, seek for large amounts
+        /// </summary>
+        private void SkipBytes(long count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            if (count <= SmallSeekThreshold)
+            {
+                // For small amounts, reading is faster than seeking with BufferedStream
+                var buffer = new byte[Math.Min(count, 256)];
+                while (count > 0)
+                {
+                    var toRead = (int)Math.Min(count, buffer.Length);
+                    var read = _stream.Read(buffer, 0, toRead);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+                    count -= read;
+                }
+            }
+            else
+            {
+                // For large amounts, seeking is better
+                _stream.Seek(count, SeekOrigin.Current);
+            }
         }
 
         private long FindTrackStartInCluster(Element cluster, int targetTrackNumber, out bool found)
@@ -774,21 +796,10 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
             }
         }
+
         private double GetTimeScaledToMilliseconds(double time)
         {
             return time * _timeCodeScale / 1000000.0;
-        }
-
-        public List<MatroskaChapter> GetChapters()
-        {
-            ReadChapters();
-
-            if (_chapters == null)
-            {
-                return new List<MatroskaChapter>();
-            }
-
-            return _chapters.Distinct().ToList();
         }
 
         private void ReadChapters()
@@ -921,16 +932,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             }
 
             return null;
-        }
-
-        public void Dispose() => Dispose(true);
-
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _stream?.Dispose();
-            }
         }
     }
 }
