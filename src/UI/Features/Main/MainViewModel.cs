@@ -446,7 +446,11 @@ public partial class MainViewModel :
         _undoRedoManager.SetupChangeDetection(this, TimeSpan.FromSeconds(1));
         LockTimeCodes = Se.Settings.General.LockTimeCodes;
         SetLibSeSettings();
-        _dropDownFormatsSearchTimer.Elapsed += (s, e) => { _dropDownFormatsSearchText = string.Empty; _dropDownFormatsSearchTimer.Stop(); };
+        _dropDownFormatsSearchTimer.Elapsed += (s, e) =>
+        {
+            _dropDownFormatsSearchText = string.Empty;
+            _dropDownFormatsSearchTimer.Stop();
+        };
     }
 
     private static void SetLibSeSettings()
@@ -7189,7 +7193,6 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    
     private void TextBoxInsertUnicodeSymbol(object? commandParameter)
     {
         if (commandParameter is string s)
@@ -9061,6 +9064,42 @@ public partial class MainViewModel :
             newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
         }
 
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull2(GetUpdateSubtitle());
+        if (!string.IsNullOrEmpty(language))
+        {
+            var l = Iso639Dash2LanguageCode.List.FirstOrDefault(p => p.TwoLetterCode == language);
+            if (l != null)
+            {
+                if (newFileName.EndsWith("." + l.EnglishName, StringComparison.OrdinalIgnoreCase))
+                {
+                    newFileName = newFileName.Substring(0, newFileName.Length - (l.EnglishName.Length + 1));
+                }
+
+                if (newFileName.EndsWith("." + l.TwoLetterCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    newFileName = newFileName.Substring(0, newFileName.Length - (l.TwoLetterCode.Length + 1));
+                }
+
+                if (newFileName.EndsWith("." + l.ThreeLetterCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    newFileName = newFileName.Substring(0, newFileName.Length - (l.ThreeLetterCode.Length + 1));
+                }
+
+                if (Se.Settings.General.SaveAsAppendLanguageCode == nameof(SaveAsLanguageAppendType.TwoLetterLanguageCode))
+                {
+                    newFileName += "." + l.TwoLetterCode;
+                }
+                else if (Se.Settings.General.SaveAsAppendLanguageCode == nameof(SaveAsLanguageAppendType.ThreeLEtterLanguageCode))
+                {
+                    newFileName += "." + l.ThreeLetterCode;
+                }
+                else if (Se.Settings.General.SaveAsAppendLanguageCode == nameof(SaveAsLanguageAppendType.FullLanguageName))
+                {
+                    newFileName += "." + l.EnglishName;
+                }
+            }
+        }
+
         var title = Se.Language.General.SaveFileAsTitle;
         if (ShowColumnOriginalText)
         {
@@ -9372,12 +9411,12 @@ public partial class MainViewModel :
                         // Delay to allow Activated event to set FileOpenedViaActivation flag, the Activated event fires asynchronously during startup
                         // and may not have completed by the time OnLoaded runs so wait and recheck the flag
                         await Task.Delay(100);
-                        
+
                         if (Program.FileOpenedViaActivation)
                         {
                             return;
                         }
-                        
+
                         bool skipLoadVideo = false;
                         _videoFileName = first.VideoFileName;
                         await Task.Delay(25);
@@ -11836,10 +11875,7 @@ public partial class MainViewModel :
     {
         if (string.IsNullOrEmpty(_videoFileName))
         {
-            Dispatcher.UIThread.Post(async () =>
-            {
-                await CommandFileOpenKeepVideo();
-            });
+            Dispatcher.UIThread.Post(async () => { await CommandFileOpenKeepVideo(); });
         }
     }
 }

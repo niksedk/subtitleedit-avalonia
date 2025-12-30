@@ -957,9 +957,18 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         /// <returns>The string being read.</returns>
         private string ReadString(int length, Encoding encoding)
         {
-            var buffer = new byte[length];
-            _stream.Read(buffer, 0, length);
-            return encoding.GetString(buffer);
+            // For small strings, use stack allocation to avoid heap allocations
+            if (length <= 256)
+            {
+                Span<byte> buffer = stackalloc byte[length];
+                _stream.Read(buffer);
+                return encoding.GetString(buffer);
+            }
+            
+            // For larger strings, fall back to heap allocation
+            var largeBuffer = new byte[length];
+            _stream.Read(largeBuffer, 0, length);
+            return encoding.GetString(largeBuffer);
         }
     }
 }
