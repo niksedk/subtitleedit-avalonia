@@ -7252,6 +7252,30 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void TrimWhitespaceSelectedLines()
+    {
+       var countOfTrimmedLines = 0;
+
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
+        foreach (var s in selectedItems)
+        {
+            var originalText = s.Text;
+            s.Text = Utilities.RemoveUnneededSpaces(originalText, languageCode).Trim();
+            if (!originalText.Equals(s.Text, StringComparison.Ordinal))
+            {
+                countOfTrimmedLines++;
+            }
+        }
+
+        if (countOfTrimmedLines > 0)
+        {
+            ShowStatus(string.Format(Se.Language.Main.TrimmedXLines, countOfTrimmedLines));
+            _updateAudioVisualizer = true;
+        }
+    }
+
+    [RelayCommand]
     private async Task SetNewStyleForSelectedLines(string styleName)
     {
         var result = await ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(vm =>

@@ -235,6 +235,7 @@ public class LanguageSettingsShortcuts
     public string ShowPointSync { get; set; }
     public string ShowMediaInformation { get; set; }
     public string ChooseSubtitleFormat { get; set; }
+    public string TrimWhitespaceSelectedLines { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -473,5 +474,6 @@ public class LanguageSettingsShortcuts
         ShowPointSync = "Show point sync";
         ShowMediaInformation = "Show media information";
         ChooseSubtitleFormat = "Choose subtitle format";
+        TrimWhitespaceSelectedLines = "Trim whitespace (selected lines)";
     }
 }

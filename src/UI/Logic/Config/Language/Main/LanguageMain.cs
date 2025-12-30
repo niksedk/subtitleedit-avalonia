@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Main;
 
 public class LanguageMain
 {
@@ -78,6 +80,7 @@ public class LanguageMain
     public string YoutubeDlDownloadedSuccessfully { get; set; }
     public string YoutubeDlNotInstalledDownloadNow { get; set; }
     public string InsertUnicodeSymbol { get; set; }
+    public string TrimmedXLines { get; set; }
 
     public LanguageMain()
     {
@@ -153,5 +156,6 @@ public class LanguageMain
         YoutubeDlDownloadedSuccessfully = "\"yt-dlp\" downloaded successfully.";
         YoutubeDlNotInstalledDownloadNow = "\"yt-dlp\" is not installed and is required for playing online videos.\n\nDownload now?";
         InsertUnicodeSymbol = "Insert Unicode symbol";
+        TrimmedXLines = "Trimmed {0} subtitle lines";
     }
 }

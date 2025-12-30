@@ -276,6 +276,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ImportImageSubtitleForEditCommand), Se.Language.Options.Shortcuts.ImportImageSubtitleForEdit },
         { nameof(MainViewModel.ShowMediaInformationCommand), Se.Language.Options.Shortcuts.ShowMediaInformation },
         { nameof(MainViewModel.ShowSubtitleFormatPickerCommand), Se.Language.Options.Shortcuts.ChooseSubtitleFormat },
+        { nameof(MainViewModel.TrimWhitespaceSelectedLinesCommand), Se.Language.Options.Shortcuts.TrimWhitespaceSelectedLines },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -500,6 +501,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ImportImageSubtitleForEditCommand, nameof(vm.ImportImageSubtitleForEditCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowMediaInformationCommand, nameof(vm.ShowMediaInformationCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowSubtitleFormatPickerCommand, nameof(vm.ShowSubtitleFormatPickerCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.TrimWhitespaceSelectedLinesCommand, nameof(vm.TrimWhitespaceSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
 
         return shortcuts;
     }
