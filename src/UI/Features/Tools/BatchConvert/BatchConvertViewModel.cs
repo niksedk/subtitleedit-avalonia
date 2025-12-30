@@ -829,28 +829,41 @@ public partial class BatchConvertViewModel : ObservableObject
 
         foreach (var fileName in fileNames)
         {
-            var ext = Path.GetExtension(fileName).ToLowerInvariant();
-            var fileInfo = new FileInfo(fileName);
-
-            Subtitle? subtitle = null;
-            var format = Se.Language.General.Unknown;
-            if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
+            bool flowControl = AddFile(fileName);
+            if (!flowControl)
             {
-                format = BatchConverter.FormatBluRaySup;
+                continue;
             }
+        }
 
-            if (ext == ".sub" && FileUtil.IsVobSub(fileName))
-            {
-                format = BatchConverter.FormatVobSub;
-            }
+        MakeBatchItemsInfo();
+        _isFilesDirty = true;
+    }
 
-            if (ext == ".mkv" || ext == ".mks")
+    private bool AddFile(string fileName)
+    {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        var fileInfo = new FileInfo(fileName);
+
+        Subtitle? subtitle = null;
+        var format = Se.Language.General.Unknown;
+        if (ext == ".sup" && FileUtil.IsBluRaySup(fileName))
+        {
+            format = BatchConverter.FormatBluRaySup;
+        }
+
+        if (ext == ".sub" && FileUtil.IsVobSub(fileName))
+        {
+            format = BatchConverter.FormatVobSub;
+        }
+
+        if (ext == ".mkv" || ext == ".mks")
+        {
+            using (var matroska = new MatroskaFile(fileName))
             {
-                using (var matroska = new MatroskaFile(fileName))
+                if (matroska.IsValid)
                 {
-                    if (matroska.IsValid)
-                    {
-                        var codecToFormat = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    var codecToFormat = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                         {
                             { "S_VOBSUB", "VobSub" },
                             { "S_HDMV/PGS", "PGS" },
@@ -861,122 +874,119 @@ public partial class BatchConvertViewModel : ObservableObject
                             { "S_HDMV/TEXTST", "TextST" }
                         };
 
-                        var tracksByFormat = new Dictionary<string, List<string>>();
+                    var tracksByFormat = new Dictionary<string, List<string>>();
 
-                        foreach (var track in matroska.GetTracks(true))
+                    foreach (var track in matroska.GetTracks(true))
+                    {
+                        if (codecToFormat.TryGetValue(track.CodecId, out var formatName))
                         {
-                            if (codecToFormat.TryGetValue(track.CodecId, out var formatName))
+                            if (!tracksByFormat.ContainsKey(formatName))
                             {
-                                if (!tracksByFormat.ContainsKey(formatName))
-                                {
-                                    tracksByFormat[formatName] = new List<string>();
-                                }
-
-                                tracksByFormat[formatName].Add(MakeMkvTrackInfoString(track));
-
-                                format = $"Matroska/{formatName} - {MakeMkvTrackInfoString(track)}";
-                                var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
-                                matroskaBatchItem.LanguageCode = track.Language;
-                                matroskaBatchItem.TrackNumber = track.TrackNumber.ToString(CultureInfo.InvariantCulture);
-                                BatchItems.Add(matroskaBatchItem);
-                                _allBatchItems.Add(matroskaBatchItem);
+                                tracksByFormat[formatName] = new List<string>();
                             }
-                        }
 
-                        if (tracksByFormat.Count == 0)
-                        {
-                            format = "No subtitle tracks";
-                        }
+                            tracksByFormat[formatName].Add(MakeMkvTrackInfoString(track));
 
-                        continue;
+                            format = $"Matroska/{formatName} - {MakeMkvTrackInfoString(track)}";
+                            var matroskaBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+                            matroskaBatchItem.LanguageCode = track.Language;
+                            matroskaBatchItem.TrackNumber = track.TrackNumber.ToString(CultureInfo.InvariantCulture);
+                            BatchItems.Add(matroskaBatchItem);
+                            _allBatchItems.Add(matroskaBatchItem);
+                        }
                     }
+
+                    if (tracksByFormat.Count == 0)
+                    {
+                        format = "No subtitle tracks";
+                    }
+
+                    return false;
                 }
             }
-            else if (ext == ".mp4" || ext == ".m4v" || ext == ".m4s")
+        }
+        else if (ext == ".mp4" || ext == ".m4v" || ext == ".m4s")
+        {
+            var mp4Files = new List<string>();
+            var mp4Parser = new MP4Parser(fileName);
+            var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
+            if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
             {
-                var mp4Files = new List<string>();
-                var mp4Parser = new MP4Parser(fileName);
-                var mp4SubtitleTracks = mp4Parser.GetSubtitleTracks();
-                if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
+                var name = "MP4/WebVTT - " + mp4Parser.VttcLanguage;
+                mp4Files.Add(name);
+                var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
+                mp4BatchItem.LanguageCode = mp4Parser.VttcLanguage;
+                BatchItems.Add(mp4BatchItem);
+                _allBatchItems.Add(mp4BatchItem);
+            }
+
+            foreach (var track in mp4SubtitleTracks)
+            {
+                if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
                 {
-                    var name = "MP4/WebVTT - " + mp4Parser.VttcLanguage;
+                    var name = $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}";
                     mp4Files.Add(name);
                     var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
-                    mp4BatchItem.LanguageCode = mp4Parser.VttcLanguage;
+                    mp4BatchItem.LanguageCode = track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString;
                     BatchItems.Add(mp4BatchItem);
                     _allBatchItems.Add(mp4BatchItem);
                 }
-
-                foreach (var track in mp4SubtitleTracks)
-                {
-                    if (track.Mdia.IsTextSubtitle || track.Mdia.IsClosedCaption)
-                    {
-                        var name = $"MP4/#{mp4SubtitleTracks.IndexOf(track)} {track.Mdia.HandlerType} - {track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString}";
-                        mp4Files.Add(name);
-                        var mp4BatchItem = new BatchConvertItem(fileName, fileInfo.Length, name, subtitle);
-                        mp4BatchItem.LanguageCode = track.Mdia.Mdhd.Iso639ThreeLetterCode ?? track.Mdia.Mdhd.LanguageString;
-                        BatchItems.Add(mp4BatchItem);
-                        _allBatchItems.Add(mp4BatchItem);
-                    }
-                }
-
-                if (mp4Files.Count <= 0)
-                {
-                    format = "No subtitle tracks";
-                }
-
-                continue;
             }
-            else if ((ext == ".ts" || ext == ".m2ts" || ext == ".mts" || ext == ".mpg" || ext == ".mpeg") &&
-                     (FileUtil.IsTransportStream(fileName) || FileUtil.IsM2TransportStream(fileName)))
+
+            if (mp4Files.Count <= 0)
             {
-                format = "Transport Stream";
-                var tsBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
-                BatchItems.Add(tsBatchItem);
-                _allBatchItems.Add(tsBatchItem);
-                continue;
+                format = "No subtitle tracks";
             }
 
-            if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
-            {
-                subtitle = Subtitle.Parse(fileName);
-                if (subtitle != null)
-                {
-                    format = subtitle.OriginalFormat.Name;
-                }
-            }
-
-            if (format == Se.Language.General.Unknown)
-            {
-                foreach (var f in SubtitleFormat.GetBinaryFormats(false))
-                {
-                    if (f.IsMine(null, fileName))
-                    {
-                        subtitle = new Subtitle();
-                        f.LoadSubtitle(subtitle, null, fileName);
-                        subtitle.OriginalFormat = f;
-                        format = f.Name;
-                        break; // format found, exit the loop
-                    }
-                }
-            }
-
-            if (format == Se.Language.General.Unknown && fileInfo.Length < 300_000)
-            {
-                subtitle = Subtitle.Parse(fileName);
-                if (subtitle != null)
-                {
-                    format = subtitle.OriginalFormat.Name;
-                }
-            }
-
-            var batchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
-            BatchItems.Add(batchItem);
-            _allBatchItems.Add(batchItem);
+            return false;
+        }
+        else if ((ext == ".ts" || ext == ".m2ts" || ext == ".mts" || ext == ".mpg" || ext == ".mpeg") &&
+                 (FileUtil.IsTransportStream(fileName) || FileUtil.IsM2TransportStream(fileName)))
+        {
+            format = "Transport Stream";
+            var tsBatchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+            BatchItems.Add(tsBatchItem);
+            _allBatchItems.Add(tsBatchItem);
+            return false;
         }
 
-        MakeBatchItemsInfo();
-        _isFilesDirty = true;
+        if (format == Se.Language.General.Unknown && fileInfo.Length < 200_000)
+        {
+            subtitle = Subtitle.Parse(fileName);
+            if (subtitle != null)
+            {
+                format = subtitle.OriginalFormat.Name;
+            }
+        }
+
+        if (format == Se.Language.General.Unknown)
+        {
+            foreach (var f in SubtitleFormat.GetBinaryFormats(false))
+            {
+                if (f.IsMine(null, fileName))
+                {
+                    subtitle = new Subtitle();
+                    f.LoadSubtitle(subtitle, null, fileName);
+                    subtitle.OriginalFormat = f;
+                    format = f.Name;
+                    break; // format found, exit the loop
+                }
+            }
+        }
+
+        if (format == Se.Language.General.Unknown && fileInfo.Length < 300_000)
+        {
+            subtitle = Subtitle.Parse(fileName);
+            if (subtitle != null)
+            {
+                format = subtitle.OriginalFormat.Name;
+            }
+        }
+
+        var batchItem = new BatchConvertItem(fileName, fileInfo.Length, format, subtitle);
+        BatchItems.Add(batchItem);
+        _allBatchItems.Add(batchItem);
+        return true;
     }
 
     private static string MakeMkvTrackInfoString(MatroskaTrackInfo track)
@@ -1223,7 +1233,7 @@ public partial class BatchConvertViewModel : ObservableObject
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.ApplyMinGap),
                 MinGapMs = MinGapMs,
-            },  
+            },
 
             SplitBreakLongLines = new BatchConvertConfig.SplitBreakLongLinesSettings
             {
@@ -1334,6 +1344,7 @@ public partial class BatchConvertViewModel : ObservableObject
         e.Handled = true;
     }
 
+    private Lock _addFileLock = new Lock();
     internal void FileGridOnDrop(object? sender, DragEventArgs e)
     {
         if (!e.DataTransfer.Contains(DataFormat.File))
@@ -1344,19 +1355,21 @@ public partial class BatchConvertViewModel : ObservableObject
         var files = e.DataTransfer.TryGetFiles();
         if (files != null)
         {
-            Dispatcher.UIThread.Post(() =>
+            Task.Run(() =>
             {
                 foreach (var file in files)
                 {
                     var path = file.Path?.LocalPath;
                     if (path != null && File.Exists(path))
                     {
-                        var fileInfo = new FileInfo(path);
-                        var subtitle = Subtitle.Parse(path);
-                        var batchItem = new BatchConvertItem(path, fileInfo.Length,
-                            subtitle != null ? subtitle.OriginalFormat.Name : Se.Language.General.Unknown, subtitle);
-                        BatchItems.Add(batchItem);
-                        _allBatchItems.Add(batchItem);
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            lock (_addFileLock)
+                            {
+                                AddFile(path);
+                                MakeBatchItemsInfo();
+                            }
+                        });
                     }
                 }
 
