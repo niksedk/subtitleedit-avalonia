@@ -228,6 +228,29 @@ public class SettingsPage : UserControl
                     Mode = BindingMode.TwoWay,
                 }
             }),
+
+            new SettingsItem(Se.Language.Options.Settings.SaveAsBehavior, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveAsBehaviorTypes)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveAsBehaviorType))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
+
+            new SettingsItem(Se.Language.Options.Settings.SaveAsAppendLanguageCode, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SaveAsAppendLanguageCode)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSaveAsAppendLanguageCode))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
+
             MakeSeparator(),
             MakeCheckboxSetting(Se.Language.Options.Settings.AutoBackupOn, nameof(_vm.AutoBackupOn)),
             MakeNumericSettingInt(Se.Language.Options.Settings.AutoBackupIntervalMinutes, nameof(_vm.AutoBackupIntervalMinutes), 1),

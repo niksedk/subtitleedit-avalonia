@@ -339,6 +339,7 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.Options.Settings.SaveAsAppendLanguageCodeThreeLetter,
             Se.Language.Options.Settings.SaveAsAppendLanguageCodeLanguageName,
         ];
+        SelectedSaveAsAppendLanguageCode = SaveAsAppendLanguageCode[0];
 
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
@@ -619,13 +620,14 @@ public partial class SettingsViewModel : ObservableObject
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
     }
 
-    private string MapFromSelectedSaveAsBehavior(string saveAsBehavior)
+    private static string MapFromSelectedSaveAsBehavior(string saveAsBehavior)
     {
         if (saveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
         {
             return Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder;
         }
-        else if (saveAsBehavior == nameof(SaveAsBehaviorType.RememberLastUsedFolder))
+        
+        if (saveAsBehavior == nameof(SaveAsBehaviourType.RememberLastUsedFolder))
         {
             return Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder;
         }
@@ -633,7 +635,7 @@ public partial class SettingsViewModel : ObservableObject
         return Se.Language.General.Default;
     }
 
-    private string MapFromSelectedSaveAsAppendLanguageCode(string languageAppendType)
+    private static string MapFromSelectedSaveAsAppendLanguageCode(string languageAppendType)
     {
         if (languageAppendType == nameof(SaveAsLanguageAppendType.TwoLetterLanguageCode))
         {
@@ -806,6 +808,8 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
         general.SubtitleDoubleClickAction = MapToSelectedSubtitleDoubleClickAction(SelectedSubtitleDoubleClickActionType);
+        general.SaveAsBehavior = MapToSaveAsBehavior(SelectedSaveAsBehaviorType);
+        general.SaveAsAppendLanguageCode = MapToSaveAsAppendLanguageCode(SelectedSaveAsAppendLanguageCode);
         general.AutoConvertToUtf8 = AutoConvertToUtf8;
 
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
@@ -971,6 +975,41 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         Se.SaveSettings();
+    }
+
+    private string MapToSaveAsBehavior(string selectedSaveAsBehaviorType)
+    {
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder)
+        {
+            return nameof(SaveAsBehaviourType.UseVideoFileName);
+        }
+
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder)
+        {
+            return nameof(SaveAsBehaviourType.RememberLastUsedFolder);
+        }
+
+        return nameof(SaveAsBehaviourType.Default);
+    }
+
+    private string MapToSaveAsAppendLanguageCode(string selectedSaveAsAppendLanguageCode)
+    {
+        if (selectedSaveAsAppendLanguageCode == Se.Language.Options.Settings.SaveAsAppendLanguageCodeTwoLetter)
+        {
+            return nameof(SaveAsLanguageAppendType.TwoLetterLanguageCode);
+        }
+
+        if (selectedSaveAsAppendLanguageCode == Se.Language.Options.Settings.SaveAsAppendLanguageCodeThreeLetter)
+        {
+            return nameof(SaveAsLanguageAppendType.ThreeLEtterLanguageCode);
+        }
+
+        if (selectedSaveAsAppendLanguageCode == Se.Language.Options.Settings.SaveAsAppendLanguageCodeLanguageName)
+        {
+            return nameof(SaveAsLanguageAppendType.FullLanguageName);
+        }
+
+        return nameof(SaveAsLanguageAppendType.None);
     }
 
     private void SetFfmpegStatus()

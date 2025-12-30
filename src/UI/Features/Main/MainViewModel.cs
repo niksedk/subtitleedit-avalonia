@@ -912,10 +912,10 @@ public partial class MainViewModel :
         }
         else
         {
-            var message = "The original subtitle does not have the same number of lines as the current subtitle." +
+            var message = "The original subtitle does not have the same number of subtitle lines as the current subtitle." +
                           Environment.NewLine
-                          + "Original lines: " + subtitle.Paragraphs.Count + Environment.NewLine
-                          + "Current lines: " + Subtitles.Count;
+                          + "Original subtitle lines: " + subtitle.Paragraphs.Count + Environment.NewLine
+                          + "Current subtitle lines: " + Subtitles.Count;
             await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }

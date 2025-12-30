@@ -205,6 +205,8 @@ public class LanguageSettings
     public string WaveformDrawStyle { get; set; }
     public string VlcWidRendering { get; set; }
     public string SubtitleDoubleClickAction { get; set; }
+    public string SaveAsBehavior { get; set; }
+    public string SaveAsAppendLanguageCode { get; set; }
     public string GridGoToSubtitleAndPause { get; set; }
     public string GridGoToSubtitleAndPlay { get; set; }
     public string GridGoToSubtitleOnly { get; set; }
@@ -420,6 +422,8 @@ public class LanguageSettings
         WaveformPauseOnSingleClick = "Pause on single click";
         WaveformDrawStyle = "Waveform draw style";
         SubtitleDoubleClickAction = "Subtitle grid double-click action";
+        SaveAsBehavior = "\"Save as\" behavior";
+        SaveAsAppendLanguageCode = "\"Save as\" append language code";
         GridGoToSubtitleAndPause = "Go to subtitle and pause";
         GridGoToSubtitleAndPlay = "Go to subtitle and play";
         GridGoToSubtitleOnly = "Go to subtitle only";
