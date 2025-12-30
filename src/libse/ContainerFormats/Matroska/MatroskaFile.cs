@@ -1,9 +1,7 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.ContainerFormats.Ebml;
+﻿using Nikse.SubtitleEdit.Core.ContainerFormats.Ebml;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text;
 
@@ -13,7 +11,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
     {
         public delegate void LoadMatroskaCallback(long position, long total);
 
-        private readonly MemoryMappedFile _memoryMappedFile;
         private readonly Stream _stream;
         private int _pixelWidth, _pixelHeight;
         private double _frameRate;
@@ -28,6 +25,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         private long _timeCodeScale = 1000000;
         private double _duration;
 
+        // For small seeks, it's faster to read and discard than to seek
+        private const int SmallSeekThreshold = 256;
+
         public bool IsValid { get; }
 
         public string Path { get; }
@@ -35,38 +35,55 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         public MatroskaFile(string path)
         {
             Path = path;
-            try
-            {
-                _memoryMappedFile = MemoryMappedFile.CreateFromFile(
-                    File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                    null, // no mapping to a name
-                    0L, // use the file's actual size
-                    MemoryMappedFileAccess.Read,
-#if NET40
-                    null, // not configuring security
-#endif
-                    HandleInheritability.None, // adjust as needed
-                    false); // close the previously passed in stream when done
 
-                _stream = _memoryMappedFile.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read);
-            }
-            catch // fallback, probably out of memory
-            {
-                Dispose(true);
-                _stream = new FastFileStream(path);
-            }
+            // Use FileStream with BufferedStream for optimal performance
+            // Buffer size of 65536 (64KB) provides good balance between memory and performance
+            var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 65536, FileOptions.SequentialScan);
+            _stream = new BufferedStream(fileStream, 65536);
 
             // read header
             var headerElement = ReadElement();
             if (headerElement != null && headerElement.Id == ElementId.Ebml)
             {
-                // read segment
-                _stream.Seek(headerElement.DataSize, SeekOrigin.Current);
+                // read segment - skip header data efficiently
+                SkipBytes(headerElement.DataSize);
                 _segmentElement = ReadElement();
                 if (_segmentElement != null && _segmentElement.Id == ElementId.Segment)
                 {
                     IsValid = true; // matroska file must start with ebml header and segment
                 }
+            }
+        }
+
+        /// <summary>
+        /// Efficiently skip bytes - uses read for small amounts, seek for large amounts
+        /// </summary>
+        private void SkipBytes(long count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            if (count <= SmallSeekThreshold)
+            {
+                // For small amounts, reading is faster than seeking with BufferedStream
+                var buffer = new byte[Math.Min(count, 256)];
+                while (count > 0)
+                {
+                    var toRead = (int)Math.Min(count, buffer.Length);
+                    var read = _stream.Read(buffer, 0, toRead);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+                    count -= read;
+                }
+            }
+            else
+            {
+                // For large amounts, seeking is better
+                _stream.Seek(count, SeekOrigin.Current);
             }
         }
 
@@ -163,7 +180,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         ReadBlockGroupElement(element, clusterTimeCode);
                         break;
                     case ElementId.SimpleBlock:
-                        var trackNumber = (int)ReadVariableLengthUInt();
+                        var trackNumber = ReadVariableLengthInt();
                         if (trackNumber == targetTrackNumber)
                         {
                             // Timecode (relative to Cluster timecode, signed int16)
@@ -193,7 +210,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         _pixelHeight = (int)ReadUInt((int)element.DataSize);
                         break;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -312,8 +329,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private void ReadContentEncodingElement(Element contentEncodingElement, ref int contentCompressionAlgorithm, ref int contentEncodingType, ref uint contentEncodingScope)
         {
+            var endPosition = contentEncodingElement.EndPosition;
             Element element;
-            while (_stream.Position < contentEncodingElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -329,8 +347,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         contentEncodingType = (int)ReadUInt((int)element.DataSize);
                         break;
                     case ElementId.ContentCompression:
+                        var compEndPosition = element.EndPosition;
                         Element compElement;
-                        while (_stream.Position < element.EndPosition && (compElement = ReadElement()) != null)
+                        while (_stream.Position < compEndPosition && (compElement = ReadElement()) != null)
                         {
                             switch (compElement.Id)
                             {
@@ -342,13 +361,13 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                                     System.Diagnostics.Debug.WriteLine("ContentCompSettings: " + contentCompSettings);
                                     break;
                                 default:
-                                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                                    SkipBytes(compElement.DataSize);
                                     break;
                             }
                         }
                         break;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -356,8 +375,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private void ReadInfoElement(Element infoElement)
         {
+            var endPosition = infoElement.EndPosition;
             Element element;
-            while (_stream.Position < infoElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -371,7 +391,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         _duration = GetTimeScaledToMilliseconds(_duration);
                         break;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -386,8 +406,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             _tracks = new List<MatroskaTrackInfo>();
 
+            var endPosition = tracksElement.EndPosition;
             Element element;
-            while (_stream.Position < tracksElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.TrackEntry)
                 {
@@ -395,7 +416,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
             }
         }
@@ -417,8 +438,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             // go to segment
             _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
 
+            var segmentEndPosition = _segmentElement.EndPosition;
             Element element;
-            while (_stream.Position < _segmentElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.Chapters)
                 {
@@ -426,7 +448,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
             }
         }
@@ -435,8 +457,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             _chapters = new List<MatroskaChapter>();
 
+            var endPosition = chaptersElement.EndPosition;
             Element element;
-            while (_stream.Position < chaptersElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.EditionEntry)
                 {
@@ -444,15 +467,16 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
             }
         }
 
         private void ReadEditionEntryElement(Element editionEntryElement)
         {
+            var endPosition = editionEntryElement.EndPosition;
             Element element;
-            while (_stream.Position < editionEntryElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.ChapterAtom)
                 {
@@ -460,7 +484,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
             }
         }
@@ -469,8 +493,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             var chapter = new MatroskaChapter();
 
+            var endPosition = chpaterAtom.EndPosition;
             Element element;
-            while (_stream.Position < chpaterAtom.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.ChapterTimeStart)
                 {
@@ -486,7 +511,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
 
                 _chapters.Add(chapter);
@@ -500,8 +525,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 Nested = true
             };
 
+            var endPosition = nestedChpaterAtom.EndPosition;
             Element element;
-            while (_stream.Position < nestedChpaterAtom.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.ChapterTimeStart)
                 {
@@ -513,7 +539,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
 
                 _chapters.Add(chapter);
@@ -522,8 +548,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private string GetChapterName(Element chapterDisplay)
         {
+            var endPosition = chapterDisplay.EndPosition;
             Element element;
-            while (_stream.Position < chapterDisplay.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 if (element.Id == ElementId.ChapString)
                 {
@@ -531,7 +558,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
             }
 
@@ -562,8 +589,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             long clusterTimeCode = 0;
 
+            var endPosition = clusterElement.EndPosition;
             Element element;
-            while (_stream.Position < clusterElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -581,7 +609,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         }
                         break;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -591,8 +619,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             MatroskaSubtitle subtitle = null;
 
+            var endPosition = clusterElement.EndPosition;
             Element element;
-            while (_stream.Position < clusterElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < endPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -612,7 +641,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         }
                         break;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -620,7 +649,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private MatroskaSubtitle ReadSubtitleBlock(Element blockElement, long clusterTimeCode)
         {
-            var trackNumber = (int)ReadVariableLengthUInt();
+            var trackNumber = ReadVariableLengthInt();
             if (trackNumber != _subtitleRipTrackNumber)
             {
                 _stream.Seek(blockElement.EndPosition, SeekOrigin.Begin);
@@ -678,7 +707,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             if (disposing)
             {
                 _stream?.Dispose();
-                _memoryMappedFile?.Dispose();
             }
         }
 
@@ -687,8 +715,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             // go to segment
             _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
 
+            var segmentEndPosition = _segmentElement.EndPosition;
             Element element;
-            while (_stream.Position < _segmentElement.EndPosition && (element = ReadElement()) != null)
+            while (_stream.Position < segmentEndPosition && (element = ReadElement()) != null)
             {
                 switch (element.Id)
                 {
@@ -699,7 +728,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                         ReadTracksElement(element);
                         return;
                     default:
-                        _stream.Seek(element.DataSize, SeekOrigin.Current);
+                        SkipBytes(element.DataSize);
                         break;
                 }
             }
@@ -710,7 +739,8 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             // go to segment
             _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
 
-            while (_stream.Position < _segmentElement.EndPosition)
+            var segmentEndPosition = _segmentElement.EndPosition;
+            while (_stream.Position < segmentEndPosition)
             {
                 var beforeReadElementIdPosition = _stream.Position;
                 var id = (ElementId)ReadVariableLengthUInt(false);
@@ -743,7 +773,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 }
                 else
                 {
-                    _stream.Seek(element.DataSize, SeekOrigin.Current);
+                    SkipBytes(element.DataSize);
                 }
 
                 progressCallback?.Invoke(element.EndPosition, _stream.Length);
@@ -766,6 +796,11 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             // Begin loop with byte set to newly read byte
             var first = _stream.ReadByte();
+            if (first < 0)
+            {
+                return 0;
+            }
+
             var length = 0;
 
             // Begin by counting the bits unset before the highest set bit
@@ -790,7 +825,58 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             result <<= --length * 8;
             for (var i = 1; i <= length; i++)
             {
-                result |= (ulong)_stream.ReadByte() << (length - i) * 8;
+                var b = _stream.ReadByte();
+                if (b < 0)
+                {
+                    break;
+                }
+                result |= (ulong)b << (length - i) * 8;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads a variable length unsigned integer as an int to avoid boxing/unboxing
+        /// </summary>
+        private int ReadVariableLengthInt(bool unsetFirstBit = true)
+        {
+            // Begin loop with byte set to newly read byte
+            var first = _stream.ReadByte();
+            if (first < 0)
+            {
+                return 0;
+            }
+
+            var length = 0;
+
+            // Begin by counting the bits unset before the highest set bit
+            var mask = 0x80;
+            for (var i = 0; i < 8; i++)
+            {
+                // Start at left, shift to right
+                if ((first & mask) == mask)
+                {
+                    length = i + 1;
+                    break;
+                }
+                mask >>= 1;
+            }
+            if (length == 0)
+            {
+                return 0;
+            }
+
+            // Read remaining big endian bytes and convert to 32-bit integer.
+            var result = unsetFirstBit ? first & (0xFF >> length) : first;
+            --length;
+            for (var i = 0; i < length; i++)
+            {
+                var b = _stream.ReadByte();
+                if (b < 0)
+                {
+                    break;
+                }
+                result = (result << 8) | b;
             }
             return result;
         }
