@@ -4320,6 +4320,9 @@ public partial class MainViewModel :
         _oldGenerateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
         _oldSpectrogramStyle = Se.Settings.Waveform.SpectrogramStyle;
 
+        Se.Settings.General.WindowPositions = Se.Settings.General.WindowPositions.OrderBy(p => p.WindowName).ToList();
+        var oldSettngsSerialized = JsonSerializer.Serialize(Se.Settings);
+
         var viewModel = await _windowService
             .ShowDialogAsync<SettingsWindow, SettingsViewModel>(Window!, vm => { vm.Initialize(this); });
 
@@ -4329,7 +4332,15 @@ public partial class MainViewModel :
             return;
         }
 
-        ApplySettings();
+        Se.Settings.General.WindowPositions = Se.Settings.General.WindowPositions.OrderBy(p => p.WindowName).ToList();
+        var newSettingsSerialized = JsonSerializer.Serialize(Se.Settings);
+
+        if (oldSettngsSerialized != newSettingsSerialized)
+        {
+            var firstSelectedIndex = SubtitleGrid.SelectedIndex;
+            ApplySettings();
+            SelectAndScrollToRow(firstSelectedIndex);
+        }
     }
 
     public void ApplySettings()
@@ -7254,7 +7265,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void TrimWhitespaceSelectedLines()
     {
-       var countOfTrimmedLines = 0;
+        var countOfTrimmedLines = 0;
 
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
