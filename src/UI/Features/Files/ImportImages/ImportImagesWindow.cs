@@ -157,9 +157,14 @@ public class ImportImagesWindow : Window
         dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
         dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
 
+        dropHost.Tapped += (s, e) =>
+        {
+            vm.FileGridTapped();
+        };
+
         var flyout = new MenuFlyout();
         flyout.Opening += vm.ImagesContextMenuOpening;
-        dataGrid.ContextFlyout = flyout;
+        dropHost.ContextFlyout = flyout;
 
         var menuItemDelete = new MenuItem
         {
@@ -178,6 +183,14 @@ public class ImportImagesWindow : Window
         };
         menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
         flyout.Items.Add(menuItemClear);
+
+        var menuItemImport = new MenuItem
+        {
+            Header = Se.Language.General.ImportDotDotDot,
+            DataContext = vm,
+            Command = vm.FileImportCommand,
+        };
+        flyout.Items.Add(menuItemImport);
 
         grid.Add(dropHost, 0);
 

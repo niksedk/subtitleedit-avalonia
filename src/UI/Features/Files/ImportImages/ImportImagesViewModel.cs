@@ -205,4 +205,12 @@ public partial class ImportImagesViewModel : ObservableObject
             });
         }
     }
+
+    internal void FileGridTapped()
+    {
+        if (Images.Count == 0)
+        {
+            FileImport().ConfigureAwait(false);
+        }
+    }
 }
