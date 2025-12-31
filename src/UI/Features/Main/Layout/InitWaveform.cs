@@ -129,6 +129,14 @@ public class InitWaveform
             flyout.Items.Add(splitMenuItem);
             vm.MenuItemAudioVisualizerSplit = splitMenuItem;
 
+            var splitAtPositionMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.SplitLine,
+                Command = vm.SplitAtPositionInWaveformCommand,
+            };
+            flyout.Items.Add(splitAtPositionMenuItem);
+            vm.MenuItemAudioVisualizerSplitAtPosition = splitAtPositionMenuItem;
+
             flyout.Items.Add(new Separator());
 
             var menuItemFilterByLayer = new MenuItem

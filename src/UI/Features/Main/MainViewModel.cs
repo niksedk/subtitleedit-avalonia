@@ -296,6 +296,7 @@ public partial class MainViewModel :
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
+    public MenuItem MenuItemAudioVisualizerSplitAtPosition { get; set; }
     public ITextBoxWrapper EditTextBoxOriginal { get; set; }
     public ITextBoxWrapper EditTextBox { get; set; }
     public StackPanel PanelSingleLineLengthsOriginal { get; set; }
@@ -367,6 +368,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
+        MenuItemAudioVisualizerSplitAtPosition = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         Toolbar = new Border();
@@ -6269,6 +6271,42 @@ public partial class MainViewModel :
         SplitSelectedLine(true, false);
     }
 
+
+    [RelayCommand]
+    private void SplitAtPositionInWaveform()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        var pos = vp.Position;
+        var subtitlesAtPosition = Subtitles
+            .Where(p =>
+                p.StartTime.TotalSeconds < pos &&
+                p.EndTime.TotalSeconds > pos).ToList();
+
+        if (subtitlesAtPosition.Count != 1)
+        {
+            return;
+        }
+
+        var line = subtitlesAtPosition[0];
+
+        var videoPosition = vp.Position;
+        if (videoPosition < line.StartTime.TotalSeconds + 0.3 ||
+            videoPosition > line.EndTime.TotalSeconds - 0.3)
+        {
+            SplitLine(false, false, line);
+            return;
+        }
+
+        SplitLine(true, false, line);
+
+        _updateAudioVisualizer = true;
+    }
+
     [RelayCommand]
     private void SplitAtVideoPosition()
     {
@@ -7405,6 +7443,11 @@ public partial class MainViewModel :
     private void SplitSelectedLine(bool atVideoPosition, bool atTextBoxPosition)
     {
         var s = SelectedSubtitle;
+        SplitLine(atVideoPosition, atTextBoxPosition, s);
+    }
+
+    private void SplitLine(bool atVideoPosition, bool atTextBoxPosition, SubtitleLineViewModel? s)
+    {
         var vp = GetVideoPlayerControl();
         if (s == null || vp == null || EditTextBox == null)
         {
@@ -11573,6 +11616,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSeparator1.IsVisible = false;
         MenuItemAudioVisualizerDelete.IsVisible = false;
         MenuItemAudioVisualizerDeleteAtPosition.IsVisible = false;
+        MenuItemAudioVisualizerSplitAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplit.IsVisible = false;
 
         if (e.NewParagraph != null)
@@ -11607,6 +11651,7 @@ public partial class MainViewModel :
         if (subtitlesAtPosition.Count > 0)
         {
             MenuItemAudioVisualizerDeleteAtPosition.IsVisible = true;
+            MenuItemAudioVisualizerSplitAtPosition.IsVisible = true;
             return;
         }
     }
