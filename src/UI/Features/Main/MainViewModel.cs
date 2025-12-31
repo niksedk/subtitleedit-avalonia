@@ -10609,19 +10609,18 @@ public partial class MainViewModel :
                 _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
             }
 
-            if (keyEventArgs.Key == Key.LeftCtrl)
+            _lastKeyPressedMs = ms;
+
+            _shortcutManager.OnKeyPressed(this, keyEventArgs);
+            if (_shortcutManager.GetActiveKeys().Count == 0)
             {
                 return;
             }
 
-            _lastKeyPressedMs = ms;
-
-            _shortcutManager.OnKeyPressed(this, keyEventArgs);
-
             if (IsTextInputFocused())
             {
                 var currentKeys = _shortcutManager.GetActiveKeys();
-                if (currentKeys.Count == 1)
+                if (currentKeys.Count == 1 && keyEventArgs.KeyModifiers == KeyModifiers.None)
                 {
                     var key = currentKeys.First();
                     var allowedSingleKeyShortcuts = new HashSet<Key>

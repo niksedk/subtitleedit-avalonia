@@ -1,159 +1,162 @@
-﻿using Avalonia.Input;
+﻿using System;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic;
 
 public class ShortcutManager : IShortcutManager
 {
     private readonly HashSet<Key> _activeKeys = [];
-    private readonly List<ShortCut> _shortcuts = [];
-    private readonly Dictionary<string, ShortCut> _lookupTable = new();
-    private bool _isDirty = true;
-    private bool _isControlPressed = false;
+    private List<ShortCut> _shortcuts = [];
+    private bool _sorted = false;
+    private bool _isControlDown = false;
 
     public static string GetKeyDisplayName(string key)
     {
-        bool isMac = OperatingSystem.IsMacOS();
-        var shortcuts = Se.Language.Options.Shortcuts;
+        if (OperatingSystem.IsMacOS())
+        {
+            return key switch
+            {
+                "Ctrl" or "Control" => Se.Language.Options.Shortcuts.ControlMac,
+                "Alt" => Se.Language.Options.Shortcuts.AltMac,
+                "Shift" => Se.Language.Options.Shortcuts.ShiftMac,
+                "Win" or "Cmd" => Se.Language.Options.Shortcuts.WinMac,
+                _ => key
+            };
+        }
 
         return key switch
         {
-            "Ctrl" or "Control" => isMac ? shortcuts.ControlMac : shortcuts.Control,
-            "Alt" => isMac ? shortcuts.AltMac : shortcuts.Alt,
-            "Shift" => isMac ? shortcuts.ShiftMac : shortcuts.Shift,
-            "Win" or "Cmd" => isMac ? shortcuts.WinMac : shortcuts.Win,
+            "Ctrl" or "Control" => Se.Language.Options.Shortcuts.Control,
+            "Alt" => Se.Language.Options.Shortcuts.Alt,
+            "Shift" => Se.Language.Options.Shortcuts.Shift,
+            "Win" => Se.Language.Options.Shortcuts.Win,
             _ => key
         };
     }
 
     public void OnKeyPressed(object? sender, KeyEventArgs e)
     {
-        // Avoid adding modifier keys to the active keys set to prevent redundancy 
-        // with KeyEventArgs.KeyModifiers
-        if (e.Key is not (Key.LeftCtrl or Key.RightCtrl or
-                         Key.LeftShift or Key.RightShift or
-                         Key.LeftAlt or Key.RightAlt or
-                         Key.LWin or Key.RWin))
+        if (e.Key != Key.LeftCtrl && e.Key != Key.RightCtrl &&
+            e.Key != Key.LeftShift && e.Key != Key.RightShift &&
+            e.Key != Key.LeftAlt && e.Key != Key.RightAlt)
         {
-            _activeKeys.Add(e.Key);
+            _activeKeys.Add(e.Key);  // do not add modifier keys
         }
-        else if (e.Key is Key.LeftCtrl or Key.RightCtrl)
+        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
-            _isControlPressed = true;
+            _isControlDown = true;
         }
     }
 
     public void OnKeyReleased(object? sender, KeyEventArgs e)
     {
         _activeKeys.Remove(e.Key);
-        if (e.Key is Key.LeftCtrl or Key.RightCtrl)
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
-            _isControlPressed = false;
+            _isControlDown = false;
         }
     }
 
     public void ClearKeys()
     {
         _activeKeys.Clear();
-        _isControlPressed = false;
+        _isControlDown = false;
     }
 
     public void RegisterShortcut(ShortCut shortcut)
     {
         _shortcuts.Add(shortcut);
-        _isDirty = true;
-    }
-
-    public void ClearShortcuts()
-    {
-        _shortcuts.Clear();
-        _lookupTable.Clear();
-        _isDirty = true;
-    }
-
-    private void RebuildLookupTable()
-    {
-        _lookupTable.Clear();
-        // Sort by key count descending so that specific shortcuts (Ctrl+Shift+S) 
-        // take precedence over general ones (Ctrl+S) if they share hashes
-        var sorted = _shortcuts.Where(s => s.Keys.Count > 0)
-                               .OrderByDescending(s => s.Keys.Count);
-
-        foreach (var sc in sorted)
-        {
-            // Map the direct hash
-            _lookupTable.TryAdd(sc.HashCode, sc);
-
-            // Map the normalized hash (e.g., "LeftCtrl" -> "Control")
-            if (!string.IsNullOrEmpty(sc.NormalizedHashCode))
-            {
-                _lookupTable.TryAdd(sc.NormalizedHashCode, sc);
-            }
-        }
-        _isDirty = false;
     }
 
     public IRelayCommand? CheckShortcuts(KeyEventArgs keyEventArgs, string activeControl)
     {
-        if (_isDirty)
+        if (!_sorted)
         {
-            RebuildLookupTable();
+            _sorted = true;
+            _shortcuts = _shortcuts.OrderByDescending(p => p.Keys.Count).ToList();
         }
 
-        // Build the current state key list
-        var currentInputKeys = new List<string>(_activeKeys.Count + 4);
-
-        foreach (var key in _activeKeys)
+        var activeKeysIncludeingModefiers = new HashSet<Key>(_activeKeys);
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
-            currentInputKeys.Add(key.ToString());
+            activeKeysIncludeingModefiers.Add(Key.LeftCtrl);
+        }
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Alt))
+        {
+            activeKeysIncludeingModefiers.Add(Key.LeftAlt);
+        }
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            activeKeysIncludeingModefiers.Add(Key.LeftShift);
         }
 
-        // Add normalized modifiers based on the event state
-        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Control)) currentInputKeys.Add("Control");
-        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Alt)) currentInputKeys.Add("Alt");
-        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Shift)) currentInputKeys.Add("Shift");
-        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Meta)) currentInputKeys.Add("Win");
+        var keys = activeKeysIncludeingModefiers.Select(p => p.ToString()).ToList();
+        var hashCode = ShortCut.CalculateHash(keys, activeControl);
+        var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, activeControl);
 
-        // 1. Check primary hash
-        var inputHash = ShortCut.CalculateHash(currentInputKeys, activeControl);
-        if (_lookupTable.TryGetValue(inputHash, out var shortcut))
+        foreach (var shortcut in _shortcuts)
         {
-            return shortcut.Action;
-        }
-
-        // 2. Fallback to normalized hash check
-        var normalizedInputHash = CalculateNormalizedHash(currentInputKeys, activeControl);
-        if (_lookupTable.TryGetValue(normalizedInputHash, out shortcut))
-        {
-            return shortcut.Action;
+            if (shortcut.Keys.Count > 0)
+            {
+                if (hashCode == shortcut.HashCode ||
+                    inputWithNormalizedModifiers == shortcut.HashCode ||
+                    inputWithNormalizedModifiers == shortcut.NormalizedHashCode)
+                {
+                    return shortcut.Action;
+                }
+            }
         }
 
         return null;
     }
 
+    public void ClearShortcuts()
+    {
+        _shortcuts.Clear();
+        _isControlDown = false;
+    }
+
+    public HashSet<Key> GetActiveKeys()
+    {
+        return [.. _activeKeys];
+    }
+
+    public bool IsControlPressed()
+    {
+        return _isControlDown;
+    }
+
     public static string CalculateNormalizedHash(List<string> inputKeys, string? control)
     {
-        var keys = new List<string>(inputKeys.Count);
+        var keys = new List<string>();
         foreach (var key in inputKeys)
         {
-            keys.Add(key switch
+            if (key is "LeftCtrl" or "RightCtrl" or "Ctrl")
             {
-                "LeftCtrl" or "RightCtrl" or "Ctrl" => "Control",
-                "LeftShift" or "RightShift" => "Shift",
-                "LeftAlt" or "RightAlt" => "Alt",
-                "LWin" or "RWin" => "Win",
-                _ => key
-            });
+                keys.Add("Control");
+            }
+            else if (key is "LeftShift" or "RightShift")
+            {
+                keys.Add("Shift");
+            }
+            else if (key is "LeftAlt" or "RightAlt")
+            {
+                keys.Add("Alt");
+            }
+            else if (key is "LWin" or "RWin")
+            {
+                keys.Add("Win");
+            }
+            else
+            {
+                keys.Add(key);
+            }
         }
 
         return ShortCut.CalculateHash(keys, control);
     }
-
-    public HashSet<Key> GetActiveKeys() => [.. _activeKeys];
-
-    public bool IsControlPressed() => _isControlPressed;
 }
