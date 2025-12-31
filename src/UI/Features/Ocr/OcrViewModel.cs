@@ -2017,7 +2017,7 @@ public partial class OcrViewModel : ObservableObject
 
                 SelectAndScrollToRow(i);
 
-                var text = await ollamaOcr.Ocr(bitmap, OllamaModel, OllamaUrl, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
+                var text = await ollamaOcr.Ocr(bitmap, OllamaUrl, OllamaModel, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
                 item.Text = text;
 
                 if (SelectedOcrSubtitleItem == item)
