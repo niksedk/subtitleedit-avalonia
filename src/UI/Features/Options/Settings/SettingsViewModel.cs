@@ -84,6 +84,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _defaultEncoding;
     [ObservableProperty] private bool _autoConvertToUtf8;
+    [ObservableProperty] private bool _autoTrimWhiteSpace;
 
     [ObservableProperty] private ObservableCollection<string> _subtitleDoubleClickActionTypes;
     [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
@@ -450,6 +451,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedSaveAsBehaviorType = MapFromSelectedSaveAsBehavior(Se.Settings.General.SaveAsBehavior);
         SelectedSaveAsAppendLanguageCode = MapFromSelectedSaveAsAppendLanguageCode(Se.Settings.General.SaveAsAppendLanguageCode);
         AutoConvertToUtf8 = general.AutoConvertToUtf8;
+        AutoTrimWhiteSpace = general.AutoTrimWhiteSpace;
 
         SelectedDefaultSubtitleFormat = general.DefaultSubtitleFormat;
         if (!DefaultSubtitleFormats.Contains(SelectedDefaultSubtitleFormat))
@@ -811,6 +813,7 @@ public partial class SettingsViewModel : ObservableObject
         general.SaveAsBehavior = MapToSaveAsBehavior(SelectedSaveAsBehaviorType);
         general.SaveAsAppendLanguageCode = MapToSaveAsAppendLanguageCode(SelectedSaveAsAppendLanguageCode);
         general.AutoConvertToUtf8 = AutoConvertToUtf8;
+        general.AutoTrimWhiteSpace = AutoTrimWhiteSpace;
 
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
         general.DefaultSaveAsFormat = SelectedSaveSubtitleFormat;

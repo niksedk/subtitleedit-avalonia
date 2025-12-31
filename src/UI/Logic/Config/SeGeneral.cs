@@ -97,6 +97,7 @@ public class SeGeneral
     public bool ShowColumnLayer { get; set; }
     public bool SelectCurrentSubtitleWhilePlaying { get; set; }
     public bool WriteAn2Tag { get; set; }
+    public bool AutoTrimWhiteSpace { get; set; }
 
     public long CurrentVideoOffsetInMs = 0;
     public bool CurrentVideoIsSmpte = false;

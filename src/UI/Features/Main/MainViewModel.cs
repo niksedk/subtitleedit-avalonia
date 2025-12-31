@@ -8135,9 +8135,22 @@ public partial class MainViewModel :
         }
         finally
         {
+            AutoTrimWhiteSpaces();
+
             _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
             _opening = false;
+        }
+    }
+
+    private void AutoTrimWhiteSpaces()
+    {
+        if (Se.Settings.General.AutoTrimWhiteSpace)
+        {
+            foreach (var item in Subtitles)
+            {
+                item.Text = Utilities.RemoveUnneededSpaces(item.Text, string.Empty).Trim();
+            }
         }
     }
 
@@ -9032,6 +9045,8 @@ public partial class MainViewModel :
             var result = await SaveSubtitleAs();
             return result;
         }
+
+        AutoTrimWhiteSpaces();
 
         var text = GetUpdateSubtitle(true).ToText(SelectedSubtitleFormat);
 
@@ -10833,6 +10848,17 @@ public partial class MainViewModel :
                 _subtitleGridSelectionChangedSkip = false;
                 e.Handled = true;
                 return;
+            }
+        }
+
+        if (Se.Settings.General.AutoTrimWhiteSpace && e.RemovedItems.Count < 10)
+        {
+            foreach (SubtitleLineViewModel? item in e.RemovedItems)
+            {
+                if (item != null)
+                {
+                    item.Text = Utilities.RemoveUnneededSpaces(item.Text, string.Empty).Trim();
+                }
             }
         }
 

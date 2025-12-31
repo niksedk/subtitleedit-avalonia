@@ -104,6 +104,7 @@ public class LanguageSettings
     public string AutoBackupIntervalMinutes { get; set; }
     public string AutoBackupDeleteAfterDays { get; set; }
     public string AutoConvertToUtf8 { get; set; }
+    public string AutoTrimWhiteSpace { get; set; }
     public string DefaultEncoding { get; set; }
     public string ColorDurationTooShort { get; set; }
     public string ColorDurationTooLong { get; set; }
@@ -322,6 +323,7 @@ public class LanguageSettings
         AutoBackupIntervalMinutes = "Auto-backup interval (minutes)";
         AutoBackupDeleteAfterDays = "Auto-backup retention (days)";
         AutoConvertToUtf8 = "Auto-convert to UTF-8 on open";
+        AutoTrimWhiteSpace = "Auto-trim white-space";
         DefaultEncoding = "Default encoding";
         ColorDurationTooShort = "Color duration if too short";
         ColorDurationTooLong = "Color duration if too long";
