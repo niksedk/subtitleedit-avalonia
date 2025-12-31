@@ -9152,36 +9152,36 @@ public partial class MainViewModel :
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_subtitleFileName);
             }
             else if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
             }
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_subtitleFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
             }
         }
 
