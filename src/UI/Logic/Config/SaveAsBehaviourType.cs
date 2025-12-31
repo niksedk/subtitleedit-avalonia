@@ -2,7 +2,9 @@
 
 public enum SaveAsBehaviourType
 {
+    UseSubtitleFileNameThenVideoFileName,
+    UseVideoFileNameThenSubtitleFileName,
     UseVideoFileName,
-    RememberLastUsedFolder,
-    Default,
+    UseSubtitleFileName,
+    New,
 }

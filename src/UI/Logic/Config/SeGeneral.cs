@@ -167,7 +167,7 @@ public class SeGeneral
         DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
         SubtitleDoubleClickAction = nameof(SubtitleDoubleClickActionType.GoToSubtitleAndPause);
-        SaveAsBehavior = nameof(SaveAsBehaviourType.UseVideoFileName);
+        SaveAsBehavior = nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName);
         SaveAsAppendLanguageCode = nameof(SaveAsLanguageAppendType.None);
         AutoConvertToUtf8 = false;
         AutoGuessAnsiEncoding = true;

@@ -217,8 +217,10 @@ public class LanguageSettings
     public string SubtitleGridFormattingShowTags { get; set; }
     public string WaveformParagraphBackgroundColor { get; set; }
     public string WaveformParagraphSelectedBackgroundColor { get; set; }
-    public string SaveAsBehaviorRememberLastUsedFolder { get; set; }
-    public string SaveAsBehaviorUseVideoFileFolder { get; set; }
+    public string SaveAsBehaviorUseSubtitleVideoFilename { get; set; }
+    public string SaveAsBehaviorUseVideoSubtitleFilename { get; set; }
+    public string SaveAsBehaviorUseVideoFileName { get; set; }
+    public string SaveAsBehaviorUseSubtitleFileName { get; set; }
     public string SaveAsAppendLanguageCodeTwoLetter { get; set; }
     public string SaveAsAppendLanguageCodeThreeLetter { get; set; }
     public string SaveAsAppendLanguageCodeLanguageName { get; set; }
@@ -434,9 +436,11 @@ public class LanguageSettings
         SubtitleGridFormattingShowFormatting = "Show formatting";
         SubtitleGridFormattingShowTags = "Show tags";
         WaveformParagraphBackgroundColor = "Waveform subtitle background color";
-        WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";
-        SaveAsBehaviorRememberLastUsedFolder = "Remember last used folder";
-        SaveAsBehaviorUseVideoFileFolder = "Use video file folder";
+        WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";        
+        SaveAsBehaviorUseSubtitleVideoFilename = "Use subtitle/video file name";
+        SaveAsBehaviorUseVideoSubtitleFilename = "Use video/subtitle file name";
+        SaveAsBehaviorUseVideoFileName = "Use video file name";
+        SaveAsBehaviorUseSubtitleFileName = "Use subtitle file name";
         SaveAsAppendLanguageCodeTwoLetter = "Two-letter";
         SaveAsAppendLanguageCodeThreeLetter = "Three-letter";
         SaveAsAppendLanguageCodeLanguageName = "Language name";

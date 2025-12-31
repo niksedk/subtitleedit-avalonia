@@ -9148,17 +9148,45 @@ public partial class MainViewModel :
     private async Task<bool> SaveSubtitleAs()
     {
         var newFileName = "New";
-        if (!string.IsNullOrEmpty(_subtitleFileName))
+        if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileNameThenVideoFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+            if (!string.IsNullOrEmpty(_subtitleFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+            }
+            else if (!string.IsNullOrEmpty(_videoFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+            }
         }
-        else if (!string.IsNullOrEmpty(_videoFileName))
+        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
         {
-            newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+            if (!string.IsNullOrEmpty(_videoFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+            }
+            if (!string.IsNullOrEmpty(_subtitleFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_subtitleFileName);
+            }
+        }
+        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
+        {
+            if (!string.IsNullOrEmpty(_videoFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+            }
+        }
+        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
+        {
+            if (!string.IsNullOrEmpty(_subtitleFileName))
+            {
+                newFileName = Path.GetFileNameWithoutExtension(_videoFileName);
+            }
         }
 
         var language = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull2(GetUpdateSubtitle());
-        if (!string.IsNullOrEmpty(language))
+        if (!string.IsNullOrEmpty(language) && Se.Settings.General.SaveAsAppendLanguageCode != nameof(SaveAsLanguageAppendType.None))
         {
             var l = Iso639Dash2LanguageCode.List.FirstOrDefault(p => p.TwoLetterCode == language);
             if (l != null)

@@ -327,9 +327,11 @@ public partial class SettingsViewModel : ObservableObject
 
         SaveAsBehaviorTypes =
         [
-            Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder,
-            Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder,
-            Se.Language.General.Default,
+            Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleVideoFilename,
+            Se.Language.Options.Settings.SaveAsBehaviorUseVideoSubtitleFilename,
+            Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileName,
+            Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleFileName,
+            Se.Language.General.Name,
         ];
         SelectedSaveAsBehaviorType = SaveAsBehaviorTypes[0];
 
@@ -624,14 +626,24 @@ public partial class SettingsViewModel : ObservableObject
 
     private static string MapFromSelectedSaveAsBehavior(string saveAsBehavior)
     {
+        if (saveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileNameThenVideoFileName))
+        {
+            return Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleVideoFilename;
+        }
+
+        if (saveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
+        {
+            return Se.Language.Options.Settings.SaveAsBehaviorUseVideoSubtitleFilename;
+        }
+
         if (saveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
         {
-            return Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder;
+            return Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileName;
         }
-        
-        if (saveAsBehavior == nameof(SaveAsBehaviourType.RememberLastUsedFolder))
+
+        if (saveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
         {
-            return Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder;
+            return Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleFileName;
         }
 
         return Se.Language.General.Default;
@@ -980,22 +992,32 @@ public partial class SettingsViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    private string MapToSaveAsBehavior(string selectedSaveAsBehaviorType)
+    private static string MapToSaveAsBehavior(string selectedSaveAsBehaviorType)
     {
-        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileFolder)
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleVideoFilename)
+        {
+            return nameof(SaveAsBehaviourType.UseSubtitleFileNameThenVideoFileName);
+        }
+
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseVideoSubtitleFilename)
+        {
+            return nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName);
+        }
+
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseVideoFileName)
         {
             return nameof(SaveAsBehaviourType.UseVideoFileName);
         }
 
-        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorRememberLastUsedFolder)
+        if (selectedSaveAsBehaviorType == Se.Language.Options.Settings.SaveAsBehaviorUseSubtitleFileName)
         {
-            return nameof(SaveAsBehaviourType.RememberLastUsedFolder);
+            return nameof(SaveAsBehaviourType.UseSubtitleFileName);
         }
 
-        return nameof(SaveAsBehaviourType.Default);
+        return nameof(SaveAsBehaviourType.New);
     }
 
-    private string MapToSaveAsAppendLanguageCode(string selectedSaveAsAppendLanguageCode)
+    private static string MapToSaveAsAppendLanguageCode(string selectedSaveAsAppendLanguageCode)
     {
         if (selectedSaveAsAppendLanguageCode == Se.Language.Options.Settings.SaveAsAppendLanguageCodeTwoLetter)
         {
