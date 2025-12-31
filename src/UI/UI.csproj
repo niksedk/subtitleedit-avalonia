@@ -69,6 +69,9 @@
 		<None Remove="Assets\FileTypes\sup.ico" />
 		<None Remove="Assets\FileTypes\vtt.ico" />
 		<None Remove="Assets\HunspellDictionaries.json" />
+		<None Remove="Assets\Languages\Danish.json" />
+		<None Remove="Assets\Languages\English.json" />
+		<None Remove="Assets\Languages\German.json" />
 		<None Remove="Assets\NetflixGlyphs.zip" />
 		<None Remove="Assets\TextToSpeech\AllTalkVoices.json" />
 		<None Remove="Assets\TextToSpeech\AzureVoices.json" />
@@ -82,6 +85,14 @@
 		<None Remove="Assets\Whisper\WhisperOpenAI.txt" />
 		<None Remove="Styles.xaml" />
 		<AvaloniaResource Include="Assets\Dictionaries.zip" />
+		<AvaloniaResource Include="Assets\Languages\Danish.json">
+		  <CopyToOutputDirectory></CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Assets\Languages\English.json">
+		  <CopyToOutputDirectory></CopyToOutputDirectory>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Assets\Languages\German.json" />
+		<AvaloniaResource Include="Assets\Languages\ChineseSimplified.json" />
 		<AvaloniaResource Include="Assets\Layout\Layout01.png" />
 		<AvaloniaResource Include="Assets\Layout\Layout02.png" />
 		<AvaloniaResource Include="Assets\Layout\Layout03.png" />
@@ -151,14 +162,5 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\libse\LibSE.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="Assets\Languages\Danish.json">
-	    <CopyToOutputDirectory></CopyToOutputDirectory>
-	  </None>
-	  <None Update="Assets\Languages\English.json">
-	    <CopyToOutputDirectory></CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 </Project>
