@@ -39,7 +39,12 @@ public class ShortcutManager : IShortcutManager
 
     public void OnKeyPressed(object? sender, KeyEventArgs e)
     {
-        _activeKeys.Add(e.Key);
+        if (e.Key != Key.LeftCtrl && e.Key != Key.RightCtrl &&
+            e.Key != Key.LeftShift && e.Key != Key.RightShift &&
+            e.Key != Key.LeftAlt && e.Key != Key.RightAlt)
+        {
+            _activeKeys.Add(e.Key);  // do not add modifier keys
+        }
     }
 
     public void OnKeyReleased(object? sender, KeyEventArgs e)
@@ -57,7 +62,7 @@ public class ShortcutManager : IShortcutManager
         _shortcuts.Add(shortcut);
     }
 
-    public IRelayCommand? CheckShortcuts(string activeControl)
+    public IRelayCommand? CheckShortcuts(KeyEventArgs keyEventArgs, string activeControl)
     {
         if (!_sorted)
         {
@@ -65,7 +70,21 @@ public class ShortcutManager : IShortcutManager
             _shortcuts = _shortcuts.OrderByDescending(p => p.Keys.Count).ToList();
         }
 
-        var keys = _activeKeys.Select(p => p.ToString()).ToList();
+        var activeKeysIncludeingModefiers = new HashSet<Key>(_activeKeys);
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            activeKeysIncludeingModefiers.Add(Key.LeftCtrl);
+        }
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Alt))
+        {
+            activeKeysIncludeingModefiers.Add(Key.LeftAlt);
+        }
+        if (keyEventArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            activeKeysIncludeingModefiers.Add(Key.LeftShift);
+        }
+
+        var keys = activeKeysIncludeingModefiers.Select(p => p.ToString()).ToList();
         var hashCode = ShortCut.CalculateHash(keys, activeControl);
         var inputWithNormalizedModifiers = CalculateNormalizedHash(keys, activeControl);
 

@@ -10609,6 +10609,11 @@ public partial class MainViewModel :
                 _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
             }
 
+            if (keyEventArgs.Key == Key.LeftCtrl)
+            {
+                return;
+            }
+
             _lastKeyPressedMs = ms;
 
             _shortcutManager.OnKeyPressed(this, keyEventArgs);
@@ -10697,10 +10702,10 @@ public partial class MainViewModel :
                     return;
                 }
 
-                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGrid.ToString());
+                var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGrid.ToString());
                 if (relayCommand == null)
                 {
-                    relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGridAndTextBox.ToString());
+                    relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGridAndTextBox.ToString());
                 }
 
                 if (relayCommand != null)
@@ -10713,7 +10718,7 @@ public partial class MainViewModel :
 
             if (AudioVisualizer != null && AudioVisualizer.IsFocused)
             {
-                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.Waveform.ToString());
+                var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.Waveform.ToString());
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -10724,7 +10729,7 @@ public partial class MainViewModel :
 
             if (EditTextBox.IsFocused)
             {
-                var relayCommand = _shortcutManager.CheckShortcuts(ShortcutCategory.SubtitleGridAndTextBox.ToString());
+                var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGridAndTextBox.ToString());
                 if (relayCommand != null)
                 {
                     keyEventArgs.Handled = true;
@@ -10736,7 +10741,7 @@ public partial class MainViewModel :
             var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
             var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToString());
 
-            var rc = _shortcutManager.CheckShortcuts(ShortcutCategory.General.ToString().ToLowerInvariant());
+            var rc = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.General.ToString().ToLowerInvariant());
             if (rc != null)
             {
                 keyEventArgs.Handled = true;

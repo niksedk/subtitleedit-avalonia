@@ -10,7 +10,7 @@ public interface IShortcutManager
     void OnKeyReleased(object? sender, KeyEventArgs e);
     void ClearKeys();
     void RegisterShortcut(ShortCut shortcut);
-    IRelayCommand? CheckShortcuts(string activeControl);
+    IRelayCommand? CheckShortcuts(KeyEventArgs keyEventArgs, string activeControl);
     void ClearShortcuts();
     HashSet<Key> GetActiveKeys();
     bool IsControlPressed();
