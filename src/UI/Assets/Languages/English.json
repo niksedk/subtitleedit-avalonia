@@ -769,7 +769,9 @@
     "xLinesSwitched": "{0} lines switched",
     "xShotChangedLoaded": "{0} shot changes loaded",
     "youtubeDlDownloadedSuccessfully": "\u0022yt-dlp\u0022 downloaded successfully.",
-    "youtubeDlNotInstalledDownloadNow": "\u0022yt-dlp\u0022 is not installed and is required for playing online videos.\n\nDownload now?"
+    "youtubeDlNotInstalledDownloadNow": "\u0022yt-dlp\u0022 is not installed and is required for playing online videos.\n\nDownload now?",
+    "insertUnicodeSymbol": "Insert Unicode symbol",
+    "trimmedXLines": "Trimmed {0} subtitle lines"
   },
   "file": {
     "ebuSaveOptions": {
@@ -1543,6 +1545,7 @@
       "autoBackupIntervalMinutes": "Auto-backup interval (minutes)",
       "autoBackupDeleteAfterDays": "Auto-backup retention (days)",
       "autoConvertToUtf8": "Auto-convert to UTF-8 on open",
+      "autoTrimWhiteSpace": "Auto-trim white-space",
       "defaultEncoding": "Default encoding",
       "colorDurationTooShort": "Color duration if too short",
       "colorDurationTooLong": "Color duration if too long",
@@ -1637,6 +1640,8 @@
       "waveformDrawStyle": "Waveform draw style",
       "vlcWidRendering": "libVLC - Native Window ID rendering",
       "subtitleDoubleClickAction": "Subtitle grid double-click action",
+      "saveAsBehavior": "\u0022Save as\u0022 behavior",
+      "saveAsAppendLanguageCode": "\u0022Save as\u0022 append language code",
       "gridGoToSubtitleAndPause": "Go to subtitle and pause",
       "gridGoToSubtitleAndPlay": "Go to subtitle and play",
       "gridGoToSubtitleOnly": "Go to subtitle only",
@@ -1645,7 +1650,14 @@
       "subtitleGridFormattingShowFormatting": "Show formatting",
       "subtitleGridFormattingShowTags": "Show tags",
       "waveformParagraphBackgroundColor": "Waveform subtitle background color",
-      "waveformParagraphSelectedBackgroundColor": "Waveform selected subtitle background color"
+      "waveformParagraphSelectedBackgroundColor": "Waveform selected subtitle background color",
+      "saveAsBehaviorUseSubtitleVideoFilename": "Use subtitle/video file name",
+      "saveAsBehaviorUseVideoSubtitleFilename": "Use video/subtitle file name",
+      "saveAsBehaviorUseVideoFileName": "Use video file name",
+      "saveAsBehaviorUseSubtitleFileName": "Use subtitle file name",
+      "saveAsAppendLanguageCodeTwoLetter": "Two-letter",
+      "saveAsAppendLanguageCodeThreeLetter": "Three-letter",
+      "saveAsAppendLanguageCodeLanguageName": "Language name"
     },
     "shortcuts": {
       "title": "Shortcuts",
@@ -1869,7 +1881,8 @@
       "showPointSyncViaOther": "Show point sync via other subtitle",
       "showPointSync": "Show point sync",
       "showMediaInformation": "Show media information",
-      "chooseSubtitleFormat": "Choose subtitle format"
+      "chooseSubtitleFormat": "Choose subtitle format",
+      "trimWhitespaceSelectedLines": "Trim whitespace (selected lines)"
     },
     "wordLists": {
       "title": "Word lists",
@@ -1949,7 +1962,8 @@
     "captureTopAlign": "Capture top align",
     "ocrImage": "OCR image",
     "oneColor": "One color (white)",
-    "darknessThreshold": "Darkness threshold"
+    "darknessThreshold": "Darkness threshold",
+    "editExportDotDotDot": "Edit/export..."
   },
   "assa": {
     "stylesTitle": "Advanced Sub Station Alpha styles",
