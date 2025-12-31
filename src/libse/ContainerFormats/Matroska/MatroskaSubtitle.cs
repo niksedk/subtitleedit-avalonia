@@ -1,6 +1,7 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using System;
 using System.IO;
+using System.IO.Compression;
 
 namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 {
@@ -24,29 +25,38 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         /// <returns>Data byte array (uncompressed)</returns>
         public byte[] GetData(MatroskaTrackInfo matroskaTrackInfo)
         {
-            if (matroskaTrackInfo.ContentEncodingType != MatroskaTrackInfo.ContentEncodingTypeCompression ||  // no compression
-                (matroskaTrackInfo.ContentEncodingScope & MatroskaTrackInfo.ContentEncodingScopeTracks) == 0) // tracks not compressed
+            // Check if compression is used and if it applies to the frame data (Scope)
+            if (matroskaTrackInfo.ContentEncodingType != 0 || // 0 = Compression
+                (matroskaTrackInfo.ContentEncodingScope & 1) == 0) // 1 = All frame data
             {
                 return Data;
             }
 
-            var outStream = new MemoryStream();
-            var outZStream = new ComponentAce.Compression.Libs.zlib.ZOutputStream(outStream);
-            var inStream = new MemoryStream(Data);
-            byte[] buffer;
+            // Ensure we have enough data to check for zlib header
+            if (Data == null || Data.Length < 2)
+            {
+                return Data;
+            }
+
             try
             {
-                MatroskaTrackInfo.CopyStream(inStream, outZStream);
-                buffer = new byte[outZStream.TotalOut];
-                outStream.Position = 0;
-                outStream.Read(buffer, 0, buffer.Length);
+                // Matroska zlib blocks usually start with 0x78 0x9C (zlib header).
+                // DeflateStream needs raw data, so we skip the first 2 bytes.
+                int headerOffset = (Data[0] == 0x78 && (Data[1] == 0x9C || Data[1] == 0x01 || Data[1] == 0xDA)) ? 2 : 0;
+
+                using var inStream = new MemoryStream(Data, headerOffset, Data.Length - headerOffset);
+                using var outStream = new MemoryStream();
+                using (var deflateStream = new DeflateStream(inStream, CompressionMode.Decompress))
+                {
+                    deflateStream.CopyTo(outStream);
+                }
+                return outStream.ToArray();
             }
-            finally
+            catch
             {
-                outZStream.Close();
-                inStream.Close();
+                // If decompression fails, return raw data as a fallback
+                return Data;
             }
-            return buffer;
         }
 
         public MatroskaSubtitle(byte[] data, long start)

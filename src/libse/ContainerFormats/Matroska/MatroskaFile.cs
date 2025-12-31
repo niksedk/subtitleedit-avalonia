@@ -163,7 +163,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         public List<MatroskaChapter> GetChapters()
         {
             ReadChapters();
-            return _chapters.Distinct().ToList();
+            return _chapters;
         }
 
         public void Dispose() => _stream?.Dispose();
@@ -216,14 +216,18 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         private void ReadSegmentCluster(LoadMatroskaCallback progressCallback)
         {
             _stream.Seek(_segmentElement.DataPosition, SeekOrigin.Begin);
-            while (_stream.Position < _segmentElement.EndPosition)
+            var endPosition = _segmentElement.EndPosition;
+            var streamLength = _stream.Length;
+            
+            while (_stream.Position < endPosition)
             {
                 var pos = _stream.Position;
                 var id = (ElementId)ReadVariableLengthUInt(false);
-                if (id == ElementId.None && pos + 1000 < _stream.Length)
+                if (id == ElementId.None && pos + 1000 < streamLength)
                 {
                     int errors = 0;
-                    while (id != ElementId.Cluster && pos + 1000 < _stream.Length && errors++ < 5_000_000)
+                    var searchLimit = streamLength;
+                    while (id != ElementId.Cluster && pos + 1000 < searchLimit && errors++ < 5_000_000)
                     {
                         _stream.Seek(++pos, SeekOrigin.Begin);
                         id = (ElementId)ReadVariableLengthUInt(false);
@@ -236,7 +240,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 if (element.Id == ElementId.Cluster) ReadCluster(element);
                 else SkipBytes(element.DataSize);
 
-                progressCallback?.Invoke(element.EndPosition, _stream.Length);
+                progressCallback?.Invoke(element.EndPosition, streamLength);
             }
         }
 
@@ -276,8 +280,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 if (lacing == 2) SkipBytes(frames);
             }
 
-            var data = new byte[(int)(blockElement.EndPosition - _stream.Position)];
-            _stream.Read(data, 0, data.Length);
+            var dataLength = (int)(blockElement.EndPosition - _stream.Position);
+            var data = new byte[dataLength];
+            _stream.Read(data, 0, dataLength);
             return new MatroskaSubtitle(data, (long)Math.Round(GetTimeScaledToMilliseconds(clusterTimeCode + timeCode)));
         }
 
@@ -413,6 +418,8 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
             ulong result = unsetFirstBit ? (ulong)(first & (0xFF >> length)) : (ulong)first;
 
+            if (length == 1) return result;
+
             // Check for EBML unknown length (all bits 1 except marker)
             bool isUnknown = unsetFirstBit && (first == (0xFF >> (8 - length)));
 
@@ -421,8 +428,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 int b = _stream.ReadByte();
                 if (b < 0) break;
 
-                // Fix for CS0675: Cast to byte first to avoid sign extension
-                result = (result << 8) | (ulong)(byte)b;
+                result = (result << 8) | (uint)b;
 
                 if (isUnknown && b != 0xFF) isUnknown = false;
             }
@@ -474,7 +480,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         private string ReadString(int length, Encoding encoding)
         {
             if (length <= 0) return string.Empty;
-            if (length <= 256)
+            if (length <= 1024)
             {
                 Span<byte> buffer = stackalloc byte[length];
                 _stream.Read(buffer);
