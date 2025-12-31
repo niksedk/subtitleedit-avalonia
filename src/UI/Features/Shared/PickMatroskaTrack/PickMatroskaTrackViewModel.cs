@@ -194,11 +194,17 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
         Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal void OnKeyDownHandler(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
             Cancel();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Enter && TracksGrid.IsFocused)
+        {
+            Ok();
+            e.Handled = true;
         }
     }
 
@@ -303,5 +309,5 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
             TracksGrid.ScrollIntoView(TracksGrid.SelectedItem, null);
             TrackChanged();
         }, DispatcherPriority.Background);
-    }
+    }   
 }

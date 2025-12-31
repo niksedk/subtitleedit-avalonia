@@ -1,7 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -53,17 +55,19 @@ public class PickMatroskaTrackWindow : Window
         grid.Add(subtitleView, 0, 1);
         grid.Add(panelButtons, 1, 0, 1, 2);
 
-
         Content = grid;
 
-        Activated += delegate
-        {
-            buttonOk.Focus(); // hack to make OnKeyDown work
-        };
-        KeyDown += (_, e) => vm.OnKeyDown(e);
+        //KeyDown += (_, e) => vm.OnKeyDown(e);
+        AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
+
+
         Loaded += (_, _) =>
         {
-            vm.SelectAndScrollToRow(0);
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                vm.SelectAndScrollToRow(0);
+                vm.TracksGrid.Focus();
+            }, DispatcherPriority.Input);
         };
     }
 
@@ -136,7 +140,7 @@ public class PickMatroskaTrackWindow : Window
         return UiUtil.MakeBorderForControlNoPadding(dataGridTracks);
     }
 
-    private Border MakeSubtitleView(PickMatroskaTrackViewModel vm)
+    private static Border MakeSubtitleView(PickMatroskaTrackViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
