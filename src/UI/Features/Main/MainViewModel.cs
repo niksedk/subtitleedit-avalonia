@@ -12013,7 +12013,7 @@ public partial class MainViewModel :
     {
         if (string.IsNullOrEmpty(_videoFileName))
         {
-            Dispatcher.UIThread.Post(async () => { await CommandFileOpenKeepVideo(); });
+            Dispatcher.UIThread.Post(async () => { await CommandVideoOpen(); });
         }
     }
 }
