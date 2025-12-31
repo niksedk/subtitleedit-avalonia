@@ -4184,7 +4184,7 @@ public partial class MainViewModel :
         ToggleSmpteTiming();
     }
 
-    private void ReloadAudioVisualizer()
+    private async void ReloadAudioVisualizer()
     {
         if (string.IsNullOrEmpty(_videoFileName))
         {
@@ -4207,7 +4207,14 @@ public partial class MainViewModel :
             var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
             if (spectrogram != null)
             {
-                spectrogram.Load();
+                if (Se.Settings.VideoControls.UseExperimentalRenderer)
+                {
+                    await spectrogram.LoadAsync();
+                }
+                else
+                {
+                    spectrogram.Load();
+                }
                 AudioVisualizer.SetSpectrogram(spectrogram);
             }
 
@@ -11090,7 +11097,14 @@ public partial class MainViewModel :
                 var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
                 if (spectrogram != null)
                 {
-                    spectrogram.Load();
+                    if (Se.Settings.VideoControls.UseExperimentalRenderer)
+                    {
+                        await spectrogram.LoadAsync();
+                    }
+                    else
+                    {
+                        spectrogram.Load();
+                    }
                     AudioVisualizer.SetSpectrogram(spectrogram);
                 }
 

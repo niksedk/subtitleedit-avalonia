@@ -1,4 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
@@ -334,6 +334,75 @@ public class SpectrogramData2 : IDisposable
                 }
             }
             Images = images;
+
+            if (Images.Count == 0)
+            {
+                Se.LogError($"No spectrogram images found in {directory}");
+            }
+        }
+        catch (Exception exception)
+        {
+            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
+        }
+    }
+
+    public async Task LoadAsync()
+    {
+        if (_loadFromDirectory == null)
+        {
+            return;
+        }
+
+        string directory = _loadFromDirectory;
+        string xmlInfoFileName = Path.Combine(directory, "Info.xml");
+        _loadFromDirectory = null;
+
+        try
+        {
+            if (!File.Exists(xmlInfoFileName))
+            {
+                return;
+            }
+
+            var doc = new XmlDocument();
+            var culture = CultureInfo.InvariantCulture;
+            doc.Load(xmlInfoFileName);
+            FftSize = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("NFFT")?.InnerText, culture);
+            ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
+            SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
+
+            var imageExtension = Se.Settings.VideoControls.UseExperimentalRenderer ? "*.png" : "*.jpg";
+            var fileNames = Directory.EnumerateFiles(directory, imageExtension)
+                .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
+                .ToList();
+
+            if (Se.Settings.VideoControls.UseExperimentalRenderer)
+            {
+                var loadTasks = fileNames.Select(async fileName =>
+                {
+                    return await Task.Run(() =>
+                    {
+                        using var fileStream = File.OpenRead(fileName);
+                        return SKBitmap.Decode(fileStream);
+                    });
+                });
+
+                var images = await Task.WhenAll(loadTasks);
+                Images = images.ToList();
+            }
+            else
+            {
+                var images = new List<SKBitmap>(fileNames.Count);
+                foreach (string fileName in fileNames)
+                {
+                    using (var fileStream = File.OpenRead(fileName))
+                    {
+                        var skBitmap = SKBitmap.Decode(fileStream);
+                        images.Add(skBitmap);
+                    }
+                }
+                Images = images;
+            }
 
             if (Images.Count == 0)
             {
@@ -888,13 +957,18 @@ public class WavePeakGenerator2 : IDisposable
             saveImageTask?.Wait();
 
             // save image
-            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".jpg");
+            var imageFormat = Se.Settings.VideoControls.UseExperimentalRenderer 
+                ? SKEncodedImageFormat.Png 
+                : SKEncodedImageFormat.Jpeg;
+            var imageQuality = Se.Settings.VideoControls.UseExperimentalRenderer ? 100 : 50;
+            var imageExtension = Se.Settings.VideoControls.UseExperimentalRenderer ? ".png" : ".jpg";
+            string imagePath = Path.Combine(spectrogramDirectory, iChunk + imageExtension);
             saveImageTask = Task.Factory.StartNew(() =>
             {
                 using (var stream = File.OpenWrite(imagePath))
-                using (var pngData = bmp.Encode(SKEncodedImageFormat.Jpeg, 50))
+                using (var imageData = bmp.Encode(imageFormat, imageQuality))
                 {
-                    pngData.SaveTo(stream);
+                    imageData.SaveTo(stream);
                 }
             });
 
