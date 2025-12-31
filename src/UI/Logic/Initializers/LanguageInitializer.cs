@@ -119,11 +119,11 @@ public class LanguageInitializer() : ILanguageInitializer
             {
                 var uri = new Uri($"avares://SubtitleEdit/Assets/Languages/{languageFile}.json");
                 await using var stream = AssetLoader.Open(uri);
-                var outputPath = Path.Combine(outputDir, languageFile);
+                var outputPath = Path.Combine(outputDir, $"{languageFile}.json");
                 await using var fileStream = File.Create(outputPath);
                 await stream.CopyToAsync(fileStream);
             }
-            catch 
+            catch
             {
                 // Ignore
             }
