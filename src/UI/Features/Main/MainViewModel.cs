@@ -38,6 +38,7 @@ using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Features.Main.MainHelpers;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Options.Language;
@@ -60,6 +61,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickLayers;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
+using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Shared.SetVideoOffset;
@@ -124,7 +126,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using MediaInfoViewViewModel = Nikse.SubtitleEdit.Features.Shared.MediaInfoView.MediaInfoViewViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
@@ -875,11 +876,7 @@ public partial class MainViewModel :
             return;
         }
 
-        bool flowControl = await SubtitleOpenOriginal(selectedIndex, fileName);
-        if (!flowControl)
-        {
-            return;
-        }
+        await SubtitleOpenOriginal(selectedIndex, fileName);
 
         _shortcutManager.ClearKeys();
     }
@@ -912,31 +909,46 @@ public partial class MainViewModel :
 
         if (subtitle.Paragraphs.Count == Subtitles.Count)
         {
-            _subtitleOriginal = subtitle;
-            _subtitleFileNameOriginal = fileName;
-            for (var i = 0; i < Subtitles.Count; i++)
-            {
-                Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
-            }
-
-            _changeSubtitleHashOriginal = GetFastHashOriginal();
-            ShowColumnOriginalText = true;
-
-            AutoFitColumns();
-            SelectAndScrollToRow(selectedIndex);
-            AddToRecentFiles(true);
+            ImportOriginalSubtitle(selectedIndex, fileName, subtitle);
+            return true;
         }
         else
         {
-            var message = "The original subtitle does not have the same number of subtitle lines as the current subtitle." +
-                          Environment.NewLine
-                          + "Original subtitle lines: " + subtitle.Paragraphs.Count + Environment.NewLine
-                          + "Current subtitle lines: " + Subtitles.Count;
-            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            var msg = string.Format(Se.Language.Main.OpenOriginalDifferentNumberOfSubtitlesXY, subtitle.Paragraphs.Count, Subtitles.Count);
+            await MessageBox.Show(Window!, Se.Language.General.Error, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            var newOriginal = ImportOriginalHelper.GetMatchingOriginalLines(Subtitles, subtitle);
+            var originalWithTextCount = newOriginal.Paragraphs.Count(p => !string.IsNullOrEmpty(p.Text));
+            if (originalWithTextCount > 0)
+            {
+                msg = string.Format(Se.Language.Main.ImportXMatchingOriginalLines, originalWithTextCount);
+                var answer = await MessageBox.Show(Window!, string.Empty, msg, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    ImportOriginalSubtitle(selectedIndex, fileName, newOriginal);
+                    return true;
+                }
+            }
         }
 
-        return true;
+        return false;
+    }
+
+    private void ImportOriginalSubtitle(int selectedIndex, string fileName, Subtitle subtitle)
+    {
+        _subtitleOriginal = subtitle;
+        _subtitleFileNameOriginal = fileName;
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            Subtitles[i].OriginalText = subtitle.Paragraphs[i].Text;
+        }
+
+        _changeSubtitleHashOriginal = GetFastHashOriginal();
+        ShowColumnOriginalText = true;
+
+        AutoFitColumns();
+        SelectAndScrollToRow(selectedIndex);
+        AddToRecentFiles(true);
     }
 
     [RelayCommand]

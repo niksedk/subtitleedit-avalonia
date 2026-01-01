@@ -16,7 +16,6 @@ using Nikse.SubtitleEdit.Features.Ocr.Engines;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
-using Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.SplitBreakLongLines;
 using Nikse.SubtitleEdit.Logic;
