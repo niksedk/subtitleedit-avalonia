@@ -722,6 +722,24 @@ public static class InitListViewAndEditBox
                 },
                 new MenuItem
                 {
+                    [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SurroundWith1Text)),
+                    Command = vm.SurroundWith1Command,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SurroundWith2Text)),
+                    Command = vm.SurroundWith2Command,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
+                    [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SurroundWith3Text)),
+                    Command = vm.SurroundWith3Command,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
                     Header = Se.Language.Main.Menu.Statistics,
                     Command = vm.StatisticsSelectedLinesCommand,
                     DataContext = vm,

@@ -214,6 +214,9 @@ public partial class MainViewModel :
     [ObservableProperty] private string _waveformGeneratingText;
     [ObservableProperty] private bool _isFilePropertiesVisible;
     [ObservableProperty] private string _filePropertiesText;
+    [ObservableProperty] private string _surroundWith1Text;
+    [ObservableProperty] private string _surroundWith2Text;
+    [ObservableProperty] private string _surroundWith3Text;
 
     public DataGrid SubtitleGrid { get; set; }
     public Window? Window { get; set; }
@@ -424,6 +427,9 @@ public partial class MainViewModel :
         VideoOffsetText = string.Empty;
         SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
         WaveformGeneratingText = string.Empty;
+        SurroundWith1Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround1Left, Se.Settings.Surround1Right);
+        SurroundWith2Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround2Left, Se.Settings.Surround2Right);
+        SurroundWith3Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround3Left, Se.Settings.Surround3Right);
 
         themeInitializer.UpdateThemesIfNeeded().ConfigureAwait(true);
         Dispatcher.UIThread.Post(async void () =>
@@ -556,6 +562,10 @@ public partial class MainViewModel :
         {
             _shortcutManager.RegisterShortcut(shortCut);
         }
+
+        SurroundWith1Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround1Left, Se.Settings.Surround1Right);
+        SurroundWith2Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround2Left, Se.Settings.Surround2Right);
+        SurroundWith3Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround3Left, Se.Settings.Surround3Right);
     }
 
     [RelayCommand]
