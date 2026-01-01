@@ -2,6 +2,7 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Nikse.SubtitleEdit.Core.ContainerFormats
 {
@@ -31,7 +32,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats
             return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
         }
 
-        private static void GenerateBitmap(FastBitmap bmp, byte[] buf, List<SKColor> fourColors)
+        private static unsafe void GenerateBitmap(SKBitmap bmp, byte[] buf, List<SKColor> fourColors)
         {
             int w = bmp.Width;
             int h = bmp.Height;
@@ -39,10 +40,25 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats
             var nibbleEnd = buf.Length * 2;
             var x = 0;
             var y = 0;
+
+            // Get direct access to pixel buffer
+            var pixelsPtr = bmp.GetPixels();
+            var pixels = (uint*)pixelsPtr.ToPointer();
+            var stride = bmp.RowBytes / 4; // Width in pixels
+
+            // Pre-convert colors to uint for faster pixel writing
+            var colorValues = new uint[4];
+            for (int i = 0; i < 4; i++)
+            {
+                var c = fourColors[i];
+                colorValues[i] = (uint)((c.Alpha << 24) | (c.Red << 16) | (c.Green << 8) | c.Blue);
+            }
+
             for (; ; )
             {
                 if (nibbleOffset >= nibbleEnd)
                 {
+                    bmp.NotifyPixelsChanged();
                     return;
                 }
 
@@ -73,8 +89,12 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats
                 var color = v & 0x03;
                 if (color > 0)
                 {
-                    var c = fourColors[color];
-                    bmp.SetPixel(x, y, c, len);
+                    var colorValue = colorValues[color];
+                    var pixelIndex = y * stride + x;
+                    for (int i = 0; i < len; i++)
+                    {
+                        pixels[pixelIndex++] = colorValue;
+                    }
                 }
 
                 x += len;
@@ -90,8 +110,11 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats
                     nibbleOffset += (nibbleOffset & 1);
                 }
             }
+
+            bmp.NotifyPixelsChanged();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetNibble(byte[] buf, int nibbleOffset)
         {
             return (buf[nibbleOffset >> 1] >> ((1 - (nibbleOffset & 1)) << 2)) & 0xf;
@@ -114,10 +137,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats
                 }
             }
 
-            var fastBmp = new FastBitmap(bmp);
-            fastBmp.LockImage();
-            GenerateBitmap(fastBmp, _rleBuffer, fourColors);
-            fastBmp.UnlockImage();
+            GenerateBitmap(bmp, _rleBuffer, fourColors);
             return bmp;
         }
 
