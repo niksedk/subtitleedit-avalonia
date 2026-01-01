@@ -47,6 +47,34 @@ public class TmpegEncXmlPropertiesWindow : Window
             }
         };
 
+        var labelOffsetX = UiUtil.MakeLabel(Se.Language.General.OffsetX).WithMinWidth(labelWidth);
+        var numericUpDownOffsetX = UiUtil.MakeNumericUpDownThreeDecimals(-100.0m, 100.0m, 150, vm, nameof(vm.OffsetX));
+        numericUpDownOffsetX.Increment = 0.001m;
+        var panelOffsetX = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelOffsetX,
+                numericUpDownOffsetX,
+            }
+        };
+
+        var labelOffsetY = UiUtil.MakeLabel(Se.Language.General.OffsetY).WithMinWidth(labelWidth);
+        var numericUpDownOffsetY = UiUtil.MakeNumericUpDownThreeDecimals(-100.0m, 100.0m, 150, vm, nameof(vm.OffsetY));
+        numericUpDownOffsetY.Increment = 0.001m;
+        var panelOffsetY = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelOffsetY,
+                numericUpDownOffsetY,
+            }
+        };
+
         var labelCheckBoxIsBold = UiUtil.MakeLabel().WithMinWidth(labelWidth);
         var checkBoxIsBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsFontBold));
         var panelCheckBoxIsBold = new StackPanel
@@ -72,6 +100,8 @@ public class TmpegEncXmlPropertiesWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -86,8 +116,10 @@ public class TmpegEncXmlPropertiesWindow : Window
 
         grid.Add(panelFontName, 0);
         grid.Add(panelFontHeight, 1);
-        grid.Add(panelCheckBoxIsBold, 2);
-        grid.Add(buttonPanel, 3);
+        grid.Add(panelOffsetX, 2);
+        grid.Add(panelOffsetY, 3);
+        grid.Add(panelCheckBoxIsBold, 4);
+        grid.Add(buttonPanel, 5);
 
         Content = grid;
 

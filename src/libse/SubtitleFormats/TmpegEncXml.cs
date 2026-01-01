@@ -21,6 +21,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public static string FontName { get; set; } = "Tahoma";
         public static string FontBold { get; set; } = "0";
         public static string FontHeight { get; set; } = "0.069";
+        public static string OffsetX { get; set; } = "0.000";
+        public static string OffsetY { get; set; } = "0.000";
 
 
         public override string Extension => ".xsubtitle";
@@ -39,14 +41,17 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return false;
         }
 
-        internal static string Layout = @"<?xml version='1.0' encoding='UTF-8'?>
+        internal static string GetLayout() =>
+            @"<?xml version='1.0' encoding='UTF-8'?>
 <TMPGEncVMESubtitleTextFormat>
     <Layout>
         <LayoutItem index='0'>
             <Name>
-                <![CDATA[Picture bottom layout]]>
+                <![CDATA[Picture Top Left layout]]>
             </Name>
-            <Position>6</Position>
+            <Position>0</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
@@ -77,9 +82,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         </LayoutItem>
         <LayoutItem index='1'>
             <Name>
-                <![CDATA[Picture top layout]]>
+                <![CDATA[Picture Top Center layout]]>
             </Name>
             <Position>1</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
@@ -90,7 +97,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
             <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>0</VerticalAlign>
+            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -110,9 +117,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         </LayoutItem>
         <LayoutItem index='2'>
             <Name>
-                <![CDATA[Picture left layout]]>
+                <![CDATA[Picture Top Right layout]]>
             </Name>
-            <Position>7</Position>
+            <Position>1</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
@@ -122,9 +131,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>0</HorizonAlign>
-            <VerticalAlign>1</VerticalAlign>
-            <DirectionVertical>1</DirectionVertical>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
             <BorderColor>0</BorderColor>
@@ -139,13 +148,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
             <TextAlign>1</TextAlign>
-            <DirectionRightToLeft>1</DirectionRightToLeft>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='3'>
             <Name>
-                <![CDATA[Picture right layout]]>
+                <![CDATA[Picture Middle Left layout]]>
             </Name>
-            <Position>8</Position>
+            <Position>3</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
@@ -155,9 +166,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>2</HorizonAlign>
-            <VerticalAlign>1</VerticalAlign>
-            <DirectionVertical>1</DirectionVertical>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
             <BorderColor>0</BorderColor>
@@ -172,20 +183,162 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
             <TextAlign>1</TextAlign>
-            <DirectionRightToLeft>1</DirectionRightToLeft>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='4'>
             <Name>
-                <![CDATA[Picture bottom layout]]>
+                <![CDATA[Picture Middle Center layout]]>
             </Name>
-            <Position>6</Position>
+            <Position>4</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
             <FontBold>[FontBold]</FontBold>
-            <FontItalic>1</FontItalic>
+            <FontItalic>0</FontItalic>
+            <FontUnderline>0</FontUnderline>
+            <FontStrikeOut>0</FontStrikeOut>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
+            <BorderActive>1</BorderActive>
+            <BorderSize>0.005</BorderSize>
+            <BorderColor>0</BorderColor>
+            <BorderOpacity>1</BorderOpacity>
+            <BackgroundActive>0</BackgroundActive>
+            <BackgroundSize>0.005</BackgroundSize>
+            <BackgroundColor>0</BackgroundColor>
+            <BackgroundOpacity>1</BackgroundOpacity>
+            <FadeInActive>0</FadeInActive>
+            <FadeInTime>1000</FadeInTime>
+            <FadeOutActive>0</FadeOutActive>
+            <FadeOutTime>1000</FadeOutTime>
+            <ScrollDirectionIndex>0</ScrollDirectionIndex>
+            <TextAlign>1</TextAlign>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
+        </LayoutItem>
+        <LayoutItem index='5'>
+            <Name>
+                <![CDATA[Picture Middle Right layout]]>
+            </Name>
+            <Position>5</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
+            <FontName>
+                <![CDATA[[FontName]]]>
+            </FontName>
+            <FontHeight>[FontHeight]</FontHeight>
+            <FontColor>17588159451135</FontColor>
+            <FontBold>[FontBold]</FontBold>
+            <FontItalic>0</FontItalic>
+            <FontUnderline>0</FontUnderline>
+            <FontStrikeOut>0</FontStrikeOut>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
+            <BorderActive>1</BorderActive>
+            <BorderSize>0.005</BorderSize>
+            <BorderColor>0</BorderColor>
+            <BorderOpacity>1</BorderOpacity>
+            <BackgroundActive>0</BackgroundActive>
+            <BackgroundSize>0.005</BackgroundSize>
+            <BackgroundColor>0</BackgroundColor>
+            <BackgroundOpacity>1</BackgroundOpacity>
+            <FadeInActive>0</FadeInActive>
+            <FadeInTime>1000</FadeInTime>
+            <FadeOutActive>0</FadeOutActive>
+            <FadeOutTime>1000</FadeOutTime>
+            <ScrollDirectionIndex>0</ScrollDirectionIndex>
+            <TextAlign>1</TextAlign>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
+        </LayoutItem>
+        <LayoutItem index='6'>
+            <Name>
+                <![CDATA[Picture Bottom Left layout]]>
+            </Name>
+            <Position>6</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
+            <FontName>
+                <![CDATA[[FontName]]]>
+            </FontName>
+            <FontHeight>[FontHeight]</FontHeight>
+            <FontColor>17588159451135</FontColor>
+            <FontBold>[FontBold]</FontBold>
+            <FontItalic>0</FontItalic>
+            <FontUnderline>0</FontUnderline>
+            <FontStrikeOut>0</FontStrikeOut>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
+            <BorderActive>1</BorderActive>
+            <BorderSize>0.005</BorderSize>
+            <BorderColor>0</BorderColor>
+            <BorderOpacity>1</BorderOpacity>
+            <BackgroundActive>0</BackgroundActive>
+            <BackgroundSize>0.005</BackgroundSize>
+            <BackgroundColor>0</BackgroundColor>
+            <BackgroundOpacity>1</BackgroundOpacity>
+            <FadeInActive>0</FadeInActive>
+            <FadeInTime>1000</FadeInTime>
+            <FadeOutActive>0</FadeOutActive>
+            <FadeOutTime>1000</FadeOutTime>
+            <ScrollDirectionIndex>0</ScrollDirectionIndex>
+            <TextAlign>1</TextAlign>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
+        </LayoutItem>
+        <LayoutItem index='7'>
+            <Name>
+                <![CDATA[Picture Bottom Center layout]]>
+            </Name>
+            <Position>7</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
+            <FontName>
+                <![CDATA[[FontName]]]>
+            </FontName>
+            <FontHeight>[FontHeight]</FontHeight>
+            <FontColor>17588159451135</FontColor>
+            <FontBold>[FontBold]</FontBold>
+            <FontItalic>0</FontItalic>
+            <FontUnderline>0</FontUnderline>
+            <FontStrikeOut>0</FontStrikeOut>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <DirectionVertical>0</DirectionVertical>
+            <BorderActive>1</BorderActive>
+            <BorderSize>0.005</BorderSize>
+            <BorderColor>0</BorderColor>
+            <BorderOpacity>1</BorderOpacity>
+            <BackgroundActive>0</BackgroundActive>
+            <BackgroundSize>0.005</BackgroundSize>
+            <BackgroundColor>0</BackgroundColor>
+            <BackgroundOpacity>1</BackgroundOpacity>
+            <FadeInActive>0</FadeInActive>
+            <FadeInTime>1000</FadeInTime>
+            <FadeOutActive>0</FadeOutActive>
+            <FadeOutTime>1000</FadeOutTime>
+            <ScrollDirectionIndex>0</ScrollDirectionIndex>
+            <TextAlign>1</TextAlign>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
+        </LayoutItem>
+        <LayoutItem index='8'>
+            <Name>
+                <![CDATA[Picture Bottom Right layout]]>
+            </Name>
+            <Position>8</Position>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
+            <FontName>
+                <![CDATA[[FontName]]]>
+            </FontName>
+            <FontHeight>[FontHeight]</FontHeight>
+            <FontColor>17588159451135</FontColor>
+            <FontBold>[FontBold]</FontBold>
+            <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
             <HorizonAlign>1</HorizonAlign>
@@ -215,11 +368,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             .Replace("[FontName]", FontName)
             .Replace("[FontBold]", FontBold)
             .Replace("[FontHeight]", FontHeight)
+            .Replace("[OffsetX]", OffsetX)
+            .Replace("[OffsetY]", OffsetY)
             ;
 
         public override string ToText(Subtitle subtitle, string title)
         {
-            var xmlStructure = Layout.Replace('\'', '"');
+            var xmlStructure = GetLayout().Replace('\'', '"');
 
             var xml = new XmlDocument();
             xml.LoadXml(xmlStructure);
@@ -235,14 +390,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 paragraph.InnerXml = "<Text><![CDATA[" + paragraph.InnerXml.Replace(Environment.NewLine, "\\n") + "]]></Text>";
 
                 XmlAttribute layoutIndex = xml.CreateAttribute("layoutindex");
-                if (p.Text.TrimStart().StartsWith("<i>", StringComparison.OrdinalIgnoreCase) && p.Text.TrimEnd().EndsWith("</i>", StringComparison.OrdinalIgnoreCase))
-                {
-                    layoutIndex.InnerText = "4";
-                }
-                else
-                {
-                    layoutIndex.InnerText = "0";
-                }
+                var layoutIndexValue = GetLayoutIndexFromAssAlignment(p.Text);
+                layoutIndex.InnerText = layoutIndexValue.ToString();
 
                 paragraph.Attributes.Append(layoutIndex);
 
@@ -265,7 +414,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             string s = ToUtf8XmlString(xml);
             var startPos = s.IndexOf("<Subtitle>", StringComparison.Ordinal) + 10;
             s = s.Substring(startPos, s.IndexOf("</Subtitle>", StringComparison.Ordinal) - startPos).Trim();
-            return Layout.Replace("@", s);
+            return GetLayout().Replace("@", s);
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
@@ -366,6 +515,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             {
                                 p.Text = "<i>" + p.Text + "</i>";
                             }
+                            
+                            // Add ASS alignment tag based on layoutindex
+                            var alignmentTag = GetAssAlignmentFromLayoutIndex(idx);
+                            if (!string.IsNullOrEmpty(alignmentTag))
+                            {
+                                p.Text = alignmentTag + p.Text;
+                            }
                         }
                     }
                     subtitle.Paragraphs.Add(p);
@@ -388,6 +544,87 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
             string[] parts = s.Split(':', '.', ',');
             return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
+        }
+
+        private static int GetLayoutIndexFromAssAlignment(string text)
+        {
+            // Check for ASS alignment tags (an1 to an9) - keypad layout
+            // 789 (top left, center, right)
+            // 456 (middle left, center, right)
+            // 123 (bottom left, center, right)
+            // Map to XML layoutindex: 0=Top Left, 1=Top Center, 2=Top Right,
+            // 3=Middle Left, 4=Middle Center, 5=Middle Right,
+            // 6=Bottom Left, 7=Bottom Center, 8=Bottom Right
+            if (text.Contains("{\\an7}"))
+            {
+                return 0; // Top-left
+            }
+            if (text.Contains("{\\an8}"))
+            {
+                return 1; // Top-center
+            }
+            if (text.Contains("{\\an9}"))
+            {
+                return 2; // Top-right
+            }
+            if (text.Contains("{\\an4}"))
+            {
+                return 3; // Middle-left
+            }
+            if (text.Contains("{\\an5}"))
+            {
+                return 4; // Middle-center
+            }
+            if (text.Contains("{\\an6}"))
+            {
+                return 5; // Middle-right
+            }
+            if (text.Contains("{\\an1}"))
+            {
+                return 6; // Bottom-left
+            }
+            if (text.Contains("{\\an2}"))
+            {
+                return 7; // Bottom-center
+            }
+            if (text.Contains("{\\an3}"))
+            {
+                return 8; // Bottom-right
+            }
+
+            // Default to bottom-center (an2) if no alignment tag is found
+            return 7;
+        }
+
+        private static string GetAssAlignmentFromLayoutIndex(int layoutIndex)
+        {
+            // Map layoutindex to ASS alignment tag (keypad layout)
+            // XML layouts: 0=Top Left, 1=Top Center, 2=Top Right,
+            // 3=Middle Left, 4=Middle Center, 5=Middle Right,
+            // 6=Bottom Left, 7=Bottom Center, 8=Bottom Right
+            switch (layoutIndex)
+            {
+                case 0:
+                    return "{\\an7}"; // Top-left
+                case 1:
+                    return "{\\an8}"; // Top-center
+                case 2:
+                    return "{\\an9}"; // Top-right
+                case 3:
+                    return "{\\an4}"; // Middle-left
+                case 4:
+                    return "{\\an5}"; // Middle-center
+                case 5:
+                    return "{\\an6}"; // Middle-right
+                case 6:
+                    return "{\\an1}"; // Bottom-left
+                case 7:
+                    return string.Empty; // "{\\an2}" (default)
+                case 8:
+                    return "{\\an3}"; // Bottom-right
+                default:
+                    return "{\\an2}"; // Default to bottom-center
+            }
         }
     }
 }

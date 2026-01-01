@@ -578,6 +578,8 @@ public class LanguageGeneral
     public string AphaThreshold { get; set; }
     public string Position { get; set; }
     public string FontHeight { get; set; }
+    public string OffsetX { get; set; }
+    public string OffsetY { get;  set; }
 
     public LanguageGeneral()
     {
@@ -1155,5 +1157,7 @@ public class LanguageGeneral
         AphaThreshold = "Alpha threshold";
         Position = "Position";
         FontHeight = "Font height";
+        OffsetX = "Offset X";
+        OffsetY = "Offset Y";
     }
 }

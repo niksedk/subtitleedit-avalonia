@@ -9,6 +9,8 @@ public class SeFormats
 
     public string TmpegEncXmlFontName { get; set; }
     public decimal TmpegEncXmlFontHeight { get; set; }
+    public decimal TmpegEncXmlOffsetX { get; set; }
+    public decimal TmpegEncXmlOffsetY { get; set; }
     public bool TmpegEncXmlFontBold { get; set; }
 
 
