@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
@@ -2372,6 +2373,13 @@ public partial class OcrViewModel : ObservableObject
     {
         Title = string.Format(Se.Language.Ocr.OcrX, Se.Language.General.Images);
         _ocrSubtitle = new OcrImportImage(images);
+        OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
+    }
+
+    internal void InitializeDivX(List<XSub> list, string fileName)
+    {
+        Title = string.Format(Se.Language.Ocr.OcrX, "DivX");
+        _ocrSubtitle = new OcrSubtitleDivX(list, fileName);
         OcrSubtitleItems = new ObservableCollection<OcrSubtitleItem>(_ocrSubtitle.MakeOcrSubtitleItems());
     }
 

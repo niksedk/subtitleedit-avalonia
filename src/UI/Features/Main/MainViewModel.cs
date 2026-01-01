@@ -9,6 +9,7 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
@@ -7992,6 +7993,19 @@ public partial class MainViewModel :
                 }
             }
 
+            if (ext == ".divx" || ext == ".avi")
+            {
+                if (ImportSubtitleFromDivX(fileName))
+                {
+                }
+                else
+                {
+                 //   MessageBox.Show(_language.NotAValidXSubFile);
+                }
+
+                return;
+            }
+
             var fileEncoding = LanguageAutoDetect.GetEncodingFromFile(fileName);
             var subtitle = Subtitle.Parse(fileName, fileEncoding);
             if (subtitle != null && subtitle.OriginalFormat.Name == new WebVTT().Name)
@@ -8175,6 +8189,35 @@ public partial class MainViewModel :
             _undoRedoManager.StartChangeDetection();
             _opening = false;
         }
+    }
+
+    private bool ImportSubtitleFromDivX(string fileName)
+    {
+        var list = DivXSubParser.ImportSubtitleFromDivX(fileName);
+        if (list.Count == 0)
+        {
+            return false;
+        }
+
+        Dispatcher.UIThread.Post(async () =>
+        {
+            var result = await ShowDialogAsync<OcrWindow, OcrViewModel>(vm => { vm.InitializeDivX(list, fileName); });
+
+            if (result.OkPressed)
+            {
+                ResetSubtitle();
+                _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                _converted = true;
+                _subtitle.Paragraphs.Clear();
+                Subtitles.Clear();
+                Subtitles.AddRange(result.OcredSubtitle);
+                Renumber();
+                ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
+                SelectAndScrollToRow(0);
+            }
+        });
+
+        return true;
     }
 
     private void AutoTrimWhiteSpaces()
