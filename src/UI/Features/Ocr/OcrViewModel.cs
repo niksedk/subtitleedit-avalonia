@@ -2020,6 +2020,8 @@ public partial class OcrViewModel : ObservableObject
 
                 var text = await ollamaOcr.Ocr(bitmap, OllamaUrl, OllamaModel, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
                 item.Text = text;
+                
+                OcrFixLineAndSetText(i, item);
 
                 if (SelectedOcrSubtitleItem == item)
                 {

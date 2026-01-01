@@ -1,14 +1,14 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
 
-namespace Nikse.SubtitleEdit.Features.Ocr;
+namespace Nikse.SubtitleEdit.Features.Ocr.Engines;
 
 public class OllamaOcr
 {
@@ -36,7 +36,7 @@ public class OllamaOcr
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             var result = await _httpClient.PostAsync(url, content, cancellationToken);
-            var bytes = await result.Content.ReadAsByteArrayAsync();
+            var bytes = await result.Content.ReadAsByteArrayAsync(cancellationToken);
             var json = Encoding.UTF8.GetString(bytes).Trim();
             if (!result.IsSuccessStatusCode)
             {
