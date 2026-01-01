@@ -855,12 +855,12 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             if (length <= _buffer.Length)
             {
                 _stream.Read(_buffer, 0, (int)length);
-                return encoding.GetString(_buffer, 0, (int)length);
+                return encoding.GetString(_buffer.AsSpan(0, (int)length));
             }
 
             var buffer = new byte[length];
             _stream.Read(buffer, 0, (int)length);
-            return encoding.GetString(buffer);
+            return encoding.GetString(buffer.AsSpan()); 
         }
     }
 }
