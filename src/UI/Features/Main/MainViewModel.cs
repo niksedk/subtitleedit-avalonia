@@ -10562,7 +10562,7 @@ public partial class MainViewModel :
 
             if (alignment == "an2" && Se.Settings.General.WriteAn2Tag == false)
             {
-                return;
+                continue;
             }
 
             if (!string.IsNullOrEmpty(item.Text))
