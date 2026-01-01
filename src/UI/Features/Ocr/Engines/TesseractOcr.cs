@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Logic;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
@@ -64,8 +65,14 @@ public class TesseractOcr
             _executablePath = GetExecutablePath();
         }
 
+        // Preprocess image: make black and white (black text on white background)
+        var nbmp = new NikseBitmap(bitmap);
+        nbmp.MakeOneColor(SKColors.Black);
+        nbmp.ReplaceTransparentWith(SKColors.White);
+        var oneColorBitmap = nbmp.GetBitmap();
+
         var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
-        await File.WriteAllBytesAsync(tempImage, bitmap.ToPngArray(), cancellationToken);
+        await File.WriteAllBytesAsync(tempImage, oneColorBitmap.ToPngArray(), cancellationToken);
 
         var tempTextFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         var process = new Process
@@ -73,7 +80,7 @@ public class TesseractOcr
             StartInfo = new ProcessStartInfo
             {
                 FileName = _executablePath,
-                Arguments = $"\"{tempImage}\" \"{tempTextFileName}\" -l {language} --psm 6 hocr --tessdata-dir \"{Se.TesseractModelFolder}\"",
+                Arguments = $"\"{tempImage}\" \"{tempTextFileName}\" -l {language} --psm 6 --oem 3 hocr --tessdata-dir \"{Se.TesseractModelFolder}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
