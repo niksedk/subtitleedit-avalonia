@@ -238,18 +238,34 @@ public class BatchConvertWindow : Window
         };
 
         var flyout = new MenuFlyout();
+        flyout.Opening += (_, _) => vm.FileGridContextMenuOpening();
         var menuItemRemove = new MenuItem
         {
             Header = Se.Language.General.Remove,
             DataContext = vm,
             Command = vm.RemoveSelectedFilesCommand,
         };
+        menuItemRemove.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsRemoveVisible)) { Source = vm });
         menuItemRemove.Bind(MenuItem.IsEnabledProperty, new Binding(nameof(vm.IsConverting))
         {
             Converter = new InverseBooleanConverter(),
             Source = vm,
         });
         flyout.Items.Add(menuItemRemove);
+
+        var menuItemOpenContainingFolder = new MenuItem
+        {
+            Header = Se.Language.General.OpenContainingFolder,
+            DataContext = vm,
+            Command = vm.OpenContainingFolderCommand,
+        };
+        menuItemOpenContainingFolder.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsOpenContainingFolderVisible)) { Source = vm });
+        menuItemOpenContainingFolder.Bind(MenuItem.IsEnabledProperty, new Binding(nameof(vm.IsConverting))
+        {
+            Converter = new InverseBooleanConverter(),
+            Source = vm,
+        });
+        flyout.Items.Add(menuItemOpenContainingFolder);
 
         var menuItemImport = new MenuItem
         {

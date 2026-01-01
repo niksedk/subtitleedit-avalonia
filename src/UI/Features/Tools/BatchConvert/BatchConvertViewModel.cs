@@ -60,6 +60,8 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private string? _selectedFilterItem;
     [ObservableProperty] private string _filterText;
     [ObservableProperty] private bool _isFilterTextVisible;
+    [ObservableProperty] private bool _isRemoveVisible;
+    [ObservableProperty] private bool _isOpenContainingFolderVisible;
 
     // Add formatting
     [ObservableProperty] private bool _formattingAddItalic;
@@ -1065,6 +1067,18 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenContainingFolder()
+    {
+        var selectedItem = SelectedBatchItem;
+        if (selectedItem == null || Window == null)
+        {
+            return;
+        }
+
+        _folderHelper.OpenFolderWithFileSelected(Window!, selectedItem.FileName);
+    }
+
+    [RelayCommand]
     private void ClearAllFiles()
     {
         BatchItems.Clear();
@@ -1581,5 +1595,11 @@ public partial class BatchConvertViewModel : ObservableObject
     internal void FilterTextChanged()
     {
         _isFilesDirty = true;
+    }
+
+    internal void FileGridContextMenuOpening()
+    {
+        IsRemoveVisible = SelectedBatchItem != null;
+        IsOpenContainingFolderVisible = SelectedBatchItem != null;
     }
 }
