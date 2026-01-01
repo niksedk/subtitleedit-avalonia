@@ -115,23 +115,30 @@ public class TesseractOcr
             }
         }
 
-        var outputFileName = File.Exists(tempTextFileName + ".html")
-            ? tempTextFileName + ".html"
-            : tempTextFileName + ".hocr";
-
         try
         {
-            if (File.Exists(outputFileName))
+            var htmlPath = tempTextFileName + ".html";
+            if (File.Exists(htmlPath))
             {
-                var result = await File.ReadAllTextAsync(outputFileName, Encoding.UTF8, cancellationToken);
+                var result = await File.ReadAllTextAsync(htmlPath, Encoding.UTF8, cancellationToken);
                 return ParseHOcr(result);
             }
+
+            var hocrPath = tempTextFileName + ".hocr";
+            if (File.Exists(hocrPath))
+            {
+                var result = await File.ReadAllTextAsync(hocrPath, Encoding.UTF8, cancellationToken);
+                return ParseHOcr(result);
+            }
+
+            return string.Empty;
         }
         finally
         {
             try
             {
-                File.Delete(outputFileName);
+                File.Delete(tempTextFileName + ".html");
+                File.Delete(tempTextFileName + ".hocr");
                 File.Delete(tempTextFileName);
             }
             catch
@@ -139,8 +146,6 @@ public class TesseractOcr
                 // Ignore cleanup errors
             }
         }
-
-        return string.Empty;
     }
 
     private static string ParseHOcr(string html)
