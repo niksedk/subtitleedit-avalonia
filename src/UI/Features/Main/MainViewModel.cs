@@ -8443,6 +8443,11 @@ public partial class MainViewModel :
         else if (mp4SubtitleTracks.Count == 1)
         {
             LoadMp4Subtitle(fileName, mp4SubtitleTracks[0]);
+
+            if (Se.Settings.General.AutoOpenVideo && mp4Parser.GetVideoTracks().Count > 0)
+            {
+                await VideoOpenFile(fileName);
+            }
         }
         else
         {
