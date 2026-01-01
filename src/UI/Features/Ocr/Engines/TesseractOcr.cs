@@ -69,62 +69,78 @@ public class TesseractOcr
         var nbmp = new NikseBitmap(bitmap);
         nbmp.MakeOneColor(SKColors.Black);
         nbmp.ReplaceTransparentWith(SKColors.White);
-        var oneColorBitmap = nbmp.GetBitmap();
+        using var oneColorBitmap = nbmp.GetBitmap();
 
-        var tempImage = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
-        await File.WriteAllBytesAsync(tempImage, oneColorBitmap.ToPngArray(), cancellationToken);
-
+        var tempImage = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.png");
         var tempTextFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        var process = new Process
+
+        try
         {
-            StartInfo = new ProcessStartInfo
+            await File.WriteAllBytesAsync(tempImage, oneColorBitmap.ToPngArray(), cancellationToken);
+
+            using var process = new Process
             {
-                FileName = _executablePath,
-                Arguments = $"\"{tempImage}\" \"{tempTextFileName}\" -l {language} --psm 6 --oem 3 hocr --tessdata-dir \"{Se.TesseractModelFolder}\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                WorkingDirectory = Se.TesseractFolder
-            },
-        };
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _executablePath,
+                    Arguments = $"\"{tempImage}\" \"{tempTextFileName}\" -l {language} --psm 6 --oem 3 hocr --tessdata-dir \"{Se.TesseractModelFolder}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    WorkingDirectory = Se.TesseractFolder
+                },
+            };
 
 #pragma warning disable CA1416 // Validate platform compatibility
-        process.Start();
-#pragma warning restore CA1416 // Validate platform compatibility;
-        await process.WaitForExitAsync(cancellationToken);
+            process.Start();
+#pragma warning restore CA1416 // Validate platform compatibility
+            await process.WaitForExitAsync(cancellationToken);
 
-        if (process.ExitCode != 0)
+            if (process.ExitCode != 0)
+            {
+                Error = await process.StandardError.ReadToEndAsync(cancellationToken);
+                return string.Empty;
+            }
+        }
+        finally
         {
-            Error = await process.StandardError.ReadToEndAsync(cancellationToken);
-            return string.Empty;
+            try
+            {
+                File.Delete(tempImage);
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
         }
 
-        File.Delete(tempImage);
+        var outputFileName = File.Exists(tempTextFileName + ".html")
+            ? tempTextFileName + ".html"
+            : tempTextFileName + ".hocr";
 
-        var outputFileName = tempTextFileName + ".html";
-        if (!File.Exists(outputFileName))
-        {
-            outputFileName = tempTextFileName + ".hocr";
-        }
-
-        var result = string.Empty;
         try
         {
             if (File.Exists(outputFileName))
             {
-                result = await File.ReadAllTextAsync(outputFileName, Encoding.UTF8, cancellationToken);
-                result = ParseHOcr(result);
-                File.Delete(outputFileName);
+                var result = await File.ReadAllTextAsync(outputFileName, Encoding.UTF8, cancellationToken);
+                return ParseHOcr(result);
             }
-            File.Delete(tempTextFileName);
         }
-        catch
+        finally
         {
-            // ignored
+            try
+            {
+                File.Delete(outputFileName);
+                File.Delete(tempTextFileName);
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
         }
 
-        return result;
+        return string.Empty;
     }
 
     private static string ParseHOcr(string html)
