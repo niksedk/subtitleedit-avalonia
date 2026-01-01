@@ -432,6 +432,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var xml = new XmlDocument { XmlResolver = null };
             xml.LoadXml(sb.ToString().Trim());
             var italicStyles = new List<bool>();
+            var positionCodes = new List<int>();
 
             foreach (XmlNode node in xml.DocumentElement.SelectNodes("Layout/LayoutItem"))
             {
@@ -443,6 +444,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 else
                 {
                     italicStyles.Add(false);
+                }
+
+                XmlNode position = node.SelectSingleNode("Position");
+                if (position != null && int.TryParse(position.InnerText, out var posCode))
+                {
+                    positionCodes.Add(posCode);
+                }
+                else
+                {
+                    positionCodes.Add(7); // Default to bottom center
                 }
             }
 
@@ -516,11 +527,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 p.Text = "<i>" + p.Text + "</i>";
                             }
                             
-                            // Add ASS alignment tag based on layoutindex
-                            var alignmentTag = GetAssAlignmentFromLayoutIndex(idx);
-                            if (!string.IsNullOrEmpty(alignmentTag))
+                            // Add ASS alignment tag based on position code from layout
+                            if (idx >= 0 && idx < positionCodes.Count)
                             {
-                                p.Text = alignmentTag + p.Text;
+                                var alignmentTag = GetAssAlignmentFromPositionCode(positionCodes[idx]);
+                                if (!string.IsNullOrEmpty(alignmentTag))
+                                {
+                                    p.Text = alignmentTag + p.Text;
+                                }
                             }
                         }
                     }
@@ -546,7 +560,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
         }
 
-        private static int GetLayoutIndexFromAssAlignment(string text)
+        protected static int GetLayoutIndexFromAssAlignment(string text)
         {
             // Check for ASS alignment tags (an1 to an9) - keypad layout
             // 789 (top left, center, right)
@@ -624,6 +638,37 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     return "{\\an3}"; // Bottom-right
                 default:
                     return "{\\an2}"; // Default to bottom-center
+            }
+        }
+
+        private static string GetAssAlignmentFromPositionCode(int positionCode)
+        {
+            // Map Position code from Layout to ASS alignment tag (keypad layout)
+            // Position codes: 0=Top Left, 1=Top Center, 2=Top Right,
+            // 3=Middle Left, 4=Middle Center, 5=Middle Right,
+            // 6=Bottom Left, 7=Bottom Center, 8=Bottom Right
+            switch (positionCode)
+            {
+                case 0:
+                    return "{\\an7}"; // Top-left
+                case 1:
+                    return "{\\an8}"; // Top-center
+                case 2:
+                    return "{\\an9}"; // Top-right
+                case 3:
+                    return "{\\an4}"; // Middle-left
+                case 4:
+                    return "{\\an5}"; // Middle-center
+                case 5:
+                    return "{\\an6}"; // Middle-right
+                case 6:
+                    return "{\\an1}"; // Bottom-left
+                case 7:
+                    return string.Empty; // Bottom-center (default, don't add tag)
+                case 8:
+                    return "{\\an3}"; // Bottom-right
+                default:
+                    return string.Empty; // Default to bottom-center (no tag)
             }
         }
     }
