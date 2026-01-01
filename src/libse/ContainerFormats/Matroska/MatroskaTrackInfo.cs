@@ -33,17 +33,6 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         public int ContentEncodingType { get; set; }
         public uint ContentEncodingScope { get; set; }
 
-        internal static void CopyStream(Stream input, Stream output)
-        {
-            var buffer = new byte[128 * 1024];
-            int len;
-            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                output.Write(buffer, 0, len);
-            }
-            output.Flush();
-        }
-
         public string GetCodecPrivate()
         {
             if (CodecPrivateRaw == null || CodecPrivateRaw.Length == 0)
