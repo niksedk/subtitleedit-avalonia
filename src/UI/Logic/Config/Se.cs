@@ -25,12 +25,12 @@ public class Se
     public string Color6 { get; set; } = "#ffffffff";
     public string Color7 { get; set; } = "#ffa500ff";
     public string Color8 { get; set; } = "#ffc0cbff";
-    public string Surround1Right { get; set; } = "♪";
     public string Surround1Left { get; set; } = "♪";
-    public string Surround2Left { get; set; } = "🎵";
-    public string Surround2Right { get; set; } = "🎵";
-    public string Surround3Left { get; set; } = "♫";
-    public string Surround3Right { get; set; } = "♫";
+    public string Surround1Right { get; set; } = "♪";
+    public string Surround2Left { get; set; } = "♫";
+    public string Surround2Right { get; set; } = "♫";
+    public string Surround3Left { get; set; } = "[";
+    public string Surround3Right { get; set; } = "]";
     public SeFile File { get; set; } = new();
     public SeEdit Edit { get; set; } = new();
     public SeTools Tools { get; set; } = new();

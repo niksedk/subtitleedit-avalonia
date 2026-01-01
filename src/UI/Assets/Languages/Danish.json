@@ -648,6 +648,8 @@
     "XShotChangedLoaded": "{0} skud\u00E6ndringer blev indl\u00E6st",
     "YoutubeDlDownloadedSuccessfully": "\u0022yt-dlp\u0022 blev downloadet.",
     "YoutubeDlNotInstalledDownloadNow": "\u0022yt-dlp\u0022 er ikke installeret og er p\u00E5kr\u00E6vet for at afspille onlinevideoer.\r\n\r\n\r\nDownload nu?",
+    "InsertUnicodeSymbol": "Inds\u00E6t Unicode-symbol",
+    "TrimmedXLines": "Trimmet {0} undertekstlinjer",
     "Menu": {
       "File": "Fil",
       "New": "Ny",
@@ -1542,6 +1544,7 @@
       "AutoBackupIntervalMinutes": "Interval for automatisk backup (minutter)",
       "AutoBackupDeleteAfterDays": "Opbevaring af automatisk backup (dage)",
       "AutoConvertToUtf8": "Automatisk konverter til UTF-8 ved \u00E5ben",
+      "AutoTrimWhiteSpace": "Automatisk trim hvidt mellemrum",
       "DefaultEncoding": "Standardkodning",
       "ColorDurationTooShort": "Farvevarighed hvis for kort",
       "ColorDurationTooLong": "Farvevarighed hvis for lang",
@@ -1636,6 +1639,8 @@
       "WaveformDrawStyle": "B\u00F8lgeform tegnestil",
       "VlcWidRendering": "libVLC - Native Window ID-gengivelse",
       "SubtitleDoubleClickAction": "Undertekstgitter dobbeltklik p\u00E5 handling",
+      "SaveAsBehavior": "\u0022Gem som\u0022 adf\u00E6rd",
+      "SaveAsAppendLanguageCode": "\u0022Gem som\u0022 tilf\u00F8j sprogkode",
       "GridGoToSubtitleAndPause": "G\u00E5 til undertekst og s\u00E6t p\u00E5 pause",
       "GridGoToSubtitleAndPlay": "G\u00E5 til undertekst og afspil",
       "GridGoToSubtitleOnly": "G\u00E5 kun til undertekster",
@@ -1644,7 +1649,14 @@
       "SubtitleGridFormattingShowFormatting": "Vis formatering",
       "SubtitleGridFormattingShowTags": "Vis tags",
       "WaveformParagraphBackgroundColor": "B\u00F8lgeform undertekst baggrundsfarve",
-      "WaveformParagraphSelectedBackgroundColor": "B\u00F8lgeform valgt undertekst baggrundsfarve"
+      "WaveformParagraphSelectedBackgroundColor": "B\u00F8lgeform valgt undertekst baggrundsfarve",
+      "SaveAsBehaviorUseSubtitleVideoFilename": "Brug undertekst/videofilnavn",
+      "SaveAsBehaviorUseVideoSubtitleFilename": "Brug video/undertekst filnavn",
+      "SaveAsBehaviorUseVideoFileName": "Brug videofilnavn",
+      "SaveAsBehaviorUseSubtitleFileName": "Brug undertekst filnavn",
+      "SaveAsAppendLanguageCodeTwoLetter": "To bogstaver",
+      "SaveAsAppendLanguageCodeThreeLetter": "Tre bogstaver",
+      "SaveAsAppendLanguageCodeLanguageName": "Sprognavn"
     },
     "Shortcuts": {
       "Title": "Shortcuts",
@@ -1855,7 +1867,7 @@
       "ColorX": "Farve {0}",
       "RemoveColor": "Fjern farve",
       "SurroundWith": "Omgiv med...",
-      "SurroundWithX": "Omring med \u0022{0}",
+      "SurroundWithX": "Omgiv med \u0022{0}",
       "RepeatLine": "Gentag linje",
       "RepeatPreviousLine": "Gentag forrige linje",
       "RepeatNextLine": "Gentag n\u00E6ste linje",
@@ -1868,7 +1880,8 @@
       "ShowPointSyncViaOther": "Vis punktsynkronisering via anden undertekst",
       "ShowPointSync": "Vis punktsynkronisering",
       "ShowMediaInformation": "Vis medieoplysninger",
-      "ChooseSubtitleFormat": "V\u00E6lg undertekstformat"
+      "ChooseSubtitleFormat": "V\u00E6lg undertekstformat",
+      "TrimWhitespaceSelectedLines": "Trim mellemrum (valgte linjer)"
     },
     "WordLists": {
       "Title": "Ordlister",
@@ -1948,7 +1961,8 @@
     "CaptureTopAlign": "Optag topjustering",
     "OcrImage": "OCR billede",
     "OneColor": "En farve (hvid)",
-    "DarknessThreshold": "M\u00F8rket\u00E6rskel"
+    "DarknessThreshold": "M\u00F8rket\u00E6rskel",
+    "EditExportDotDotDot": "Rediger/eksporter..."
   },
   "Assa": {
     "StylesTitle": "Avancerede Sub Station Alpha stilarter",

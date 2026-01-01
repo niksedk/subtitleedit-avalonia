@@ -40,7 +40,6 @@ public partial class ShortcutsViewModel : ObservableObject
     public bool OkPressed { get; set; }
     public Window? Window { get; set; }
     public MainViewModel? MainViewModel { get; set; }
-    public TreeView ShortcutsTreeView { get; internal set; }
 
     private IFileHelper _fileHelper;
     private readonly IWindowService _windowService;
@@ -78,7 +77,6 @@ public partial class ShortcutsViewModel : ObservableObject
             Se.Language.Options.Shortcuts.Unassigned,
         };
         SelectedFilter = _filters[0];
-        ShortcutsTreeView = new TreeView();
         _allShortcuts = new List<ShortCut>();
         _configurableCommands = new List<IRelayCommand>();
         _color1 = Se.Settings.Color1.FromHexToColor();
@@ -331,6 +329,10 @@ public partial class ShortcutsViewModel : ObservableObject
         Se.Settings.Surround3Left = _surround3Left;
         Se.Settings.Surround3Right = _surround3Right;
 
+        ShortcutsMain.CommandTranslationLookup[nameof(MainViewModel.SurroundWith1Command)] = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround1Left, Se.Settings.Surround1Right);
+        ShortcutsMain.CommandTranslationLookup[nameof(MainViewModel.SurroundWith2Command)] = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround2Left, Se.Settings.Surround2Right);
+        ShortcutsMain.CommandTranslationLookup[nameof(MainViewModel.SurroundWith3Command)] = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround3Left, Se.Settings.Surround3Right);
+
         Se.SaveSettings();
 
         OkPressed = true;
@@ -444,6 +446,12 @@ public partial class ShortcutsViewModel : ObservableObject
             {
                 _surround1Left = result.Before;
                 _surround1Right = result.After;
+
+                var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.SurroundWith1Command);
+                if (flatNodeBack != null)
+                {
+                    flatNodeBack.Title = string.Format(string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, _surround1Left, _surround1Right));
+                }
             }
         }
         else if (node.ShortCut.Action == MainViewModel.SurroundWith2Command)
@@ -456,6 +464,12 @@ public partial class ShortcutsViewModel : ObservableObject
             {
                 _surround2Left = result.Before;
                 _surround2Right = result.After;
+
+                var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.SurroundWith2Command);
+                if (flatNodeBack != null)
+                {
+                    flatNodeBack.Title = string.Format(string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, _surround2Left, _surround2Right));
+                }
             }
         }
         else if (node.ShortCut.Action == MainViewModel.SurroundWith3Command)
@@ -468,6 +482,12 @@ public partial class ShortcutsViewModel : ObservableObject
             {
                 _surround3Left = result.Before;
                 _surround3Right = result.After;
+
+                var flatNodeBack = FlatNodes.FirstOrDefault(n => n?.ShortCut?.Action == MainViewModel.SurroundWith3Command);
+                if (flatNodeBack != null)
+                {
+                    flatNodeBack.Title = string.Format(string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, _surround3Left, _surround3Right));
+                }
             }
         }
         else if (node.ShortCut.Action == MainViewModel.VideoMoveCustom1BackCommand)

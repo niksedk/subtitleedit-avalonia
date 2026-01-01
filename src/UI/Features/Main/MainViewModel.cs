@@ -5089,7 +5089,7 @@ public partial class MainViewModel :
         _colorService.RemoveColorTags(selectedItems);
     }
 
-    private void SurroundWith(string surround1Left, string surround1Right)
+    private void SurroundWith(string surroundLeft, string surroundRight)
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? [];
         if (selectedItems.Count == 0)
@@ -5098,22 +5098,22 @@ public partial class MainViewModel :
         }
 
         var first = selectedItems.First();
-        var haveSurround = first.Text.StartsWith(surround1Left) && first.Text.EndsWith(surround1Right);
+        var haveSurround = first.Text.StartsWith(surroundLeft) && first.Text.EndsWith(surroundRight);
 
         // add toggle functionality
         foreach (var item in selectedItems)
         {
             if (haveSurround)
             {
-                if (item.Text.StartsWith(surround1Left) && item.Text.EndsWith(surround1Right))
+                if (item.Text.StartsWith(surroundLeft) && item.Text.EndsWith(surroundRight))
                 {
-                    item.Text = item.Text.Substring(surround1Left.Length,
-                        item.Text.Length - surround1Left.Length - surround1Right.Length);
+                    item.Text = item.Text.Substring(surroundLeft.Length,
+                        item.Text.Length - surroundLeft.Length - surroundRight.Length);
                 }
             }
             else
             {
-                item.Text = surround1Left + item.Text + surround1Right;
+                item.Text = surroundLeft + item.Text + surroundRight;
             }
         }
 
