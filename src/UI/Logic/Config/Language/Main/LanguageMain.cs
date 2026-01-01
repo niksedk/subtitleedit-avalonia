@@ -68,7 +68,7 @@ public class LanguageMain
     public string TextOnly { get; set; }
     public string TextUp { get; set; }
     public string TimeCodesOnly { get; set; }
-    public string TimedTextRosettaPropertiesDotDotDot { get; set; }
+    public string XPropertiesDotDotDot { get; set; }
     public string TotalCharacters { get; set; }
     public string UnbreakHint { get; set; }
     public string UndoPerformed { get; set; }
@@ -146,7 +146,7 @@ public class LanguageMain
         TextOnly = "Text only";
         TextUp = "Text up";
         TimeCodesOnly = "Time codes only";
-        TimedTextRosettaPropertiesDotDotDot = "Timed Text IMSC Rosetta properties...";
+        XPropertiesDotDotDot = "{0} properties...";
         TotalCharacters = "Total chars: {0}";
         UnbreakHint = "Unbreak selected lines";
         UndoPerformed = "Undo performed";

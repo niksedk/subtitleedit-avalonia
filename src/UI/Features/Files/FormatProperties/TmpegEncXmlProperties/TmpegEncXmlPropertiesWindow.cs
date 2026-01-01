@@ -1,0 +1,96 @@
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Nikse.SubtitleEdit.Logic;
+using Nikse.SubtitleEdit.Logic.Config;
+
+namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
+
+public class TmpegEncXmlPropertiesWindow : Window
+{
+    public TmpegEncXmlPropertiesWindow(TmpegEncXmlPropertiesViewModel vm)
+    {
+        UiUtil.InitializeWindow(this, GetType().Name);
+        Title = Se.Language.File.TmpegEncXmlProperties;
+        SizeToContent = SizeToContent.WidthAndHeight;
+        CanResize = false;
+        MinWidth = 400;
+        MinHeight = 200;
+        vm.Window = this;
+        DataContext = vm;
+
+        var labelWidth = 200;
+        
+        var labelFontName = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(labelWidth);
+        var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName));
+        var panelFontName = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelFontName,
+                comboBoxFontName,
+            }
+        };
+
+        var labelLineHeight = UiUtil.MakeLabel(Se.Language.General.LineHeigth).WithMinWidth(labelWidth);
+        var textBoxLineHeight = UiUtil.MakeTextBox(100, vm, nameof(vm.FontHeight));
+        var panelLineHeight = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelLineHeight,
+                textBoxLineHeight,
+            }
+        };
+
+        //var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize).WithMinWidth(labelWidth);
+        //var textBoxFontSize = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontSize)); 
+        //var panelFontSize = new StackPanel
+        //{
+        //    Orientation = Orientation.Horizontal,
+        //    HorizontalAlignment = HorizontalAlignment.Left,
+        //    Children =
+        //    {
+        //        labelFontSize,
+        //        textBoxFontSize,
+        //    }
+        //};
+
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+
+        grid.Add(panelFontName, 0);
+        grid.Add(panelLineHeight, 1);
+//        grid.Add(panelFontSize, 2);
+        grid.Add(buttonPanel, 5);
+
+        Content = grid;
+
+        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        KeyDown += (_, e) => vm.OnKeyDown(e);
+    }
+}

@@ -3,10 +3,15 @@
 public class SeFormats
 {
     public string RosettaLanguage { get; set; }
-    public bool RosettaLanguageAutoDetect { get; set; }
-    
+    public bool RosettaLanguageAutoDetect { get; set; }    
     public string RosettaFontSize { get; set; }
     public string RosettaLineHeight { get; set; }
+
+    public string TmpegEncXmlFontName { get; set; }
+    public decimal TmpegEncXmlFontHeight { get; set; }
+    public int TmpegEncXmlPosition { get; set; }
+    public bool TmpegEncXmlFontBold { get; set; }
+
 
     public SeFormats()
     {
@@ -14,5 +19,10 @@ public class SeFormats
         RosettaLanguageAutoDetect = true;
         RosettaFontSize = "100%";
         RosettaLineHeight = "125%";
+
+        TmpegEncXmlFontName = "Tahoma";
+        TmpegEncXmlFontHeight = 0.069m;
+        TmpegEncXmlPosition = 23;
+        TmpegEncXmlFontBold = false;
     }
 }

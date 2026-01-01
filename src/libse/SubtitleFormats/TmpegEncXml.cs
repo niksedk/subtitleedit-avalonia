@@ -18,6 +18,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
     public class TmpegEncXml : SubtitleFormat
     {
+        public static string FontName { get; set; } = "Tahoma";
+        public static string FontBold { get; set; } = "0";
+        public static string FontHeight { get; set; } = "0.069";
+        public static string Position { get; set; } = "23";
+
+
         public override string Extension => ".xsubtitle";
 
         public override string Name => "TMPGEnc VME";
@@ -47,7 +53,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
-            <FontBold>0</FontBold>
+            <FontBold>[FontBold]</FontBold>
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
@@ -207,10 +213,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         @
     </Subtitle>
 </TMPGEncVMESubtitleTextFormat>"
-            .Replace("[FontName]", Configuration.Settings.SubtitleSettings.TmpegEncXmlFontName)
-            .Replace("[FontHeight]", Configuration.Settings.SubtitleSettings.TmpegEncXmlFontHeight)
-            .Replace("[Position]", Configuration.Settings.SubtitleSettings.TmpegEncXmlPosition);
-
+            .Replace("[FontName]", FontName)
+            .Replace("[FontBold]", FontBold)
+            .Replace("[FontHeight]", FontHeight)
+            .Replace("[Position]", Position);
 
         public override string ToText(Subtitle subtitle, string title)
         {

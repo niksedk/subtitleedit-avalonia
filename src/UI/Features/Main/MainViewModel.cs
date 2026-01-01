@@ -494,6 +494,11 @@ public partial class MainViewModel :
         {
             TimedTextImscRosetta.Language = Se.Settings.Formats.RosettaLanguage;
         }
+
+        TmpegEncXml.FontName = Se.Settings.Formats.TmpegEncXmlFontName;
+        TmpegEncXml.FontHeight = Se.Settings.Formats.TmpegEncXmlFontHeight.ToString(CultureInfo.InvariantCulture);
+        TmpegEncXml.Position = Se.Settings.Formats.TmpegEncXmlPosition.ToString(CultureInfo.InvariantCulture);
+        TmpegEncXml.FontBold = Se.Settings.Formats.TmpegEncXmlFontBold ? "1" : "0";
     }
 
     private static void InitializeFfmpeg()
@@ -1088,6 +1093,12 @@ public partial class MainViewModel :
         if (format is TimedTextImscRosetta)
         {
             var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm => { });
+            SetLibSeSettings();
+        }
+
+        if (format is TmpegEncXml)
+        {
+            var result = await ShowDialogAsync<TmpegEncXmlPropertiesWindow, TmpegEncXmlPropertiesViewModel>(vm => { });
             SetLibSeSettings();
         }
 
@@ -11830,10 +11841,10 @@ public partial class MainViewModel :
         if (e.AddedItems.Count == 1)
         {
             var format = e.AddedItems[0] as SubtitleFormat;
-            if (format is TimedTextImscRosetta)
+            if (format is TimedTextImscRosetta or TmpegEncXml)
             {
                 IsFilePropertiesVisible = true;
-                FilePropertiesText = Se.Language.Main.TimedTextRosettaPropertiesDotDotDot;
+                FilePropertiesText = string.Format(Se.Language.Main.XPropertiesDotDotDot, format.Name);
             }
         }
     }
