@@ -58,9 +58,20 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 return new List<MatroskaTrackInfo>();
             }
 
-            return subtitleOnly
-                ? _tracks.Where(t => t.IsSubtitle).ToList()
-                : _tracks;
+            if (!subtitleOnly)
+            {
+                return _tracks;
+            }
+
+            var subtitleTracks = new List<MatroskaTrackInfo>(_tracks.Count);
+            for (var i = 0; i < _tracks.Count; i++)
+            {
+                if (_tracks[i].IsSubtitle)
+                {
+                    subtitleTracks.Add(_tracks[i]);
+                }
+            }
+            return subtitleTracks;
         }
 
         /// <summary>
@@ -381,12 +392,7 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
         {
             ReadChapters();
 
-            if (_chapters == null)
-            {
-                return new List<MatroskaChapter>();
-            }
-
-            return _chapters.Distinct().ToList();
+            return _chapters ?? new List<MatroskaChapter>();
         }
 
         private void ReadChapters()
@@ -465,9 +471,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 {
                     _stream.Seek(element.DataSize, SeekOrigin.Current);
                 }
-
-                _chapters.Add(chapter);
             }
+
+            _chapters.Add(chapter);
         }
 
         private void ReadNestedChaptersTimeStart(Element nestedChpaterAtom)
@@ -492,9 +498,9 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 {
                     _stream.Seek(element.DataSize, SeekOrigin.Current);
                 }
-
-                _chapters.Add(chapter);
             }
+
+            _chapters.Add(chapter);
         }
 
         private string GetChapterName(Element chapterDisplay)
@@ -740,15 +746,16 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
 
         private ulong ReadVariableLengthUInt(bool unsetFirstBit = true)
         {
-            // Begin loop with byte set to newly read byte
             var first = _stream.ReadByte();
-            var length = 0;
+            if (first == -1)
+            {
+                return 0;
+            }
 
-            // Begin by counting the bits unset before the highest set bit
+            var length = 0;
             var mask = 0x80;
             for (var i = 0; i < 8; i++)
             {
-                // Start at left, shift to right
                 if ((first & mask) == mask)
                 {
                     length = i + 1;
@@ -761,12 +768,14 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
                 return 0;
             }
 
-            // Read remaining big endian bytes and convert to 64-bit unsigned integer.
             var result = (ulong)(unsetFirstBit ? first & (0xFF >> length) : first);
-            result <<= --length * 8;
-            for (var i = 1; i <= length; i++)
+            if (length > 1)
             {
-                result |= (ulong)_stream.ReadByte() << (length - i) * 8;
+                _stream.Read(_buffer, 0, length - 1);
+                for (var i = 0; i < length - 1; i++)
+                {
+                    result = (result << 8) | _buffer[i];
+                }
             }
             return result;
         }
@@ -824,9 +833,10 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             _stream.Read(_buffer, 0, 4);
             if (BitConverter.IsLittleEndian)
             {
-                return BitConverter.ToSingle(new[] { _buffer[3], _buffer[2], _buffer[1], _buffer[0] }, 0);
+                Span<byte> reversed = stackalloc byte[4] { _buffer[3], _buffer[2], _buffer[1], _buffer[0] };
+                return BitConverter.ToSingle(reversed);
             }
-            return BitConverter.ToSingle(_buffer, 0);
+            return BitConverter.ToSingle(_buffer.AsSpan(0, 4));
         }
 
         /// <summary>
@@ -839,9 +849,10 @@ namespace Nikse.SubtitleEdit.Core.ContainerFormats.Matroska
             _stream.Read(_buffer, 0, 8);
             if (BitConverter.IsLittleEndian)
             {
-                return BitConverter.ToDouble(new[] { _buffer[7], _buffer[6], _buffer[5], _buffer[4], _buffer[3], _buffer[2], _buffer[1], _buffer[0] }, 0);
+                Span<byte> reversed = stackalloc byte[8] { _buffer[7], _buffer[6], _buffer[5], _buffer[4], _buffer[3], _buffer[2], _buffer[1], _buffer[0] };
+                return BitConverter.ToDouble(reversed);
             }
-            return BitConverter.ToDouble(_buffer, 0);
+            return BitConverter.ToDouble(_buffer.AsSpan(0, 8));
         }
 
         /// <summary>
