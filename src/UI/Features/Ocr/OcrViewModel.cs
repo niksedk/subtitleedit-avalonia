@@ -2464,6 +2464,17 @@ public partial class OcrViewModel : ObservableObject
     internal void OnLoaded()
     {
         DictionaryChanged();
+        Dispatcher.UIThread.Post(() =>
+        {
+            SubtitleGrid.Focus();
+            if (OcrSubtitleItems.Count > 0)
+            {
+                SelectedOcrSubtitleItem = OcrSubtitleItems[0];
+                SubtitleGrid.SelectedIndex = 0;
+                SubtitleGrid.ScrollIntoView(SelectedOcrSubtitleItem, null);
+                TrackChanged();
+            }
+        });
     }
 
     internal void TextBoxTextChanged(object? sender, TextChangedEventArgs e)
