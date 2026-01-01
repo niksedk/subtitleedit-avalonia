@@ -576,6 +576,8 @@ public class LanguageGeneral
     public string AdjustAlpha { get; set; }
     public string AlphaAdjustment { get; set; }
     public string AphaThreshold { get; set; }
+    public string Position { get; set; }
+    public string FontHeight { get; set; }
 
     public LanguageGeneral()
     {
@@ -1151,5 +1153,7 @@ public class LanguageGeneral
         AdjustAlpha = "Adjust alpha (transparency)";
         AlphaAdjustment = "Alpha adjustment";
         AphaThreshold = "Alpha threshold";
+        Position = "Position";
+        FontHeight = "Font height";
     }
 }

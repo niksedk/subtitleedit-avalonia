@@ -19,7 +19,7 @@ public class TmpegEncXmlPropertiesWindow : Window
         DataContext = vm;
 
         var labelWidth = 200;
-        
+
         var labelFontName = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(labelWidth);
         var comboBoxFontName = UiUtil.MakeComboBox(vm.FontNames, vm, nameof(vm.SelectedFontName));
         var panelFontName = new StackPanel
@@ -33,31 +33,32 @@ public class TmpegEncXmlPropertiesWindow : Window
             }
         };
 
-        var labelLineHeight = UiUtil.MakeLabel(Se.Language.General.LineHeigth).WithMinWidth(labelWidth);
-        var textBoxLineHeight = UiUtil.MakeTextBox(100, vm, nameof(vm.FontHeight));
-        var panelLineHeight = new StackPanel
+        var labelFontHeight = UiUtil.MakeLabel(Se.Language.General.FontHeight).WithMinWidth(labelWidth);
+        var numericUpDownFontHeight = UiUtil.MakeNumericUpDownThreeDecimals(0.04m, 1.0m, 150, vm, nameof(vm.FontHeight));
+        numericUpDownFontHeight.Increment = 0.001m;
+        var panelFontHeight = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
-                labelLineHeight,
-                textBoxLineHeight,
+                labelFontHeight,
+                numericUpDownFontHeight,
             }
         };
 
-        //var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize).WithMinWidth(labelWidth);
-        //var textBoxFontSize = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontSize)); 
-        //var panelFontSize = new StackPanel
-        //{
-        //    Orientation = Orientation.Horizontal,
-        //    HorizontalAlignment = HorizontalAlignment.Left,
-        //    Children =
-        //    {
-        //        labelFontSize,
-        //        textBoxFontSize,
-        //    }
-        //};
+        var labelCheckBoxIsBold = UiUtil.MakeLabel().WithMinWidth(labelWidth);
+        var checkBoxIsBold = UiUtil.MakeCheckBox(Se.Language.General.Bold, vm, nameof(vm.IsFontBold));
+        var panelCheckBoxIsBold = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                labelCheckBoxIsBold,
+                checkBoxIsBold,
+            }
+        };
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -84,9 +85,9 @@ public class TmpegEncXmlPropertiesWindow : Window
         };
 
         grid.Add(panelFontName, 0);
-        grid.Add(panelLineHeight, 1);
-//        grid.Add(panelFontSize, 2);
-        grid.Add(buttonPanel, 5);
+        grid.Add(panelFontHeight, 1);
+        grid.Add(panelCheckBoxIsBold, 2);
+        grid.Add(buttonPanel, 3);
 
         Content = grid;
 

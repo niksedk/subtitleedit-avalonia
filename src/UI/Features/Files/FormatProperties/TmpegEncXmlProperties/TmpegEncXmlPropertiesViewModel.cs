@@ -12,9 +12,9 @@ namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 public partial class TmpegEncXmlPropertiesViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _fontNames;
-    [ObservableProperty] private string _selectedFontName;
+    [ObservableProperty] private string? _selectedFontName;
     [ObservableProperty] private decimal _fontHeight;
-    [ObservableProperty] private int _position;
+    [ObservableProperty] private bool _isFontBold;
 
     public Window? Window { get; set; }
 
@@ -23,23 +23,18 @@ public partial class TmpegEncXmlPropertiesViewModel : ObservableObject
     public TmpegEncXmlPropertiesViewModel()
     {
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
-        SelectedFontName = FontNames.First();
+        var fn = FontNames.FirstOrDefault(p => p == Se.Settings.Formats.TmpegEncXmlFontName);
+        SelectedFontName = fn ?? FontNames.FirstOrDefault();
 
         FontHeight = Se.Settings.Formats.TmpegEncXmlFontHeight;
-
-        Position = Se.Settings.Formats.TmpegEncXmlPosition;
-
-        LoadSettings();
-    }
-
-    private void LoadSettings()
-    {
-      
+        IsFontBold = Se.Settings.Formats.TmpegEncXmlFontBold;
     }
 
     private void SaveSettings()
     {
-        
+        Se.Settings.Formats.TmpegEncXmlFontName = SelectedFontName ?? new SeFormats().TmpegEncXmlFontName;
+        Se.Settings.Formats.TmpegEncXmlFontHeight = FontHeight;
+        Se.Settings.Formats.TmpegEncXmlFontBold = IsFontBold;
 
         Se.SaveSettings();
     }

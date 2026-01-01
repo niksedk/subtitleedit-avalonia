@@ -2229,4 +2229,9 @@ public static class UiUtil
             window.WindowState = WindowState.Normal;
         }
     }
+
+    internal static object MakeLabel(object position)
+    {
+        throw new NotImplementedException();
+    }
 }

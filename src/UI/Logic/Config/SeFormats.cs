@@ -9,7 +9,6 @@ public class SeFormats
 
     public string TmpegEncXmlFontName { get; set; }
     public decimal TmpegEncXmlFontHeight { get; set; }
-    public int TmpegEncXmlPosition { get; set; }
     public bool TmpegEncXmlFontBold { get; set; }
 
 
@@ -22,7 +21,6 @@ public class SeFormats
 
         TmpegEncXmlFontName = "Tahoma";
         TmpegEncXmlFontHeight = 0.069m;
-        TmpegEncXmlPosition = 23;
         TmpegEncXmlFontBold = false;
     }
 }

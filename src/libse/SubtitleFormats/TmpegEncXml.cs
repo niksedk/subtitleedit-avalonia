@@ -21,7 +21,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public static string FontName { get; set; } = "Tahoma";
         public static string FontBold { get; set; } = "0";
         public static string FontHeight { get; set; } = "0.069";
-        public static string Position { get; set; } = "23";
 
 
         public override string Extension => ".xsubtitle";
@@ -47,7 +46,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture bottom layout]]>
             </Name>
-            <Position>[Position]</Position>
+            <Position>6</Position>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
@@ -80,13 +79,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture top layout]]>
             </Name>
-            <Position>[Position]</Position>
+            <Position>1</Position>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
-            <FontBold>0</FontBold>
+            <FontBold>[FontBold]</FontBold>
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
@@ -113,13 +112,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture left layout]]>
             </Name>
-            <Position>[Position]</Position>
+            <Position>7</Position>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
-            <FontBold>0</FontBold>
+            <FontBold>[FontBold]</FontBold>
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
@@ -146,13 +145,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture right layout]]>
             </Name>
-            <Position>[Position]</Position>
+            <Position>8</Position>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
-            <FontBold>0</FontBold>
+            <FontBold>[FontBold]</FontBold>
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
@@ -179,13 +178,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture bottom layout]]>
             </Name>
-            <Position>[Position]</Position>
+            <Position>6</Position>
             <FontName>
                 <![CDATA[[FontName]]]>
             </FontName>
             <FontHeight>[FontHeight]</FontHeight>
             <FontColor>17588159451135</FontColor>
-            <FontBold>0</FontBold>
+            <FontBold>[FontBold]</FontBold>
             <FontItalic>1</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
@@ -216,7 +215,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             .Replace("[FontName]", FontName)
             .Replace("[FontBold]", FontBold)
             .Replace("[FontHeight]", FontHeight)
-            .Replace("[Position]", Position);
+            ;
 
         public override string ToText(Subtitle subtitle, string title)
         {

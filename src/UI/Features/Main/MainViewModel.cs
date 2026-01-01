@@ -497,7 +497,6 @@ public partial class MainViewModel :
 
         TmpegEncXml.FontName = Se.Settings.Formats.TmpegEncXmlFontName;
         TmpegEncXml.FontHeight = Se.Settings.Formats.TmpegEncXmlFontHeight.ToString(CultureInfo.InvariantCulture);
-        TmpegEncXml.Position = Se.Settings.Formats.TmpegEncXmlPosition.ToString(CultureInfo.InvariantCulture);
         TmpegEncXml.FontBold = Se.Settings.Formats.TmpegEncXmlFontBold ? "1" : "0";
     }
 
