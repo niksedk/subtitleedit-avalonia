@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -3087,6 +3088,20 @@ public partial class MainViewModel :
         if (!string.IsNullOrEmpty(fileName))
         {
             await VideoOpenFile(fileName);
+
+            if (!string.IsNullOrEmpty(_videoFileName) && InitLayout.LayoutHasNoVideo(Se.Settings.General.LayoutNumber))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    Se.Language.Title,
+                    Se.Language.Main.VideoOpenedChangeLayoutQuestion,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    await CommandShowLayout();
+                }
+            }
         }
 
         _shortcutManager.ClearKeys();
@@ -8004,7 +8019,7 @@ public partial class MainViewModel :
                 }
                 else
                 {
-                 //   MessageBox.Show(_language.NotAValidXSubFile);
+                    //   MessageBox.Show(_language.NotAValidXSubFile);
                 }
 
                 return;
