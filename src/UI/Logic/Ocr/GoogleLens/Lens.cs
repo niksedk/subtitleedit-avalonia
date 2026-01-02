@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Ocr.GoogleLens;
 
+public interface ILens
+{
+    Task<LensResult> ScanByBitmap(SKBitmap bitmap);
+}
+
 public class Lens : LensCore
 {
     public Lens(Dictionary<string, object>? config = null, Func<HttpRequestMessage, Task<HttpResponseMessage>>? fetch = null)
