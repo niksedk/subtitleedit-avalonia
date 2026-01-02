@@ -15,10 +15,12 @@ public class MpvReloader : IMpvReloader
     public int VideoWidth { get; set; } = 1280;
     public int VideoHeight { get; set; } = 720;
 
+    private readonly AdvancedSubStationAlpha _assFormat = new();
     private Subtitle? _subtitlePrev;
     private string _mpvTextOld = string.Empty;
     private int _mpvSubOldHash = -1;
     private string? _mpvTextFileName;
+    private string? _mpvTextFileExtension;
     private int _retryCount = 3;
     private string? _mpvPreviewStyleHeader;
 
@@ -31,6 +33,8 @@ public class MpvReloader : IMpvReloader
 
         try
         {
+            var uiFormatType = uiFormat.GetType();
+            
             subtitle = new Subtitle(subtitle, false);
             if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
             {
@@ -46,25 +50,15 @@ public class MpvReloader : IMpvReloader
                 }
             }
 
-            SubtitleFormat format = new AdvancedSubStationAlpha();
+            SubtitleFormat format = _assFormat;
             string text;
-
-            var uiFormatType = uiFormat.GetType();
-            //if (uiFormatType == typeof(NetflixImsc11Japanese))
-            //{
-            //    text = NetflixImsc11JapaneseToAss.Convert(subtitle, VideoWidth, VideoHeight);
-            //}
-            //else
             if (uiFormatType == typeof(WebVTT) || uiFormatType == typeof(WebVTTFileWithLineNumber))
             {
-                //TODO: add some caching!?
                 var defaultStyle = GetMpvPreviewStyle(Se.Settings.Video);
                 defaultStyle.BorderStyle = "3";
                 subtitle = new Subtitle(subtitle);
                 subtitle = WebVttToAssa.Convert(subtitle, defaultStyle, VideoWidth, VideoHeight);
-                format = new AdvancedSubStationAlpha();
-                text = subtitle.ToText(format);
-                //    File.WriteAllText(@"c:\data\__a.ass", text);
+                text = subtitle.ToText(_assFormat);
             }
             else
             {
@@ -75,7 +69,7 @@ public class MpvReloader : IMpvReloader
                         subtitle.Header = SubStationAlpha.DefaultHeader;
                     }
 
-                    if (subtitle.Header != null && subtitle.Header.Contains("[V4 Styles]"))
+                    if (subtitle.Header != null && subtitle.Header.Contains("[V4 Styles]", StringComparison.Ordinal))
                     {
                         subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromSubStationAlpha(subtitle.Header);
                     }
@@ -99,20 +93,18 @@ public class MpvReloader : IMpvReloader
                         subtitle.Header = MpvPreviewStyleHeader;
                     }
 
-                    if (oldSub.Header != null && oldSub.Header.Length > 20 && oldSub.Header.Substring(3, 3) == "STL")
+                    if (oldSub.Header != null && oldSub.Header.Length > 20 && oldSub.Header.AsSpan(3, 3).SequenceEqual("STL"))
                     {
-                        subtitle.Header = subtitle.Header.Replace("Style: Default,", "Style: Box," +
-                            Configuration.Settings.General.VideoPlayerPreviewFontName + "," +
-                            Configuration.Settings.General.VideoPlayerPreviewFontSize + ",&H00FFFFFF,&H0300FFFF,&H00000000,&H02000000," +
-                            (Configuration.Settings.General.VideoPlayerPreviewFontBold ? "-1" : "0") + ",0,0,0,100,100,0,0,3,2,0,2,10,10,10,1" +
-                                                                   Environment.NewLine + "Style: Default,");
+                        var boldValue = Configuration.Settings.General.VideoPlayerPreviewFontBold ? "-1" : "0";
+                        var boxStyle = $"Style: Box,{Configuration.Settings.General.VideoPlayerPreviewFontName},{Configuration.Settings.General.VideoPlayerPreviewFontSize},&H00FFFFFF,&H0300FFFF,&H00000000,&H02000000,{boldValue},0,0,0,100,100,0,0,3,2,0,2,10,10,10,1{Environment.NewLine}Style: Default,";
+                        subtitle.Header = subtitle.Header.Replace("Style: Default,", boxStyle, StringComparison.Ordinal);
 
                         var useBox = false;
                         if (Configuration.Settings.SubtitleSettings.EbuStlTeletextUseBox)
                         {
                             try
                             {
-                                var encoding = Ebu.GetEncoding(oldSub.Header.Substring(0, 3));
+                                var encoding = Ebu.GetEncoding(oldSub.Header[..3]);
                                 var buffer = encoding.GetBytes(oldSub.Header);
                                 var header = Ebu.ReadHeader(buffer);
                                 if (header.DisplayStandardCode != "0")
@@ -144,7 +136,7 @@ public class MpvReloader : IMpvReloader
                 var hash = subtitle.GetFastHashCode(null);
                 if (hash != _mpvSubOldHash || string.IsNullOrEmpty(_mpvTextOld))
                 {
-                    text = subtitle.ToText(new AdvancedSubStationAlpha());
+                    text = subtitle.ToText(_assFormat);
                     _mpvSubOldHash = hash;
                 }
                 else
@@ -156,12 +148,13 @@ public class MpvReloader : IMpvReloader
 
             if (text != _mpvTextOld || _mpvTextFileName == null || _retryCount > 0)
             {
-                if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
+                if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || _mpvTextFileExtension != format.Extension)
                 {
                     mpvContext.SubRemove();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
-                    await File.WriteAllTextAsync(_mpvTextFileName, text);
+                    _mpvTextFileExtension = format.Extension;
+                    await File.WriteAllTextAsync(_mpvTextFileName, text).ConfigureAwait(false);
                     mpvContext.SubAdd(_mpvTextFileName);
                     mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
@@ -169,7 +162,7 @@ public class MpvReloader : IMpvReloader
                 else
                 {
                     mpvContext.SubRemove();
-                    await File.WriteAllTextAsync(_mpvTextFileName, text);
+                    await File.WriteAllTextAsync(_mpvTextFileName, text).ConfigureAwait(false);
                     mpvContext.SubAdd(_mpvTextFileName);
                 }
                 _mpvTextOld = text;
@@ -199,7 +192,6 @@ public class MpvReloader : IMpvReloader
     public void UpdateMpvStyle()
     {
         var mpvStyle = GetMpvPreviewStyle(Se.Settings.Video);
-
         MpvPreviewStyleHeader = string.Format(AdvancedSubStationAlpha.HeaderNoStyles, "MPV preview file", mpvStyle.ToRawAss(SsaStyle.DefaultAssStyleFormat));
     }
 
@@ -241,8 +233,10 @@ public class MpvReloader : IMpvReloader
     public void Reset()
     {
         _mpvTextFileName = null;
+        _mpvTextFileExtension = null;
         _mpvTextOld = string.Empty;
         _mpvPreviewStyleHeader = null;
         _retryCount = 3;
+        _mpvSubOldHash = -1;
     }
 }
