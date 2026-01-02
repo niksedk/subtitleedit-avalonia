@@ -1,7 +1,6 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -19,111 +18,45 @@ public class Lens : LensCore
         }
     }
 
-    public async Task<LensResult> ScanByFile(string path)
+    public async Task<LensResult> ScanByBitmap(SKBitmap bitmap)
     {
-        if (string.IsNullOrEmpty(path))
+        if (bitmap == null)
         {
-            throw new ArgumentException("scanByFile expects a string, got null or empty");
+            throw new ArgumentNullException(nameof(bitmap));
         }
 
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException($"File not found: {path}");
-        }
-
-        var fileBuffer = await File.ReadAllBytesAsync(path);
-        return await ScanByBuffer(fileBuffer);
-    }
-
-    public async Task<LensResult> ScanByBuffer(byte[] buffer)
-    {
-        SKEncodedImageFormat? fileType = null;
-        
-        try
-        {
-            using var stream = new MemoryStream(buffer);
-            using var codec = SKCodec.Create(stream);
-            if (codec != null)
-            {
-                fileType = codec.EncodedFormat;
-            }
-        }
-        catch
-        {
-            Console.WriteLine("Could not determine file type from buffer. Attempting to process anyway.");
-        }
-
-        int originalWidth, originalHeight;
-        
-        try
-        {
-            var dimensions = Helper.ImageDimensionsFromData(buffer);
-            originalWidth = dimensions.Width;
-            originalHeight = dimensions.Height;
-        }
-        catch (Exception e)
-        {
-            throw new Exception("Could not read image metadata using SkiaSharp.", e);
-        }
+        var originalWidth = bitmap.Width;
+        var originalHeight = bitmap.Height;
 
         if (originalWidth == 0 || originalHeight == 0)
         {
             throw new Exception("Could not determine original image dimensions.");
         }
 
-        var imageToProcessBuffer = buffer;
-        var finalMime = fileType switch
-        {
-            SKEncodedImageFormat.Png => "image/png",
-            SKEncodedImageFormat.Jpeg => "image/jpeg",
-            SKEncodedImageFormat.Webp => "image/webp",
-            _ => "image/png"
-        };
+        var bitmapToProcess = bitmap;
+        var finalMime = "image/png";
 
         const int MAX_DIMENSION = 1200;
-        
+
         // Only process if absolutely necessary
         if (originalWidth > MAX_DIMENSION || originalHeight > MAX_DIMENSION)
         {
-            using var inputStream = new MemoryStream(buffer);
-            using var original = SKBitmap.Decode(inputStream);
-            
-            if (original == null)
-            {
-                throw new Exception("Could not decode image");
-            }
-
             // Calculate new dimensions maintaining aspect ratio
-            float ratio = Math.Min((float)MAX_DIMENSION / original.Width, (float)MAX_DIMENSION / original.Height);
-            int newWidth = (int)(original.Width * ratio);
-            int newHeight = (int)(original.Height * ratio);
+            float ratio = Math.Min((float)MAX_DIMENSION / originalWidth, (float)MAX_DIMENSION / originalHeight);
+            int newWidth = (int)(originalWidth * ratio);
+            int newHeight = (int)(originalHeight * ratio);
 
-            using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+            using var resized = bitmap.Resize(new SKImageInfo(newWidth, newHeight), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
             if (resized == null)
             {
                 throw new Exception("Could not resize image");
             }
-                
-            using var image = SKImage.FromBitmap(resized);
-            
-            // Keep original format if possible
-            SKEncodedImageFormat format = fileType == SKEncodedImageFormat.Png 
-                ? SKEncodedImageFormat.Png 
-                : SKEncodedImageFormat.Jpeg;
-                
-            if (format == SKEncodedImageFormat.Png)
-            {
-                finalMime = "image/png";
-            }
-            else
-            {
-                finalMime = "image/jpeg";
-            }
-            
-            using var data = image.Encode(format, 90);
-            imageToProcessBuffer = data.ToArray();
+
+            var imageToProcessBuffer = resized.ToPngArray();
+            return await ScanByData(imageToProcessBuffer, finalMime, new[] { originalWidth, originalHeight });
         }
 
-        return await ScanByData(imageToProcessBuffer, finalMime, new[] { originalWidth, originalHeight });
+        var buffer = bitmapToProcess.ToPngArray();
+        return await ScanByData(buffer, finalMime, [originalWidth, originalHeight]);
     }
 }

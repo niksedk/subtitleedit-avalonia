@@ -274,30 +274,6 @@ public class LensCore
         return LensProtoResponse.Deserialize(responseBytes);
     }
 
-    public async Task<LensResult> ScanByURL(string url)
-    {
-        var imageResponse = await _fetch!(new HttpRequestMessage(HttpMethod.Get, url));
-        
-        if (!imageResponse.IsSuccessStatusCode)
-        {
-            throw new Exception($"Failed to fetch image from URL: {url}, status: {imageResponse.StatusCode}");
-        }
-
-        var imageBuffer = await imageResponse.Content.ReadAsByteArrayAsync();
-        var uint8ImgArray = imageBuffer;
-
-        var mime = "image/jpeg";
-        var ext = url.Split('.').Last().ToLower();
-        if (Constants.EXT_TO_MIME.ContainsKey(ext))
-        {
-            mime = Constants.EXT_TO_MIME[ext];
-        }
-
-        var dimensions = Helper.ImageDimensionsFromData(uint8ImgArray);
-        
-        return await ScanByData(uint8ImgArray, mime, new[] { dimensions.Width, dimensions.Height });
-    }
-
     public async Task<LensResult> ScanByData(byte[] uint8Array, string mime, int[] originalDimensions)
     {
         if (!Constants.SUPPORTED_MIMES.Contains(mime) && mime != "image/gif")
