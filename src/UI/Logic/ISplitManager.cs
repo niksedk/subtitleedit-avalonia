@@ -51,6 +51,21 @@ public class SplitManager : ISplitManager
         else if (lines.Count > 2)
         {
             var splitIndex = lines.Count / 2;
+
+            if (lines.Count % 2 == 1)
+            {
+                var try1First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex + 1)).Trim();
+                var try1Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex + 1, lines.Count - (splitIndex + 1))).Trim();
+
+                var try2First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex)).Trim();
+                var try2Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex, lines.Count - splitIndex)).Trim();
+
+                if (Math.Abs(try1First.Length - try1Second.Length) < Math.Abs(try2First.Length - try2Second.Length))
+                {
+                    splitIndex = splitIndex + 1;
+                }
+            }
+
             subtitle.Text = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex)).Trim();
             newSubtitle.Text = string.Join(Environment.NewLine, lines.GetRange(splitIndex, lines.Count - splitIndex)).Trim();
         }

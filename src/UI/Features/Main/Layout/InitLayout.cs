@@ -10,8 +10,6 @@ public static partial class InitLayout
 {
     public const int WaveFormHeight = 150;
 
-    private static readonly Dictionary<int, LayoutPositions> _savedLayoutPositions = new();
-
     public class LayoutPositions
     {
         public List<double> RowHeights { get; set; } = new();
@@ -956,8 +954,12 @@ public static partial class InitLayout
 
     internal static void MakeLayout12KeepVideo(MainView mainPage, MainViewModel vm)
     {
-
         vm.ContentGrid.Children.Clear();
         vm.ContentGrid.Children.Add(InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm));
+    }
+
+    internal static bool LayoutHasNoVideo(int layoutNumber)
+    {
+        return layoutNumber == 12;
     }
 }

@@ -392,6 +392,16 @@ public partial class AutoTranslateViewModel : ObservableObject
             }
         }
 
+        var languageName = Iso639Dash2LanguageCode.List.FirstOrDefault(l => l.TwoLetterCode.Equals(sourceLanguageIsoCode, StringComparison.InvariantCultureIgnoreCase))?.EnglishName;
+        if (SelectedSourceLanguage == null && !string.IsNullOrEmpty(languageName))
+        {
+            var lang = SourceLanguages.FirstOrDefault(p => p.Name == languageName);
+            if (lang != null)
+            {
+                SelectedSourceLanguage = lang;
+            }
+        }
+
         if (SelectedSourceLanguage == null && !string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastSource))
         {
             var lang = SourceLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastSource);
@@ -431,6 +441,16 @@ public partial class AutoTranslateViewModel : ObservableObject
             }
         }
 
+        var languageName = Iso639Dash2LanguageCode.List.FirstOrDefault(l => l.TwoLetterCode.Equals(targetLanguageIsoCode, StringComparison.InvariantCultureIgnoreCase))?.EnglishName;
+        if (SelectedTargetLanguage == null && !string.IsNullOrEmpty(languageName))
+        {
+            var lang = TargetLanguages.FirstOrDefault(p => p.Name == languageName);
+            if (lang != null)
+            {
+                SelectedTargetLanguage = lang;
+            }
+        }
+
         if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.AutoTranslateLastTarget))
         {
             var lang = TargetLanguages.FirstOrDefault(p => p.Code == Se.Settings.AutoTranslate.AutoTranslateLastTarget);
@@ -445,9 +465,9 @@ public partial class AutoTranslateViewModel : ObservableObject
             SelectedTargetLanguage = TargetLanguages[0];
         }
 
-        if (SelectedSourceLanguage == SelectedTargetLanguage && TargetLanguages.Count > 1)
+        if (SelectedSourceLanguage?.Name == SelectedTargetLanguage?.Name && TargetLanguages.Count > 1)
         {
-            if (SelectedSourceLanguage?.Code == "en")
+            if (SelectedSourceLanguage?.Code == "en" || SelectedSourceLanguage?.Name =="English")
             {
                 SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "de");
             }
@@ -1142,6 +1162,12 @@ public partial class AutoTranslateViewModel : ObservableObject
             return installedLanguages[0];
         }
 
+        var sourceLanguageCode = Iso639Dash2LanguageCode.GetTwoLetterCodeFromEnglishName(sourceLanguage);
+        if (!string.IsNullOrEmpty(sourceLanguageCode) && uiCultureTargetLanguage == sourceLanguageCode && installedLanguages.Count > 0 && installedLanguages[0] != sourceLanguageCode)
+        {
+            return installedLanguages[0];
+        }
+
         if (uiCultureTargetLanguage == defaultSourceLanguage)
         {
             foreach (var s in Utilities.GetDictionaryLanguages())
@@ -1190,7 +1216,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         }
 
         // Set target language to something different than source language
-        if (uiCultureTargetLanguage == defaultSourceLanguage && defaultSourceLanguage == "en")
+        if (uiCultureTargetLanguage == defaultSourceLanguage && (defaultSourceLanguage == "en" || defaultSourceLanguage == "English"))
         {
             uiCultureTargetLanguage = "es";
         }

@@ -38,7 +38,10 @@ public static class DivXSubParser
 
                     if (TryReadXSub(stream, out var xSub))
                     {
-                        list.Add(xSub);
+                        if (xSub != null)
+                        {
+                            list.Add(xSub);
+                        }
                         // Move loop index forward to skip the header we just processed
                         i += 50;
                     }
@@ -66,7 +69,7 @@ public static class DivXSubParser
                s[25] == 0x5d;                                  // ]
     }
 
-    private static bool TryReadXSub(FileStream stream, out XSub xSub)
+    private static bool TryReadXSub(FileStream stream, out XSub? xSub)
     {
         xSub = null;
         Span<byte> header = stackalloc byte[26 + 14 + 12]; // Timecode + Metadata + Colors

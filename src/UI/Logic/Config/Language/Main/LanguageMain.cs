@@ -84,6 +84,7 @@ public class LanguageMain
     public string TrimmedXLines { get; set; }
     public string OpenOriginalDifferentNumberOfSubtitlesXY { get; set; }
     public string ImportXMatchingOriginalLines { get; set; }
+    public string VideoOpenedChangeLayoutQuestion { get; set; }
 
     public LanguageMain()
     {
@@ -162,5 +163,6 @@ public class LanguageMain
         TrimmedXLines = "Trimmed {0} subtitle lines";
         OpenOriginalDifferentNumberOfSubtitlesXY = "The original subtitle file does not have the same number of subtitles as the current subtitle file.\n\n• Original subtitles: {0}\n• Current subtitles: {1}";
         ImportXMatchingOriginalLines = "Import {0} matching original subtitles?";
+        VideoOpenedChangeLayoutQuestion = "A video file has been opened.\n\nDo you want to change the layout to show the video panel?";
     }
 }
