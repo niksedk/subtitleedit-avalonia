@@ -31,7 +31,7 @@ internal class HeaderData
         { "Sec-Fetch-Site", "same-origin" },
         { "Sec-Fetch-User", "?1" },
         { "Upgrade-Insecure-Requests", "1" },
-        { "User-Agent", Config["userAgent"] as string }
+        { "User-Agent", Config["userAgent"] as string ?? string.Empty }
         };
         return headers;
     }

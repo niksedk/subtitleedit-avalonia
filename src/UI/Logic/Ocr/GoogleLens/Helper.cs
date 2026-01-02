@@ -26,9 +26,11 @@ internal class Helper
         int newWidth = (int)(original.Width * ratio);
         int newHeight = (int)(original.Height * ratio);
 
-        using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.High);
+        using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
         if (resized == null)
+        {
             throw new InvalidOperationException("Could not resize image");
+        }
             
         using var image = SKImage.FromBitmap(resized);
         using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
@@ -42,41 +44,37 @@ internal class Helper
         using var codec = SKCodec.Create(inputStream);
         
         if (codec == null)
+        {
             throw new InvalidOperationException("Could not decode image");
+        }
             
         return (codec.Info.Width, codec.Info.Height);
     }
     
     public static byte[] DecompressDeflate(byte[] deflateData)
     {
-        using (MemoryStream inputStream = new MemoryStream(deflateData))
-        using (DeflateStream deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress))
-        using (MemoryStream outputStream = new MemoryStream())
-        {
-            deflateStream.CopyTo(outputStream);
-            return outputStream.ToArray();
-        }
+        using var inputStream = new MemoryStream(deflateData);
+        using var deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress);
+        using var outputStream = new MemoryStream();
+        deflateStream.CopyTo(outputStream);
+        return outputStream.ToArray();
     }
     
     public static byte[] DecompressGzip(byte[] gzipData)
     {
-        using (MemoryStream inputStream = new MemoryStream(gzipData))
-        using (GZipStream gzipStream = new GZipStream(inputStream, CompressionMode.Decompress))
-        using (MemoryStream outputStream = new MemoryStream())
-        {
-            gzipStream.CopyTo(outputStream);
-            return outputStream.ToArray();
-        }
+        using var inputStream = new MemoryStream(gzipData);
+        using var gzipStream = new GZipStream(inputStream, CompressionMode.Decompress);
+        using var outputStream = new MemoryStream();
+        gzipStream.CopyTo(outputStream);
+        return outputStream.ToArray();
     }
     
     public static byte[] DecompressBrotli(byte[] brotliData)
     {
-        using (MemoryStream inputStream = new MemoryStream(brotliData))
-        using (BrotliStream brotliStream = new BrotliStream(inputStream, CompressionMode.Decompress))
-        using (MemoryStream outputStream = new MemoryStream())
-        {
-            brotliStream.CopyTo(outputStream);
-            return outputStream.ToArray();
-        }
+        using var inputStream = new MemoryStream(brotliData);
+        using var brotliStream = new BrotliStream(inputStream, CompressionMode.Decompress);
+        using var outputStream = new MemoryStream();
+        brotliStream.CopyTo(outputStream);
+        return outputStream.ToArray();
     }
 }

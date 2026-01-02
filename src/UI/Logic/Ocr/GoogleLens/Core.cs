@@ -49,6 +49,7 @@ public class Core
 
         ParseCookies();
     }
+    
     public async Task<List<string>> ScanByFileAsync(string path)
     {
         var file = await File.ReadAllBytesAsync(path);
@@ -99,14 +100,14 @@ public class Core
     public async Task<List<string>> FetchAsync(HttpContent formdata, int[] originalDimensions, bool secondTry = false)
     {
         var paramsList = new Dictionary<string, string>
-    {
-        { "s", "4" },
-        { "re", "df" },
-        { "stcs", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString() },
-        { "vpw", HeaderData.Config["viewport"].ToString() },
-        { "vph", HeaderData.Config["viewport"].ToString() },
-        { "ep", "subb" }
-    };
+        {
+            { "s", "4" },
+            { "re", "df" },
+            { "stcs", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString() },
+            { "vpw", HeaderData.Config["viewport"].ToString()! },
+            { "vph", HeaderData.Config["viewport"].ToString()! },
+            { "ep", "subb" }
+        };
 
         var url = $"{HeaderData.Config["endpoint"]}?{new FormUrlEncodedContent(paramsList).ReadAsStringAsync().Result}";
         var headers = HeaderData.GenerateHeaders();
@@ -131,6 +132,7 @@ public class Core
         var response = await _fetch(request);
         var text = await response.Content.ReadAsStringAsync();
         byte[] responseBytes = await response.Content.ReadAsByteArrayAsync();
+        
         // Check the content encoding and decompress accordingly
         if (response.Content.Headers.ContentEncoding.Contains("gzip"))
         {
@@ -144,12 +146,13 @@ public class Core
         {
             responseBytes = Helper.DecompressBrotli(responseBytes);
         }
-        var responseBodys = Encoding.UTF8.GetString(responseBytes);
-        var responseBody = Encoding.GetEncoding("iso-8859-1").GetString(responseBytes);
+        
+        var responseBody = Encoding.UTF8.GetString(responseBytes);
 
-
-
-        SetCookies(response.Headers.GetValues("set-cookie"));
+        if (response.Headers.TryGetValues("set-cookie", out var setCookieValues))
+        {
+            SetCookies(setCookieValues);
+        }
 
         if (response.StatusCode == System.Net.HttpStatusCode.Found)
         {
@@ -166,7 +169,10 @@ public class Core
             GenerateCookieHeader(consentHeaders);
 
             var location = response.Headers.Location;
-            if (location == null) throw new Exception("Location header not found");
+            if (location == null)
+            {
+                throw new Exception("Location header not found");
+            }
 
             var redirectLink = new Uri(location.ToString());
             var params2 = new Dictionary<string, string>
@@ -193,7 +199,10 @@ public class Core
 
             if (saveConsentResponse.StatusCode == System.Net.HttpStatusCode.SeeOther)
             {
-                SetCookies(saveConsentResponse.Headers.GetValues("set-cookie"));
+                if (saveConsentResponse.Headers.TryGetValues("set-cookie", out var consentCookies))
+                {
+                    SetCookies(consentCookies);
+                }
                 await Task.Delay(500);
                 return await FetchAsync(formdata, originalDimensions, true);
             }
@@ -206,14 +215,15 @@ public class Core
 
         try
         {
-            var afData = GetAFData(responseBodys);
-            return ParseResult(afData, originalDimensions);
+            var afData = GetAFData(responseBody);
+            return ParseResult(afData!, originalDimensions);
         }
         catch (Exception e)
         {
             throw new CoreError($"Could not parse response: {e.Message}", (int)response.StatusCode, response.Headers, text);
         }
     }
+    
     public async Task<List<string>> ScanByData(byte[] uint8, string mime, int[] originalDimensions)
     {
         if (!Constants.SUPPORTED_MIMES.Contains(mime))
@@ -239,15 +249,16 @@ public class Core
         var file = new ByteArrayContent(uint8);
         file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
         var formdata = new MultipartFormDataContent
-    {
-        { file, "encoded_image", fileName },
-        { new StringContent(width.ToString()), "original_width" },
-        { new StringContent(height.ToString()), "original_height" },
-        { new StringContent($"{width},{height}"), "processed_image_dimensions" }
-    };
+        {
+            { file, "encoded_image", fileName },
+            { new StringContent(width.ToString()), "original_width" },
+            { new StringContent(height.ToString()), "original_height" },
+            { new StringContent($"{width},{height}"), "processed_image_dimensions" }
+        };
 
         return await FetchAsync(formdata, originalDimensions);
     }
+    
     private void GenerateCookieHeader(Dictionary<string, string> header)
     {
         if (HeaderData.Cookies.Count > 0)
@@ -270,11 +281,15 @@ public class Core
             }
         }
     }
-    private Cookie ParseCookie(string cookieHeader)
+    
+    private Cookie? ParseCookie(string cookieHeader)
     {
         var parts = cookieHeader.Split(';');
         var cookieParts = parts[0].Split('=');
-        if (cookieParts.Length != 2) return null;
+        if (cookieParts.Length != 2)
+        {
+            return null;
+        }
 
         var cookie = new Cookie
         {
@@ -298,7 +313,7 @@ public class Core
         return cookie;
     }
 
-    public static JObject GetAFData(string text)
+    public static JObject? GetAFData(string text)
     {
         var matches = Regex.Matches(text, @"AF_initDataCallback\((\{.*?\})\)", RegexOptions.Singleline);
         var lensCallback = matches.FirstOrDefault(m => m.Value.Contains("DetectedObject"));
@@ -315,37 +330,59 @@ public class Core
     public static List<string> ParseResult(JObject afData, int[] imageDimensions)
     {
         var data = afData["data"];
-        var fullTextPart = data[3];
+        var fullTextPart = data?[3];
         var textSegments = new List<string>();
         var textRegions = new List<double[]>();
 
         try
         {
             // Method 1: get text segments and regions directly
-            textSegments = fullTextPart[4][0][0].ToObject<List<string>>();
-            textRegions = data[2][3][0].Where(x => x[11].ToString().StartsWith("text:"))
-                .Select(x => x[1].ToObject<double[]>()).ToList();
+            if (fullTextPart?[4]?[0]?[0] != null)
+            {
+                textSegments = fullTextPart[4]![0]![0]!.ToObject<List<string>>()!;
+            }
+            if (data?[2]?[3]?[0] != null)
+            {
+                textRegions = data[2]![3]![0]!.Where(x => x[11]?.ToString()?.StartsWith("text:") == true)
+                    .Select(x => x[1]!.ToObject<double[]>()!).ToList();
+            }
         }
         catch
         {
-            var bigParts = fullTextPart[2][0];
-            foreach (var bigPart in bigParts)
+            var bigParts = fullTextPart?[2]?[0];
+            if (bigParts != null)
             {
-                var parts = bigPart[0];
-                foreach (var part in parts)
+                foreach (var bigPart in bigParts)
                 {
-                    var text = part[0].Select(t => t[0].ToString() + (t[3]?.ToString() ?? "")).Aggregate((a, b) => a + b);
-                    var region = part[1].ToObject<double[]>();
-                    var y = region[0];
-                    var x = region[1];
-                    double width = region[2];
-                    double height = region[3];
-                    double centerX = x + width / 2;
-                    double centerY = y + height / 2;
-                    region = new double[] { centerX, centerY, width, height };
+                    var parts = bigPart[0];
+                    if (parts == null)
+                    {
+                        continue;
+                    }
+                    
+                    foreach (var part in parts)
+                    {
+                        if (part[0] == null || part[1] == null)
+                        {
+                            continue;
+                        }
+                        
+                        var text = part[0]!.Select(t => t[0]?.ToString() + (t[3]?.ToString() ?? "")).Aggregate((a, b) => a + b);
+                        var region = part[1]!.ToObject<double[]>();
+                        if (region != null && region.Length >= 4)
+                        {
+                            var y = region[0];
+                            var x = region[1];
+                            double width = region[2];
+                            double height = region[3];
+                            double centerX = x + width / 2;
+                            double centerY = y + height / 2;
+                            region = [centerX, centerY, width, height];
 
-                    textSegments.Add(text);
-                    textRegions.Add(region);
+                            textSegments.Add(text);
+                            textRegions.Add(region);
+                        }
+                    }
                 }
             }
         }
@@ -354,11 +391,10 @@ public class Core
 
     private async Task<HttpResponseMessage> DefaultFetchAsync(HttpRequestMessage request)
     {
-        using (var client = new HttpClient())
-        {
-            return await client.SendAsync(request);
-        }
+        using var client = new HttpClient();
+        return await client.SendAsync(request);
     }
+    
     private void ParseCookies()
     {
         if (HeaderData.Config.ContainsKey("headers") && ((Dictionary<string, string>)HeaderData.Config["headers"]).ContainsKey("cookie"))
@@ -367,12 +403,15 @@ public class Core
             var cookiePairs = cookieHeader.Split("; ").Select(c => c.Split('='));
             foreach (var pair in cookiePairs)
             {
-                HeaderData.Config[pair[0]] = new
+                if (pair.Length >= 2)
                 {
-                    name = pair[0],
-                    value = pair[1],
-                    expires = DateTimeOffset.MaxValue.ToUnixTimeMilliseconds()
-                };
+                    HeaderData.Config[pair[0]] = new
+                    {
+                        name = pair[0],
+                        value = pair[1],
+                        expires = DateTimeOffset.MaxValue.ToUnixTimeMilliseconds()
+                    };
+                }
             }
         }
     } 

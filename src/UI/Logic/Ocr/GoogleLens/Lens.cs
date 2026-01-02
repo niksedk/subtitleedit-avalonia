@@ -23,7 +23,7 @@ public class Lens : LensCore
     {
         if (string.IsNullOrEmpty(path))
         {
-            throw new ArgumentException($"scanByFile expects a string, got null or empty");
+            throw new ArgumentException("scanByFile expects a string, got null or empty");
         }
 
         if (!File.Exists(path))
@@ -89,16 +89,20 @@ public class Lens : LensCore
             using var original = SKBitmap.Decode(inputStream);
             
             if (original == null)
+            {
                 throw new Exception("Could not decode image");
+            }
 
             // Calculate new dimensions maintaining aspect ratio
             float ratio = Math.Min((float)MAX_DIMENSION / original.Width, (float)MAX_DIMENSION / original.Height);
             int newWidth = (int)(original.Width * ratio);
             int newHeight = (int)(original.Height * ratio);
 
-            using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), SKFilterQuality.High);
+            using var resized = original.Resize(new SKImageInfo(newWidth, newHeight), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
             if (resized == null)
+            {
                 throw new Exception("Could not resize image");
+            }
                 
             using var image = SKImage.FromBitmap(resized);
             
