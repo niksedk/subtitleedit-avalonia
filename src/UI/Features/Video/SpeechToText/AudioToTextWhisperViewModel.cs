@@ -614,6 +614,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return false;
         }
 
+        if (string.IsNullOrEmpty(waveFileName) && videoFileName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+        {
+            waveFileName = videoFileName;
+        }
+
         var srtFileName = waveFileName + ".srt";
         if (!File.Exists(srtFileName) && waveFileName.EndsWith(".wav"))
         {
@@ -635,6 +640,20 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (!File.Exists(vttFileName))
         {
             vttFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName)) + ".vtt";
+        }
+
+        if (!File.Exists(srtFileName) && !File.Exists(vttFileName))
+        {
+            //   [39] = "output_srt: saving output to 'C:\\Users\\nikse\\AppData\\Local\\Temp\\se_audioclip_01e9ec97-a99d-465c-8468-a1d34dd441e4.wav.srt'\r\n"
+            foreach (var line in outputText)
+            {
+                var findText = "output_srt: saving output to";
+                if (line.Contains(findText, StringComparison.OrdinalIgnoreCase))
+                {
+                    srtFileName = line.Substring(line.IndexOf(findText) + findText.Length + 1).Trim('"', ' ', '\'', '\r', '\n');
+                    break;
+                }
+            }
         }
 
         if (!File.Exists(srtFileName) && !File.Exists(vttFileName))

@@ -740,6 +740,12 @@ public static class InitListViewAndEditBox
                 },
                 new MenuItem
                 {
+                    Header = Se.Language.Main.Menu.TextToSpeech,
+                    Command = vm.SpeechToTextSelectedLinesCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
                     Header = Se.Language.Main.Menu.Statistics,
                     Command = vm.StatisticsSelectedLinesCommand,
                     DataContext = vm,

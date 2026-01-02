@@ -9,7 +9,6 @@ using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Core.ContainerFormats;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
@@ -3403,6 +3402,7 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
+        _shortcutManager.ClearShortcuts();
     }
 
     private void ResetPlaySelection()
@@ -11220,7 +11220,7 @@ public partial class MainViewModel :
                 }
             }
 
-            text = text + " - " + Se.Language.Title;
+            text = text + " - " + Se.Language.Title + " " + Se.Version;
             if (_changeSubtitleHash != GetFastHash())
             {
                 text = "*" + text;
