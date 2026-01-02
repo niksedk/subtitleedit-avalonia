@@ -3362,6 +3362,9 @@
 		<Ending from=" ." to="." />
 		<Ending from=" !" to="!" />
 		<Ending from=" lf " to=" if " />
+		<Ending from="Therel" to="There!" />
+		<Ending from=" therel" to=" there!" />
+		<Ending from=" herel" to=" here!" />
 	</EndLines>
 	<RegularExpressions>
 		<RegEx find="([a-z]) Won't " replaceWith="$1 won't " />
