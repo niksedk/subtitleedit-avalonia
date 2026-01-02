@@ -37,6 +37,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Dictionaries;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.Ocr;
+using Nikse.SubtitleEdit.Logic.Ocr.GoogleLens;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -1261,6 +1262,10 @@ public partial class OcrViewModel : ObservableObject
 
             RunGoogleLensOcr(selectedIndices);
         }
+        else if (ocrEngine.EngineType == OcrEngineType.GoogleLensSharp)
+        {
+            RunGoogleLensOcrSharp(selectedIndices);
+        }
     }
 
     private Lock BatchLock = new Lock();
@@ -1400,6 +1405,72 @@ public partial class OcrViewModel : ObservableObject
         });
     }
 
+    private void RunGoogleLensOcrSharp(List<int> selectedIndices)
+    {
+        var numberOfImages = selectedIndices.Count;
+        var ocrEngine = new GoogleLensOcrSharp(new Lens());
+        var language = SelectedGoogleLensLanguage?.Code ?? "en";
+        Se.Settings.Ocr.PaddleOcrLastLanguage = language;
+
+        var batchImages = new List<PaddleOcrBatchInput>(numberOfImages);
+        var count = 0;
+        ProgressText = $"Initializing Google Lens OCR...";
+        foreach (var i in selectedIndices)
+        {
+            count++;
+            var ocrItem = OcrSubtitleItems[i];
+            batchImages.Add(new PaddleOcrBatchInput
+            {
+                Bitmap = ocrItem.GetSkBitmap(),
+                Index = i,
+                Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
+            });
+
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+        }
+
+        var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
+        {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            lock (BatchLock)
+            {
+                var number = p.Index;
+                if (!selectedIndices.Contains(number))
+                {
+                    return;
+                }
+
+                var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+                var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+                ProgressValue = number / (double)OcrSubtitleItems.Count;
+                ProgressText = $"Running OCR... {number + 1}/{OcrSubtitleItems.Count}";
+
+                var scrollToIndex = number;
+                var item = p.Item;
+                if (item == null)
+                {
+                    item = OcrSubtitleItems[p.Index];
+                }
+
+                item.Text = p.Text;
+                OcrFixLineAndSetText(number, item);
+            }
+        });
+
+        _ = Task.Run(() =>
+        {
+            ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
+            IsOcrRunning = false;
+        });
+    }
 
     private void RunNOcr(List<int> selectedIndices)
     {
@@ -2404,7 +2475,7 @@ public partial class OcrViewModel : ObservableObject
         IsTesseractVisible = et == OcrEngineType.Tesseract;
         IsPaddleOcrVisible = et == OcrEngineType.PaddleOcrStandalone || et == OcrEngineType.PaddleOcrPython;
         IsGoogleVisionVisible = et == OcrEngineType.GoogleVision;
-        IsGoogleLensVisible = et == OcrEngineType.GoogleLens;
+        IsGoogleLensVisible = et == OcrEngineType.GoogleLens || et == OcrEngineType.GoogleLensSharp;
         IsMistralOcrVisible = et == OcrEngineType.Mistral;
         IsBinaryImageCompareVisible = et == OcrEngineType.BinaryImageCompare;
 

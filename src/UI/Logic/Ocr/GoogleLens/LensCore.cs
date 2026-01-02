@@ -1,4 +1,3 @@
-using Nikse.SubtitleEdit.Logic.Ocr.GoogleLens;
 using Nikse.SubtitleEdit.Logic.Ocr.GoogleLens.Proto;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ public class LensCore
         {
             AutomaticDecompression = System.Net.DecompressionMethods.All
         };
-        
+
         _sharedHttpClient = new HttpClient(handler)
         {
             Timeout = TimeSpan.FromSeconds(30)
@@ -216,11 +215,11 @@ public class LensCore
         return new LensResult(detectedLanguage, segments);
     }
 
-    protected async Task<LensProtoResponse> SendProtoRequest(byte[] serializedRequest)
+    protected async Task<LensProtoResponse> SendProtoRequest(byte[] serializedRequest, string twoLetterLanguageCode)
     {
-        var targetLanguage = _config.GetValueOrDefault("targetLanguage") as string ?? "en";
+        var targetLanguage = twoLetterLanguageCode;
         var endpoint = _config.GetValueOrDefault("endpoint") as string ?? Constants.LENS_PROTO_ENDPOINT;
-        
+
         var headers = new Dictionary<string, string>
         {
             { "Content-Type", "application/x-protobuf" },
@@ -274,7 +273,7 @@ public class LensCore
         return LensProtoResponse.Deserialize(responseBytes);
     }
 
-    public async Task<LensResult> ScanByData(byte[] uint8Array, string mime, int[] originalDimensions)
+    public async Task<LensResult> ScanByData(byte[] uint8Array, string mime, int[] originalDimensions, string twoLetterLanguageCode)
     {
         if (!Constants.SUPPORTED_MIMES.Contains(mime) && mime != "image/gif")
         {
@@ -284,7 +283,7 @@ public class LensCore
         var actualDimensions = Helper.ImageDimensionsFromData(uint8Array);
 
         var serializedRequest = CreateLensProtoRequest(uint8Array, actualDimensions.Width, actualDimensions.Height);
-        var serverResponse = await SendProtoRequest(serializedRequest);
+        var serverResponse = await SendProtoRequest(serializedRequest, twoLetterLanguageCode);
 
         return ParseLensProtoResponse(serverResponse, originalDimensions ?? new[] { actualDimensions.Width, actualDimensions.Height });
     }

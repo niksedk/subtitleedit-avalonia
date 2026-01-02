@@ -8,10 +8,10 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.GoogleLens;
 
 public interface ILens
 {
-    Task<LensResult> ScanByBitmap(SKBitmap bitmap);
+    Task<LensResult> ScanByBitmap(SKBitmap bitmap, string twoLetterLanguageCode);
 }
 
-public class Lens : LensCore
+public class Lens : LensCore, ILens
 {
     public Lens(Dictionary<string, object>? config = null, Func<HttpRequestMessage, Task<HttpResponseMessage>>? fetch = null)
         : base(config, fetch)
@@ -23,7 +23,7 @@ public class Lens : LensCore
         }
     }
 
-    public async Task<LensResult> ScanByBitmap(SKBitmap bitmap)
+    public async Task<LensResult> ScanByBitmap(SKBitmap bitmap, string twoLetterLanguageCode)
     {
         if (bitmap == null)
         {
@@ -58,10 +58,10 @@ public class Lens : LensCore
             }
 
             var imageToProcessBuffer = resized.ToPngArray();
-            return await ScanByData(imageToProcessBuffer, finalMime, new[] { originalWidth, originalHeight });
+            return await ScanByData(imageToProcessBuffer, finalMime, new[] { originalWidth, originalHeight }, twoLetterLanguageCode);
         }
 
         var buffer = bitmapToProcess.ToPngArray();
-        return await ScanByData(buffer, finalMime, [originalWidth, originalHeight]);
+        return await ScanByData(buffer, finalMime, [originalWidth, originalHeight], twoLetterLanguageCode);
     }
 }

@@ -48,9 +48,10 @@ public class OcrEngineItem
 
         list.Add(new("Mistral OCR", OcrEngineType.Mistral, "Mistral OCR is a cloud-based OCR engine", "", ""));
 
+        list.Add(new("Google Lens Sharp", OcrEngineType.GoogleLensSharp, "Google Lens (free, but capped) cloud-based OCR engine by Google", "", ""));
         if (OperatingSystem.IsWindows())
         {
-            list.Add(new("Google Lens", OcrEngineType.GoogleLens, "Google Lens (free, but capped) cloud-based OCR engine by Google", "", ""));
+            list.Add(new("Google Lens Standalone", OcrEngineType.GoogleLens, "Google Lens (free, but capped) cloud-based OCR engine by Google", "", ""));
         }
 
         return list;

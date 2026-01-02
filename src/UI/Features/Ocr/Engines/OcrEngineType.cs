@@ -9,6 +9,7 @@ public enum OcrEngineType
     Ollama,
     GoogleVision,
     GoogleLens,
+    GoogleLensSharp,
     AzureVision,
     AmazonRekognition,
     Mistral,

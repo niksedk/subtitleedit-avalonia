@@ -110,6 +110,7 @@ using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.Ocr;
+using Nikse.SubtitleEdit.Logic.Ocr.GoogleLens;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using AudioToTextWhisperViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.AudioToTextWhisperViewModel;
 using AudioVisualizerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.AudioVisualizerUndockedViewModel;
@@ -150,6 +151,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IGoogleLensOcrDownloadService, GoogleLensOcrDownloadService>();
         collection.AddTransient<IInsertService, InsertService>();
         collection.AddTransient<ILanguageInitializer, LanguageInitializer>();
+        collection.AddTransient<ILens, Lens>();
         collection.AddTransient<IMergeManager, MergeManager>();
         collection.AddTransient<IMpvReloader, MpvReloader>();
         collection.AddTransient<INOcrCaseFixer, NOcrCaseFixer>();
