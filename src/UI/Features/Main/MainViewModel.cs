@@ -302,6 +302,8 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerSplitAtPosition { get; set; }
+    public MenuItem MenuItemAudioVisualizerMergeWithPrevious { get; set; }
+    public MenuItem MenuItemAudioVisualizerMergeWithNext { get; set; }
     public ITextBoxWrapper EditTextBoxOriginal { get; set; }
     public ITextBoxWrapper EditTextBox { get; set; }
     public StackPanel PanelSingleLineLengthsOriginal { get; set; }
@@ -374,6 +376,8 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
         MenuItemAudioVisualizerSplitAtPosition = new MenuItem();
+        MenuItemAudioVisualizerMergeWithPrevious = new MenuItem();
+        MenuItemAudioVisualizerMergeWithNext = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         Toolbar = new Border();
@@ -11758,6 +11762,8 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerDeleteAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplitAtPosition.IsVisible = false;
         MenuItemAudioVisualizerSplit.IsVisible = false;
+        MenuItemAudioVisualizerMergeWithPrevious.IsVisible = false;
+        MenuItemAudioVisualizerMergeWithNext.IsVisible = false;
 
         if (e.NewParagraph != null)
         {
@@ -11769,6 +11775,8 @@ public partial class MainViewModel :
         var subtitlesAtPosition = Subtitles
             .Where(p => p.StartTime.TotalSeconds < e.PositionInSeconds &&
                         p.EndTime.TotalSeconds > e.PositionInSeconds).ToList();
+        var selectedIdx = SubtitleGrid.SelectedIndex;
+        var isLast = selectedIdx >= 0 && selectedIdx == Subtitles.Count - 1;
 
         if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&
@@ -11779,6 +11787,8 @@ public partial class MainViewModel :
             MenuItemAudioVisualizerSeparator1.IsVisible = true;
             MenuItemAudioVisualizerDelete.IsVisible = true;
             MenuItemAudioVisualizerSplit.IsVisible = true;
+            MenuItemAudioVisualizerMergeWithPrevious.IsVisible = selectedIdx > 0;
+            MenuItemAudioVisualizerMergeWithNext.IsVisible = !isLast;
             return;
         }
 

@@ -137,6 +137,22 @@ public class InitWaveform
             flyout.Items.Add(splitAtPositionMenuItem);
             vm.MenuItemAudioVisualizerSplitAtPosition = splitAtPositionMenuItem;
 
+            var MergeWithPreviousMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.MergeBefore,
+                Command = vm.MergeWithLineBeforeCommand,
+            };
+            flyout.Items.Add(MergeWithPreviousMenuItem);
+            vm.MenuItemAudioVisualizerMergeWithPrevious = MergeWithPreviousMenuItem;
+
+            var MergeWithNextMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.MergeAfter,
+                Command = vm.MergeWithLineAfterCommand,
+            };
+            flyout.Items.Add(MergeWithNextMenuItem);
+            vm.MenuItemAudioVisualizerMergeWithNext = MergeWithNextMenuItem;
+
             flyout.Items.Add(new Separator());
 
             var menuItemFilterByLayer = new MenuItem
