@@ -580,6 +580,7 @@ public class LanguageGeneral
     public string FontHeight { get; set; }
     public string OffsetX { get; set; }
     public string OffsetY { get;  set; }
+    public string InsertSubtitleFileAtVideoPositionDotDotDot { get; set; }
 
     public LanguageGeneral()
     {
@@ -1159,5 +1160,6 @@ public class LanguageGeneral
         FontHeight = "Font height";
         OffsetX = "Offset X";
         OffsetY = "Offset Y";
+        InsertSubtitleFileAtVideoPositionDotDotDot = "Insert subtitle file at video position...";
     }
 }

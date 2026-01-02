@@ -293,6 +293,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
     public MenuItem MenuItemAudioVisualizerInsertNewSelection { get; set; }
+    public MenuItem MenuIteminsertSubtitleFileAtPositionMenuItem { get; set; }
     public MenuItem MenuItemAudioVisualizerDelete { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertBefore { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAfter { get; set; }
@@ -367,6 +368,7 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
         MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
+        MenuIteminsertSubtitleFileAtPositionMenuItem  = new MenuItem();
         MenuItemAudioVisualizerDelete = new MenuItem();
         MenuItemAudioVisualizerInsertBefore = new MenuItem();
         MenuItemAudioVisualizerInsertAfter = new MenuItem();
@@ -1789,11 +1791,11 @@ public partial class MainViewModel :
         if (subtitle.Paragraphs.Count != Subtitles.Count)
         {
             var message = "The style import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
-                                                                                                                      + "Imported lines: " + subtitle.Paragraphs.Count +
-                                                                                                                      Environment.NewLine
-                                                                                                                      + "Current lines: " + Subtitles.Count + Environment.NewLine
-                                                                                                                      + Environment.NewLine +
-                                                                                                                      "Do you want to continue anyway?";
+                        + "Imported lines: " + subtitle.Paragraphs.Count +
+                        Environment.NewLine
+                        + "Current lines: " + Subtitles.Count + Environment.NewLine
+                        + Environment.NewLine +
+                        "Do you want to continue anyway?";
 
             var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Error);
@@ -1856,6 +1858,45 @@ public partial class MainViewModel :
             {
                 Subtitles[i].Text = s;
             }
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private async Task InsertSubtitleFileAtVideoPosition()
+    {
+        var vp = GetVideoPlayerControl();
+        if (Window == null || vp == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle, false);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null || subtitle.Paragraphs.Count <= 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat,
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _shortcutManager.ClearKeys();
+            return;
+        }
+
+        var videoPosition = vp.Position;
+        var firstStartTime = subtitle.Paragraphs[0].StartTime.TotalMilliseconds;
+        foreach (var p in subtitle.Paragraphs)
+        {
+            var newParagraph = new SubtitleLineViewModel(p, SelectedSubtitleFormat);
+            var offset = p.StartTime.TotalMilliseconds - firstStartTime;
+            newParagraph.StartTime = TimeSpan.FromMilliseconds(videoPosition * 1000 + offset);
+            
+            _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         }
 
         _updateAudioVisualizer = true;
@@ -11754,6 +11795,7 @@ public partial class MainViewModel :
     public void AudioVisualizerFlyoutMenuOpening(object sender, AudioVisualizer.ContextEventArgs e)
     {
         MenuItemAudioVisualizerInsertNewSelection.IsVisible = false;
+        MenuIteminsertSubtitleFileAtPositionMenuItem.IsVisible = false;
         MenuItemAudioVisualizerInsertAtPosition.IsVisible = false;
         MenuItemAudioVisualizerInsertBefore.IsVisible = false;
         MenuItemAudioVisualizerInsertAfter.IsVisible = false;
@@ -11777,6 +11819,13 @@ public partial class MainViewModel :
                         p.EndTime.TotalSeconds > e.PositionInSeconds).ToList();
         var selectedIdx = SubtitleGrid.SelectedIndex;
         var isLast = selectedIdx >= 0 && selectedIdx == Subtitles.Count - 1;
+
+        var vp = GetVideoPlayerControl();
+        if (vp != null && !string.IsNullOrEmpty(_videoFileName))
+        {
+            var lastSeconds = Subtitles.LastOrDefault()?.EndTime.TotalSeconds ?? 0;
+            MenuIteminsertSubtitleFileAtPositionMenuItem.IsVisible = vp.Position > lastSeconds;
+        }         
 
         if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&

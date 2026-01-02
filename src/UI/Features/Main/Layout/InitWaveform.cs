@@ -84,6 +84,14 @@ public class InitWaveform
             flyout.Items.Add(insertNewMenuItem);
             vm.MenuItemAudioVisualizerInsertAtPosition = insertNewMenuItem;
 
+            var insertSubtitleFileAtPositionMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.InsertSubtitleFileAtVideoPositionDotDotDot,
+                Command = vm.InsertSubtitleFileAtVideoPositionCommand,
+            };
+            flyout.Items.Add(insertSubtitleFileAtPositionMenuItem);
+            vm.MenuIteminsertSubtitleFileAtPositionMenuItem = insertSubtitleFileAtPositionMenuItem;
+
             var deleteAtPositionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.DeleteAtPosition,
