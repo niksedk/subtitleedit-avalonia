@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -11468,16 +11467,22 @@ public partial class MainViewModel :
                     ResetPlaySelection();
                 }
             }
-
-            if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
-            {
-                _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
-            }
         };
         _positionTimer.Start();
 
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _slowTimer.Tick += (s, e) => { UpdateGaps(); };
+        _slowTimer.Tick += (s, e) => 
+        { 
+            UpdateGaps();
+            var vp = GetVideoPlayerControl();
+            if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+            {
+                Task.Run(async() => 
+                { 
+                    await _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat); 
+                });
+            }
+        };
         _slowTimer.Start();
     }
 

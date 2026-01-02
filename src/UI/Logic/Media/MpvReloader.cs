@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 
@@ -21,7 +22,7 @@ public class MpvReloader : IMpvReloader
     private int _retryCount = 3;
     private string? _mpvPreviewStyleHeader;
 
-    public void RefreshMpv(LibMpvDynamicPlayer mpvContext, Subtitle subtitle, SubtitleFormat uiFormat)
+    public async Task RefreshMpv(LibMpvDynamicPlayer mpvContext, Subtitle subtitle, SubtitleFormat uiFormat)
     {
         if (subtitle.Paragraphs.Count == 0)
         {
@@ -160,7 +161,7 @@ public class MpvReloader : IMpvReloader
                     mpvContext.SubRemove();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
-                    File.WriteAllText(_mpvTextFileName, text);
+                    await File.WriteAllTextAsync(_mpvTextFileName, text);
                     mpvContext.SubAdd(_mpvTextFileName);
                     mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
@@ -168,7 +169,7 @@ public class MpvReloader : IMpvReloader
                 else
                 {
                     mpvContext.SubRemove();
-                    File.WriteAllText(_mpvTextFileName, text);
+                    await File.WriteAllTextAsync(_mpvTextFileName, text);
                     mpvContext.SubAdd(_mpvTextFileName);
                 }
                 _mpvTextOld = text;
