@@ -434,6 +434,18 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarVideoPositionSlider, nameof(_vm.ShowWaveformToolbarVideoPositionSlider)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlaybackSpeed, nameof(_vm.ShowWaveformToolbarPlaybackSpeed)),
 
+            MakeSeparator(),
+            MakeCheckboxSetting("Use Experimental Waveform Renderer (Beta)", nameof(_vm.UseExperimentalRenderer)),
+            new SettingsItem("", () => new TextBlock
+            {
+                Text = "⚠️ Enables performance optimizations (async loading, WebP format, SIMD FFT). Can be disabled anytime.",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 165, 0)),
+                Margin = new Thickness(20, 0, 0, 5),
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = 500,
+            }),
+            MakeSeparator(),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAllowOverlap, nameof(_vm.WaveformAllowOverlap)),

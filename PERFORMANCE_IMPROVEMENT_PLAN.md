@@ -19,6 +19,15 @@ This ensures:
 
 ---
 
+## Current Status (Phase 1 Outcome)
+
+- Phase 1 experiments completed, **no measurable performance improvement** on ARM or Intel so far.
+- SIMD/experimental FFT path did not outperform legacy; kept only for further Intel testing.
+- End-to-end spectrogram generation timings remain comparable to legacy; see `PERFORMANCE_METRICS.md` for raw measurements.
+- Next steps: focus on alternative optimizations (Phase 2+ items) since quick wins were ineffective.
+
+---
+
 ## How Components Currently Work
 
 ### 1. **Waveform Generation**
@@ -159,8 +168,11 @@ src/UI/Controls/AudioVisualizerControl/
 
 ## Phase 1: Quick Wins + Generation Optimizations (3-5 days)
 
-### 1.1 **Async Spectrogram Loading** ⚡
-**File:** `src/UI/Logic/Media/WaveToVisualizer2.cs:297-347`
+### ✅ **COMPLETED ITEMS**
+
+### 1.1 **Async Spectrogram Loading** ⚡ ✅
+**File:** `src/UI/Logic/Media/WaveToVisualizer2.cs:349-415`
+**Status:** IMPLEMENTED
 
 **Implementation:**
 ```csharp

@@ -4207,7 +4207,7 @@ public partial class MainViewModel :
             var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
             if (spectrogram != null)
             {
-                if (Se.Settings.VideoControls.UseExperimentalRenderer)
+                if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
                 {
                     await spectrogram.LoadAsync();
                 }
@@ -11097,7 +11097,7 @@ public partial class MainViewModel :
                 var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
                 if (spectrogram != null)
                 {
-                    if (Se.Settings.VideoControls.UseExperimentalRenderer)
+                    if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
                     {
                         await spectrogram.LoadAsync();
                     }

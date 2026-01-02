@@ -196,6 +196,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
     [ObservableProperty] private bool _waveformAllowOverlap;
+    [ObservableProperty] private bool _useExperimentalRenderer;
 
     [ObservableProperty] private ObservableCollection<string> _waveformSingleClickActionTypes;
     [ObservableProperty] private string _selectedWaveformSingleClickActionType;
@@ -670,12 +671,18 @@ public partial class SettingsViewModel : ObservableObject
         WaveformInvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel;
         WaveformSnapToShotChanges = Se.Settings.Waveform.SnapToShotChanges;
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
+<<<<<<< HEAD
         WaveformAllowOverlap = Se.Settings.Waveform.AllowOverlap;
 
         SelectedWaveformSingleClickActionType = MapWaveformSingleClickToTranslation(Se.Settings.Waveform.SingleClickAction);
         SelectedWaveformDoubleClickActionType = MapWaveformDoubleClickToTranslation(Se.Settings.Waveform.DoubleClickAction);
 
         WaveformRightClickSelectsSubtitle = Se.Settings.Waveform.RightClickSelectsSubtitle;
+=======
+        WaveformPauseOnSingleClick = Se.Settings.Waveform.PauseOnSingleClick;
+        WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
+        UseExperimentalRenderer = Configuration.Settings.VideoControls.UseExperimentalRenderer;
+>>>>>>> 6307dc03 (unssucceful Phase1 compleated)
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -1202,12 +1209,18 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.InvertMouseWheel = WaveformInvertMouseWheel;
         Se.Settings.Waveform.SnapToShotChanges = WaveformSnapToShotChanges;
         Se.Settings.Waveform.ShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
+<<<<<<< HEAD
         Se.Settings.Waveform.AllowOverlap = WaveformAllowOverlap;
 
         Se.Settings.Waveform.SingleClickAction = MapWaveformSingleClickFromTranslation(SelectedWaveformSingleClickActionType);
         Se.Settings.Waveform.DoubleClickAction = MapWaveformDoubleClickFromTranslation(SelectedWaveformDoubleClickActionType);
 
         Se.Settings.Waveform.RightClickSelectsSubtitle = WaveformRightClickSelectsSubtitle;
+=======
+        Se.Settings.Waveform.PauseOnSingleClick = WaveformPauseOnSingleClick;
+        Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
+        Configuration.Settings.VideoControls.UseExperimentalRenderer = UseExperimentalRenderer;
+>>>>>>> 6307dc03 (unssucceful Phase1 compleated)
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

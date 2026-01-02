@@ -2,11 +2,13 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -324,7 +326,7 @@ public class SpectrogramData2 : IDisposable
                 .ToList();
 
             var images = new List<SKBitmap>(fileNames.Count);
-
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             foreach (string fileName in fileNames)
             {
                 using (var fileStream = File.OpenRead(fileName))
@@ -334,7 +336,8 @@ public class SpectrogramData2 : IDisposable
                 }
             }
             Images = images;
-
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load: {fileNames.Count} images in {sw.ElapsedMilliseconds}ms (avg: {sw.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image)");
             if (Images.Count == 0)
             {
                 Se.LogError($"No spectrogram images found in {directory}");
@@ -346,7 +349,10 @@ public class SpectrogramData2 : IDisposable
         }
     }
 
-    public async Task LoadAsync()
+    /// <summary>
+    /// Experimental async Wave loading
+    /// </summary>
+    public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         if (_loadFromDirectory == null)
         {
@@ -369,40 +375,35 @@ public class SpectrogramData2 : IDisposable
             doc.Load(xmlInfoFileName);
             FftSize = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("NFFT")?.InnerText, culture);
             ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
-            SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
+            SampleDuration =
+                Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
-            var imageExtension = Se.Settings.VideoControls.UseExperimentalRenderer ? "*.png" : "*.jpg";
+            var imageExtension = "*.jpg";
             var fileNames = Directory.EnumerateFiles(directory, imageExtension)
                 .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
                 .ToList();
 
-            if (Se.Settings.VideoControls.UseExperimentalRenderer)
-            {
-                var loadTasks = fileNames.Select(async fileName =>
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var images = new SKBitmap[fileNames.Count];
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken };
+            
+            await Parallel.ForEachAsync(
+                fileNames.Select((fileName, index) => (fileName, index)),
+                parallelOptions,
+                async (item, cancellationToken) =>
                 {
-                    return await Task.Run(() =>
+                    var bitmap = await Task.Run(() =>
                     {
-                        using var fileStream = File.OpenRead(fileName);
+                        using var fileStream = File.OpenRead(item.fileName);
                         return SKBitmap.Decode(fileStream);
-                    });
+                    }, cancellationToken);
+                    images[item.index] = bitmap;
                 });
 
-                var images = await Task.WhenAll(loadTasks);
-                Images = images.ToList();
-            }
-            else
-            {
-                var images = new List<SKBitmap>(fileNames.Count);
-                foreach (string fileName in fileNames)
-                {
-                    using (var fileStream = File.OpenRead(fileName))
-                    {
-                        var skBitmap = SKBitmap.Decode(fileStream);
-                        images.Add(skBitmap);
-                    }
-                }
-                Images = images;
-            }
+            Images = images.ToList();
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine(
+                $"[PERF] Spectrogram async load: {fileNames.Count} images in {sw.ElapsedMilliseconds}ms (avg: {sw.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image, max 10 parallel)");
 
             if (Images.Count == 0)
             {
@@ -865,8 +866,13 @@ public class WavePeakGenerator2 : IDisposable
 
     //////////////////////////////////////// SPECTRUM ///////////////////////////////////////////////////////////
 
+    // TODO: Phase 1.2 - Implement parallel FFT processing
+    // When experimental renderer is enabled, process chunks in parallel using Parallel.For
+    // This requires refactoring to avoid sequential file reading dependency
+    // Estimated performance gain: 4-8x on multi-core CPUs
     public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, System.Threading.CancellationToken token)
     {
+        var totalSw = System.Diagnostics.Stopwatch.StartNew();
         const int fftSize = 256; // image height = fft size / 2
         const int imageWidth = 1024;
 
@@ -957,11 +963,9 @@ public class WavePeakGenerator2 : IDisposable
             saveImageTask?.Wait();
 
             // save image
-            var imageFormat = Se.Settings.VideoControls.UseExperimentalRenderer 
-                ? SKEncodedImageFormat.Png 
-                : SKEncodedImageFormat.Jpeg;
-            var imageQuality = Se.Settings.VideoControls.UseExperimentalRenderer ? 100 : 50;
-            var imageExtension = Se.Settings.VideoControls.UseExperimentalRenderer ? ".png" : ".jpg";
+            var imageFormat = SKEncodedImageFormat.Jpeg;
+            var imageQuality = 50;
+            var imageExtension = ".jpg";
             string imagePath = Path.Combine(spectrogramDirectory, iChunk + imageExtension);
             saveImageTask = Task.Factory.StartNew(() =>
             {
@@ -998,6 +1002,10 @@ public class WavePeakGenerator2 : IDisposable
             doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
         }
 
+        totalSw.Stop();
+        var mode = Configuration.Settings.VideoControls.UseExperimentalRenderer ? "Experimental (Modern FFT, JPEG)" : "Legacy (RealFFT, JPEG)";
+        System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram generation ({mode}): {chunkCount} chunks in {totalSw.ElapsedMilliseconds}ms (avg: {totalSw.ElapsedMilliseconds / (double)chunkCount:F2}ms/chunk, {Header.LengthInSeconds:F1}s audio)");
+
         return new SpectrogramData2(fftSize, imageWidth, sampleDuration, images);
     }
 
@@ -1009,11 +1017,14 @@ public class WavePeakGenerator2 : IDisposable
         private readonly int _nfft;
         private readonly MagnitudeToIndexMapper _mapper;
         private readonly RealFFT _fft;
+        private readonly SimdFFT? _simdFft;
         private readonly SKColor[] _palette;
         private readonly double[] _segment;
         private readonly double[] _window;
         private readonly double[] _magnitude1;
         private readonly double[] _magnitude2;
+        private long _fftCallCount = 0;
+        private long _fftTotalTicks = 0;
 
         public static string GetSpectrogramFolder(string videoFileName, int trackNumber = -1)
         {
@@ -1050,6 +1061,17 @@ public class WavePeakGenerator2 : IDisposable
             _nfft = nfft;
             _mapper = new MagnitudeToIndexMapper(100.0, MagnitudeIndexRange - 1);
             _fft = new RealFFT(nfft);
+            
+            if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
+            {
+                _simdFft = new SimdFFT(nfft);
+                System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with SIMD FFT (size: {nfft})");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with legacy RealFFT (size: {nfft})");
+            }
+            
             _palette = GeneratePalette();
             _segment = new double[nfft];
             _window = CreateRaisedCosineWindow(nfft);
@@ -1065,6 +1087,10 @@ public class WavePeakGenerator2 : IDisposable
 
         public unsafe SKBitmap Draw(double[] samples)
         {
+            _fftCallCount = 0;
+            _fftTotalTicks = 0;
+            var drawSw = System.Diagnostics.Stopwatch.StartNew();
+            
             int width = samples.Length / _nfft;
             int height = _nfft / 2;
             var bmp = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
@@ -1093,6 +1119,16 @@ public class WavePeakGenerator2 : IDisposable
             }
 
             bmp.NotifyPixelsChanged();
+            drawSw.Stop();
+            
+            if (_fftCallCount > 0)
+            {
+                var totalFftMs = (_fftTotalTicks * 1000.0) / System.Diagnostics.Stopwatch.Frequency;
+                var avgFftMs = totalFftMs / _fftCallCount;
+                var fftType = _simdFft != null ? "SIMD" : "Legacy";
+                System.Diagnostics.Debug.WriteLine($"[PERF] Draw: {width}x{height} bitmap in {drawSw.ElapsedMilliseconds}ms | FFT ({fftType}): {_fftCallCount} calls, {totalFftMs:F3}ms total, {avgFftMs:F3}ms avg");
+            }
+            
             return bmp;
         }
 
@@ -1105,7 +1141,18 @@ public class WavePeakGenerator2 : IDisposable
             }
 
             // transform to the frequency domain
-            _fft.ComputeForward(_segment);
+            var fftSw = System.Diagnostics.Stopwatch.StartNew();
+            if (_simdFft != null)
+            {
+                _simdFft.ComputeForward(_segment);
+            }
+            else
+            {
+                _fft.ComputeForward(_segment);
+            }
+            fftSw.Stop();
+            _fftCallCount++;
+            _fftTotalTicks += fftSw.ElapsedTicks;
 
             // compute the magnitude of the spectrum
             MagnitudeSpectrum(_segment, magnitude);
