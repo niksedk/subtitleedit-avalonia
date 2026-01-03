@@ -758,8 +758,95 @@ public class FfmpegGenerator
     }
 
 
-    internal static string AlterEmbeddedTracksMatroska(List<EmbeddedTrack> embeddedTracks, List<EmbeddedTrack> originalTracks)
+    internal static string AlterEmbeddedTracksMatroska(List<EmbeddedTrack> embeddedTracks, List<EmbeddedTrack> originalTracks, string inputFileName, string outputFileName)
     {
-        return string.Empty;
+        var args = new List<string>();
+        args.Add("-y");
+        args.Add($"-i \"{inputFileName}\"");
+        
+        // Add new subtitle files as additional inputs
+        var newTracks = embeddedTracks.Where(t => t.New && !string.IsNullOrEmpty(t.FileName) && File.Exists(t.FileName)).ToList();
+        foreach (var track in newTracks)
+        {
+            args.Add($"-i \"{track.FileName}\"");
+        }
+        
+        // Map video streams
+        args.Add("-map 0:v");
+        
+        // Map audio streams
+        args.Add("-map 0:a");
+        
+        // Map subtitle streams - include only non-deleted original tracks
+        var deletedNumbers = new HashSet<int>(embeddedTracks.Where(t => t.Deleted && !t.New).Select(t => t.Number));
+        var originalSubtitleCount = originalTracks.Count;
+        
+        for (var i = 0; i < originalSubtitleCount; i++)
+        {
+            if (!deletedNumbers.Contains(i))
+            {
+                args.Add($"-map 0:s:{i}");
+            }
+        }
+        
+        // Map new subtitle tracks
+        for (int i = 0; i < newTracks.Count; i++)
+        {
+            var inputIndex = i + 1; // New tracks start from input 1
+            args.Add($"-map {inputIndex}:0");
+        }
+        
+        // Copy all codecs
+        args.Add("-c copy");
+        
+        // Set metadata for all tracks
+        var outputSubtitleIndex = 0;
+        var tracksToProcess = embeddedTracks.Where(t => !t.Deleted).ToList();
+        
+        foreach (var track in tracksToProcess)
+        {
+            var originalTrack = originalTracks.FirstOrDefault(t => t.Number == track.Number);
+            
+            // Set language metadata
+            if (!string.IsNullOrEmpty(track.LanguageOrTitle))
+            {
+                args.Add($"-metadata:s:s:{outputSubtitleIndex} language={track.LanguageOrTitle}");
+            }
+            
+            // Set title metadata
+            if (!string.IsNullOrEmpty(track.Name))
+            {
+                args.Add($"-metadata:s:s:{outputSubtitleIndex} title=\"{track.Name}\"");
+            }
+            
+            // Set disposition flags
+            var dispositions = new List<string>();
+            
+            if (track.Default)
+            {
+                dispositions.Add("default");
+            }
+            
+            if (track.Forced)
+            {
+                dispositions.Add("forced");
+            }
+            
+            if (dispositions.Count > 0)
+            {
+                args.Add($"-disposition:s:{outputSubtitleIndex} {string.Join("+", dispositions)}");
+            }
+            else
+            {
+                args.Add($"-disposition:s:{outputSubtitleIndex} 0");
+            }
+            
+            outputSubtitleIndex++;
+        }
+        
+        // Add output file
+        args.Add($"\"{outputFileName}\"");
+        
+        return string.Join(" ", args);
     }
 }

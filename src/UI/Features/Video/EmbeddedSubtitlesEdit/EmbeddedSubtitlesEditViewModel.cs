@@ -56,14 +56,12 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
-    private readonly IInsertService _insertService;
 
-    public EmbeddedSubtitlesEditViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService, IInsertService insertService)
+    public EmbeddedSubtitlesEditViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
         _windowService = windowService;
-        _insertService = insertService;
 
         Tracks = new ObservableCollection<EmbeddedTrack>();
         VideoFileName = string.Empty;
@@ -198,7 +196,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 
         if (FileUtil.IsMatroskaFileFast(VideoFileName))
         {
-            arguments = FfmpegGenerator.AlterEmbeddedTracksMatroska(Tracks.ToList(), _originalTracks);
+            arguments = FfmpegGenerator.AlterEmbeddedTracksMatroska(Tracks.ToList(), _originalTracks, VideoFileName, _outputFileName);
         }
         else
         {
@@ -212,6 +210,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 #pragma warning restore CA1416 // Validate platform compatibility
         _ffmpegProcess.BeginOutputReadLine();
         _ffmpegProcess.BeginErrorReadLine();
+        _timerGenerate.Start();
 
         return true;
     }
@@ -322,6 +321,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             FileName = tempFileName,
             New = true,
         };
+        Tracks.Add(embeddedTrack);
     }
 
 
@@ -445,6 +445,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
+        _outputFileName = outputVideoFileName;
         _doAbort = false;
         _log.Clear();
         IsGenerating = true;
