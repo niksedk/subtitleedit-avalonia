@@ -581,6 +581,7 @@ public class LanguageGeneral
     public string OffsetX { get; set; }
     public string OffsetY { get;  set; }
     public string InsertSubtitleFileAtVideoPositionDotDotDot { get; set; }
+    public string Smart { get; set; }
 
     public LanguageGeneral()
     {
@@ -1161,5 +1162,6 @@ public class LanguageGeneral
         OffsetX = "Offset X";
         OffsetY = "Offset Y";
         InsertSubtitleFileAtVideoPositionDotDotDot = "Insert subtitle file at video position...";
+        Smart = "Smart";
     }
 }

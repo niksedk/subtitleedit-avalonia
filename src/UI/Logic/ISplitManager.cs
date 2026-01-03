@@ -52,17 +52,36 @@ public class SplitManager : ISplitManager
         {
             var splitIndex = lines.Count / 2;
 
-            if (lines.Count % 2 == 1)
+            if (lines.Count % 2 == 1) // odd number of lines
             {
-                var try1First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex + 1)).Trim();
-                var try1Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex + 1, lines.Count - (splitIndex + 1))).Trim();
-
-                var try2First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex)).Trim();
-                var try2Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex, lines.Count - splitIndex)).Trim();
-
-                if (Math.Abs(try1First.Length - try1Second.Length) < Math.Abs(try2First.Length - try2Second.Length))
+                if (Se.Settings.Tools.SplitOddLinesAction == nameof(SplitOddLinesActionType.WeightTop))
                 {
                     splitIndex = splitIndex + 1;
+                }
+                else if (Se.Settings.Tools.SplitOddLinesAction == nameof(SplitOddLinesActionType.WeightBottom))
+                {
+                    // no changes
+                }
+                else // SplitUnevenLineActionType.Smart
+                {
+                    var try1First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex + 1)).Trim();
+                    var try1Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex + 1, lines.Count - (splitIndex + 1))).Trim();
+
+                    var try2First = string.Join(Environment.NewLine, lines.GetRange(0, splitIndex)).Trim();
+                    var try2Second = string.Join(Environment.NewLine, lines.GetRange(splitIndex, lines.Count - splitIndex)).Trim();
+
+                    if (try1First.EndsWith('.') && !try2First.EndsWith('.'))
+                    {
+                        splitIndex = splitIndex + 1;
+                    }
+                    else if (!try1First.EndsWith(".") && try2First.EndsWith('.'))
+                    {
+                        // no changes
+                    }
+                    else if (Math.Abs(try1First.Length - try1Second.Length) < Math.Abs(try2First.Length - try2Second.Length))
+                    {
+                        splitIndex = splitIndex + 1;
+                    }
                 }
             }
 

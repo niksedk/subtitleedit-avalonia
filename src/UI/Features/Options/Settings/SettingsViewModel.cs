@@ -97,6 +97,8 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private bool _goToLineNumberAlsoSetVideoPosition;
     [ObservableProperty] private bool _adjustAllTimesRememberLineSelectionChoice;
+    [ObservableProperty] private ObservableCollection<string> _splitOddNumberOfLinesActions;
+    [ObservableProperty] private string _selectedSplitOddNumberOfLinesAction;
 
     [ObservableProperty] private bool _showUpDownStartTime;
     [ObservableProperty] private bool _showUpDownEndTime;
@@ -344,6 +346,14 @@ public partial class SettingsViewModel : ObservableObject
         ];
         SelectedSaveAsAppendLanguageCode = SaveAsAppendLanguageCode[0];
 
+        SplitOddNumberOfLinesActions =
+        [
+            Se.Language.General.Smart,
+            Se.Language.Options.Settings.SplitOddLineActionWeightTop,
+            Se.Language.Options.Settings.SplitOddLineActionWeightBottom,
+        ];
+        SelectedSplitOddNumberOfLinesAction = SplitOddNumberOfLinesActions[0];
+
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
 
@@ -469,6 +479,7 @@ public partial class SettingsViewModel : ObservableObject
 
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
         AdjustAllTimesRememberLineSelectionChoice = Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice;
+        SelectedSplitOddNumberOfLinesAction = MapFromSplitOddActionToLanguageCode(Se.Settings.Tools.SplitOddLinesAction);
 
         SelectedTheme = MapThemeToTranslation(appearance.Theme);
         SelectedFontName = FontNames.FirstOrDefault(p => p == appearance.FontName) ?? FontNames.First();
@@ -622,6 +633,21 @@ public partial class SettingsViewModel : ObservableObject
         ExistsErrorLogFile = File.Exists(Se.GetErrorLogFilePath());
         ExistsWhisperLogFile = File.Exists(Se.GetWhisperLogFilePath());
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
+    }
+
+    private static string MapFromSplitOddActionToLanguageCode(string splitAction)
+    {
+        if (splitAction == nameof(SplitOddLinesActionType.WeightTop))
+        {
+            return Se.Language.Options.Settings.SplitOddLineActionWeightTop;
+        }
+
+        if (splitAction == nameof(SplitOddLinesActionType.WeightBottom))
+        {
+            return Se.Language.Options.Settings.SplitOddLineActionWeightBottom;
+        }
+
+        return Se.Language.General.Smart;
     }
 
     private static string MapFromSelectedSaveAsBehavior(string saveAsBehavior)
@@ -832,6 +858,7 @@ public partial class SettingsViewModel : ObservableObject
 
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
         Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;
+        Se.Settings.Tools.SplitOddLinesAction = MapFromSplitOddActionTranslationToCode(SelectedSplitOddNumberOfLinesAction);
 
         appearance.Theme = MapThemeFromTranslation(SelectedTheme);
         appearance.FontName = SelectedFontName == FontNames.First()
@@ -990,6 +1017,21 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         Se.SaveSettings();
+    }
+
+    private string MapFromSplitOddActionTranslationToCode(string translation)
+    {
+        if (translation == Se.Language.Options.Settings.SplitOddLineActionWeightTop)
+        {
+            return nameof(SplitOddLinesActionType.WeightTop);
+        }
+        
+        if (translation == Se.Language.Options.Settings.SplitOddLineActionWeightBottom)
+        {
+            return nameof(SplitOddLinesActionType.WeightBottom);
+        }
+
+        return nameof(SplitOddLinesActionType.Smart);
     }
 
     private static string MapToSaveAsBehavior(string selectedSaveAsBehaviorType)

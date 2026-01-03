@@ -31,6 +31,7 @@ public class SeTools
     public bool SplitByTime { get; set; }
     public string SplitSubtitleFormat { get; set; }
     public string? SplitSubtitleEncoding { get; set; }
+    public string SplitOddLinesAction { get; set; }
     public bool GoToLineNumberAlsoSetVideoPosition { get; set; }
     public bool SplitRebalanceLongLinesSplit { get; set; }
     public bool SplitRebalanceLongLinesRebalance { get; set; }
@@ -66,6 +67,7 @@ public class SeTools
         GoToLineNumberAlsoSetVideoPosition = true;
         SplitRebalanceLongLinesSplit = true;
         SplitRebalanceLongLinesRebalance = true;
+        SplitOddLinesAction = nameof(SplitOddLinesActionType.Smart);
         UnicodeSymbolsToInsert = "♪;♫;—;…;°;∙;©;®;☺;☹;♥;☮;☯;Σ;∞;≡;⇒;π";
 
         BinEditLeftMargin = 10;

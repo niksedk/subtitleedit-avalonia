@@ -224,6 +224,9 @@ public class LanguageSettings
     public string SaveAsAppendLanguageCodeTwoLetter { get; set; }
     public string SaveAsAppendLanguageCodeThreeLetter { get; set; }
     public string SaveAsAppendLanguageCodeLanguageName { get; set; }
+    public string SplitOddLineActionWeightTop { get; set; }
+    public string SplitOddLineActionWeightBottom { get; set; }
+    public string SplitOddLinesAction { get; set; }
 
     public LanguageSettings()
     {
@@ -444,6 +447,9 @@ public class LanguageSettings
         SaveAsAppendLanguageCodeTwoLetter = "Two-letter";
         SaveAsAppendLanguageCodeThreeLetter = "Three-letter";
         SaveAsAppendLanguageCodeLanguageName = "Language name";
+        SplitOddLineActionWeightTop = "Weight top";
+        SplitOddLineActionWeightBottom = "Weight bottom";
+        SplitOddLinesAction = "Split odd lines action";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

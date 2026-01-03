@@ -471,6 +471,16 @@ public class SettingsPage : UserControl
         [
             MakeCheckboxSetting(Se.Language.Options.Settings.GoToLineNumberSetsVideoPosition, nameof(_vm.GoToLineNumberAlsoSetVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.AdjustAllTimesRememberLineSelectionChoice, nameof(_vm.AdjustAllTimesRememberLineSelectionChoice)),
+            new SettingsItem(Se.Language.Options.Settings.SplitOddLinesAction, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SplitOddNumberOfLinesActions)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSplitOddNumberOfLinesAction))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Appearance,
