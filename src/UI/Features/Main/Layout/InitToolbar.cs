@@ -330,6 +330,7 @@ public static class InitToolbar
         };
         comboBoxSubtitleFormat.SelectionChanged += vm.ComboBoxSubtitleFormatChanged;
         comboBoxSubtitleFormat.KeyDown += vm.ComboBoxSubtitleFormatKeyDown;
+        comboBoxSubtitleFormat.PointerPressed += vm.ComboBoxSubtitleFormatPointerPressed;   
         stackPanelRight.Children.Add(comboBoxSubtitleFormat);
         isLastSeparator = false;
 

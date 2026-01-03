@@ -12174,4 +12174,16 @@ public partial class MainViewModel :
             Dispatcher.UIThread.Post(async () => { await CommandVideoOpen(); });
         }
     }
+
+    internal void ComboBoxSubtitleFormatPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(null).Properties.IsRightButtonPressed)
+        {
+            Dispatcher.UIThread.Post(async() =>
+            {
+                await ShowSubtitleFormatPicker();
+            });
+            e.Handled = true;
+        }
+    }
 }
