@@ -46,22 +46,12 @@ public class EmbeddedSubtitlesEditWindow : Window
         var tracksView = MakeTracksView(vm);
         var progressView = MakeProgressView(vm);
 
-        var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
-
-        var comboBoxVideoExtension = UiUtil.MakeComboBox<string>(
-            vm.VideoExtensions,
-            vm,
-            nameof(vm.SelectedVideoExtension)
-        ).WithMarginRight(10);
-
         var buttonGenerate = UiUtil.MakeButton(Se.Language.General.Generate, vm.GenerateCommand)
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonConfig = UiUtil.MakeButton(vm.OkCommand, IconNames.Settings)
             .WithMarginRight(5)
             .WithBindEnabled(nameof(vm.IsGenerating), new InverseBooleanConverter());
         var buttonPanel = UiUtil.MakeButtonBar(
-            labelVideoExtension,
-            comboBoxVideoExtension,
             buttonGenerate,
             UiUtil.MakeButtonCancel(vm.CancelCommand)
         );

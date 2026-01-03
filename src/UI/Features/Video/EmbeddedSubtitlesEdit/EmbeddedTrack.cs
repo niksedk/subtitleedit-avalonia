@@ -8,9 +8,11 @@ public partial class EmbeddedTrack : ObservableObject
     [ObservableProperty] private string _format;
     [ObservableProperty] private string _languageOrTitle;
     [ObservableProperty] private string _name;
-    public bool Default { get; set; }
+    [ObservableProperty] private bool _default;
     [ObservableProperty] private bool _forced;
     [ObservableProperty] private bool _deleted;
+
+    public int Number { get; set; }
     public bool New { get; set; }
     public string FileName { get; set; } = string.Empty;
     public FfmpegTrackInfo? FfmpegTrackInfo { get; set; }
@@ -20,6 +22,19 @@ public partial class EmbeddedTrack : ObservableObject
         Format = string.Empty;
         LanguageOrTitle = string.Empty;
         Name = string.Empty;
+    }
+
+    public EmbeddedTrack(EmbeddedTrack track)
+    {
+        Format = track.Format;
+        LanguageOrTitle = track.LanguageOrTitle;
+        Name = track.Name;
+        Default = track.Default;
+        Forced = track.Forced;
+        Deleted = track.Deleted;
+        New = track.New;
+        FileName = track.FileName;
+        FfmpegTrackInfo = track.FfmpegTrackInfo;
     }
 
     public override string ToString()

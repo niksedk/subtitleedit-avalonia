@@ -1,8 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.Layout;
-using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -19,60 +16,57 @@ public class EditEmbeddedTrackWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        vm.UpDown = new NumericUpDown
-        {
-            VerticalAlignment = VerticalAlignment.Center,
-            Width = 150,
-            VerticalContentAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.LineNumber))
-            {
-                Mode = BindingMode.TwoWay,
-            },
-            [!NumericUpDown.MaximumProperty] = new Binding(nameof(vm.MaxLineNumber))
-            {
-                Mode = BindingMode.OneWay,
-            },
-            Minimum = 1,
-            Increment = 1,          // Only step in whole numbers
-            FormatString = "F0",    // Show 0 decimal places
-        };
-        vm.UpDown.KeyDown += (sender, args) => vm.OnKeyDown(args);
+        var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
+        var textBoxName = UiUtil.MakeTextBox(300, vm, nameof(vm.Name)); 
 
-        var panel = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 15,
-            Margin = new Thickness(10, 20, 10, 10),
-            Children =
-            {
-                new Label
-                {
-                    Content = Se.Language.General.GoToLineNumber,
-                    VerticalAlignment = VerticalAlignment.Center,
-                },
-                vm.UpDown,
-            }
-        };
+        var labelTitleOrLanguage = UiUtil.MakeLabel(Se.Language.Video.TitleOrLanguage);
+        var textBoxTitleOrLanguage = UiUtil.MakeTextBox(300, vm, nameof(vm.TitleOrlanguage));
+
+        var checkBoxForced = UiUtil.MakeCheckBox(Se.Language.General.Forced, vm, nameof(vm.IsForced));
+        var checkBoxDefault = UiUtil.MakeCheckBox(Se.Language.General.Default, vm, nameof(vm.IsDefault));
 
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButtonOk(vm.OkCommand),
             UiUtil.MakeButtonCancel(vm.CancelCommand));
 
-        var contentPanel = new StackPanel
+        var grid = new Grid
         {
-            Orientation = Orientation.Vertical,
-            Spacing = 15,
-            Margin = UiUtil.MakeWindowMargin(),
-            Children =
+            RowDefinitions =
             {
-                panel,
-                buttonPanel,
-            }
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 5,
+            RowSpacing = 5,
+            Width = double.NaN,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        Content = contentPanel;
+        grid.Add(labelName, 0, 0);
+        grid.Add(textBoxName, 0, 1);
 
-        Activated += delegate { vm.Activated(); };
+        grid.Add(labelTitleOrLanguage, 1, 0);
+        grid.Add(textBoxTitleOrLanguage, 1, 1);
+
+        grid.Add(checkBoxForced, 2, 1);
+
+        grid.Add(checkBoxDefault, 3, 1);
+
+        grid.Add(buttonPanel, 4, 0, 1, 2);
+
+
+        Content = grid;
+
+        Loaded += (_,e) => vm.EditEmbeddedTrackWindowLoaded(e);
         KeyDown += (_, args) => vm.OnKeyDown(args);
     }
 }

@@ -3,7 +3,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -18,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -29,12 +29,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     [ObservableProperty] private string _videoFileName;
     [ObservableProperty] private ObservableCollection<EmbeddedTrack> _tracks;
     [ObservableProperty] private EmbeddedTrack? _selectedTrck;
-    [ObservableProperty] private ObservableCollection<string> _videoExtensions;
-    [ObservableProperty] private string _selectedVideoExtension;
     [ObservableProperty] private string _progressText;
     [ObservableProperty] private double _progressValue;
-    [ObservableProperty] private ObservableCollection<BurnInJobItem> _jobItems;
-    [ObservableProperty] private BurnInJobItem? _selectedJobItem;
     [ObservableProperty] private bool _isGenerating;
 
     public Window? Window { get; set; }
@@ -46,16 +42,15 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     private long _startTicks;
     private long _processedFrames;
     private Process? _ffmpegProcess;
-    private Process? _ffmpegListKeyFramesProcess;
     private readonly Timer _timerGenerate;
     private bool _doAbort;
-    private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
-    private string _inputVideoFileName;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
-    private string _importFileName;
     private Subtitle _currentSubtitle;
     private FfmpegMediaInfo2? _mediaInfo;
+    private List<EmbeddedTrack> _originalTracks;
+    private long _totalFrames = 0;
+    private string _outputFileName;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -69,35 +64,23 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         _windowService = windowService;
         _insertService = insertService;
 
-        VideoExtensions = new ObservableCollection<string>
-        {
-            ".mkv",
-            ".mp4",
-            ".webm",
-        };
-        SelectedVideoExtension = VideoExtensions[0];
-
         Tracks = new ObservableCollection<EmbeddedTrack>();
         VideoFileName = string.Empty;
         ProgressText = string.Empty;
-        JobItems = new ObservableCollection<BurnInJobItem>();
         TracksGrid = new DataGrid();
 
         _log = new StringBuilder();
         _timerGenerate = new();
         _timerGenerate.Elapsed += TimerGenerateElapsed;
         _timerGenerate.Interval = 100;
-        _importFileName = string.Empty;
-        _inputVideoFileName = string.Empty;
         _currentSubtitle = new Subtitle();
-        UpdateSelection();
-        LoadSettings();
+        _originalTracks = new List<EmbeddedTrack>();
+        _outputFileName = string.Empty;
     }
 
     public void Initialize(string videoFileName, Subtitle subtitle, SubtitleFormat subtitleFormat, FfmpegMediaInfo2? mediaInfo)
     {
         VideoFileName = videoFileName;
-        _inputVideoFileName = videoFileName;
         _currentSubtitle = subtitle;
         _subtitleFormat = subtitleFormat;
         _mediaInfo = mediaInfo;
@@ -150,23 +133,16 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 
         if (!_ffmpegProcess.HasExited)
         {
-            var percentage = (int)Math.Round((double)_processedFrames / JobItems[_jobItemIndex].TotalFrames * 100.0,
+            var percentage = (int)Math.Round((double)_processedFrames / _totalFrames * 100.0,
                 MidpointRounding.AwayFromZero);
             percentage = Math.Clamp(percentage, 0, 100);
 
             var durationMs = (DateTime.UtcNow.Ticks - _startTicks) / 10_000;
             var msPerFrame = (float)durationMs / _processedFrames;
-            var estimatedTotalMs = msPerFrame * JobItems[_jobItemIndex].TotalFrames;
+            var estimatedTotalMs = msPerFrame * _totalFrames;
             var estimatedLeft = ProgressHelper.ToProgressTime(estimatedTotalMs - durationMs);
 
-            if (JobItems.Count == 1)
-            {
-                ProgressText = $"Generating video... {percentage}%     {estimatedLeft}";
-            }
-            else
-            {
-                ProgressText = $"Generating video {_jobItemIndex + 1}/{JobItems.Count}... {percentage}%     {estimatedLeft}";
-            }
+            ProgressText = $"Generating video... {percentage}%     {estimatedLeft}";
 
             return;
         }
@@ -175,11 +151,9 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         ProgressValue = 100;
         ProgressText = string.Empty;
 
-        var jobItem = JobItems[_jobItemIndex];
-
-        if (!File.Exists(jobItem.OutputVideoFileName))
+        if (!File.Exists(_outputFileName))
         {
-            SeLogger.Error("Output video file not found: " + jobItem.OutputVideoFileName + Environment.NewLine +
+            SeLogger.Error("Output video file not found: " + _outputFileName + Environment.NewLine +
                                  "ffmpeg: " + _ffmpegProcess.StartInfo.FileName + Environment.NewLine +
                                  "Parameters: " + _ffmpegProcess.StartInfo.Arguments + Environment.NewLine +
                                  "OS: " + Environment.OSVersion + Environment.NewLine +
@@ -191,7 +165,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             {
                 await MessageBox.Show(Window!,
                     "Unable to generate video",
-                    "Output video file not generated: " + jobItem.OutputVideoFileName + Environment.NewLine +
+                    "Output video file not generated: " + _outputFileName + Environment.NewLine +
                     "Parameters: " + _ffmpegProcess.StartInfo.Arguments,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -203,74 +177,34 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
-        JobItems[_jobItemIndex].Status = Se.Language.General.Done;
-
         Dispatcher.UIThread.Invoke(async () =>
         {
             ProgressValue = 0;
-
-            if (_jobItemIndex < JobItems.Count - 1)
-            {
-                InitAndStartJobItem(_jobItemIndex + 1);
-                return;
-            }
-
             IsGenerating = false;
-
-            if (JobItems.Count == 1)
-            {
-                await _folderHelper.OpenFolderWithFileSelected(Window!, jobItem.OutputVideoFileName);
-            }
-            else
-            {
-                var sb = new StringBuilder($"Generated files ({JobItems.Count}):" + Environment.NewLine +
-                                           Environment.NewLine);
-                foreach (var item in JobItems)
-                {
-                    sb.AppendLine($"{item.OutputVideoFileName} ==> {item.Status}");
-                }
-
-                await MessageBox.Show(Window!,
-                    "Generating done",
-                    sb.ToString(),
-                    MessageBoxButtons.OK);
-            }
+            await _folderHelper.OpenFolderWithFileSelected(Window!, _outputFileName);
         });
     }
 
-    private void InitAndStartJobItem(int index)
+    private bool RunEncoding()
     {
-        _startTicks = DateTime.UtcNow.Ticks;
-        _jobItemIndex = index;
-        var jobItem = JobItems[index];
-        var mediaInfo = FfmpegMediaInfo.Parse(jobItem.InputVideoFileName);
-        jobItem.TotalFrames = mediaInfo.GetTotalFrames();
-        jobItem.TotalSeconds = mediaInfo.Duration.TotalSeconds;
-        jobItem.Width = mediaInfo.Dimension.Width;
-        jobItem.Height = mediaInfo.Dimension.Height;
-        jobItem.UseTargetFileSize = false;
-        jobItem.Status = Se.Language.General.Generating;
-
-        var result = RunEncoding(jobItem);
-        if (result)
+        var videoFileName = VideoFileName;
+        if (string.IsNullOrEmpty(VideoFileName) || !File.Exists(VideoFileName))
         {
-            _timerGenerate.Start();
+            return false;
         }
-    }
 
-    private bool RunEncoding(BurnInJobItem jobItem)
-    {
         string arguments = "";
 
-        //if (SelectedCutType.CutType == CutType.MergeSegments)
-        //{
-        //    arguments = FfmpegGenerator.GetMergeSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
-        //}
-        //else
-        //{
-        //    arguments = FfmpegGenerator.GetRemoveSegmentsParameters(jobItem.InputVideoFileName, jobItem.OutputVideoFileName, Segments.ToList());
-        //}
+        if (FileUtil.IsMatroskaFileFast(VideoFileName))
+        {
+            arguments = FfmpegGenerator.AlterEmbeddedTracksMatroska(Tracks.ToList(), _originalTracks);
+        }
+        else
+        {
+            return false;
+        }
 
+        _startTicks = DateTime.UtcNow.Ticks;
         _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
         _ffmpegProcess.Start();
@@ -321,7 +255,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     private string MakeOutputFileName(string videoFileName)
     {
         var nameNoExt = Path.GetFileNameWithoutExtension(videoFileName);
-        var ext = SelectedVideoExtension;
+        var ext = Path.GetExtension(VideoFileName) ?? ".mkv";
         var suffix = Se.Settings.Video.BurnIn.BurnInSuffix;
         var fileName = Path.Combine(Path.GetDirectoryName(videoFileName)!, nameNoExt + suffix + ext);
         if (Se.Settings.Video.BurnIn.UseOutputFolder &&
@@ -450,6 +384,27 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         {
             vm.Initialize(selectedTrack);
         });
+
+        if (result != null && result.OkPressed)
+        {
+            selectedTrack.Name = result.Name;
+            selectedTrack.LanguageOrTitle = result.TitleOrlanguage;
+            selectedTrack.Forced = result.IsForced;
+
+            if (result.IsDefault)
+            {
+                // unset default on all other tracks
+                foreach (var track in Tracks)
+                {
+                    if (track != selectedTrack)
+                    {
+                        track.Default = false;
+                    }
+                }
+            }
+
+            selectedTrack.Default = result.IsDefault;
+        }
     }
 
     [RelayCommand]
@@ -470,11 +425,14 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                 Dispatcher.UIThread.Invoke(() =>
                 {
                     Tracks.Clear();
+                    _originalTracks.Clear();
                     var tracks = FindTracks(fileName, mediaInfo);
                     foreach (var track in tracks)
                     {
                         Tracks.Add(track);
+                        _originalTracks.Add(new EmbeddedTrack(track));
                     }
+                    SelectAndScrollToRow(0);
                 });
             });
             _mediaInfo = FfmpegMediaInfo2.Parse(fileName);
@@ -488,8 +446,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         {
             await MessageBox.Show(
                 Window!,
-                "No segments added",
-                $"Add one or more segments - e.g. via the waveform",
+                "No tracks added",
+                $"Add one or more tracks",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
 
@@ -497,15 +455,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         }
 
         var outputVideoFileName = MakeOutputFileName(VideoFileName);
-        outputVideoFileName = await _fileHelper.PickSaveFile(Window!, SelectedVideoExtension, outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
+        outputVideoFileName = await _fileHelper.PickSaveFile(Window!, Path.GetExtension(VideoFileName) ?? ".mkv", outputVideoFileName, Se.Language.Video.SaveVideoAsTitle);
         if (string.IsNullOrEmpty(outputVideoFileName))
-        {
-            return;
-        }
-
-        JobItems = GetCurrentVideoAsJobItems(outputVideoFileName);
-
-        if (JobItems.Count == 0)
         {
             return;
         }
@@ -515,18 +466,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         IsGenerating = true;
         _processedFrames = 0;
         ProgressValue = 0;
-        SaveSettings();
 
-        InitAndStartJobItem(0);
-    }
-
-    private void LoadSettings()
-    {
-    }
-
-    private void SaveSettings()
-    {
-        Se.SaveSettings();
+        IsGenerating = RunEncoding();
     }
 
     [RelayCommand]
@@ -551,13 +492,15 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Cancel();
+        }
     }
-
 
     internal void OnClosing()
     {
-        SaveSettings();
         UiUtil.SaveWindowPosition(Window);
     }
 
@@ -573,7 +516,10 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                 foreach (var track in tracks)
                 {
                     Tracks.Add(track);
+                    _originalTracks.Add(new EmbeddedTrack(track));
                 }
+
+                SelectAndScrollToRow(0);
             });
         });
     }
@@ -594,6 +540,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                     {
                         var embeddedTrack = new EmbeddedTrack
                         {
+                            Number = Tracks.Count,
                             Format = track.CodecId,
                             LanguageOrTitle = !string.IsNullOrEmpty(track.Language) ? track.Language : track.Name,
                             Name = track.Name,
@@ -615,6 +562,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             {
                 var embeddedTrack = new EmbeddedTrack
                 {
+                    Number = Tracks.Count,
                     Format = "WebVTT",
                     Name = string.Empty,
                     FileName = string.Empty,
@@ -625,6 +573,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             {
                 var embeddedTrack = new EmbeddedTrack
                 {
+                    Number = Tracks.Count,
                     Format = track.Mdia.Name,
                     Name = track.Name,
                     FileName = string.Empty,
@@ -636,33 +585,23 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         return list;
     }
 
-    internal void AudioVisualizerOnNewSelectionInsert(object sender, ParagraphEventArgs e)
-    {
-    }
-
-
     private void SelectAndScrollToRow(int index)
     {
-        //if (index < 0 || index >= Segments.Count)
-        //{
-        //    return;
-        //}
+        if (index < 0 || index >= Tracks.Count)
+        {
+            return;
+        }
 
-        //Dispatcher.UIThread.Post(() =>
-        //{
-        //    SegmentGrid.SelectedIndex = index;
-        //    SegmentGrid.ScrollIntoView(SegmentGrid.SelectedItem, null);
-        //    UpdateSelection();
-        //}, DispatcherPriority.Background);
+        Dispatcher.UIThread.Post(() =>
+        {
+            TracksGrid.SelectedIndex = index;
+            TracksGrid.ScrollIntoView(TracksGrid.SelectedItem, null);
+        }, DispatcherPriority.Background);
     }
 
     internal void TracksGridChanged(object? sender, SelectionChangedEventArgs e)
     {
-        UpdateSelection();
-    }
 
-    private void UpdateSelection()
-    {
     }
 
     internal void OnTracksGridKeyDown(KeyEventArgs e)

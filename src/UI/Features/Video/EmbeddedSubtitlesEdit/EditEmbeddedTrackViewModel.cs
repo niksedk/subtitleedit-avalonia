@@ -1,9 +1,6 @@
-using System;
-using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
+using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -11,30 +8,33 @@ namespace Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 
 public partial class EditEmbeddedTrackViewModel : ObservableObject
 {
-    [ObservableProperty] private int? _lineNumber;
-    [ObservableProperty] private int _maxLineNumber;
+    [ObservableProperty] private string _name;
+    [ObservableProperty] private string _titleOrlanguage;
+    [ObservableProperty] private bool _isForced;
+    [ObservableProperty] private bool _isDefault;
     
     public Window? Window { get; set; }
-    public NumericUpDown UpDown { get; set; }
 
     public bool OkPressed { get; private set; }
 
     public EditEmbeddedTrackViewModel()
     {
-        LineNumber = 1;
-        MaxLineNumber = 100;
-        UpDown = new NumericUpDown();   
+        Name = string.Empty;
+        TitleOrlanguage = string.Empty;
     }
 
     internal void Initialize(EmbeddedTrack selectedTrack)
     {
-        
+        Name = selectedTrack.Name;
+        TitleOrlanguage = selectedTrack.LanguageOrTitle;
+        IsForced = selectedTrack.Forced;
+        IsDefault = selectedTrack.Default;
     }
 
     [RelayCommand]                   
     private void Ok() 
     {
-        OkPressed = LineNumber != null;
+        OkPressed = true;
         Window?.Close();
     }
     
@@ -57,15 +57,8 @@ public partial class EditEmbeddedTrackViewModel : ObservableObject
         }
     }
 
-    public void Activated()
+    internal void EditEmbeddedTrackWindowLoaded(RoutedEventArgs e)
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            var textBox = UpDown.GetVisualDescendants()
-                .OfType<TextBox>()
-                .FirstOrDefault();
-            textBox?.SelectAll();
-            UpDown.Focus(); 
-        });
-    } 
+        Window?.Focus();
+    }
 }

@@ -1,9 +1,11 @@
 ﻿using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -753,5 +755,11 @@ public class FfmpegGenerator
         args += $" \"{outputFileName}\"";
 
         return args;
+    }
+
+
+    internal static string AlterEmbeddedTracksMatroska(List<EmbeddedTrack> embeddedTracks, List<EmbeddedTrack> originalTracks)
+    {
+        return string.Empty;
     }
 }

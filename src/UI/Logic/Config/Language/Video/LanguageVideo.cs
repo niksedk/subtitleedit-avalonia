@@ -30,6 +30,7 @@ public class LanguageVideo
     public string ImportCurrentSubtitle { get; set; }
     public string AddRemoveEmbeddedSubtitlesTitle { get; set; }
     public string AddCurrentSubtitle { get; set; }
+    public string TitleOrLanguage { get; set; }
 
     public LanguageVideo()
     {
@@ -57,5 +58,6 @@ public class LanguageVideo
         ImportCurrentSubtitle = "Import current subtitle";
         AddRemoveEmbeddedSubtitlesTitle = "Add/remove embedded subtitles";
         AddCurrentSubtitle = "Add current subtitle";
+        TitleOrLanguage = "Title/language";
     }
 }
