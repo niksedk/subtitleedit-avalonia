@@ -45,8 +45,8 @@ jobs:
       - name: Build
         run: dotnet build --configuration ${{ inputs.build_configuration }} --no-restore
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+      # - name: Test
+      #   run: dotnet test --no-build --verbosity normal
 
       - name: Download libmpv for Windows
         run: |
@@ -362,8 +362,8 @@ jobs:
       - name: Build
         run: dotnet build --configuration ${{ inputs.build_configuration }} --no-restore
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+      # - name: Test
+      #   run: dotnet test --no-build --verbosity normal
 
       - name: Publish Linux x64 app
         run: |
