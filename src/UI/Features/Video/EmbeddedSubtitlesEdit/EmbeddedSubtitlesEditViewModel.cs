@@ -149,6 +149,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         _timerGenerate.Stop();
         ProgressValue = 100;
         ProgressText = string.Empty;
+        Se.LogError(_log.ToString());
 
         if (!File.Exists(_outputFileName))
         {
@@ -203,6 +204,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return false;
         }
 
+        SeLogger.Error($"FFmpeg command: {arguments}");
+        
         _startTicks = DateTime.UtcNow.Ticks;
         _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -520,13 +523,14 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             if (matroskaFile.IsValid)
             {
                 var tracks = matroskaFile.GetTracks();
+                var subtitleIndex = 0;
                 foreach (var track in tracks)
                 {
                     if (track.IsSubtitle)
                     {
                         var embeddedTrack = new EmbeddedTrack
                         {
-                            Number = Tracks.Count,
+                            Number = subtitleIndex,  // Use subtitle stream index for FFmpeg
                             Format = track.CodecId,
                             LanguageOrTitle = !string.IsNullOrEmpty(track.Language) ? track.Language : track.Name,
                             Name = track.Name,
@@ -535,6 +539,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                             Default = track.IsDefault,
                         };
                         list.Add(embeddedTrack);
+                        subtitleIndex++;
                     }
                 }
             }
@@ -544,27 +549,30 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                  videoFileName.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
         {
             var mp4Parser = new MP4Parser(videoFileName);
+            var subtitleIndex = 0;
             if (mp4Parser.VttcSubtitle != null && mp4Parser.VttcSubtitle.Paragraphs.Count > 0)
             {
                 var embeddedTrack = new EmbeddedTrack
                 {
-                    Number = Tracks.Count,
+                    Number = subtitleIndex,
                     Format = "WebVTT",
                     Name = string.Empty,
                     FileName = string.Empty,
                 };
                 list.Add(embeddedTrack);
+                subtitleIndex++;
             }
             foreach (var track in mp4Parser.GetSubtitleTracks())
             {
                 var embeddedTrack = new EmbeddedTrack
                 {
-                    Number = Tracks.Count,
+                    Number = subtitleIndex,
                     Format = track.Mdia.Name,
                     Name = track.Name,
                     FileName = string.Empty,
                 };
                 list.Add(embeddedTrack);
+                subtitleIndex++;
             }
         }
 

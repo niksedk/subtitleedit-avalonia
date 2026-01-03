@@ -762,91 +762,114 @@ public class FfmpegGenerator
     {
         var args = new List<string>();
         args.Add("-y");
+        args.Add("-fflags +genpts");
         args.Add($"-i \"{inputFileName}\"");
-        
-        // Add new subtitle files as additional inputs
-        var newTracks = embeddedTracks.Where(t => t.New && !string.IsNullOrEmpty(t.FileName) && File.Exists(t.FileName)).ToList();
-        foreach (var track in newTracks)
+
+        // New external subtitle inputs
+        var newInputs = embeddedTracks.Where(t => t.New && !string.IsNullOrEmpty(t.FileName) && File.Exists(t.FileName)).ToList();
+        foreach (var track in newInputs)
         {
             args.Add($"-i \"{track.FileName}\"");
         }
+
+        // Map only the first video and first audio stream explicitly
+        // This avoids issues with multiple video streams and attached pictures
+        args.Add("-map 0:V:0");  // First actual video stream (not attached pic)
+        args.Add("-map 0:a:0?"); // First audio stream (optional)
+
+        // Build list of output subtitle tracks: non-deleted original tracks, then new tracks
+        var outputSubs = new List<EmbeddedTrack>();
         
-        // Map video streams
-        args.Add("-map 0:v");
-        
-        // Map audio streams
-        args.Add("-map 0:a");
-        
-        // Map subtitle streams - include only non-deleted original tracks
-        var deletedNumbers = new HashSet<int>(embeddedTracks.Where(t => t.Deleted && !t.New).Select(t => t.Number));
-        var originalSubtitleCount = originalTracks.Count;
-        
-        for (var i = 0; i < originalSubtitleCount; i++)
+        // Find non-deleted original subtitle tracks
+        foreach (var track in embeddedTracks)
         {
-            if (!deletedNumbers.Contains(i))
+            if (track.New)
             {
-                args.Add($"-map 0:s:{i}");
+                continue; // Handle new tracks separately
+            }
+            
+            if (track.Deleted)
+            {
+                continue; // Skip deleted tracks
+            }
+            
+            // This is an existing track that should be kept
+            outputSubs.Add(track);
+        }
+        
+        // Add new subtitle tracks
+        foreach (var track in embeddedTracks)
+        {
+            if (track.New && !track.Deleted && !string.IsNullOrEmpty(track.FileName) && File.Exists(track.FileName))
+            {
+                outputSubs.Add(track);
             }
         }
-        
-        // Map new subtitle tracks
-        for (int i = 0; i < newTracks.Count; i++)
+
+        // Map original subtitle streams that are kept
+        foreach (var track in embeddedTracks)
         {
-            var inputIndex = i + 1; // New tracks start from input 1
+            if (track.New || track.Deleted)
+            {
+                continue;
+            }
+            
+            args.Add($"-map 0:s:{track.Number}");
+        }
+
+        // Map new subtitle inputs
+        for (int i = 0; i < newInputs.Count; i++)
+        {
+            var inputIndex = i + 1; // input 0 is the original file
             args.Add($"-map {inputIndex}:0");
         }
-        
+
         // Copy all codecs
         args.Add("-c copy");
         
-        // Set metadata for all tracks
-        var outputSubtitleIndex = 0;
-        var tracksToProcess = embeddedTracks.Where(t => !t.Deleted).ToList();
-        
-        foreach (var track in tracksToProcess)
+        // Fix timestamp issues when copying streams
+        args.Add("-avoid_negative_ts make_zero");
+        args.Add("-max_interleave_delta 0");
+
+        // Set metadata and dispositions for each output subtitle index
+        for (int outIndex = 0; outIndex < outputSubs.Count; outIndex++)
         {
-            var originalTrack = originalTracks.FirstOrDefault(t => t.Number == track.Number);
-            
-            // Set language metadata
-            if (!string.IsNullOrEmpty(track.LanguageOrTitle))
+            var t = outputSubs[outIndex];
+            if (!string.IsNullOrEmpty(t.LanguageOrTitle))
             {
-                args.Add($"-metadata:s:s:{outputSubtitleIndex} language={track.LanguageOrTitle}");
+                var lang = t.LanguageOrTitle.Contains(' ') ? $"\"{t.LanguageOrTitle}\"" : t.LanguageOrTitle;
+                args.Add($"-metadata:s:s:{outIndex} language={lang}");
             }
-            
-            // Set title metadata
-            if (!string.IsNullOrEmpty(track.Name))
+
+            if (!string.IsNullOrEmpty(t.Name))
             {
-                args.Add($"-metadata:s:s:{outputSubtitleIndex} title=\"{track.Name}\"");
+                args.Add($"-metadata:s:s:{outIndex} title=\"{t.Name}\"");
             }
-            
-            // Set disposition flags
+
             var dispositions = new List<string>();
-            
-            if (track.Default)
+            if (t.Default)
             {
                 dispositions.Add("default");
             }
-            
-            if (track.Forced)
+
+            if (t.Forced)
             {
                 dispositions.Add("forced");
             }
-            
+
             if (dispositions.Count > 0)
             {
-                args.Add($"-disposition:s:{outputSubtitleIndex} {string.Join("+", dispositions)}");
+                args.Add($"-disposition:s:{outIndex} {string.Join("+", dispositions)}");
             }
             else
             {
-                args.Add($"-disposition:s:{outputSubtitleIndex} 0");
+                args.Add($"-disposition:s:{outIndex} 0");
             }
-            
-            outputSubtitleIndex++;
         }
-        
-        // Add output file
+
+        // Output file
         args.Add($"\"{outputFileName}\"");
-        
+
         return string.Join(" ", args);
     }
 }
