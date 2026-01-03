@@ -246,6 +246,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<EditWholeTextViewModel>();
         collection.AddTransient<ElevenLabsSettingsViewModel>();
         collection.AddTransient<EmbeddedSubtitlesEditViewModel>();
+        collection.AddTransient<EmbedTrackPreviewViewModel>();
         collection.AddTransient<EditEmbeddedTrackViewModel>();
         collection.AddTransient<EncodingSettingsViewModel>();
         collection.AddTransient<ErrorListViewModel>();

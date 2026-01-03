@@ -204,7 +204,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return false;
         }
 
-        SeLogger.Error($"FFmpeg command: {arguments}");
+        _log.AppendLine($"FFmpeg command: {arguments}");
 
         _startTicks = DateTime.UtcNow.Ticks;
         _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
@@ -350,6 +350,23 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         {
             selectedTrack.Deleted = !selectedTrack.Deleted;
         }
+    }
+
+    [RelayCommand]
+    private async Task Preview()
+    {
+        var selectedTrack = SelectedTrck;
+        if (selectedTrack == null || Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EmbedTrackPreviewWindow, EmbedTrackPreviewViewModel>(Window, vm =>
+        {
+            //var matroskaTrackInfo = selectedTrack
+            vm.Initialize(new MatroskaFile(VideoFileName), selectedTrack.MatroskaTrackInfo, VideoFileName, selectedTrack.FileName);
+        });
+
     }
 
     [RelayCommand]
@@ -551,6 +568,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                             FileName = string.Empty,
                             Forced = track.IsForced,
                             Default = track.IsDefault,
+                            MatroskaTrackInfo = track,
                         };
                         list.Add(embeddedTrack);
                         subtitleIndex++;

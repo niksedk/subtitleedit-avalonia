@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 
 namespace Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 
@@ -16,6 +17,7 @@ public partial class EmbeddedTrack : ObservableObject
     public bool New { get; set; }
     public string FileName { get; set; } = string.Empty;
     public FfmpegTrackInfo? FfmpegTrackInfo { get; set; }
+    public MatroskaTrackInfo? MatroskaTrackInfo { get; set; }
 
     public EmbeddedTrack()
     {

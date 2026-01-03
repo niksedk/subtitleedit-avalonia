@@ -26,6 +26,7 @@ public class EmbeddedSubtitlesEditWindow : Window
 
         var labelVideoFileName = UiUtil.MakeLabel(Se.Language.General.VideoFile);
         var textBoxVideoFileName = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.VideoFileName)).WithHorizontalAlignmentStretch();
+        textBoxVideoFileName.IsReadOnly = true;
         var buttonBrowseVideoFile = UiUtil.MakeButtonBrowse(vm.BrowseVideoFileCommand);
         var gridVideoFile = new Grid
         {
@@ -170,6 +171,8 @@ public class EmbeddedSubtitlesEditWindow : Window
         {
             Content = Se.Language.General.Add,
             Command = vm.AddCommand,
+            Margin = new Thickness(4, 0),
+            Padding = new Thickness(12, 6),
             Flyout = new MenuFlyout
             {
                 Items =
@@ -184,6 +187,7 @@ public class EmbeddedSubtitlesEditWindow : Window
         };
         var buttonEdit = UiUtil.MakeButton(Se.Language.General.Edit, vm.EditCommand);
         var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand);
+        var buttonPreview = UiUtil.MakeButton(Se.Language.General.Preview, vm.PreviewCommand);
 
         var panelButtons = new StackPanel
         {
@@ -193,6 +197,7 @@ public class EmbeddedSubtitlesEditWindow : Window
                 buttonAdd,
                 buttonEdit,
                 buttonDelete,
+                buttonPreview,
             },
         };
 
