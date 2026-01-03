@@ -283,6 +283,20 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
+        if (fileName.EndsWith(".sup", StringComparison.OrdinalIgnoreCase) && FileUtil.IsBluRaySup(fileName))
+        {
+            var supTrack = new EmbeddedTrack
+            {
+                Format = Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant(),
+                LanguageOrTitle = Path.GetFileNameWithoutExtension(fileName),
+                Name = Path.GetFileName(fileName),
+                FileName = fileName,
+                New = true,
+            };
+            Tracks.Add(supTrack);
+            return;
+        }
+
         var subtitle = Subtitle.Parse(fileName);
         if (subtitle.Paragraphs.Count == 0)
         {
