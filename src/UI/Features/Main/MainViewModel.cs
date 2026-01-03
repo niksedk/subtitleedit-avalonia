@@ -368,7 +368,7 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
         MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
-        MenuIteminsertSubtitleFileAtPositionMenuItem  = new MenuItem();
+        MenuIteminsertSubtitleFileAtPositionMenuItem = new MenuItem();
         MenuItemAudioVisualizerDelete = new MenuItem();
         MenuItemAudioVisualizerInsertBefore = new MenuItem();
         MenuItemAudioVisualizerInsertAfter = new MenuItem();
@@ -1895,7 +1895,7 @@ public partial class MainViewModel :
             var newParagraph = new SubtitleLineViewModel(p, SelectedSubtitleFormat);
             var offset = p.StartTime.TotalMilliseconds - firstStartTime;
             newParagraph.StartTime = TimeSpan.FromMilliseconds(videoPosition * 1000 + offset);
-            
+
             _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         }
 
@@ -11470,17 +11470,14 @@ public partial class MainViewModel :
         };
         _positionTimer.Start();
 
-        _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _slowTimer.Tick += (s, e) => 
-        { 
+        _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+        _slowTimer.Tick += (s, e) =>
+        {
             UpdateGaps();
             var vp = GetVideoPlayerControl();
             if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
             {
-                Task.Run(async() => 
-                { 
-                    await _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat); 
-                });
+                _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat).ConfigureAwait(false);
             }
         };
         _slowTimer.Start();
@@ -11845,7 +11842,7 @@ public partial class MainViewModel :
         {
             var lastSeconds = Subtitles.LastOrDefault()?.EndTime.TotalSeconds ?? 0;
             MenuIteminsertSubtitleFileAtPositionMenuItem.IsVisible = vp.Position > lastSeconds;
-        }         
+        }
 
         if (selectedSubtitles?.Count == 1 &&
             subtitlesAtPosition.Count == 1 &&

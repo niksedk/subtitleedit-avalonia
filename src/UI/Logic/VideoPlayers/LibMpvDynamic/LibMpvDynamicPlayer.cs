@@ -1220,6 +1220,11 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         DoMpvCommand("sub-remove");
     }
 
+    public void SubReload()
+    {
+        DoMpvCommand("sub-reload");
+    }
+
     public void SubAdd(string fileName)
     {
         DoMpvCommand("sub-add", fileName, "select");

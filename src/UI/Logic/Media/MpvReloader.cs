@@ -124,7 +124,7 @@ public class MpvReloader : IMpvReloader
 
                             p.Extra = useBox ? "Box" : "Default";
 
-                            if (p.Text.Contains("<box>"))
+                            if (p.Text.Contains("<box>", StringComparison.Ordinal))
                             {
                                 p.Extra = "Box";
                                 p.Text = p.Text.Replace("<box>", string.Empty).Replace("</box>", string.Empty);
@@ -150,20 +150,18 @@ public class MpvReloader : IMpvReloader
             {
                 if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || _mpvTextFileExtension != format.Extension)
                 {
-                    mpvContext.SubRemove();
                     DeleteTempMpvFileName();
                     _mpvTextFileName = FileUtil.GetTempFileName(format.Extension);
                     _mpvTextFileExtension = format.Extension;
-                    await File.WriteAllTextAsync(_mpvTextFileName, text).ConfigureAwait(false);
+                    await File.WriteAllTextAsync(_mpvTextFileName, text);
+                    mpvContext.SubRemove();
                     mpvContext.SubAdd(_mpvTextFileName);
-                    mpvContext.SetOptionString("sid", "auto");
                     _retryCount--;
                 }
                 else
                 {
-                    mpvContext.SubRemove();
-                    await File.WriteAllTextAsync(_mpvTextFileName, text).ConfigureAwait(false);
-                    mpvContext.SubAdd(_mpvTextFileName);
+                    await File.WriteAllTextAsync(_mpvTextFileName, text);
+                    mpvContext.SubReload();
                 }
                 _mpvTextOld = text;
             }
