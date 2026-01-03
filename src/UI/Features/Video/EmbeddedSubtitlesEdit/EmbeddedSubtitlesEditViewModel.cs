@@ -8,7 +8,6 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -19,6 +18,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -51,6 +51,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     private List<EmbeddedTrack> _originalTracks;
     private long _totalFrames = 0;
     private string _outputFileName;
+    private static readonly Regex FrameFinderRegex = new(@"[Ff]rame=\s*\d+", RegexOptions.Compiled);
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
@@ -223,33 +224,24 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         }
 
         _log?.AppendLine(outLine.Data);
-    }
 
-    private ObservableCollection<BurnInJobItem> GetCurrentVideoAsJobItems(string outputVideoFileName)
-    {
-        var subtitle = new Subtitle(_subtitle);
-
-        var srt = new SubRip();
-        var subtitleFileName = Path.Combine(Path.GetTempFileName() + srt.Extension);
-        if (_subtitleFormat is { Name: AdvancedSubStationAlpha.NameOfFormat })
+        var match = FrameFinderRegex.Match(outLine.Data);
+        if (!match.Success)
         {
-            var assa = new AdvancedSubStationAlpha();
-            subtitleFileName = Path.Combine(Path.GetTempFileName() + assa.Extension);
-            File.WriteAllText(subtitleFileName, assa.ToText(subtitle, string.Empty));
-        }
-        else
-        {
-            File.WriteAllText(subtitleFileName, srt.ToText(subtitle, string.Empty));
+            return;
         }
 
-        var jobItem = new BurnInJobItem(string.Empty, 1920, 1080) //TODO: use source video width/height
+        var arr = match.Value.Split('=');
+        if (arr.Length != 2)
         {
-            InputVideoFileName = VideoFileName,
-            OutputVideoFileName = outputVideoFileName,
-        };
-        jobItem.AddSubtitleFileName(subtitleFileName);
+            return;
+        }
 
-        return new ObservableCollection<BurnInJobItem>(new[] { jobItem });
+        if (long.TryParse(arr[1].Trim(), out var f))
+        {
+            _processedFrames = f;
+            ProgressValue = (double)_processedFrames * 100.0 / _totalFrames;
+        }
     }
 
     private string MakeOutputFileName(string videoFileName)
@@ -273,25 +265,6 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         }
 
         return fileName;
-    }
-
-    public static int CalculateFontSize(int videoWidth, int videoHeight, double factor, int minSize = 8,
-        int maxSize = 2000)
-    {
-        factor = Math.Clamp(factor, 0, 1);
-
-        // Calculate the diagonal resolution
-        var diagonalResolution = Math.Sqrt(videoWidth * videoWidth + videoHeight * videoHeight);
-
-        // Calculate base size (when factor is 0.5)
-        var baseSize = diagonalResolution * 0.019; // around 2% of diagonal as base size
-
-        // Apply logarithmic scaling
-        var scaleFactor = Math.Pow(maxSize / baseSize, 2 * (factor - 0.5));
-        var fontSize = (int)Math.Round(baseSize * scaleFactor);
-
-        // Clamp the font size between minSize and maxSize
-        return Math.Clamp(fontSize, minSize, maxSize);
     }
 
     [RelayCommand]
@@ -442,6 +415,17 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     [RelayCommand]
     private async Task Generate()
     {
+        if (_mediaInfo == null || _mediaInfo.Duration == null)
+        {
+            await MessageBox.Show(
+                Window!,
+                "Unable to get media info",
+                $"Cannot generate video without valid media info",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }   
+
         if (Tracks.Count == 0)
         {
             await MessageBox.Show(
@@ -466,6 +450,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         IsGenerating = true;
         _processedFrames = 0;
         ProgressValue = 0;
+        _totalFrames = (long)Math.Round((double)_mediaInfo!.FramesRate * _mediaInfo.Duration!.TotalSeconds);
 
         IsGenerating = RunEncoding();
     }
