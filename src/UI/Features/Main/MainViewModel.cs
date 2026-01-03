@@ -2547,6 +2547,36 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task VideoEmbed()
+    {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            await CommandVideoOpen();
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        var result = await ShowDialogAsync<EmbeddedSubtitlesEditWindow, EmbeddedSubtitlesEditViewModel>(vm =>
+        {
+            vm.Initialize(_videoFileName, GetUpdateSubtitle(), SelectedSubtitleFormat, _mediaInfo);
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
     private async Task VideoReEncode()
     {
         var ffmpegOk = await RequireFfmpegOk();

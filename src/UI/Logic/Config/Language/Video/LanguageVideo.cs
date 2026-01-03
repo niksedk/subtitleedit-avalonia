@@ -14,6 +14,7 @@ public class LanguageVideo
     public string ReEncodeVideoForBetterSubtitlingDotDotDot { get; set; }
     public string CutVideoTitle { get; set; }
     public string CutVideoDotDotDot { get; set; }
+    public string EmbedSubtitlesDotDotDot { get; set; }
     public string GenerateTimeCodes { get; set; }
     public string CheckeredImage { get; set; }
     public string SaveVideoAsTitle { get; set; }
@@ -38,6 +39,7 @@ public class LanguageVideo
         ReEncodeVideoForBetterSubtitlingDotDotDot = "Re-encode video for better subtitling...";
         CutVideoTitle = "Cut video";
         CutVideoDotDotDot = "Cut video...";
+        EmbedSubtitlesDotDotDot = "Add/remove embedded subtitles...";
         GenerateTimeCodes = "Generate time codes";
         CheckeredImage = "Checkered image";
         SaveVideoAsTitle = "Save video as";

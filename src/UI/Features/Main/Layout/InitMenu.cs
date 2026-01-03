@@ -556,6 +556,11 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
+                            Header = Se.Language.Video.EmbedSubtitlesDotDotDot,
+                            Command = vm.VideoEmbedCommand,
+                        },
+                        new MenuItem
+                        {
                             [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SetVideoOffsetText)),
                             Command = vm.ShowVideoSetOffsetCommand,
                         },
