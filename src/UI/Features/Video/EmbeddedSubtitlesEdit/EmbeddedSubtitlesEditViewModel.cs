@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
@@ -12,6 +14,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +22,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Nikse.SubtitleEdit.Features.Video.CutVideo;
+namespace Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 
 public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 {
@@ -77,6 +80,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         Tracks = new ObservableCollection<EmbeddedTrack>();
         VideoFileName = string.Empty;
         ProgressText = string.Empty;
+        JobItems = new ObservableCollection<BurnInJobItem>();
+        TracksGrid = new DataGrid();
 
         _log = new StringBuilder();
         _timerGenerate = new();
@@ -356,42 +361,124 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Add()
+    private async Task Add()
     {
+        if (Window == null)
+        {
+            return;
+        }
 
+        var fileName = await _fileHelper.PickOpenFile(Window, "title", "Advanced Sub Station Alpha", "ass", "SubRip", "srt");
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle.Paragraphs.Count == 0)
+        {
+            await MessageBox.Show(
+                Window,
+                "No subtitles found",
+                "The selected subtitle file does not contain any subtitles.",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return;
+        }
+
+        var embeddedTrack = new EmbeddedTrack
+        {
+            Format = Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant(),
+            LanguageOrTitle = Path.GetFileNameWithoutExtension(fileName),
+            Name = Path.GetFileName(fileName),
+            FileName = fileName,
+            New = true,
+        };
+        Tracks.Add(embeddedTrack);
     }
 
     [RelayCommand]
-    private async Task Import()
+    private void AddCurrent()
     {
-     
+        if (Window == null || _currentSubtitle == null || _currentSubtitle.Paragraphs.Count == 0 || _subtitleFormat == null)
+        {
+            return;
+        }
+
+        var tempFileName = Path.Combine(Path.GetTempPath(), "EmbeddedSubtitleEdit_" + Guid.NewGuid() + _subtitleFormat.Extension);
+        File.WriteAllText(tempFileName, _subtitleFormat.ToText(_currentSubtitle, string.Empty));
+        var embeddedTrack = new EmbeddedTrack
+        {
+            Format = _subtitleFormat.Name,
+            LanguageOrTitle = Path.GetFileNameWithoutExtension(tempFileName),
+            Name = Path.GetFileName(tempFileName),
+            FileName = tempFileName,
+            New = true,
+        };
     }
 
-    [RelayCommand]
-    private void ImportCurrent()
-    {
-
-    }
 
     [RelayCommand]
     private void Delete()
     {
-       
+        var selectedTrack = SelectedTrck;
+        if (selectedTrack != null)
+        {
+            selectedTrack.Deleted = !selectedTrack.Deleted;
+        }
     }
 
     [RelayCommand]
     private void Clear()
     {
+        foreach (var track in Tracks)
+        {
+            track.Deleted = true;
+        }
     }
 
     [RelayCommand]
-    private void SetStart()
+    private async Task Edit()
     {
+        var selectedTrack = SelectedTrck;
+        if (Window == null || selectedTrack == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<EditEmbeddedTrackWindow, EditEmbeddedTrackViewModel>(Window, vm =>
+        {
+            vm.Initialize(selectedTrack);
+        });
     }
 
     [RelayCommand]
-    private void SetEnd()
+    private async Task BrowseVideoFile()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenVideoFile(Window, Se.Language.General.OpenVideoFileTitle);
+        if (!string.IsNullOrEmpty(fileName))
+        {
+            VideoFileName = fileName;
+            _ = Task.Run(() =>
+            {
+                var mediaInfo = FfmpegMediaInfo2.Parse(fileName);
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    Tracks.Clear();
+                    var tracks = FindTracks(fileName, mediaInfo);
+                    foreach (var track in tracks)
+                    {
+                        Tracks.Add(track);
+                    }
+                });
+            });
+            _mediaInfo = FfmpegMediaInfo2.Parse(fileName);
+        }
     }
 
     [RelayCommand]
@@ -464,7 +551,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
-        
+
     }
 
 
@@ -478,13 +565,82 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
     {
         StartTitleTimer();
         UiUtil.RestoreWindowPosition(Window);
+        Task.Run(() =>
+        {
+            var tracks = FindTracks(VideoFileName, _mediaInfo);
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                foreach (var track in tracks)
+                {
+                    Tracks.Add(track);
+                }
+            });
+        });
+    }
+
+    private List<EmbeddedTrack> FindTracks(string videoFileName, FfmpegMediaInfo2? mediaInfo)
+    {
+        var list = new List<EmbeddedTrack>();
+
+        if (FileUtil.IsMatroskaFileFast(videoFileName))
+        {
+            var matroskaFile = new MatroskaFile(videoFileName);
+            if (matroskaFile.IsValid)
+            {
+                var tracks = matroskaFile.GetTracks();
+                foreach (var track in tracks)
+                {
+                    if (track.IsSubtitle)
+                    {
+                        var embeddedTrack = new EmbeddedTrack
+                        {
+                            Format = track.CodecId,
+                            LanguageOrTitle = !string.IsNullOrEmpty(track.Language) ? track.Language : track.Name,
+                            Name = track.Name,
+                            FileName = string.Empty,
+                            Forced = track.IsForced,
+                            Default = track.IsDefault,
+                        };
+                        list.Add(embeddedTrack);
+                    }
+                }
+            }
+        }
+        else if (videoFileName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) ||
+                 videoFileName.EndsWith(".m4v", StringComparison.OrdinalIgnoreCase) ||
+                 videoFileName.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
+        {
+            var mp4Parser = new MP4Parser(videoFileName);
+            if (mp4Parser.VttcSubtitle != null && mp4Parser.VttcSubtitle.Paragraphs.Count > 0)
+            {
+                var embeddedTrack = new EmbeddedTrack
+                {
+                    Format = "WebVTT",
+                    Name = string.Empty,
+                    FileName = string.Empty,
+                };
+                list.Add(embeddedTrack);
+            }
+            foreach (var track in mp4Parser.GetSubtitleTracks())
+            {
+                var embeddedTrack = new EmbeddedTrack
+                {
+                    Format = track.Mdia.Name,
+                    Name = track.Name,
+                    FileName = string.Empty,
+                };
+                list.Add(embeddedTrack);
+            }
+        }
+
+        return list;
     }
 
     internal void AudioVisualizerOnNewSelectionInsert(object sender, ParagraphEventArgs e)
     {
     }
 
-  
+
     private void SelectAndScrollToRow(int index)
     {
         //if (index < 0 || index >= Segments.Count)
@@ -500,12 +656,26 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         //}, DispatcherPriority.Background);
     }
 
-    internal void SegmentsGridChanged(object? sender, SelectionChangedEventArgs e)
+    internal void TracksGridChanged(object? sender, SelectionChangedEventArgs e)
     {
         UpdateSelection();
     }
 
     private void UpdateSelection()
     {
+    }
+
+    internal void OnTracksGridKeyDown(KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            Delete();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Insert)
+        {
+            _ = Add();
+            e.Handled = true;
+        }
     }
 }

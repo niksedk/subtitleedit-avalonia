@@ -44,7 +44,7 @@
 		<PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
 		<PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.2" />
 		<PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.2" />
-		<PackageReference Include="SharpCompress" Version="0.42.1" />
+		<PackageReference Include="SharpCompress" Version="0.43.0" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.1" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
 		<PackageReference Include="System.Text.Json" Version="10.0.1" />

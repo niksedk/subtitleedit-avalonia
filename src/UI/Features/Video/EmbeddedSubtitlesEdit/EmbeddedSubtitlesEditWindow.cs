@@ -4,19 +4,18 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Styling;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
-namespace Nikse.SubtitleEdit.Features.Video.CutVideo;
+namespace Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 
 public class EmbeddedSubtitlesEditWindow : Window
 {
     public EmbeddedSubtitlesEditWindow(EmbeddedSubtitlesEditViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Video.CutVideoTitle;
+        Title = Se.Language.Video.AddRemoveEmbeddedSubtitlesTitle;
         CanResize = true;
         Width = 1000;
         Height = 800;
@@ -25,7 +24,26 @@ public class EmbeddedSubtitlesEditWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var segmentsView = MakeTracksView(vm);
+        var labelVideoFileName = UiUtil.MakeLabel(Se.Language.General.VideoFile);
+        var textBoxVideoFileName = UiUtil.MakeTextBox(double.NaN, vm, nameof(vm.VideoFileName)).WithHorizontalAlignmentStretch();
+        var buttonBrowseVideoFile = UiUtil.MakeButtonBrowse(vm.BrowseVideoFileCommand);
+        var gridVideoFile = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // label
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }, // textbox
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // button
+            },
+            ColumnSpacing = 5,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        gridVideoFile.Add(labelVideoFileName, 0, 0);
+        gridVideoFile.Add(textBoxVideoFileName, 0, 1);
+        gridVideoFile.Add(buttonBrowseVideoFile, 0, 2);
+
+
+        var tracksView = MakeTracksView(vm);
         var progressView = MakeProgressView(vm);
 
         var labelVideoExtension = UiUtil.MakeLabel(Se.Language.General.VideoExtension);
@@ -59,7 +77,7 @@ public class EmbeddedSubtitlesEditWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }, 
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             Width = double.NaN,
@@ -68,8 +86,8 @@ public class EmbeddedSubtitlesEditWindow : Window
             RowSpacing = 5,
         };
 
-        grid.Add(UiUtil.MakeLabel("Video file"), 0);
-        grid.Add(segmentsView, 1);
+        grid.Add(UiUtil.MakeBorderForControl(gridVideoFile), 0);
+        grid.Add(tracksView, 1);
         grid.Add(progressView, 2);
         grid.Add(buttonPanel, 3);
 
@@ -83,9 +101,9 @@ public class EmbeddedSubtitlesEditWindow : Window
 
     private static Border MakeTracksView(EmbeddedSubtitlesEditViewModel vm)
     {
-        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
-        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
-        var dataGridSubtitle = new DataGrid
+        var booleanToCheckMarkConverter = new BooleanToCheckMarkConverter();
+        var booleanToDeleteMarkConverter = new BooleanToDeleteMarkConverter();
+        var dataGridTracks = new DataGrid
         {
             AutoGenerateColumns = false,
             SelectionMode = DataGridSelectionMode.Single,
@@ -101,69 +119,87 @@ public class EmbeddedSubtitlesEditWindow : Window
             {
                 new DataGridTextColumn
                 {
+                    Header = string.Empty,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(EmbeddedTrack.Deleted), BindingMode.OneWay) { Converter = booleanToDeleteMarkConverter },
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
                     Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Name)),
+                    Binding = new Binding(nameof(EmbeddedTrack.Name), BindingMode.OneWay),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Title,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.LanguageOrTitle)),
+                    Binding = new Binding(nameof(EmbeddedTrack.LanguageOrTitle), BindingMode.OneWay),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Default,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Default)),
+                    Binding = new Binding(nameof(EmbeddedTrack.Default)) { Converter = booleanToCheckMarkConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Forced,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Forced)),
+                    Binding = new Binding(nameof(EmbeddedTrack.Forced), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter, Mode = BindingMode.OneWay },
+                    IsReadOnly = true,
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Format,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(EmbeddedTrack.Format), BindingMode.OneWay),
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.FileName)),
+                    Binding = new Binding(nameof(EmbeddedTrack.FileName), BindingMode.OneWay),
                     IsReadOnly = true,
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },
             },
         };
-        dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTrck)) { Source = vm });
-        dataGridSubtitle.SelectionChanged += vm.SegmentsGridChanged;
-        vm.TracksGrid = dataGridSubtitle;
+        dataGridTracks.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Tracks)) { Source = vm });
+        dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTrck)) { Source = vm });
+        dataGridTracks.SelectionChanged += vm.TracksGridChanged;
+        dataGridTracks.KeyDown += (s, e) => vm.OnTracksGridKeyDown(e);
+        dataGridTracks.DoubleTapped += (s, e) => vm.EditCommand.Execute(null);
+        vm.TracksGrid = dataGridTracks;
 
         var buttonAdd = new SplitButton
         {
             Content = Se.Language.General.Add,
-            Command = vm.ImportCommand,
+            Command = vm.AddCommand,
             Flyout = new MenuFlyout
             {
                 Items =
                 {
                     new MenuItem
                     {
-                        Header = Se.Language.Video.ImportCurrentSubtitle,
-                        Command = vm.ImportCurrentCommand,
+                        Header = Se.Language.Video.AddCurrentSubtitle,
+                        Command = vm.AddCurrentCommand,
                     },
                 }
             }
         };
-        var buttonEdit = UiUtil.MakeButton(Se.Language.General.Edit, vm.SetStartCommand);
+        var buttonEdit = UiUtil.MakeButton(Se.Language.General.Edit, vm.EditCommand);
         var buttonDelete = UiUtil.MakeButton(Se.Language.General.Delete, vm.DeleteCommand);
 
         var panelButtons = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
-            { 
+            {
                 buttonAdd,
                 buttonEdit,
                 buttonDelete,
@@ -187,7 +223,7 @@ public class EmbeddedSubtitlesEditWindow : Window
             RowSpacing = 5,
         };
 
-        grid.Add(dataGridSubtitle, 0, 0);
+        grid.Add(dataGridTracks, 0, 0);
         grid.Add(panelButtons, 1, 0);
 
         return UiUtil.MakeBorderForControl(grid);
@@ -247,5 +283,5 @@ public class EmbeddedSubtitlesEditWindow : Window
         grid.Add(statusText, 0, 0);
 
         return grid;
-    }  
+    }
 }

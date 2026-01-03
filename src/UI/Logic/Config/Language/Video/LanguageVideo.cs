@@ -28,6 +28,8 @@ public class LanguageVideo
     public string MpvRenderOpenGl { get; set; }
     public string MpvRenderSoftware { get; set; }
     public string ImportCurrentSubtitle { get; set; }
+    public string AddRemoveEmbeddedSubtitlesTitle { get; set; }
+    public string AddCurrentSubtitle { get; set; }
 
     public LanguageVideo()
     {
@@ -53,5 +55,7 @@ public class LanguageVideo
         MpvRenderOpenGl = "OpenGL";
         MpvRenderSoftware = "Software (slow)";
         ImportCurrentSubtitle = "Import current subtitle";
+        AddRemoveEmbeddedSubtitlesTitle = "Add/remove embedded subtitles";
+        AddCurrentSubtitle = "Add current subtitle";
     }
 }

@@ -93,6 +93,7 @@ using Nikse.SubtitleEdit.Features.Translate;
 using Nikse.SubtitleEdit.Features.Video.BlankVideo;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Features.Video.CutVideo;
+using Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 using Nikse.SubtitleEdit.Features.Video.GoToVideoPosition;
 using Nikse.SubtitleEdit.Features.Video.OpenFromUrl;
 using Nikse.SubtitleEdit.Features.Video.ReEncodeVideo;
@@ -245,6 +246,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<EditWholeTextViewModel>();
         collection.AddTransient<ElevenLabsSettingsViewModel>();
         collection.AddTransient<EmbeddedSubtitlesEditViewModel>();
+        collection.AddTransient<EditEmbeddedTrackViewModel>();
         collection.AddTransient<EncodingSettingsViewModel>();
         collection.AddTransient<ErrorListViewModel>();
         collection.AddTransient<ExportCavena890ViewModel>();
