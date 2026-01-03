@@ -205,7 +205,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         }
 
         SeLogger.Error($"FFmpeg command: {arguments}");
-        
+
         _startTicks = DateTime.UtcNow.Ticks;
         _ffmpegProcess = FfmpegGenerator.GetProcess(arguments, OutputHandler);
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -277,7 +277,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, "title", "Advanced Sub Station Alpha", "ass", "SubRip", "srt");
+        var fileName = await _fileHelper.PickOpenFile(Window, "title", "Subtitle files", "*.ass;*.srt;*.sup", "All files", "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -441,7 +441,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             return;
-        }   
+        }
 
         if (Tracks.Count == 0)
         {
