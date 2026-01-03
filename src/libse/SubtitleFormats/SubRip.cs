@@ -73,14 +73,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
-            
+
             // Pre-allocate capacity for better performance
             var linesCount = lines.Count;
-            if (linesCount > 100)
-            {
-                subtitle.Paragraphs.Capacity = linesCount / 4; // Rough estimate: 4 lines per paragraph
-            }
-            
+            subtitle.Paragraphs.Capacity = linesCount / 4; // Rough estimate: 4 lines per paragraph
+
             var line = string.Empty;
             var next = linesCount > 0 ? lines[0].TrimEnd().Trim('\u007F') : string.Empty;
             var nextNext = linesCount > 1 ? lines[1].TrimEnd().Trim('\u007F') : string.Empty;
@@ -94,7 +91,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 nextNextNext = (i + 3 < linesCount) ? lines[i + 3].TrimEnd().Trim('\u007F') : string.Empty; //  007F=127=delete asci
 
                 var trimmedLine = line.Trim(); // Cache trimmed line
-                
+
                 // A new line is missing between two paragraphs or no line number (buggy file)
                 if (_expecting == ExpectingLine.Text && i + 1 < linesCount && !string.IsNullOrEmpty(_paragraph?.Text) &&
                     Utilities.IsInteger(line) && TryReadTimeCodesLine(trimmedLine, null, false))
@@ -286,7 +283,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 return false;
             }
-            
+
             var s = input.TrimStart('-', ' ');
             if (s.Length < 10 || !char.IsDigit(s[0]))
             {
