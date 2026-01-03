@@ -3012,7 +3012,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm => { vm.Initialize(SelectedSubtitleFormat); });
+        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm => 
+        { 
+            vm.Initialize(SelectedSubtitleFormat, GetUpdateSubtitle()); 
+        });
 
         if (viewModel.OkPressed)
         {

@@ -30,7 +30,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     
     private readonly List<string> _allSubtitleFormatNames;
-    private readonly Subtitle _sampleSubtitle;
+    private Subtitle _sampleSubtitle;
 
     public PickSubtitleFormatViewModel()
     {
@@ -49,9 +49,25 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
         _sampleSubtitle.Paragraphs.Add(new Paragraph("This is a sample subtitle.", 3500, 6000));
     }
 
-    internal void Initialize(SubtitleFormat subtitleFormat)
+    internal void Initialize(SubtitleFormat subtitleFormat, Subtitle subtitle)
     {
         SelectedSubtitleFormatName = subtitleFormat.FriendlyName;
+
+        if (subtitle.Paragraphs.Count > 1)
+        {
+            _sampleSubtitle = new Subtitle(subtitle);
+
+            if (_sampleSubtitle.Footer != null && _sampleSubtitle.Footer.Length > 100)
+            {
+                _sampleSubtitle.Footer = string.Empty;
+            }
+
+            while (_sampleSubtitle.Paragraphs.Count > 2)
+            {
+                _sampleSubtitle.Paragraphs.RemoveAt(2);
+            }
+        }
+
         UpdatePreview();
     }
 

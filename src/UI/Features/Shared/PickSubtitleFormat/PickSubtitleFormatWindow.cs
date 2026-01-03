@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -49,6 +50,14 @@ public class PickSubtitleFormatWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        listBoxFormats.Styles.Add(new Style(x => x.OfType<ListBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(ListBoxItem.PaddingProperty, new Thickness(4, 2)),
+                new Setter(ListBoxItem.MarginProperty, new Thickness(0)),
+            }
+        });
         listBoxFormats.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.SubtitleFormatNames)));
         listBoxFormats.Bind(Avalonia.Controls.Primitives.SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitleFormatName)) { Mode = BindingMode.TwoWay });
         listBoxFormats.SelectionChanged += (_, _) => vm.SelectedSubtitleFormatNameChanged();
@@ -91,7 +100,7 @@ public class PickSubtitleFormatWindow : Window
         grid.Add(panelSearch, 0);
         grid.Add(listBoxBorder, 1);
         grid.Add(labelPreview, 2);
-        grid.Add(vm.PreviewContainer, 3);
+        grid.Add(UiUtil.MakeBorderForControl(vm.PreviewContainer), 3);
         grid.Add(buttonPanel, 4);
 
         Content = grid;
