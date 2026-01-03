@@ -1510,9 +1510,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             foreach (var line in lines)
             {
                 lineNumber++;
+                var trimmedLine = line.Trim();
+                
                 if (!eventsStarted && !fontsStarted && !graphicsStarted &&
-                    !line.Trim().Equals("[fonts]", StringComparison.InvariantCultureIgnoreCase) &&
-                    !line.Trim().Equals("[graphics]", StringComparison.InvariantCultureIgnoreCase))
+                    !trimmedLine.Equals("[fonts]", StringComparison.InvariantCultureIgnoreCase) &&
+                    !trimmedLine.Equals("[graphics]", StringComparison.InvariantCultureIgnoreCase))
                 {
                     header.AppendLine(line);
                 }
@@ -1521,14 +1523,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                 {
                     // skip empty and comment lines
                 }
-                else if (line.TrimStart().StartsWith("dialog:", StringComparison.OrdinalIgnoreCase) || line.TrimStart().StartsWith("dialogue:", StringComparison.OrdinalIgnoreCase)) // fix faulty font tags...
+                else if (line.TrimStart().StartsWith("dialog:", StringComparison.OrdinalIgnoreCase) || line.TrimStart().StartsWith("dialogue:", StringComparison.OrdinalIgnoreCase))
                 {
                     eventsStarted = true;
                     fontsStarted = false;
                     graphicsStarted = false;
                 }
 
-                if (line.Trim().Equals("[events]", StringComparison.OrdinalIgnoreCase))
+                if (trimmedLine.Equals("[events]", StringComparison.OrdinalIgnoreCase))
                 {
                     if (header.ToString().IndexOf(Environment.NewLine + "[events]", StringComparison.OrdinalIgnoreCase) < 0)
                     {
@@ -1542,7 +1544,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                     fontsStarted = false;
                     graphicsStarted = false;
                 }
-                else if (line.Trim().Equals("[fonts]", StringComparison.OrdinalIgnoreCase))
+                else if (trimmedLine.Equals("[fonts]", StringComparison.OrdinalIgnoreCase))
                 {
                     eventsStarted = false;
                     fontsStarted = true;
@@ -1550,7 +1552,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                     footer.AppendLine();
                     footer.AppendLine("[Fonts]");
                 }
-                else if (line.Trim().Equals("[graphics]", StringComparison.OrdinalIgnoreCase))
+                else if (trimmedLine.Equals("[graphics]", StringComparison.OrdinalIgnoreCase))
                 {
                     eventsStarted = false;
                     fontsStarted = false;
@@ -1558,7 +1560,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                     footer.AppendLine();
                     footer.AppendLine("[Graphics]");
                 }
-                else if (line.Trim().Equals("[Aegisub Extradata]", StringComparison.OrdinalIgnoreCase))
+                else if (trimmedLine.Equals("[Aegisub Extradata]", StringComparison.OrdinalIgnoreCase))
                 {
                     eventsStarted = false;
                     fontsStarted = false;
@@ -1576,7 +1578,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                 }
                 else if (eventsStarted)
                 {
-                    string s = line.Trim().ToLowerInvariant();
+                    var s = trimmedLine.ToLowerInvariant();
                     if (line.Length > 10 && s.StartsWith("format:", StringComparison.Ordinal))
                     {
                         indexLayer = -1;
@@ -1595,49 +1597,41 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
                         for (int i = 0; i < format.Length; i++)
                         {
                             var formatTrimmed = format[i].Trim();
-                            if (formatTrimmed.Equals("start", StringComparison.Ordinal))
+                            switch (formatTrimmed)
                             {
-                                indexStart = i;
-                            }
-                            else if (formatTrimmed.Equals("end", StringComparison.Ordinal))
-                            {
-                                indexEnd = i;
-                            }
-                            else if (formatTrimmed.Equals("text", StringComparison.Ordinal))
-                            {
-                                indexText = i;
-                            }
-                            else if (formatTrimmed.Equals("style", StringComparison.Ordinal))
-                            {
-                                indexStyle = i;
-                            }
-                            else if (formatTrimmed.Equals("actor", StringComparison.Ordinal))
-                            {
-                                indexActor = i;
-                            }
-                            else if (formatTrimmed.Equals("name", StringComparison.Ordinal))
-                            {
-                                indexName = i;
-                            }
-                            else if (formatTrimmed.Equals("marginl", StringComparison.Ordinal))
-                            {
-                                indexMarginL = i;
-                            }
-                            else if (formatTrimmed.Equals("marginr", StringComparison.Ordinal))
-                            {
-                                indexMarginR = i;
-                            }
-                            else if (formatTrimmed.Equals("marginv", StringComparison.Ordinal))
-                            {
-                                indexMarginV = i;
-                            }
-                            else if (formatTrimmed.Equals("effect", StringComparison.Ordinal))
-                            {
-                                indexEffect = i;
-                            }
-                            else if (formatTrimmed.Equals("layer", StringComparison.Ordinal))
-                            {
-                                indexLayer = i;
+                                case "start":
+                                    indexStart = i;
+                                    break;
+                                case "end":
+                                    indexEnd = i;
+                                    break;
+                                case "text":
+                                    indexText = i;
+                                    break;
+                                case "style":
+                                    indexStyle = i;
+                                    break;
+                                case "actor":
+                                    indexActor = i;
+                                    break;
+                                case "name":
+                                    indexName = i;
+                                    break;
+                                case "marginl":
+                                    indexMarginL = i;
+                                    break;
+                                case "marginr":
+                                    indexMarginR = i;
+                                    break;
+                                case "marginv":
+                                    indexMarginV = i;
+                                    break;
+                                case "effect":
+                                    indexEffect = i;
+                                    break;
+                                case "layer":
+                                    indexLayer = i;
+                                    break;
                             }
                         }
                     }
