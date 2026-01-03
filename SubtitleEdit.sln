@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "macBundle", "macBundle", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSE", "src\libse\LibSE.csproj", "{28555E54-253F-6C49-5DB8-4B2C88F26731}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSETests", "tests\libse\LibSETests.csproj", "{21C390BF-0785-5EC6-6F63-787A969378AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{28555E54-253F-6C49-5DB8-4B2C88F26731}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28555E54-253F-6C49-5DB8-4B2C88F26731}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28555E54-253F-6C49-5DB8-4B2C88F26731}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21C390BF-0785-5EC6-6F63-787A969378AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21C390BF-0785-5EC6-6F63-787A969378AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
