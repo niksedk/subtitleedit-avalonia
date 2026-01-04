@@ -171,7 +171,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 divCounter++;
             }
 
-            var xmlString = ToUtf8XmlString(xml).Replace(" xmlns=\"\"", string.Empty);
+            var xmlString = ToUtf8XmlString(xml)
+                .Replace(" xmlns=\"\"", string.Empty)
+                .Replace("encoding=\"utf-8\"", "encoding=\"UTF-8\"");
             subtitle.Header = xmlString;
             return xmlString;
         }
