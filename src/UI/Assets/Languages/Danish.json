@@ -574,7 +574,13 @@
     "TotalAdjustmentX": "Samlet justering: {0}",
     "AdjustAlpha": "Juster alfa (gennemsigtighed)",
     "AlphaAdjustment": "Alfa justering",
-    "AphaThreshold": "Alfa-t\u00E6rskel"
+    "AphaThreshold": "Alfa-t\u00E6rskel",
+    "Position": "Position",
+    "FontHeight": "Skrifth\u00F8jde",
+    "OffsetX": "Offset X",
+    "OffsetY": "Offset Y",
+    "InsertSubtitleFileAtVideoPositionDotDotDot": "Inds\u00E6t undertekstfil ved videoposition...",
+    "Smart": "Smart"
   },
   "Main": {
     "AudioTrackIsNowX": "Lydsporet er nu \u0022{0}",
@@ -636,7 +642,7 @@
     "TextOnly": "Kun tekst",
     "TextUp": "Tekst op",
     "TimeCodesOnly": "Kun tidskoder",
-    "TimedTextRosettaPropertiesDotDotDot": "Timed Text IMSC Rosetta-egenskaber...",
+    "XPropertiesDotDotDot": "{0} ejendomme...",
     "TotalCharacters": "Total chars: {0}",
     "UnbreakHint": "Fjern valgte linjer",
     "UndoPerformed": "Fortryd udf\u00F8rt",
@@ -650,6 +656,9 @@
     "YoutubeDlNotInstalledDownloadNow": "\u0022yt-dlp\u0022 er ikke installeret og er p\u00E5kr\u00E6vet for at afspille onlinevideoer.\r\n\r\n\r\nDownload nu?",
     "InsertUnicodeSymbol": "Inds\u00E6t Unicode-symbol",
     "TrimmedXLines": "Trimmet {0} undertekstlinjer",
+    "OpenOriginalDifferentNumberOfSubtitlesXY": "Den originale undertekstfil har ikke det samme antal undertekster som den aktuelle undertekstfil.\r\n\r\n\r\n\u2022 Originale undertekster: {0}\r\n\r\n\u2022 Aktuelle undertekster: {1}",
+    "ImportXMatchingOriginalLines": "Vil du importere {0} matchende originale undertekster?",
+    "VideoOpenedChangeLayoutQuestion": "En videofil er blevet \u00E5bnet.\r\n\r\n\r\nVil du \u00E6ndre layoutet for at vise videopanelet?",
     "Menu": {
       "File": "Fil",
       "New": "Ny",
@@ -792,6 +801,7 @@
     "SaveCompareHtmlTitle": "Gem sammenligne HTML-fil",
     "PickMatroskaTrackX": "V\u00E6lg Matroska-spor - {0}",
     "RosettaProperties": "Timed Text Rosetta IMSC egenskaber",
+    "TmpegEncXmlProperties": "TMPGEnc VME egenskaber",
     "EbuSaveOptions": {
       "Title": "EBU save options",
       "GeneralSubtitleInformation": "Generel undertekstinformation",
@@ -1269,6 +1279,7 @@
     "ReEncodeVideoForBetterSubtitlingDotDotDot": "Omkode video for bedre undertekster...",
     "CutVideoTitle": "Klip video",
     "CutVideoDotDotDot": "Klip video...",
+    "EmbedSubtitlesDotDotDot": "Tilf\u00F8j/fjern indlejrede undertekster...",
     "GenerateTimeCodes": "Generer tidskoder",
     "CheckeredImage": "Ternet billede",
     "SaveVideoAsTitle": "Gem video som",
@@ -1282,6 +1293,9 @@
     "MpvRenderOpenGl": "OpenGL",
     "MpvRenderSoftware": "Software (langsom)",
     "ImportCurrentSubtitle": "Importer aktuel undertekst",
+    "AddRemoveEmbeddedSubtitlesTitle": "Tilf\u00F8j/fjern indlejrede undertekster",
+    "AddCurrentSubtitle": "Tilf\u00F8j aktuel undertekst",
+    "TitleOrLanguage": "Titel/sprog",
     "BurnIn": {
       "Title": "Generer video med indbr\u00E6ndte undertekster",
       "InfoAssaOff": "Bem\u00E6rk: Avanceret SubStation Alpha-styling underst\u00F8ttes.",
@@ -1656,7 +1670,10 @@
       "SaveAsBehaviorUseSubtitleFileName": "Brug undertekst filnavn",
       "SaveAsAppendLanguageCodeTwoLetter": "To bogstaver",
       "SaveAsAppendLanguageCodeThreeLetter": "Tre bogstaver",
-      "SaveAsAppendLanguageCodeLanguageName": "Sprognavn"
+      "SaveAsAppendLanguageCodeLanguageName": "Sprognavn",
+      "SplitOddLineActionWeightTop": "V\u00E6gt top",
+      "SplitOddLineActionWeightBottom": "V\u00E6gt bund",
+      "SplitOddLinesAction": "Split ulige linjer handling"
     },
     "Shortcuts": {
       "Title": "Shortcuts",
@@ -1867,7 +1884,7 @@
       "ColorX": "Farve {0}",
       "RemoveColor": "Fjern farve",
       "SurroundWith": "Omgiv med...",
-      "SurroundWithX": "Omgiv med \u0022{0}",
+      "SurroundWithXY": "Omring med {0}/{1}",
       "RepeatLine": "Gentag linje",
       "RepeatPreviousLine": "Gentag forrige linje",
       "RepeatNextLine": "Gentag n\u00E6ste linje",

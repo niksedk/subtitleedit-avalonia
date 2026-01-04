@@ -575,7 +575,13 @@
     "totalAdjustmentX": "Total adjustment: {0}",
     "adjustAlpha": "Adjust alpha (transparency)",
     "alphaAdjustment": "Alpha adjustment",
-    "aphaThreshold": "Alpha threshold"
+    "aphaThreshold": "Alpha threshold",
+    "position": "Position",
+    "fontHeight": "Font height",
+    "offsetX": "Offset X",
+    "offsetY": "Offset Y",
+    "insertSubtitleFileAtVideoPositionDotDotDot": "Insert subtitle file at video position...",
+    "smart": "Smart"
   },
   "main": {
     "menu": {
@@ -758,7 +764,7 @@
     "textOnly": "Text only",
     "textUp": "Text up",
     "timeCodesOnly": "Time codes only",
-    "timedTextRosettaPropertiesDotDotDot": "Timed Text IMSC Rosetta properties...",
+    "xPropertiesDotDotDot": "{0} properties...",
     "totalCharacters": "Total chars: {0}",
     "unbreakHint": "Unbreak selected lines",
     "undoPerformed": "Undo performed",
@@ -771,7 +777,10 @@
     "youtubeDlDownloadedSuccessfully": "\u0022yt-dlp\u0022 downloaded successfully.",
     "youtubeDlNotInstalledDownloadNow": "\u0022yt-dlp\u0022 is not installed and is required for playing online videos.\n\nDownload now?",
     "insertUnicodeSymbol": "Insert Unicode symbol",
-    "trimmedXLines": "Trimmed {0} subtitle lines"
+    "trimmedXLines": "Trimmed {0} subtitle lines",
+    "openOriginalDifferentNumberOfSubtitlesXY": "The original subtitle file does not have the same number of subtitles as the current subtitle file.\n\n\u2022 Original subtitles: {0}\n\u2022 Current subtitles: {1}",
+    "importXMatchingOriginalLines": "Import {0} matching original subtitles?",
+    "videoOpenedChangeLayoutQuestion": "A video file has been opened.\n\nDo you want to change the layout to show the video panel?"
   },
   "file": {
     "ebuSaveOptions": {
@@ -946,7 +955,8 @@
     "loadXFromFile": "Load \u0022{0}\u0022 from file",
     "saveCompareHtmlTitle": "Save compare HTML file",
     "pickMatroskaTrackX": "Pick Matroska track - {0}",
-    "rosettaProperties": "Timed Text Rosetta IMSC properties"
+    "rosettaProperties": "Timed Text Rosetta IMSC properties",
+    "tmpegEncXmlProperties": "TMPGEnc VME properties"
   },
   "edit": {
     "modifySelection": {
@@ -1376,6 +1386,7 @@
     "reEncodeVideoForBetterSubtitlingDotDotDot": "Re-encode video for better subtitling...",
     "cutVideoTitle": "Cut video",
     "cutVideoDotDotDot": "Cut video...",
+    "embedSubtitlesDotDotDot": "Add/remove embedded subtitles...",
     "generateTimeCodes": "Generate time codes",
     "checkeredImage": "Checkered image",
     "saveVideoAsTitle": "Save video as",
@@ -1388,7 +1399,10 @@
     "mpvRenderNative": "Native",
     "mpvRenderOpenGl": "OpenGL",
     "mpvRenderSoftware": "Software (slow)",
-    "importCurrentSubtitle": "Import current subtitle"
+    "importCurrentSubtitle": "Import current subtitle",
+    "addRemoveEmbeddedSubtitlesTitle": "Add/remove embedded subtitles",
+    "addCurrentSubtitle": "Add current subtitle",
+    "titleOrLanguage": "Title/language"
   },
   "waveform": {
     "guessTimeCodes": "Guess time codes",
@@ -1657,7 +1671,10 @@
       "saveAsBehaviorUseSubtitleFileName": "Use subtitle file name",
       "saveAsAppendLanguageCodeTwoLetter": "Two-letter",
       "saveAsAppendLanguageCodeThreeLetter": "Three-letter",
-      "saveAsAppendLanguageCodeLanguageName": "Language name"
+      "saveAsAppendLanguageCodeLanguageName": "Language name",
+      "splitOddLineActionWeightTop": "Weight top",
+      "splitOddLineActionWeightBottom": "Weight bottom",
+      "splitOddLinesAction": "Split odd lines action"
     },
     "shortcuts": {
       "title": "Shortcuts",
@@ -1868,7 +1885,7 @@
       "colorX": "Color {0}",
       "removeColor": "Remove color",
       "surroundWith": "Surround with...",
-      "surroundWithX": "Surround with \u0022{0}\u0022",
+      "surroundWithXY": "Surround with {0}/{1}",
       "repeatLine": "Repeat line",
       "repeatPreviousLine": "Repeat previous line",
       "repeatNextLine": "Repeat next line",
