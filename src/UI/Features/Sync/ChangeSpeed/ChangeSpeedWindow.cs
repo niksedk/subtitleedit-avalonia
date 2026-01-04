@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -11,7 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
 
 public class ChangeSpeedWindow : Window
 {
-   
+
     public ChangeSpeedWindow(ChangeSpeedViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -35,8 +34,8 @@ public class ChangeSpeedWindow : Window
             Maximum = 1000,
             Increment = 0.1m,
             DataContext = vm,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SpeedPercent)) 
-            { 
+            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SpeedPercent))
+            {
                 Mode = BindingMode.TwoWay,
                 Converter = new DoubleToFourDecimalConverter(),
             },
@@ -84,10 +83,11 @@ public class ChangeSpeedWindow : Window
             },
         };
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);   
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        
+        var buttonOk = UiUtil.MakeButton(Se.Language.General.Change, vm.OkCommand);
+        var buttonApply = UiUtil.MakeButton(Se.Language.General.Apply, vm.ApplyCommand);
+        var buttonDone = UiUtil.MakeButtonDone(vm.CancelCommand);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonApply, buttonDone);
+
         var grid = new Grid
         {
             RowDefinitions =
@@ -112,7 +112,7 @@ public class ChangeSpeedWindow : Window
         grid.Add(buttonPanel, 2);
 
         Content = grid;
-        
+
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }

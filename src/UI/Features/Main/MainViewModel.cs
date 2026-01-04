@@ -4020,7 +4020,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>();
+        var result = await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(vm =>
+        {
+            vm.Initialize(Subtitles);
+        });
         if (result.OkPressed)
         {
             ChangeSpeedViewModel.ChangeSpeed(Subtitles, result.SpeedPercent);

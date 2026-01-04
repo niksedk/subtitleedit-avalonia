@@ -15,6 +15,8 @@ public partial class ChangeSpeedViewModel : ObservableObject
     [ObservableProperty] private bool _adjustSelectedLines;
     [ObservableProperty] private bool _adjustSelectedLinesAndForward;
 
+    private ObservableCollection<SubtitleLineViewModel>? _subtitles;
+
     public Window? Window { get; set; }
     
     public bool OkPressed { get; private set; }
@@ -36,17 +38,33 @@ public partial class ChangeSpeedViewModel : ObservableObject
         SpeedPercent = 99.9889;
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
+
+    [RelayCommand]
+    private void Apply()
+    {
+        if (_subtitles == null)
+        {
+            return;
+        }
+
+        ChangeSpeed(_subtitles, SpeedPercent);
+    }
+
     [RelayCommand]                   
     private void Cancel() 
     {
         Window?.Close();
+    }
+
+    internal void Initialize(ObservableCollection<SubtitleLineViewModel> subtitles)
+    { 
+        _subtitles = subtitles;
     }
 
     internal void OnKeyDown(KeyEventArgs e)
