@@ -288,8 +288,8 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             var supTrack = new EmbeddedTrack
             {
                 Format = MatroskaTrackType.BluRay,
-                LanguageOrTitle = Path.GetFileNameWithoutExtension(fileName),
-                Name = Path.GetFileName(fileName),
+                LanguageOrTitle = "eng",
+                Name = "English",
                 FileName = fileName,
                 New = true,
             };
@@ -332,7 +332,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         Tracks.Add(embeddedTrack);
     }
 
-    private static string GetMatroskaCodecId(string fileName, SubtitleFormat originalFormat)
+    private static string GetMatroskaCodecId(string? fileName, SubtitleFormat originalFormat)
     {
         if (originalFormat.Name == SubRip.NameOfFormat)
         {
@@ -354,6 +354,11 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return MatroskaTrackType.WebVTT;
         }
 
+        if (fileName == null)
+        {
+            return MatroskaTrackType.AdvancedSubStationAlpha;
+        }
+
         return Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant();
     }
 
@@ -365,13 +370,23 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
+        var format = _subtitleFormat;
+        var allowedFormats = new[] { SubRip.NameOfFormat, WebVTT.NameOfFormat, AdvancedSubStationAlpha.NameOfFormat, SubStationAlpha.NameOfFormat };
+        if (!allowedFormats.Contains(format.Name))
+        {
+            format = new AdvancedSubStationAlpha();
+        }
+
+
         var tempFileName = Path.Combine(Path.GetTempPath(), "EmbeddedSubtitleEdit_" + Guid.NewGuid() + _subtitleFormat.Extension);
         File.WriteAllText(tempFileName, _subtitleFormat.ToText(_currentSubtitle, string.Empty));
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(_currentSubtitle);
+        var isoLanguage = Iso639Dash2LanguageCode.List.FirstOrDefault(l => l.TwoLetterCode.Equals(language, StringComparison.OrdinalIgnoreCase));
         var embeddedTrack = new EmbeddedTrack
         {
-            Format = _subtitleFormat.Name,
-            LanguageOrTitle = Path.GetFileNameWithoutExtension(tempFileName),
-            Name = Path.GetFileName(tempFileName),
+            Format = GetMatroskaCodecId(null, format),
+            LanguageOrTitle = isoLanguage?.ThreeLetterCode ?? language,
+            Name = isoLanguage?.EnglishName ?? string.Empty,
             FileName = tempFileName,
             New = true,
         };
@@ -400,7 +415,6 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<EmbedTrackPreviewWindow, EmbedTrackPreviewViewModel>(Window, vm =>
         {
-            //var matroskaTrackInfo = selectedTrack
             vm.Initialize(new MatroskaFile(VideoFileName), selectedTrack.MatroskaTrackInfo, VideoFileName, selectedTrack.FileName);
         });
 

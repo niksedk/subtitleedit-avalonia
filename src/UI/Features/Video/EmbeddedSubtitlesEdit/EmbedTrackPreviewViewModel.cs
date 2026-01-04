@@ -78,13 +78,57 @@ public partial class EmbedTrackPreviewViewModel : ObservableObject
 
     private bool InitTrack()
     {
+        Rows.Clear();
+
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            if (_subtitleFileName.EndsWith(".sup", StringComparison.OrdinalIgnoreCase) && FileUtil.IsBluRaySup(_subtitleFileName))
+            {
+                var pcsData = BluRaySupParser.ParseBluRaySup(_subtitleFileName, new System.Text.StringBuilder());
+                for (var i = 0; i < 20 && i < pcsData.Count; i++)
+                {
+                    var item = pcsData[i];
+                    var bitmap = item.GetBitmap();
+                    var cue = new MatroskaSubtitleCueDisplay()
+                    {
+                        Number = i + 1,
+                        Show = TimeSpan.FromMilliseconds(item.StartTimeCode.TotalMilliseconds),
+                        Duration = TimeSpan.FromMilliseconds(item.EndTimeCode.TotalMilliseconds - item.StartTimeCode.TotalMilliseconds),
+                        Image = new Image { Source = bitmap.ToAvaloniaBitmap() },
+                    };
+                    Rows.Add(cue);
+                }
+
+                return pcsData.Count > 0;
+            }
+
+            var subtitle = Subtitle.Parse(_subtitleFileName);
+            if (subtitle != null)
+            {
+                for (var i = 0; i < subtitle.Paragraphs.Count; i++)
+                {
+                    var item = subtitle.Paragraphs[i];
+                    var cue = new MatroskaSubtitleCueDisplay()
+                    {
+                        Number = i + 1,
+                        Show = TimeSpan.FromMilliseconds(item.StartTime.TotalMilliseconds),
+                        Duration = TimeSpan.FromMilliseconds(item.EndTime.TotalMilliseconds - item.StartTime.TotalMilliseconds),
+                        Text = item.Text,
+                    };
+                    Rows.Add(cue);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
         var selectedTrack = _matroskaTrack;
         if (selectedTrack == null)
         {
             return false;
         }
 
-        Rows.Clear();
         var trackInfo = selectedTrack;
         var subtitles = _matroskaFile?.GetSubtitle(trackInfo.TrackNumber, null);
         if (trackInfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
