@@ -1029,9 +1029,17 @@ public partial class OcrViewModel : ObservableObject
             }
         }
 
+        var itemsToRemove = selectedIndices
+            .Select(idx => OcrSubtitleItems[idx])
+            .ToList();
+
+        foreach (var item in itemsToRemove)
+        {
+            OcrSubtitleItems.Remove(item);
+        }
+
         foreach (var index in selectedIndices.OrderByDescending(p => p))
         {
-            OcrSubtitleItems.RemoveAt(index);
             _ocrSubtitle?.Delete(index);
         }
 
@@ -2091,7 +2099,7 @@ public partial class OcrViewModel : ObservableObject
 
                 var text = await ollamaOcr.Ocr(bitmap, OllamaUrl, OllamaModel, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
                 item.Text = text;
-                
+
                 OcrFixLineAndSetText(i, item);
 
                 if (SelectedOcrSubtitleItem == item)

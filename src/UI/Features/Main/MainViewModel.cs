@@ -1658,32 +1658,14 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, "Blu-ray sup", ".sup");
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
             return;
         }
 
-        IOcrSubtitle? imageSubtitle = null;
-        if (FileUtil.IsBluRaySup((fileName)))
-        {
-            var subtitles = BluRaySupParser.ParseBluRaySup(fileName, new StringBuilder());
-            if (subtitles.Count > 0)
-            {
-                imageSubtitle = new OcrSubtitleBluRay(subtitles);
-            }
-        }
-
-        if (imageSubtitle == null)
-        {
-            await MessageBox.Show(Window, Se.Language.General.Error, "Image based subtitle format not found/supported.",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            _shortcutManager.ClearKeys();
-            return;
-        }
-
-        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => { vm.Initialize(fileName, imageSubtitle); });
+        var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => { vm.Initialize(fileName, null); });
     }
 
     [RelayCommand]
@@ -10347,7 +10329,7 @@ public partial class MainViewModel :
         try
         {
             var indicesToRemove = selectedItems
-                .Select(item => Subtitles.IndexOf(item))
+                .Select(Subtitles.IndexOf)
                 .Where(i => i >= 0)
                 .OrderByDescending(i => i)
                 .ToList();

@@ -225,7 +225,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", Se.Language.General.AllFiles, "*.*");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
