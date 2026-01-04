@@ -124,7 +124,7 @@ public class EmbeddedSubtitlesEditWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Title,
+                    Header = Se.Language.General.Language,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(EmbeddedTrack.LanguageOrTitle), BindingMode.OneWay),
                     IsReadOnly = true,
@@ -145,7 +145,7 @@ public class EmbeddedSubtitlesEditWindow : Window
                 },
                 new DataGridTextColumn
                 {
-                    Header = Se.Language.General.Format,
+                    Header = Se.Language.General.Codec,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     Binding = new Binding(nameof(EmbeddedTrack.Format), BindingMode.OneWay),
                     IsReadOnly = true,

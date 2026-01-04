@@ -236,6 +236,10 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
         {
             AddTextContent(trackInfo, subtitles, new AdvancedSubStationAlpha());
         }
+        else if (trackInfo.CodecId is MatroskaTrackType.WebVTT or MatroskaTrackType.WebVTT2 && subtitles != null)
+        {
+            AddTextContent(trackInfo, subtitles, new WebVTT());
+        }
         else if (trackInfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
         {
             var pcsData = BluRaySupParser.ParseBluRaySupFromMatroska(trackInfo, _matroskaFile);
