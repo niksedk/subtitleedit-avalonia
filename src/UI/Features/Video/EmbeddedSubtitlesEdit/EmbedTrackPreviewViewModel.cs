@@ -26,18 +26,13 @@ public partial class EmbedTrackPreviewViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public string WindowTitle { get; private set; }
 
-    private readonly IFileHelper _fileHelper;
-    private readonly IWindowService _windowService;
-
     private MatroskaTrackInfo? _matroskaTrack;
     private MatroskaFile? _matroskaFile;
     private string _videoFileName;
     private string _subtitleFileName;
 
-    public EmbedTrackPreviewViewModel(IFileHelper fileHelper, IWindowService windowService)
+    public EmbedTrackPreviewViewModel()
     {
-        _fileHelper = fileHelper;
-        _windowService = windowService;
         WindowTitle = string.Empty;
         Rows = new ObservableCollection<MatroskaSubtitleCueDisplay>();
         _matroskaTrack = new MatroskaTrackInfo();
@@ -80,7 +75,6 @@ public partial class EmbedTrackPreviewViewModel : ObservableObject
             e.Handled = true;
         }
     }
-
 
     private bool InitTrack()
     {

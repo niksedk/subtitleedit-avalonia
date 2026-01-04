@@ -277,7 +277,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, "title", "Subtitle files", "*.ass;*.srt;*.sup", "All files", "*.*");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, Se.Language.General.SubtitleFiles, "*.ass;*.srt;*.vtt;*.ssa;*.sup", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -287,7 +287,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         {
             var supTrack = new EmbeddedTrack
             {
-                Format = Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant(),
+                Format = MatroskaTrackType.BluRay,
                 LanguageOrTitle = Path.GetFileNameWithoutExtension(fileName),
                 Name = Path.GetFileName(fileName),
                 FileName = fileName,
@@ -298,7 +298,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         }
 
         var subtitle = Subtitle.Parse(fileName);
-        if (subtitle.Paragraphs.Count == 0)
+        if (subtitle == null || subtitle.Paragraphs.Count == 0)
         {
             await MessageBox.Show(
                 Window,
@@ -309,15 +309,52 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
+        // Convert not suited formats to ASSA for embedding
+        var allowedFormats = new[] { SubRip.NameOfFormat, WebVTT.NameOfFormat, AdvancedSubStationAlpha.NameOfFormat, SubStationAlpha.NameOfFormat };
+        if (!allowedFormats.Contains(subtitle.OriginalFormat.Name))
+        {
+            var assFormat = new AdvancedSubStationAlpha();
+            var tempFileName = Path.Combine(Path.GetTempPath(), "EmbeddedSubtitleEdit_" + Guid.NewGuid() + assFormat.Extension);
+            File.WriteAllText(tempFileName, assFormat.ToText(subtitle, string.Empty));
+            fileName = tempFileName;
+        }
+
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
+        var isoLanguage = Iso639Dash2LanguageCode.List.FirstOrDefault(l => l.TwoLetterCode.Equals(language, StringComparison.OrdinalIgnoreCase));
         var embeddedTrack = new EmbeddedTrack
         {
-            Format = Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant(),
-            LanguageOrTitle = Path.GetFileNameWithoutExtension(fileName),
-            Name = Path.GetFileName(fileName),
+            Format = GetMatroskaCodecId(fileName, subtitle.OriginalFormat),
+            LanguageOrTitle = isoLanguage?.ThreeLetterCode ?? language,
+            Name = isoLanguage?.EnglishName ?? string.Empty,
             FileName = fileName,
             New = true,
         };
         Tracks.Add(embeddedTrack);
+    }
+
+    private static string GetMatroskaCodecId(string fileName, SubtitleFormat originalFormat)
+    {
+        if (originalFormat.Name == SubRip.NameOfFormat)
+        {
+            return MatroskaTrackType.SubRip;
+        }
+
+        if (originalFormat.Name == AdvancedSubStationAlpha.NameOfFormat)
+        {
+            return MatroskaTrackType.AdvancedSubStationAlpha;
+        }
+
+        if (originalFormat.Name == SubStationAlpha.NameOfFormat)
+        {
+            return MatroskaTrackType.SubStationAlpha;
+        }
+
+        if (originalFormat.Name == WebVTT.NameOfFormat)
+        {
+            return MatroskaTrackType.WebVTT;
+        }
+
+        return Path.GetExtension(fileName).TrimStart('.').ToUpperInvariant();
     }
 
     [RelayCommand]
@@ -422,7 +459,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenVideoFile(Window, Se.Language.General.OpenVideoFileTitle);
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenVideoFileTitle, "Matroska files", "*.mkv;*.webm");
         if (!string.IsNullOrEmpty(fileName))
         {
             VideoFileName = fileName;
@@ -531,7 +568,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
         Task.Run(() =>
         {
             var tracks = FindTracks(VideoFileName, _mediaInfo);
-            Dispatcher.UIThread.Invoke(() =>
+            Dispatcher.UIThread.Invoke(async() =>
             {
                 foreach (var track in tracks)
                 {
@@ -540,11 +577,22 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
                 }
 
                 SelectAndScrollToRow(0);
+
+                if (!FileUtil.IsMatroskaFileFast(VideoFileName))
+                {
+                    _ = await MessageBox.Show(
+                        Window!,
+                        "Unsupported video format",
+                        "Only Matroska (.mkv, .webm) files are supported for editing embedded subtitles.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    Cancel();
+                }
             });
         });
     }
 
-    private List<EmbeddedTrack> FindTracks(string videoFileName, FfmpegMediaInfo2? mediaInfo)
+    private static List<EmbeddedTrack> FindTracks(string videoFileName, FfmpegMediaInfo2? mediaInfo)
     {
         var list = new List<EmbeddedTrack>();
 
@@ -624,12 +672,7 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             TracksGrid.ScrollIntoView(TracksGrid.SelectedItem, null);
         }, DispatcherPriority.Background);
     }
-
-    internal void TracksGridChanged(object? sender, SelectionChangedEventArgs e)
-    {
-
-    }
-
+     
     internal void OnTracksGridKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Delete)

@@ -73,6 +73,7 @@ public class PickMatroskaTrackWindow : Window
 
     private static Border MakeTracksView(PickMatroskaTrackViewModel vm)
     {
+        var booleanToCheckMarkConverter = new BooleanToCheckMarkConverter();
         var dataGridTracks = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -119,14 +120,14 @@ public class PickMatroskaTrackWindow : Window
                 {
                     Header = Se.Language.General.Default,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault)),
+                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter},
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Forced,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced)),
+                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter},
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },

@@ -14,5 +14,7 @@ public class MatroskaTrackType
 
     public const string TextSt = "S_HDMV/TEXTST";
 
+    public const string WebVTT = "S_TEXT/WEBVTT";
+
 
 }

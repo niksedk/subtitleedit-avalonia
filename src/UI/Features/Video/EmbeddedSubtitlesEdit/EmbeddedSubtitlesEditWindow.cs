@@ -162,7 +162,6 @@ public class EmbeddedSubtitlesEditWindow : Window
         };
         dataGridTracks.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Tracks)) { Source = vm });
         dataGridTracks.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedTrck)) { Source = vm });
-        dataGridTracks.SelectionChanged += vm.TracksGridChanged;
         dataGridTracks.KeyDown += (s, e) => vm.OnTracksGridKeyDown(e);
         dataGridTracks.DoubleTapped += (s, e) => vm.EditCommand.Execute(null);
         vm.TracksGrid = dataGridTracks;
