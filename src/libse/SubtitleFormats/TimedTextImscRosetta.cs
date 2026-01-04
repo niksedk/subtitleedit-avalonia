@@ -277,8 +277,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     XmlAttribute attr = ttmlXml.CreateAttribute("style");
                     attr.InnerText = "s_italic";
                     span.Attributes.Append(attr);
+                    
+                    // Get the text content directly without nesting spans
+                    var textContent = child.InnerText;
+                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
                     ttmlNode.AppendChild(span);
-                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
                 }
                 else if (child.Name == "b")
                 {
@@ -286,8 +289,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     XmlAttribute attr = ttmlXml.CreateAttribute("style");
                     attr.InnerText = "s_bold";
                     span.Attributes.Append(attr);
+                    
+                    // Get the text content directly without nesting spans
+                    var textContent = child.InnerText;
+                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
                     ttmlNode.AppendChild(span);
-                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
                 }
                 else if (child.Name == "u")
                 {
@@ -295,8 +301,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     XmlAttribute attr = ttmlXml.CreateAttribute("style");
                     attr.InnerText = "s_underline";
                     span.Attributes.Append(attr);
+                    
+                    // Get the text content directly without nesting spans
+                    var textContent = child.InnerText;
+                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
                     ttmlNode.AppendChild(span);
-                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
                 }
                 else
                 {
