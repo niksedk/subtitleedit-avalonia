@@ -3043,9 +3043,9 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm => 
-        { 
-            vm.Initialize(SelectedSubtitleFormat, GetUpdateSubtitle()); 
+        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm =>
+        {
+            vm.Initialize(SelectedSubtitleFormat, GetUpdateSubtitle());
         });
 
         if (viewModel.OkPressed)
@@ -3491,7 +3491,6 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
-        _shortcutManager.ClearShortcuts();
     }
 
     private void ResetPlaySelection()
@@ -12213,7 +12212,7 @@ public partial class MainViewModel :
     {
         if (e.GetCurrentPoint(null).Properties.IsRightButtonPressed)
         {
-            Dispatcher.UIThread.Post(async() =>
+            Dispatcher.UIThread.Post(async () =>
             {
                 await ShowSubtitleFormatPicker();
             });
