@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
@@ -551,8 +551,8 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         }
         else
         {
-            var ci = new CultureInfo(Se.Settings.Formats.RosettaLanguage);
-            SelectedLanguage = ci.TwoLetterISOLanguageName.ToLowerInvariant();
+            var lang = Languages.FirstOrDefault(l => l == Se.Settings.Formats.RosettaLanguage);
+            SelectedLanguage = lang ?? Languages[0];
         }
     }
 

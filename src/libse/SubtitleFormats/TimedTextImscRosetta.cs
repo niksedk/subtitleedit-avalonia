@@ -139,7 +139,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             xmlStructure = xmlStructure.Replace("[frameRateMultiplier]", frameRateMultiplier);
 
             var language = Language;
-            if (language.Length != 2)
+            if (string.IsNullOrEmpty(language))
             {
                 language = LanguageAutoDetect.AutoDetectGoogleLanguage(subtitle);
             }
