@@ -50,6 +50,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Top Left layout]]>
             </Name>
             <Position>0</Position>
+            <HorizonAlign>0</HorizonAlign>  
+            <VerticalAlign>0</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -61,8 +63,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -77,7 +77,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>0</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='1'>
@@ -85,6 +85,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Top Center layout]]>
             </Name>
             <Position>1</Position>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>0</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -96,8 +98,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -120,6 +120,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Top Right layout]]>
             </Name>
             <Position>2</Position>
+            <HorizonAlign>2</HorizonAlign>
+            <VerticalAlign>0</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -131,8 +133,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -147,7 +147,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>2</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='3'>
@@ -155,6 +155,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Middle Left layout]]>
             </Name>
             <Position>3</Position>
+            <HorizonAlign>0</HorizonAlign>
+            <VerticalAlign>1</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -166,8 +168,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -182,7 +182,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>0</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='4'>
@@ -190,6 +190,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Middle Center layout]]>
             </Name>
             <Position>4</Position>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>1</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -201,8 +203,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -225,6 +225,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Middle Right layout]]>
             </Name>
             <Position>5</Position>
+            <HorizonAlign>2</HorizonAlign>
+            <VerticalAlign>1</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -236,8 +238,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -252,7 +252,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>2</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='6'>
@@ -260,6 +260,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Bottom Left layout]]>
             </Name>
             <Position>6</Position>
+            <HorizonAlign>0</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -271,8 +273,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -287,7 +287,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>0</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
         <LayoutItem index='7'>
@@ -295,6 +295,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Bottom Center layout]]>
             </Name>
             <Position>7</Position>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -306,8 +308,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -330,6 +330,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 <![CDATA[Picture Bottom Right layout]]>
             </Name>
             <Position>8</Position>
+            <HorizonAlign>2</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
@@ -341,8 +343,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FontItalic>0</FontItalic>
             <FontUnderline>0</FontUnderline>
             <FontStrikeOut>0</FontStrikeOut>
-            <HorizonAlign>1</HorizonAlign>
-            <VerticalAlign>2</VerticalAlign>
             <DirectionVertical>0</DirectionVertical>
             <BorderActive>1</BorderActive>
             <BorderSize>0.005</BorderSize>
@@ -357,7 +357,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <FadeOutActive>0</FadeOutActive>
             <FadeOutTime>1000</FadeOutTime>
             <ScrollDirectionIndex>0</ScrollDirectionIndex>
-            <TextAlign>1</TextAlign>
+            <TextAlign>2</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
     </Layout>
@@ -526,7 +526,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             {
                                 p.Text = "<i>" + p.Text + "</i>";
                             }
-                            
+
                             // Add ASS alignment tag based on position code from layout
                             if (idx >= 0 && idx < positionCodes.Count)
                             {
