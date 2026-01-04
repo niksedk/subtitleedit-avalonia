@@ -46,7 +46,7 @@ public partial class EmbedTrackPreviewViewModel : ObservableObject
         _matroskaTrack = matroskaTrack;
         _videoFileName = videoFileName;
         _subtitleFileName = subtitleFileName;
-        WindowTitle = string.Format(Se.Language.File.PickMatroskaTrackX, videoFileName);
+        WindowTitle = string.Format(Se.Language.Video.ViewMatroskaTrackX, videoFileName);
     }
 
     private void Close()
@@ -98,6 +98,10 @@ public partial class EmbedTrackPreviewViewModel : ObservableObject
         else if (trackInfo.CodecId is MatroskaTrackType.AdvancedSubStationAlpha or MatroskaTrackType.AdvancedSubStationAlpha2 && subtitles != null)
         {
             AddTextContent(trackInfo, subtitles, new AdvancedSubStationAlpha());
+        }
+        else if (trackInfo.CodecId is MatroskaTrackType.WebVTT or MatroskaTrackType.WebVTT2 && subtitles != null)
+        {
+            AddTextContent(trackInfo, subtitles, new WebVTT());
         }
         else if (trackInfo.CodecId == MatroskaTrackType.BluRay && subtitles != null && _matroskaFile != null)
         {

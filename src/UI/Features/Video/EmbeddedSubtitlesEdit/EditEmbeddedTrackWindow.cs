@@ -19,7 +19,7 @@ public class EditEmbeddedTrackWindow : Window
         var labelName = UiUtil.MakeLabel(Se.Language.General.Name);
         var textBoxName = UiUtil.MakeTextBox(300, vm, nameof(vm.Name)); 
 
-        var labelTitleOrLanguage = UiUtil.MakeLabel(Se.Language.Video.TitleOrLanguage);
+        var labelTitleOrLanguage = UiUtil.MakeLabel(Se.Language.General.Language);
         var textBoxTitleOrLanguage = UiUtil.MakeTextBox(300, vm, nameof(vm.TitleOrlanguage));
 
         var checkBoxForced = UiUtil.MakeCheckBox(Se.Language.General.Forced, vm, nameof(vm.IsForced));

@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Tools;
 
 public class LanguageVideo
 {
@@ -31,6 +33,7 @@ public class LanguageVideo
     public string AddRemoveEmbeddedSubtitlesTitle { get; set; }
     public string AddCurrentSubtitle { get; set; }
     public string TitleOrLanguage { get; set; }
+    public string ViewMatroskaTrackX { get; set; }
 
     public LanguageVideo()
     {
@@ -59,5 +62,6 @@ public class LanguageVideo
         AddRemoveEmbeddedSubtitlesTitle = "Add/remove embedded subtitles";
         AddCurrentSubtitle = "Add current subtitle";
         TitleOrLanguage = "Title/language";
+        ViewMatroskaTrackX = "View Matroska track - {0}";
     }
 }
