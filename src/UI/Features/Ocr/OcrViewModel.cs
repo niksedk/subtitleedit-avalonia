@@ -1325,7 +1325,7 @@ public partial class OcrViewModel : ObservableObject
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 var pctString = percentage.ToString(CultureInfo.InvariantCulture);
                 ProgressValue = number / (double)OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {number + 1}/{OcrSubtitleItems.Count}";
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, number + 1, OcrSubtitleItems.Count);
 
                 var scrollToIndex = number;
                 var item = p.Item;
@@ -1392,7 +1392,7 @@ public partial class OcrViewModel : ObservableObject
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 var pctString = percentage.ToString(CultureInfo.InvariantCulture);
                 ProgressValue = number / (double)OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {number + 1}/{OcrSubtitleItems.Count}";
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, number + 1, OcrSubtitleItems.Count);
 
                 var scrollToIndex = number;
                 var item = p.Item;
@@ -1459,7 +1459,7 @@ public partial class OcrViewModel : ObservableObject
                 var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
                 var pctString = percentage.ToString(CultureInfo.InvariantCulture);
                 ProgressValue = number / (double)OcrSubtitleItems.Count;
-                ProgressText = $"Running OCR... {number + 1}/{OcrSubtitleItems.Count}";
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, number + 1, OcrSubtitleItems.Count);
 
                 var scrollToIndex = number;
                 var item = p.Item;
@@ -1473,9 +1473,9 @@ public partial class OcrViewModel : ObservableObject
             }
         });
 
-        _ = Task.Run(() =>
+        _ = Task.Run(async () =>
         {
-            ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
+            await ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
             IsOcrRunning = false;
         });
     }

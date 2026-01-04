@@ -19,34 +19,30 @@ public class GoogleLensOcrSharp
 
     private Lock _lockObject = new Lock();
 
-    public void OcrBatch(List<PaddleOcrBatchInput> input, string language, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(List<PaddleOcrBatchInput> input, string language, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         _batchProgress = progress;
 
-        Task.Run(async () =>
+        foreach (var bmpInput in input)
         {
-            foreach (var bmpInput in input)
+            if (bmpInput.Bitmap == null)
             {
-                if (bmpInput.Bitmap == null)
-                {
-                    continue;
-                }
-
-                var result = await _lens.ScanByBitmap(bmpInput.Bitmap, language);
-                bmpInput.Text = string.Join(Environment.NewLine, result.Segments.Where(s => !string.IsNullOrWhiteSpace(s.Text)).Select(p=>p.Text).ToList()).Trim();
-                lock (_lockObject)
-                {
-                    var progressReport = new PaddleOcrBatchProgress
-                    {
-                        Index = bmpInput.Index,
-                        Text = bmpInput.Text,
-                        Item = bmpInput.Item,
-                    };
-                    _batchProgress?.Report(progressReport);
-                }
-
+                continue;
             }
-        }, cancellationToken);
+
+            var result = await _lens.ScanByBitmap(bmpInput.Bitmap, language);
+            bmpInput.Text = string.Join(Environment.NewLine, result.Segments.Where(s => !string.IsNullOrWhiteSpace(s.Text)).Select(p => p.Text).ToList()).Trim();
+            lock (_lockObject)
+            {
+                var progressReport = new PaddleOcrBatchProgress
+                {
+                    Index = bmpInput.Index,
+                    Text = bmpInput.Text,
+                    Item = bmpInput.Item,
+                };
+                _batchProgress?.Report(progressReport);
+            }
+        }
     }
 
     public static List<OcrLanguage2> GetLanguages()
