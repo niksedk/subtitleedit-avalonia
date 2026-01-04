@@ -1402,7 +1402,8 @@
     "importCurrentSubtitle": "Import current subtitle",
     "addRemoveEmbeddedSubtitlesTitle": "Add/remove embedded subtitles",
     "addCurrentSubtitle": "Add current subtitle",
-    "titleOrLanguage": "Title/language"
+    "titleOrLanguage": "Title/language",
+    "viewMatroskaTrackX": "View Matroska track - {0}"
   },
   "waveform": {
     "guessTimeCodes": "Guess time codes",

@@ -16,6 +16,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -842,6 +843,29 @@ public partial class BatchConvertViewModel : ObservableObject
         _isFilesDirty = true;
     }
 
+    [RelayCommand]
+    private async Task ShowSubtitleFormatPicker()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(Window, vm =>
+        {
+            vm.Initialize(SubtitleFormat.AllSubtitleFormats.FirstOrDefault(p => p.Name == SelectedTargetFormat) ?? new SubRip(), new Subtitle());
+        });
+
+        if (viewModel.OkPressed)
+        {
+            var selectedFormat = viewModel.GetSelectedFormat();
+            if (selectedFormat != null && selectedFormat.Name != SelectedTargetFormat)
+            {
+                SelectedTargetFormat = selectedFormat.Name;
+            }
+        }
+    }
+
     private bool AddFile(string fileName)
     {
         var ext = Path.GetExtension(fileName).ToLowerInvariant();
@@ -1601,5 +1625,13 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         IsRemoveVisible = SelectedBatchItem != null;
         IsOpenContainingFolderVisible = SelectedBatchItem != null;
+    }
+
+    internal void ComboBoxSubtitleFormatPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(async () =>
+        {
+            await ShowSubtitleFormatPicker();
+        });
     }
 }
