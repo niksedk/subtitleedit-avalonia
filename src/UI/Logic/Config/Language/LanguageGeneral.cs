@@ -128,8 +128,6 @@ public class LanguageGeneral
     public string DurationMinutes { get; set; }
     public string Edit { get; set; }
     public string EditDotDotDot { get; set; }
-    public string EditImagedBaseSubtitle { get; set; }
-    public string EditImagedBaseSubtitleX { get; set; }
     public string Editing { get; set; }
     public string Effect { get; set; }
     public string Enabled { get; set; }
@@ -709,8 +707,6 @@ public class LanguageGeneral
         DurationMinutes = "Duration in minutes";
         Edit = "Edit";
         EditDotDotDot = "Edit...";
-        EditImagedBaseSubtitle = "Edit imaged-based subtitle";
-        EditImagedBaseSubtitleX = "Edit imaged-based subtitle: {0}";
         Editing = "Editing";
         Effect = "Effect";
         Enabled = "Enabled";

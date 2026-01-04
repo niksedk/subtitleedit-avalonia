@@ -17,6 +17,7 @@ public partial class BinarySubtitleItem : ObservableObject
     [ObservableProperty] private int _screenWidth;
     [ObservableProperty] private int _screenHeight;
     [ObservableProperty] private Bitmap? _bitmap;
+    [ObservableProperty] private bool _isForced;
 
     private bool _isUpdating;
 
@@ -89,7 +90,6 @@ public partial class BinarySubtitleItem : ObservableObject
 
     public int OcrSubtitleIndex { get; set; }
     public int Number { get; set; }
-    public bool IsForced { get; set; }
     public string Text { get; set; }
     public SKSizeI ScreenSize => new SKSizeI(ScreenWidth, ScreenHeight);
 

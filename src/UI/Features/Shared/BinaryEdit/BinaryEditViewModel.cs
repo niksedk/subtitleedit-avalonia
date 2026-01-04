@@ -225,7 +225,7 @@ public partial class BinaryEditViewModel : ObservableObject
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", "All files", "*.*");
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.OpenSubtitleFileTitle, ".sup", "Blu-ray sup", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -267,7 +267,7 @@ public partial class BinaryEditViewModel : ObservableObject
             ScreenWidth = Subtitles[0].ScreenSize.Width;
             ScreenHeight = Subtitles[0].ScreenSize.Height;
             UpdateStatusText();
-            Window.Title = string.Format(Se.Language.General.EditImagedBaseSubtitleX, fileName);
+            Window.Title = string.Format(Se.Language.Tools.ImageBasedEdit.EditImagedBaseSubtitleX, fileName);
         }
 
         var videoFileName = TryGetVideoFileName(fileName);
@@ -833,6 +833,82 @@ public partial class BinaryEditViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void CenterHorizontally()
+    {
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, work on all subtitles
+        var itemsToResize = selectedItems.Count > 0 ? selectedItems : Subtitles.ToList();
+
+        if (itemsToResize.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var subtitle in selectedItems)
+        {
+            if (subtitle.Bitmap == null)
+            {
+                continue;
+            }
+
+            var screenWidth = subtitle.ScreenSize.Width;
+            var imageWidth = (int)subtitle.Bitmap.Size.Width;
+            subtitle.X = (screenWidth - imageWidth) / 2;
+        }
+
+        UpdateOverlayPosition();
+    }
+
+    [RelayCommand]
+    private void Crop()
+    {
+        // Get selected subtitles
+        var selectedItems = new List<BinarySubtitleItem>();
+        if (SubtitleGrid?.SelectedItems != null)
+        {
+            foreach (var item in SubtitleGrid.SelectedItems)
+            {
+                if (item is BinarySubtitleItem binaryItem)
+                {
+                    selectedItems.Add(binaryItem);
+                }
+            }
+        }
+
+        // If no selection, work on all subtitles
+        var itemsToResize = selectedItems.Count > 0 ? selectedItems : Subtitles.ToList();
+
+        if (itemsToResize.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var subtitle in selectedItems)
+        {
+            if (subtitle.Bitmap == null)
+            {
+                continue;
+            }
+
+            subtitle.Bitmap = subtitle.Bitmap.ToSkBitmap().CropTransparentColors().ToAvaloniaBitmap();
+        }
+
+        UpdateOverlayPosition();
+    }
+
+    [RelayCommand]
     private async Task AdjustAllTimes()
     {
         if (Window == null)
@@ -1151,15 +1227,6 @@ public partial class BinaryEditViewModel : ObservableObject
             }
 
             selectedItem.Bitmap = skBitmap.ToAvaloniaBitmap();
-
-            // Refresh the grid to show the updated bitmap
-            if (SubtitleGrid != null)
-            {
-                var currentIndex = SubtitleGrid.SelectedIndex;
-                SubtitleGrid.ItemsSource = null;
-                SubtitleGrid.ItemsSource = Subtitles;
-                SubtitleGrid.SelectedIndex = currentIndex;
-            }
 
             UpdateOverlayPosition();
             UpdateStatusText();

@@ -19,7 +19,7 @@ public class BinaryEditWindow : Window
     public BinaryEditWindow(BinaryEditViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.General.EditImagedBaseSubtitle;
+        Title = Se.Language.Tools.ImageBasedEdit.EditImagedBaseSubtitle;
         Width = 1200;
         Height = 700;
         MinWidth = 1000;
@@ -191,7 +191,7 @@ public class BinaryEditWindow : Window
         // Tools menu
         menu.Items.Add(new MenuItem
         {
-            Header = l.Tools,
+            Header = l.ToolsSelectedLines,
             Items =
             {
                 new MenuItem
@@ -206,23 +206,33 @@ public class BinaryEditWindow : Window
                 },
                 new MenuItem
                 {
-                    Header = "Alignment...",
+                    Header = Se.Language.General.AlignmentDotDotDot,
                     Command = vm.AlignmentCommand,
                 },
                 new MenuItem
                 {
-                    Header = "Resize images...",
+                    Header = Se.Language.Tools.ImageBasedEdit.ResizeImagesDotDotDot,
                     Command = vm.ResizeImagesCommand,
                 },
                 new MenuItem
                 {
-                    Header = "Adjust brightness...",
+                    Header = Se.Language.Tools.ImageBasedEdit.AdjustBrightnessDotDotDot,
                     Command = vm.AdjustBrightnessCommand,
                 },
                 new MenuItem
                 {
-                    Header = "Adjust alpha...",
+                    Header =  Se.Language.Tools.ImageBasedEdit.AdjustAlphaDotDotDot,
                     Command = vm.AdjustAlphaCommand,
+                },
+                new MenuItem
+                {
+                    Header =  Se.Language.Tools.ImageBasedEdit.CenterHorizontally,
+                    Command = vm.CenterHorizontallyCommand,
+                },
+                new MenuItem
+                {
+                    Header =  Se.Language.Tools.ImageBasedEdit.CropImages,
+                    Command = vm.CropCommand,
                 },
             },
         });

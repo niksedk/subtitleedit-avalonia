@@ -35,6 +35,7 @@ public class LanguageMainMenu
 
 
     public string Tools { get; set; }
+    public string ToolsSelectedLines { get; set; }
     public string AdjustDurations { get; set; }
     public string ApplyDurationLimits { get; set; }
     public string BatchConvert { get; set; }
@@ -136,6 +137,7 @@ public class LanguageMainMenu
         ModifySelectionDotDotDot = "Modify _selection...";
 
         Tools = "_Tools";
+        ToolsSelectedLines = "_Tools (selected lines)";
         AdjustDurations = "_Adjust durations...";
         ApplyDurationLimits = "Apply duration _limits...";
         FixCommonErrors = "_Fix common errors...";
