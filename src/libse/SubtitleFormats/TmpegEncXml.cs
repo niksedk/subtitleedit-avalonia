@@ -360,6 +360,41 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <TextAlign>2</TextAlign>
             <DirectionRightToLeft>0</DirectionRightToLeft>
         </LayoutItem>
+        <LayoutItem index='9'>
+            <Name>
+                <![CDATA[Picture Bottom Center Italic layout]]>
+            </Name>
+            <Position>7</Position>
+            <HorizonAlign>1</HorizonAlign>
+            <VerticalAlign>2</VerticalAlign>
+            <OffsetX>[OffsetX]</OffsetX>
+            <OffsetY>[OffsetY]</OffsetY>
+            <FontName>
+                <![CDATA[[FontName]]]>
+            </FontName>
+            <FontHeight>[FontHeight]</FontHeight>
+            <FontColor>17588159451135</FontColor>
+            <FontBold>[FontBold]</FontBold>
+            <FontItalic>1</FontItalic>
+            <FontUnderline>0</FontUnderline>
+            <FontStrikeOut>0</FontStrikeOut>
+            <DirectionVertical>0</DirectionVertical>
+            <BorderActive>1</BorderActive>
+            <BorderSize>0.005</BorderSize>
+            <BorderColor>0</BorderColor>
+            <BorderOpacity>1</BorderOpacity>
+            <BackgroundActive>0</BackgroundActive>
+            <BackgroundSize>0.005</BackgroundSize>
+            <BackgroundColor>0</BackgroundColor>
+            <BackgroundOpacity>1</BackgroundOpacity>
+            <FadeInActive>0</FadeInActive>
+            <FadeInTime>1000</FadeInTime>
+            <FadeOutActive>0</FadeOutActive>
+            <FadeOutTime>1000</FadeOutTime>
+            <ScrollDirectionIndex>0</ScrollDirectionIndex>
+            <TextAlign>1</TextAlign>
+            <DirectionRightToLeft>0</DirectionRightToLeft>
+        </LayoutItem>
     </Layout>
     <Subtitle>
         @
@@ -607,38 +642,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
 
             // Default to bottom-center (an2) if no alignment tag is found
+            if (IsItalic(text))
+            {
+                return 9; // Bottom-center Italic layout
+            }
+
             return 7;
         }
 
-        private static string GetAssAlignmentFromLayoutIndex(int layoutIndex)
+        private static bool IsItalic(string text)
         {
-            // Map layoutindex to ASS alignment tag (keypad layout)
-            // XML layouts: 0=Top Left, 1=Top Center, 2=Top Right,
-            // 3=Middle Left, 4=Middle Center, 5=Middle Right,
-            // 6=Bottom Left, 7=Bottom Center, 8=Bottom Right
-            switch (layoutIndex)
-            {
-                case 0:
-                    return "{\\an7}"; // Top-left
-                case 1:
-                    return "{\\an8}"; // Top-center
-                case 2:
-                    return "{\\an9}"; // Top-right
-                case 3:
-                    return "{\\an4}"; // Middle-left
-                case 4:
-                    return "{\\an5}"; // Middle-center
-                case 5:
-                    return "{\\an6}"; // Middle-right
-                case 6:
-                    return "{\\an1}"; // Bottom-left
-                case 7:
-                    return string.Empty; // "{\\an2}" (default)
-                case 8:
-                    return "{\\an3}"; // Bottom-right
-                default:
-                    return "{\\an2}"; // Default to bottom-center
-            }
+            var s = text.IndexOf("<i>", StringComparison.OrdinalIgnoreCase);
+            return s < 20 && text.EndsWith("</i>", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string GetAssAlignmentFromPositionCode(int positionCode)
