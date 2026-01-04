@@ -119,7 +119,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             <Name>
                 <![CDATA[Picture Top Right layout]]>
             </Name>
-            <Position>1</Position>
+            <Position>2</Position>
             <OffsetX>[OffsetX]</OffsetX>
             <OffsetY>[OffsetY]</OffsetY>
             <FontName>
