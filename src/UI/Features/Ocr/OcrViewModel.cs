@@ -1552,7 +1552,7 @@ public partial class OcrViewModel : ObservableObject
                             index++;
                             continue;
                         }
-
+                        
                         Dispatcher.UIThread.Post(async void () =>
                         {
                             var result =
@@ -1618,6 +1618,12 @@ public partial class OcrViewModel : ObservableObject
                 index++;
             }
 
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                IsOcrRunning = false;
+                return;
+            }
+            
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
             var unknownWords = OcrFixLineAndSetText(i, item);
 

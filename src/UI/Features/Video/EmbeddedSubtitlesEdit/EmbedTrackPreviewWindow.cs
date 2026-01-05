@@ -111,12 +111,14 @@ public class EmbedTrackPreviewWindow : Window
                     Header = Se.Language.General.TextOrImage,
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<MatroskaSubtitleCueDisplay>((item, _) =>
                     {
                         var stackPanel = new StackPanel
                         {
                             Orientation = Orientation.Vertical,
-                            Spacing = 5
+                            Spacing = 5,
+                            HorizontalAlignment =  HorizontalAlignment.Left,
                         };
 
                         // Add text if available
@@ -126,6 +128,7 @@ public class EmbedTrackPreviewWindow : Window
                             {
                                 Text = item.Text,
                                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                                HorizontalAlignment = HorizontalAlignment.Left,
                                 MaxWidth = 300 // Adjust as needed
                             };
                             stackPanel.Children.Add(textBlock);
