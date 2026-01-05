@@ -202,6 +202,7 @@ public class LanguageSettings
     public string WaveformGenerateSpectrogram { get; set; }
     public string WaveformSpectrogramMode { get; set; }
     public string WaveformCenterOnSingleClick { get; set; }
+    public string WaveformSingleClickSelectsSubtitle { get; set; }
     public string WaveformPauseOnSingleClick { get; set; }
     public string WaveformDrawStyle { get; set; }
     public string VlcWidRendering { get; set; }
@@ -426,6 +427,7 @@ public class LanguageSettings
         WaveformGenerateSpectrogram = "Generate spectrogram";
         WaveformSpectrogramMode = "Spectrogram mode (works at generate time)";
         WaveformCenterOnSingleClick = "Center on single click";
+        WaveformSingleClickSelectsSubtitle = "Select subtitle on single click";
         WaveformPauseOnSingleClick = "Pause on single click";
         WaveformDrawStyle = "Waveform draw style";
         SubtitleDoubleClickAction = "Subtitle grid double-click action";

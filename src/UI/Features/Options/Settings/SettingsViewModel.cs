@@ -171,6 +171,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
     [ObservableProperty] private bool _waveformPauseOnSingleClick;
     [ObservableProperty] private bool _waveformCenterOnSingleClick;
+    [ObservableProperty] private bool _waveformSingleClickSelectsSubtitle;
 
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
@@ -577,6 +578,7 @@ public partial class SettingsViewModel : ObservableObject
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
         WaveformPauseOnSingleClick = Se.Settings.Waveform.PauseOnSingleClick;
         WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
+        WaveformSingleClickSelectsSubtitle = Se.Settings.Waveform.SingleClickSelectsSubtitle;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -950,6 +952,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.ShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
         Se.Settings.Waveform.PauseOnSingleClick = WaveformPauseOnSingleClick;
         Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
+        Se.Settings.Waveform.SingleClickSelectsSubtitle = WaveformSingleClickSelectsSubtitle;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;

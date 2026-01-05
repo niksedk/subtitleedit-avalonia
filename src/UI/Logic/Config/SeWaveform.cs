@@ -42,6 +42,8 @@ public class SeWaveform
     public string LastDisplayMode { get; set; }
     public bool PauseOnSingleClick { get; set; }
     public bool CenterOnSingleClick { get; set; }
+    public bool SingleClickSelectsSubtitle { get; set; }
+
 
     public SeWaveform()
     {

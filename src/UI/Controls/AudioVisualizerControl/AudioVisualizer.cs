@@ -356,6 +356,19 @@ public class AudioVisualizer : Control
         PointerPressed += OnPointerPressed;
         PointerReleased += OnPointerReleased;
         PointerWheelChanged += OnPointerWheelChanged;
+        Tapped += (sender, e) =>
+        {
+            if (Se.Settings.Waveform.SingleClickSelectsSubtitle)
+            {
+                var point = e.GetPosition(this);
+                var p = HitTestParagraph(point);
+                if (p != null && OnParagraphDoubleTapped != null) //TODO: new event
+                {
+                    var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
+                }
+            }
+        };
         DoubleTapped += (sender, e) =>
         {
             if (OnParagraphDoubleTapped != null)
