@@ -13,12 +13,7 @@ public class BinaryOcrDb
     public List<BinaryOcrBitmap> CompareImages = new List<BinaryOcrBitmap>();
     public List<BinaryOcrBitmap> CompareImagesExpanded = new List<BinaryOcrBitmap>();
 
-    public BinaryOcrDb(string fileName)
-    {
-        FileName = fileName;
-    }
-
-    public BinaryOcrDb(string fileName, bool loadCompareImages)
+    public BinaryOcrDb(string fileName, bool loadCompareImages = true)
     {
         FileName = fileName;
         if (loadCompareImages)
@@ -73,7 +68,7 @@ public class BinaryOcrDb
         }
     }
 
-    public void LoadCompareImages()
+    private void LoadCompareImages()
     {
         var list = new List<BinaryOcrBitmap>();
         var expandList = new List<BinaryOcrBitmap>();

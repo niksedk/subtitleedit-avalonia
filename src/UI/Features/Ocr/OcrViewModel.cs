@@ -807,10 +807,15 @@ public partial class OcrViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowBinaryOcrSettings()
     {
-        InitNOcrDb();
+        var dbName = SelectedImageCompareDatabase;
+        if (string.IsNullOrEmpty(dbName))
+        {
+            return;
+        }
+        
         var result =
             await _windowService.ShowDialogAsync<BinaryOcrSettingsWindow, BinaryOcrSettingsViewModel>(Window!,
-                vm => { vm.Initialize(_nOcrDb!); });
+                vm => { vm.Initialize(dbName); });
 
         if (result.EditPressed)
         {
@@ -824,16 +829,17 @@ public partial class OcrViewModel : ObservableObject
         {
             try
             {
-                File.Delete(_nOcrDb!.FileName);
-                NOcrDatabases.Remove(SelectedNOcrDatabase!);
-                SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+                var fileName = Path.Combine(Se.OcrFolder, dbName + ".db");
+                File.Delete(fileName);
+                ImageCompareDatabases.Remove(SelectedNOcrDatabase!);
+                SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
 
-                if (SelectedNOcrDatabase == null)
+                if (SelectedImageCompareDatabase == null)
                 {
-                    _nOcrDb = new NOcrDb(Path.Combine(Se.OcrFolder, "Default.nocr"));
-                    _nOcrDb.Save();
-                    NOcrDatabases.Add("Default");
-                    SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+                    var binaryOcrDb = new BinaryOcrDb(Path.Combine(Se.OcrFolder, "Latin.db"));
+                    binaryOcrDb.Save();
+                    ImageCompareDatabases.Add("Latin");
+                    SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
                 }
             }
             catch
@@ -841,7 +847,7 @@ public partial class OcrViewModel : ObservableObject
                 await MessageBox.Show(
                     Window!,
                     "Error deleting file",
-                    $"Could not delete the file {_nOcrDb!.FileName}.",
+                    $"Could not delete the file {Path.Combine(Se.OcrFolder, dbName+ ".db")}.",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -851,7 +857,7 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.NewPressed)
         {
-            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!,
+            var newResult = await _windowService.ShowDialogAsync<BinaryOcrDbNewWindow, BinaryOcrDbNewViewModel>(Window!,
                 vm => { vm.Initialize(Se.Language.Ocr.NewNOcrDatabase, string.Empty); });
             if (newResult.OkPressed)
             {
@@ -860,7 +866,7 @@ public partial class OcrViewModel : ObservableObject
                     Directory.CreateDirectory(Se.OcrFolder);
                 }
 
-                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".db");
                 if (File.Exists(newFileName))
                 {
                     await MessageBox.Show(
@@ -872,13 +878,13 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                _nOcrDb = new NOcrDb(newFileName);
-                _nOcrDb.Save();
-                NOcrDatabases.Add(newResult.DatabaseName);
-                var sortedList = NOcrDatabases.OrderBy(p => p).ToList();
-                NOcrDatabases.Clear();
-                NOcrDatabases.AddRange(sortedList);
-                SelectedNOcrDatabase = newResult.DatabaseName;
+                var binaryOcrDb = new BinaryOcrDb(newFileName);
+                binaryOcrDb.Save();
+                ImageCompareDatabases.Add(newResult.DatabaseName);
+                var sortedList = ImageCompareDatabases.OrderBy(p => p).ToList();
+                ImageCompareDatabases.Clear();
+                ImageCompareDatabases.AddRange(sortedList);
+                SelectedImageCompareDatabase = newResult.DatabaseName;
             }
 
             return;
@@ -899,7 +905,7 @@ public partial class OcrViewModel : ObservableObject
                     Directory.CreateDirectory(Se.OcrFolder);
                 }
 
-                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".db");
                 if (File.Exists(newFileName))
                 {
                     await MessageBox.Show(
@@ -911,18 +917,18 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                File.Move(_nOcrDb!.FileName, newFileName);
-                NOcrDatabases.Clear();
-                foreach (var s in NOcrDb.GetDatabases().OrderBy(p => p))
+                var oldFileName = Path.Combine(Se.OcrFolder, dbName + ".db");
+                File.Move(oldFileName, newFileName);
+                ImageCompareDatabases.Clear();
+                foreach (var s in BinaryOcrDb.GetDatabases().OrderBy(p => p))
                 {
-                    NOcrDatabases.Add(s);
+                    ImageCompareDatabases.Add(s);
                 }
 
-                SelectedNOcrDatabase = newResult.DatabaseName;
+                SelectedImageCompareDatabase = newResult.DatabaseName;
             }
         }
     }
-
 
     [RelayCommand]
     private async Task PickTesseractModel()

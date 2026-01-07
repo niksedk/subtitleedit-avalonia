@@ -152,6 +152,12 @@ public class OcrWindow : Window
                 UiUtil.MakeComboBox(vm.ImageCompareDatabases, vm, nameof(vm.SelectedImageCompareDatabase), nameof(vm.IsBinaryImageCompareVisible))
                     .WithMarginRight(0)
                     .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
+                UiUtil.MakeButton(vm.ShowBinaryOcrSettingsCommand, IconNames.Settings)
+                    .WithMarginRight(20)
+                    .WithMarginBottom(2)
+                    .WithBottomAlignment()
+                    .WithBindIsVisible(nameof(vm.IsBinaryImageCompareVisible))
+                    .BindIsEnabled(vm, nameof(OcrViewModel.IsOcrRunning), new InverseBooleanConverter()),
                 UiUtil.MakeLabel(Se.Language.Ocr.NumberOfPixelsIsSpace, nameof(vm.IsBinaryImageCompareVisible)),
                 UiUtil.MakeComboBox(vm.BinaryOcrPixelsAreSpaceList, vm, nameof(vm.SelectedBinaryOcrPixelsAreSpace),
                         nameof(vm.IsBinaryImageCompareVisible))

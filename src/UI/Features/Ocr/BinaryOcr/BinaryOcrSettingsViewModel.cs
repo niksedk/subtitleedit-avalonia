@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -21,7 +22,11 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
     public bool DeletePressed { get; set; }
     public bool NewPressed { get; set; }
     public bool RenamePressed { get; set; }
-    private NOcrDb _nOcrDb;
+    
+    private List<string> _binaryOcrDatabases;
+    private string _binaryOcrDatabaseName;
+    private BinaryOcrDb? _binaryOcrDb;
+
 
     private readonly IWindowService _windowService;
 
@@ -30,14 +35,17 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
         _windowService = windowService;
 
         ActionText = string.Empty;
-        _nOcrDb = new NOcrDb(string.Empty);
+        _binaryOcrDatabases = new List<string>();
+        _binaryOcrDatabaseName = string.Empty;
     }
 
-    public void Initialize(NOcrDb nOcrDb)
+    public void Initialize(string binaryOcrDatabase)
     {
-        _nOcrDb = nOcrDb;
-        var name = Path.GetFileNameWithoutExtension(nOcrDb.FileName);
-        ActionText = string.Format("Select action to perform on nOCR database \"{0}\"", name);
+        _binaryOcrDatabases = BinaryOcrDb.GetDatabases();
+        _binaryOcrDatabaseName = binaryOcrDatabase;
+        _binaryOcrDb = new  BinaryOcrDb(binaryOcrDatabase);
+        var name = Path.GetFileNameWithoutExtension(_binaryOcrDatabaseName);
+        ActionText = string.Format("Select action to perform on Binary Image Compare database \"{0}\"", name);
     }
 
     [RelayCommand]
@@ -50,12 +58,12 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task Delete()
     {
-        var name = Path.GetFileNameWithoutExtension(_nOcrDb.FileName);
-        var totalItemsCount = _nOcrDb.TotalCharacterCount;
+        var name = Path.GetFileNameWithoutExtension(_binaryOcrDatabaseName);
+        var totalItemsCount = 1; // TODO: fix to get actual count from database
         var answer = await MessageBox.Show(
            Window!,
-           "Delete nOCR database?",
-           string.Format("Do you want to delete the current nOCR database \"{0}\" with {1:#,###,##0} items?", name, totalItemsCount),   
+           "Delete Binary Image Compare database?",
+           string.Format("Do you want to delete the current Binary Image Compare database \"{0}\" with {1:#,###,##0} items?", name, totalItemsCount),   
            MessageBoxButtons.YesNoCancel,
            MessageBoxIcon.Question);
 
