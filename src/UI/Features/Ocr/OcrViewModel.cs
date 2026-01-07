@@ -247,6 +247,7 @@ public partial class OcrViewModel : ObservableObject
             {
                 // ignored
             }
+
             DoFixOcrErrors = ocr.DoFixOcrErrors;
             DoPromptForUnknownWords = ocr.DoPromptForUnknownWords;
             DoTryToGuessUnknownWords = ocr.DoTryToGuessUnknownWords;
@@ -453,10 +454,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        var result = await _windowService.ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(Window, vm =>
-        {
-            vm.Initialize(string.Empty, _ocrSubtitle);
-        });
+        var result = await _windowService.ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(Window, vm => { vm.Initialize(string.Empty, _ocrSubtitle); });
     }
 
     [RelayCommand]
@@ -805,6 +803,126 @@ public partial class OcrViewModel : ObservableObject
             }
         }
     }
+
+    [RelayCommand]
+    private async Task ShowBinaryOcrSettings()
+    {
+        InitNOcrDb();
+        var result =
+            await _windowService.ShowDialogAsync<BinaryOcrSettingsWindow, BinaryOcrSettingsViewModel>(Window!,
+                vm => { vm.Initialize(_nOcrDb!); });
+
+        if (result.EditPressed)
+        {
+            await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!,
+                vm => { vm.Initialize(_nOcrDb!); });
+
+            return;
+        }
+
+        if (result.DeletePressed)
+        {
+            try
+            {
+                File.Delete(_nOcrDb!.FileName);
+                NOcrDatabases.Remove(SelectedNOcrDatabase!);
+                SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+
+                if (SelectedNOcrDatabase == null)
+                {
+                    _nOcrDb = new NOcrDb(Path.Combine(Se.OcrFolder, "Default.nocr"));
+                    _nOcrDb.Save();
+                    NOcrDatabases.Add("Default");
+                    SelectedNOcrDatabase = NOcrDatabases.FirstOrDefault();
+                }
+            }
+            catch
+            {
+                await MessageBox.Show(
+                    Window!,
+                    "Error deleting file",
+                    $"Could not delete the file {_nOcrDb!.FileName}.",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+
+            return;
+        }
+
+        if (result.NewPressed)
+        {
+            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!,
+                vm => { vm.Initialize(Se.Language.Ocr.NewNOcrDatabase, string.Empty); });
+            if (newResult.OkPressed)
+            {
+                if (!Directory.Exists(Se.OcrFolder))
+                {
+                    Directory.CreateDirectory(Se.OcrFolder);
+                }
+
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                if (File.Exists(newFileName))
+                {
+                    await MessageBox.Show(
+                        Window!,
+                        Se.Language.General.FileAlreadyExists,
+                        string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
+
+                _nOcrDb = new NOcrDb(newFileName);
+                _nOcrDb.Save();
+                NOcrDatabases.Add(newResult.DatabaseName);
+                var sortedList = NOcrDatabases.OrderBy(p => p).ToList();
+                NOcrDatabases.Clear();
+                NOcrDatabases.AddRange(sortedList);
+                SelectedNOcrDatabase = newResult.DatabaseName;
+            }
+
+            return;
+        }
+
+        if (result.RenamePressed)
+        {
+            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!,
+                vm =>
+                {
+                    vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase,
+                        Path.GetFileNameWithoutExtension(_nOcrDb!.FileName));
+                });
+            if (newResult.OkPressed)
+            {
+                if (!Directory.Exists(Se.OcrFolder))
+                {
+                    Directory.CreateDirectory(Se.OcrFolder);
+                }
+
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".nocr");
+                if (File.Exists(newFileName))
+                {
+                    await MessageBox.Show(
+                        Window!,
+                        Se.Language.General.FileAlreadyExists,
+                        string.Format(Se.Language.General.FileXAlreadyExists, newFileName),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return;
+                }
+
+                File.Move(_nOcrDb!.FileName, newFileName);
+                NOcrDatabases.Clear();
+                foreach (var s in NOcrDb.GetDatabases().OrderBy(p => p))
+                {
+                    NOcrDatabases.Add(s);
+                }
+
+                SelectedNOcrDatabase = newResult.DatabaseName;
+            }
+        }
+    }
+
 
     [RelayCommand]
     private async Task PickTesseractModel()
@@ -1552,7 +1670,7 @@ public partial class OcrViewModel : ObservableObject
                             index++;
                             continue;
                         }
-                        
+
                         Dispatcher.UIThread.Post(async void () =>
                         {
                             var result =
@@ -1623,7 +1741,7 @@ public partial class OcrViewModel : ObservableObject
                 IsOcrRunning = false;
                 return;
             }
-            
+
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
             var unknownWords = OcrFixLineAndSetText(i, item);
 
