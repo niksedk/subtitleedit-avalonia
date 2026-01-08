@@ -7294,19 +7294,16 @@ public partial class MainViewModel :
         }
 
         var prev = Subtitles[idx.Value - 1];
-        s.StartTime =
-            TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds +
-                                      Se.Settings.General.MinimumMillisecondsBetweenLines);
+        s.SetStartTimeOnly(TimeSpan.FromMilliseconds(prev.EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines));
         _updateAudioVisualizer = true;
     }
-
 
     [RelayCommand]
     private void ExtendSelectedToNext()
     {
         var s = SelectedSubtitle;
         var idx = SelectedSubtitleIndex;
-        if (s == null || idx == null || idx < Subtitles.Count - 1 || LockTimeCodes)
+        if (s == null || idx == null || idx >= Subtitles.Count - 1 || LockTimeCodes)
         {
             return;
         }
