@@ -9,6 +9,7 @@ namespace Nikse.SubtitleEdit.Logic.Ocr;
 
 public class BinaryOcrDb
 {
+    public const string Extension = ".db";
     public string FileName { get; }
     public List<BinaryOcrBitmap> CompareImages = new List<BinaryOcrBitmap>();
     public List<BinaryOcrBitmap> CompareImagesExpanded = new List<BinaryOcrBitmap>();
@@ -249,7 +250,7 @@ public class BinaryOcrDb
 
     public static List<string> GetDatabases()
     {
-        var files = Directory.GetFiles(Se.OcrFolder.TrimEnd(Path.DirectorySeparatorChar), "*.db");
+        var files = Directory.GetFiles(Se.OcrFolder.TrimEnd(Path.DirectorySeparatorChar), "*" + Extension);
         return files
             .Select(p => Path.GetFileNameWithoutExtension(p) ?? string.Empty)
             .Where(p => !string.IsNullOrEmpty(p))

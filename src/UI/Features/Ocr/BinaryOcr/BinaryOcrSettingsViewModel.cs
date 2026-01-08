@@ -22,9 +22,9 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
     public bool DeletePressed { get; set; }
     public bool NewPressed { get; set; }
     public bool RenamePressed { get; set; }
-    
+    public string BinaryOcrDatabaseName { get; set; }
+
     private List<string> _binaryOcrDatabases;
-    private string _binaryOcrDatabaseName;
     private BinaryOcrDb? _binaryOcrDb;
 
 
@@ -36,15 +36,15 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
 
         ActionText = string.Empty;
         _binaryOcrDatabases = new List<string>();
-        _binaryOcrDatabaseName = string.Empty;
+        BinaryOcrDatabaseName = string.Empty;
     }
 
     public void Initialize(string binaryOcrDatabase)
     {
         _binaryOcrDatabases = BinaryOcrDb.GetDatabases();
-        _binaryOcrDatabaseName = binaryOcrDatabase;
+        BinaryOcrDatabaseName = binaryOcrDatabase;
         _binaryOcrDb = new  BinaryOcrDb(binaryOcrDatabase);
-        var name = Path.GetFileNameWithoutExtension(_binaryOcrDatabaseName);
+        var name = Path.GetFileNameWithoutExtension(BinaryOcrDatabaseName);
         ActionText = string.Format("Select action to perform on Binary Image Compare database \"{0}\"", name);
     }
 
@@ -58,7 +58,7 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task Delete()
     {
-        var name = Path.GetFileNameWithoutExtension(_binaryOcrDatabaseName);
+        var name = Path.GetFileNameWithoutExtension(BinaryOcrDatabaseName);
         var totalItemsCount = 1; // TODO: fix to get actual count from database
         var answer = await MessageBox.Show(
            Window!,

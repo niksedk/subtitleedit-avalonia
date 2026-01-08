@@ -829,14 +829,18 @@ public partial class OcrViewModel : ObservableObject
         {
             try
             {
-                var fileName = Path.Combine(Se.OcrFolder, dbName + ".db");
+                var fileName = Path.Combine(Se.OcrFolder, dbName + BinaryOcrDb.Extension);
                 File.Delete(fileName);
-                ImageCompareDatabases.Remove(SelectedNOcrDatabase!);
-                SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
 
+                ImageCompareDatabases.Clear();
+                foreach (var db in BinaryOcrDb.GetDatabases())
+                {
+                    ImageCompareDatabases.Add(db);
+                }
+                SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
                 if (SelectedImageCompareDatabase == null)
                 {
-                    var binaryOcrDb = new BinaryOcrDb(Path.Combine(Se.OcrFolder, "Latin.db"));
+                    var binaryOcrDb = new BinaryOcrDb(Path.Combine(Se.OcrFolder, "Latin" + BinaryOcrDb.Extension));
                     binaryOcrDb.Save();
                     ImageCompareDatabases.Add("Latin");
                     SelectedImageCompareDatabase = ImageCompareDatabases.FirstOrDefault();
@@ -847,7 +851,7 @@ public partial class OcrViewModel : ObservableObject
                 await MessageBox.Show(
                     Window!,
                     "Error deleting file",
-                    $"Could not delete the file {Path.Combine(Se.OcrFolder, dbName + ".db")}.",
+                    $"Could not delete the file {Path.Combine(Se.OcrFolder, dbName + BinaryOcrDb.Extension)}.",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -866,7 +870,7 @@ public partial class OcrViewModel : ObservableObject
                     Directory.CreateDirectory(Se.OcrFolder);
                 }
 
-                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".db");
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + BinaryOcrDb.Extension);
                 if (File.Exists(newFileName))
                 {
                     await MessageBox.Show(
@@ -892,20 +896,15 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.RenamePressed)
         {
-            var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!,
-                vm =>
-                {
-                    vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase,
-                        Path.GetFileNameWithoutExtension(_nOcrDb!.FileName));
-                });
+            var newResult = await _windowService.ShowDialogAsync<BinaryOcrDbNewWindow, BinaryOcrDbNewViewModel>(Window!,
+            vm =>
+            {
+                vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase, result.BinaryOcrDatabaseName);
+            });
+
             if (newResult.OkPressed)
             {
-                if (!Directory.Exists(Se.OcrFolder))
-                {
-                    Directory.CreateDirectory(Se.OcrFolder);
-                }
-
-                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + ".db");
+                var newFileName = Path.Combine(Se.OcrFolder, newResult.DatabaseName + BinaryOcrDb.Extension);
                 if (File.Exists(newFileName))
                 {
                     await MessageBox.Show(
@@ -917,7 +916,7 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
 
-                var oldFileName = Path.Combine(Se.OcrFolder, dbName + ".db");
+                var oldFileName = Path.Combine(Se.OcrFolder, dbName + BinaryOcrDb.Extension);
                 File.Move(oldFileName, newFileName);
                 ImageCompareDatabases.Clear();
                 foreach (var s in BinaryOcrDb.GetDatabases().OrderBy(p => p))
@@ -1840,7 +1839,7 @@ public partial class OcrViewModel : ObservableObject
             return null;
         }
 
-        var fileName = Path.Combine(Se.OcrFolder, SelectedImageCompareDatabase + ".db");
+        var fileName = Path.Combine(Se.OcrFolder, SelectedImageCompareDatabase + BinaryOcrDb.Extension);
         if (!File.Exists(fileName))
         {
             return null;
@@ -1933,6 +1932,7 @@ public partial class OcrViewModel : ObservableObject
                                         result.BinaryOcrBitmap.Width = result.FirstBinaryOcrBitmap.Width;
                                         result.BinaryOcrBitmap.Height = result.FirstBinaryOcrBitmap.Height;
                                         result.BinaryOcrBitmap.NumberOfColoredPixels = result.FirstBinaryOcrBitmap.NumberOfColoredPixels;
+                                        result.BinaryOcrBitmap.Hash = result.FirstBinaryOcrBitmap.Hash;
                                     }
 
                                     db.Add(result.BinaryOcrBitmap);

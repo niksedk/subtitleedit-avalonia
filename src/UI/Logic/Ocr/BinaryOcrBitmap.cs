@@ -26,7 +26,7 @@ public class BinaryOcrBitmap
     public int X { get; set; }
     public int Y { get; set; }
     public int NumberOfColoredPixels { get; set; }
-    public uint Hash { get; private set; }
+    public uint Hash { get; set; }
     private byte[] _colors = Array.Empty<byte>();
     public bool Italic { get; set; }
     public int ExpandCount { get; set; }
