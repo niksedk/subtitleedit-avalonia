@@ -819,8 +819,8 @@ public partial class OcrViewModel : ObservableObject
 
         if (result.EditPressed)
         {
-            await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!,
-                vm => { vm.Initialize(_nOcrDb!); });
+            await _windowService.ShowDialogAsync<BinaryOcrDbEditWindow, BinaryOcrDbEditViewModel>(Window!,
+                vm => { vm.Initialize(SelectedImageCompareDatabase!); });
 
             return;
         }

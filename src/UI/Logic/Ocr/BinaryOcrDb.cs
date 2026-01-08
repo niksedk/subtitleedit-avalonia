@@ -14,6 +14,8 @@ public class BinaryOcrDb
     public List<BinaryOcrBitmap> CompareImages = new List<BinaryOcrBitmap>();
     public List<BinaryOcrBitmap> CompareImagesExpanded = new List<BinaryOcrBitmap>();
 
+    public List<BinaryOcrBitmap> AllCompareImages => CompareImages.Concat(CompareImagesExpanded).ToList();
+
     public BinaryOcrDb(string fileName, bool loadCompareImages = true)
     {
         FileName = fileName;

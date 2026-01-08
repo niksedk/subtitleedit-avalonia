@@ -210,8 +210,9 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BinarySettingsViewModel>();
         collection.AddTransient<BinaryOcrCharacterAddViewModel>();
         collection.AddTransient<BinaryOcrCharacterHistoryViewModel>();
-        collection.AddTransient<BinaryOcrInspectViewModel>();
+        collection.AddTransient<BinaryOcrDbEditViewModel>();
         collection.AddTransient<BinaryOcrDbNewViewModel>();
+        collection.AddTransient<BinaryOcrInspectViewModel>();
         collection.AddTransient<BinaryOcrSettingsViewModel>();
         collection.AddTransient<BlankVideoViewModel>();
         collection.AddTransient<BookmarkEditViewModel>();
