@@ -19,8 +19,8 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _characters;
     [ObservableProperty] private string? _selectedCharacter;
-    [ObservableProperty] private ObservableCollection<NOcrChar> _currentCharacterItems;
-    [ObservableProperty] private NOcrChar? _selectedCurrentCharacterItem;
+    [ObservableProperty] private ObservableCollection<BinaryOcrBitmap> _currentCharacterItems;
+    [ObservableProperty] private BinaryOcrBitmap? _selectedCurrentCharacterItem;
     [ObservableProperty] private bool _isNewLinesForegroundActive;
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _itemText;
@@ -32,11 +32,9 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string _title;
 
     public Window? Window { get; set; }
-    public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
     public TextBox TextBoxItem { get; set; }
 
     public bool OkPressed { get; set; }
-    private NOcrDb _nOcrDb;
     private bool _isControlDown;
     private BinaryOcrDb _binaryImageCompareDatabase;
 
@@ -46,16 +44,13 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
         IsNewLinesBackgroundActive = false;
         DatabaseName = string.Empty;
         Characters = new ObservableCollection<string>();
-        CurrentCharacterItems = new ObservableCollection<NOcrChar>();
+        CurrentCharacterItems = new ObservableCollection<BinaryOcrBitmap>();
         ItemText = string.Empty;
         IsItemItalic = false;
-        _nOcrDb = new NOcrDb(string.Empty);
-        NOcrDrawingCanvas = new NOcrDrawingCanvasView();
         TextBoxItem = new TextBox();
         ResolutionAndTopMargin = string.Empty;
         ZoomFactorInfo = string.Empty;
         ExpandInfo = string.Empty;
-        NOcrDrawingCanvas.ZoomFactor = Se.Settings.Ocr.NOcrZoomFactor;
         Title = string.Empty;
         _binaryImageCompareDatabase = new BinaryOcrDb(string.Empty, false);
     }
@@ -84,30 +79,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ZoomIn()
-    {
-        if (NOcrDrawingCanvas.ZoomFactor < 20)
-        {
-            NOcrDrawingCanvas.ZoomFactor++;
-            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
-        }
-
-        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
-    }
-
-    [RelayCommand]
-    private void ZoomOut()
-    {
-        if (NOcrDrawingCanvas.ZoomFactor > 1)
-        {
-            NOcrDrawingCanvas.ZoomFactor--;
-            Se.Settings.Ocr.NOcrZoomFactor = (int)NOcrDrawingCanvas.ZoomFactor;
-        }
-
-        ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
-    }
-
-    [RelayCommand]
     private async Task Update()
     {
         var item = SelectedCurrentCharacterItem;
@@ -125,8 +96,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
 
         item.Text = ItemText;
         item.Italic = IsItemItalic;
-        _nOcrDb.Save();
-
         Close();
     }
 
@@ -141,8 +110,8 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
 
         var answer = await MessageBox.Show(
                    Window!,
-                   "Delete nOCR item?",
-                   $"Do you want to delete the current nOCR item?",
+                   "Delete \"Binary image compare\" item?",
+                   $"Do you want to delete the current \"Binary image compare\" item?",
                    MessageBoxButtons.YesNoCancel,
                    MessageBoxIcon.Question);
 
@@ -151,9 +120,9 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        _nOcrDb.OcrCharacters.Remove(item);
-        _nOcrDb.OcrCharactersExpanded.Remove(item);
-        _nOcrDb.Save();
+        //_nOcrDb.OcrCharacters.Remove(item);
+        //_nOcrDb.OcrCharactersExpanded.Remove(item);
+        //_nOcrDb.Save();
 
         Close();
     }
@@ -176,7 +145,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
         else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = true;
-            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
     }
 
@@ -185,7 +153,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isControlDown = false;
-            NOcrDrawingCanvas.IsControlDown = _isControlDown;
         }
     }
 
@@ -235,8 +202,11 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        var items = _nOcrDb.OcrCharactersCombined.Where(c => c.Text == selectedCharacter).ToList();
-        CurrentCharacterItems.AddRange(items);
+        var items = _binaryImageCompareDatabase.AllCompareImages.Where(c => c.Text == selectedCharacter).ToList();
+        foreach (var item in items)
+        {
+            CurrentCharacterItems.Add(item);
+        }
         SelectedCurrentCharacterItem = CurrentCharacterItems.FirstOrDefault();
     }
 
@@ -254,7 +224,7 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
 
         ItemText = selectedItem.Text;
         IsItemItalic = selectedItem.Italic;
-        ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.MarginTop);
+        ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.Y);
 
         if (selectedItem.ExpandCount == 0)
         {
