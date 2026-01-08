@@ -27,7 +27,7 @@ public class BinaryOcrBitmap
     public int Y { get; set; }
     public int NumberOfColoredPixels { get; set; }
     public uint Hash { get; set; }
-    private byte[] _colors = Array.Empty<byte>();
+    public byte[] Colors { get; set; } = [];
     public bool Italic { get; set; }
     public int ExpandCount { get; set; }
     public bool LoadedOk { get; }
@@ -50,8 +50,8 @@ public class BinaryOcrBitmap
     {
         Width = width;
         Height = height;
-        _colors = new byte[Width * Height];
-        Hash = MurMurHash3.Hash(_colors);
+        Colors = new byte[Width * Height];
+        Hash = MurMurHash3.Hash(Colors);
         NumberOfColoredPixels = 0;
     }
 
@@ -82,8 +82,8 @@ public class BinaryOcrBitmap
                 Text = System.Text.Encoding.UTF8.GetString(buffer);
             }
 
-            _colors = new byte[Width * Height];
-            _ = stream.Read(_colors, 0, _colors.Length);
+            Colors = new byte[Width * Height];
+            _ = stream.Read(Colors, 0, Colors.Length);
             LoadedOk = true;
         }
         catch
@@ -111,7 +111,7 @@ public class BinaryOcrBitmap
     {
         Width = nbmp.Width;
         Height = nbmp.Height;
-        _colors = new byte[Width * Height];
+        Colors = new byte[Width * Height];
         var numberOfColoredPixels = 0;
         for (int y = 0; y < Height; y++)
         {
@@ -120,29 +120,29 @@ public class BinaryOcrBitmap
                 var alpha = nbmp.GetAlpha(x, y);
                 if (alpha < 100)
                 {
-                    _colors[Width * y + x] = 0;
+                    Colors[Width * y + x] = 0;
                 }
                 else
                 {
-                    _colors[Width * y + x] = 1;
+                    Colors[Width * y + x] = 1;
                     numberOfColoredPixels++;
                 }
             }
         }
         NumberOfColoredPixels = numberOfColoredPixels;
-        Hash = MurMurHash3.Hash(_colors);
+        Hash = MurMurHash3.Hash(Colors);
     }
 
     public bool AreColorsEqual(BinaryOcrBitmap other)
     {
-        if (_colors.Length != other._colors.Length)
+        if (Colors.Length != other.Colors.Length)
         {
             return false;
         }
 
-        for (int i = 0; i < _colors.Length; i++)
+        for (int i = 0; i < Colors.Length; i++)
         {
-            if (_colors[i] != other._colors[i])
+            if (Colors[i] != other.Colors[i])
             {
                 return false;
             }
@@ -182,7 +182,7 @@ public class BinaryOcrBitmap
             stream.Write(textBuffer, 0, textBuffer.Length);
         }
 
-        stream.Write(_colors, 0, _colors.Length);
+        stream.Write(Colors, 0, Colors.Length);
     }
 
     private static void WriteInt16(Stream stream, ushort val)
@@ -205,17 +205,17 @@ public class BinaryOcrBitmap
 
     public int GetPixel(int x, int y)
     {
-        return _colors[Width * y + x];
+        return Colors[Width * y + x];
     }
 
     public int GetPixel(int index)
     {
-        return _colors[index];
+        return Colors[index];
     }
 
     public void SetPixel(int x, int y)
     {
-        _colors[Width * y + x] = 1;
+        Colors[Width * y + x] = 1;
     }
 
     /// <summary>

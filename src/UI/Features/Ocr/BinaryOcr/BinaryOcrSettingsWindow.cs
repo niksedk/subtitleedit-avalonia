@@ -8,7 +8,7 @@ public class BinaryOcrSettingsWindow : Window
 {
     public BinaryOcrSettingsWindow(BinaryOcrSettingsViewModel vm)
     {
-        Title = Se.Language.Ocr.NOcrDatabase;
+        Title = Se.Language.Ocr.BinaryImageCompareDatabase;
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
         SizeToContent = SizeToContent.WidthAndHeight;

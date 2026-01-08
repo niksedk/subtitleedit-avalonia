@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +6,9 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Ocr;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
@@ -45,7 +45,7 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
         BinaryOcrDatabaseName = binaryOcrDatabase;
         _binaryOcrDb = new  BinaryOcrDb(binaryOcrDatabase);
         var name = Path.GetFileNameWithoutExtension(BinaryOcrDatabaseName);
-        ActionText = string.Format("Select action to perform on Binary Image Compare database \"{0}\"", name);
+        ActionText = string.Format("Select action to perform on \"Binary image compare\" database \"{0}\"", name);
     }
 
     [RelayCommand]
@@ -63,7 +63,7 @@ public partial class BinaryOcrSettingsViewModel : ObservableObject
         var answer = await MessageBox.Show(
            Window!,
            "Delete Binary Image Compare database?",
-           string.Format("Do you want to delete the current Binary Image Compare database \"{0}\" with {1:#,###,##0} items?", name, totalItemsCount),   
+           string.Format("Do you want to delete the current \"Binary image compare\" database \"{0}\" with {1:#,###,##0} items?", name, totalItemsCount),   
            MessageBoxButtons.YesNoCancel,
            MessageBoxIcon.Question);
 

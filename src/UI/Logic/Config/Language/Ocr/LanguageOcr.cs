@@ -66,6 +66,7 @@ public class LanguageOcr
     public string DarknessThreshold { get; set; }
     public string EditExportDotDotDot { get; set; }
     public string EditBinaryOcrDatabase { get; set; }
+    public string BinaryImageCompareDatabase { get; set; }
 
     public LanguageOcr()
     {
@@ -130,6 +131,7 @@ public class LanguageOcr
         OneColor = "One color (white)";
         DarknessThreshold = "Darkness threshold";
         EditExportDotDotDot = "Edit/export...";
-        EditBinaryOcrDatabase = "Edit Binary Image Compare database";
+        EditBinaryOcrDatabase = "Edit \"Binary image compare\" database";
+        BinaryImageCompareDatabase = "\"Binary image compare\" database";
     }
 }

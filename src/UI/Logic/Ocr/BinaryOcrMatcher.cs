@@ -121,7 +121,6 @@ public class BinaryOcrMatcher : IBinaryOcrMatcher
             }
         }
 
-
         // allow for error %
         for (int k = 0; k < binaryOcrDb.CompareImagesExpanded.Count; k++)
         {
