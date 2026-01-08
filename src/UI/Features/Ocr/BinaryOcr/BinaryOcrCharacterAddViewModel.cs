@@ -50,6 +50,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     private BinaryOcrDb _db;
     private bool _isControlDown;
     private bool _isWinDown;
+    private BinaryOcrBitmap _firstBinaryOcrBitmap;
 
     public BinaryOcrCharacterAddViewModel()
     {
@@ -142,7 +143,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
                 Y = _splitItem.Top,
                 ExpandCount = 0,
             };
-
+            _firstBinaryOcrBitmap = BinaryOcrBitmap;
             ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, BinaryOcrBitmap.Width, BinaryOcrBitmap.Height, BinaryOcrBitmap.Y);
         }
 

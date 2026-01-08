@@ -32,38 +32,36 @@ public class BinaryOcrDb
         var compareImages = new List<BinaryOcrBitmap>(CompareImages);
         var compareImagesExpanded = new List<BinaryOcrBitmap>(CompareImagesExpanded);
 
-        using (Stream gz = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress))
+        using Stream gz = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress);
+        foreach (var bob in compareImages)
         {
-            foreach (var bob in compareImages)
+            if (bob.ExpandCount > 0)
             {
-                if (bob.ExpandCount > 0)
-                {
-                    throw new Exception("Oops, expand image in CompareImages!");
-                }
-
-                bob.Save(gz);
+                throw new Exception("Oops, expand image in CompareImages!");
             }
-            foreach (var bob in compareImagesExpanded)
+
+            bob.Save(gz);
+        }
+        foreach (var bob in compareImagesExpanded)
+        {
+            if (bob.ExpandCount == 0)
             {
-                if (bob.ExpandCount == 0)
+                throw new Exception("Oops, not expanded image in CompareImagesExpanded!");
+            }
+
+            bob.Save(gz);
+            if (bob.ExpandedList.Count != bob.ExpandCount - 1)
+            {
+                throw new Exception("BinaryOcrDb.Save: Expanded image should have " + (bob.ExpandCount - 1) + " sub images");
+            }
+            foreach (var expandedBob in bob.ExpandedList)
+            {
+                if (expandedBob.Text != null)
                 {
-                    throw new Exception("Oops, not expanded image in CompareImagesExpanded!");
+                    throw new Exception("BinaryOcrDb.Save: sub image should have null text");
                 }
 
-                bob.Save(gz);
-                if (bob.ExpandedList.Count != bob.ExpandCount - 1)
-                {
-                    throw new Exception("BinaryOcrDb.Save: Expanded image should have " + (bob.ExpandCount - 1) + " sub images");
-                }
-                foreach (var expandedBob in bob.ExpandedList)
-                {
-                    if (expandedBob.Text != null)
-                    {
-                        throw new Exception("BinaryOcrDb.Save: sub image should have null text");
-                    }
-
-                    expandedBob.Save(gz);
-                }
+                expandedBob.Save(gz);
             }
         }
     }
@@ -79,74 +77,68 @@ public class BinaryOcrDb
             return;
         }
 
-        using (var stream = new MemoryStream())
+        using var stream = new MemoryStream();
+        using (var gz = new GZipStream(File.OpenRead(FileName), CompressionMode.Decompress))
         {
-            using (var gz = new GZipStream(File.OpenRead(FileName), CompressionMode.Decompress))
-            {
-                gz.CopyTo(stream);
-            }
+            gz.CopyTo(stream);
+        }
 
-            stream.Position = 0;
-            bool done = false;
-            while (!done)
+        stream.Position = 0;
+        bool done = false;
+        while (!done)
+        {
+            var bob = new BinaryOcrBitmap(stream);
+            if (bob.LoadedOk)
             {
-                var bob = new BinaryOcrBitmap(stream);
-                if (bob.LoadedOk)
+                if (bob.ExpandCount > 0)
                 {
-                    if (bob.ExpandCount > 0)
+                    expandList.Add(bob);
+                    bob.ExpandedList = new List<BinaryOcrBitmap>();
+                    for (int i = 1; i < bob.ExpandCount; i++)
                     {
-                        expandList.Add(bob);
-                        bob.ExpandedList = new List<BinaryOcrBitmap>();
-                        for (int i = 1; i < bob.ExpandCount; i++)
+                        var expandedBob = new BinaryOcrBitmap(stream);
+                        if (expandedBob.LoadedOk)
                         {
-                            var expandedBob = new BinaryOcrBitmap(stream);
-                            if (expandedBob.LoadedOk)
+                            if (expandedBob.Text != null)
                             {
-                                if (expandedBob.Text != null)
-                                {
-                                    throw new Exception("BinaryOcrDb.LoadCompareImages: sub image should have null text");
-                                }
+                                throw new Exception("BinaryOcrDb.LoadCompareImages: sub image should have null text");
+                            }
 
-                                bob.ExpandedList.Add(expandedBob);
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            bob.ExpandedList.Add(expandedBob);
                         }
-                    }
-                    else
-                    {
-                        list.Add(bob);
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
                 else
                 {
-                    done = true;
+                    list.Add(bob);
                 }
             }
-
-            CompareImages = list;
-            CompareImagesExpanded = expandList;
+            else
+            {
+                done = true;
+            }
         }
+
+        CompareImages = list;
+        CompareImagesExpanded = expandList;
     }
 
-    private static int MaxCommaQuoteTopDiff = 15;
+    private const int MaxCommaQuoteTopDiff = 15;
 
     public static bool AllowEqual(BinaryOcrBitmap match, BinaryOcrBitmap newBob)
     {
-        if (match.Text != null && (match.Text == "," || match.Text == "'") &&
-            Math.Abs(match.Y - newBob.Y) > MaxCommaQuoteTopDiff)
-        {
-            return false;
-        }
-        return true;
+        return match.Text == null || (match.Text != "," && match.Text != "'") ||
+               Math.Abs(match.Y - newBob.Y) <= MaxCommaQuoteTopDiff;
     }
 
     public int FindExactMatch(BinaryOcrBitmap bob)
     {
         var bobHash = bob.Hash;
-        for (int i = 0; i < CompareImages.Count; i++)
+        for (var i = 0; i < CompareImages.Count; i++)
         {
             var b = CompareImages[i];
             if (bobHash == b.Hash && bob.Width == b.Width && bob.Height == b.Height && bob.NumberOfColoredPixels == b.NumberOfColoredPixels)
@@ -157,12 +149,13 @@ public class BinaryOcrDb
                 }
             }
         }
+        
         return -1;
     }
 
     public int FindExactMatchExpanded(BinaryOcrBitmap bob)
     {
-        for (int i = 0; i < CompareImagesExpanded.Count; i++)
+        for (var i = 0; i < CompareImagesExpanded.Count; i++)
         {
             var b = CompareImagesExpanded[i];
             if (bob.Hash == b.Hash &&
@@ -188,6 +181,7 @@ public class BinaryOcrDb
             }
 
         }
+        
         return -1;
     }
 
@@ -213,8 +207,8 @@ public class BinaryOcrDb
             }
             else
             {
-                bool allAlike = true;
-                for (int i = 0; i < bob.ExpandCount - 1; i++)
+                var allAlike = true;
+                for (var i = 0; i < bob.ExpandCount - 1; i++)
                 {
                     if (bob.ExpandedList[i].Hash != CompareImagesExpanded[index].ExpandedList[i].Hash)
                     {
@@ -226,6 +220,7 @@ public class BinaryOcrDb
                         throw new Exception("BinaryOcrDb.Add: sub image should have null text");
                     }
                 }
+                
                 if (!allAlike)
                 {
                     CompareImagesExpanded.Add(bob);
@@ -248,6 +243,7 @@ public class BinaryOcrDb
                 throw new Exception("BinaryOcrDb.Add: Image already in db!");
             }
         }
+        
         return index;
     }
 

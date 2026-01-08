@@ -86,7 +86,7 @@ public class BinaryOcrMatcher : IBinaryOcrMatcher
         var bob = new BinaryOcrBitmap(target) { X = targetItem.X, Y = targetItem.Top };
 
         // precise expanded match
-        for (int k = 0; k < binaryOcrDb.CompareImagesExpanded.Count; k++)
+        for (var k = 0; k < binaryOcrDb.CompareImagesExpanded.Count; k++)
         {
             var b = binaryOcrDb.CompareImagesExpanded[k];
             if (bob.Hash == b.Hash && bob.Width == b.Width && bob.Height == b.Height && bob.NumberOfColoredPixels == b.NumberOfColoredPixels)
