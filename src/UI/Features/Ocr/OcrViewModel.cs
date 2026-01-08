@@ -812,7 +812,7 @@ public partial class OcrViewModel : ObservableObject
         {
             return;
         }
-        
+
         var result =
             await _windowService.ShowDialogAsync<BinaryOcrSettingsWindow, BinaryOcrSettingsViewModel>(Window!,
                 vm => { vm.Initialize(dbName); });
@@ -847,7 +847,7 @@ public partial class OcrViewModel : ObservableObject
                 await MessageBox.Show(
                     Window!,
                     "Error deleting file",
-                    $"Could not delete the file {Path.Combine(Se.OcrFolder, dbName+ ".db")}.",
+                    $"Could not delete the file {Path.Combine(Se.OcrFolder, dbName + ".db")}.",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -1927,6 +1927,14 @@ public partial class OcrViewModel : ObservableObject
                                     _binaryOcrAddHistoryManager.Add(result.BinaryOcrBitmap, letterBitmap,
                                         OcrSubtitleItems.IndexOf(item));
                                     IsInspectAdditionsVisible = true;
+
+                                    if (result.FirstBinaryOcrBitmap != null)
+                                    {
+                                        result.BinaryOcrBitmap.Width = result.FirstBinaryOcrBitmap.Width;
+                                        result.BinaryOcrBitmap.Height = result.FirstBinaryOcrBitmap.Height;
+                                        result.BinaryOcrBitmap.NumberOfColoredPixels = result.FirstBinaryOcrBitmap.NumberOfColoredPixels;
+                                    }
+
                                     db.Add(result.BinaryOcrBitmap);
                                     _ = Task.Run(() => db.Save());
                                 }

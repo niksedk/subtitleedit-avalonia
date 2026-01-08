@@ -21,11 +21,11 @@ public class BinaryOcrBitmap
     //text len bytes=text (UTF-8)
     //w*h bytes / 8=pixels as bits(byte aligned)
 
-    public int Width { get; private set; }
-    public int Height { get; private set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
-    public int NumberOfColoredPixels { get; private set; }
+    public int NumberOfColoredPixels { get; set; }
     public uint Hash { get; private set; }
     private byte[] _colors = Array.Empty<byte>();
     public bool Italic { get; set; }

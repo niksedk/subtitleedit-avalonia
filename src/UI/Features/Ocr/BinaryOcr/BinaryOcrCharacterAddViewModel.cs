@@ -50,7 +50,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     private BinaryOcrDb _db;
     private bool _isControlDown;
     private bool _isWinDown;
-    private BinaryOcrBitmap _firstBinaryOcrBitmap;
+    public BinaryOcrBitmap? FirstBinaryOcrBitmap { get; set; }
 
     public BinaryOcrCharacterAddViewModel()
     {
@@ -143,7 +143,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
                 Y = _splitItem.Top,
                 ExpandCount = 0,
             };
-            _firstBinaryOcrBitmap = BinaryOcrBitmap;
+            FirstBinaryOcrBitmap = BinaryOcrBitmap;
             ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, BinaryOcrBitmap.Width, BinaryOcrBitmap.Height, BinaryOcrBitmap.Y);
         }
 
@@ -283,6 +283,13 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
         {
             BinaryOcrBitmap.Text = NewText;
             BinaryOcrBitmap.Italic = IsNewTextItalic;
+            
+            // if (_firstBinaryOcrBitmap != null)
+            // {
+            //     BinaryOcrBitmap.Width = _firstBinaryOcrBitmap.Width;
+            //     BinaryOcrBitmap.Height = _firstBinaryOcrBitmap.Height;
+            //     BinaryOcrBitmap.NumberOfColoredPixels = _firstBinaryOcrBitmap.NumberOfColoredPixels;
+            // }
         }
         OkPressed = true;
         SaveSettings();
