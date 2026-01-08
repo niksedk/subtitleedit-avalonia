@@ -283,7 +283,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
         {
             BinaryOcrBitmap.Text = NewText;
             BinaryOcrBitmap.Italic = IsNewTextItalic;
-            
+
             // if (_firstBinaryOcrBitmap != null)
             // {
             //     BinaryOcrBitmap.Width = _firstBinaryOcrBitmap.Width;
@@ -338,8 +338,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
 
     private void SetTitle()
     {
-        Title =
-            $"Add Binary OCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_db.FileName)}\"";
+        Title = $"Add Binary OCR character for line  {_startFromNumber + 1}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_db.FileName)}\"";
     }
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)

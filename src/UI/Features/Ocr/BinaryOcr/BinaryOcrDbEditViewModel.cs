@@ -207,7 +207,13 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
              .Distinct()
              .OrderBy(c => c)
              .ToList();
-        Characters.AddRange(characters);
+        foreach (var s in characters)
+        {
+            if (!string.IsNullOrEmpty(s))
+            {
+                Characters.Add(s);
+            }
+        }
 
         SelectedCharacter = characters.FirstOrDefault();
         CharactersChanged();

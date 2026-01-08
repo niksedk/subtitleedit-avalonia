@@ -13,6 +13,7 @@ public class BinaryOcrCharacterAddWindow : Window
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
+        Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));   
         Title = string.Empty;
         Width = 1200;
         Height = 700;
