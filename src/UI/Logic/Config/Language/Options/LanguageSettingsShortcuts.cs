@@ -207,6 +207,8 @@ public class LanguageSettingsShortcuts
     public string TextBoxItalic { get; set; }
     public string ResetWaveformZoomAndSpeed { get; set; }
     public string TogglePlaybackSpeed { get; set; }
+    public string PlaybackSpeedSlower { get; set; }
+    public string PlaybackSpeedFaster { get; set; }
     public string SwitchOriginalAndTranslationSelectedLines { get; set; }
     public string MergeOriginalIntoTranslationSelectedLines { get; set; }
     public string SeekSilence { get; set; }
@@ -444,8 +446,10 @@ public class LanguageSettingsShortcuts
         CopyTextFromOriginalSelectedLines = "Copy text from original (selected lines)";
         TextBoxRemoveAllFormatting = "Text box, remove all formatting";
         TextBoxItalic = "Text box italic";
-        ResetWaveformZoomAndSpeed = "Reset waveform zoom and playback speed";
-        TogglePlaybackSpeed = "Toggle playback speed";
+        ResetWaveformZoomAndSpeed = "Reset waveform zoom and playback speed (play rate)";
+        TogglePlaybackSpeed = "Toggle playback speed (play rate)";
+        PlaybackSpeedSlower = "Playback speed slower (play rate)";
+        PlaybackSpeedFaster = "Playback speed faster (play rate)";
         SwitchOriginalAndTranslationSelectedLines = "Switch original and translation (selected lines)";
         MergeOriginalIntoTranslationSelectedLines = "Merge original and translation (selected lines)";
         SeekSilence = "Seek silence";

@@ -7030,6 +7030,42 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void PlaybackSlower()
+    {
+        var vp = GetVideoPlayerControl();
+        if (AudioVisualizer == null || vp == null)
+        {
+            return;
+        }
+
+        var idx = Speeds.IndexOf(SelectedSpeed);
+        if (idx > 0)
+        {
+            idx--;
+            SelectedSpeed = Speeds[idx];
+            ShowStatus(string.Format(Se.Language.Main.SpeedIsNowX, SelectedSpeed));
+        }
+    }
+
+    [RelayCommand]
+    private void PlaybackFaster()
+    {
+        var vp = GetVideoPlayerControl();
+        if (AudioVisualizer == null || vp == null)
+        {
+            return;
+        }
+
+        var idx = Speeds.IndexOf(SelectedSpeed);
+        if (idx < Speeds.Count - 1)
+        {
+            idx++;
+            SelectedSpeed = Speeds[idx];
+            ShowStatus(string.Format(Se.Language.Main.SpeedIsNowX, SelectedSpeed));
+        }
+    }
+
+    [RelayCommand]
     private void FetchFirstWordFromNextSubtitle()
     {
         var s = SelectedSubtitle;

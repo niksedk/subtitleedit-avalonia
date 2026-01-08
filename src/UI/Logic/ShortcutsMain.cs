@@ -238,6 +238,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.SubtitleGridPasteCommand), Se.Language.Options.Shortcuts.SubtitleGridPaste },
         { nameof(MainViewModel.ShowChooseProfileCommand), Se.Language.Options.Shortcuts.ChooseRuleProfile },
         { nameof(MainViewModel.TogglePlaybackSpeedCommand), Se.Language.Options.Shortcuts.TogglePlaybackSpeed },
+        { nameof(MainViewModel.PlaybackSlowerCommand), Se.Language.Options.Shortcuts.PlaybackSpeedSlower },
+        { nameof(MainViewModel.PlaybackFasterCommand), Se.Language.Options.Shortcuts.PlaybackSpeedFaster },
         { nameof(MainViewModel.VideoSetPositionCurrentSubtitleStartCommand), Se.Language.Options.Shortcuts.SetVideoPositionCurrentSubtitleStart },
         { nameof(MainViewModel.VideoSetPositionCurrentSubtitleEndCommand), Se.Language.Options.Shortcuts.SetVideoPositionCurrentSubtitleEnd },
         { nameof(MainViewModel.ToggleAudioTracksCommand), Se.Language.Options.Shortcuts.ToggleAudioTracks },
@@ -463,6 +465,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SubtitleGridPasteCommand, nameof(vm.SubtitleGridPasteCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.ShowChooseProfileCommand, nameof(vm.ShowChooseProfileCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.TogglePlaybackSpeedCommand, nameof(vm.TogglePlaybackSpeedCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.PlaybackSlowerCommand, nameof(vm.PlaybackSlowerCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.PlaybackFasterCommand, nameof(vm.PlaybackFasterCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoSetPositionCurrentSubtitleStartCommand, nameof(vm.VideoSetPositionCurrentSubtitleStartCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoSetPositionCurrentSubtitleEndCommand, nameof(vm.VideoSetPositionCurrentSubtitleEndCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToggleAudioTracksCommand, nameof(vm.ToggleAudioTracksCommand), ShortcutCategory.General);
