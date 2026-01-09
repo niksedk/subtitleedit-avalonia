@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
@@ -21,6 +22,7 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
     [ObservableProperty] private string? _selectedCharacter;
     [ObservableProperty] private ObservableCollection<BinaryOcrBitmap> _currentCharacterItems;
     [ObservableProperty] private BinaryOcrBitmap? _selectedCurrentCharacterItem;
+    [ObservableProperty] private Bitmap? _itemBitmap;
     [ObservableProperty] private bool _isNewLinesForegroundActive;
     [ObservableProperty] private bool _isNewLinesBackgroundActive;
     [ObservableProperty] private string _itemText;
@@ -51,6 +53,7 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
         ResolutionAndTopMargin = string.Empty;
         ZoomFactorInfo = string.Empty;
         ExpandInfo = string.Empty;
+        ItemBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
         Title = string.Empty;
         _binaryImageCompareDatabase = new BinaryOcrDb(string.Empty, false);
     }
@@ -222,8 +225,9 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        ItemText = selectedItem.Text;
+        ItemText = selectedItem.Text ?? string.Empty;
         IsItemItalic = selectedItem.Italic;
+        ItemBitmap = selectedItem.ToSKBitmap().ToAvaloniaBitmap();
         ResolutionAndTopMargin = string.Format(Se.Language.Ocr.ResolutionXYAndTopmarginZ, selectedItem.Width, selectedItem.Height, selectedItem.Y);
 
         if (selectedItem.ExpandCount == 0)

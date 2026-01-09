@@ -3,6 +3,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Avalonia.Media.Imaging;
 
 namespace Nikse.SubtitleEdit.Logic.Ocr;
 
@@ -247,7 +248,7 @@ public class BinaryOcrBitmap
         return newRectangle;
     }
 
-    public SKBitmap ToOldBitmap()
+    public SKBitmap ToSKBitmap()
     {
         return ToOldBitmap(SKColors.White);
     }
@@ -905,6 +906,5 @@ public class BinaryOcrBitmap
 
         return true;
     }
-
 }
 

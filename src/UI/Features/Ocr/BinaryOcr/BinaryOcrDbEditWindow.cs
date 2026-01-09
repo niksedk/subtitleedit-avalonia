@@ -101,7 +101,7 @@ public class BinaryOcrDbEditWindow : Window
         return UiUtil.MakeBorderForControl(grid);
     }
 
-    private Border MakeCurrentItemControlsView(BinaryOcrDbEditViewModel vm)
+    private static Border MakeCurrentItemControlsView(BinaryOcrDbEditViewModel vm)
     {
         var grid = new Grid
         {
@@ -121,13 +121,30 @@ public class BinaryOcrDbEditWindow : Window
         };
 
         vm.TextBoxItem = UiUtil.MakeTextBox(100, vm, nameof(vm.ItemText));
-
+        
+        var image = new Image
+        {
+            Margin = new Thickness(0, 5, 0, 0),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+        };
+        image.Bind(Image.SourceProperty, new Binding(nameof(vm.ItemBitmap)));
+        var imageBorder = new Border
+        {
+            BorderBrush = UiUtil.GetBorderBrush(),
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(5),
+            Child = image,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+        };
+        
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             Children =
             {
                 UiUtil.MakeLabel(Se.Language.Ocr.CurrentImage).WithBold(),
+                imageBorder,
                 vm.TextBoxItem,
                 UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsItemItalic)),
                 UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.ResolutionAndTopMargin)),
@@ -135,6 +152,7 @@ public class BinaryOcrDbEditWindow : Window
                 UiUtil.MakeButton("Update", vm.UpdateCommand).WithMarginTop(25).WithLeftAlignment(),
                 UiUtil.MakeButton("Delete", vm.DeleteCommand).WithMarginTop(5).WithLeftAlignment(),
             },
+            Spacing = 5,
         };
 
         grid.Add(panelCurrent, 0, 0);
