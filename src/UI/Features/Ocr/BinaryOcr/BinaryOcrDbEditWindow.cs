@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -60,8 +58,7 @@ public class BinaryOcrDbEditWindow : Window
             buttonOk.Focus(); // hack to make OnKeyDown work
         };
         KeyDown += (_, e) => vm.KeyDown(e);
-        KeyUp += (_, e) => vm.KeyUp(e);
-        Loaded += (_,_) => Title = vm.Title;    
+        Loaded += (_, _) => Title = vm.Title;
     }
 
     private static Border MakeCharacterControlsView(BinaryOcrDbEditViewModel vm)
@@ -121,7 +118,7 @@ public class BinaryOcrDbEditWindow : Window
         };
 
         vm.TextBoxItem = UiUtil.MakeTextBox(100, vm, nameof(vm.ItemText));
-        
+
         var image = new Image
         {
             Margin = new Thickness(0, 5, 0, 0),
@@ -136,7 +133,7 @@ public class BinaryOcrDbEditWindow : Window
             Child = image,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
         };
-        
+
         var panelCurrent = new StackPanel
         {
             Orientation = Avalonia.Layout.Orientation.Vertical,

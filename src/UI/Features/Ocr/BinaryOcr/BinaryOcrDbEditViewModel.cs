@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,7 +13,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 
@@ -37,7 +37,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
     public TextBox TextBoxItem { get; set; }
 
     public bool OkPressed { get; set; }
-    private bool _isControlDown;
     private BinaryOcrDb _binaryImageCompareDatabase;
 
     public BinaryOcrDbEditViewModel()
@@ -123,10 +122,9 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
             return;
         }
 
-        //_nOcrDb.OcrCharacters.Remove(item);
-        //_nOcrDb.OcrCharactersExpanded.Remove(item);
-        //_nOcrDb.Save();
-
+        _binaryImageCompareDatabase.CompareImages.Remove(item);
+        _binaryImageCompareDatabase.CompareImagesExpanded.Remove(item);
+        _binaryImageCompareDatabase.Save();
         Close();
     }
 
@@ -144,27 +142,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             Close();
-        }
-        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-        {
-            _isControlDown = true;
-        }
-    }
-
-    public void KeyUp(KeyEventArgs e)
-    {
-        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-        {
-            _isControlDown = false;
-        }
-    }
-
-    internal void TextBoxDatabaseNameKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-        {
-            e.Handled = true;
-            Ok();
         }
     }
 
