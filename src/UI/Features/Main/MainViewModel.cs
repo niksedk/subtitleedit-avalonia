@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -2256,7 +2257,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-    
+
     [RelayCommand]
     private async Task ColumnPasteFromClipboard()
     {
@@ -6642,22 +6643,22 @@ public partial class MainViewModel :
         FocusEditTextBox();
         _updateAudioVisualizer = true;
     }
-    
+
     [RelayCommand]
     private async Task WaveformPasteFromClipboard()
     {
         var vp = GetVideoPlayerControl();
-        if (Window == null || vp == null || AudioVisualizer == null)
+        if (Window == null || Window.Clipboard == null || vp == null || AudioVisualizer == null)
         {
             return;
         }
-        
-        var text = await Window.Clipboard.GetTextAsync();
+
+        var text = await Window.Clipboard.TryGetTextAsync();
         if (string.IsNullOrEmpty(text))
         {
             return;
         }
-        
+
         var startMs = vp.Position * 1000.0;
         var duration = Se.Settings.General.NewEmptyDefaultMs;
         var endMs = startMs + duration;
@@ -9462,6 +9463,7 @@ public partial class MainViewModel :
 
         _subtitleFileName = saveAsResult.FileName;
         _subtitle.FileName = saveAsResult.FileName;
+        _converted = false;
         _lastOpenSaveFormat = saveAsResult.SubtitleFormat;
         SelectedSubtitleFormat = saveAsResult.SubtitleFormat;
         var result = await SaveSubtitle();
@@ -11938,11 +11940,14 @@ public partial class MainViewModel :
         if (subtitlesAtPosition.Count == 0)
         {
             MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
-            
-            var clipboardText =  Window.Clipboard.GetTextAsync().Result;
-            if (!string.IsNullOrEmpty(clipboardText))
+
+            if (Window != null && Window.Clipboard != null)
             {
-                MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = true;
+                var clipboardText = Window.Clipboard.TryGetTextAsync().Result;
+                if (!string.IsNullOrEmpty(clipboardText))
+                {
+                    MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = true;
+                }
             }
 
             return;
