@@ -301,6 +301,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerSplit { get; set; }
     public Separator MenuItemAudioVisualizerSeparator1 { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertAtPosition { get; set; }
+    public MenuItem MenuItemAudioVisualizerPasteFromClipboardMenuItem { get; set; }
     public MenuItem MenuItemAudioVisualizerDeleteAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerSplitAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerMergeWithPrevious { get; set; }
@@ -376,6 +377,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSplit = new MenuItem();
         MenuItemAudioVisualizerSeparator1 = new Separator();
         MenuItemAudioVisualizerInsertAtPosition = new MenuItem();
+        MenuItemAudioVisualizerPasteFromClipboardMenuItem = new MenuItem();
         MenuItemAudioVisualizerDeleteAtPosition = new MenuItem();
         MenuItemAudioVisualizerSplitAtPosition = new MenuItem();
         MenuItemAudioVisualizerMergeWithPrevious = new MenuItem();
@@ -2254,8 +2256,7 @@ public partial class MainViewModel :
 
         _shortcutManager.ClearKeys();
     }
-
-
+    
     [RelayCommand]
     private async Task ColumnPasteFromClipboard()
     {
@@ -6639,6 +6640,30 @@ public partial class MainViewModel :
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
         FocusEditTextBox();
+        _updateAudioVisualizer = true;
+    }
+    
+    [RelayCommand]
+    private async Task WaveformPasteFromClipboard()
+    {
+        var vp = GetVideoPlayerControl();
+        if (Window == null || vp == null || AudioVisualizer == null)
+        {
+            return;
+        }
+        
+        var text = await Window.Clipboard.GetTextAsync();
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+        
+        var startMs = vp.Position * 1000.0;
+        var duration = Se.Settings.General.NewEmptyDefaultMs;
+        var endMs = startMs + duration;
+        var newParagraph = new SubtitleLineViewModel(new Paragraph(text, startMs, endMs), SelectedSubtitleFormat);
+        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        SelectAndScrollToSubtitle(newParagraph);
         _updateAudioVisualizer = true;
     }
 
@@ -11865,6 +11890,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerInsertNewSelection.IsVisible = false;
         MenuIteminsertSubtitleFileAtPositionMenuItem.IsVisible = false;
         MenuItemAudioVisualizerInsertAtPosition.IsVisible = false;
+        MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = false;
         MenuItemAudioVisualizerInsertBefore.IsVisible = false;
         MenuItemAudioVisualizerInsertAfter.IsVisible = false;
         MenuItemAudioVisualizerSeparator1.IsVisible = false;
@@ -11912,6 +11938,13 @@ public partial class MainViewModel :
         if (subtitlesAtPosition.Count == 0)
         {
             MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
+            
+            var clipboardText =  Window.Clipboard.GetTextAsync().Result;
+            if (!string.IsNullOrEmpty(clipboardText))
+            {
+                MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = true;
+            }
+
             return;
         }
 

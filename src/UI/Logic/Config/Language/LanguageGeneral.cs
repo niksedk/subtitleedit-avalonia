@@ -218,6 +218,7 @@ public class LanguageGeneral
     public string InsertAfter { get; set; }
     public string InsertAtPositionAndFocusTextBox { get; set; }
     public string InsertAtPositionNoFocusTextBox { get; set; }
+    public string WaveformPasteFromClipboard { get; set; }
     public string InsertBefore { get; set; }
     public string InsertNewSelection { get; set; }
     public string InsertSubtitleAfterCurrentLine { get; set; }
@@ -798,6 +799,7 @@ public class LanguageGeneral
         InsertAfter = "Insert after";
         InsertAtPositionAndFocusTextBox = "Insert subtitle at video position and focus text box";
         InsertAtPositionNoFocusTextBox = "Insert subtitle at video position (no focus text box)";
+        WaveformPasteFromClipboard = "Paste from clipboard";
         InsertBefore = "Insert before";
         InsertNewSelection = "Insert new selection";
         InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";

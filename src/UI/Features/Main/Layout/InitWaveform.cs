@@ -84,6 +84,14 @@ public class InitWaveform
             flyout.Items.Add(insertNewMenuItem);
             vm.MenuItemAudioVisualizerInsertAtPosition = insertNewMenuItem;
 
+            var pasteFromClipboardMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.WaveformPasteFromClipboard,
+                Command = vm.WaveformPasteFromClipboardCommand,
+            };
+            flyout.Items.Add(pasteFromClipboardMenuItem);
+            vm.MenuItemAudioVisualizerPasteFromClipboardMenuItem = pasteFromClipboardMenuItem;
+
             var insertSubtitleFileAtPositionMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertSubtitleFileAtVideoPositionDotDotDot,
