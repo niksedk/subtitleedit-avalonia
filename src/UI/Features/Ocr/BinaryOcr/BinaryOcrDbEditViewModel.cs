@@ -76,11 +76,6 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void DeleteCurrentItem()
-    {
-    }
-
-    [RelayCommand]
     private async Task Update()
     {
         var item = SelectedCurrentCharacterItem;
@@ -98,6 +93,9 @@ public partial class BinaryOcrDbEditViewModel : ObservableObject
 
         item.Text = ItemText;
         item.Italic = IsItemItalic;
+
+        _binaryImageCompareDatabase.Save();
+
         Close();
     }
 

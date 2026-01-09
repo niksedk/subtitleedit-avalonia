@@ -88,7 +88,7 @@ public class LanguageOcr
         EditNOcrDatabase = "Edit nOCR database";
         ZoomFactorX = "Zoom factor: {0}x";
         ExpandInfoX = "Expand count: {0}";
-        EditNOcrDatabaseXWithYItems = "Edit nOCR database {0} with {1} items";
+        EditNOcrDatabaseXWithYItems = "Edit nOCR database {0} with {1:#,###,##0} items";
         NewNOcrDatabase = "New nOCR database";
         RenameNOcrDatabase = "Rename nOCR database";
         NOcrDatabase = "nOCR database";

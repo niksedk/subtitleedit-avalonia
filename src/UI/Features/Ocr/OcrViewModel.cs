@@ -442,7 +442,7 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.google.com/search?q=" + Utilities.UrlEncode(selectedWord.ToString())));
+        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.google.com/search?q=" + Utilities.UrlEncode(selectedWord.Word.Word)));
     }
 
 
