@@ -1,9 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
@@ -192,7 +194,7 @@ public static class UiUtil
 
     public static Button MakeButton(string text, IRelayCommand? command, object? parameter = null)
     {
-        return new Button
+        var button = new Button
         {
             Content = text,
             Margin = new Thickness(4, 0),
@@ -205,6 +207,16 @@ public static class UiUtil
             Command = command,
             CommandParameter = parameter
         };
+
+        if (Se.Settings.Appearance.UseFocusedButtonBackgroundColor)
+        {
+            var focusStyle = new Style(x => x.OfType<Button>().Class(":focus"));
+            focusStyle.Setters.Add(new Setter(Button.BackgroundProperty, new SolidColorBrush(Se.Settings.Appearance.FocusedButtonBackgroundColor.FromHexToColor())));
+            //focusStyle.Setters.Add(new Setter(Button.ForegroundProperty, Brushes.White));
+            button.Styles.Add(focusStyle);
+        }
+
+        return button;
     }
 
     public static Button MakeBrowseButton(IRelayCommand? command)

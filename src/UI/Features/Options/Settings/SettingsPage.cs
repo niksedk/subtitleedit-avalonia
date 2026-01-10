@@ -500,6 +500,16 @@ public class SettingsPage : UserControl
                     UiUtil.MakeLabel(Se.Language.General.RequiresRestart).WithMarginLeft(5).WithOpacity(0.6),
                 }
             }),
+            MakeCheckboxSetting(Se.Language.Options.Settings.UseFocusedButtonBackgroundColor, nameof(_vm.UseFocusedButtonBackgroundColor)),
+            new SettingsItem(Se.Language.Options.Settings.FocusedButtonBackgroundColor, () => new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Children =
+                {
+                    UiUtil.MakeColorPicker(_vm, nameof(_vm.FocusedButtonBackgroundColor)),
+                    UiUtil.MakeLabel(Se.Language.General.RequiresRestart).WithMarginLeft(5).WithOpacity(0.6),
+                }
+            }),
             new SettingsItem(Se.Language.Options.Settings.UiFont, () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SelectedFontName))),
             new SettingsItem(Se.Language.Options.Settings.SubtitleTextBoxAndGridFontName,
                 () => UiUtil.MakeComboBox(_vm.FontNames, _vm, nameof(_vm.SubtitleTextBoxAndGridFontName))),

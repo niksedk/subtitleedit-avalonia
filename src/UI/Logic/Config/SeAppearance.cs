@@ -22,6 +22,8 @@ public class SeAppearance
     public bool GridCompactMode { get; set; }
     public string BookmarkColor { get; set; }
     public string DarkModeBackgroundColor { get; set; }
+    public bool UseFocusedButtonBackgroundColor { get; set; }
+    public string FocusedButtonBackgroundColor { get; set; }
     public string GridLinesAppearance { get; set; }
     public bool ShowHorizontalLineAboveToolbar { get; set; }
 
@@ -63,6 +65,8 @@ public class SeAppearance
         SubtitleGridFormattingType = (int)SubtitleGridFormattingTypes.ShowFormatting;
         GridLinesAppearance = DataGridGridLinesVisibility.None.ToString();
         DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();
+        UseFocusedButtonBackgroundColor = true;
+        FocusedButtonBackgroundColor = new Color(99, 30, 144, 255).FromColorToHex();
         BookmarkColor = Colors.Gold.FromColorToHex();
         GridCompactMode = true;
         ShowLayer = true;

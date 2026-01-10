@@ -197,6 +197,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
     [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
     [ObservableProperty] private Color _darkModeBackgroundColor;
+    [ObservableProperty] private bool _useFocusedButtonBackgroundColor;
+    [ObservableProperty] private Color _focusedButtonBackgroundColor;
     [ObservableProperty] private Color _bookmarkColor;
     [ObservableProperty] private bool _isEditCustomContinuationStyleVisible;
     [ObservableProperty] private bool _isMpvChosen;
@@ -522,6 +524,8 @@ public partial class SettingsViewModel : ObservableObject
         ShowHorizontalLineAboveToolbar = appearance.ShowHorizontalLineAboveToolbar;
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
         DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
+        UseFocusedButtonBackgroundColor = appearance.UseFocusedButtonBackgroundColor;
+        FocusedButtonBackgroundColor = appearance.FocusedButtonBackgroundColor.FromHexToColor();
         BookmarkColor = appearance.BookmarkColor.FromHexToColor();
         ShowUpDownStartTime = appearance.ShowUpDownStartTime;
         ShowUpDownEndTime = appearance.ShowUpDownEndTime;
@@ -922,6 +926,8 @@ public partial class SettingsViewModel : ObservableObject
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
+        appearance.UseFocusedButtonBackgroundColor = UseFocusedButtonBackgroundColor;
+        appearance.FocusedButtonBackgroundColor = FocusedButtonBackgroundColor.FromColorToHex();
         appearance.BookmarkColor = BookmarkColor.FromColorToHex();
         appearance.ShowUpDownStartTime = ShowUpDownStartTime;
         appearance.ShowUpDownEndTime = ShowUpDownEndTime;

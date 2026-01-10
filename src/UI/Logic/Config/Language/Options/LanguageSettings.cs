@@ -230,6 +230,8 @@ public class LanguageSettings
     public string SplitOddLinesAction { get; set; }
     public string WaveformSingleClickSetStartOrEndSelected { get; set; }
     public string WaveformSingleClickOffsetSelected { get; set; }
+    public string UseFocusedButtonBackgroundColor { get; set; }
+    public string FocusedButtonBackgroundColor { get; set; }
 
     public LanguageSettings()
     {
@@ -456,6 +458,8 @@ public class LanguageSettings
         SplitOddLinesAction = "Split odd lines action";
         WaveformSingleClickSetStartOrEndSelected = "Mouse single click + modifier set start or end of selected subtitle";
         WaveformSingleClickOffsetSelected = "Mouse single click + modifier offset selected subtitle";
+        UseFocusedButtonBackgroundColor = "Use focused button background color";
+        FocusedButtonBackgroundColor = "Focused button background color";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)
