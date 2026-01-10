@@ -358,11 +358,11 @@ public class AudioVisualizer : Control
         PointerWheelChanged += OnPointerWheelChanged;
         Tapped += (sender, e) =>
         {
-            if (Se.Settings.Waveform.SingleClickSelectsSubtitle)
+            if (Se.Settings.Waveform.SingleClickSelectsSubtitle && !_isCtrlDown && !_isAltDown && !_isShiftDown)
             {
                 var point = e.GetPosition(this);
                 var p = HitTestParagraph(point);
-                if (p != null && OnParagraphDoubleTapped != null) //TODO: new event
+                if (p != null && OnParagraphDoubleTapped != null)
                 {
                     var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
                     OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
