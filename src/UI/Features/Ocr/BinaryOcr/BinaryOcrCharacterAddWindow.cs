@@ -67,6 +67,7 @@ public class BinaryOcrCharacterAddWindow : Window
 
         vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
         vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
+        vm.TextBoxNew.PointerReleased += vm.TextBoxMacPointerReleased;
         var menuFlyout = new MenuFlyout();
         CharactersFlyoutMenuHelper.MakeFlyoutLetters(menuFlyout, vm.InsertSpecialCharacterCommand); 
         vm.TextBoxNew.ContextFlyout = menuFlyout;

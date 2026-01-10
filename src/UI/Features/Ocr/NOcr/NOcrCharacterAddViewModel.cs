@@ -50,6 +50,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private List<ImageSplitterItem2> _letters;
     private ImageSplitterItem2 _splitItem;
+
     public NOcrChar NOcrChar { get; private set; }
     public NOcrDrawingCanvasView NOcrDrawingCanvas { get; set; }
     public TextBox TextBoxNew { get; set; }
@@ -597,6 +598,18 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
                 ZoomOut();
                 e.Handled = true;
             }
+        }
+    }
+
+    internal void TextBoxMacPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (OperatingSystem.IsMacOS() &&
+            _isControlDown &&
+            sender is Control control)
+        {
+            var args = new ContextRequestedEventArgs(e);
+            control.RaiseEvent(args);
+            e.Handled = args.Handled;
         }
     }
 }

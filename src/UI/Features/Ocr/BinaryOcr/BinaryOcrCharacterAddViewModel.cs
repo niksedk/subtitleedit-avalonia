@@ -35,6 +35,7 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
 
     private List<ImageSplitterItem2> _letters;
     private ImageSplitterItem2 _splitItem;
+
     public BinaryOcrBitmap? BinaryOcrBitmap { get; private set; }
     public TextBox TextBoxNew { get; set; }
     public bool OkPressed { get; set; }
@@ -448,5 +449,17 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     internal void OnClosing(object? sender, WindowClosingEventArgs e)
     {
         UiUtil.SaveWindowPosition(Window);
+    }
+
+    internal void TextBoxMacPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (OperatingSystem.IsMacOS() &&
+            _isControlDown &&
+            sender is Control control)
+        {
+            var args = new ContextRequestedEventArgs(e);
+            control.RaiseEvent(args);
+            e.Handled = args.Handled;
+        }
     }
 }
