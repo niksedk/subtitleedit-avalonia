@@ -14,7 +14,7 @@ public class NOcrCharacterAddWindow : Window
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = string.Empty;
+        Bind(Window.TitleProperty, new Binding(nameof(vm.Title)));
         Width = 1200;
         Height = 700;
         MinWidth = 900;
@@ -67,6 +67,10 @@ public class NOcrCharacterAddWindow : Window
 
         vm.TextBoxNew.KeyDown += vm.TextBoxNewOnKeyDown;
         vm.TextBoxNew.KeyUp += vm.TextBoxNewOnKeyUp;
+
+        var menuFlyout = new MenuFlyout();
+        CharactersFlyoutMenuHelper.MakeFlyoutLetters(menuFlyout, vm.InsertSpecialCharacterCommand);
+        vm.TextBoxNew.ContextFlyout = menuFlyout;
 
         Activated += delegate
         {

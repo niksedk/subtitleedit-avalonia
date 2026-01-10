@@ -279,18 +279,14 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
-        if (BinaryOcrBitmap != null)
+        if (BinaryOcrBitmap == null || _db.FindExactMatch(BinaryOcrBitmap) >= 0)
         {
-            BinaryOcrBitmap.Text = NewText;
-            BinaryOcrBitmap.Italic = IsNewTextItalic;
-
-            // if (_firstBinaryOcrBitmap != null)
-            // {
-            //     BinaryOcrBitmap.Width = _firstBinaryOcrBitmap.Width;
-            //     BinaryOcrBitmap.Height = _firstBinaryOcrBitmap.Height;
-            //     BinaryOcrBitmap.NumberOfColoredPixels = _firstBinaryOcrBitmap.NumberOfColoredPixels;
-            // }
+            Close();
+            return;
         }
+
+        BinaryOcrBitmap.Text = NewText;
+        BinaryOcrBitmap.Italic = IsNewTextItalic;
         OkPressed = true;
         SaveSettings();
         Close();
@@ -323,6 +319,22 @@ public partial class BinaryOcrCharacterAddViewModel : ObservableObject
     {
         AbortPressed = true;
         Close();
+    }
+
+    [RelayCommand]
+    private void InsertSpecialCharacter(object parameter)
+    {
+        if (parameter is string str)
+        {
+            var selectionStart = TextBoxNew.SelectionStart;
+            NewText = NewText.Insert(selectionStart, str);
+            Dispatcher.UIThread.Post(() =>
+            {
+                TextBoxNew.SelectionStart = selectionStart + str.Length;
+                TextBoxNew.SelectionEnd = TextBoxNew.SelectionStart;
+                TextBoxNew.Focus();
+            });
+        }   
     }
 
     private void Close()

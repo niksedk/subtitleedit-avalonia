@@ -395,8 +395,24 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         ZoomFactorInfo = string.Format(Se.Language.Ocr.ZoomFactorX, NOcrDrawingCanvas.ZoomFactor);
     }
 
+    [RelayCommand]
+    private void InsertSpecialCharacter(object parameter)
+    {
+        if (parameter is string str)
+        {
+            var selectionStart = TextBoxNew.SelectionStart;
+            NewText = NewText.Insert(selectionStart, str);
+            Dispatcher.UIThread.Post(() =>
+            {
+                TextBoxNew.SelectionStart = selectionStart + str.Length;
+                TextBoxNew.SelectionEnd = TextBoxNew.SelectionStart;
+                TextBoxNew.Focus();
+            });
+        }
+    }
+
     private void Close()
-    {        
+    {
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
@@ -418,8 +434,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
     private void SetTitle()
     {
-        Title =
-            $"Add nOCR character for line  {_startFromNumber}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
+        Title = $"Add nOCR character for line  {_startFromNumber + 1}, character {_letters.IndexOf(_splitItem) + 1} of {_letters.Count} using database \"{Path.GetFileNameWithoutExtension(_nOcrDb.FileName)}\"";
     }
 
     internal void TextBoxNewOnKeyDown(object? sender, KeyEventArgs e)
