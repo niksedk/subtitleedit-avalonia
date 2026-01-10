@@ -128,8 +128,6 @@
     "durationMinutes": "Duration in minutes",
     "edit": "Edit",
     "editDotDotDot": "Edit...",
-    "editImagedBaseSubtitle": "Edit imaged-based subtitle",
-    "editImagedBaseSubtitleX": "Edit imaged-based subtitle: {0}",
     "editing": "Editing",
     "effect": "Effect",
     "enabled": "Enabled",
@@ -220,6 +218,7 @@
     "insertAfter": "Insert after",
     "insertAtPositionAndFocusTextBox": "Insert subtitle at video position and focus text box",
     "insertAtPositionNoFocusTextBox": "Insert subtitle at video position (no focus text box)",
+    "waveformPasteFromClipboard": "Paste from clipboard",
     "insertBefore": "Insert before",
     "insertNewSelection": "Insert new selection",
     "insertSubtitleAfterCurrentLine": "Insert subtitle after current line...",
@@ -581,7 +580,8 @@
     "offsetX": "Offset X",
     "offsetY": "Offset Y",
     "insertSubtitleFileAtVideoPositionDotDotDot": "Insert subtitle file at video position...",
-    "smart": "Smart"
+    "smart": "Smart",
+    "imagedBasedSubtitles": "Image-based subtitles"
   },
   "main": {
     "menu": {
@@ -615,6 +615,7 @@
       "rightToLeftMode": "R_ight-to-left mode",
       "modifySelectionDotDotDot": "Modify _selection...",
       "tools": "_Tools",
+      "toolsSelectedLines": "_Tools (selected lines)",
       "adjustDurations": "_Adjust durations...",
       "applyDurationLimits": "Apply duration _limits...",
       "batchConvert": "_Batch convert...",
@@ -1248,6 +1249,15 @@
       "netflixReportSaved": "Netflix quality report saved",
       "netFlixQualityReportSavedToX": "Netflix quality report saved to:\n {0}"
     },
+    "imageBasedEdit": {
+      "editImagedBaseSubtitle": "Edit imaged-based subtitle",
+      "editImagedBaseSubtitleX": "Edit imaged-based subtitle: {0}",
+      "resizeImagesDotDotDot": "Resize images...",
+      "adjustBrightnessDotDotDot": "Adjust brightness...",
+      "adjustAlphaDotDotDot": "Adjust alpha...",
+      "centerHorizontally": "Center horizontally",
+      "cropImages": "Crop images"
+    },
     "pickAlignmentTitle": "Choose alignment",
     "pickFontNameTitle": "Choose font name",
     "colorPickerTitle": "Choose color",
@@ -1651,6 +1661,7 @@
       "waveformGenerateSpectrogram": "Generate spectrogram",
       "waveformSpectrogramMode": "Spectrogram mode (works at generate time)",
       "waveformCenterOnSingleClick": "Center on single click",
+      "waveformSingleClickSelectsSubtitle": "Select subtitle on single click",
       "waveformPauseOnSingleClick": "Pause on single click",
       "waveformDrawStyle": "Waveform draw style",
       "vlcWidRendering": "libVLC - Native Window ID rendering",
@@ -1872,6 +1883,8 @@
       "textBoxItalic": "Text box italic",
       "resetWaveformZoomAndSpeed": "Reset waveform zoom and playback speed",
       "togglePlaybackSpeed": "Toggle playback speed",
+      "playbackSpeedSlower": "Playback speed slower (play rate)",
+      "playbackSpeedFaster": "Playback speed faster (play rate)",
       "switchOriginalAndTranslationSelectedLines": "Switch original and translation (selected lines)",
       "mergeOriginalIntoTranslationSelectedLines": "Merge original and translation (selected lines)",
       "seekSilence": "Seek silence",
@@ -1981,7 +1994,9 @@
     "ocrImage": "OCR image",
     "oneColor": "One color (white)",
     "darknessThreshold": "Darkness threshold",
-    "editExportDotDotDot": "Edit/export..."
+    "editExportDotDotDot": "Edit/export...",
+    "editBinaryOcrDatabase": "Edit \u0022Binary image compare\u0022 database",
+    "binaryImageCompareDatabase": "\u0022Binary image compare\u0022 database"
   },
   "assa": {
     "stylesTitle": "Advanced Sub Station Alpha styles",
