@@ -43,6 +43,8 @@ public class SeWaveform
     public bool PauseOnSingleClick { get; set; }
     public bool CenterOnSingleClick { get; set; }
     public bool SingleClickSelectsSubtitle { get; set; }
+    public string SingleClickSetSelectedStartOrEndModifier { get; set; }
+    public string SingleClickSetSelectedOffsetModifier { get; set; }
 
 
     public SeWaveform()
@@ -72,6 +74,8 @@ public class SeWaveform
         WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Fancy.ToString();
         PauseOnSingleClick = true;
         CenterOnSingleClick = false;
+        SingleClickSetSelectedStartOrEndModifier = "Shift";
+        SingleClickSetSelectedOffsetModifier = "Alt";
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;

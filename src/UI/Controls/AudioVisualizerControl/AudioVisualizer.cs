@@ -358,14 +358,52 @@ public class AudioVisualizer : Control
         PointerWheelChanged += OnPointerWheelChanged;
         Tapped += (sender, e) =>
         {
+            var point = e.GetPosition(this);
             if (Se.Settings.Waveform.SingleClickSelectsSubtitle && !_isCtrlDown && !_isAltDown && !_isShiftDown)
             {
-                var point = e.GetPosition(this);
                 var p = HitTestParagraph(point);
                 if (p != null && OnParagraphDoubleTapped != null)
                 {
                     var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                    e.Handled = true;
                     OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
+                }
+            }
+
+            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Ctrl" ||
+                _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Shift" ||
+                _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Alt")
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    var distanceInSecondsFromSelectedStart = seconds - firstSelected.StartTime.TotalSeconds;
+                    var distanceInSecondsFromSelectedEnd = seconds - firstSelected.EndTime.TotalSeconds;
+                    if (Math.Abs(distanceInSecondsFromSelectedStart) < Math.Abs(distanceInSecondsFromSelectedEnd))
+                    {
+                        firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
+                    }
+                    else
+                    {
+                        firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
+                    }
+                    e.Handled = true;
+                    InvalidateVisual();
+                }
+            }
+
+            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Ctrl" ||
+                _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Shift" ||
+                _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Alt")
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
+                    e.Handled = true;
+                    InvalidateVisual();
                 }
             }
         };
