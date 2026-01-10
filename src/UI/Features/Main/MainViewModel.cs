@@ -7033,6 +7033,54 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void WaveformVerticalZoomIn()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.VerticalZoomFactor = Math.Max(Math.Min(AudioVisualizer.VerticalZoomFactor - 0.1, AudioVisualizer.MaxZoomFactor), AudioVisualizer.MinZoomFactor);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformVerticalZoomOut()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.VerticalZoomFactor = Math.Max(Math.Min(AudioVisualizer.VerticalZoomFactor + 0.1, AudioVisualizer.MaxZoomFactor), AudioVisualizer.MinZoomFactor);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformHorizontalZoomIn()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.ZoomFactor = Math.Max(Math.Min(AudioVisualizer.ZoomFactor - 0.1, AudioVisualizer.MaxZoomFactor), AudioVisualizer.MinZoomFactor);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void WaveformHorizontalZoomOut()
+    {
+        if (AudioVisualizer == null)
+        {
+            return;
+        }
+
+        AudioVisualizer.ZoomFactor = Math.Max(Math.Min(AudioVisualizer.ZoomFactor + 0.1, AudioVisualizer.MaxZoomFactor), AudioVisualizer.MinZoomFactor);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void TogglePlaybackSpeed()
     {
         var vp = GetVideoPlayerControl();

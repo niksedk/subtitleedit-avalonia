@@ -238,6 +238,10 @@ public class LanguageSettingsShortcuts
     public string ShowMediaInformation { get; set; }
     public string ChooseSubtitleFormat { get; set; }
     public string TrimWhitespaceSelectedLines { get; set; }
+    public string WaveformHorizontalZoomInCommand { get; set; }
+    public string WaveformHorizontalZoomOutCommand { get; set; }
+    public string WaveformVerticalZoomInCommand { get; set; }
+    public string WaveformVerticalZoomOutCommand { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -479,5 +483,9 @@ public class LanguageSettingsShortcuts
         ShowMediaInformation = "Show media information";
         ChooseSubtitleFormat = "Choose subtitle format";
         TrimWhitespaceSelectedLines = "Trim whitespace (selected lines)";
+        WaveformHorizontalZoomInCommand = "Waveform horizontal zoom in";
+        WaveformHorizontalZoomOutCommand = "Waveform horizontal zoom out";
+        WaveformVerticalZoomInCommand = "Waveform vertical zoom in";
+        WaveformVerticalZoomOutCommand = "Waveform vertical zoom out";
     }
 }

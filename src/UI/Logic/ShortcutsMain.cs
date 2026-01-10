@@ -226,7 +226,10 @@ public static class ShortcutsMain
         { nameof(MainViewModel.WaveformSetEndAndStartOfNextAfterGapCommand), Se.Language.Options.Shortcuts.WaveformSetEndAndStartOfNextAfterGap },
         { nameof(MainViewModel.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand), Se.Language.Options.Shortcuts.WaveformSetEndAndStartOfNextAfterGapAndGoToNext },
         { nameof(MainViewModel.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), Se.Language.Options.Shortcuts.WaveformSetStartAndSetEndOfPreviousMinusGap },
-        { nameof(MainViewModel.FetchFirstWordFromNextSubtitleCommand), Se.Language.Options.Shortcuts.FetchFirstWordFromNextSubtitle },
+        { nameof(MainViewModel.WaveformHorizontalZoomInCommand), Se.Language.Options.Shortcuts.WaveformHorizontalZoomInCommand },
+        { nameof(MainViewModel.WaveformHorizontalZoomOutCommand), Se.Language.Options.Shortcuts.WaveformHorizontalZoomOutCommand },
+        { nameof(MainViewModel.WaveformVerticalZoomInCommand), Se.Language.Options.Shortcuts.WaveformVerticalZoomInCommand },
+        { nameof(MainViewModel.WaveformVerticalZoomOutCommand), Se.Language.Options.Shortcuts.WaveformVerticalZoomOutCommand },
         { nameof(MainViewModel.MoveLastWordToNextSubtitleCommand), Se.Language.Options.Shortcuts.MoveLastWordToNextSubtitle },
         { nameof(MainViewModel.MoveLastWordFromFirstLineDownCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MoveLastWordFromFirstLineDownCurrentSubtitle },
         { nameof(MainViewModel.MoveFirstWordFromNextLineUpCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MoveFirstWordFromNextLineUpCurrentSubtitle },
@@ -437,6 +440,10 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand, nameof(vm.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand, nameof(vm.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformHorizontalZoomInCommand, nameof(vm.WaveformHorizontalZoomInCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformHorizontalZoomOutCommand, nameof(vm.WaveformHorizontalZoomOutCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformVerticalZoomInCommand, nameof(vm.WaveformVerticalZoomInCommand), ShortcutCategory.Waveform);
+        AddShortcut(shortcuts, vm.WaveformVerticalZoomOutCommand, nameof(vm.WaveformVerticalZoomOutCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.ToggleShotChangesAtVideoPositionCommand, nameof(vm.ToggleShotChangesAtVideoPositionCommand), ShortcutCategory.Waveform);
         AddShortcut(shortcuts, vm.ShowWaveformSeekSilenceCommand, nameof(vm.ShowWaveformSeekSilenceCommand), ShortcutCategory.Waveform);
 

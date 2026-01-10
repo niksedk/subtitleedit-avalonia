@@ -492,6 +492,8 @@ public class AudioVisualizer : Control
         }
     }
 
+    public const double MinZoomFactor = 0.1;
+    public const double MaxZoomFactor = 20.0;
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         _lastMouseWheelScroll = Environment.TickCount64;
@@ -504,14 +506,14 @@ public class AudioVisualizer : Control
         {
             var newZoomFactor = ZoomFactor + delta / 10.0;
 
-            if (newZoomFactor < 0.1)
+            if (newZoomFactor < MinZoomFactor)
             {
-                newZoomFactor = 0.1;
+                newZoomFactor = MinZoomFactor;
             }
 
-            if (newZoomFactor > 20.0)
+            if (newZoomFactor > MaxZoomFactor)
             {
-                newZoomFactor = 20.0;
+                newZoomFactor = MaxZoomFactor;
             }
 
             ZoomFactor = newZoomFactor;
@@ -524,14 +526,14 @@ public class AudioVisualizer : Control
         {
             var newZoomFactor = VerticalZoomFactor + delta / 10.0;
 
-            if (newZoomFactor < 0.1)
+            if (newZoomFactor < MinZoomFactor)
             {
-                newZoomFactor = 0.1;
+                newZoomFactor = MinZoomFactor;
             }
 
-            if (newZoomFactor > 20.0)
+            if (newZoomFactor > MaxZoomFactor)
             {
-                newZoomFactor = 20.0;
+                newZoomFactor = MaxZoomFactor;
             }
 
             VerticalZoomFactor = newZoomFactor;
