@@ -1824,23 +1824,6 @@ public class AudioVisualizer : Control
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private double CalculateY(double value, double baseHeight, double halfWaveformHeight)
-    {
-        if (WavePeaks == null)
-        {
-            return halfWaveformHeight;
-        }
-
-        // Normalize the value to the control's height
-        var normalizedValue = value / WavePeaks.HighestPeak * VerticalZoomFactor;
-        var yOffset = normalizedValue * halfWaveformHeight;
-
-        // Ensure Y stays within bounds
-        var y = halfWaveformHeight - yOffset;
-        return Math.Max(0, Math.Min(Bounds.Height, y));
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double CalculateYOptimized(double value, double halfWaveformHeight, double highestPeak, double verticalZoomFactor, double boundsHeight)
     {
         // Normalize the value to the control's height
@@ -1927,7 +1910,6 @@ public class AudioVisualizer : Control
 
         return (double)index / WavePeaks.SampleRate;
     }
-
 
     public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex, List<SubtitleLineViewModel> selectedIndexes)
     {
