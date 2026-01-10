@@ -56,6 +56,15 @@ public static class ShortcutsMain
         { nameof(MainViewModel.DeleteSelectedLinesCommand), Se.Language.Options.Shortcuts.ListDeleteSelection },
         { nameof(MainViewModel.DuplicateSelectedLinesCommand), Se.Language.Options.Shortcuts.DuplicateSelectedLines},
         { nameof(MainViewModel.ShowAlignmentPickerCommand), Se.Language.Options.Shortcuts.ShowAlignmentPicker},
+        { nameof(MainViewModel.DoAlignmentAn1Command), string.Format(Se.Language.General.AlignmentX, "an1")},
+        { nameof(MainViewModel.DoAlignmentAn2Command), string.Format(Se.Language.General.AlignmentX, "an2")},
+        { nameof(MainViewModel.DoAlignmentAn3Command), string.Format(Se.Language.General.AlignmentX, "an3")},
+        { nameof(MainViewModel.DoAlignmentAn4Command), string.Format(Se.Language.General.AlignmentX, "an4")},
+        { nameof(MainViewModel.DoAlignmentAn5Command), string.Format(Se.Language.General.AlignmentX, "an5")},
+        { nameof(MainViewModel.DoAlignmentAn6Command), string.Format(Se.Language.General.AlignmentX, "an6")},
+        { nameof(MainViewModel.DoAlignmentAn7Command), string.Format(Se.Language.General.AlignmentX, "an7")},
+        { nameof(MainViewModel.DoAlignmentAn8Command), string.Format(Se.Language.General.AlignmentX, "an8")},
+        { nameof(MainViewModel.DoAlignmentAn9Command), string.Format(Se.Language.General.AlignmentX, "an9")},
         { nameof(MainViewModel.AddOrEditBookmarkCommand), Se.Language.Options.Shortcuts.AddOrEditBookmark},
         { nameof(MainViewModel.ToggleBookmarkSelectedLinesNoTextCommand), Se.Language.Options.Shortcuts.ToggleBookmark},
         { nameof(MainViewModel.CopyTextFromOriginalToTranslationCommand), Se.Language.Options.Shortcuts.CopyTextFromOriginalSelectedLines},
@@ -294,6 +303,15 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.DeleteSelectedLinesCommand, nameof(vm.DeleteSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.DuplicateSelectedLinesCommand, nameof(vm.DuplicateSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.ShowAlignmentPickerCommand, nameof(vm.ShowAlignmentPickerCommand), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn1Command, nameof(vm.DoAlignmentAn1Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn2Command, nameof(vm.DoAlignmentAn2Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn3Command, nameof(vm.DoAlignmentAn3Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn4Command, nameof(vm.DoAlignmentAn4Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn5Command, nameof(vm.DoAlignmentAn5Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn6Command, nameof(vm.DoAlignmentAn6Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn7Command, nameof(vm.DoAlignmentAn7Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn8Command, nameof(vm.DoAlignmentAn8Command), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.DoAlignmentAn9Command, nameof(vm.DoAlignmentAn9Command), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.AddOrEditBookmarkCommand, nameof(vm.AddOrEditBookmarkCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.ToggleBookmarkSelectedLinesNoTextCommand, nameof(vm.ToggleBookmarkSelectedLinesNoTextCommand), ShortcutCategory.SubtitleGrid);
         AddShortcut(shortcuts, vm.CopyTextFromOriginalToTranslationCommand, nameof(vm.CopyTextFromOriginalToTranslationCommand), ShortcutCategory.SubtitleGrid);

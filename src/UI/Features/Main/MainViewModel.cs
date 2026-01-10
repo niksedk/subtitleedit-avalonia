@@ -5085,6 +5085,130 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void DoAlignmentAn1()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an1");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void DoAlignmentAn2()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an2");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn3()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an3");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn4()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an4");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn5()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an5");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn6()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an6");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn7()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an7");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn8()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an8");
+        _updateAudioVisualizer = true;
+    }
+
+
+    [RelayCommand]
+    private void DoAlignmentAn9()
+    {
+        var selected = SelectedSubtitle;
+        if (selected == null)
+        {
+            return;
+        }
+
+        SetAlignmentToSelected("an9");
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private async Task ShowFontNamePicker()
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? [];

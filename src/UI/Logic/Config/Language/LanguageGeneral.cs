@@ -582,6 +582,7 @@ public class LanguageGeneral
     public string InsertSubtitleFileAtVideoPositionDotDotDot { get; set; }
     public string Smart { get; set; }
     public string ImagedBasedSubtitles { get; set; }
+    public string AlignmentX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1163,5 +1164,6 @@ public class LanguageGeneral
         InsertSubtitleFileAtVideoPositionDotDotDot = "Insert subtitle file at video position...";
         Smart = "Smart";
         ImagedBasedSubtitles = "Image-based subtitles";
+        AlignmentX = "Set alignment \"{0}\" for selected lines";
     }
 }
