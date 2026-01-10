@@ -228,6 +228,8 @@ public class LanguageSettings
     public string SplitOddLineActionWeightTop { get; set; }
     public string SplitOddLineActionWeightBottom { get; set; }
     public string SplitOddLinesAction { get; set; }
+    public string WaveformSingleClickSetStartOrEndSelected { get; set; }
+    public string WaveformSingleClickOffsetSelected { get; set; }
 
     public LanguageSettings()
     {
@@ -441,7 +443,7 @@ public class LanguageSettings
         SubtitleGridFormattingShowFormatting = "Show formatting";
         SubtitleGridFormattingShowTags = "Show tags";
         WaveformParagraphBackgroundColor = "Waveform subtitle background color";
-        WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";        
+        WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";
         SaveAsBehaviorUseSubtitleVideoFilename = "Use subtitle/video file name";
         SaveAsBehaviorUseVideoSubtitleFilename = "Use video/subtitle file name";
         SaveAsBehaviorUseVideoFileName = "Use video file name";
@@ -452,6 +454,8 @@ public class LanguageSettings
         SplitOddLineActionWeightTop = "Weight top";
         SplitOddLineActionWeightBottom = "Weight bottom";
         SplitOddLinesAction = "Split odd lines action";
+        WaveformSingleClickSetStartOrEndSelected = "Mouse single click + modifier set start or end of selected subtitle";
+        WaveformSingleClickOffsetSelected = "Mouse single click + modifier offset selected subtitle";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

@@ -370,7 +370,7 @@ public class AudioVisualizer : Control
                 }
             }
 
-            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Ctrl" ||
+            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Control" ||
                 _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Shift" ||
                 _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Alt")
             {
@@ -393,7 +393,7 @@ public class AudioVisualizer : Control
                 }
             }
 
-            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Ctrl" ||
+            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Control" ||
                 _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Shift" ||
                 _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Alt")
             {

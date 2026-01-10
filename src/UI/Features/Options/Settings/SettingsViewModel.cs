@@ -173,6 +173,10 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformCenterOnSingleClick;
     [ObservableProperty] private bool _waveformSingleClickSelectsSubtitle;
 
+    [ObservableProperty] private ObservableCollection<string> _modifiers;
+    [ObservableProperty] private string _waveformSingleClickSetStartOrEndSelected;
+    [ObservableProperty] private string _waveformSingleClickOffsetSelected;
+
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
     [ObservableProperty] private ObservableCollection<string> _fontNames;
@@ -354,6 +358,15 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.Options.Settings.SplitOddLineActionWeightBottom,
         ];
         SelectedSplitOddNumberOfLinesAction = SplitOddNumberOfLinesActions[0];
+
+        Modifiers = new ObservableCollection<string>
+        {
+            OperatingSystem.IsMacOS() ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control,
+            Se.Language.Options.Shortcuts.Shift,
+            Se.Language.Options.Shortcuts.Alt,
+        };
+        WaveformSingleClickSetStartOrEndSelected = Modifiers[1];
+        WaveformSingleClickOffsetSelected = Modifiers[2];
 
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
@@ -579,6 +592,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformPauseOnSingleClick = Se.Settings.Waveform.PauseOnSingleClick;
         WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
         WaveformSingleClickSelectsSubtitle = Se.Settings.Waveform.SingleClickSelectsSubtitle;
+        WaveformSingleClickSetStartOrEndSelected = GetTranslationModifierFromSetting(Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier);
+        WaveformSingleClickOffsetSelected = GetTranslationModifierFromSetting(Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier);
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -635,6 +650,26 @@ public partial class SettingsViewModel : ObservableObject
         ExistsErrorLogFile = File.Exists(Se.GetErrorLogFilePath());
         ExistsWhisperLogFile = File.Exists(Se.GetWhisperLogFilePath());
         ExistsSettingsFile = File.Exists(Se.GetSettingsFilePath());
+    }
+
+    private string GetTranslationModifierFromSetting(string modifier)
+    {
+        if (modifier == "Control" || modifier == "Ctrl")
+        {
+            return OperatingSystem.IsMacOS() ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control;
+        }
+        else if (modifier == "Shift")
+        {
+            return Se.Language.Options.Shortcuts.Shift;
+        }
+        else if (modifier == "Alt")
+        {
+            return Se.Language.Options.Shortcuts.Alt;
+        }
+        else
+        {
+            return string.Empty;
+        }
     }
 
     private static string MapFromSplitOddActionToLanguageCode(string splitAction)
@@ -953,6 +988,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.PauseOnSingleClick = WaveformPauseOnSingleClick;
         Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
         Se.Settings.Waveform.SingleClickSelectsSubtitle = WaveformSingleClickSelectsSubtitle;
+        Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier = MapFromTranslationModifierToSetting(WaveformSingleClickSetStartOrEndSelected);
+        Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier = MapFromTranslationModifierToSetting(WaveformSingleClickOffsetSelected);
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;
@@ -1020,6 +1057,26 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         Se.SaveSettings();
+    }
+
+    private string MapFromTranslationModifierToSetting(string waveformSingleClickSetStartOrEndSelected)
+    {
+        if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Control || waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.ControlMac)
+        {
+            return "Control";
+        }
+        else if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Shift)
+        {
+            return "Shift";
+        }
+        else if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Alt)
+        {
+            return "Alt";
+        }
+        else
+        {
+            return string.Empty;
+        }
     }
 
     private string MapFromSplitOddActionTranslationToCode(string translation)
