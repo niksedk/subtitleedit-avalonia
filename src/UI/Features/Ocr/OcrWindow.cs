@@ -7,6 +7,7 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Styling;
+using AvaloniaEdit;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -333,6 +334,7 @@ public class OcrWindow : Window
         dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedOcrSubtitleItem)) { Source = vm });
         dataGridSubtitle.KeyDown += vm.SubtitleGridKeyDown;
         dataGridSubtitle.DoubleTapped += (s, e) => vm.SubtitleGridDoubleTapped();
+        dataGridSubtitle.PointerReleased += vm.DataGridSubtitleMacPointerReleased;
         vm.SubtitleGrid = dataGridSubtitle;
 
         // Create a Flyout for the DataGrid

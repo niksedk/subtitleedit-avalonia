@@ -348,6 +348,8 @@ public partial class OcrViewModel : ObservableObject
             vm.IsFontBold = TextBoxFontWeight == FontWeight.Bold;
         });
 
+        _isCtrlDown = false;
+
         if (!result.OkPressed || result.SelectedFontName == null)
         {
             return;
@@ -367,6 +369,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         var result = await _windowService.ShowDialogAsync<GetDictionariesWindow, GetDictionariesViewModel>(Window!);
+        _isCtrlDown = false;
         if (result.OkPressed && result.SelectedDictionary != null)
         {
             LoadDictionaries();
@@ -405,6 +408,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToNamesListWindow, AddToNamesListViewModel>(Window,
             vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
+        _isCtrlDown = false;
     }
 
     [RelayCommand]
@@ -418,6 +422,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToUserDictionaryWindow, AddToUserDictionaryViewModel>(Window!,
             vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
+        _isCtrlDown = false;
     }
 
     [RelayCommand]
@@ -431,6 +436,7 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AddToOcrReplaceListWindow, AddToOcrReplaceListViewModel>(Window!,
             vm => { vm.Initialize(selectedWord.Word.Word, Dictionaries.ToList(), SelectedDictionary); });
+        _isCtrlDown = false;
     }
 
     [RelayCommand]
@@ -455,6 +461,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         var result = await _windowService.ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(Window, vm => { vm.Initialize(string.Empty, _ocrSubtitle); });
+        _isCtrlDown = false;
     }
 
     [RelayCommand]
@@ -513,6 +520,7 @@ public partial class OcrViewModel : ObservableObject
                 vm.Initialize(nBmp.GetBitmap(), SelectedOcrSubtitleItem, _nOcrDb, SelectedNOcrMaxWrongPixels, letters,
                     matches);
             });
+        _isCtrlDown = false;
 
         if (result.AddBetterMatchPressed)
         {
@@ -523,6 +531,8 @@ public partial class OcrViewModel : ObservableObject
                         vm.Initialize(nBmp, item, letters, result.LetterIndex, _nOcrDb!, SelectedNOcrMaxWrongPixels,
                             _nOcrAddHistoryManager, false, false);
                     });
+
+            _isCtrlDown = false;
 
             if (characterAddResult.OkPressed)
             {
@@ -535,6 +545,8 @@ public partial class OcrViewModel : ObservableObject
             {
                 await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
                     vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+
+                _isCtrlDown = false;
             }
         }
     }
@@ -575,6 +587,8 @@ public partial class OcrViewModel : ObservableObject
                     matches);
             });
 
+        _isCtrlDown = false;
+
         if (result.AddBetterMatchPressed)
         {
             var characterAddResult =
@@ -584,6 +598,8 @@ public partial class OcrViewModel : ObservableObject
                         vm.Initialize(nBmp, item, letters, result.LetterIndex, db, SelectedNOcrMaxWrongPixels,
                             _binaryOcrAddHistoryManager, false, false);
                     });
+
+            _isCtrlDown = false;
 
             if (characterAddResult.OkPressed && characterAddResult.BinaryOcrBitmap != null)
             {
@@ -596,6 +612,8 @@ public partial class OcrViewModel : ObservableObject
             {
                 await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
                     vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+
+                _isCtrlDown = false;
             }
         }
     }
@@ -614,6 +632,8 @@ public partial class OcrViewModel : ObservableObject
         {
             await _windowService.ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
                 vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+
+            _isCtrlDown = false;
         }
 
         if (engine.EngineType == OcrEngineType.BinaryImageCompare)
@@ -626,6 +646,8 @@ public partial class OcrViewModel : ObservableObject
 
             await _windowService.ShowDialogAsync<BinaryOcrCharacterHistoryWindow, BinaryOcrCharacterHistoryViewModel>(Window!,
                 vm => { vm.Initialize(db, _binaryOcrAddHistoryManager); });
+
+            _isCtrlDown = false;
         }
     }
 
@@ -639,6 +661,7 @@ public partial class OcrViewModel : ObservableObject
         }
 
         await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize(Se.Language.Ocr.OcrImage, item.GetBitmap()); });
+        _isCtrlDown = false;
     }
 
     [RelayCommand]
@@ -652,6 +675,7 @@ public partial class OcrViewModel : ObservableObject
 
         var imageIndex = OcrSubtitleItems.IndexOf(item) + 1;
         var fileName = await _fileHelper.PickSaveSubtitleFile(Window!, ".png", $"image{imageIndex}", Se.Language.General.SaveImageAs);
+        _isCtrlDown = false;
         if (string.IsNullOrEmpty(fileName))
         {
             return;
@@ -679,6 +703,8 @@ public partial class OcrViewModel : ObservableObject
         var result = await _windowService.ShowDialogAsync<PickOllamaModelWindow, PickOllamaModelViewModel>(Window!,
             vm => { vm.Initialize(Se.Language.General.PickOllamaModel, OllamaModel, OllamaUrl); });
 
+        _isCtrlDown = false;
+
         if (result.OkPressed && result.SelectedModel != null)
         {
             OllamaModel = result.SelectedModel;
@@ -693,10 +719,14 @@ public partial class OcrViewModel : ObservableObject
             await _windowService.ShowDialogAsync<NOcrSettingsWindow, NOcrSettingsViewModel>(Window!,
                 vm => { vm.Initialize(_nOcrDb!); });
 
+        _isCtrlDown = false;
+
         if (result.EditPressed)
         {
             await _windowService.ShowDialogAsync<NOcrDbEditWindow, NOcrDbEditViewModel>(Window!,
                 vm => { vm.Initialize(_nOcrDb!); });
+
+            _isCtrlDown = false;
 
             return;
         }
@@ -734,6 +764,7 @@ public partial class OcrViewModel : ObservableObject
         {
             var newResult = await _windowService.ShowDialogAsync<NOcrDbNewWindow, NOcrDbNewViewModel>(Window!,
                 vm => { vm.Initialize(Se.Language.Ocr.NewNOcrDatabase, string.Empty); });
+            _isCtrlDown = false;
             if (newResult.OkPressed)
             {
                 if (!Directory.Exists(Se.OcrFolder))
@@ -773,6 +804,7 @@ public partial class OcrViewModel : ObservableObject
                     vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase,
                         Path.GetFileNameWithoutExtension(_nOcrDb!.FileName));
                 });
+            _isCtrlDown = false;
             if (newResult.OkPressed)
             {
                 if (!Directory.Exists(Se.OcrFolder))
@@ -817,10 +849,14 @@ public partial class OcrViewModel : ObservableObject
             await _windowService.ShowDialogAsync<BinaryOcrSettingsWindow, BinaryOcrSettingsViewModel>(Window!,
                 vm => { vm.Initialize(dbName); });
 
+        _isCtrlDown = false;
+
         if (result.EditPressed)
         {
             await _windowService.ShowDialogAsync<BinaryOcrDbEditWindow, BinaryOcrDbEditViewModel>(Window!,
                 vm => { vm.Initialize(SelectedImageCompareDatabase!); });
+
+            _isCtrlDown = false;
 
             return;
         }
@@ -901,6 +937,8 @@ public partial class OcrViewModel : ObservableObject
             {
                 vm.Initialize(Se.Language.Ocr.RenameNOcrDatabase, result.BinaryOcrDatabaseName);
             });
+
+            _isCtrlDown = false;
 
             if (newResult.OkPressed)
             {
@@ -1009,6 +1047,8 @@ public partial class OcrViewModel : ObservableObject
 
         var result = await _windowService
             .ShowDialogAsync<PreProcessingWindow, PreProcessingViewModel>(Window, vm => { vm.Initialize(_preProcessingSettings, selectedItem.GetSkBitmapClean()); });
+
+        _isCtrlDown = false;
 
         if (result.OkPressed)
         {
@@ -1305,6 +1345,9 @@ public partial class OcrViewModel : ObservableObject
 
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
                     vm => { vm.Initialize(PaddleOcrDownloadType.EngineCpu); });
+
+                _isCtrlDown = false;
+
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -1317,6 +1360,9 @@ public partial class OcrViewModel : ObservableObject
             {
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
                     vm => { vm.Initialize(PaddleOcrDownloadType.Models); });
+
+                _isCtrlDown = false;
+
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -1333,6 +1379,9 @@ public partial class OcrViewModel : ObservableObject
             {
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
                     vm => { vm.Initialize(PaddleOcrDownloadType.Models); });
+
+                _isCtrlDown = false;
+
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -1384,6 +1433,7 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 var result = await _windowService.ShowDialogAsync<DownloadGoogleLensOcrWindow, DownloadGoogleLensOcrViewModel>(Window);
+                _isCtrlDown = false;
                 if (!result.OkPressed)
                 {
                     PauseOcr();
@@ -1687,6 +1737,8 @@ public partial class OcrViewModel : ObservableObject
                                             SelectedNOcrMaxWrongPixels, _nOcrAddHistoryManager, true, true);
                                     });
 
+                            _isCtrlDown = false;
+
                             if (result.OkPressed)
                             {
                                 var letterBitmap = letters[letterIndex].NikseBitmap;
@@ -1717,6 +1769,8 @@ public partial class OcrViewModel : ObservableObject
                                 await _windowService
                                     .ShowDialogAsync<NOcrCharacterHistoryWindow, NOcrCharacterHistoryViewModel>(Window!,
                                         vm => { vm.Initialize(_nOcrDb!, _nOcrAddHistoryManager); });
+
+                                _isCtrlDown = false;
                             }
                         });
 
@@ -1764,6 +1818,7 @@ public partial class OcrViewModel : ObservableObject
                         var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
                             vm => { vm.Initialize(item.GetBitmap(), item.Text, unknownWord, suggestions); });
 
+
                         if (result.ChangeWholeTextPressed)
                         {
                             item.Text = result.WholeText;
@@ -1809,11 +1864,13 @@ public partial class OcrViewModel : ObservableObject
                 await tcs.Task;
                 if (!IsOcrRunning)
                 {
+                    _isCtrlDown = false;
                     return;
                 }
             }
         }
 
+        _isCtrlDown = false;
         IsOcrRunning = false;
     }
 
@@ -2816,6 +2873,18 @@ public partial class OcrViewModel : ObservableObject
         if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
         {
             _isCtrlDown = false;
+        }
+    }
+
+    internal void DataGridSubtitleMacPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (OperatingSystem.IsMacOS() &&
+            _isCtrlDown &&
+            sender is Control control)
+        {
+            var args = new ContextRequestedEventArgs(e);
+            control.RaiseEvent(args);
+            e.Handled = args.Handled;
         }
     }
 }
