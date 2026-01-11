@@ -883,6 +883,13 @@ public class AudioVisualizer : Control
         var currentIndex = _displayableParagraphs.IndexOf(_activeParagraph);
         var previous = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
+
+        if (_isShiftDown)
+        { 
+            previous = null;
+            next = null;
+        }
+
         if (NewSelectionParagraph == _activeParagraph)
         {
             previous = _displayableParagraphs.LastOrDefault(p => p.StartTime < _activeParagraph.StartTime);
