@@ -290,6 +290,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
     public MenuItem MenuItemAudioVisualizerInsertNewSelection { get; set; }
+    public MenuItem MenuItemAudioVisualizerPasteNewSelection { get; set; }
     public MenuItem MenuIteminsertSubtitleFileAtPositionMenuItem { get; set; }
     public MenuItem MenuItemAudioVisualizerDelete { get; set; }
     public MenuItem MenuItemAudioVisualizerInsertBefore { get; set; }
@@ -368,6 +369,7 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog = new MenuItem();
         MenuItemMerge = new MenuItem();
         MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
+        MenuItemAudioVisualizerPasteNewSelection = new MenuItem();
         MenuIteminsertSubtitleFileAtPositionMenuItem = new MenuItem();
         MenuItemAudioVisualizerDelete = new MenuItem();
         MenuItemAudioVisualizerInsertBefore = new MenuItem();
@@ -6756,6 +6758,35 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task WaveformNewSelectionPasteFromClipboard()
+    {
+        var vp = GetVideoPlayerControl();
+        if (Window == null || Window.Clipboard == null || vp == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        var newParagraph = AudioVisualizer.NewSelectionParagraph;
+        if (newParagraph == null)
+        {
+            return;
+        }
+
+        var text = await Window.Clipboard.TryGetTextAsync();
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        newParagraph.Text = text.Trim();
+        _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        AudioVisualizer.NewSelectionParagraph = null;
+        SelectAndScrollToSubtitle(newParagraph);
+        Renumber();
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private async Task WaveformPasteFromClipboard()
     {
         var vp = GetVideoPlayerControl();
@@ -12050,6 +12081,7 @@ public partial class MainViewModel :
     public void AudioVisualizerFlyoutMenuOpening(object sender, AudioVisualizer.ContextEventArgs e)
     {
         MenuItemAudioVisualizerInsertNewSelection.IsVisible = false;
+        MenuItemAudioVisualizerPasteNewSelection.IsVisible = false;
         MenuIteminsertSubtitleFileAtPositionMenuItem.IsVisible = false;
         MenuItemAudioVisualizerInsertAtPosition.IsVisible = false;
         MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = false;
@@ -12066,6 +12098,9 @@ public partial class MainViewModel :
         if (e.NewParagraph != null)
         {
             MenuItemAudioVisualizerInsertNewSelection.IsVisible = true;
+
+            var text = Window?.Clipboard?.TryGetTextAsync().Result;
+            MenuItemAudioVisualizerPasteNewSelection.IsVisible = !string.IsNullOrEmpty(text);
             return;
         }
 

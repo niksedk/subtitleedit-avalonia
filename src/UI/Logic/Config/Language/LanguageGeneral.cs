@@ -221,6 +221,7 @@ public class LanguageGeneral
     public string WaveformPasteFromClipboard { get; set; }
     public string InsertBefore { get; set; }
     public string InsertNewSelection { get; set; }
+    public string PasteNewSelection { get; set; }
     public string InsertSubtitleAfterCurrentLine { get; set; }
     public string InspectAdditions { get; set; }
     public string InvertSelection { get; set; }
@@ -803,6 +804,7 @@ public class LanguageGeneral
         WaveformPasteFromClipboard = "Paste from clipboard";
         InsertBefore = "Insert before";
         InsertNewSelection = "Insert new selection";
+        PasteNewSelection = "Paste clipboard text to new selection";
         InsertSubtitleAfterCurrentLine = "Insert subtitle after current line...";
         InspectAdditions = "Inspect additions...";
         InvertSelection = "Invert selection";

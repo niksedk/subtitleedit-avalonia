@@ -78,6 +78,14 @@ public class InitWaveform
             flyout.Items.Add(insertSelectionMenuItem);
             vm.MenuItemAudioVisualizerInsertNewSelection = insertSelectionMenuItem;
 
+            var pasteSelectionMenuItem = new MenuItem
+            {
+                Header = Se.Language.General.PasteNewSelection,
+                Command = vm.WaveformNewSelectionPasteFromClipboardCommand,
+            };
+            flyout.Items.Add(pasteSelectionMenuItem);
+            vm.MenuItemAudioVisualizerPasteNewSelection = pasteSelectionMenuItem;
+
             var insertNewMenuItem = new MenuItem
             {
                 Header = Se.Language.General.InsertAtPositionAndFocusTextBox,
@@ -89,7 +97,7 @@ public class InitWaveform
             var pasteFromClipboardMenuItem = new MenuItem
             {
                 Header = Se.Language.General.WaveformPasteFromClipboard,
-                Command = vm.WaveformPasteFromClipboardCommand,
+                Command = vm.WaveformNewSelectionPasteFromClipboardCommand,
             };
             flyout.Items.Add(pasteFromClipboardMenuItem);
             vm.MenuItemAudioVisualizerPasteFromClipboardMenuItem = pasteFromClipboardMenuItem;
@@ -456,7 +464,7 @@ public class InitWaveform
         };
         flyoutMore.Items.Add(menuItemHideControls);
 
-        
+
         if (setttings.ShowToolbarPlay)
         {
             controlsPanel.Children.Add(buttonPlay);
