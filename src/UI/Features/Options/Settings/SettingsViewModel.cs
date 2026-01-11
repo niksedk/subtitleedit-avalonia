@@ -182,11 +182,6 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformAllowOverlap;
     [ObservableProperty] private bool _waveformCenterOnSingleClick;
     [ObservableProperty] private bool _waveformSingleClickSelectsSubtitle;
-
-    [ObservableProperty] private ObservableCollection<string> _modifiers;
-    [ObservableProperty] private string _waveformSingleClickSetStartOrEndSelected;
-    [ObservableProperty] private string _waveformSingleClickOffsetSelected;
-
     [ObservableProperty] private ObservableCollection<string> _themes;
     [ObservableProperty] private string _selectedTheme;
     [ObservableProperty] private ObservableCollection<string> _fontNames;
@@ -370,15 +365,6 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.Options.Settings.SplitOddLineActionWeightBottom,
         ];
         SelectedSplitOddNumberOfLinesAction = SplitOddNumberOfLinesActions[0];
-
-        Modifiers = new ObservableCollection<string>
-        {
-            OperatingSystem.IsMacOS() ? Se.Language.Options.Shortcuts.ControlMac : Se.Language.Options.Shortcuts.Control,
-            Se.Language.Options.Shortcuts.Shift,
-            Se.Language.Options.Shortcuts.Alt,
-        };
-        WaveformSingleClickSetStartOrEndSelected = Modifiers[1];
-        WaveformSingleClickOffsetSelected = Modifiers[2];
 
         WaveformSpaceInfo = string.Empty;
         IsMpvChosen = true;
@@ -614,8 +600,6 @@ public partial class SettingsViewModel : ObservableObject
         WaveformAllowOverlap = Se.Settings.Waveform.AllowOverlap;
         WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
         WaveformSingleClickSelectsSubtitle = Se.Settings.Waveform.SingleClickSelectsSubtitle;
-        WaveformSingleClickSetStartOrEndSelected = GetTranslationModifierFromSetting(Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier);
-        WaveformSingleClickOffsetSelected = GetTranslationModifierFromSetting(Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier);
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -1020,8 +1004,6 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.AllowOverlap = WaveformAllowOverlap;
         Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
         Se.Settings.Waveform.SingleClickSelectsSubtitle = WaveformSingleClickSelectsSubtitle;
-        Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier = MapFromTranslationModifierToSetting(WaveformSingleClickSetStartOrEndSelected);
-        Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier = MapFromTranslationModifierToSetting(WaveformSingleClickOffsetSelected);
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;
@@ -1089,26 +1071,6 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         Se.SaveSettings();
-    }
-
-    private string MapFromTranslationModifierToSetting(string waveformSingleClickSetStartOrEndSelected)
-    {
-        if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Control || waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.ControlMac)
-        {
-            return "Control";
-        }
-        else if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Shift)
-        {
-            return "Shift";
-        }
-        else if (waveformSingleClickSetStartOrEndSelected == Se.Language.Options.Shortcuts.Alt)
-        {
-            return "Alt";
-        }
-        else
-        {
-            return string.Empty;
-        }
     }
 
     private string MapFromSplitOddActionTranslationToCode(string translation)

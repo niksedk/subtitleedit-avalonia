@@ -64,7 +64,6 @@ public partial class BatchErrorListViewModel : ObservableObject
             vm.Initialize(Se.Language.General.FileSaved,
                 string.Format(Se.Language.Tools.BatchConvert.ErrorsExportedX, Subtitles.Count), fileName, true, true);
         });
-
     }
 
     private static string CsvTextEncode(string s)

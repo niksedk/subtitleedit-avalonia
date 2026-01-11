@@ -370,32 +370,39 @@ public class AudioVisualizer : Control
                 }
             }
 
-            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Control" ||
-                _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Shift" ||
-                _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier == "Alt")
+            if (_isShiftDown)
             {
                 var firstSelected = AllSelectedParagraphs.FirstOrDefault();
                 var seconds = RelativeXPositionToSeconds(point.X);
                 if (firstSelected != null)
                 {
-                    var distanceInSecondsFromSelectedStart = seconds - firstSelected.StartTime.TotalSeconds;
-                    var distanceInSecondsFromSelectedEnd = seconds - firstSelected.EndTime.TotalSeconds;
-                    if (Math.Abs(distanceInSecondsFromSelectedStart) < Math.Abs(distanceInSecondsFromSelectedEnd))
+                    if (seconds < firstSelected.EndTime.TotalSeconds - 0.01)
                     {
                         firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
                     }
-                    else
+                    e.Handled = true;
+                    InvalidateVisual();
+                    return;
+                }
+            }
+
+            if (_isCtrlDown)
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    if (seconds > firstSelected.StartTime.TotalSeconds + 0.01)
                     {
                         firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
                     }
                     e.Handled = true;
                     InvalidateVisual();
+                    return;
                 }
             }
 
-            if (_isCtrlDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Control" ||
-                _isShiftDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Shift" ||
-                _isAltDown && Se.Settings.Waveform.SingleClickSetSelectedOffsetModifier == "Alt")
+            if (_isAltDown)
             {
                 var firstSelected = AllSelectedParagraphs.FirstOrDefault();
                 var seconds = RelativeXPositionToSeconds(point.X);
@@ -404,6 +411,7 @@ public class AudioVisualizer : Control
                     firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
                     e.Handled = true;
                     InvalidateVisual();
+                    return;
                 }
             }
         };
@@ -679,6 +687,12 @@ public class AudioVisualizer : Control
         if (IsReadOnly)
         {
             InvalidateVisual();
+            return;
+        }
+
+        if (_isCtrlDown || _isShiftDown || _isAltDown)
+        {
+            _interactionMode = InteractionMode.None;
             return;
         }
 
