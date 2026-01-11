@@ -985,7 +985,7 @@ public class AudioVisualizer : Control
 
                 if (SnapToShotChanges)
                 {
-                    var oneFrameSeconds = 0.042;// snap to frame before shot change - TODO: Get fps from video
+                    var oneFrameSeconds = 0; // Or should it be one frame before, like  0.042 (Get fps from video)
                     var nearestShotChange = ShotChangesHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newEnd));
                     if (nearestShotChange != null)
                     {
