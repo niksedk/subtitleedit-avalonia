@@ -10,6 +10,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,18 +43,20 @@ public partial class BatchErrorListViewModel : ObservableObject
         }
 
         var suggestedFileName = "Subtitle-file-errors";
-        var fileName = await _fileHelper.PickSaveFile(Window, ".csv" , suggestedFileName, Se.Language.General.Export);
+        var fileName = await _fileHelper.PickSaveFile(Window, ".csv", suggestedFileName, Se.Language.General.Export);
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        // export to csv
-        //TODO: implement export and save to utf-8 file
         var sb = new StringBuilder();
-        foreach (var line in Subtitles)
-        { 
+        sb.AppendLine("FileName,LineNumber,Text,Error");
+        foreach (var errorItem in Subtitles)
+        {
+            sb.AppendLine($"{CsvTextEncode(errorItem.FileName)},{errorItem.Number},{CsvTextEncode(errorItem.Text)},{CsvTextEncode(errorItem.Error)}");
         }
+
+        await File.WriteAllTextAsync(fileName, sb.ToString(), Encoding.UTF8);
 
         _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
         vm =>
@@ -62,6 +65,14 @@ public partial class BatchErrorListViewModel : ObservableObject
                 string.Format(Se.Language.Tools.BatchConvert.ErrorsExportedX, Subtitles.Count), fileName, true, true);
         });
 
+    }
+
+    private static string CsvTextEncode(string s)
+    {
+        s = s.Replace("\"", "\"\"");
+        s = s.Replace("\r", "\\r");
+        s = s.Replace("\n", "\\n");
+        return $"\"{s}\"";
     }
 
     [RelayCommand]
@@ -97,7 +108,7 @@ public partial class BatchErrorListViewModel : ObservableObject
                 }
             }
         }
-       
+
         HasErrors = Subtitles.Count > 0;
     }
 
