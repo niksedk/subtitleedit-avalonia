@@ -16,9 +16,11 @@ using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.ErrorList;
 using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
 using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchErrorList;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.RemoveTextForHearingImpaired;
 using Nikse.SubtitleEdit.Features.Translate;
@@ -732,9 +734,26 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         var stats = BatchStatics.CalculateGeneralStatistics(BatchItems.ToList());
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!,
-            vm => { vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true); });
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm => 
+        { 
+            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true); 
+        });
     }
+
+    [RelayCommand]
+    private async Task ShowErrorList()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<BatchErrorListWindow, BatchErrorListViewModel>(Window!, vm =>
+        {
+            vm.Initialize(BatchItems.ToList());
+        });
+    }
+
 
     [RelayCommand]
     private void CancelConvert()

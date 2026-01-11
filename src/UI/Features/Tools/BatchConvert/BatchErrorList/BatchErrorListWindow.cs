@@ -2,27 +2,28 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchErrorList;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
 namespace Nikse.SubtitleEdit.Features.Shared.ErrorList;
 
-public class ErrorListWindow : Window
+public class BatchErrorListWindow : Window
 {
-    public ErrorListWindow(ErrorListViewModel vm)
+    public BatchErrorListWindow(BatchErrorListViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.ListErrors;
         CanResize = true;
-        Width = 600;
+        Width = 1024;
         Height = 700;
         MinWidth = 600;
         MinHeight = 400;
         vm.Window = this;
         DataContext = vm;
 
-        var buttonGoTo = UiUtil.MakeButton(Se.Language.General.GoTo, vm.GoToCommand).WithBindIsEnabled(nameof(vm.HasErrors));
+        var buttonGoTo = UiUtil.MakeButton(Se.Language.General.ExportDotDotDot, vm.ExportCommand).WithBindIsEnabled(nameof(vm.HasErrors));
         var buttonCancel = UiUtil.MakeButtonDone(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonGoTo, buttonCancel);
 
@@ -54,7 +55,7 @@ public class ErrorListWindow : Window
         KeyDown += (s, e) => vm.OnKeyDown(e);
     }
 
-    private static Border MakeErrorsGridView(ErrorListViewModel vm)
+    private static Border MakeErrorsGridView(BatchErrorListViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -67,31 +68,36 @@ public class ErrorListWindow : Window
             DataContext = vm.Subtitles,
         };
 
-        dataGrid.DoubleTapped += vm.OnBookmarksGridDoubleTapped;
-
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
 
         // Columns
         dataGrid.Columns.Add(new DataGridTextColumn
         {
+            Header = Se.Language.General.FileName,
+            Binding = new Binding(nameof(BatchErrorListItem.FileName)),
+            CellTheme = UiUtil.DataGridNoBorderCellTheme,
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) 
+        });
+        dataGrid.Columns.Add(new DataGridTextColumn
+        {
             Header = Se.Language.General.NumberSymbol,
-            Binding = new Binding(nameof(ErrorListItem.Number)),
+            Binding = new Binding(nameof(BatchErrorListItem.Number)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         });
         dataGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Text,
-            Binding = new Binding(nameof(ErrorListItem.Text)),
+            Binding = new Binding(nameof(BatchErrorListItem.Text)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) 
         });
         dataGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Error,
-            Binding = new Binding(nameof(ErrorListItem.Error)),
+            Binding = new Binding(nameof(BatchErrorListItem.Error)),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
-            Width = new DataGridLength(1, DataGridLengthUnitType.Star) // star sizing to take all available space
+            Width = new DataGridLength(1, DataGridLengthUnitType.Star) 
         });
 
         dataGrid.DataContext = vm.Subtitles;
@@ -101,8 +107,6 @@ public class ErrorListWindow : Window
             Mode = BindingMode.TwoWay
         });
         dataGrid.SelectionChanged += vm.GridSelectionChanged;
-        dataGrid.DoubleTapped += (s, e) => vm.GoToCommand.Execute(null);    
-        dataGrid.KeyDown += (s, e) => vm.GridKeyDown(e);  
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }

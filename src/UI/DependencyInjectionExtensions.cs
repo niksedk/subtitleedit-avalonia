@@ -79,6 +79,7 @@ using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert.BatchErrorList;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
@@ -203,6 +204,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BatchConvertFixCommonErrorsSettingsViewModel>();
         collection.AddTransient<BatchConvertSettingsViewModel>();
         collection.AddTransient<BatchConvertViewModel>();
+        collection.AddTransient<BatchErrorListViewModel>();
         collection.AddTransient<BinaryAdjustAllTimesViewModel>();
         collection.AddTransient<BinaryAdjustAlphaViewModel>();
         collection.AddTransient<BinaryAdjustBrightnessViewModel>();

@@ -25,6 +25,7 @@ public class LanguageBatchConvert
     public string EditStyles { get; set; }
     public string EditProperties { get; set; }
     public string EditAttachments { get; set; }
+    public string ErrorsExportedX { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -49,5 +50,6 @@ public class LanguageBatchConvert
         EditStyles = "Edit styles";
         EditProperties = "Edit properties";
         EditAttachments = "Edit attachments";
+        ErrorsExportedX = "Errors exported: {0}";
     }
 }

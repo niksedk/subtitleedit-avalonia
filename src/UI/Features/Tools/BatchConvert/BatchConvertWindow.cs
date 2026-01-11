@@ -62,6 +62,11 @@ public class BatchConvertWindow : Window
                         Header = Se.Language.File.Statistics.Title,
                         Command = vm.StatisticsCommand,
                     },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.ListErrors,
+                        Command = vm.ShowErrorListCommand,
+                    },
                 }
             }
         };
