@@ -164,6 +164,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<IShortcutManager, ShortcutManager>();
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
         collection.AddTransient<ISplitManager, SplitManager>();
+        collection.AddTransient<ISubtitleFileService, SubtitleFileService>();
         collection.AddTransient<IThemeInitializer, ThemeInitializer>();
         collection.AddTransient<ITtsDownloadService, TtsDownloadService>();
         collection.AddTransient<IUndoRedoManager, UndoRedoManager>();
