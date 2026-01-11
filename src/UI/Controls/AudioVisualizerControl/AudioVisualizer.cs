@@ -918,8 +918,17 @@ public class AudioVisualizer : Control
                 double availableStart = previous != null ? previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds : 0;
                 double availableEnd = next != null ? next.StartTime.TotalSeconds - 0.001 - MinGapSeconds : double.MaxValue;
                 double availableSpace = availableEnd - availableStart;
-                if (availableSpace < _originalDurationSeconds)
-                {
+                if (availableSpace + 0.001 < _originalDurationSeconds ||
+                    (previous != null && _originalStartSeconds < previous.EndTime.TotalSeconds) ||
+                    (next != null && _originalEndSeconds > next.StartTime.TotalSeconds))
+                { // overlap - keep current duration
+                    if (newStart < 0 && _originalStartSeconds >= 0)
+                    {
+                        break;
+                    }
+
+                    _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
+                    _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + _originalDurationSeconds);
                     break;
                 }
 
@@ -1056,13 +1065,28 @@ public class AudioVisualizer : Control
 
     private SubtitleLineViewModel? HitTestParagraph(Point point)
     {
-        foreach (var p in _displayableParagraphs)
+        for (var i = 0; i < _displayableParagraphs.Count; i++)
         {
+            SubtitleLineViewModel p = _displayableParagraphs[i];
             double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
             double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
 
             if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
             {
+                if (i < _displayableParagraphs.Count - 1)
+                {
+                    var p2 = _displayableParagraphs[i + 1];
+                    double left2 = SecondsToXPosition(p2.StartTime.TotalSeconds - StartPositionSeconds);
+                    double right2 = SecondsToXPosition(p2.EndTime.TotalSeconds - StartPositionSeconds);
+                    if (point.X >= left2 - ResizeMargin && point.X <= right2 + ResizeMargin)
+                    {
+                        if (AllSelectedParagraphs.Contains(p2))
+                        {
+                            return p2;
+                        }
+                    }
+                }
+
                 return p;
             }
         }
