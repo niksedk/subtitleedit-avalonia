@@ -19,6 +19,7 @@ public static class Locator
 {
     public static IServiceProvider Services { get; set; } = default!;
 }
+
 public class MainView : ViewBase
 {
     private MainViewModel? _vm;

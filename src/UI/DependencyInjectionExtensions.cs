@@ -20,6 +20,7 @@ using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Features.Main.MainHelpers;
 using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Ocr.BinaryOcr;
 using Nikse.SubtitleEdit.Features.Ocr.Download;
@@ -159,6 +160,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<INamesList, SeNamesList>();
         collection.AddTransient<IOcrFixEngine2, OcrFixEngine2>();
         collection.AddTransient<IOcrInitializer, OcrInitializer>();
+        collection.AddTransient<IPasteFromClipboardHelper, PasteFromClipboardHelper>();
         collection.AddTransient<IShortcutManager, ShortcutManager>();
         collection.AddTransient<ISpellCheckManager, SpellCheckManager>();
         collection.AddTransient<ISplitManager, SplitManager>();

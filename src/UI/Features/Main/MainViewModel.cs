@@ -278,6 +278,7 @@ public partial class MainViewModel :
     private readonly IFontNameService _fontNameService;
     private readonly ISpellCheckManager _spellCheckManager;
     private readonly ICasingToggler _casingToggler;
+    private readonly IPasteFromClipboardHelper _pasteFromClipboardHelper;
 
     private bool IsEmpty => Subtitles.Count == 0 || (Subtitles.Count == 1 && string.IsNullOrEmpty(Subtitles[0].Text));
 
@@ -330,7 +331,8 @@ public partial class MainViewModel :
         IColorService colorService,
         IFontNameService fontNameService,
         ISpellCheckManager spellCheckManager,
-        ICasingToggler casingToggler)
+        ICasingToggler casingToggler,
+        IPasteFromClipboardHelper pasteFromClipboardHelper)
     {
         _fileHelper = fileHelper;
         _folderHelper = folderHelper;
@@ -348,6 +350,7 @@ public partial class MainViewModel :
         _fontNameService = fontNameService;
         _spellCheckManager = spellCheckManager;
         _casingToggler = casingToggler;
+        _pasteFromClipboardHelper = pasteFromClipboardHelper;
 
         _loading = true;
         Configuration.DataDirectoryOverride = Se.DataFolder;
@@ -2267,7 +2270,6 @@ public partial class MainViewModel :
         var text = await ClipboardHelper.GetTextAsync(Window);
         if (string.IsNullOrEmpty(text))
         {
-            _shortcutManager.ClearKeys();
             ShowStatus(Se.Language.Main.NoTextInClipboard);
             return;
         }
@@ -6770,12 +6772,13 @@ public partial class MainViewModel :
             return;
         }
 
-        var startMs = vp.Position * 1000.0;
-        var duration = Se.Settings.General.NewEmptyDefaultMs;
-        var endMs = startMs + duration;
-        var newParagraph = new SubtitleLineViewModel(new Paragraph(text, startMs, endMs), SelectedSubtitleFormat);
-        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
-        SelectAndScrollToSubtitle(newParagraph);
+        var linesInserted = _pasteFromClipboardHelper.PasteFromClipboard(text, vp.Position * 1000.0, Subtitles, SelectedSubtitleFormat);
+        Renumber();
+        if (linesInserted.Count == 1)
+        {
+            SelectAndScrollToSubtitle(linesInserted.First());
+        }
+
         _updateAudioVisualizer = true;
     }
 
