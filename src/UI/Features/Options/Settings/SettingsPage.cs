@@ -405,6 +405,7 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterOnSingleClick, nameof(_vm.WaveformCenterOnSingleClick)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAllowOverlap, nameof(_vm.WaveformAllowOverlap)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSingleClickSelectsSubtitle, nameof(_vm.WaveformSingleClickSelectsSubtitle)),
             new SettingsItem(Se.Language.Options.Settings.WaveformSingleClickSetStartOrEndSelected,
                 () => UiUtil.MakeComboBox(_vm.Modifiers, _vm, nameof(_vm.WaveformSingleClickSetStartOrEndSelected))),

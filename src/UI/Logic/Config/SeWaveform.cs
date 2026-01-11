@@ -45,7 +45,7 @@ public class SeWaveform
     public bool SingleClickSelectsSubtitle { get; set; }
     public string SingleClickSetSelectedStartOrEndModifier { get; set; }
     public string SingleClickSetSelectedOffsetModifier { get; set; }
-
+    public bool AllowOverlap { get; set; }
 
     public SeWaveform()
     {

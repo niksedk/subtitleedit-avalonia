@@ -884,7 +884,7 @@ public class AudioVisualizer : Control
         var previous = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
 
-        if (_isShiftDown)
+        if (_isShiftDown || Se.Settings.Waveform.AllowOverlap)
         { 
             previous = null;
             next = null;

@@ -170,6 +170,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
     [ObservableProperty] private bool _waveformPauseOnSingleClick;
+    [ObservableProperty] private bool _waveformAllowOverlap;
     [ObservableProperty] private bool _waveformCenterOnSingleClick;
     [ObservableProperty] private bool _waveformSingleClickSelectsSubtitle;
 
@@ -594,6 +595,7 @@ public partial class SettingsViewModel : ObservableObject
         WaveformSnapToShotChanges = Se.Settings.Waveform.SnapToShotChanges;
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
         WaveformPauseOnSingleClick = Se.Settings.Waveform.PauseOnSingleClick;
+        WaveformAllowOverlap = Se.Settings.Waveform.AllowOverlap;
         WaveformCenterOnSingleClick = Se.Settings.Waveform.CenterOnSingleClick;
         WaveformSingleClickSelectsSubtitle = Se.Settings.Waveform.SingleClickSelectsSubtitle;
         WaveformSingleClickSetStartOrEndSelected = GetTranslationModifierFromSetting(Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier);
@@ -992,6 +994,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.SnapToShotChanges = WaveformSnapToShotChanges;
         Se.Settings.Waveform.ShotChangesAutoGenerate = WaveformShotChangesAutoGenerate;
         Se.Settings.Waveform.PauseOnSingleClick = WaveformPauseOnSingleClick;
+        Se.Settings.Waveform.AllowOverlap = WaveformAllowOverlap;
         Se.Settings.Waveform.CenterOnSingleClick = WaveformCenterOnSingleClick;
         Se.Settings.Waveform.SingleClickSelectsSubtitle = WaveformSingleClickSelectsSubtitle;
         Se.Settings.Waveform.SingleClickSetSelectedStartOrEndModifier = MapFromTranslationModifierToSetting(WaveformSingleClickSetStartOrEndSelected);

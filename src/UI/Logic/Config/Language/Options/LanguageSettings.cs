@@ -218,6 +218,7 @@ public class LanguageSettings
     public string SubtitleGridFormattingShowTags { get; set; }
     public string WaveformParagraphBackgroundColor { get; set; }
     public string WaveformParagraphSelectedBackgroundColor { get; set; }
+    public string WaveformAllowOverlap { get; set; }
     public string SaveAsBehaviorUseSubtitleVideoFilename { get; set; }
     public string SaveAsBehaviorUseVideoSubtitleFilename { get; set; }
     public string SaveAsBehaviorUseVideoFileName { get; set; }
@@ -446,6 +447,7 @@ public class LanguageSettings
         SubtitleGridFormattingShowTags = "Show tags";
         WaveformParagraphBackgroundColor = "Waveform subtitle background color";
         WaveformParagraphSelectedBackgroundColor = "Waveform selected subtitle background color";
+        WaveformAllowOverlap = "Allow overlap (when moving/resizing)";
         SaveAsBehaviorUseSubtitleVideoFilename = "Use subtitle/video file name";
         SaveAsBehaviorUseVideoSubtitleFilename = "Use video/subtitle file name";
         SaveAsBehaviorUseVideoFileName = "Use video file name";
