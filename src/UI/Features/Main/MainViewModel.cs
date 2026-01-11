@@ -41,7 +41,6 @@ using Nikse.SubtitleEdit.Features.Help;
 using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Features.Main.MainHelpers;
 using Nikse.SubtitleEdit.Features.Ocr;
-using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
@@ -128,7 +127,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using MediaInfoViewViewModel = Nikse.SubtitleEdit.Features.Shared.MediaInfoView.MediaInfoViewViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
