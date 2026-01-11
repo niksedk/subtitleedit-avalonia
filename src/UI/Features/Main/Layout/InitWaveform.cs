@@ -5,6 +5,7 @@ using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
+using Nikse.SubtitleEdit.Core.Settings;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
@@ -19,6 +20,7 @@ public class InitWaveform
     public static Grid MakeWaveform(MainViewModel vm)
     {
         var languageHints = Se.Language.Main.Waveform;
+        var setttings = Se.Settings.Waveform;
         var shortcuts = ShortcutsMain.GetUsedShortcuts(vm);
 
         // Create main layout grid
@@ -35,20 +37,20 @@ public class InitWaveform
         {
             vm.AudioVisualizer = new AudioVisualizer
             {
-                DrawGridLines = Se.Settings.Waveform.DrawGridLines,
-                WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor(),
-                WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor(),
-                WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor(),
-                WaveformCursorColor = Se.Settings.Waveform.WaveformCursorColor.FromHexToColor(),
-                WaveformFancyHighColor = Se.Settings.Waveform.WaveformFancyHighColor.FromHexToColor(),
-                ParagraphBackground = Se.Settings.Waveform.ParagraphBackground.FromHexToColor(),
-                ParagraphSelectedBackground = Se.Settings.Waveform.ParagraphSelectedBackground.FromHexToColor(),
-                InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
+                DrawGridLines = setttings.DrawGridLines,
+                WaveformColor = setttings.WaveformColor.FromHexToColor(),
+                WaveformBackgroundColor = setttings.WaveformBackgroundColor.FromHexToColor(),
+                WaveformSelectedColor = setttings.WaveformSelectedColor.FromHexToColor(),
+                WaveformCursorColor = setttings.WaveformCursorColor.FromHexToColor(),
+                WaveformFancyHighColor = setttings.WaveformFancyHighColor.FromHexToColor(),
+                ParagraphBackground = setttings.ParagraphBackground.FromHexToColor(),
+                ParagraphSelectedBackground = setttings.ParagraphSelectedBackground.FromHexToColor(),
+                InvertMouseWheel = setttings.InvertMouseWheel,
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Height = double.NaN, // Auto height
-                WaveformDrawStyle = GetWaveformDrawStyle(Se.Settings.Waveform.WaveformDrawStyle),
+                WaveformDrawStyle = GetWaveformDrawStyle(setttings.WaveformDrawStyle),
                 MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0,
-                FocusOnMouseOver = Se.Settings.Waveform.FocusOnMouseOver,
+                FocusOnMouseOver = setttings.FocusOnMouseOver,
             };
             vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
             vm.AudioVisualizer.Height = double.NaN; // Auto height
@@ -60,7 +62,7 @@ public class InitWaveform
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
             vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
-            vm.AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
+            vm.AudioVisualizer.WaveformHeightPercentage = setttings.SpectrogramCombinedWaveformHeight;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
@@ -295,12 +297,21 @@ public class InitWaveform
         };
         Attached.SetIcon(buttonSetEnd, IconNames.RayEnd);
 
+        var buttonRemoveBlankLines = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.RemoveBlankLinesCommand,
+            FontWeight = FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RemoveBlankLines, shortcuts, nameof(vm.RemoveBlankLinesCommand)),
+        };
+        Attached.SetIcon(buttonRemoveBlankLines, IconNames.CardRemoveOutline);
+
         var iconHorizontal = new Icon
         {
             Value = IconNames.ArrowLeftRightBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom));
+        };
         var sliderHorizontalZoom = new Slider
         {
             Minimum = 0.1,
@@ -309,7 +320,7 @@ public class InitWaveform
             VerticalAlignment = VerticalAlignment.Center,
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomHorizontalHint, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformHorizontalZoom));
+        };
         sliderHorizontalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -325,7 +336,7 @@ public class InitWaveform
             Value = IconNames.ArrowUpDownBold,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(10, 0, 4, 0)
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom));
+        };
         var sliderVerticalZoom = new Slider
         {
             Minimum = 0.1,
@@ -335,7 +346,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformVerticalZoom));
+        };
         sliderVerticalZoom.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -355,7 +366,7 @@ public class InitWaveform
             Margin = new Thickness(0, 0, 10, 0),
             Focusable = true,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.VideoPosition, shortcuts),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformVideoPositionSlider));
+        };
         sliderPosition.TemplateApplied += (s, e) =>
         {
             if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -367,7 +378,7 @@ public class InitWaveform
         sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
         sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
 
-        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed).BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed));
+        var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
         var comboBoxSpeed = new ComboBox
         {
             VerticalAlignment = VerticalAlignment.Center,
@@ -378,7 +389,7 @@ public class InitWaveform
             Padding = new Thickness(2, 2, 0, 2),
             Background = Brushes.Transparent,
             BorderThickness = new Thickness(0),
-        }.BindIsVisible(vm, nameof(vm.ShowWaveformPlaybackSpeed));
+        };
         comboBoxSpeed.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Speeds)));
         comboBoxSpeed.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(vm.SelectedSpeed)) { Mode = BindingMode.TwoWay });
         comboBoxSpeed.SelectionChanged += (s, e) =>
@@ -445,18 +456,58 @@ public class InitWaveform
         };
         flyoutMore.Items.Add(menuItemHideControls);
 
-        controlsPanel.Children.Add(buttonPlay);
-        controlsPanel.Children.Add(toggleButtonRepeat);
-        controlsPanel.Children.Add(buttonNew);
-        controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
-        controlsPanel.Children.Add(buttonSetStart);
-        controlsPanel.Children.Add(buttonSetEnd);
-        controlsPanel.Children.Add(iconHorizontal);
-        controlsPanel.Children.Add(sliderHorizontalZoom);
-        controlsPanel.Children.Add(iconVertical);
-        controlsPanel.Children.Add(sliderVerticalZoom);
-        controlsPanel.Children.Add(sliderPosition);
-        controlsPanel.Children.Add(panelSpeed);
+        
+        if (setttings.ShowToolbarPlay)
+        {
+            controlsPanel.Children.Add(buttonPlay);
+        }
+
+        if (setttings.ShowToolbarRepeat)
+        {
+            controlsPanel.Children.Add(toggleButtonRepeat);
+        }
+
+        if (setttings.ShowToolbarNew)
+        {
+            controlsPanel.Children.Add(buttonNew);
+        }
+
+        if (setttings.ShowToolbarSetStartAndOffsetTheRest)
+        {
+            controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
+        }
+
+        if (setttings.ShowToolbarSetStart)
+        {
+            controlsPanel.Children.Add(buttonSetStart);
+        }
+
+        if (setttings.ShowToolbarSetEnd)
+        {
+            controlsPanel.Children.Add(buttonSetEnd);
+        }
+
+        if (setttings.ShowToolbarHorizontalZoom)
+        {
+            controlsPanel.Children.Add(iconHorizontal);
+            controlsPanel.Children.Add(sliderHorizontalZoom);
+        }
+
+        if (setttings.ShowToolbarVerticalZoom)
+        {
+            controlsPanel.Children.Add(iconVertical);
+            controlsPanel.Children.Add(sliderVerticalZoom);
+        }
+
+        if (setttings.ShowToolbarVideoPositionSlider)
+        {
+            controlsPanel.Children.Add(sliderPosition);
+        }
+
+        if (setttings.ShowToolbarPlaybackSpeed)
+        {
+            controlsPanel.Children.Add(panelSpeed);
+        }
 
         controlsPanel.Children.Add(toggleButtonAutoSelectOnPlay);
         controlsPanel.Children.Add(toggleButtonCenter);

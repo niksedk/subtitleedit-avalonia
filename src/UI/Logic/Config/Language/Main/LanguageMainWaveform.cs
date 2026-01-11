@@ -15,6 +15,7 @@ public class LanguageMainWaveform
     public string VideoPosition { get; set; }
     public string HideWaveformToolbar { get; set; }
     public string ResetZoomAndSpeed { get; set; }
+    public string RemoveBlankLines { get; set; }
 
     public LanguageMainWaveform()
     {
@@ -31,5 +32,6 @@ public class LanguageMainWaveform
         VideoPosition = "Video position {0}";
         HideWaveformToolbar = "Hide toolbar {0}";
         ResetZoomAndSpeed = "Reset zoom & playback speed {0}";
+        RemoveBlankLines = "Remove blank lines {0}";
     }
 }

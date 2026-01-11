@@ -10,10 +10,19 @@ public class SeWaveform
     public bool DrawGridLines { get; set; }
     public bool FocusTextBoxAfterInsertNew { get; set; }
     public int SpectrogramCombinedWaveformHeight { get; set; }
-    public bool ShowWaveformVerticalZoom { get; set; }
-    public bool ShowWaveformHorizontalZoom { get; set; }
-    public bool ShowWaveformVideoPositionSlider { get; set; }
-    public bool ShowWaveformPlaybackSpeed { get; set; }
+
+    public bool ShowToolbarPlay { get; set; }
+    public bool ShowToolbarRepeat { get; set; }
+    public bool ShowToolbarRemoveBlankLines { get; set; }
+    public bool ShowToolbarNew { get; set; }
+    public bool ShowToolbarSetStart { get; set; }
+    public bool ShowToolbarSetEnd { get; set; }
+    public bool ShowToolbarSetStartAndOffsetTheRest { get; set; }
+    public bool ShowToolbarVerticalZoom { get; set; }
+    public bool ShowToolbarHorizontalZoom { get; set; }
+    public bool ShowToolbarVideoPositionSlider { get; set; }
+    public bool ShowToolbarPlaybackSpeed { get; set; }
+
     public string WaveformColor { get; set; }
     public string WaveformBackgroundColor { get; set; }
     public string WaveformSelectedColor { get; set; }
@@ -65,10 +74,21 @@ public class SeWaveform
         SnapToShotChangesPixels = 8;
         SnapToShotChanges = true;
         ShotChangesAutoGenerate = false;
-        ShowWaveformVerticalZoom = true;
-        ShowWaveformHorizontalZoom = true;
-        ShowWaveformVideoPositionSlider = true;
-        ShowWaveformPlaybackSpeed = true;
+        ShowToolbarPlay = true;
+        ShowToolbarRepeat = true;
+        ShowToolbarRemoveBlankLines = false;
+        ShowToolbarNew = true;
+        ShowToolbarSetStart = true;
+        ShowToolbarSetEnd = true;
+        ShowToolbarSetStartAndOffsetTheRest = true;
+        ShowToolbarVerticalZoom = true;
+        ShowToolbarHorizontalZoom = true;
+        ShowToolbarVideoPositionSlider = true;
+        ShowToolbarPlaybackSpeed = true;
+        ShowToolbarVerticalZoom = true;
+        ShowToolbarHorizontalZoom = true;
+        ShowToolbarVideoPositionSlider = true;
+        ShowToolbarPlaybackSpeed = true;
         SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
         LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();
         WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Fancy.ToString();

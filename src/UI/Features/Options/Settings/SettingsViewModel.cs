@@ -146,10 +146,19 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private int _waveformSpectrogramCombinedWaveformHeight;
 
     [ObservableProperty] private bool _waveformShowToolbar;
-    [ObservableProperty] private bool _showWaveformVerticalZoom;
-    [ObservableProperty] private bool _showWaveformHorizontalZoom;
-    [ObservableProperty] private bool _showWaveformVideoPositionSlider;
-    [ObservableProperty] private bool _showWaveformPlaybackSpeed;
+
+    [ObservableProperty] private bool _showWaveformToolbarPlay;
+    [ObservableProperty] private bool _showWaveformToolbarRepeat;
+    [ObservableProperty] private bool _showWaveformToolbarRemoveBlankLines;
+    [ObservableProperty] private bool _showWaveformToolbarNew;
+    [ObservableProperty] private bool _showWaveformToolbarSetStart;
+    [ObservableProperty] private bool _showWaveformToolbarSetEnd;
+    [ObservableProperty] private bool _showWaveformToolbarSetStartAndOffsetTheRest;
+    [ObservableProperty] private bool _showWaveformToolbarVerticalZoom;
+    [ObservableProperty] private bool _showWaveformToolbarHorizontalZoom;
+    [ObservableProperty] private bool _showWaveformToolbarVideoPositionSlider;
+    [ObservableProperty] private bool _showWaveformToolbarPlaybackSpeed;
+
     [ObservableProperty] private bool _waveformFocusTextboxAfterInsertNew;
     [ObservableProperty] private string _waveformSpaceInfo;
     [ObservableProperty] private string _libMpvPath;
@@ -579,10 +588,17 @@ public partial class SettingsViewModel : ObservableObject
 
         WaveformSpectrogramCombinedWaveformHeight = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
 
-        ShowWaveformVerticalZoom = Se.Settings.Waveform.ShowWaveformVerticalZoom;
-        ShowWaveformHorizontalZoom = Se.Settings.Waveform.ShowWaveformHorizontalZoom;
-        ShowWaveformVideoPositionSlider = Se.Settings.Waveform.ShowWaveformVideoPositionSlider;
-        ShowWaveformPlaybackSpeed = Se.Settings.Waveform.ShowWaveformPlaybackSpeed;
+        ShowWaveformToolbarPlay = Se.Settings.Waveform.ShowToolbarPlay;
+        ShowWaveformToolbarRepeat = Se.Settings.Waveform.ShowToolbarRepeat;
+        ShowWaveformToolbarRemoveBlankLines = Se.Settings.Waveform.ShowToolbarRemoveBlankLines;
+        ShowWaveformToolbarNew = Se.Settings.Waveform.ShowToolbarNew;
+        ShowWaveformToolbarSetStart = Se.Settings.Waveform.ShowToolbarSetStart;
+        ShowWaveformToolbarSetEnd = Se.Settings.Waveform.ShowToolbarSetEnd;
+        ShowWaveformToolbarSetStartAndOffsetTheRest = Se.Settings.Waveform.ShowToolbarSetStartAndOffsetTheRest;
+        ShowWaveformToolbarVerticalZoom = Se.Settings.Waveform.ShowToolbarVerticalZoom;
+        ShowWaveformToolbarHorizontalZoom = Se.Settings.Waveform.ShowToolbarHorizontalZoom;
+        ShowWaveformToolbarVideoPositionSlider = Se.Settings.Waveform.ShowToolbarVideoPositionSlider;
+        ShowWaveformToolbarPlaybackSpeed = Se.Settings.Waveform.ShowToolbarPlaybackSpeed;
         WaveformFocusTextboxAfterInsertNew = Se.Settings.Waveform.FocusTextBoxAfterInsertNew;
         WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         WaveformBackgroundColor = Se.Settings.Waveform.WaveformBackgroundColor.FromHexToColor();
@@ -979,10 +995,17 @@ public partial class SettingsViewModel : ObservableObject
 
         Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = WaveformSpectrogramCombinedWaveformHeight;
 
-        Se.Settings.Waveform.ShowWaveformVerticalZoom = ShowWaveformVerticalZoom;
-        Se.Settings.Waveform.ShowWaveformHorizontalZoom = ShowWaveformHorizontalZoom;
-        Se.Settings.Waveform.ShowWaveformVideoPositionSlider = ShowWaveformVideoPositionSlider;
-        Se.Settings.Waveform.ShowWaveformPlaybackSpeed = ShowWaveformPlaybackSpeed;
+        Se.Settings.Waveform.ShowToolbarPlay = ShowWaveformToolbarPlay;
+        Se.Settings.Waveform.ShowToolbarRepeat = ShowWaveformToolbarRepeat;
+        Se.Settings.Waveform.ShowToolbarRemoveBlankLines = ShowWaveformToolbarRemoveBlankLines;
+        Se.Settings.Waveform.ShowToolbarNew = ShowWaveformToolbarNew;
+        Se.Settings.Waveform.ShowToolbarSetStart = ShowWaveformToolbarSetStart;
+        Se.Settings.Waveform.ShowToolbarSetEnd = ShowWaveformToolbarSetEnd;
+        Se.Settings.Waveform.ShowToolbarSetStartAndOffsetTheRest = ShowWaveformToolbarSetStartAndOffsetTheRest;
+        Se.Settings.Waveform.ShowToolbarVerticalZoom = ShowWaveformToolbarVerticalZoom;
+        Se.Settings.Waveform.ShowToolbarHorizontalZoom = ShowWaveformToolbarHorizontalZoom;
+        Se.Settings.Waveform.ShowToolbarVideoPositionSlider = ShowWaveformToolbarVideoPositionSlider;
+        Se.Settings.Waveform.ShowToolbarPlaybackSpeed = ShowWaveformToolbarPlaybackSpeed;
         Se.Settings.Waveform.WaveformColor = WaveformColor.FromColorToHex();
         Se.Settings.Waveform.WaveformBackgroundColor = WaveformBackgroundColor.FromColorToHex();
         Se.Settings.Waveform.ParagraphBackground = WaveformParagraphBackgroundColor.FromColorToHex();

@@ -118,10 +118,17 @@ public class LanguageSettings
     public string WaveformCenterVideoPosition { get; set; }
     public string WaveformShowToolbar { get; set; }
     public string WaveformSpectrogramCombinedWaveformHeight { get; set; }
-    public string ShowWaveformHorizontalZoom { get; set; }
-    public string ShowWaveformVerticalZoom { get; set; }
-    public string ShowWaveformVideoPositionSlider { get; set; }
-    public string ShowWaveformPlaybackSpeed { get; set; }
+    public string ShowWaveformToolbarPlay { get; set; }
+    public string ShowWaveformToolbarRepeat { get; set; }
+    public string ShowWaveformToolbarRemoveBlankLines { get; set; }
+    public string ShowWaveformToolbarNew { get; set; }
+    public string ShowWaveformToolbarSetStart { get; set; }
+    public string ShowWaveformToolbarSetEnd { get; set; }
+    public string ShowWaveformToolbarStartAndOffsetTheRest { get; set; }
+    public string ShowWaveformToolbarHorizontalZoom { get; set; }
+    public string ShowWaveformToolbarVerticalZoom { get; set; }
+    public string ShowWaveformToolbarVideoPositionSlider { get; set; }
+    public string ShowWaveformToolbarPlaybackSpeed { get; set; }
     public string WaveformFocusTextboxAfterInsertNew { get; set; }
     public string WaveformInvertMouseWheel { get; set; }
     public string WaveformSnapToShotChanges { get; set; }
@@ -349,10 +356,17 @@ public class LanguageSettings
         WaveformCenterVideoPosition = "Center video position";
         WaveformShowToolbar = "Show toolbar";
         WaveformSpectrogramCombinedWaveformHeight = "Waveform/spectrogram combined, waveform height %";
-        ShowWaveformHorizontalZoom = "Toolbar: show horizontal zoom slider";
-        ShowWaveformVerticalZoom = "Toolbar: show vertical zoom slider";
-        ShowWaveformVideoPositionSlider = "Toolbar: show video position slider";
-        ShowWaveformPlaybackSpeed = "Toolbar: show playback speed";
+        ShowWaveformToolbarPlay = "Toolbar: show play button";
+        ShowWaveformToolbarRepeat = "Toolbar: show repeat button";
+        ShowWaveformToolbarRemoveBlankLines = "Toolbar: show remove blank lines button";
+        ShowWaveformToolbarNew = "Toolbar: show new subtitle button";
+        ShowWaveformToolbarSetStart = "Toolbar: show set start button";
+        ShowWaveformToolbarSetEnd = "Toolbar: show set end button";
+        ShowWaveformToolbarStartAndOffsetTheRest = "Toolbar: show set start and offset the rest button";
+        ShowWaveformToolbarHorizontalZoom = "Toolbar: show horizontal zoom slider";
+        ShowWaveformToolbarVerticalZoom = "Toolbar: show vertical zoom slider";
+        ShowWaveformToolbarVideoPositionSlider = "Toolbar: show video position slider";
+        ShowWaveformToolbarPlaybackSpeed = "Toolbar: show playback speed";
         WaveformFocusTextboxAfterInsertNew = "Focus text box after insert";
         WaveformInvertMouseWheel = "Invert mouse-wheel";
         WaveformSnapToShotChanges = "Snap to shot changes";
