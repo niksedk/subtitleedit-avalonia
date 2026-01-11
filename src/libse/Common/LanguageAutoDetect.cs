@@ -2038,6 +2038,154 @@ namespace Nikse.SubtitleEdit.Core.Common
             }
             dictionary.Add("ur", count);
 
+            // Russian
+            count = 0;
+            foreach (var letter in Letters.Russian)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("ru", count);
+
+            // Greek
+            count = 0;
+            foreach (var letter in Letters.Greek)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("el", count);
+
+            // Hebrew
+            count = 0;
+            foreach (var letter in Letters.Hebrew)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("he", count);
+
+            // Devanagari (Hindi)
+            count = 0;
+            foreach (var letter in Letters.Devanagari)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("hi", count);
+
+            // Bengali
+            count = 0;
+            foreach (var letter in Letters.Bengali)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("bn", count);
+
+            // Armenian
+            count = 0;
+            foreach (var letter in Letters.Armenian)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("hy", count);
+
+            // Georgian
+            count = 0;
+            foreach (var letter in Letters.Georgian)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("ka", count);
+
+            // Chinese
+            count = 0;
+            foreach (var letter in Letters.Chinese)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("zh", count);
+
+            count = 0;
+            foreach (var letter in Letters.Amharic)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("am", count);
+
+            count = 0;
+            foreach (var letter in Letters.Khmer)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("km", count);
+
+            count = 0;
+            foreach (var letter in Letters.Deutsch)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("de", count);
+
+            count = 0;
+            foreach (var letter in Letters.Swedish)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("sv", count);
+
+            count = 0;
+            foreach (var letter in Letters.French)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("fr", count);
+
+            count = 0;
+            foreach (var letter in Letters.Spanish)
+            {
+                if (text.Contains(letter))
+                {
+                    count++;
+                }
+            }
+            dictionary.Add("es", count);
+
             var maxHitsLanguage = dictionary.FirstOrDefault(x => x.Value == dictionary.Values.Max());
             return maxHitsLanguage.Value > 0 ? maxHitsLanguage.Key : null;
         }
@@ -2055,6 +2203,20 @@ namespace Nikse.SubtitleEdit.Core.Common
             public const string Thai = "กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ";
             public const string Urdu = "ﺍﺎﺁﺂﺏﺑﺒﺐﭖﭘﭙﭗﺕﺗﺘﺖﭦﭨﭩﭧﺙﺛﺜﺚﺝﺟﺠﺞﭺﭼﭽﭻﺡﺣﺤﺢﺥﺧﺨﺦﺩﺪﺫﺬﺭﺮﮌﮍﺯﺰﮊﮋﺱﺳﺴﺲﺵﺷﺸﺶﺹﺻﺼﺺﺽﺿﻀﺾﻁﻃﻄﻂﻅﻇﻈﻆﻉﻋﻌﻊﻍﻏﻐﻎﻑﻓﻔﻒﻕﻗﻘﻖﻙﻛﻜﻚﻻﻼﻝﻟﻠﻞﻡﻣﻤﻢﻥﻧﻨﻦﻭﻮﮮﮯﮦﮨﮩﮧﯼﯾﯿﯽﮪﮬﮭﮫﴽﴼﺀﺋﺌﹱﹷﹹ";
             public const string Sinhalese = "අආඇඈඉඊඋඌඍඎඏඐඑඒඓඔඕඖකඛගඝඞඟචඡජඣඤඥඦටඨඩඪණඬතථදධනඳපඵබභමඹයරලවශෂසහළෆ්ාැෑිීුූෘෙේෛොෝෞෟ෦෧෨෩෪෫෬෭෮෯";
+            public const string Russian = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+            public const string Greek = "αβγδεζηθικλμνξοπρσςτυφχψωάέήίόύώ";
+            public const string Hebrew = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ";
+            public const string Devanagari = "अआइईउऊऋएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह";
+            public const string Bengali = "অআইঈউঊঋএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহ";
+            public const string Armenian = "աբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆ";
+            public const string Georgian = "აბგდევზთიკლმნოპჟრსტუფქღყშჩცძწჭხჯჰ";
+            public const string Chinese = "的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也";
+            public const string Amharic = "ሀሁሂሃሄህሆለሉሊላሌልሎመሙሚማሜምሞሰሱሲሳሴስሶ";
+            public const string Khmer = "កខគឃងចឆជឈញដឋឌឍណតថទធនបផពភមយរលវសហឡអ";
+            public const string Swedish = "äö";
+            public const string Deutsch = "äöüß";
+            public const string Spanish = "ñÑáéíóúÁÉÍÓÚ¡¿";
+            public const string French = "çÇœŒàâæéèêëîïôùûüÿÀÂÆÉÈÊËÎÏÔÙÛÜŸ";
         }
     }
 }

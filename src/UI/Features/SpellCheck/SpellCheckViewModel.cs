@@ -133,7 +133,12 @@ public partial class SpellCheckViewModel : ObservableObject
             subtitle.Paragraphs.Add(p);
         }
 
-        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(subtitle) ?? "en";
+        var languageCode = LanguageAutoDetect.AutoDetectGoogleLanguageOrNull(subtitle);
+        if (languageCode == null)
+        {
+            languageCode = "en";
+        }
+
         var threeLetterCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(languageCode);
         SelectedDictionary = Dictionaries.FirstOrDefault(p => p.GetThreeLetterCode().Equals(threeLetterCode, StringComparison.OrdinalIgnoreCase));
 
