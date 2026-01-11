@@ -690,12 +690,6 @@ public class AudioVisualizer : Control
             return;
         }
 
-        if (_isCtrlDown || _isShiftDown || _isAltDown)
-        {
-            _interactionMode = InteractionMode.None;
-            return;
-        }
-
         var p = HitTestParagraph(point);
         if (p == null)
         {
@@ -779,6 +773,11 @@ public class AudioVisualizer : Control
         }
         else if (point.X > left && point.X < right)
         {
+            if (_isCtrlDown || _isAltDown)
+            {
+                _interactionMode = InteractionMode.None;
+                return;
+            }
             _interactionMode = InteractionMode.Moving;
         }
     }
@@ -786,7 +785,6 @@ public class AudioVisualizer : Control
     private void OnPointerExited(object? sender, PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        //NewSelectionParagraph = null;
         InvalidateVisual();
     }
 

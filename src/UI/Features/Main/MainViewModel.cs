@@ -6830,9 +6830,7 @@ public partial class MainViewModel :
     private void WaveformInsertAtPositionAndFocusTextBox()
     {
         var vp = GetVideoPlayerControl();
-        if (vp == null ||
-            AudioVisualizer == null ||
-            AudioVisualizer.NewSelectionParagraph == null)
+        if (vp == null || AudioVisualizer == null)
         {
             return;
         }
@@ -6841,16 +6839,18 @@ public partial class MainViewModel :
         var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
         var newParagraph =
             new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
+        _undoRedoManager.StopChangeDetection();
         var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
         var next = Subtitles.GetOrNull(idx + 1);
         if (next != null)
         {
-            if (next.StartTime.TotalMilliseconds < endMs)
+            if (next.StartTime.TotalMilliseconds < endMs && next.StartTime.TotalMilliseconds > newParagraph.StartTime.TotalMilliseconds + 200)
             {
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
                                                                  Se.Settings.General.MinimumMillisecondsBetweenLines);
             }
         }
+        _undoRedoManager.StartChangeDetection();
 
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
@@ -6862,27 +6862,27 @@ public partial class MainViewModel :
     private void WaveformInsertAtPositionNoFocusTextBox()
     {
         var vp = GetVideoPlayerControl();
-        if (vp == null ||
-            AudioVisualizer == null ||
-            AudioVisualizer.NewSelectionParagraph == null)
+        if (vp == null || AudioVisualizer == null)
         {
             return;
         }
-
+        
         var startMs = vp.Position * 1000.0;
         var endMs = startMs + Se.Settings.General.NewEmptyDefaultMs;
         var newParagraph =
             new SubtitleLineViewModel(new Paragraph(string.Empty, startMs, endMs), SelectedSubtitleFormat);
-        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);
+        _undoRedoManager.StopChangeDetection();
+        var idx = _insertService.InsertInCorrectPosition(Subtitles, newParagraph);       
         var next = Subtitles.GetOrNull(idx + 1);
         if (next != null)
         {
-            if (next.StartTime.TotalMilliseconds < endMs)
+            if (next.StartTime.TotalMilliseconds < endMs && next.StartTime.TotalMilliseconds > newParagraph.StartTime.TotalMilliseconds + 200)
             {
                 newParagraph.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds -
                                                                  Se.Settings.General.MinimumMillisecondsBetweenLines);
             }
         }
+        _undoRedoManager.StartChangeDetection();
 
         AudioVisualizer.NewSelectionParagraph = null;
         SelectAndScrollToSubtitle(newParagraph);
@@ -12132,10 +12132,9 @@ public partial class MainViewModel :
             return;
         }
 
+        MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
         if (subtitlesAtPosition.Count == 0)
         {
-            MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
-
             if (Window != null && Window.Clipboard != null)
             {
                 var clipboardText = Window.Clipboard.TryGetTextAsync().Result;
