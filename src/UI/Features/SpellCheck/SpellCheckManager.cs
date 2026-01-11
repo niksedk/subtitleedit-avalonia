@@ -94,7 +94,8 @@ public class SpellCheckManager : ISpellCheckManager, IDoSpell
         else
         {
             var name = Path.GetFileNameWithoutExtension(dictionaryFile);
-            _spellCheckWordLists = new SpellCheckWordLists2(name, this);
+            var fiveLetterCode = SpellCheckDictionaryDisplay.GetFiveLetterLanguageName(name);
+            _spellCheckWordLists = new SpellCheckWordLists2(fiveLetterCode ?? "en_US", this);
         }
 
         return true;

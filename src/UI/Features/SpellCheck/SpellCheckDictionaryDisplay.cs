@@ -193,13 +193,17 @@ public class SpellCheckDictionaryDisplay
     internal string? GetFiveLetterLanguageName()
     {
         var fileName = Path.GetFileNameWithoutExtension(DictionaryFileName).Replace('-', '_');
+        return GetFiveLetterLanguageName(fileName);
+    }
 
-        if (fileName == "es_ANY")
+    internal static string? GetFiveLetterLanguageName(string fileName)
+    {
+        if (fileName == "es_ANY" || fileName == "es-ANY")
         {
             return "es_ES";
         }
 
-        if (fileName == "russian_aot")
+        if (fileName == "russian_aot" || fileName == "russian-aot")
         {
             return "ru_RU";
         }
