@@ -885,7 +885,7 @@ public class AudioVisualizer : Control
         var next = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
 
         if (_isShiftDown || Se.Settings.Waveform.AllowOverlap)
-        { 
+        {
             previous = null;
             next = null;
         }
@@ -985,14 +985,14 @@ public class AudioVisualizer : Control
 
                 if (SnapToShotChanges)
                 {
+                    var oneFrameSeconds = 0.042;// snap to frame before shot change - TODO: Get fps from video
                     var nearestShotChange = ShotChangesHelper.GetClosestShotChange(_shotChanges, TimeCode.FromSeconds(newEnd));
                     if (nearestShotChange != null)
                     {
                         var nearest = (double)nearestShotChange;
-                        if (nearest != newEnd && Math.Abs(newEnd - nearest) < ShotChangeSnapSeconds)
+                        if (nearest != newEnd && Math.Abs(newEnd - nearest + oneFrameSeconds) < ShotChangeSnapSeconds)
                         {
-                            var oneFrame = 42;// snap to frame before shot change - TODO: Correct? - TODO: get fps from video
-                            newEnd = nearest - oneFrame;
+                            newEnd = nearest - oneFrameSeconds;
                         }
                     }
                 }
