@@ -93,6 +93,14 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Apply()
+    {
+        OkPressed = true;
+        SaveFileStylesToHeader();
+        SaveSettings();
+    }
+
+    [RelayCommand]
     private void Cancel()
     {
         Close();
