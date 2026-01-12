@@ -135,7 +135,8 @@ public partial class MainViewModel :
     IAdjustCallback,
     IFocusSubtitleLine,
     IUndoRedoClient,
-    IFindResult
+    IFindResult,
+    IApplyAssaStyles
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -690,21 +691,26 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(vm =>
         {
             vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
-                SelectedSubtitle?.Style ?? string.Empty);
+                SelectedSubtitle?.Style ?? string.Empty, this);
         });
 
         if (result.OkPressed)
         {
-            _subtitle.Header = result.Header;
-            var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
-            var first = styles.FirstOrDefault() ?? "Default";
+            ApplyAssaStyles(result);
+        }
+    }
 
-            foreach (var s in Subtitles)
+    public void ApplyAssaStyles(AssaStylesViewModel result)
+    {
+        _subtitle.Header = result.Header;
+        var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
+        var first = styles.FirstOrDefault() ?? "Default";
+
+        foreach (var s in Subtitles)
+        {
+            if (string.IsNullOrEmpty(s.Style) || !styles.Contains(s.Style))
             {
-                if (string.IsNullOrEmpty(s.Style) || !styles.Contains(s.Style))
-                {
-                    s.Style = first;
-                }
+                s.Style = first;
             }
         }
     }

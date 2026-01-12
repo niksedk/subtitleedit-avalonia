@@ -45,7 +45,8 @@ public class AssaStylesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var buttonApply = UiUtil.MakeButton(Se.Language.General.Apply, vm.ApplyCommand);
+        var buttonApply = UiUtil.MakeButton(Se.Language.General.Apply, vm.ApplyCommand)
+            .WithBindIsVisible(nameof(vm.IsApplyVisible));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonApply, buttonOk, buttonCancel);

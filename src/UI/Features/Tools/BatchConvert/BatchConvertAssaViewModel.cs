@@ -67,7 +67,7 @@ public partial class BatchConvertAssaViewModel : ObservableObject
 
         var result = await _windowService.ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(Window, vm =>
         {
-            vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty, string.Empty);
+            vm.Initialize(_subtitle, new AdvancedSubStationAlpha(), string.Empty, string.Empty, null);
         });
 
         if (result.OkPressed)

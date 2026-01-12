@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -34,6 +35,7 @@ public partial class AssaStylesViewModel : ObservableObject
     [ObservableProperty] private BorderStyleItem _selectedBorderType;
     [ObservableProperty] private string _currentTitle;
     [ObservableProperty] private bool _isFileStylesFocused;
+    [ObservableProperty] private bool _isApplyVisible;
     [ObservableProperty] private Bitmap? _imagePreview;
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isDeleteAllVisible;
@@ -51,6 +53,7 @@ public partial class AssaStylesViewModel : ObservableObject
 
     private readonly IFileHelper _fileHelper;
     private readonly IWindowService _windowService;
+    private IApplyAssaStyles? _applyAssaStyles;
     private Subtitle _subtitle;
     private readonly System.Timers.Timer _timerUpdatePreview;
 
@@ -98,6 +101,7 @@ public partial class AssaStylesViewModel : ObservableObject
         OkPressed = true;
         SaveFileStylesToHeader();
         SaveSettings();
+        _applyAssaStyles?.ApplyAssaStyles(this);
     }
 
     [RelayCommand]
@@ -546,11 +550,19 @@ public partial class AssaStylesViewModel : ObservableObject
         Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
-    public void Initialize(Subtitle subtitle, SubtitleFormat format, string fileName, string selectedStyleName)
+    public void Initialize(
+        Subtitle subtitle, 
+        SubtitleFormat format, 
+        string fileName, 
+        string selectedStyleName, 
+        IApplyAssaStyles? applyAssaStyles)
     {
         Title = string.Format(Se.Language.Assa.StylesTitleX, fileName);
         Header = subtitle.Header;
         _subtitle = subtitle;
+        _applyAssaStyles = applyAssaStyles;
+        IsApplyVisible = applyAssaStyles != null;
+
 
         if (Header != null && Header.Contains("http://www.w3.org/ns/ttml"))
         {
