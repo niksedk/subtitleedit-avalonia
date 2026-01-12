@@ -20,7 +20,7 @@ public class InitWaveform
     public static Grid MakeWaveform(MainViewModel vm)
     {
         var languageHints = Se.Language.Main.Waveform;
-        var setttings = Se.Settings.Waveform;
+        var settings = Se.Settings.Waveform;
         var shortcuts = ShortcutsMain.GetUsedShortcuts(vm);
 
         // Create main layout grid
@@ -37,20 +37,20 @@ public class InitWaveform
         {
             vm.AudioVisualizer = new AudioVisualizer
             {
-                DrawGridLines = setttings.DrawGridLines,
-                WaveformColor = setttings.WaveformColor.FromHexToColor(),
-                WaveformBackgroundColor = setttings.WaveformBackgroundColor.FromHexToColor(),
-                WaveformSelectedColor = setttings.WaveformSelectedColor.FromHexToColor(),
-                WaveformCursorColor = setttings.WaveformCursorColor.FromHexToColor(),
-                WaveformFancyHighColor = setttings.WaveformFancyHighColor.FromHexToColor(),
-                ParagraphBackground = setttings.ParagraphBackground.FromHexToColor(),
-                ParagraphSelectedBackground = setttings.ParagraphSelectedBackground.FromHexToColor(),
-                InvertMouseWheel = setttings.InvertMouseWheel,
+                DrawGridLines = settings.DrawGridLines,
+                WaveformColor = settings.WaveformColor.FromHexToColor(),
+                WaveformBackgroundColor = settings.WaveformBackgroundColor.FromHexToColor(),
+                WaveformSelectedColor = settings.WaveformSelectedColor.FromHexToColor(),
+                WaveformCursorColor = settings.WaveformCursorColor.FromHexToColor(),
+                WaveformFancyHighColor = settings.WaveformFancyHighColor.FromHexToColor(),
+                ParagraphBackground = settings.ParagraphBackground.FromHexToColor(),
+                ParagraphSelectedBackground = settings.ParagraphSelectedBackground.FromHexToColor(),
+                InvertMouseWheel = settings.InvertMouseWheel,
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Height = double.NaN, // Auto height
-                WaveformDrawStyle = GetWaveformDrawStyle(setttings.WaveformDrawStyle),
+                WaveformDrawStyle = GetWaveformDrawStyle(settings.WaveformDrawStyle),
                 MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0,
-                FocusOnMouseOver = setttings.FocusOnMouseOver,
+                FocusOnMouseOver = settings.FocusOnMouseOver,
             };
             vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
             vm.AudioVisualizer.Height = double.NaN; // Auto height
@@ -62,7 +62,7 @@ public class InitWaveform
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
             vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
-            vm.AudioVisualizer.WaveformHeightPercentage = setttings.SpectrogramCombinedWaveformHeight;
+            vm.AudioVisualizer.WaveformHeightPercentage = settings.SpectrogramCombinedWaveformHeight;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
@@ -465,54 +465,54 @@ public class InitWaveform
         flyoutMore.Items.Add(menuItemHideControls);
 
 
-        if (setttings.ShowToolbarPlay)
+        if (settings.ShowToolbarPlay)
         {
             controlsPanel.Children.Add(buttonPlay);
         }
 
-        if (setttings.ShowToolbarRepeat)
+        if (settings.ShowToolbarRepeat)
         {
             controlsPanel.Children.Add(toggleButtonRepeat);
         }
 
-        if (setttings.ShowToolbarNew)
+        if (settings.ShowToolbarNew)
         {
             controlsPanel.Children.Add(buttonNew);
         }
 
-        if (setttings.ShowToolbarSetStartAndOffsetTheRest)
+        if (settings.ShowToolbarSetStartAndOffsetTheRest)
         {
             controlsPanel.Children.Add(buttonSetStartAndOffsetTheRest);
         }
 
-        if (setttings.ShowToolbarSetStart)
+        if (settings.ShowToolbarSetStart)
         {
             controlsPanel.Children.Add(buttonSetStart);
         }
 
-        if (setttings.ShowToolbarSetEnd)
+        if (settings.ShowToolbarSetEnd)
         {
             controlsPanel.Children.Add(buttonSetEnd);
         }
 
-        if (setttings.ShowToolbarHorizontalZoom)
+        if (settings.ShowToolbarHorizontalZoom)
         {
             controlsPanel.Children.Add(iconHorizontal);
             controlsPanel.Children.Add(sliderHorizontalZoom);
         }
 
-        if (setttings.ShowToolbarVerticalZoom)
+        if (settings.ShowToolbarVerticalZoom)
         {
             controlsPanel.Children.Add(iconVertical);
             controlsPanel.Children.Add(sliderVerticalZoom);
         }
 
-        if (setttings.ShowToolbarVideoPositionSlider)
+        if (settings.ShowToolbarVideoPositionSlider)
         {
             controlsPanel.Children.Add(sliderPosition);
         }
 
-        if (setttings.ShowToolbarPlaybackSpeed)
+        if (settings.ShowToolbarPlaybackSpeed)
         {
             controlsPanel.Children.Add(panelSpeed);
         }

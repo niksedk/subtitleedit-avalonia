@@ -12393,6 +12393,7 @@ public partial class MainViewModel :
     {
         if (OperatingSystem.IsMacOS() &&
             _shortcutManager.IsControlPressed() &&
+            !_shortcutManager.IsShiftPressed() &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);

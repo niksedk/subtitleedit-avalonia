@@ -370,7 +370,7 @@ public class AudioVisualizer : Control
                 }
             }
 
-            if (_isShiftDown)
+            if (_isShiftDown && !_isCtrlDown)
             {
                 var firstSelected = AllSelectedParagraphs.FirstOrDefault();
                 var seconds = RelativeXPositionToSeconds(point.X);
@@ -386,7 +386,7 @@ public class AudioVisualizer : Control
                 }
             }
 
-            if (_isCtrlDown)
+            if (_isCtrlDown || (OperatingSystem.IsMacOS() && _isShiftDown))
             {
                 var firstSelected = AllSelectedParagraphs.FirstOrDefault();
                 var seconds = RelativeXPositionToSeconds(point.X);
@@ -443,21 +443,9 @@ public class AudioVisualizer : Control
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
-        {
-            _isAltDown = false;
-            e.Handled = true;
-        }
-        else if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-        {
-            _isCtrlDown = false;
-            e.Handled = true;
-        }
-        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-        {
-            _isShiftDown = false;
-            e.Handled = true;
-        }
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
@@ -575,9 +563,12 @@ public class AudioVisualizer : Control
         }
 
         var showContextMenu = false;
-        if (e.InitialPressMouseButton == MouseButton.Left && OperatingSystem.IsMacOS() && _isCtrlDown)
+        if (e.InitialPressMouseButton == MouseButton.Left && OperatingSystem.IsMacOS())
         {
-            showContextMenu = true;
+            if (_isCtrlDown && !_isShiftDown && !_isAltDown)
+            {
+                showContextMenu = true;
+            }
         }
         else if (e.InitialPressMouseButton == MouseButton.Right)
         {

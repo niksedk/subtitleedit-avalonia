@@ -15,6 +15,7 @@ public class ShortcutManager : IShortcutManager
     private FrozenDictionary<string, ShortCut>? _lookupTable;
     private bool _isDirty = true;
     private bool _isControlPressed = false;
+    private bool _isShiftPressed = false;
 
     public static string GetKeyDisplayName(string key)
     {
@@ -36,25 +37,23 @@ public class ShortcutManager : IShortcutManager
         // Avoid adding modifier keys to the active keys set to prevent redundancy 
         // with KeyEventArgs.KeyModifiers
         if (e.Key is not (Key.LeftCtrl or Key.RightCtrl or
-                         Key.LeftShift or Key.RightShift or
-                         Key.LeftAlt or Key.RightAlt or
-                         Key.LWin or Key.RWin))
+            Key.LeftShift or Key.RightShift or
+            Key.LeftAlt or Key.RightAlt or
+            Key.LWin or Key.RWin))
         {
             _activeKeys.Add(e.Key);
         }
-        else if (e.Key is Key.LeftCtrl or Key.RightCtrl)
-        {
-            _isControlPressed = true;
-        }
+
+        _isControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
     }
 
     public void OnKeyReleased(object? sender, KeyEventArgs e)
     {
         _activeKeys.Remove(e.Key);
-        if (e.Key is Key.LeftCtrl or Key.RightCtrl)
-        {
-            _isControlPressed = false;
-        }
+
+        _isControlPressed = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
     }
 
     public void ClearKeys()
@@ -81,7 +80,7 @@ public class ShortcutManager : IShortcutManager
         // Sort by key count descending so that specific shortcuts (Ctrl+Shift+S) 
         // take precedence over general ones (Ctrl+S) if they share hashes
         var sorted = _shortcuts.Where(s => s.Keys.Count > 0)
-                               .OrderByDescending(s => s.Keys.Count);
+            .OrderByDescending(s => s.Keys.Count);
 
         var builder = new Dictionary<string, ShortCut>();
         foreach (var sc in sorted)
@@ -95,7 +94,7 @@ public class ShortcutManager : IShortcutManager
                 builder.TryAdd(sc.NormalizedHashCode, sc);
             }
         }
-        
+
         _lookupTable = builder.ToFrozenDictionary();
         _isDirty = false;
     }
@@ -175,4 +174,5 @@ public class ShortcutManager : IShortcutManager
     public HashSet<Key> GetActiveKeys() => [.. _activeKeys];
 
     public bool IsControlPressed() => _isControlPressed;
+    public bool IsShiftPressed() => _isShiftPressed;
 }

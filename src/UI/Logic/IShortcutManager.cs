@@ -14,4 +14,5 @@ public interface IShortcutManager
     void ClearShortcuts();
     HashSet<Key> GetActiveKeys();
     bool IsControlPressed();
+    bool IsShiftPressed();
 }
