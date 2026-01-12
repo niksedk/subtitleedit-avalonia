@@ -2749,6 +2749,9 @@ public partial class MainViewModel :
             subtitle.Text = string.Empty;
         }
 
+        _subtitleFileNameOriginal = _subtitleFileName;
+        _subtitleFileName = null;
+        _converted = true;
         _shortcutManager.ClearKeys();
         ShowColumnOriginalText = true;
         AutoFitColumns();
