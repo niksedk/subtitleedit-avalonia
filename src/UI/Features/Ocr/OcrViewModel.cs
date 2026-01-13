@@ -1316,15 +1316,15 @@ public partial class OcrViewModel : ObservableObject
 
         if (ocrEngine.EngineType == OcrEngineType.nOcr)
         {
-            RunNOcr(selectedIndices);
+            RunNOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.BinaryImageCompare)
         {
-            RunBinaryImageCompareOcr(selectedIndices);
+            RunBinaryImageCompareOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Tesseract)
         {
-            RunTesseractOcr(selectedIndices);
+            RunTesseractOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrStandalone)
         {
@@ -1370,7 +1370,7 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunPaddleOcr(selectedIndices, ocrEngine.EngineType);
+            RunPaddleOcr(selectedIndices, ocrEngine.EngineType, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.PaddleOcrPython)
         {
@@ -1389,11 +1389,11 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunPaddleOcr(selectedIndices, ocrEngine.EngineType);
+            RunPaddleOcr(selectedIndices, ocrEngine.EngineType, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Ollama)
         {
-            RunOllamaOcr(selectedIndices);
+            RunOllamaOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.Mistral)
         {
@@ -1409,7 +1409,7 @@ public partial class OcrViewModel : ObservableObject
                 return;
             }
 
-            RunMistralOcr(selectedIndices);
+            RunMistralOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleVision)
         {
@@ -1441,17 +1441,17 @@ public partial class OcrViewModel : ObservableObject
                 }
             }
 
-            RunGoogleLensOcr(selectedIndices);
+            RunGoogleLensOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleLensSharp)
         {
-            RunGoogleLensOcrSharp(selectedIndices);
+            RunGoogleLensOcrSharp(selectedIndices, _cancellationTokenSource.Token);
         }
     }
 
     private Lock BatchLock = new Lock();
 
-    private void RunPaddleOcr(List<int> selectedIndices, OcrEngineType engineType)
+    private void RunPaddleOcr(List<int> selectedIndices, OcrEngineType engineType, CancellationToken cancellationToken)
     {
         var numberOfImages = selectedIndices.Count;
         var ocrEngine = new PaddleOcr();
@@ -1473,7 +1473,7 @@ public partial class OcrViewModel : ObservableObject
                 Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
             });
 
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1482,7 +1482,7 @@ public partial class OcrViewModel : ObservableObject
 
         var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
@@ -1514,12 +1514,12 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(async () =>
         {
-            await ocrEngine.OcrBatch(engineType, batchImages, language, PaddleUseGpu, mode, ocrProgress, _cancellationTokenSource.Token);
+            await ocrEngine.OcrBatch(engineType, batchImages, language, PaddleUseGpu, mode, ocrProgress, cancellationToken);
             IsOcrRunning = false;
         });
     }
 
-    private void RunGoogleLensOcr(List<int> selectedIndices)
+    private void RunGoogleLensOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var numberOfImages = selectedIndices.Count;
         var ocrEngine = new GoogleLensOcr();
@@ -1540,7 +1540,7 @@ public partial class OcrViewModel : ObservableObject
                 Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
             });
 
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1549,7 +1549,7 @@ public partial class OcrViewModel : ObservableObject
 
         var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
@@ -1581,12 +1581,12 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(() =>
         {
-            ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
+            ocrEngine.OcrBatch(batchImages, language, ocrProgress, cancellationToken);
             IsOcrRunning = false;
         });
     }
 
-    private void RunGoogleLensOcrSharp(List<int> selectedIndices)
+    private void RunGoogleLensOcrSharp(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var numberOfImages = selectedIndices.Count;
         var ocrEngine = new GoogleLensOcrSharp(new Lens());
@@ -1607,7 +1607,7 @@ public partial class OcrViewModel : ObservableObject
                 Text = $"{count} / {numberOfImages}: {ocrItem.StartTime} - {ocrItem.EndTime}"
             });
 
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1616,7 +1616,7 @@ public partial class OcrViewModel : ObservableObject
 
         var ocrProgress = new Progress<PaddleOcrBatchProgress>(p =>
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
@@ -1648,12 +1648,12 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(async () =>
         {
-            await ocrEngine.OcrBatch(batchImages, language, ocrProgress, _cancellationTokenSource.Token);
+            await ocrEngine.OcrBatch(batchImages, language, ocrProgress, cancellationToken);
             IsOcrRunning = false;
         });
     }
 
-    private void RunNOcr(List<int> selectedIndices)
+    private void RunNOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         if (!InitNOcrDb())
         {
@@ -1663,15 +1663,15 @@ public partial class OcrViewModel : ObservableObject
         _skipOnceChars.Clear();
         _ = Task.Run(() =>
         {
-            using var _ = RunNOcrLoop(selectedIndices);
+            using var _ = RunNOcrLoop(selectedIndices, cancellationToken);
         });
     }
 
-    private async Task RunNOcrLoop(List<int> selectedIndices)
+    private async Task RunNOcrLoop(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         foreach (var i in selectedIndices)
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1747,7 +1747,7 @@ public partial class OcrViewModel : ObservableObject
                                 IsInspectAdditionsVisible = true;
                                 _nOcrDb.Add(result.NOcrChar);
                                 _ = Task.Run(() => _nOcrDb.Save());
-                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.AbortPressed)
                             {
@@ -1756,12 +1756,12 @@ public partial class OcrViewModel : ObservableObject
                             else if (result.UseOncePressed)
                             {
                                 _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.SkipPressed)
                             {
                                 _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.InspectHistoryPressed)
                             {
@@ -1795,7 +1795,7 @@ public partial class OcrViewModel : ObservableObject
                 index++;
             }
 
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1874,7 +1874,7 @@ public partial class OcrViewModel : ObservableObject
         IsOcrRunning = false;
     }
 
-    private void RunBinaryImageCompareOcr(List<int> selectedIndices)
+    private void RunBinaryImageCompareOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var db = InitImageComparOcrDb();
         if (db == null)
@@ -1885,7 +1885,7 @@ public partial class OcrViewModel : ObservableObject
         _skipOnceChars.Clear();
         _ = Task.Run(() =>
         {
-            using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices);
+            using var _ = RunBinaryImageCompareOcrLoop(db, selectedIndices, cancellationToken);
         });
     }
 
@@ -1906,11 +1906,11 @@ public partial class OcrViewModel : ObservableObject
         return new BinaryOcrDb(fileName, true);
     }
 
-    private async Task RunBinaryImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices)
+    private async Task RunBinaryImageCompareOcrLoop(BinaryOcrDb db, List<int> selectedIndices, CancellationToken cancellationToken)
     {
         foreach (var i in selectedIndices)
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 IsOcrRunning = false;
                 return;
@@ -1997,7 +1997,7 @@ public partial class OcrViewModel : ObservableObject
                                     _ = Task.Run(() => db.Save());
                                 }
 
-                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.AbortPressed)
                             {
@@ -2006,12 +2006,12 @@ public partial class OcrViewModel : ObservableObject
                             else if (result.UseOncePressed)
                             {
                                 _runOnceChars.Add(new SkipOnceChar(i, letterIndex, result.NewText));
-                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.SkipPressed)
                             {
                                 _skipOnceChars.Add(new SkipOnceChar(i, letterIndex));
-                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList()));
+                                _ = Task.Run(() => RunBinaryImageCompareOcrLoop(db, selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.InspectHistoryPressed)
                             {
@@ -2237,7 +2237,7 @@ public partial class OcrViewModel : ObservableObject
         return true;
     }
 
-    private void RunTesseractOcr(List<int> selectedIndices)
+    private void RunTesseractOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var tesseractOcr = new TesseractOcr();
         var language = SelectedTesseractDictionaryItem?.Code ?? "eng";
@@ -2246,7 +2246,7 @@ public partial class OcrViewModel : ObservableObject
         {
             foreach (var i in selectedIndices)
             {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
@@ -2257,22 +2257,17 @@ public partial class OcrViewModel : ObservableObject
                 var item = OcrSubtitleItems[i];
                 var bitmap = item.GetSkBitmap();
 
-                var text = await tesseractOcr.Ocr(bitmap, language, _cancellationTokenSource.Token);
+                var text = await tesseractOcr.Ocr(bitmap, language, cancellationToken);
                 item.Text = text;
 
                 OcrFixLineAndSetText(i, item);
-
-                if (SelectedOcrSubtitleItem == item)
-                {
-                    CurrentText = text;
-                }
             }
 
             PauseOcr();
         });
     }
 
-    private void RunOllamaOcr(List<int> selectedIndices)
+    private void RunOllamaOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var ollamaOcr = new OllamaOcr();
 
@@ -2280,7 +2275,7 @@ public partial class OcrViewModel : ObservableObject
         {
             foreach (var i in selectedIndices)
             {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
@@ -2293,22 +2288,17 @@ public partial class OcrViewModel : ObservableObject
 
                 SelectAndScrollToRow(i);
 
-                var text = await ollamaOcr.Ocr(bitmap, OllamaUrl, OllamaModel, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
+                var text = await ollamaOcr.Ocr(bitmap, OllamaUrl, OllamaModel, SelectedOllamaLanguage ?? "English", cancellationToken);
                 item.Text = text;
 
                 OcrFixLineAndSetText(i, item);
-
-                if (SelectedOcrSubtitleItem == item)
-                {
-                    CurrentText = text;
-                }
             }
 
             PauseOcr();
         });
     }
 
-    private void RunMistralOcr(List<int> selectedIndices)
+    private void RunMistralOcr(List<int> selectedIndices, CancellationToken cancellationToken)
     {
         var mistralOcr = new MistralOcr(MistralApiKey);
 
@@ -2316,7 +2306,7 @@ public partial class OcrViewModel : ObservableObject
         {
             foreach (var i in selectedIndices)
             {
-                if (_cancellationTokenSource.Token.IsCancellationRequested)
+                if (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
@@ -2329,15 +2319,10 @@ public partial class OcrViewModel : ObservableObject
 
                 SelectAndScrollToRow(i);
 
-                var text = await mistralOcr.Ocr(bitmap, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
+                var text = await mistralOcr.Ocr(bitmap, SelectedOllamaLanguage ?? "English", cancellationToken);
                 item.Text = text;
 
                 OcrFixLineAndSetText(i, item);
-
-                if (SelectedOcrSubtitleItem == item)
-                {
-                    CurrentText = text;
-                }
             }
 
             PauseOcr();
