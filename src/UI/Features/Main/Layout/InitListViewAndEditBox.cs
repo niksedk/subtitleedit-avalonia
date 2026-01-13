@@ -794,11 +794,15 @@ public static class InitListViewAndEditBox
         {
             DataContext = vm,
             UseVideoOffset = true,
-            [!TimeCodeUpDown.ValueProperty] = new Binding($"{nameof(vm.SelectedSubtitle)}.{nameof(SubtitleLineViewModel.StartTime)}")
-            {
-                Mode = BindingMode.TwoWay,
-            },
         };
+        var startTimeBindingName = nameof(vm.SelectedSubtitle) + "." + (Se.Settings.Appearance.ShowUpDownEndTime
+            ? nameof(SubtitleLineViewModel.StartTimeOnly)
+            : nameof(SubtitleLineViewModel.StartTime));
+        timeCodeUpDown[!TimeCodeUpDown.ValueProperty] = new Binding(startTimeBindingName)
+        {
+            Mode = BindingMode.TwoWay,
+        };
+
         if (!vm.ShowUpDownLabels && Se.Settings.Appearance.ShowHints)
         {
             ToolTip.SetTip(timeCodeUpDown, Se.Language.General.Show);

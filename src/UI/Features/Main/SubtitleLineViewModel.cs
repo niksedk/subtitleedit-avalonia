@@ -294,8 +294,32 @@ public partial class SubtitleLineViewModel : ObservableObject
         }
     }
 
+    public TimeSpan StartTimeOnly
+    {
+        get => StartTime;
+        set
+        {
+            if (StartTime == value)
+            {
+                return;
+            }
+
+            if (_skipUpdate)
+            {
+                return;
+            }
+
+            _skipUpdate = true;
+            SetStartTimeOnly(value);
+            _skipUpdate = false;
+            OnPropertyChanged();
+        }
+    }
+
     partial void OnStartTimeChanged(TimeSpan value)
     {
+        OnPropertyChanged(nameof(StartTimeOnly));
+
         if (_skipUpdate)
         {
             return;
