@@ -238,6 +238,7 @@ public class LanguageSettings
     public string SplitOddLinesAction { get; set; }
     public string UseFocusedButtonBackgroundColor { get; set; }
     public string FocusedButtonBackgroundColor { get; set; }
+    public string ForceCrLfOnSave { get; set; }
 
     public LanguageSettings()
     {
@@ -472,6 +473,7 @@ public class LanguageSettings
         SplitOddLinesAction = "Split odd lines action";
         UseFocusedButtonBackgroundColor = "Use focused button background color";
         FocusedButtonBackgroundColor = "Focused button background color";
+        ForceCrLfOnSave = "Force CR+LF on save (text subtitle files)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

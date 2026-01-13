@@ -409,23 +409,23 @@ public partial class SubtitleLineViewModel : ObservableObject
 
         if (lineCount > general.MaxNumberOfLines)
         {
-            errors.AppendLine("Max lines: " + lineCount + " >" + general.MaxNumberOfLines);
+            errors.AppendLine("Max #lines: " + lineCount + " >" + general.MaxNumberOfLines);
         }
 
-        var cps = CharactersPerSecond;
-        if (cps > general.SubtitleMaximumCharactersPerSeconds)
+        var cpsRounded = Math.Round(CharactersPerSecond, 2, MidpointRounding.AwayFromZero);
+        if (cpsRounded > general.SubtitleMaximumCharactersPerSeconds)
         {
-            errors.AppendLine("Cps: " + cps + " > " + general.SubtitleMaximumCharactersPerSeconds);
+            errors.AppendLine("Cps: " + cpsRounded + " > " + general.SubtitleMaximumCharactersPerSeconds);
         }
 
-        var durMs = Duration.TotalMilliseconds;
-        if (durMs < general.SubtitleMinimumDisplayMilliseconds)
+        var durMsRounded = Math.Round(Duration.TotalMilliseconds, 3, MidpointRounding.AwayFromZero);
+        if (durMsRounded < general.SubtitleMinimumDisplayMilliseconds)
         {
-            errors.AppendLine("Min duration: " + durMs + " < " + general.SubtitleMinimumDisplayMilliseconds);
+            errors.AppendLine("Min duration: " + durMsRounded + " < " + general.SubtitleMinimumDisplayMilliseconds);
         }
-        if (durMs > general.SubtitleMaximumDisplayMilliseconds)
+        if (durMsRounded > general.SubtitleMaximumDisplayMilliseconds)
         {
-            errors.AppendLine("Max duration: " + durMs + " > " + general.SubtitleMaximumDisplayMilliseconds);
+            errors.AppendLine("Max duration: " + durMsRounded + " > " + general.SubtitleMaximumDisplayMilliseconds);
         }
 
         return errors.ToString();

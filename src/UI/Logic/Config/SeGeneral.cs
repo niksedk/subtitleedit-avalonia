@@ -74,6 +74,7 @@ public class SeGeneral
     public bool AutoBackupOn { get; set; }
     public int AutoBackupIntervalMinutes { get; set; }
     public int AutoBackupDeleteAfterDays { get; set; }
+    public bool ForceCrLfOnSave { get; set; }
 
     public bool ColorDurationTooShort { get; set; }
     public bool ColorDurationTooLong { get; set; }

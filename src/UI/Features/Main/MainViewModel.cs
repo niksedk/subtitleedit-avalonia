@@ -9467,6 +9467,17 @@ public partial class MainViewModel :
         AutoTrimWhiteSpaces();
 
         var text = GetUpdateSubtitle(true).ToText(SelectedSubtitleFormat);
+        
+        if (Se.Settings.General.ForceCrLfOnSave)
+        {
+            var lines = text.SplitToLines();
+            var sb = new StringBuilder();
+            foreach (var line in lines)
+            {
+                sb.Append(line + "\r\n");
+            }
+            text = sb.ToString();
+        }
 
         try
         {
