@@ -76,6 +76,8 @@ public class LensProtoResponse
         using var stream = new MemoryStream(data);
         using var reader = new CodedInputStream(stream);
 
+        var textLayout = new TextLayout();
+
         while (!reader.IsAtEnd)
         {
             var tag = reader.ReadTag();
@@ -102,8 +104,8 @@ public class LensProtoResponse
                                 var level3 = reader2.ReadBytes().ToByteArray();
                                 using var stream3 = new MemoryStream(level3);
                                 using var reader3 = new CodedInputStream(stream3);
-                                
-                                var textLayout = new TextLayout();
+
+                                // Each text block (field 1 at level2) contains a paragraph
                                 var paragraph = new Paragraph();
                                 
                                 while (!reader3.IsAtEnd)
@@ -148,7 +150,6 @@ public class LensProtoResponse
                                 if (paragraph.Lines.Count > 0)
                                 {
                                     textLayout.Paragraphs.Add(paragraph);
-                                    return new TextData { TextLayout = textLayout };
                                 }
                             }
                             else
@@ -167,6 +168,12 @@ public class LensProtoResponse
             {
                 reader.SkipLastField();
             }
+        }
+
+        // Return after processing all text blocks
+        if (textLayout.Paragraphs.Count > 0)
+        {
+            return new TextData { TextLayout = textLayout };
         }
 
         return null;
