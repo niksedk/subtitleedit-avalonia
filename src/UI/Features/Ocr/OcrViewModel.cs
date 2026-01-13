@@ -2332,6 +2332,8 @@ public partial class OcrViewModel : ObservableObject
                 var text = await mistralOcr.Ocr(bitmap, SelectedOllamaLanguage ?? "English", _cancellationTokenSource.Token);
                 item.Text = text;
 
+                OcrFixLineAndSetText(i, item);
+
                 if (SelectedOcrSubtitleItem == item)
                 {
                     CurrentText = text;
