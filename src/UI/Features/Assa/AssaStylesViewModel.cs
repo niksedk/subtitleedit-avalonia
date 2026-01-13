@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -517,15 +516,18 @@ public partial class AssaStylesViewModel : ObservableObject
     [RelayCommand]
     private void StorageCopyToFiles()
     {
-        var selectedStyle = SelectedStorageStyle;
-        if (Window == null || selectedStyle == null)
+        var selectedItems = StorageStyleGrid.SelectedItems.Cast<StyleDisplay>().ToList();
+        if (Window == null || selectedItems.Count == 0)
         {
             return;
         }
 
-        var style = selectedStyle.ToSsaStyle();
-        style.Name = MakeUniqueName(style.Name, FileStyles);
-        FileStyles.Add(new StyleDisplay(style));
+        foreach (var item in selectedItems)
+        {
+            var style = item.ToSsaStyle();
+            style.Name = MakeUniqueName(style.Name, FileStyles);
+            FileStyles.Add(new StyleDisplay(style));
+        }
     }
 
     [RelayCommand]
@@ -551,10 +553,10 @@ public partial class AssaStylesViewModel : ObservableObject
     }
 
     public void Initialize(
-        Subtitle subtitle, 
-        SubtitleFormat format, 
-        string fileName, 
-        string selectedStyleName, 
+        Subtitle subtitle,
+        SubtitleFormat format,
+        string fileName,
+        string selectedStyleName,
         IApplyAssaStyles? applyAssaStyles)
     {
         Title = string.Format(Se.Language.Assa.StylesTitleX, fileName);
