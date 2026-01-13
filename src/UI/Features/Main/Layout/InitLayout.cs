@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
@@ -272,7 +273,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         // set waveform height
@@ -358,7 +359,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         // set waveform height
@@ -444,7 +445,7 @@ public static partial class InitLayout
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 3;
@@ -527,7 +528,7 @@ public static partial class InitLayout
         // Add right nested grid to right content
         rightContent.Child = rightNestedGrid;
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 4;
@@ -593,7 +594,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 5;
@@ -648,7 +649,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 6;
@@ -692,7 +693,7 @@ public static partial class InitLayout
         Grid.SetColumn(rightContent, 2);
         contentGrid.Children.Add(rightContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 7;
@@ -736,7 +737,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 8;
@@ -780,7 +781,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 9;
@@ -863,7 +864,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 2);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 10;
@@ -929,7 +930,7 @@ public static partial class InitLayout
         Grid.SetRow(bottomContent, 4);
         contentGrid.Children.Add(bottomContent);
 
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(contentGrid);
 
         return 11;
@@ -937,8 +938,7 @@ public static partial class InitLayout
 
     private static int MakeLayout12(MainView mainPage, MainViewModel vm)
     {
-
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm));
 
         // hide video player
@@ -954,12 +954,91 @@ public static partial class InitLayout
 
     internal static void MakeLayout12KeepVideo(MainView mainPage, MainViewModel vm)
     {
-        vm.ContentGrid.Children.Clear();
+        CleanupOldContent(vm.ContentGrid);
         vm.ContentGrid.Children.Add(InitListViewAndEditBox.MakeLayoutListViewAndEditBox(mainPage, vm));
     }
 
     internal static bool LayoutHasNoVideo(int layoutNumber)
     {
         return layoutNumber == 12;
+    }
+
+    private static void CleanupOldContent(Grid contentGrid)
+    {
+        // Recursively dispose controls and unhook events
+        foreach (var child in contentGrid.Children)
+        {
+            CleanupControl(child);
+        }
+
+        contentGrid.Children.Clear();
+    }
+
+    private static void CleanupControl(Control? control)
+    {
+        if (control == null)
+        {
+            return;
+        }
+
+        // Handle AudioVisualizer - clear specific references
+        if (control is AudioVisualizer audioVisualizer)
+        {
+            audioVisualizer.MenuFlyout = null;
+        }
+        // Handle DataGrid - clear data bindings and sources
+        else if (control is DataGrid dataGrid)
+        {
+            // Clear data bindings to prevent event handlers from being retained
+            dataGrid.ItemsSource = null;
+            dataGrid.SelectedItem = null;
+            dataGrid.SelectedItems?.Clear();
+            dataGrid.Columns.Clear();
+            dataGrid.ContextFlyout = null;
+        }
+        // Handle TextBox - clear event handlers
+        else if (control is TextBox textBox)
+        {
+            textBox.TextChanged -= null;
+            textBox.GotFocus -= null;
+            textBox.PointerReleased -= null;
+        }
+        // Handle Panels (Grid, StackPanel, etc.)
+        else if (control is Panel panel)
+        {
+            foreach (var child in panel.Children)
+            {
+                CleanupControl(child);
+            }
+            panel.Children.Clear();
+        }
+        // Handle Borders
+        else if (control is Border border)
+        {
+            CleanupControl(border.Child);
+            border.Child = null;
+        }
+        // Handle ContentControl (Button, etc.)
+        else if (control is ContentControl contentControl)
+        {
+            if (contentControl.Content is Control childControl)
+            {
+                CleanupControl(childControl);
+            }
+            contentControl.Content = null;
+        }
+
+        // Dispose if the control implements IDisposable
+        if (control is IDisposable disposable)
+        {
+            try
+            {
+                disposable.Dispose();
+            }
+            catch
+            {
+                // Ignore disposal errors
+            }
+        }
     }
 }

@@ -24,6 +24,23 @@ public static class InitListViewAndEditBox
     {
         mainPage.DataContext = vm;
 
+        // Unhook events from the old SubtitleGrid if it exists
+        if (vm.SubtitleGrid != null)
+        {
+            vm.SubtitleGrid.SelectionChanged -= vm.SubtitleGrid_SelectionChanged;
+            vm.SubtitleGrid.DoubleTapped -= vm.OnSubtitleGridDoubleTapped;
+            vm.SubtitleGrid.PointerPressed -= vm.SubtitleGrid_PointerPressed;
+            vm.SubtitleGrid.PointerReleased -= vm.SubtitleGrid_PointerReleased;
+            
+            // Remove handlers added with AddHandler
+            vm.SubtitleGrid.RemoveHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed);
+            vm.SubtitleGrid.RemoveHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased);
+            
+            // Clear the grid to help with garbage collection
+            vm.SubtitleGrid.ItemsSource = null;
+            vm.SubtitleGrid.ContextFlyout = null;
+        }
+
         var mainGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("*,Auto"),
