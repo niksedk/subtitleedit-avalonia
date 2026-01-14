@@ -174,6 +174,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnGap;
     [ObservableProperty] private bool _showColumnDuration;
     [ObservableProperty] private bool _showColumnActor;
+    [ObservableProperty] private bool _showColumnStyle;
     [ObservableProperty] private bool _showColumnCps;
     [ObservableProperty] private bool _showColumnWpm;
     [ObservableProperty] private bool _showColumnLayer;
@@ -411,6 +412,7 @@ public partial class MainViewModel :
         ShowColumnDuration = Se.Settings.General.ShowColumnDuration;
         ShowColumnGap = Se.Settings.General.ShowColumnGap;
         ShowColumnActor = Se.Settings.General.ShowColumnActor;
+        ShowColumnStyle = Se.Settings.General.ShowColumnStyle;
         ShowColumnCps = Se.Settings.General.ShowColumnCps;
         ShowColumnWpm = Se.Settings.General.ShowColumnWpm;
         ShowColumnLayer = Se.Settings.General.ShowColumnLayer;
@@ -4925,6 +4927,14 @@ public partial class MainViewModel :
     {
         Se.Settings.General.ShowColumnActor = !Se.Settings.General.ShowColumnActor;
         ShowColumnActor = Se.Settings.General.ShowColumnActor;
+        AutoFitColumns();
+    }
+
+    [RelayCommand]
+    private void ToggleShowColumnStyle()
+    {
+        Se.Settings.General.ShowColumnStyle = !Se.Settings.General.ShowColumnStyle;
+        ShowColumnStyle = Se.Settings.General.ShowColumnStyle;
         AutoFitColumns();
     }
 
@@ -9815,6 +9825,7 @@ public partial class MainViewModel :
             Se.Settings.General.ShowColumnDuration = ShowColumnDuration;
             Se.Settings.General.ShowColumnGap = ShowColumnGap;
             Se.Settings.General.ShowColumnActor = ShowColumnActor;
+            Se.Settings.General.ShowColumnStyle = ShowColumnStyle;
             Se.Settings.General.ShowColumnCps = ShowColumnCps;
             Se.Settings.General.ShowColumnWpm = ShowColumnWpm;
             Se.Settings.General.ShowColumnLayer = ShowColumnLayer;

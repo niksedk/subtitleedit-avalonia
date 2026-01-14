@@ -431,6 +431,7 @@ public class LanguageGeneral
     public string ShowActorColumn { get; set; }
     public string ShowCpsColumn { get; set; }
     public string ShowDurationColumn { get; set; }
+    public string ShowStyleColumn { get; set; }
     public string ShowGapColumn { get; set; }
     public string ShowHideColumn { get; set; }
     public string ShowHistory { get; set; }
@@ -1016,6 +1017,7 @@ public class LanguageGeneral
         ShowActorColumn = "Show \"Actor\" column";
         ShowCpsColumn = "Show \"Chars/sec\" column";
         ShowDurationColumn = "Show \"Duration\" column";
+        ShowStyleColumn = "Show \"Style\" column";
         ShowGapColumn = "Show \"Gap\" column";
         ShowHideColumn = "Show \"Hide\" column";
         ShowHistory = "Show history";
