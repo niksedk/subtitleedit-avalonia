@@ -20,9 +20,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         public static string FontName { get; set; } = "Tahoma";
         public static string FontBold { get; set; } = "0";
-        public static string FontHeight { get; set; } = "0.069";
-        public static string OffsetX { get; set; } = "0.000";
-        public static string OffsetY { get; set; } = "0.000";
+        public static string FontHeight { get; set; } = "0.067";
+        public static string OffsetX { get; set; } = "0.001";
+        public static string OffsetY { get; set; } = "0.001";
 
 
         public override string Extension => ".xsubtitle";

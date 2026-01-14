@@ -19,10 +19,13 @@ public class SeFormats
         RosettaLanguage = "en";
         RosettaLanguageAutoDetect = true;
         RosettaFontSize = "100%";
-        RosettaLineHeight = "125%";
+        RosettaLineHeight = "125%";        
 
         TmpegEncXmlFontName = "Tahoma";
-        TmpegEncXmlFontHeight = 0.069m;
+        TmpegEncXmlFontHeight = 0.067m;
         TmpegEncXmlFontBold = false;
+        TmpegEncXmlOffsetX = 0.001m;
+        TmpegEncXmlOffsetY = 0.001m;
+
     }
 }
