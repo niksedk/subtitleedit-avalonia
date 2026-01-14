@@ -1151,8 +1151,29 @@ public partial class MainViewModel :
         }
 
         await _folderHelper.OpenFolderWithFileSelected(Window!, _subtitleFileName);
-
         _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private async Task CopySubtitlePathToClipboard()
+    {
+        if (Window == null || Window.Clipboard == null || string.IsNullOrEmpty(_subtitleFileName))
+        {
+            return;
+        }
+
+        await Window.Clipboard.SetTextAsync(_subtitleFileName);
+    }
+
+    [RelayCommand]
+    private async Task CopySubtitleOriginalPathToClipboard()
+    {
+        if (Window == null || Window.Clipboard == null || string.IsNullOrEmpty(_subtitleFileNameOriginal))
+        {
+            return;
+        }
+
+        await Window.Clipboard.SetTextAsync(_subtitleFileNameOriginal);
     }
 
     [RelayCommand]

@@ -242,6 +242,8 @@ public class LanguageSettingsShortcuts
     public string WaveformHorizontalZoomOutCommand { get; set; }
     public string WaveformVerticalZoomInCommand { get; set; }
     public string WaveformVerticalZoomOutCommand { get; set; }
+    public string CopySubtitlePathToClipboard { get; set; }
+    public string CopySubtitleOriginalPathToClipboard { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -487,5 +489,7 @@ public class LanguageSettingsShortcuts
         WaveformHorizontalZoomOutCommand = "Waveform horizontal zoom out";
         WaveformVerticalZoomInCommand = "Waveform vertical zoom in";
         WaveformVerticalZoomOutCommand = "Waveform vertical zoom out";
+        CopySubtitlePathToClipboard = "Copy subtitle path to clipboard";
+        CopySubtitleOriginalPathToClipboard = "Copy subtitle path of original to clipboard";
     }
 }

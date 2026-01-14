@@ -89,6 +89,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowCompareCommand), Se.Language.Options.Shortcuts.FileCompare },
         { nameof(MainViewModel.ShowRestoreAutoBackupCommand), Se.Language.Options.Shortcuts.RestoreAutoBackup },
         { nameof(MainViewModel.OpenContainingFolderCommand), Se.Language.Options.Shortcuts.OpenContainingFolder },
+        { nameof(MainViewModel.CopySubtitlePathToClipboardCommand), Se.Language.Options.Shortcuts.CopySubtitlePathToClipboard },
+        { nameof(MainViewModel.CopySubtitleOriginalPathToClipboardCommand), Se.Language.Options.Shortcuts.CopySubtitleOriginalPathToClipboard },
         { nameof(MainViewModel.ImportTimeCodesCommand), Se.Language.Options.Shortcuts.ImportTimeCodes },
         { nameof(MainViewModel.ShowImportSubtitleWithManuallyChosenEncodingCommand), Se.Language.Options.Shortcuts.ImportSubtitleWithManuallyChosenEncoding },
         { nameof(MainViewModel.ExportBluRaySupCommand), Se.Language.Options.Shortcuts.ExportBluRaySup },
@@ -335,6 +337,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowCompareCommand, nameof(vm.ShowCompareCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowRestoreAutoBackupCommand, nameof(vm.ShowRestoreAutoBackupCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.OpenContainingFolderCommand, nameof(vm.OpenContainingFolderCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CopySubtitlePathToClipboardCommand, nameof(vm.CopySubtitlePathToClipboardCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CopySubtitleOriginalPathToClipboardCommand, nameof(vm.CopySubtitleOriginalPathToClipboardCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ImportTimeCodesCommand, nameof(vm.ImportTimeCodesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowImportSubtitleWithManuallyChosenEncodingCommand, nameof(vm.ShowImportSubtitleWithManuallyChosenEncodingCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CommandFileOpenKeepVideoCommand, nameof(vm.CommandFileOpenKeepVideoCommand), ShortcutCategory.General);
