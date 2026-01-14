@@ -4776,9 +4776,12 @@ public partial class MainViewModel :
         }
 
         var list = new List<SubtitleLineViewModel>();
-        foreach (var s in Subtitles)
+        for (int i = 0; i < Subtitles.Count; i++)
         {
-            if (!string.IsNullOrEmpty(s.GetErrors()))
+            SubtitleLineViewModel? s = Subtitles[i];
+            var prev = i > 0 ? Subtitles[i - 1] : null; 
+            var next = i < Subtitles.Count - 1 ? Subtitles[i + 1] : null;
+            if (!string.IsNullOrEmpty(s.GetErrors(prev, next)))
             {
                 list.Add(s);
             }
@@ -4816,7 +4819,9 @@ public partial class MainViewModel :
         for (var i = idx - 1; i >= 0; i--)
         {
             var s = Subtitles[i];
-            if (!string.IsNullOrEmpty(s.GetErrors()))
+            var prev = i > 0 ? Subtitles[i - 1] : null;
+            var next = i < Subtitles.Count - 1 ? Subtitles[i + 1] : null;
+            if (!string.IsNullOrEmpty(s.GetErrors(prev, next)))
             {
                 SelectAndScrollToRow(i);
                 break;
@@ -4850,7 +4855,9 @@ public partial class MainViewModel :
         for (var i = idx + 1; i < Subtitles.Count; i++)
         {
             var s = Subtitles[i];
-            if (!string.IsNullOrEmpty(s.GetErrors()))
+            var prev = i > 0 ? Subtitles[i - 1] : null;
+            var next = i < Subtitles.Count - 1 ? Subtitles[i + 1] : null;
+            if (!string.IsNullOrEmpty(s.GetErrors(prev, next)))
             {
                 SelectAndScrollToRow(i);
                 break;

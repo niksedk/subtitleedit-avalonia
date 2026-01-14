@@ -98,9 +98,13 @@ public partial class BatchErrorListViewModel : ObservableObject
                 continue;
             }
 
-            foreach (var p in batchItem.Subtitle.Paragraphs)
+            for (int i = 0; i < batchItem.Subtitle.Paragraphs.Count; i++)
             {
-                var errorItem = new BatchErrorListItem(batchItem.FileName, new SubtitleLineViewModel(p, batchItem.Subtitle.OriginalFormat ?? new SubRip()));
+                Core.Common.Paragraph? p = batchItem.Subtitle.Paragraphs[i];
+                var prev = i > 0 ? batchItem.Subtitle.Paragraphs[i - 1] : null;
+                var next = i < batchItem.Subtitle.Paragraphs.Count - 1 ? batchItem.Subtitle.Paragraphs[i + 1] : null;
+                var format = batchItem.Subtitle.OriginalFormat ?? new SubRip();
+                var errorItem = new BatchErrorListItem(batchItem.FileName, new SubtitleLineViewModel(p, format), prev, next);
                 if (!string.IsNullOrEmpty(errorItem.Error))
                 {
                     Subtitles.Add(errorItem);

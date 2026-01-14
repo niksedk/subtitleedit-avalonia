@@ -423,7 +423,7 @@ public partial class SubtitleLineViewModel : ObservableObject
         return (double)Text.CountCharacters(true) / Duration.TotalSeconds;
     }
 
-    public string GetErrors()
+    public string GetErrors(SubtitleLineViewModel? prev, SubtitleLineViewModel? next)
     {
         var errors = new StringBuilder();
 
@@ -431,13 +431,13 @@ public partial class SubtitleLineViewModel : ObservableObject
         var lines = Text.SplitToLines();
         var lineCount = lines.Count;
 
-        if (lineCount > general.MaxNumberOfLines)
+        if (lineCount > general.MaxNumberOfLines && Se.Settings.General.ColorTextTooManyLines)
         {
             errors.AppendLine("Max #lines: " + lineCount + " >" + general.MaxNumberOfLines);
         }
 
         var cpsRounded = Math.Round(CharactersPerSecond, 2, MidpointRounding.AwayFromZero);
-        if (cpsRounded > general.SubtitleMaximumCharactersPerSeconds)
+        if (cpsRounded > general.SubtitleMaximumCharactersPerSeconds && Se.Settings.General.ColorDurationTooShort)
         {
             errors.AppendLine("Cps: " + cpsRounded + " > " + general.SubtitleMaximumCharactersPerSeconds);
         }
@@ -445,11 +445,67 @@ public partial class SubtitleLineViewModel : ObservableObject
         var durMsRounded = Math.Round(Duration.TotalMilliseconds, 3, MidpointRounding.AwayFromZero);
         if (durMsRounded < general.SubtitleMinimumDisplayMilliseconds)
         {
-            errors.AppendLine("Min duration: " + durMsRounded + " < " + general.SubtitleMinimumDisplayMilliseconds);
+            if (Se.Settings.General.ColorDurationTooShort)
+            {
+                errors.AppendLine("Min duration: " + durMsRounded + " < " + general.SubtitleMinimumDisplayMilliseconds);
+            }
         }
         if (durMsRounded > general.SubtitleMaximumDisplayMilliseconds)
         {
-            errors.AppendLine("Max duration: " + durMsRounded + " > " + general.SubtitleMaximumDisplayMilliseconds);
+            if (Se.Settings.General.ColorDurationTooLong)
+            {
+                errors.AppendLine("Max duration: " + durMsRounded + " > " + general.SubtitleMaximumDisplayMilliseconds);
+            }
+        }
+
+        if (Se.Settings.General.ColorTextTooLong)
+        {
+            foreach (var line in lines)
+            {
+                if (line.Length > general.SubtitleLineMaximumLength)
+                {
+
+                    errors.AppendLine("Max line length: " + line.Length + " > " + general.SubtitleLineMaximumLength);
+                }
+            }
+        }
+
+        if (prev != null)
+        {
+            var gapPrev = (StartTime - prev.EndTime).TotalMilliseconds;
+            if (gapPrev < 0)
+            {
+                if (Se.Settings.General.ColorTimeCodeOverlap)
+                {
+                    errors.AppendLine("Overlap from previous: " + Math.Round(-gapPrev, 3));
+                }
+            }
+            else if (gapPrev < general.MinimumMillisecondsBetweenLines)
+            {
+                if (Se.Settings.General.ColorGapTooShort)
+                {
+                    errors.AppendLine("Min gap to previous: " + Math.Round(gapPrev, 3) + " < " + general.MinimumMillisecondsBetweenLines);
+                }
+            }
+        }
+
+        if (next != null)
+        {
+            var gapNext = (next.StartTime - EndTime).TotalMilliseconds;
+            if (gapNext < 0)
+            {
+                if (Se.Settings.General.ColorTimeCodeOverlap)
+                {
+                    errors.AppendLine("Overlap to next: " + Math.Round(-gapNext, 3));
+                }
+            }
+            else if (gapNext < general.MinimumMillisecondsBetweenLines)
+            {
+                if (Se.Settings.General.ColorGapTooShort)
+                {
+                    errors.AppendLine("Min gap to next: " + Math.Round(gapNext, 3) + " < " + general.MinimumMillisecondsBetweenLines);
+                }
+            }
         }
 
         return errors.ToString();

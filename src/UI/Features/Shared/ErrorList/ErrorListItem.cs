@@ -9,11 +9,11 @@ public class ErrorListItem
     public string Error { get; set; }
     public SubtitleLineViewModel Subtitle { get; set; }
 
-    public ErrorListItem(SubtitleLineViewModel subtitle)
+    public ErrorListItem(SubtitleLineViewModel subtitle, SubtitleLineViewModel? prev, SubtitleLineViewModel? next)
     {
         Subtitle = subtitle;
         Text = subtitle.Text;
         Number = subtitle.Number;
-        Error = subtitle.GetErrors();
+        Error = subtitle.GetErrors(prev, next);
     }
 }

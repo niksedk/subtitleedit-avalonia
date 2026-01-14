@@ -48,9 +48,12 @@ public partial class ErrorListViewModel : ObservableObject
 
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels)
     {
-        foreach (var subtitleLine in subtitleLineViewModels)
+        for (int i = 0; i < subtitleLineViewModels.Count; i++)
         {
-            Subtitles.Add(new ErrorListItem(subtitleLine));
+            SubtitleLineViewModel? subtitleLine = subtitleLineViewModels[i];
+            var prev = i > 0 ? subtitleLineViewModels[i - 1] : null;
+            var next = i < subtitleLineViewModels.Count - 1 ? subtitleLineViewModels[i + 1] : null;
+            Subtitles.Add(new ErrorListItem(subtitleLine, prev, next));
         }
         
         HasErrors = SelectedSubtitle != null;
