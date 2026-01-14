@@ -92,6 +92,7 @@ public class SeGeneral
     public bool ShowColumnEndTime { get; set; }
     public bool ShowColumnGap { get; set; }
     public bool ShowColumnDuration { get; set; }
+    public bool ShowColumnStyle { get; set; }
     public bool ShowColumnActor { get; set; }
     public bool ShowColumnCps { get; set; }
     public bool ShowColumnWpm { get; set; }

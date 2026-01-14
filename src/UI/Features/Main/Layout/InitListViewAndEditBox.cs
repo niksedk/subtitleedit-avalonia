@@ -88,6 +88,7 @@ public static class InitListViewAndEditBox
         var inverseBooleanConverter = new InverseBooleanConverter();
         var textOneLineShortConverter = new TextOneLineShortConverter();
         var booleanToGridLengthConverter = new BooleanToGridLengthConverter();
+        var booleanAndConverter = BooleanAndConverter.Instance;
 
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
@@ -246,11 +247,17 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
-        styleColumn.Bind(DataGridTextColumn.IsVisibleProperty, new Binding(nameof(vm.HasFormatStyle))
+        
+        var styleColumnMultiBinding = new MultiBinding
         {
-            Mode = BindingMode.OneWay,
-            Source = vm,
-        });
+            Converter = booleanAndConverter,
+            Bindings =
+            {
+                new Binding(nameof(vm.HasFormatStyle)) { Source = vm, Mode = BindingMode.OneWay },
+                new Binding(nameof(vm.ShowColumnStyle)) { Source = vm, Mode = BindingMode.OneWay }
+            }
+        };
+        styleColumn.Bind(DataGridColumn.IsVisibleProperty, styleColumnMultiBinding);
         vm.SubtitleGrid.Columns.Add(styleColumn);
 
         var columnGap = new DataGridTemplateColumn
@@ -467,6 +474,31 @@ public static class InitListViewAndEditBox
         };
         showGapMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
         flyout.Items.Add(showGapMenuItem);
+
+        var showStyleMenuItem = new MenuItem
+        {
+            Header = Se.Language.General.ShowStyleColumn,
+            Command = vm.ToggleShowColumnStyleCommand,
+            DataContext = vm,
+            Icon = new Icon
+            {
+                Value = IconNames.CheckBold,
+                VerticalAlignment = VerticalAlignment.Center,
+                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnStyle)),
+            }
+        };
+        var showStyleColumnMultiBinding = new MultiBinding
+        {
+            Converter = booleanAndConverter,
+            Bindings =
+            {
+                new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Source = vm, Mode = BindingMode.OneWay },
+                new Binding(nameof(vm.HasFormatStyle)) { Source = vm, Mode = BindingMode.OneWay }
+            }
+        };
+        showStyleMenuItem.Bind(Visual.IsVisibleProperty, showStyleColumnMultiBinding);
+
+        flyout.Items.Add(showStyleMenuItem);
 
         var showActorMenuItem = new MenuItem
         {
