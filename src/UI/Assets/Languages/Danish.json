@@ -127,8 +127,6 @@
     "DurationMinutes": "Varighed i minutter",
     "Edit": "Rediger",
     "EditDotDotDot": "Rediger...",
-    "EditImagedBaseSubtitle": "Rediger billedbaseret undertekst",
-    "EditImagedBaseSubtitleX": "Rediger billedbaseret undertekst: {0}",
     "Editing": "Redigering",
     "Effect": "Effekt",
     "Enabled": "Aktiveret",
@@ -219,8 +217,10 @@
     "InsertAfter": "Inds\u00E6t efter",
     "InsertAtPositionAndFocusTextBox": "Inds\u00E6t undertekst ved videoposition og fokus tekstboks",
     "InsertAtPositionNoFocusTextBox": "Inds\u00E6t undertekst ved videoposition (ingen fokus tekstboks)",
+    "WaveformPasteFromClipboard": "Inds\u00E6t fra udklipsholder",
     "InsertBefore": "Inds\u00E6t f\u00F8r",
     "InsertNewSelection": "Inds\u00E6t nyt valg",
+    "PasteNewSelection": "Inds\u00E6t udklipsholdertekst til nyt valg",
     "InsertSubtitleAfterCurrentLine": "Inds\u00E6t undertekst efter den aktuelle linje...",
     "InspectAdditions": "Unders\u00F8g tilf\u00F8jelser...",
     "InvertSelection": "Inverter valg",
@@ -430,6 +430,7 @@
     "ShowActorColumn": "Vis kolonnen \u0027Skuespiller\u0027",
     "ShowCpsColumn": "Vis kolonnen \u0027Karakterer/sek\u0027",
     "ShowDurationColumn": "Vis kolonnen \u0027Varighed\u0027",
+    "ShowStyleColumn": "Vis kolonnen \u0022Stil\u0022",
     "ShowGapColumn": "Vis kolonnen \u0027Gap\u0027",
     "ShowHideColumn": "Vis \u0027Skjul\u0027 kolonne",
     "ShowHistory": "Vis historik",
@@ -580,7 +581,12 @@
     "OffsetX": "Offset X",
     "OffsetY": "Offset Y",
     "InsertSubtitleFileAtVideoPositionDotDotDot": "Inds\u00E6t undertekstfil ved videoposition...",
-    "Smart": "Smart"
+    "Smart": "Smart",
+    "ImagedBasedSubtitles": "Billedbaserede undertekster",
+    "AlignmentX": "Indstil justering \u0022{0}\u0022 for valgte linjer",
+    "Play": "Spil",
+    "Pause": "Pause",
+    "PlayNext": "Spil n\u00E6ste"
   },
   "Main": {
     "AudioTrackIsNowX": "Lydsporet er nu \u0022{0}",
@@ -690,6 +696,7 @@
       "RightToLeftMode": "H\u00F8jre-til-venstre-tilstand",
       "ModifySelectionDotDotDot": "Rediger _valg...",
       "Tools": "V\u00E6rkt\u00F8jer",
+      "ToolsSelectedLines": "_V\u00E6rkt\u00F8jer (valgte linjer)",
       "AdjustDurations": "Juster varigheder ...",
       "ApplyDurationLimits": "Anvend varighed _gr\u00E6nser...",
       "BatchConvert": "Batch konvertering ...",
@@ -767,6 +774,8 @@
     },
     "Waveform": {
       "PlayPauseHint": "Afspil/s\u00E6t p\u00E5 pause {0}",
+      "PlayNextHint": "Spil n\u00E6ste {0}",
+      "PlaySelectionHint": "Afspil valgte {0}",
       "SetStartAndOffsetTheRestHint": "Indstil start p\u00E5 nuv\u00E6rende undertekst og forskyd resten {0}",
       "RepeatHint": "Gentag afspilning af aktuelle undertekster {0}",
       "SetStartHint": "Indstil start p\u00E5 nuv\u00E6rende undertekst {0}",
@@ -778,7 +787,8 @@
       "SelectCurrentLineWhilePlayingHint": "V\u00E6lg den aktuelle undertekst, mens du spiller {0}",
       "VideoPosition": "Videoposition {0}",
       "HideWaveformToolbar": "Skjul v\u00E6rkt\u00F8jslinje {0}",
-      "ResetZoomAndSpeed": "Nulstil zoom og afspilningshastighed {0}"
+      "ResetZoomAndSpeed": "Nulstil zoom og afspilningshastighed {0}",
+      "RemoveBlankLines": "Fjern tomme linjer {0}"
     }
   },
   "File": {
@@ -1200,7 +1210,8 @@
       "UseSourceStylesIfPossible": "Brug kilde stilarter, hvis muligt",
       "EditStyles": "Rediger stilarter",
       "EditProperties": "Rediger egenskaber",
-      "EditAttachments": "Rediger vedh\u00E6ftede filer"
+      "EditAttachments": "Rediger vedh\u00E6ftede filer",
+      "ErrorsExportedX": "Fejl eksporteret: {0}"
     },
     "ChangeCasing": {
       "Title": "Change casing",
@@ -1251,6 +1262,15 @@
       "SaveNetflixQualityReport": "Gem Netflix kvalitetsrapport",
       "NetflixReportSaved": "Netflix kvalitetsrapport gemt",
       "NetFlixQualityReportSavedToX": "Netflix kvalitetsrapport gemt til:\r\n\r\n{0}"
+    },
+    "ImageBasedEdit": {
+      "EditImagedBaseSubtitle": "Rediger billedbaseret undertekst",
+      "EditImagedBaseSubtitleX": "Rediger billedbaseret undertekst: {0}",
+      "ResizeImagesDotDotDot": "\u00C6ndr st\u00F8rrelse p\u00E5 billeder...",
+      "AdjustBrightnessDotDotDot": "Juster lysstyrken...",
+      "AdjustAlphaDotDotDot": "Juster alfa...",
+      "CenterHorizontally": "Centrer vandret",
+      "CropImages": "Besk\u00E6r billeder"
     }
   },
   "SpellCheck": {
@@ -1296,6 +1316,7 @@
     "AddRemoveEmbeddedSubtitlesTitle": "Tilf\u00F8j/fjern indlejrede undertekster",
     "AddCurrentSubtitle": "Tilf\u00F8j aktuel undertekst",
     "TitleOrLanguage": "Titel/sprog",
+    "ViewMatroskaTrackX": "Se Matroska-spor - {0}",
     "BurnIn": {
       "Title": "Generer video med indbr\u00E6ndte undertekster",
       "InfoAssaOff": "Bem\u00E6rk: Avanceret SubStation Alpha-styling underst\u00F8ttes.",
@@ -1572,10 +1593,17 @@
       "WaveformCenterVideoPosition": "Center video position",
       "WaveformShowToolbar": "Vis v\u00E6rkt\u00F8jslinje",
       "WaveformSpectrogramCombinedWaveformHeight": "B\u00F8lgeform/spektrogram kombineret, b\u00F8lgeformh\u00F8jde %",
-      "ShowWaveformHorizontalZoom": "V\u00E6rkt\u00F8jslinje: vis vandret zoom-skyder",
-      "ShowWaveformVerticalZoom": "V\u00E6rkt\u00F8jslinje: vis lodret zoomskyder",
-      "ShowWaveformVideoPositionSlider": "V\u00E6rkt\u00F8jslinje: vis videopositionsskyderen",
-      "ShowWaveformPlaybackSpeed": "V\u00E6rkt\u00F8jslinje: Vis afspilningshastighed",
+      "ShowWaveformToolbarPlay": "V\u00E6rkt\u00F8jslinje: vis afspilningsknappen",
+      "ShowWaveformToolbarRepeat": "V\u00E6rkt\u00F8jslinje: Vis gentag-knap",
+      "ShowWaveformToolbarRemoveBlankLines": "V\u00E6rkt\u00F8jslinje: vis knappen Fjern tomme linjer",
+      "ShowWaveformToolbarNew": "V\u00E6rkt\u00F8jslinje: vis ny undertekstknap",
+      "ShowWaveformToolbarSetStart": "V\u00E6rkt\u00F8jslinje: vis s\u00E6t startknap",
+      "ShowWaveformToolbarSetEnd": "V\u00E6rkt\u00F8jslinje: vis s\u00E6t afslutningsknap",
+      "ShowWaveformToolbarStartAndOffsetTheRest": "V\u00E6rkt\u00F8jslinje: vis s\u00E6t start og forskyd hvileknappen",
+      "ShowWaveformToolbarHorizontalZoom": "V\u00E6rkt\u00F8jslinje: vis vandret zoom-skyder",
+      "ShowWaveformToolbarVerticalZoom": "V\u00E6rkt\u00F8jslinje: vis lodret zoomskyder",
+      "ShowWaveformToolbarVideoPositionSlider": "V\u00E6rkt\u00F8jslinje: vis videopositionsskyderen",
+      "ShowWaveformToolbarPlaybackSpeed": "V\u00E6rkt\u00F8jslinje: vis afspilningshastighed",
       "WaveformFocusTextboxAfterInsertNew": "Fokus\u00E9r tekstboks efter inds\u00E6ttelse",
       "WaveformInvertMouseWheel": "Vend musehjulet",
       "WaveformSnapToShotChanges": "Snap til skud \u00E6ndringer",
@@ -1649,6 +1677,7 @@
       "WaveformGenerateSpectrogram": "Generer spektrogram",
       "WaveformSpectrogramMode": "Spektrogramtilstand (fungerer p\u00E5 genereringstidspunktet)",
       "WaveformCenterOnSingleClick": "Centrer p\u00E5 enkelt klik",
+      "WaveformSingleClickSelectsSubtitle": "V\u00E6lg undertekst ved et enkelt klik",
       "WaveformPauseOnSingleClick": "Pause ved et enkelt klik",
       "WaveformDrawStyle": "B\u00F8lgeform tegnestil",
       "VlcWidRendering": "libVLC - Native Window ID-gengivelse",
@@ -1664,6 +1693,7 @@
       "SubtitleGridFormattingShowTags": "Vis tags",
       "WaveformParagraphBackgroundColor": "B\u00F8lgeform undertekst baggrundsfarve",
       "WaveformParagraphSelectedBackgroundColor": "B\u00F8lgeform valgt undertekst baggrundsfarve",
+      "WaveformAllowOverlap": "",
       "SaveAsBehaviorUseSubtitleVideoFilename": "Brug undertekst/videofilnavn",
       "SaveAsBehaviorUseVideoSubtitleFilename": "Brug video/undertekst filnavn",
       "SaveAsBehaviorUseVideoFileName": "Brug videofilnavn",
@@ -1673,7 +1703,12 @@
       "SaveAsAppendLanguageCodeLanguageName": "Sprognavn",
       "SplitOddLineActionWeightTop": "V\u00E6gt top",
       "SplitOddLineActionWeightBottom": "V\u00E6gt bund",
-      "SplitOddLinesAction": "Split ulige linjer handling"
+      "SplitOddLinesAction": "Split ulige linjer handling",
+      "UseFocusedButtonBackgroundColor": "Brug baggrundsfarve til fokuseret knap",
+      "FocusedButtonBackgroundColor": "Fokuseret knap baggrundsfarve",
+      "ForceCrLfOnSave": "Tving CR\u002BLF ved lagring (tekstundertekstfiler)",
+      "ShowWaveformToolbarPlayNext": "V\u00E6rkt\u00F8jslinje: vis afspil n\u00E6ste knap",
+      "ShowWaveformToolbarPlaySelection": "V\u00E6rkt\u00F8jslinje: Vis afspilningsvalgknap"
     },
     "Shortcuts": {
       "Title": "Shortcuts",
@@ -1782,7 +1817,6 @@
       "ResetShortcutsDetail": "Vil du nulstille alle genveje til standardv\u00E6rdier?",
       "TogglePlayPause": "Skift afspilning/pause",
       "ToggleLockTimeCodes": "Sl\u00E5 l\u00E5setidskoder til/fra",
-      "Help": "Hj\u00E6lp",
       "DuplicateSelectedLines": "Dupliker valgte linjer",
       "SourceView": "Kildevisning",
       "ShowAlignmentPicker": "Justering",
@@ -1831,7 +1865,6 @@
       "BatchConvert": "Batchkonvertering",
       "BridgeGaps": "Bro mellemrum",
       "ApplyMinGap": "P\u00E5f\u00F8r min. mellemrum",
-      "ChangeCasing": "Skift hus",
       "FixCommonErrors": "Ret almindelige fejl",
       "MakeEmptyTranslationFromCurrentSubtitle": "Lav en tom overs\u00E6ttelse fra den aktuelle undertekst",
       "MergeLinesWithSameText": "Flet linjer med samme tekst",
@@ -1857,8 +1890,6 @@
       "CutVideo": "Klip video",
       "AdjustAllTimes": "Juster alle tider",
       "VisualSync": "Visuel synkronisering",
-      "ChangeFrameRate": "Skift billedhastighed",
-      "ChangeSpeed": "Skift hastighed",
       "TranslateViaCopyPaste": "Overs\u00E6t via copy-paste",
       "Shortcuts": "Genveje",
       "WordLists": "Ordlister",
@@ -1870,6 +1901,8 @@
       "TextBoxItalic": "Tekstboks kursiv",
       "ResetWaveformZoomAndSpeed": "Nulstil b\u00F8lgeformszoom og afspilningshastighed",
       "TogglePlaybackSpeed": "Skift afspilningshastighed",
+      "PlaybackSpeedSlower": "Afspilningshastighed langsommere (afspilningshastighed)",
+      "PlaybackSpeedFaster": "Afspilningshastighed hurtigere (afspilningshastighed)",
       "SwitchOriginalAndTranslationSelectedLines": "Skift original og overs\u00E6ttelse (udvalgte linjer)",
       "MergeOriginalIntoTranslationSelectedLines": "Flet original og overs\u00E6ttelse (udvalgte linjer)",
       "SeekSilence": "S\u00F8g stilhed",
@@ -1898,7 +1931,13 @@
       "ShowPointSync": "Vis punktsynkronisering",
       "ShowMediaInformation": "Vis medieoplysninger",
       "ChooseSubtitleFormat": "V\u00E6lg undertekstformat",
-      "TrimWhitespaceSelectedLines": "Trim mellemrum (valgte linjer)"
+      "TrimWhitespaceSelectedLines": "Trim mellemrum (valgte linjer)",
+      "WaveformHorizontalZoomInCommand": "B\u00F8lgeform vandret zoom ind",
+      "WaveformHorizontalZoomOutCommand": "B\u00F8lgeform vandret zoom ud",
+      "WaveformVerticalZoomInCommand": "Lodret b\u00F8lgeform zoom ind",
+      "WaveformVerticalZoomOutCommand": "B\u00F8lgeform lodret zoom ud",
+      "CopySubtitlePathToClipboard": "Kopier undertekststien til udklipsholderen",
+      "CopySubtitleOriginalPathToClipboard": "Kopier undertekststien til originalen til udklipsholderen"
     },
     "WordLists": {
       "Title": "Ordlister",
@@ -1979,7 +2018,9 @@
     "OcrImage": "OCR billede",
     "OneColor": "En farve (hvid)",
     "DarknessThreshold": "M\u00F8rket\u00E6rskel",
-    "EditExportDotDotDot": "Rediger/eksporter..."
+    "EditExportDotDotDot": "Rediger/eksporter...",
+    "EditBinaryOcrDatabase": "Rediger databasen \u0022Sammenlign bin\u00E6re billeder\u0022.",
+    "BinaryImageCompareDatabase": "\u0022Bin\u00E6r billedsammenligning\u0022 database"
   },
   "Assa": {
     "StylesTitle": "Avancerede Sub Station Alpha stilarter",

@@ -119,7 +119,6 @@ public class LanguageSettingsShortcuts
     public string ResetShortcutsDetail { get; set; }
     public string TogglePlayPause { get; set; }
     public string ToggleLockTimeCodes { get; set; }
-    public string Help { get; set; }
     public string DuplicateSelectedLines { get; set; }
     public string SourceView { get; set; }
     public string ShowAlignmentPicker { get; set; }
@@ -168,7 +167,6 @@ public class LanguageSettingsShortcuts
     public string BatchConvert { get; set; }
     public string BridgeGaps { get; set; }
     public string ApplyMinGap { get; set; }
-    public string ChangeCasing { get; set; }
     public string FixCommonErrors { get; set; }
     public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
     public string MergeLinesWithSameText { get; set; }
@@ -194,8 +192,6 @@ public class LanguageSettingsShortcuts
     public string CutVideo { get; set; }
     public string AdjustAllTimes { get; set; }
     public string VisualSync { get; set; }
-    public string ChangeFrameRate { get; set; }
-    public string ChangeSpeed { get; set; }
     public string TranslateViaCopyPaste { get; set; }
     public string Shortcuts { get; set; }
     public string WordLists { get; set; }
@@ -366,7 +362,6 @@ public class LanguageSettingsShortcuts
         ResetShortcuts = "Reset shortcuts";
         ResetShortcutsDetail = "Do you want to reset all shortcuts to default values?";
         ToggleLockTimeCodes = "Toggle lock time codes";
-        Help = "Help";
         DuplicateSelectedLines = "Duplicate selected lines";
         SourceView = "Source view";
         ShowAlignmentPicker = "Alignment";
@@ -415,7 +410,6 @@ public class LanguageSettingsShortcuts
         BatchConvert = "Batch convert";
         BridgeGaps = "Bridge gaps";
         ApplyMinGap = "Apply min gap";
-        ChangeCasing = "Change casing";
         FixCommonErrors = "Fix common errors";
         MakeEmptyTranslationFromCurrentSubtitle = "Make empty translation from current subtitle";
         MergeLinesWithSameText = "Merge lines with same text";
@@ -441,8 +435,6 @@ public class LanguageSettingsShortcuts
         CutVideo = "Cut video";
         AdjustAllTimes = "Adjust all times";
         VisualSync = "Visual sync";
-        ChangeFrameRate = "Change frame rate";
-        ChangeSpeed = "Change speed";
         TranslateViaCopyPaste = "Translate via copy-paste";
         Shortcuts = "Shortcuts";
         WordLists = "Word lists";

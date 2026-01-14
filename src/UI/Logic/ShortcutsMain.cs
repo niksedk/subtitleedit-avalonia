@@ -119,7 +119,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowToolsBatchConvertCommand), Se.Language.Options.Shortcuts.BatchConvert },
         { nameof(MainViewModel.ShowBridgeGapsCommand), Se.Language.Options.Shortcuts.BridgeGaps },
         { nameof(MainViewModel.ShowApplyMinGapCommand), Se.Language.Options.Shortcuts.ApplyMinGap },
-        { nameof(MainViewModel.ShowToolsChangeCasingCommand), Se.Language.Options.Shortcuts.ChangeCasing },
+        { nameof(MainViewModel.ShowToolsChangeCasingCommand), Se.Language.General.ChangeCasing },
         { nameof(MainViewModel.ShowToolsFixCommonErrorsCommand), Se.Language.Options.Shortcuts.FixCommonErrors },
         { nameof(MainViewModel.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MakeEmptyTranslationFromCurrentSubtitle },
         { nameof(MainViewModel.ShowToolsMergeLinesWithSameTextCommand), Se.Language.Options.Shortcuts.MergeLinesWithSameText },
@@ -148,8 +148,8 @@ public static class ShortcutsMain
         // Sync
         { nameof(MainViewModel.ShowSyncAdjustAllTimesCommand),  Se.Language.Options.Shortcuts.AdjustAllTimes },
         { nameof(MainViewModel.ShowVisualSyncCommand),  Se.Language.Options.Shortcuts.VisualSync },
-        { nameof(MainViewModel.ShowSyncChangeFrameRateCommand),  Se.Language.Options.Shortcuts.ChangeFrameRate },
-        { nameof(MainViewModel.ShowSyncChangeSpeedCommand),  Se.Language.Options.Shortcuts.ChangeSpeed },
+        { nameof(MainViewModel.ShowSyncChangeFrameRateCommand),  Se.Language.General.ChangeFrameRate },
+        { nameof(MainViewModel.ShowSyncChangeSpeedCommand),  Se.Language.General.ChangeSpeed },
         { nameof(MainViewModel.ShowPointSyncCommand),  Se.Language.Options.Shortcuts.ShowPointSync },
         { nameof(MainViewModel.ShowPointSyncViaOtherCommand),  Se.Language.Options.Shortcuts.ShowPointSyncViaOther },
 
@@ -228,7 +228,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ExtendSelectedToPreviousCommand),  Se.Language.General.ExtendSelectedToPrevious },
         { nameof(MainViewModel.ExtendSelectedToNextCommand),  Se.Language.General.ExtendSelectedToNext },
         { nameof(MainViewModel.ToggleLockTimeCodesCommand), Se.Language.Options.Shortcuts.ToggleLockTimeCodes },
-        { nameof(MainViewModel.ShowHelpCommand), Se.Language.Options.Shortcuts.Help },
+        { nameof(MainViewModel.ShowHelpCommand), Se.Language.General.Help },
         { nameof(MainViewModel.ShowSourceViewCommand), Se.Language.Options.Shortcuts.SourceView },
         { nameof(MainViewModel.MergeWithLineBeforeCommand), Se.Language.General.MergeWithLineBeforeAndAutoBreak },
         { nameof(MainViewModel.MergeWithLineAfterCommand), Se.Language.General.MergeWithLineAfterAndAutoBreak },
