@@ -446,6 +446,19 @@ public class AudioVisualizer : Control
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
+        {
+            _isCtrlDown = false;
+        }
+        else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
+        {
+            _isAltDown = false;
+        }
+        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+        {
+            _isShiftDown = false;
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
