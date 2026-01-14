@@ -57,6 +57,7 @@ internal class IconNames
     public const string Network = "mdi-network";
     public const string New = "mdi-invoice-text-plus";
     public const string NewText = "mdi-invoice-text-plus-outline";
+    public const string Next = "mdi-chevron-right";
     public const string Ocr = "mdi-ocr";
     public const string Palette = "mdi-palette";
     public const string PanRight = "mdi-pan-right";
@@ -67,6 +68,8 @@ internal class IconNames
     public const string PlayBox = "mdi-play-box";
     public const string PlayCircle = "mdi-play-circle";
     public const string PlaySpeed = "mdi-play-speed";
+    public const string PlayOutline = "mdi-play-outline";
+    public const string PlayPlaylist = "mdi-playlist-play";
     public const string Plus = "mdi-plus";
     public const string PoliceBadge = "mdi-police-badge";
     public const string RayEnd = "mdi-ray-end";
@@ -79,6 +82,7 @@ internal class IconNames
     public const string SetMerge = "mdi-set-merge";
     public const string SetSplit = "mdi-set-split";
     public const string Settings = "mdi-cog";
+    public const string SkipNext = "mdi-skip-next";
     public const string Spellcheck = "mdi-spellcheck";
     public const string StopCircle = "mdi-stop-circle";
     public const string SwapVertical = "mdi-swap-vertical";

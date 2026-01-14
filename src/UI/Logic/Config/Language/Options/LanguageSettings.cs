@@ -239,6 +239,8 @@ public class LanguageSettings
     public string UseFocusedButtonBackgroundColor { get; set; }
     public string FocusedButtonBackgroundColor { get; set; }
     public string ForceCrLfOnSave { get; set; }
+    public string ShowWaveformToolbarPlayNext { get; set; }
+    public string ShowWaveformToolbarPlaySelection { get; set; }
 
     public LanguageSettings()
     {
@@ -474,6 +476,8 @@ public class LanguageSettings
         UseFocusedButtonBackgroundColor = "Use focused button background color";
         FocusedButtonBackgroundColor = "Focused button background color";
         ForceCrLfOnSave = "Force CR+LF on save (text subtitle files)";
+        ShowWaveformToolbarPlayNext = "Toolbar: show play next button";
+        ShowWaveformToolbarPlaySelection = "Toolbar: show play selection button";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

@@ -622,6 +622,26 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void PlayNext()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        var next = Subtitles.FirstOrDefault(s => s.StartTime.TotalSeconds >= vp.Position);
+        if (next == null)
+        {
+            return;
+        }
+
+        vp.Position = next.StartTime.TotalSeconds;
+        SelectAndScrollToSubtitle(next);
+        vp.VideoPlayerInstance.Play();
+    }
+
+    [RelayCommand]
     private void Pause()
     {
         var vp = GetVideoPlayerControl();

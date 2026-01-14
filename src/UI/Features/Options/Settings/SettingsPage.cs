@@ -397,6 +397,8 @@ public class SettingsPage : UserControl
                 () => UiUtil.MakeComboBox(_vm.WaveformDrawStyles, _vm, nameof(_vm.SelectedWaveformDrawStyle))),
 
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlay, nameof(_vm.ShowWaveformToolbarPlay)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlayNext, nameof(_vm.ShowWaveformToolbarPlayNext)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlaySelection, nameof(_vm.ShowWaveformToolbarPlaySelection)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarRepeat, nameof(_vm.ShowWaveformToolbarRepeat)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarRemoveBlankLines, nameof(_vm.ShowWaveformToolbarRemoveBlankLines)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarNew, nameof(_vm.ShowWaveformToolbarNew)),

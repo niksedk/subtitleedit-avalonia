@@ -278,6 +278,24 @@ public class InitWaveform
         Attached.SetIcon(buttonPlay, IconNames.Play);
         vm.ButtonWaveformPlay = buttonPlay;
 
+        var buttonPlayNext = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.PlayNextCommand,
+            FontWeight = FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlayNextHint, shortcuts, nameof(vm.PlayNextCommand)),
+        };
+        Attached.SetIcon(buttonPlayNext, IconNames.SkipNext);
+
+        var buttonPlaySelectedLines = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.PlaySelectedLinesWithoutLoopCommand,
+            FontWeight = FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlaySelectionHint, shortcuts, nameof(vm.PlaySelectedLinesWithoutLoopCommand)),
+        };
+        Attached.SetIcon(buttonPlaySelectedLines, IconNames.PlayPlaylist);
+
         var toggleButtonRepeat = new ToggleButton
         {
             DataContext = vm,
@@ -478,10 +496,19 @@ public class InitWaveform
         };
         flyoutMore.Items.Add(menuItemHideControls);
 
-
         if (settings.ShowToolbarPlay)
         {
             controlsPanel.Children.Add(buttonPlay);
+        }
+
+        if (settings.ShowToolbarPlayNext)
+        {
+            controlsPanel.Children.Add(buttonPlayNext);
+        }
+
+        if (settings.ShowToolbarPlaySelection)
+        {
+            controlsPanel.Children.Add(buttonPlaySelectedLines);
         }
 
         if (settings.ShowToolbarRepeat)
@@ -507,6 +534,11 @@ public class InitWaveform
         if (settings.ShowToolbarSetEnd)
         {
             controlsPanel.Children.Add(buttonSetEnd);
+        }
+
+        if (settings.ShowToolbarRemoveBlankLines)
+        {
+            controlsPanel.Children.Add(buttonRemoveBlankLines);
         }
 
         if (settings.ShowToolbarHorizontalZoom)

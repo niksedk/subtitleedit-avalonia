@@ -149,6 +149,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformShowToolbar;
 
     [ObservableProperty] private bool _showWaveformToolbarPlay;
+    [ObservableProperty] private bool _showWaveformToolbarPlayNext;
+    [ObservableProperty] private bool _showWaveformToolbarPlaySelection;
     [ObservableProperty] private bool _showWaveformToolbarRepeat;
     [ObservableProperty] private bool _showWaveformToolbarRemoveBlankLines;
     [ObservableProperty] private bool _showWaveformToolbarNew;
@@ -577,6 +579,8 @@ public partial class SettingsViewModel : ObservableObject
         WaveformSpectrogramCombinedWaveformHeight = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
 
         ShowWaveformToolbarPlay = Se.Settings.Waveform.ShowToolbarPlay;
+        ShowWaveformToolbarPlayNext = Se.Settings.Waveform.ShowToolbarPlayNext;
+        ShowWaveformToolbarPlaySelection = Se.Settings.Waveform.ShowToolbarPlaySelection;
         ShowWaveformToolbarRepeat = Se.Settings.Waveform.ShowToolbarRepeat;
         ShowWaveformToolbarRemoveBlankLines = Se.Settings.Waveform.ShowToolbarRemoveBlankLines;
         ShowWaveformToolbarNew = Se.Settings.Waveform.ShowToolbarNew;
@@ -983,6 +987,8 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = WaveformSpectrogramCombinedWaveformHeight;
 
         Se.Settings.Waveform.ShowToolbarPlay = ShowWaveformToolbarPlay;
+        Se.Settings.Waveform.ShowToolbarPlayNext = ShowWaveformToolbarPlayNext;
+        Se.Settings.Waveform.ShowToolbarPlaySelection = ShowWaveformToolbarPlaySelection;
         Se.Settings.Waveform.ShowToolbarRepeat = ShowWaveformToolbarRepeat;
         Se.Settings.Waveform.ShowToolbarRemoveBlankLines = ShowWaveformToolbarRemoveBlankLines;
         Se.Settings.Waveform.ShowToolbarNew = ShowWaveformToolbarNew;

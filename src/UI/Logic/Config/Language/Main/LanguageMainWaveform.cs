@@ -3,6 +3,8 @@
 public class LanguageMainWaveform
 {
     public string PlayPauseHint { get; set; }
+    public string PlayNextHint { get; set; }
+    public string PlaySelectionHint { get; set; }
     public string SetStartAndOffsetTheRestHint { get; set; }
     public string RepeatHint { get; set; }
     public string SetStartHint { get; set; }
@@ -20,6 +22,8 @@ public class LanguageMainWaveform
     public LanguageMainWaveform()
     {
         PlayPauseHint = "Play / Pause {0}";
+        PlayNextHint = "Play next {0}";
+        PlaySelectionHint = "Play selection {0}";
         SetStartAndOffsetTheRestHint = "Set start of current subtitle and offset the rest {0}";
         RepeatHint = "Repeat playing current subtitle {0}";
         SetStartHint = "Set start of current subtitle {0}";

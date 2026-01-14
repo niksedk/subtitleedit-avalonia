@@ -586,6 +586,7 @@ public class LanguageGeneral
     public string AlignmentX { get; set; }
     public string Play { get; set; }
     public string Pause { get; set; }
+    public string PlayNext { get; set; }
 
     public LanguageGeneral()
     {
@@ -1171,5 +1172,6 @@ public class LanguageGeneral
         AlignmentX = "Set alignment \"{0}\" for selected lines";
         Play = "Play";
         Pause = "Pause";
+        PlayNext = "Play next";
     }
 }

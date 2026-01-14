@@ -12,6 +12,8 @@ public class SeWaveform
     public int SpectrogramCombinedWaveformHeight { get; set; }
 
     public bool ShowToolbarPlay { get; set; }
+    public bool ShowToolbarPlayNext { get; set; }
+    public bool ShowToolbarPlaySelection { get; set; }
     public bool ShowToolbarRepeat { get; set; }
     public bool ShowToolbarRemoveBlankLines { get; set; }
     public bool ShowToolbarNew { get; set; }
