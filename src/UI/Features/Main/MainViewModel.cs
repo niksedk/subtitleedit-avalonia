@@ -610,6 +610,30 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void Play()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        vp.VideoPlayerInstance.Play();
+    }
+
+    [RelayCommand]
+    private void Pause()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        vp.VideoPlayerInstance.Pause();
+    }
+
+    [RelayCommand]
     private void TogglePlayPause()
     {
         var control = GetVideoPlayerControl();
