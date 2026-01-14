@@ -97,7 +97,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         Language = languageCode;
 
         SelectedLanguage = Languages.FirstOrDefault(p => p.Code.TwoLetterISOLanguageName == languageCode);
-        if (SelectedLanguage != null)
+        if (SelectedLanguage == null)
         {
             SelectedLanguage = Languages.First(p => p.Code.TwoLetterISOLanguageName == "en");
         }
