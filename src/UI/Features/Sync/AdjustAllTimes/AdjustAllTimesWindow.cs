@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 
@@ -22,8 +23,7 @@ public class AdjustAllTimesWindow : Window
         var label = new Label
         {
             Content = Se.Language.General.Adjustment,
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 5, 0, 5),
+            VerticalAlignment = VerticalAlignment.Center,
         };
 
         var timeCodeUpDown = new TimeCodeUpDown
@@ -32,53 +32,109 @@ public class AdjustAllTimesWindow : Window
             [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.Adjustment))
             {
                 Mode = BindingMode.TwoWay,
-            },
-            VerticalAlignment = VerticalAlignment.Top,
+            }
         };
 
-        var gridAdjustment = new Grid
+        var splitButtonShowEarlier = new SplitButton
         {
-            ColumnDefinitions =
+            Content = Se.Language.Sync.ShowEarlier,
+            VerticalAlignment = VerticalAlignment.Center,
+            Command = vm.ShowEarlierCommand,
+            Margin = new Thickness(10, 0, 0, 0),
+            Flyout = new MenuFlyout
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnSpacing = 5,
-            RowSpacing  = 5,
+                Items =
+                {
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.TenMilliseconds,
+                        Command = vm.ShowEarlierTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(10),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.OneHundredMilliseconds,
+                        Command = vm.ShowEarlierTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(100),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.FiveHundredMilliseconds,
+                        Command = vm.ShowEarlierTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(500),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.OneSecond,
+                        Command = vm.ShowEarlierTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromSeconds(1),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.FiveSeconds,
+                        Command = vm.ShowEarlierTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromSeconds(5),
+                    },
+                }
+            }
         };
 
-        gridAdjustment.Add(label, 0, 0);
-        gridAdjustment.Add(timeCodeUpDown, 0, 1);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier, vm.ShowEarlierCommand).WithMarginBottom(25).WithMarginTop(0).WithMinWidth(150), 0, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater, vm.ShowLaterCommand).WithMarginBottom(25).WithMarginTop(0).WithMinWidth(150), 0, 3);
+        var splitButtonShowLater = new SplitButton
+        {
+            Content = Se.Language.Sync.ShowLater,
+            VerticalAlignment = VerticalAlignment.Center,
+            Command = vm.ShowLaterCommand,
+            Margin = new Thickness(5, 0, 0, 0),
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                   new MenuItem
+                    {
+                        Header = Se.Language.General.TenMilliseconds,
+                        Command = vm.ShowLaterTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(10),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.OneHundredMilliseconds,
+                        Command = vm.ShowLaterTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(100),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.FiveHundredMilliseconds,
+                        Command = vm.ShowLaterTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromMilliseconds(500),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.OneSecond,
+                        Command = vm.ShowLaterTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromSeconds(1),
+                    },
+                    new MenuItem
+                    {
+                        Header = Se.Language.General.FiveSeconds,
+                        Command = vm.ShowLaterTimeSpanCommand,
+                        CommandParameter = TimeSpan.FromSeconds(5),
+                    },
+                }
+            }
+        };
 
-
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 10 ms", vm.ShowEarlierCommand).WithMinWidth(150), 1, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 10 ms", vm.ShowLaterCommand).WithMinWidth(150), 1, 3);
-
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 100 ms", vm.ShowEarlierCommand).WithMinWidth(150), 2, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 100 ms", vm.ShowLaterCommand).WithMinWidth(150), 2, 3);
-
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": ½ sec", vm.ShowEarlierCommand).WithMinWidth(150), 3, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": ½ sec", vm.ShowLaterCommand).WithMinWidth(150), 3, 3);
-
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 1 sec", vm.ShowEarlierCommand).WithMinWidth(150), 4, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 1 sec", vm.ShowLaterCommand).WithMinWidth(150), 4, 4);
-
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 5 sec", vm.ShowEarlierCommand).WithMinWidth(150), 5, 2);
-        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 5 sec", vm.ShowLaterCommand).WithMinWidth(150), 5, 3);
-
+        var panelAdjustment = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                label,
+                timeCodeUpDown,
+                splitButtonShowEarlier,
+                splitButtonShowLater,
+            },
+        };
 
         var panelRadioButtons = new StackPanel
         {
@@ -125,13 +181,13 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(gridAdjustment, 0);
+        grid.Add(panelAdjustment, 0);
         grid.Add(panelRadioButtons, 1);
         grid.Add(buttonPanel, 2);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

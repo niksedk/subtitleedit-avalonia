@@ -67,6 +67,7 @@ public class LanguageOcr
     public string EditExportDotDotDot { get; set; }
     public string EditBinaryOcrDatabase { get; set; }
     public string BinaryImageCompareDatabase { get; set; }
+    public object OneHundredMilliseconds { get; internal set; }
 
     public LanguageOcr()
     {

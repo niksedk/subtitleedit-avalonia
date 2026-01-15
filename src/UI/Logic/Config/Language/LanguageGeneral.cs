@@ -588,6 +588,11 @@ public class LanguageGeneral
     public string Play { get; set; }
     public string Pause { get; set; }
     public string PlayNext { get; set; }
+    public object TenMilliseconds { get; set; }
+    public object OneHundredMilliseconds { get; set; }
+    public object FiveHundredMilliseconds { get; set; }
+    public object OneSecond { get; set; }
+    public object FiveSeconds { get; set; }
 
     public LanguageGeneral()
     {
@@ -1175,5 +1180,11 @@ public class LanguageGeneral
         Play = "Play";
         Pause = "Pause";
         PlayNext = "Play next";
+        TenMilliseconds = "10 milliseconds";
+        OneHundredMilliseconds = "100 milliseconds";
+        FiveHundredMilliseconds = "500 milliseconds";
+        OneSecond = "One second";
+        FiveSeconds = "Five seconds";
+
     }
 }

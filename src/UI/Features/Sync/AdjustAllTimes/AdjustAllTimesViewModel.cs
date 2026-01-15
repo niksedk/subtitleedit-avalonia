@@ -87,6 +87,14 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         ShowTotalAdjustmentInfo();
     }
 
+    [RelayCommand]
+    private void ShowEarlierTimeSpan(TimeSpan ts)
+    {
+        _totalAdjustment -= ts.TotalSeconds;
+        Apply();
+        ShowTotalAdjustmentInfo();
+    }
+
     private void ShowTotalAdjustmentInfo()
     {
         TotalAdjustmentInfo = string.Format(Se.Language.General.TotalAdjustmentX, new TimeCode(_totalAdjustment * 1000.0).ToShortDisplayString());
@@ -96,6 +104,14 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowLater()
     {
         _totalAdjustment += Adjustment.TotalSeconds;
+        Apply();
+        ShowTotalAdjustmentInfo();
+    }
+
+    [RelayCommand]
+    private void ShowLaterTimeSpan(TimeSpan ts)
+    {
+        _totalAdjustment += ts.TotalSeconds;
         Apply();
         ShowTotalAdjustmentInfo();
     }
