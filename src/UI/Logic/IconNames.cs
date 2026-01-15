@@ -38,6 +38,7 @@ internal class IconNames
     public const string FindReplace = "mdi-find-replace";
     public const string Folder = "mdi-folder";
     public const string FolderOpen = "mdi-folder-open";
+    public const string FormatClear = "mdi-format-clear";
     public const string Fullscreen = "mdi-fullscreen";
     public const string FullscreenExit = "mdi-fullscreen-exit";
     public const string Help = "mdi-help";

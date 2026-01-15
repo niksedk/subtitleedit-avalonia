@@ -3574,10 +3574,11 @@ public partial class MainViewModel :
             return false;
         }
 
+        vp.VideoPlayerInstance.Pause();
         var p = selectedItems.First();
         vp.Position = p.StartTime.TotalSeconds;
-        vp.VideoPlayerInstance.Play();
         _playSelectionItem = new PlaySelectionItem(selectedItems, p.EndTime, loop);
+        vp.VideoPlayerInstance.Play();
 
         return true;
     }
@@ -11716,12 +11717,16 @@ public partial class MainViewModel :
                         var p = _playSelectionItem.GetNextSubtitle();
                         if (p == null)
                         {
+                            Se.LogError("Get next is null: " + mediaPlayerSeconds + " >= " + _playSelectionItem.EndSeconds);
                             ShowStatus("Get next is null");
                             vp.VideoPlayerInstance.Pause();
+                            vp.Position = _playSelectionItem.EndSeconds;
                             ResetPlaySelection();
                         }
-                        else
+                        else 
                         {
+                            Se.LogError("Go to next: " + p.StartTime);
+                            ShowStatus("Go to next: " + p.StartTime);
                             vp.Position = p.StartTime.TotalSeconds;
                             Dispatcher.UIThread.Post(() =>
                             {
