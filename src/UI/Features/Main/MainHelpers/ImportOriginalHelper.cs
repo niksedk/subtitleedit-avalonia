@@ -1,4 +1,5 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+﻿using Google.Api.Gax.ResourceNames;
+using Nikse.SubtitleEdit.Core.Common;
 using System;
 using System.Collections.ObjectModel;
 
@@ -53,10 +54,16 @@ public static class ImportOriginalHelper
         }
 
         // try with middle time only
+        var lineMiddle = (line.StartTime.TotalMilliseconds + line.EndTime.TotalMilliseconds) / 2.0;
         foreach (var originalLine in original.Paragraphs)
         {
-            var lineMiddle = (line.StartTime.TotalMilliseconds + line.EndTime.TotalMilliseconds) / 2;
-            if (originalLine.StartTime.TotalSeconds < lineMiddle && originalLine.EndTime.TotalSeconds > lineMiddle)
+            if (originalLine.StartTime.TotalMilliseconds <= lineMiddle && originalLine.EndTime.TotalMilliseconds >= lineMiddle)
+            {
+                return originalLine;
+            }
+
+            var originalMiddle = (originalLine.StartTime.TotalMilliseconds + originalLine.EndTime.TotalMilliseconds) / 2.0;
+            if (line.StartTime.TotalMilliseconds <= originalMiddle && line.EndTime.TotalMilliseconds >= originalMiddle)
             {
                 return originalLine;
             }
