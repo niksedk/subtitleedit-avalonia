@@ -22,7 +22,8 @@ public class AdjustAllTimesWindow : Window
         var label = new Label
         {
             Content = Se.Language.General.Adjustment,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 5, 0, 5),
         };
 
         var timeCodeUpDown = new TimeCodeUpDown
@@ -31,21 +32,53 @@ public class AdjustAllTimesWindow : Window
             [!TimeCodeUpDown.ValueProperty] = new Binding(nameof(vm.Adjustment))
             {
                 Mode = BindingMode.TwoWay,
-            }
+            },
+            VerticalAlignment = VerticalAlignment.Top,
         };
 
-        var panelAdjustment = new StackPanel
+        var gridAdjustment = new Grid
         {
-            Orientation = Orientation.Horizontal,
-            VerticalAlignment = VerticalAlignment.Center,
-            Children =
+            ColumnDefinitions =
             {
-                label,
-                timeCodeUpDown,
-                UiUtil.MakeButton(Se.Language.Sync.ShowEarlier, vm.ShowEarlierCommand).WithMarginLeft(15),
-                UiUtil.MakeButton(Se.Language.Sync.ShowLater, vm.ShowLaterCommand),
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnSpacing = 5,
+            RowSpacing  = 5,
         };
+
+        gridAdjustment.Add(label, 0, 0);
+        gridAdjustment.Add(timeCodeUpDown, 0, 1);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier, vm.ShowEarlierCommand).WithMarginBottom(25).WithMarginTop(0).WithMinWidth(150), 0, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater, vm.ShowLaterCommand).WithMarginBottom(25).WithMarginTop(0).WithMinWidth(150), 0, 3);
+
+
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 10 ms", vm.ShowEarlierCommand).WithMinWidth(150), 1, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 10 ms", vm.ShowLaterCommand).WithMinWidth(150), 1, 3);
+
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 100 ms", vm.ShowEarlierCommand).WithMinWidth(150), 2, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 100 ms", vm.ShowLaterCommand).WithMinWidth(150), 2, 3);
+
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": ½ sec", vm.ShowEarlierCommand).WithMinWidth(150), 3, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": ½ sec", vm.ShowLaterCommand).WithMinWidth(150), 3, 3);
+
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 1 sec", vm.ShowEarlierCommand).WithMinWidth(150), 4, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 1 sec", vm.ShowLaterCommand).WithMinWidth(150), 4, 4);
+
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowEarlier + ": 5 sec", vm.ShowEarlierCommand).WithMinWidth(150), 5, 2);
+        gridAdjustment.Add(UiUtil.MakeButton(Se.Language.Sync.ShowLater + ": 5 sec", vm.ShowLaterCommand).WithMinWidth(150), 5, 3);
+
 
         var panelRadioButtons = new StackPanel
         {
@@ -92,7 +125,7 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelAdjustment, 0);
+        grid.Add(gridAdjustment, 0);
         grid.Add(panelRadioButtons, 1);
         grid.Add(buttonPanel, 2);
 

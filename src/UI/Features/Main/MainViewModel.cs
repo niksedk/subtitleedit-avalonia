@@ -4799,7 +4799,7 @@ public partial class MainViewModel :
         for (int i = 0; i < Subtitles.Count; i++)
         {
             SubtitleLineViewModel? s = Subtitles[i];
-            var prev = i > 0 ? Subtitles[i - 1] : null; 
+            var prev = i > 0 ? Subtitles[i - 1] : null;
             var next = i < Subtitles.Count - 1 ? Subtitles[i + 1] : null;
             if (!string.IsNullOrEmpty(s.GetErrors(prev, next)))
             {
@@ -6187,7 +6187,7 @@ public partial class MainViewModel :
         }
 
         var p = Subtitles[currentIndex + 1];
-        SubtitleGrid.SelectedItem = p;  
+        SubtitleGrid.SelectedItem = p;
         vp.Position = p.StartTime.TotalSeconds;
         _playSelectionItem = new PlaySelectionItem(new List<SubtitleLineViewModel> { p }, p.EndTime, true);
         vp.VideoPlayerInstance.Play();
@@ -6827,6 +6827,12 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void FocusTextBox()
+    {
+        FocusEditTextBox();
+    }
+
+    [RelayCommand]
     private void WaveformInsertAtPositionNoFocusTextBox()
     {
         var vp = GetVideoPlayerControl();
@@ -7389,6 +7395,8 @@ public partial class MainViewModel :
 
             SubtitleGrid.Focus();
         }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -7399,7 +7407,11 @@ public partial class MainViewModel :
             return;
         }
 
-        if (EditTextBox.IsFocused)
+        if (AudioVisualizer.IsFocused)
+        {
+            FocusEditTextBox();
+        }
+        else if (EditTextBox.IsFocused)
         {
             if (AudioVisualizer.IsFocused)
             {
@@ -7408,10 +7420,8 @@ public partial class MainViewModel :
 
             AudioVisualizer.Focus();
         }
-        else
-        {
-            FocusEditTextBox();
-        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
@@ -11028,7 +11038,7 @@ public partial class MainViewModel :
     {
         lock (_onKeyDownHandlerLock)
         {
-            var ms = Environment.TickCount64; 
+            var ms = Environment.TickCount64;
             var msDiff = ms - _lastKeyPressedMs;
             var k = keyEventArgs.Key;
             if (msDiff > 5000)
@@ -11586,7 +11596,7 @@ public partial class MainViewModel :
                 if (isPlaying)
                 {
                     Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
-                    
+
                     if (_playSelectionItem != null && mediaPlayerSeconds >= _playSelectionItem.EndSeconds)
                     {
                         var p = _playSelectionItem.GetNextSubtitle(mediaPlayerSeconds);
@@ -11596,7 +11606,7 @@ public partial class MainViewModel :
                             vp.Position = _playSelectionItem.EndSeconds;
                             ResetPlaySelection();
                         }
-                        else 
+                        else
                         {
                             if (_playSelectionItem.HasGapOrIsFirst())
                             {

@@ -296,6 +296,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowMediaInformationCommand), Se.Language.Options.Shortcuts.ShowMediaInformation },
         { nameof(MainViewModel.ShowSubtitleFormatPickerCommand), Se.Language.Options.Shortcuts.ChooseSubtitleFormat },
         { nameof(MainViewModel.TrimWhitespaceSelectedLinesCommand), Se.Language.Options.Shortcuts.TrimWhitespaceSelectedLines },
+        { nameof(MainViewModel.FocusTextBoxCommand), Se.Language.Options.Shortcuts.FocusTextBox },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -541,6 +542,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowMediaInformationCommand, nameof(vm.ShowMediaInformationCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowSubtitleFormatPickerCommand, nameof(vm.ShowSubtitleFormatPickerCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.TrimWhitespaceSelectedLinesCommand, nameof(vm.TrimWhitespaceSelectedLinesCommand), ShortcutCategory.SubtitleGrid);
+        AddShortcut(shortcuts, vm.FocusTextBoxCommand, nameof(vm.FocusTextBoxCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

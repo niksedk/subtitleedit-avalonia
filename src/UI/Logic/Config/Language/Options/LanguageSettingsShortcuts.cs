@@ -240,6 +240,7 @@ public class LanguageSettingsShortcuts
     public string WaveformVerticalZoomOutCommand { get; set; }
     public string CopySubtitlePathToClipboard { get; set; }
     public string CopySubtitleOriginalPathToClipboard { get; set; }
+    public string FocusTextBox { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -483,5 +484,6 @@ public class LanguageSettingsShortcuts
         WaveformVerticalZoomOutCommand = "Waveform vertical zoom out";
         CopySubtitlePathToClipboard = "Copy subtitle path to clipboard";
         CopySubtitleOriginalPathToClipboard = "Copy subtitle path of original to clipboard";
+        FocusTextBox = "Focus text box";
     }
 }
