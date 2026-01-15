@@ -198,7 +198,6 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _showColumnLayerFlyoutMenuItem;
     [ObservableProperty] private bool _isVideoLoaded;
     [ObservableProperty] private bool _isTextBoxSplitAtCursorAndVideoPositionVisible;
-    [ObservableProperty] private bool _isRepeatOn;
     [ObservableProperty] private ObservableCollection<string> _speeds;
     [ObservableProperty] private string _selectedSpeed;
     [ObservableProperty] private bool _showWaveformDisplayModeSeparator;
@@ -252,8 +251,6 @@ public partial class MainViewModel :
     private DispatcherTimer _positionTimer = new();
     private DispatcherTimer _slowTimer = new();
     private CancellationTokenSource _videoOpenTokenSource;
-    private SubtitleLineViewModel? _repeatSubtitle;
-    private bool _ignoreRepeatToggleCommand;
     private VideoPlayerControl? _fullScreenVideoPlayerControl;
     private static SolidColorBrush _transparentBrush = new SolidColorBrush(Colors.Transparent);
     private static SolidColorBrush _errorBrush = new SolidColorBrush(_errorColor);
@@ -3567,7 +3564,6 @@ public partial class MainViewModel :
 
     private bool PlayerSelectedLines(bool loop)
     {
-        _repeatSubtitle = null;
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
         var vp = GetVideoPlayerControl();
         if (Window == null || selectedItems.Count == 0 || vp == null)
@@ -3579,7 +3575,6 @@ public partial class MainViewModel :
         var p = selectedItems.First();
         vp.Position = p.StartTime.TotalSeconds;
         _playSelectionItem = new PlaySelectionItem(selectedItems, p.EndTime, loop);
-        Se.LogError("new Play selection, endtime: " + p.EndTime);
         vp.VideoPlayerInstance.Play();
 
         return true;
@@ -6150,154 +6145,50 @@ public partial class MainViewModel :
         _shortcutManager.ClearKeys();
     }
 
-
-    [RelayCommand]
-    private void RepeatLineToggle()
-    {
-        if (_ignoreRepeatToggleCommand)
-        {
-            return;
-        }
-
-        try
-        {
-            _ignoreRepeatToggleCommand = true;
-
-            if (_repeatSubtitle != null)
-            {
-                _repeatSubtitle = null;
-                IsRepeatOn = false;
-                return;
-            }
-
-            var selectedSubtitle = SelectedSubtitle;
-            _repeatSubtitle = null;
-            var vp = GetVideoPlayerControl();
-            if (selectedSubtitle == null || vp == null || string.IsNullOrEmpty(_videoFileName))
-            {
-                IsRepeatOn = false;
-                return;
-            }
-
-            _repeatSubtitle = selectedSubtitle;
-            IsRepeatOn = true;
-            vp.Position = selectedSubtitle.StartTime.TotalSeconds;
-            if (!vp.IsPlaying)
-            {
-                vp.TogglePlayPause();
-            }
-
-            _updateAudioVisualizer = true;
-        }
-        finally
-        {
-            _ignoreRepeatToggleCommand = false;
-        }
-    }
-
     [RelayCommand]
     private void RepeatPreviousLine()
     {
-        if (_ignoreRepeatToggleCommand)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
+        var vp = GetVideoPlayerControl();
+        if (Window == null || selectedItems.Count == 0 || vp == null)
         {
             return;
         }
 
-        try
+        vp.VideoPlayerInstance.Pause();
+        var currentIndex = Subtitles.IndexOf(selectedItems.First());
+        if (currentIndex <= 0)
         {
-            _ignoreRepeatToggleCommand = true;
-
-            var idx = SelectedSubtitleIndex ?? -1;
-            var vp = GetVideoPlayerControl();
-            _repeatSubtitle = null;
-            if (Subtitles.Count == 0 || idx <= 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
-            {
-                if (vp != null && vp.IsPlaying)
-                {
-                    vp.TogglePlayPause();
-                }
-
-                IsRepeatOn = false;
-                return;
-            }
-
-            idx--;
-            if (idx >= Subtitles.Count)
-            {
-                if (vp.IsPlaying)
-                {
-                    vp.TogglePlayPause();
-                }
-
-                IsRepeatOn = false;
-                return;
-            }
-
-            SelectAndScrollToRow(idx);
-            _repeatSubtitle = Subtitles[idx];
-            IsRepeatOn = true;
-            vp.Position = _repeatSubtitle.StartTime.TotalSeconds;
-            if (!vp.IsPlaying)
-            {
-                vp.TogglePlayPause();
-            }
-
-            _updateAudioVisualizer = true;
+            return;
         }
-        finally
-        {
-            _ignoreRepeatToggleCommand = false;
-        }
+
+        var p = Subtitles[currentIndex - 1];
+        vp.Position = p.StartTime.TotalSeconds;
+        _playSelectionItem = new PlaySelectionItem(selectedItems, p.EndTime, true);
+        vp.VideoPlayerInstance.Play();
     }
 
     [RelayCommand]
     private void RepeatNextLine()
     {
-        if (_ignoreRepeatToggleCommand)
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
+        var vp = GetVideoPlayerControl();
+        if (Window == null || selectedItems.Count == 0 || vp == null)
         {
             return;
         }
 
-        try
+        vp.VideoPlayerInstance.Pause();
+        var currentIndex = Subtitles.IndexOf(selectedItems.First());
+        if (currentIndex >= Subtitles.Count - 1)
         {
-            _ignoreRepeatToggleCommand = true;
-
-            var idx = SelectedSubtitleIndex ?? -1;
-            var vp = GetVideoPlayerControl();
-            _repeatSubtitle = null;
-            if (Subtitles.Count == 0 || idx < 0 || idx >= Subtitles.Count || vp == null || string.IsNullOrEmpty(_videoFileName))
-            {
-                IsRepeatOn = false;
-                return;
-            }
-
-            idx++;
-            if (idx >= Subtitles.Count)
-            {
-                if (vp.IsPlaying)
-                {
-                    vp.TogglePlayPause();
-                }
-
-                IsRepeatOn = false;
-                return;
-            }
-
-            SelectAndScrollToRow(idx);
-            _repeatSubtitle = Subtitles[idx];
-            IsRepeatOn = true;
-            vp.Position = _repeatSubtitle.StartTime.TotalSeconds;
-            if (!vp.IsPlaying)
-            {
-                vp.TogglePlayPause();
-            }
-
-            _updateAudioVisualizer = true;
+            return;
         }
-        finally
-        {
-            _ignoreRepeatToggleCommand = false;
-        }
+
+        var p = Subtitles[currentIndex + 1];
+        vp.Position = p.StartTime.TotalSeconds;
+        _playSelectionItem = new PlaySelectionItem(selectedItems, p.EndTime, true);
+        vp.VideoPlayerInstance.Play();
     }
 
     [RelayCommand]
@@ -11135,13 +11026,7 @@ public partial class MainViewModel :
     {
         lock (_onKeyDownHandlerLock)
         {
-            if (_repeatSubtitle != null)
-            {
-                IsRepeatOn = false;
-                _repeatSubtitle = null;
-            }
-
-            var ms = Environment.TickCount64; // DateTime.UtcNow.Ticks; // Stopwatch.GetTimestamp(); GetTimestamp does not work on mac!?
+            var ms = Environment.TickCount64; 
             var msDiff = ms - _lastKeyPressedMs;
             var k = keyEventArgs.Key;
             if (msDiff > 5000)
@@ -11699,35 +11584,18 @@ public partial class MainViewModel :
                 if (isPlaying)
                 {
                     Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Pause);
-                    var rs = _repeatSubtitle;
-                    if (rs != null)
-                    {
-                        if (mediaPlayerSeconds >= rs.StartTime.TotalSeconds &&
-                            mediaPlayerSeconds <= rs.EndTime.TotalSeconds)
-                        {
-                            // do nothing, still in repeat range
-                        }
-                        else
-                        {
-                            vp.Position = rs.StartTime.TotalSeconds;
-                        }
-                    }
                     
-                    else if (_playSelectionItem != null && mediaPlayerSeconds >= _playSelectionItem.EndSeconds)
+                    if (_playSelectionItem != null && mediaPlayerSeconds >= _playSelectionItem.EndSeconds)
                     {
                         var p = _playSelectionItem.GetNextSubtitle(mediaPlayerSeconds);
                         if (p == null)
                         {
-                            Se.LogError("Get next is null: " + mediaPlayerSeconds + " >= " + _playSelectionItem.EndSeconds);
-                            ShowStatus("Get next is null" + mediaPlayerSeconds + " >= " + _playSelectionItem.EndSeconds);
                             vp.VideoPlayerInstance.Pause();
                             vp.Position = _playSelectionItem.EndSeconds;
                             ResetPlaySelection();
                         }
                         else 
                         {
-                            Se.LogError("Go to next: " + p.StartTime);
-                            ShowStatus("Go to next: " + p.StartTime);
                             if (_playSelectionItem.HasGapOrIsFirst())
                             {
                                 vp.Position = p.StartTime.TotalSeconds;

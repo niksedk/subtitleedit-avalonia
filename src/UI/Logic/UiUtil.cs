@@ -2246,4 +2246,9 @@ public static class UiUtil
     {
         throw new NotImplementedException();
     }
+
+    internal static object MakeToolTip(object playSelectedRepeatHint, List<ShortCut> shortcuts, string v)
+    {
+        throw new NotImplementedException();
+    }
 }

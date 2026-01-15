@@ -6,7 +6,6 @@ public class LanguageMainWaveform
     public string PlayNextHint { get; set; }
     public string PlaySelectionHint { get; set; }
     public string SetStartAndOffsetTheRestHint { get; set; }
-    public string RepeatHint { get; set; }
     public string SetStartHint { get; set; }
     public string SetEndHint { get; set; }
     public string NewHint { get; set; }
@@ -18,6 +17,7 @@ public class LanguageMainWaveform
     public string HideWaveformToolbar { get; set; }
     public string ResetZoomAndSpeed { get; set; }
     public string RemoveBlankLines { get; set; }
+    public string PlaySelectedRepeatHint { get; set; }
 
     public LanguageMainWaveform()
     {
@@ -25,7 +25,6 @@ public class LanguageMainWaveform
         PlayNextHint = "Play next {0}";
         PlaySelectionHint = "Play selection {0}";
         SetStartAndOffsetTheRestHint = "Set start of current subtitle and offset the rest {0}";
-        RepeatHint = "Repeat playing current subtitle {0}";
         SetStartHint = "Set start of current subtitle {0}";
         SetEndHint = "Set end of current subtitle {0}";
         NewHint = "Insert new subtitle at video position {0}";
@@ -37,5 +36,6 @@ public class LanguageMainWaveform
         HideWaveformToolbar = "Hide toolbar {0}";
         ResetZoomAndSpeed = "Reset zoom & playback speed {0}";
         RemoveBlankLines = "Remove blank lines {0}";
+        PlaySelectedRepeatHint = "Play selected subtitle(s) in repeat mode {0}";
     }
 }

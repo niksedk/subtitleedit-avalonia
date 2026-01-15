@@ -278,15 +278,6 @@ public class InitWaveform
         Attached.SetIcon(buttonPlay, IconNames.Play);
         vm.ButtonWaveformPlay = buttonPlay;
 
-        var buttonPlayNext = new Button
-        {
-            Margin = new Thickness(0, 0, 3, 0),
-            Command = vm.PlayNextCommand,
-            FontWeight = FontWeight.Bold,
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlayNextHint, shortcuts, nameof(vm.PlayNextCommand)),
-        };
-        Attached.SetIcon(buttonPlayNext, IconNames.SkipNext);
-
         var buttonPlaySelectedLines = new Button
         {
             Margin = new Thickness(0, 0, 3, 0),
@@ -296,16 +287,24 @@ public class InitWaveform
         };
         Attached.SetIcon(buttonPlaySelectedLines, IconNames.PlayPlaylist);
 
-        var toggleButtonRepeat = new ToggleButton
+        var buttonPlaySelectedLinesRepeat = new Button
         {
             DataContext = vm,
-            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(vm.IsRepeatOn)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Center,
+            Command = vm.PlaySelectedLinesWithLoopCommand,
             Margin = new Thickness(0, 0, 3, 0),
-            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.RepeatHint, shortcuts, nameof(vm.RepeatLineToggleCommand)),
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlaySelectedRepeatHint, shortcuts, nameof(vm.PlaySelectedLinesWithLoopCommand)),
         };
-        Attached.SetIcon(toggleButtonRepeat, IconNames.Refresh);
-        toggleButtonRepeat.IsCheckedChanged += (s, e) => vm.RepeatLineToggleCommand.Execute(null);
+        Attached.SetIcon(buttonPlaySelectedLinesRepeat, IconNames.Refresh);
+
+        var buttonPlayNext = new Button
+        {
+            Margin = new Thickness(0, 0, 3, 0),
+            Command = vm.PlayNextCommand,
+            FontWeight = FontWeight.Bold,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.PlayNextHint, shortcuts, nameof(vm.PlayNextCommand)),
+        };
+        Attached.SetIcon(buttonPlayNext, IconNames.SkipNext);
 
         var buttonNew = new Button
         {
@@ -501,11 +500,6 @@ public class InitWaveform
             controlsPanel.Children.Add(buttonPlay);
         }
 
-        if (settings.ShowToolbarPlayNext)
-        {
-            controlsPanel.Children.Add(buttonPlayNext);
-        }
-
         if (settings.ShowToolbarPlaySelection)
         {
             controlsPanel.Children.Add(buttonPlaySelectedLines);
@@ -513,7 +507,12 @@ public class InitWaveform
 
         if (settings.ShowToolbarRepeat)
         {
-            controlsPanel.Children.Add(toggleButtonRepeat);
+            controlsPanel.Children.Add(buttonPlaySelectedLinesRepeat);
+        }
+
+        if (settings.ShowToolbarPlayNext)
+        {
+            controlsPanel.Children.Add(buttonPlayNext);
         }
 
         if (settings.ShowToolbarNew)
