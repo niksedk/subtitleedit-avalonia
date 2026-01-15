@@ -3578,6 +3578,7 @@ public partial class MainViewModel :
         var p = selectedItems.First();
         vp.Position = p.StartTime.TotalSeconds;
         _playSelectionItem = new PlaySelectionItem(selectedItems, p.EndTime, loop);
+        Se.LogError("new Play selection, endtime: " + p.EndTime);
         vp.VideoPlayerInstance.Play();
 
         return true;
