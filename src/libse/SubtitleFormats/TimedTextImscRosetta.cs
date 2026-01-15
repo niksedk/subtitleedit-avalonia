@@ -273,27 +273,61 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (child.Name == "i")
                 {
-                    XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                    attr.InnerText = "s_italic";
-                    span.Attributes.Append(attr);
-                    
-                    // Get the text content directly without nesting spans
-                    var textContent = child.InnerText;
-                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                    ttmlNode.AppendChild(span);
+                    // Check if nested <b> tag exists for combined italic+bold
+                    bool hasBold = child.InnerXml.Contains("<b>");
+                    if (hasBold)
+                    {
+                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                        attr.InnerText = "s_italic s_bold";
+                        span.Attributes.Append(attr);
+                        
+                        // Get the text content, removing the nested <b> tags
+                        var textContent = child.InnerText;
+                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
+                        ttmlNode.AppendChild(span);
+                    }
+                    else
+                    {
+                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                        attr.InnerText = "s_italic";
+                        span.Attributes.Append(attr);
+                        
+                        // Get the text content directly without nesting spans
+                        var textContent = child.InnerText;
+                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
+                        ttmlNode.AppendChild(span);
+                    }
                 }
                 else if (child.Name == "b")
                 {
-                    XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                    attr.InnerText = "s_bold";
-                    span.Attributes.Append(attr);
-                    
-                    // Get the text content directly without nesting spans
-                    var textContent = child.InnerText;
-                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                    ttmlNode.AppendChild(span);
+                    // Check if nested <i> tag exists for combined bold+italic
+                    bool hasItalic = child.InnerXml.Contains("<i>");
+                    if (hasItalic)
+                    {
+                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                        attr.InnerText = "s_italic s_bold";
+                        span.Attributes.Append(attr);
+                        
+                        // Get the text content, removing the nested <i> tags
+                        var textContent = child.InnerText;
+                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
+                        ttmlNode.AppendChild(span);
+                    }
+                    else
+                    {
+                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                        attr.InnerText = "s_bold";
+                        span.Attributes.Append(attr);
+                        
+                        // Get the text content directly without nesting spans
+                        var textContent = child.InnerText;
+                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
+                        ttmlNode.AppendChild(span);
+                    }
                 }
                 else if (child.Name == "u")
                 {
@@ -587,69 +621,74 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         var styleName = child.Attributes["style"].Value;
 
-                        if (styleName == "s_italic")
+                        // Check for combined styles (space-separated)
+                        var styleNames = styleName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var style in styleNames)
                         {
-                            isItalic = true;
-                        }
-                        else if (styleName == "s_bold")
-                        {
-                            isBold = true;
-                        }
-                        else if (styleName == "s_underline")
-                        {
-                            isUnderlined = true;
-                        }
-                        else if (styles.Contains(styleName))
-                        {
-                            try
+                            if (style == "s_italic")
                             {
-                                var nsmgr = new XmlNamespaceManager(xml.NameTable);
-                                nsmgr.AddNamespace("ttml", "http://www.w3.org/ns/ttml");
-                                XmlNode head = xml.DocumentElement.SelectSingleNode("ttml:head", nsmgr);
-                                foreach (XmlNode styleNode in head.SelectNodes("//ttml:style", nsmgr))
+                                isItalic = true;
+                            }
+                            else if (style == "s_bold")
+                            {
+                                isBold = true;
+                            }
+                            else if (style == "s_underline")
+                            {
+                                isUnderlined = true;
+                            }
+                            else if (styles.Contains(style))
+                            {
+                                try
                                 {
-                                    string currentStyle = null;
-                                    if (styleNode.Attributes["xml:id"] != null)
+                                    var nsmgr = new XmlNamespaceManager(xml.NameTable);
+                                    nsmgr.AddNamespace("ttml", "http://www.w3.org/ns/ttml");
+                                    XmlNode head = xml.DocumentElement.SelectSingleNode("ttml:head", nsmgr);
+                                    foreach (XmlNode styleNode in head.SelectNodes("//ttml:style", nsmgr))
                                     {
-                                        currentStyle = styleNode.Attributes["xml:id"].Value;
-                                    }
-                                    else if (styleNode.Attributes["id"] != null)
-                                    {
-                                        currentStyle = styleNode.Attributes["id"].Value;
-                                    }
-
-                                    if (currentStyle == styleName)
-                                    {
-                                        if (styleNode.Attributes["tts:fontStyle"] != null && styleNode.Attributes["tts:fontStyle"].Value == "italic")
+                                        string currentStyle = null;
+                                        if (styleNode.Attributes["xml:id"] != null)
                                         {
-                                            isItalic = true;
+                                            currentStyle = styleNode.Attributes["xml:id"].Value;
+                                        }
+                                        else if (styleNode.Attributes["id"] != null)
+                                        {
+                                            currentStyle = styleNode.Attributes["id"].Value;
                                         }
 
-                                        if (styleNode.Attributes["tts:fontWeight"] != null && styleNode.Attributes["tts:fontWeight"].Value == "bold")
+                                        if (currentStyle == style)
                                         {
-                                            isBold = true;
-                                        }
+                                            if (styleNode.Attributes["tts:fontStyle"] != null && styleNode.Attributes["tts:fontStyle"].Value == "italic")
+                                            {
+                                                isItalic = true;
+                                            }
 
-                                        if (styleNode.Attributes["tts:textDecoration"] != null && styleNode.Attributes["tts:textDecoration"].Value == "underline")
-                                        {
-                                            isUnderlined = true;
-                                        }
+                                            if (styleNode.Attributes["tts:fontWeight"] != null && styleNode.Attributes["tts:fontWeight"].Value == "bold")
+                                            {
+                                                isBold = true;
+                                            }
 
-                                        if (styleNode.Attributes["tts:fontFamily"] != null)
-                                        {
-                                            fontFamily = styleNode.Attributes["tts:fontFamily"].Value;
-                                        }
+                                            if (styleNode.Attributes["tts:textDecoration"] != null && styleNode.Attributes["tts:textDecoration"].Value == "underline")
+                                            {
+                                                isUnderlined = true;
+                                            }
 
-                                        if (styleNode.Attributes["tts:color"] != null)
-                                        {
-                                            color = styleNode.Attributes["tts:color"].Value;
+                                            if (styleNode.Attributes["tts:fontFamily"] != null)
+                                            {
+                                                fontFamily = styleNode.Attributes["tts:fontFamily"].Value;
+                                            }
+
+                                            if (styleNode.Attributes["tts:color"] != null)
+                                            {
+                                                color = styleNode.Attributes["tts:color"].Value;
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                System.Diagnostics.Debug.WriteLine(e);
+                                catch (Exception e)
+                                {
+                                    System.Diagnostics.Debug.WriteLine(e);
+                                }
                             }
                         }
                     }
