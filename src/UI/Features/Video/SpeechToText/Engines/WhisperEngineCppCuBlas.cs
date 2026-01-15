@@ -10,11 +10,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEngineCpp : IWhisperEngine
+public class WhisperEngineCppCuBlas : IWhisperEngine
 {
-    public static string StaticName => "Whisper CPP";
+    public static string StaticName => "Whisper CPP cuBLAS";
     public string Name => StaticName;
-    public string Choice => WhisperChoice.Cpp;
+    public string Choice => WhisperChoice.CppCuBlas;
     public string Url => "https://github.com/ggerganov/whisper.cpp";
 
     public List<WhisperLanguage> Languages => WhisperLanguage.Languages.OrderBy(p => p.Name).ToList();
@@ -50,7 +50,7 @@ public class WhisperEngineCpp : IWhisperEngine
             Directory.CreateDirectory(baseFolder);
         }
 
-        var folder = Path.Combine(baseFolder, "Cpp");
+        var folder = Path.Combine(baseFolder, "CppCuBlas");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
@@ -61,20 +61,30 @@ public class WhisperEngineCpp : IWhisperEngine
 
     public string GetAndCreateWhisperModelFolder(WhisperModel? whisperModel)
     {
-        var baseFolder = GetAndCreateWhisperFolder();
+        var baseFolder = Se.WhisperFolder;
+        if (!Directory.Exists(baseFolder))
+        {
+            Directory.CreateDirectory(baseFolder);
+        }
 
-        var folder = Path.Combine(baseFolder, "Models");
+        var folder = Path.Combine(baseFolder, "Cpp");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
         }
 
-        return folder;
+        var modelsFolder = Path.Combine(folder, "Models");
+        if (!Directory.Exists(modelsFolder))
+        {
+            Directory.CreateDirectory(modelsFolder);
+        }
+
+        return modelsFolder;
     }
 
     public string GetExecutable()
     {
-        var fullPath = Path.Combine(GetAndCreateWhisperFolder(), GetExecutableFileName());
+        string fullPath = Path.Combine(GetAndCreateWhisperFolder(), GetExecutableFileName());
 
         if (!File.Exists(fullPath) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -93,8 +103,7 @@ public class WhisperEngineCpp : IWhisperEngine
 
     public bool IsModelInstalled(WhisperModel model)
     {
-        var baseFolder = GetAndCreateWhisperFolder();
-        var folder = Path.Combine(baseFolder, "Models");
+        var folder = GetAndCreateWhisperModelFolder(null);
         if (!Directory.Exists(folder))
         {
             return false;

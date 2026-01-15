@@ -123,6 +123,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         Engines = [new WhisperEngineCpp()];
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            Engines.Add(new WhisperEngineCppCuBlas());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
             Engines.Add(new WhisperEngineConstMe());
         }

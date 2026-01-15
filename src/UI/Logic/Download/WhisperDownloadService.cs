@@ -11,6 +11,7 @@ public interface IWhisperDownloadService
 {
     Task DownloadFile(string url, string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperCpp(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadWhisperCppCuBlas(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperConstMe(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperPurfviewFasterWhisperXxl(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
 }
@@ -22,6 +23,8 @@ public class WhisperDownloadService : IWhisperDownloadService
     private const string MacArmUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-arm.zip";
     private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-x64.zip";
     private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-182-linux.zip";
+
+    private const string WindowsUrlCuBlass = "https://github.com/ggml-org/whisper.cpp/releases/download/v1.8.2/whisper-cublas-12.4.0-bin-x64.zip";
 
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
 
@@ -40,6 +43,11 @@ public class WhisperDownloadService : IWhisperDownloadService
     }
 
     public async Task DownloadWhisperCpp(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
+    {
+        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(), stream, progress, cancellationToken);
+    }
+
+    public async Task DownloadWhisperCppCuBlas(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(), stream, progress, cancellationToken);
     }
@@ -89,6 +97,16 @@ public class WhisperDownloadService : IWhisperDownloadService
                 default:
                     throw new PlatformNotSupportedException("Unsupported macOS architecture.");
             }
+        }
+
+        throw new PlatformNotSupportedException();
+    }
+
+    private static string GetUrlCuBlas()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return WindowsUrlCuBlass;
         }
 
         throw new PlatformNotSupportedException();
