@@ -5,10 +5,10 @@ namespace Nikse.SubtitleEdit.Features.Main.MainHelpers;
 
 public class PlaySelectionItem
 {
-    public double EndSeconds { get; set; } = -1;
-    public int Index { get; set; } = -1;
+    public double EndSeconds { get; set; } 
+    public int Index { get; set; } 
     public bool Loop { get; set; }
-    public List<SubtitleLineViewModel> Subtitles { get; set; } = new List<SubtitleLineViewModel>();
+    public List<SubtitleLineViewModel> Subtitles { get; set; }
 
     public PlaySelectionItem(List<SubtitleLineViewModel> subtitles, TimeSpan endTime, bool loop)
     {
@@ -18,26 +18,39 @@ public class PlaySelectionItem
         Loop = loop;
     }
 
-    public SubtitleLineViewModel? GetNextSubtitle()
+    public SubtitleLineViewModel? GetNextSubtitle(double playerPositionInSeconds)
     {
-        if (Index < Subtitles.Count-1)
+        // find the first subtitle after the current position
+        var nextIndex = Subtitles.FindIndex(s => s.EndTime.TotalSeconds >= playerPositionInSeconds);
+        if (nextIndex >= 0)
         {
-            Index++;
+            Index = nextIndex;
             var s = Subtitles[Index];
             EndSeconds = s.EndTime.TotalSeconds;
             return s;
         }
-        else
+        
+        if (Loop)
         {
-            if (Loop)
-            {
-                Index = 0;
-                var s = Subtitles[Index];
-                EndSeconds = s.EndTime.TotalSeconds;
-                return s;
-            }
-
-            return null;
+            Index = 0;
+            var s = Subtitles[Index];
+            EndSeconds = s.EndTime.TotalSeconds;
+            return s;
         }
+
+        return null;
+    }
+
+    public bool HasGapOrIsFirst()
+    {
+        if (Index < 1)
+        {
+            return true;
+        }
+
+        var previousEnd = Subtitles[Index-1].EndTime.TotalMilliseconds;
+        var currentStart = Subtitles[Index].StartTime.TotalMilliseconds;
+        
+        return currentStart - previousEnd > 100;
     }
 }

@@ -979,7 +979,7 @@ public partial class MainViewModel :
         else
         {
             var msg = string.Format(Se.Language.Main.OpenOriginalDifferentNumberOfSubtitlesXY, subtitle.Paragraphs.Count, Subtitles.Count);
-            await MessageBox.Show(Window!, Se.Language.General.Error, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            await MessageBox.Show(Window!, Se.Language.General.Information, msg, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             var newOriginal = ImportOriginalHelper.GetMatchingOriginalLines(Subtitles, subtitle);
             var originalWithTextCount = newOriginal.Paragraphs.Count(p => !string.IsNullOrEmpty(p.Text));
@@ -3567,6 +3567,7 @@ public partial class MainViewModel :
 
     private bool PlayerSelectedLines(bool loop)
     {
+        _repeatSubtitle = null;
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
         var vp = GetVideoPlayerControl();
         if (Window == null || selectedItems.Count == 0 || vp == null)
@@ -11711,15 +11712,14 @@ public partial class MainViewModel :
                             vp.Position = rs.StartTime.TotalSeconds;
                         }
                     }
-
-
+                    
                     else if (_playSelectionItem != null && mediaPlayerSeconds >= _playSelectionItem.EndSeconds)
                     {
-                        var p = _playSelectionItem.GetNextSubtitle();
+                        var p = _playSelectionItem.GetNextSubtitle(mediaPlayerSeconds);
                         if (p == null)
                         {
                             Se.LogError("Get next is null: " + mediaPlayerSeconds + " >= " + _playSelectionItem.EndSeconds);
-                            ShowStatus("Get next is null");
+                            ShowStatus("Get next is null" + mediaPlayerSeconds + " >= " + _playSelectionItem.EndSeconds);
                             vp.VideoPlayerInstance.Pause();
                             vp.Position = _playSelectionItem.EndSeconds;
                             ResetPlaySelection();
@@ -11728,7 +11728,11 @@ public partial class MainViewModel :
                         {
                             Se.LogError("Go to next: " + p.StartTime);
                             ShowStatus("Go to next: " + p.StartTime);
-                            vp.Position = p.StartTime.TotalSeconds;
+                            if (_playSelectionItem.HasGapOrIsFirst())
+                            {
+                                vp.Position = p.StartTime.TotalSeconds;
+                            }
+
                             Dispatcher.UIThread.Post(() =>
                             {
                                 SubtitleGrid.ScrollIntoView(p, null);
