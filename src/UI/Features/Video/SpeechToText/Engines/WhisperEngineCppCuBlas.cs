@@ -29,7 +29,7 @@ public class WhisperEngineCppCuBlas : IWhisperEngine
     }
 
     public string Extension => ".bin";
-    public string UnpackSkipFolder => string.Empty;
+    public string UnpackSkipFolder => "Release";
 
     public bool IsEngineInstalled()
     {

@@ -49,7 +49,7 @@ public class WhisperDownloadService : IWhisperDownloadService
 
     public async Task DownloadWhisperCppCuBlas(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
     {
-        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(), stream, progress, cancellationToken);
+        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrlCuBlas(), stream, progress, cancellationToken);
     }
 
     public async Task DownloadWhisperConstMe(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
