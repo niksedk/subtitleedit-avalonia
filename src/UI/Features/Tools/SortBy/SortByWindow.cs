@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Main;
@@ -15,14 +17,14 @@ public class SortByWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.SortBy.Title;
         CanResize = true;
-        Width = 1000;
+        Width = 1200;
         Height = 800;
-        MinWidth = 900;
+        MinWidth = 1000;
         MinHeight = 500;
         vm.Window = this;
         DataContext = vm;
 
-        var gridControls = new Grid();
+        var gridControls = MakeSortControls(vm);
 
         var subtitleView = MakeSubtitleView(vm);
 
@@ -57,6 +59,101 @@ public class SortByWindow : Window
 
         Loaded += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
+    }
+
+    private Grid MakeSortControls(SortByViewModel vm)
+    {
+        var labelProperty = UiUtil.MakeLabel("Property:");
+        var comboBoxProperty = new ComboBox
+        {
+            Width = 200,
+            DataContext = vm,
+            ItemsSource = vm.AvailableProperties,
+        };
+        comboBoxProperty.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(SortByViewModel.SelectedAvailableProperty)) { Mode = BindingMode.TwoWay });
+
+        var checkBoxAscending = UiUtil.MakeCheckBox("Ascending", vm, nameof(SortByViewModel.NewCriterionAscending));
+        
+        var buttonAdd = UiUtil.MakeButton("Add", vm.AddSortCriterionCommand).WithMarginLeft(10);
+        
+        var listBoxSortCriteria = new ListBox
+        {
+            Width = 300,
+            Height = 200,
+            DataContext = vm,
+        };
+        listBoxSortCriteria.Bind(ListBox.ItemsSourceProperty, new Binding(nameof(SortByViewModel.SortCriteria)));
+        listBoxSortCriteria.Bind(ListBox.SelectedItemProperty, new Binding(nameof(SortByViewModel.SelectedSortCriterion)) { Mode = BindingMode.TwoWay });
+        listBoxSortCriteria.ItemTemplate = new FuncDataTemplate<SortCriterion>((criterion, _) =>
+            new TextBlock
+            {
+                Text = criterion.DisplayName,
+                Margin = new Thickness(5)
+            }, true);
+
+        var buttonRemove = UiUtil.MakeButton("Remove", vm.RemoveSortCriterionCommand);
+        var buttonMoveUp = UiUtil.MakeButton("Move Up", vm.MoveSortCriterionUpCommand);
+        var buttonMoveDown = UiUtil.MakeButton("Move Down", vm.MoveSortCriterionDownCommand);
+        var buttonToggle = UiUtil.MakeButton("Toggle Direction", vm.ToggleSortDirectionCommand);
+        var buttonClear = UiUtil.MakeButton("Clear All", vm.ClearSortCriteriaCommand);
+
+        var stackPanelButtons = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Spacing = 5,
+            Margin = new Thickness(10, 0, 0, 0),
+            Children =
+            {
+                buttonRemove,
+                buttonMoveUp,
+                buttonMoveDown,
+                buttonToggle,
+                buttonClear
+            }
+        };
+
+        var stackPanelAdd = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 10,
+            Margin = new Thickness(0, 0, 0, 10),
+            Children =
+            {
+                labelProperty,
+                comboBoxProperty,
+                checkBoxAscending,
+                buttonAdd
+            }
+        };
+
+        var stackPanelList = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Children =
+            {
+                UiUtil.MakeBorderForControl(listBoxSortCriteria),
+                stackPanelButtons
+            }
+        };
+
+        var labelSortOrder = UiUtil.MakeLabel("Sort Order:").WithBold().WithMarginBottom(5);
+
+        var mainPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(10),
+            Children =
+            {
+                labelSortOrder,
+                stackPanelAdd,
+                stackPanelList
+            }
+        };
+
+        return new Grid
+        {
+            Children = { mainPanel }
+        };
     }
 
     private Border MakeSubtitleView(SortByViewModel vm)
