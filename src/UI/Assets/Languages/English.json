@@ -587,7 +587,15 @@
     "alignmentX": "Set alignment \u0022{0}\u0022 for selected lines",
     "play": "Play",
     "pause": "Pause",
-    "playNext": "Play next"
+    "playNext": "Play next",
+    "tenMilliseconds": "10 milliseconds",
+    "oneHundredMilliseconds": "100 milliseconds",
+    "fiveHundredMilliseconds": "500 milliseconds",
+    "oneSecond": "One second",
+    "fiveSeconds": "Five seconds",
+    "toggleDirection": "Toggle direction",
+    "property": "Property",
+    "ascending": "Ascending"
   },
   "main": {
     "menu": {
@@ -678,7 +686,8 @@
       "removeUnicodeControlCharacters": "Remove Unicode control chars (selected lines)",
       "reverseRightToLeftStartEnd": "Reverse RTL start/end (selected lines)",
       "pointSync": "_Point sync...",
-      "pointSyncViaOther": "Point sync via _other subtitle..."
+      "pointSyncViaOther": "Point sync via _other subtitle...",
+      "sortSubtitles": "_Sort subtitles..."
     },
     "toolbar": {
       "newHint": "Start a new subtitle file {0}",
@@ -702,7 +711,6 @@
       "playNextHint": "Play next {0}",
       "playSelectionHint": "Play selection {0}",
       "setStartAndOffsetTheRestHint": "Set start of current subtitle and offset the rest {0}",
-      "repeatHint": "Repeat playing current subtitle {0}",
       "setStartHint": "Set start of current subtitle {0}",
       "setEndHint": "Set end of current subtitle {0}",
       "newHint": "Insert new subtitle at video position {0}",
@@ -713,7 +721,8 @@
       "videoPosition": "Video position {0}",
       "hideWaveformToolbar": "Hide toolbar {0}",
       "resetZoomAndSpeed": "Reset zoom \u0026 playback speed {0}",
-      "removeBlankLines": "Remove blank lines {0}"
+      "removeBlankLines": "Remove blank lines {0}",
+      "playSelectedRepeatHint": "Play selected subtitle(s) in repeat mode {0}"
     },
     "audioTrackIsNowX": "Audio track is now \u0022{0}\u0022",
     "autoBreakHint": "Auto-break selected lines",
@@ -790,7 +799,9 @@
     "trimmedXLines": "Trimmed {0} subtitle lines",
     "openOriginalDifferentNumberOfSubtitlesXY": "The original subtitle file does not have the same number of subtitles as the current subtitle file.\n\n\u2022 Original subtitles: {0}\n\u2022 Current subtitles: {1}",
     "importXMatchingOriginalLines": "Import {0} matching original subtitles?",
-    "videoOpenedChangeLayoutQuestion": "A video file has been opened.\n\nDo you want to change the layout to show the video panel?"
+    "videoOpenedChangeLayoutQuestion": "A video file has been opened.\n\nDo you want to change the layout to show the video panel?",
+    "sortedByStartTime": "Sorted by \u0022Show\u0022 time",
+    "sortedByEndTime": "Sorted by \u0022Hide\u0022 time"
   },
   "file": {
     "ebuSaveOptions": {
@@ -1184,6 +1195,10 @@
       "numberOfSmallGapsBridgedX": "Number of small gaps bridged: {0}",
       "percentFoPrevious": "Gap for previous (%)",
       "gapChange": "Gap change"
+    },
+    "sortBy": {
+      "title": "Sort subtitles",
+      "sortOrder": "Sort order"
     },
     "batchConvert": {
       "title": "Batch convert",
@@ -1679,6 +1694,7 @@
       "waveformSpectrogramMode": "Spectrogram mode (works at generate time)",
       "waveformCenterOnSingleClick": "Center on single click",
       "waveformSingleClickSelectsSubtitle": "Select subtitle on single click",
+      "waveformRightClickSelectsSubtitle": "Select subtitle on right click",
       "waveformPauseOnSingleClick": "Pause on single click",
       "waveformDrawStyle": "Waveform draw style",
       "vlcWidRendering": "libVLC - Native Window ID rendering",
@@ -1938,7 +1954,10 @@
       "waveformVerticalZoomInCommand": "Waveform vertical zoom in",
       "waveformVerticalZoomOutCommand": "Waveform vertical zoom out",
       "copySubtitlePathToClipboard": "Copy subtitle path to clipboard",
-      "copySubtitleOriginalPathToClipboard": "Copy subtitle path of original to clipboard"
+      "copySubtitleOriginalPathToClipboard": "Copy subtitle path of original to clipboard",
+      "focusTextBox": "Focus text box",
+      "sortByStartTime": "Sort by \u0022Show\u0022 time",
+      "sortByEndTime": "Sort by \u0022Hide\u0022 time"
     },
     "wordLists": {
       "title": "Word lists",
