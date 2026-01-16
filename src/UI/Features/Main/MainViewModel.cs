@@ -7882,16 +7882,16 @@ public partial class MainViewModel :
     private void SplitLine(bool atVideoPosition, bool atTextBoxPosition, SubtitleLineViewModel? s)
     {
         var vp = GetVideoPlayerControl();
-        if (s == null || vp == null || EditTextBox == null)
+        if (s == null || EditTextBox == null)
         {
             return;
         }
 
-        if (atTextBoxPosition && atTextBoxPosition)
+        if (atTextBoxPosition && atTextBoxPosition && vp != null)
         {
             _splitManager.Split(Subtitles, s, vp.Position, EditTextBox.SelectionStart);
         }
-        else if (atVideoPosition)
+        else if (atVideoPosition && vp != null)
         {
             _splitManager.Split(Subtitles, s, vp.Position);
         }
