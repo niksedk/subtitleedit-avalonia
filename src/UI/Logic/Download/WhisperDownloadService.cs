@@ -19,12 +19,13 @@ public interface IWhisperDownloadService
 public class WhisperDownloadService : IWhisperDownloadService
 {
     private readonly HttpClient _httpClient;
-    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-blas-bin-x64.zip";
+    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-blas-bin-x64.zip";
     private const string MacArmUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-arm.zip";
     private const string MacX64Url = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cpp-182-mac-x64.zip";
-    private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-182-linux.zip";
+    private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/WhisperCppLinux64.zip";
 
-    private const string WindowsUrlCuBlass = "https://github.com/ggml-org/whisper.cpp/releases/download/v1.8.2/whisper-cublas-12.4.0-bin-x64.zip";
+    private const string WindowsUrlCuBlass = "https://github.com/ggml-org/whisper.cpp/releases/download/v1.8.3/whisper-cublas-12.4.0-bin-x64.zip";
+    private const string LinuxUrlCuBlass = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/WhisperCppCudaLinux64.zip";
 
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
 
@@ -107,6 +108,11 @@ public class WhisperDownloadService : IWhisperDownloadService
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return WindowsUrlCuBlass;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return LinuxUrlCuBlass;
         }
 
         throw new PlatformNotSupportedException();

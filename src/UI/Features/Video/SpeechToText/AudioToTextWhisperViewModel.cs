@@ -129,6 +129,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
+            Engines.Add(new WhisperEngineCppCuBlas());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
         }
 
