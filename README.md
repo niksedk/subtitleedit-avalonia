@@ -64,12 +64,12 @@ sudo pacman -S mpv ffmpeg
 
 #### Fedora
 ```bash
-sudo dnf install mpv ffmpeg
+sudo dnf install mpv-libs ffmpeg
 ```
 
 #### openSUSE
 ```bash
-sudo zypper install mpv ffmpeg
+sudo zypper install libmpv1 ffmpeg
 ```
 
 > ⚙️ Note: The provided builds are self-contained and do not require a separate .NET installation.
