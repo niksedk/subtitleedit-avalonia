@@ -12395,4 +12395,13 @@ public partial class MainViewModel :
             e.Handled = true;
         }
     }
+
+    internal void AudioVisualizerSelectRequested(object sender, ParagraphEventArgs e)
+    {
+        var s = Subtitles.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+        if (s != null)
+        {
+            SubtitleGrid.SelectedItem = s;
+        } 
+    }
 }

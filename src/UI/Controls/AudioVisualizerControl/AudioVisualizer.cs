@@ -333,6 +333,7 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnParagraphDoubleTapped;
     public event ParagraphEventHandler? OnNewSelectionInsert;
     public event ParagraphEventHandler? OnDeletePressed;
+    public event ParagraphEventHandler? OnSelectRequested;
 
     public AudioVisualizer()
     {
@@ -575,6 +576,14 @@ public class AudioVisualizer : Control
             nsp = null;
         }
 
+        var pos = e.GetPosition(this);
+
+        if (nsp == null && e.InitialPressMouseButton == MouseButton.Right && Se.Settings.Waveform.RightClickSelectsSubtitle)
+        {
+            var p = HitTestParagraph(pos);
+            OnSelectRequested?.Invoke(this, new ParagraphEventArgs(RelativeXPositionToSeconds(pos.X), p));
+        }
+
         var showContextMenu = false;
         if (e.InitialPressMouseButton == MouseButton.Left && OperatingSystem.IsMacOS())
         {
@@ -597,7 +606,7 @@ public class AudioVisualizer : Control
             nsp?.UpdateDuration();
             _audioVisualizerLastScroll = 0;
             e.Handled = true;
-            var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
+            var videoPosition = RelativeXPositionToSeconds(pos.X);
             OnVideoPositionChanged?.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             FlyoutMenuOpening?.Invoke(this, new ContextEventArgs { PositionInSeconds = videoPosition, NewParagraph = nsp });
             InvalidateVisual();
@@ -625,7 +634,7 @@ public class AudioVisualizer : Control
         {
             if (OnVideoPositionChanged != null)
             {
-                var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                var videoPosition = RelativeXPositionToSeconds(pos.X);
                 _audioVisualizerLastScroll = 0;
                 OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             }
@@ -643,13 +652,13 @@ public class AudioVisualizer : Control
             {
                 if (_isCtrlDown && !OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
                 {
-                    var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                    var videoPosition = RelativeXPositionToSeconds(pos.X);
                     _audioVisualizerLastScroll = 0;
                     OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
                 }
                 else if (_isShiftDown && OperatingSystem.IsMacOS() && _activeParagraph != null && OnToggleSelection != null)
                 {
-                    var videoPosition = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                    var videoPosition = RelativeXPositionToSeconds(pos.X);
                     _audioVisualizerLastScroll = 0;
                     OnToggleSelection.Invoke(this, new ParagraphEventArgs(videoPosition, _activeParagraph));
                 }

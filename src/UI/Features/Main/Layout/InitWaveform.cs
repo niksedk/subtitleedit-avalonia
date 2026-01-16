@@ -41,6 +41,7 @@ public class InitWaveform
             vm.AudioVisualizer.OnDeletePressed -= vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased -= vm.ControlMacPointerReleased;
             vm.AudioVisualizer.FlyoutMenuOpening -= vm.AudioVisualizerFlyoutMenuOpening;
+            vm.AudioVisualizer.OnSelectRequested -= vm.AudioVisualizerSelectRequested;
 
             // Clear the flyout menu to help with garbage collection
             vm.AudioVisualizer.MenuFlyout.Items.Clear();
@@ -65,23 +66,19 @@ public class InitWaveform
                 WaveformDrawStyle = GetWaveformDrawStyle(settings.WaveformDrawStyle),
                 MinGapSeconds = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0,
                 FocusOnMouseOver = settings.FocusOnMouseOver,
+                IsReadOnly = Se.Settings.General.LockTimeCodes,
+                WaveformHeightPercentage = settings.SpectrogramCombinedWaveformHeight,
             };
-            vm.AudioVisualizer.VerticalAlignment = VerticalAlignment.Stretch;
-            vm.AudioVisualizer.Height = double.NaN; // Auto height
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
             vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
-            //vm.AudioVisualizer.OnStatus += vm.AudioVisualizerOnStatus;
             vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
-            vm.AudioVisualizer.IsReadOnly = Se.Settings.General.LockTimeCodes;
-            vm.AudioVisualizer.WaveformHeightPercentage = settings.SpectrogramCombinedWaveformHeight;
+            vm.AudioVisualizer.OnSelectRequested += vm.AudioVisualizerSelectRequested;
 
             // Create a Flyout for the DataGrid
             var flyout = new MenuFlyout();
-
-            //flyout.Opening += vm.AudioVisualizerContextOpening;
             vm.AudioVisualizer.FlyoutMenuOpening += vm.AudioVisualizerFlyoutMenuOpening;
 
             var insertSelectionMenuItem = new MenuItem
