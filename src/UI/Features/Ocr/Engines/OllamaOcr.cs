@@ -31,7 +31,7 @@ public class OllamaOcr
         {
             var modelJson = "\"model\": \"" + model + "\",";
 
-            var prompt = string.Format("Get the text (use '\\n' for new line) from this image in {0}. Return only the text - no commnts or notes. For new line, use '\\n'.", language);
+            var prompt = string.Format("Get the text (use '\\n' for new line) from this image in {0}. Return only the text - no comments or notes. For new line, use '\\n'.", language);
             var input = "{ " + modelJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + bitmap.ToBase64String() + "\"] } ] }";
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
