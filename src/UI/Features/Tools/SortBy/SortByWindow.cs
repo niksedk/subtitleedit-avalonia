@@ -90,7 +90,7 @@ public class SortByWindow : Window
             {
                 Margin = new Thickness(5)
             };
-            textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(SortCriterion.DisplayName)));
+            textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(SortCriterion.DisplayText)));
             return textBlock;
         }, true);
 
@@ -163,6 +163,7 @@ public class SortByWindow : Window
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+        var twoDecimalConverter = new DoubleToTwoDecimalConverter();
         var dataGridSubtitle = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -205,6 +206,13 @@ public class SortByWindow : Window
                     Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Cps,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = twoDecimalConverter },
+                    IsReadOnly = true,
                 },
             },
         };

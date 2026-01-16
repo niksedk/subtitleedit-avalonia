@@ -14,17 +14,24 @@ namespace Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 
 public class SortCriterion : ObservableObject
 {
-    private string _property;
+    private string _propertyName;
+    private string _displayName;
     private bool _ascending;
 
-    public string Property
+    public string PropertyName
     {
-        get => _property;
+        get => _propertyName;
+        set => SetProperty(ref _propertyName, value);
+    }
+
+    public string DisplayName
+    {
+        get => _displayName;
         set
         {
-            if (SetProperty(ref _property, value))
+            if (SetProperty(ref _displayName, value))
             {
-                OnPropertyChanged(nameof(DisplayName));
+                OnPropertyChanged(nameof(DisplayText));
             }
         }
     }
@@ -36,16 +43,17 @@ public class SortCriterion : ObservableObject
         {
             if (SetProperty(ref _ascending, value))
             {
-                OnPropertyChanged(nameof(DisplayName));
+                OnPropertyChanged(nameof(DisplayText));
             }
         }
     }
 
-    public string DisplayName => Ascending ? $"{Property} ↑" : $"{Property} ↓";
+    public string DisplayText => Ascending ? $"{DisplayName} ↑" : $"{DisplayName} ↓";
 
-    public SortCriterion(string property, bool ascending = true)
+    public SortCriterion(string propertyName, string displayName, bool ascending = true)
     {
-        _property = property;
+        _propertyName = propertyName;
+        _displayName = displayName;
         _ascending = ascending;
     }
 }
@@ -68,6 +76,8 @@ public partial class SortByViewModel : ObservableObject
     private readonly System.Timers.Timer _timerUpdatePreview;
     private bool _dirty;
     private readonly List<SubtitleLineViewModel> _originalSubtitles;
+    private Dictionary<string, string> _propertyTranslationMap;
+    private Dictionary<string, string> _displayNameToPropertyMap;
 
 
     public SortByViewModel()
@@ -77,6 +87,8 @@ public partial class SortByViewModel : ObservableObject
         _originalSubtitles = new List<SubtitleLineViewModel>();
         _availableProperties = new ObservableCollection<string>();
         _sortCriteria = new ObservableCollection<SortCriterion>();
+        _propertyTranslationMap = new Dictionary<string, string>();
+        _displayNameToPropertyMap = new Dictionary<string, string>();
 
         InitializeAvailableProperties();
         LoadSettings();
@@ -96,18 +108,33 @@ public partial class SortByViewModel : ObservableObject
 
     private void InitializeAvailableProperties()
     {
-        AvailableProperties.Add("Number");
-        AvailableProperties.Add("StartTime");
-        AvailableProperties.Add("EndTime");
-        AvailableProperties.Add("Duration");
-        AvailableProperties.Add("Text");
-        AvailableProperties.Add("OriginalText");
-        AvailableProperties.Add("Style");
-        AvailableProperties.Add("Actor");
-        AvailableProperties.Add("Layer");
-        AvailableProperties.Add("Gap");
-        AvailableProperties.Add("CharactersPerSecond");
-        AvailableProperties.Add("WordsPerMinute");
+        var lang = Se.Language.General;
+        
+        // Add properties with their translated display names
+        _propertyTranslationMap = new Dictionary<string, string>
+        {
+            { "Number", lang.Number },
+            { "StartTime", lang.Show },
+            { "EndTime", lang.Hide },
+            { "Duration", lang.Duration },
+            { "Text", lang.Text },
+            { "OriginalText", lang.OriginalText },
+            { "Style", lang.Style },
+            { "Actor", lang.Actor },
+            { "Layer", lang.Layer },
+            { "Gap", lang.Gap },
+            { "CharactersPerSecond", lang.CharsPerSec },
+            { "WordsPerMinute", lang.WordsPerMin }
+        };
+
+        // Reverse map for lookup
+        _displayNameToPropertyMap = _propertyTranslationMap.ToDictionary(x => x.Value, x => x.Key);
+
+        // Add translated display names to the UI
+        foreach (var displayName in _propertyTranslationMap.Values)
+        {
+            AvailableProperties.Add(displayName);
+        }
     }
 
     private void UpdatePreview()
@@ -145,14 +172,14 @@ public partial class SortByViewModel : ObservableObject
             if (isFirst)
             {
                 orderedItems = criterion.Ascending
-                    ? items.OrderBy(item => GetPropertyValue(item, criterion.Property))
-                    : items.OrderByDescending(item => GetPropertyValue(item, criterion.Property));
+                    ? items.OrderBy(item => GetPropertyValue(item, criterion.PropertyName))
+                    : items.OrderByDescending(item => GetPropertyValue(item, criterion.PropertyName));
             }
             else
             {
                 orderedItems = criterion.Ascending
-                    ? orderedItems!.ThenBy(item => GetPropertyValue(item, criterion.Property))
-                    : orderedItems!.ThenByDescending(item => GetPropertyValue(item, criterion.Property));
+                    ? orderedItems!.ThenBy(item => GetPropertyValue(item, criterion.PropertyName))
+                    : orderedItems!.ThenByDescending(item => GetPropertyValue(item, criterion.PropertyName));
             }
         }
 
@@ -215,7 +242,13 @@ public partial class SortByViewModel : ObservableObject
             return;
         }
 
-        var criterion = new SortCriterion(SelectedAvailableProperty, NewCriterionAscending);
+        // Convert display name to property name
+        if (!_displayNameToPropertyMap.TryGetValue(SelectedAvailableProperty, out var propertyName))
+        {
+            return;
+        }
+
+        var criterion = new SortCriterion(propertyName, SelectedAvailableProperty, NewCriterionAscending);
         SortCriteria.Add(criterion);
         _dirty = true;
         _timerUpdatePreview.Start();

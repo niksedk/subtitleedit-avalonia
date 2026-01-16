@@ -984,7 +984,7 @@ public static partial class InitLayout
         // Handle AudioVisualizer - clear specific references
         if (control is AudioVisualizer audioVisualizer)
         {
-            audioVisualizer.MenuFlyout = null;
+            audioVisualizer.MenuFlyout = new MenuFlyout();
         }
         // Handle DataGrid - clear data bindings and sources
         else if (control is DataGrid dataGrid)
