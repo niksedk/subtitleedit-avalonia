@@ -593,6 +593,9 @@ public class LanguageGeneral
     public object FiveHundredMilliseconds { get; set; }
     public object OneSecond { get; set; }
     public object FiveSeconds { get; set; }
+    public string ToggleDirection { get; set; }
+    public string Property { get; set; }
+    public string Ascending { get; set; }
 
     public LanguageGeneral()
     {
@@ -1185,6 +1188,8 @@ public class LanguageGeneral
         FiveHundredMilliseconds = "500 milliseconds";
         OneSecond = "One second";
         FiveSeconds = "Five seconds";
-
+        ToggleDirection = "Toggle direction";
+        Property = "Property";
+        Ascending = "Ascending";
     }
 }

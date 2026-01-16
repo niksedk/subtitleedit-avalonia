@@ -63,7 +63,7 @@ public class SortByWindow : Window
 
     private Grid MakeSortControls(SortByViewModel vm)
     {
-        var labelProperty = UiUtil.MakeLabel("Property:");
+        var labelProperty = UiUtil.MakeLabel(Se.Language.General.Property);
         var comboBoxProperty = new ComboBox
         {
             Width = 200,
@@ -72,10 +72,10 @@ public class SortByWindow : Window
         };
         comboBoxProperty.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(SortByViewModel.SelectedAvailableProperty)) { Mode = BindingMode.TwoWay });
 
-        var checkBoxAscending = UiUtil.MakeCheckBox("Ascending", vm, nameof(SortByViewModel.NewCriterionAscending));
-        
-        var buttonAdd = UiUtil.MakeButton("Add", vm.AddSortCriterionCommand).WithMarginLeft(10);
-        
+        var checkBoxAscending = UiUtil.MakeCheckBox(Se.Language.General.Ascending, vm, nameof(SortByViewModel.NewCriterionAscending));
+
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddSortCriterionCommand).WithMarginLeft(10);
+
         var listBoxSortCriteria = new ListBox
         {
             Width = 300,
@@ -85,17 +85,20 @@ public class SortByWindow : Window
         listBoxSortCriteria.Bind(ListBox.ItemsSourceProperty, new Binding(nameof(SortByViewModel.SortCriteria)));
         listBoxSortCriteria.Bind(ListBox.SelectedItemProperty, new Binding(nameof(SortByViewModel.SelectedSortCriterion)) { Mode = BindingMode.TwoWay });
         listBoxSortCriteria.ItemTemplate = new FuncDataTemplate<SortCriterion>((criterion, _) =>
-            new TextBlock
+        {
+            var textBlock = new TextBlock
             {
-                Text = criterion.DisplayName,
                 Margin = new Thickness(5)
-            }, true);
+            };
+            textBlock.Bind(TextBlock.TextProperty, new Binding(nameof(SortCriterion.DisplayName)));
+            return textBlock;
+        }, true);
 
-        var buttonRemove = UiUtil.MakeButton("Remove", vm.RemoveSortCriterionCommand);
-        var buttonMoveUp = UiUtil.MakeButton("Move Up", vm.MoveSortCriterionUpCommand);
-        var buttonMoveDown = UiUtil.MakeButton("Move Down", vm.MoveSortCriterionDownCommand);
-        var buttonToggle = UiUtil.MakeButton("Toggle Direction", vm.ToggleSortDirectionCommand);
-        var buttonClear = UiUtil.MakeButton("Clear All", vm.ClearSortCriteriaCommand);
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveSortCriterionCommand).WithMinWidth(130).WithMarginTop(15);
+        var buttonMoveUp = UiUtil.MakeButton(Se.Language.General.MoveUp, vm.MoveSortCriterionUpCommand).WithMinWidth(130);
+        var buttonMoveDown = UiUtil.MakeButton(Se.Language.General.MoveDown, vm.MoveSortCriterionDownCommand).WithMinWidth(130);
+        var buttonToggle = UiUtil.MakeButton(Se.Language.General.ToggleDirection, vm.ToggleSortDirectionCommand).WithMinWidth(130);
+        var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearSortCriteriaCommand).WithMinWidth(130);
 
         var stackPanelButtons = new StackPanel
         {
@@ -136,7 +139,7 @@ public class SortByWindow : Window
             }
         };
 
-        var labelSortOrder = UiUtil.MakeLabel("Sort Order:").WithBold().WithMarginBottom(5);
+        var labelSortOrder = UiUtil.MakeLabel(Se.Language.Tools.SortBy.SortOrder).WithBold().WithMarginBottom(5);
 
         var mainPanel = new StackPanel
         {
@@ -165,7 +168,7 @@ public class SortByWindow : Window
             AutoGenerateColumns = false,
             SelectionMode = DataGridSelectionMode.Single,
             CanUserResizeColumns = true,
-            CanUserSortColumns = true,
+            CanUserSortColumns = false,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,

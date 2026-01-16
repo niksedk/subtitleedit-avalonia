@@ -20,13 +20,25 @@ public class SortCriterion : ObservableObject
     public string Property
     {
         get => _property;
-        set => SetProperty(ref _property, value);
+        set
+        {
+            if (SetProperty(ref _property, value))
+            {
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
     }
 
     public bool Ascending
     {
         get => _ascending;
-        set => SetProperty(ref _ascending, value);
+        set
+        {
+            if (SetProperty(ref _ascending, value))
+            {
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
     }
 
     public string DisplayName => Ascending ? $"{Property} ↑" : $"{Property} ↓";
@@ -265,7 +277,6 @@ public partial class SortByViewModel : ObservableObject
         }
 
         SelectedSortCriterion.Ascending = !SelectedSortCriterion.Ascending;
-        OnPropertyChanged(nameof(SelectedSortCriterion));
         _dirty = true;
         _timerUpdatePreview.Start();
     }
