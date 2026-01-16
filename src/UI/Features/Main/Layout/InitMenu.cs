@@ -417,6 +417,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.SortSubtitles,
+                Command = vm.ShowSortByCommand,
+            },
+            new MenuItem
+            {
                 Header = l.RemoveTextForHearingImpaired,
                 Command = vm.ShowToolsRemoveTextForHearingImpairedCommand,
             },

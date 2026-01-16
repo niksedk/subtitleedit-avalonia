@@ -339,6 +339,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ShowHistoryViewModel>();
         collection.AddTransient<ShowImageViewModel>();
         collection.AddTransient<SourceViewViewModel>();
+        collection.AddTransient<SortByViewModel>();
         collection.AddTransient<SpellCheckViewModel>();
         collection.AddTransient<SplitBreakLongLinesViewModel>();
         collection.AddTransient<SplitSubtitleViewModel>();

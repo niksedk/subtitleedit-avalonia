@@ -4840,6 +4840,41 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowSortBy()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var result = await ShowDialogAsync<SortByWindow, SortByViewModel>(vm => { vm.Initialize(Subtitles.ToList()); });
+
+        if (result.OkPressed)
+        {
+            var selectedSubtitle = SelectedSubtitle;
+            Subtitles.Clear();
+            foreach (var s in result.Subtitles)
+            {
+                Subtitles.Add(s);
+            }
+            if (selectedSubtitle != null)
+            {
+                SelectAndScrollToSubtitle(selectedSubtitle);
+            }
+            else
+            {
+                SelectAndScrollToRow(0);
+            }
+        }
+    }
+
+    [RelayCommand]
     private async Task ListErrors()
     {
         if (Window == null)

@@ -7,6 +7,7 @@ public class LanguageTools
     public LanguageApplyDurationLimits ApplyDurationLimits { get; set; } = new();
     public LanguageApplyMinGaps ApplyMinGaps { get; set; } = new();
     public LanguageBridgeGaps BridgeGaps { get; set; } = new();
+    public LanguageSortBy SortBy { get; set; } = new();
     public LanguageBatchConvert BatchConvert { get; set; } = new();
     public LanguageChangeCasing ChangeCasing { get; set; } = new();
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
