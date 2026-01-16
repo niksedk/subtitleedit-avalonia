@@ -90,6 +90,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [RelayCommand]
     private void ShowEarlierTimeSpan(TimeSpan ts)
     {
+        Adjustment = ts;
         _totalAdjustment -= ts.TotalSeconds;
         Apply();
         ShowTotalAdjustmentInfo();
@@ -111,6 +112,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [RelayCommand]
     private void ShowLaterTimeSpan(TimeSpan ts)
     {
+        Adjustment = ts;
         _totalAdjustment += ts.TotalSeconds;
         Apply();
         ShowTotalAdjustmentInfo();
