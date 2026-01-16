@@ -4782,6 +4782,64 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void SortByStartTime()
+    {
+        if (IsEmpty)
+        {
+            return;
+        }
+
+        var selected = SelectedSubtitle;
+
+        var sortedSubtitles = Subtitles.OrderBy(p => p.StartTime).ToList();
+        Subtitles.Clear();
+        foreach (var s in sortedSubtitles)
+        {
+            Subtitles.Add(s);
+        }
+
+        if (selected != null)
+        {
+            SelectAndScrollToSubtitle(selected);
+        }
+        else
+        {
+            SelectAndScrollToRow(0);
+        }
+
+        ShowStatus(Se.Language.Main.SortedByStartTime);
+    }
+
+    [RelayCommand]
+    private void SortByEndTime()
+    {
+        if (IsEmpty)
+        {
+            return;
+        }
+
+        var selected = SelectedSubtitle;
+
+        var sortedSubtitles = Subtitles.OrderBy(p => p.EndTime).ToList();
+        Subtitles.Clear();
+        foreach (var s in sortedSubtitles)
+        {
+            Subtitles.Add(s);
+        }
+
+        if (selected != null)
+        {
+            SelectAndScrollToSubtitle(selected);
+        }
+        else
+        {
+            SelectAndScrollToRow(0);
+        }
+
+        ShowStatus(Se.Language.Main.SortedByEndTime);
+    }
+
+    [RelayCommand]
     private async Task ListErrors()
     {
         if (Window == null)
@@ -12402,6 +12460,6 @@ public partial class MainViewModel :
         if (s != null)
         {
             SubtitleGrid.SelectedItem = s;
-        } 
+        }
     }
 }

@@ -241,6 +241,8 @@ public class LanguageSettingsShortcuts
     public string CopySubtitlePathToClipboard { get; set; }
     public string CopySubtitleOriginalPathToClipboard { get; set; }
     public string FocusTextBox { get; set; }
+    public string SortByStartTime { get; set; }
+    public string SortByEndTime { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -485,5 +487,7 @@ public class LanguageSettingsShortcuts
         CopySubtitlePathToClipboard = "Copy subtitle path to clipboard";
         CopySubtitleOriginalPathToClipboard = "Copy subtitle path of original to clipboard";
         FocusTextBox = "Focus text box";
+        SortByStartTime = "Sort by \"Show\" time";
+        SortByEndTime = "Sort by \"Hide\" time";
     }
 }

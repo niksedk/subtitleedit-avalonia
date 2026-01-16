@@ -710,7 +710,7 @@ public partial class ShortcutsViewModel : ObservableObject
         Se.Settings.Shortcuts.Clear();
         Se.Settings.InitializeMainShortcuts(MainViewModel);
         _allShortcuts = ShortcutsMain.GetAllShortcuts(MainViewModel);
-        UpdateVisibleShortcuts(string.Empty);
+        UpdateVisibleShortcuts(SearchText);
     }
 
     private bool Search(string searchText, ShortCut p)
