@@ -596,6 +596,7 @@ public class LanguageGeneral
     public string ToggleDirection { get; set; }
     public string Property { get; set; }
     public string Ascending { get; set; }
+    public string Question { get; set; }
 
     public LanguageGeneral()
     {
@@ -1191,5 +1192,6 @@ public class LanguageGeneral
         ToggleDirection = "Toggle direction";
         Property = "Property";
         Ascending = "Ascending";
+        Question = "Question";
     }
 }

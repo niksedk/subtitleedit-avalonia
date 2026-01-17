@@ -300,9 +300,41 @@ public partial class ShortcutsViewModel : ObservableObject
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
+
     [RelayCommand]
-    private void CommandOk()
+    private async Task CommandOk()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var duplicates = FindDuplicateShortcuts();
+        if (duplicates.Any())
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine(Se.Language.Options.Shortcuts.DuplicatesFound);
+            sb.AppendLine();
+            foreach (var duplicate in duplicates)
+            {
+                sb.AppendLine($"• {duplicate}");
+            }
+            sb.AppendLine();
+            sb.Append("Save anyway?");
+
+            var answer = await MessageBox.Show(
+                      Window!,
+                      Se.Language.General.Question,
+                      sb.ToString(),
+                      MessageBoxButtons.YesNoCancel,
+                      MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
         var shortcuts = new List<SeShortCut>();
         foreach (var shortcut in _allShortcuts)
         {
@@ -558,6 +590,56 @@ public partial class ShortcutsViewModel : ObservableObject
                 }
             }
         }
+    }
+
+    private List<string> FindDuplicateShortcuts()
+    {
+        var duplicates = new List<string>();
+        var shortcutGroups = new Dictionary<string, List<ShortCut>>();
+
+        foreach (var shortcut in _allShortcuts)
+        {
+            if (IsEmpty(shortcut))
+            {
+                continue;
+            }
+
+            var keysCombination = string.Join("+", shortcut.Keys.OrderBy(k => k));
+            if (string.IsNullOrWhiteSpace(keysCombination))
+            {
+                continue;
+            }
+
+            if (!shortcutGroups.ContainsKey(keysCombination))
+            {
+                shortcutGroups[keysCombination] = new List<ShortCut>();
+            }
+            shortcutGroups[keysCombination].Add(shortcut);
+        }
+
+        foreach (var group in shortcutGroups.Where(g => g.Value.Count > 1))
+        {
+            var shortcuts = group.Value;
+            var hasGeneral = shortcuts.Any(s => s.Category == ShortcutCategory.General);
+
+            if (hasGeneral)
+            {
+                var names = shortcuts.Select(s => MakeDisplayName(s, false)).ToList();
+                duplicates.Add($"{group.Key}: {string.Join(", ", names)} (\"General\" conflicts with all categories)");
+            }
+            else
+            {
+                var differentCategories = shortcuts.Select(s => s.Category).Distinct().Count() > 1;
+                if (!differentCategories)
+                {
+                    var names = shortcuts.Select(s => MakeDisplayName(s, false)).ToList();
+                    var category = shortcuts.First().Category.ToString();
+                    duplicates.Add($"{group.Key}: {string.Join(", ", names)} (in \"{category}\")");
+                }
+            }
+        }
+
+        return duplicates;
     }
 
     private static bool IsEmpty(ShortCut shortcut)

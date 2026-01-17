@@ -243,6 +243,7 @@ public class LanguageSettingsShortcuts
     public string FocusTextBox { get; set; }
     public string SortByStartTime { get; set; }
     public string SortByEndTime { get; set; }
+    public string DuplicatesFound { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -489,5 +490,6 @@ public class LanguageSettingsShortcuts
         FocusTextBox = "Focus text box";
         SortByStartTime = "Sort by \"Show\" time";
         SortByEndTime = "Sort by \"Hide\" time";
+        DuplicatesFound = "The following duplicate shortcuts were found:";
     }
 }
