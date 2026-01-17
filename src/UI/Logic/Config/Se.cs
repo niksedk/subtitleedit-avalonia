@@ -178,7 +178,7 @@ public class Se
     public static string SpectrogramsFolder => Path.Combine(DataFolder, "Spectrograms");
     public static string ShotChangesFolder => Path.Combine(DataFolder, "ShotChanges");
 
-    public static string Version { get; set; } = "v5.0.0-preview91";
+    public static string Version { get; set; } = "v5.0.0-preview92";
 
     public Se()
     {
