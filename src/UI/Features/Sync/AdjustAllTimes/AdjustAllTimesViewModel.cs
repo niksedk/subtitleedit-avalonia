@@ -3,6 +3,7 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -119,6 +120,22 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
         isNegativeAdjustment = false;
         Apply();
+    }
+
+    [RelayCommand]
+    private async Task ShowHelp()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await MessageBox.Show(
+               Window,
+               Se.Language.General.Information,
+               Se.Language.Sync.AdjustAllShortcuts,
+               MessageBoxButtons.OK,
+               MessageBoxIcon.Information);
     }
 
     private void Apply()
