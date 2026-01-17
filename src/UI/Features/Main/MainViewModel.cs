@@ -4798,6 +4798,8 @@ public partial class MainViewModel :
             Subtitles.Add(s);
         }
 
+        Renumber();
+
         if (selected != null)
         {
             SelectAndScrollToSubtitle(selected);
@@ -4826,6 +4828,8 @@ public partial class MainViewModel :
         {
             Subtitles.Add(s);
         }
+
+        Renumber();
 
         if (selected != null)
         {
@@ -4863,6 +4867,8 @@ public partial class MainViewModel :
             {
                 Subtitles.Add(s);
             }
+            Renumber();
+
             if (selectedSubtitle != null)
             {
                 SelectAndScrollToSubtitle(selectedSubtitle);
