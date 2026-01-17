@@ -181,13 +181,17 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var labelStatus = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.StatusText));
+
         grid.Add(panelAdjustment, 0);
         grid.Add(panelRadioButtons, 1);
         grid.Add(buttonPanel, 2);
+        grid.Add(labelStatus, 2);
 
         Content = grid;
 
         Loaded += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += (_, e) => vm.OnKeyDown(e);
+        Closing += (_, e) => vm.OnClosing(e);
     }
 }

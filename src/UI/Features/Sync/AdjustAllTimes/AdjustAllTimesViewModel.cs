@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 
@@ -15,9 +17,11 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [ObservableProperty] private bool _adjustSelectedLines;
     [ObservableProperty] private bool _adjustSelectedLinesAndForward;
     [ObservableProperty] private string _totalAdjustmentInfo;
+    [ObservableProperty] private string _statusText;
 
     private double _totalAdjustment;
-
+    private CancellationToken _cancellationToken;
+    private CancellationTokenSource _cancellationTokenSource;
     private IAdjustCallback? _adjustCallback;
 
     public Window? Window { get; set; }
@@ -28,6 +32,9 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     {
         TotalAdjustmentInfo = string.Empty;
         LoadSettings();
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+        StatusText = string.Empty;  
     }
 
     public void Initialize(IAdjustCallback adjustCallback, int selectedLinesCount)
@@ -83,6 +90,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowEarlier()
     {
         _totalAdjustment -= Adjustment.TotalSeconds;
+        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -92,6 +100,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     {
         Adjustment = ts;
         _totalAdjustment -= ts.TotalSeconds;
+        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -105,6 +114,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowLater()
     {
         _totalAdjustment += Adjustment.TotalSeconds;
+        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -114,6 +124,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     {
         Adjustment = ts;
         _totalAdjustment += ts.TotalSeconds;
+        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -147,6 +158,21 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         Window?.Close();
     }
 
+    private Lock _statusLock = new Lock();
+    private async Task ShowStatus(string statusText)
+    {
+        lock (_statusLock)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationToken = _cancellationTokenSource.Token;
+        }
+
+        StatusText = statusText;
+        await Task.Delay(2000, _cancellationToken);
+        StatusText = string.Empty;
+    }
+
     private void InvokeAdjustCallback()
     {
         _adjustCallback?.Adjust(
@@ -166,5 +192,10 @@ public partial class AdjustAllTimesViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void OnClosing(WindowClosingEventArgs e)
+    {
+        _cancellationTokenSource.Cancel();
     }
 }

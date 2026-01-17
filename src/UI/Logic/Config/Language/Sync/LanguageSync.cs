@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.Sync;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.Sync;
 
 public class LanguageSync
 {
@@ -27,6 +29,7 @@ public class LanguageSync
     public string SyncPoints { get; set; }
     public string PointSync { get; set; }
     public string PointSyncViaOther { get; set; }
+    public string AdjustmentX { get; set; }
 
     public LanguageSync()
     {
@@ -55,5 +58,6 @@ public class LanguageSync
         SyncPoints = "Sync points";
         PointSync = "Point sync";
         PointSyncViaOther = "Point sync via other subtitle";
+        AdjustmentX = "Adjustment: {0}";
     }
 }
