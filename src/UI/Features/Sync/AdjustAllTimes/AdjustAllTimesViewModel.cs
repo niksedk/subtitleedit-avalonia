@@ -17,15 +17,14 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [ObservableProperty] private bool _adjustAll;
     [ObservableProperty] private bool _adjustSelectedLines;
     [ObservableProperty] private bool _adjustSelectedLinesAndForward;
-    [ObservableProperty] private string _totalAdjustmentInfo;
     [ObservableProperty] private string _statusText;
 
-    private double _totalAdjustment;
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
     private IAdjustCallback? _adjustCallback;
     private readonly List<StatusMessage> _statusMessages = new();
     private readonly object _statusLock = new();
+    private bool isNegativeAdjustment = false;
 
     public Window? Window { get; set; }
 
@@ -33,7 +32,6 @@ public partial class AdjustAllTimesViewModel : ObservableObject
 
     public AdjustAllTimesViewModel()
     {
-        TotalAdjustmentInfo = string.Empty;
         LoadSettings();
         _cancellationTokenSource = new CancellationTokenSource();
         _cancellationToken = _cancellationTokenSource.Token;
@@ -92,44 +90,35 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     [RelayCommand]
     private void ShowEarlier()
     {
-        _totalAdjustment -= Adjustment.TotalSeconds;
         ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
+        isNegativeAdjustment = true;
         Apply();
-        ShowTotalAdjustmentInfo();
     }
 
     [RelayCommand]
     private void ShowEarlierTimeSpan(TimeSpan ts)
     {
         Adjustment = ts;
-        _totalAdjustment -= ts.TotalSeconds;
         ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
+        isNegativeAdjustment = true;
         Apply();
-        ShowTotalAdjustmentInfo();
-    }
-
-    private void ShowTotalAdjustmentInfo()
-    {
-        TotalAdjustmentInfo = string.Format(Se.Language.General.TotalAdjustmentX, new TimeCode(_totalAdjustment * 1000.0).ToShortDisplayString());
     }
 
     [RelayCommand]
     private void ShowLater()
     {
-        _totalAdjustment += Adjustment.TotalSeconds;
         ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
+        isNegativeAdjustment = false;
         Apply();
-        ShowTotalAdjustmentInfo();
     }
 
     [RelayCommand]
     private void ShowLaterTimeSpan(TimeSpan ts)
     {
         Adjustment = ts;
-        _totalAdjustment += ts.TotalSeconds;
         ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
+        isNegativeAdjustment = false;
         Apply();
-        ShowTotalAdjustmentInfo();
     }
 
     private void Apply()
@@ -219,14 +208,13 @@ public partial class AdjustAllTimesViewModel : ObservableObject
 
     private void InvokeAdjustCallback()
     {
+        var ts = isNegativeAdjustment ? -Adjustment : Adjustment;
+
         _adjustCallback?.Adjust(
-            TimeSpan.FromSeconds(_totalAdjustment),
+            ts,
             AdjustAll,
             AdjustSelectedLines,
             AdjustSelectedLinesAndForward);
-
-        TotalAdjustmentInfo = string.Empty;
-        _totalAdjustment = 0; // Reset after applying
     }
 
     internal void OnKeyDown(KeyEventArgs e)
