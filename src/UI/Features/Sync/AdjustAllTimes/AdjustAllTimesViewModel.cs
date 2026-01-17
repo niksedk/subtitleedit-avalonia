@@ -160,6 +160,10 @@ public partial class AdjustAllTimesViewModel : ObservableObject
 
         lock (_statusLock)
         {
+            if (_statusMessages.Count >= 4)
+            {
+                _statusMessages.RemoveAt(0);
+            }
             _statusMessages.Add(statusMessage);
             UpdateStatusDisplay();
         }
@@ -223,6 +227,30 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else if ((e.Key == Key.Right || e.Key == Key.FnRightArrow) && e.KeyModifiers == KeyModifiers.Shift)
+        {
+            ShowLaterTimeSpan(TimeSpan.FromMilliseconds(10));
+        }
+        else if ((e.Key == Key.Right || e.Key == Key.FnRightArrow) && e.KeyModifiers == KeyModifiers.Control)
+        {
+            ShowLaterTimeSpan(TimeSpan.FromMilliseconds(100));
+        }
+        else if ((e.Key == Key.Right || e.Key == Key.FnRightArrow) && e.KeyModifiers == KeyModifiers.Alt)
+        {
+            ShowLaterTimeSpan(TimeSpan.FromMilliseconds(500));
+        }
+        else if ((e.Key == Key.Left || e.Key == Key.FnLeftArrow) && e.KeyModifiers == KeyModifiers.Shift)
+        {
+            ShowEarlierTimeSpan(TimeSpan.FromMilliseconds(10));
+        }
+        else if ((e.Key == Key.Left || e.Key == Key.FnLeftArrow) && e.KeyModifiers == KeyModifiers.Control)
+        {
+            ShowEarlierTimeSpan(TimeSpan.FromMilliseconds(100));
+        }
+        else if ((e.Key == Key.Left || e.Key == Key.FnLeftArrow) && e.KeyModifiers == KeyModifiers.Alt)
+        {
+            ShowEarlierTimeSpan(TimeSpan.FromMilliseconds(500));
         }
     }
 
