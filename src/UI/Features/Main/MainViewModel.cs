@@ -1709,7 +1709,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, "Blu-ray sup", ".sup");
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
@@ -1717,6 +1717,7 @@ public partial class MainViewModel :
         }
 
         await SubtitleOpen(fileName);
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1735,6 +1736,7 @@ public partial class MainViewModel :
         }
 
         var result = await ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(vm => { vm.Initialize(fileName, null); });
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -1800,6 +1802,7 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
+        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
