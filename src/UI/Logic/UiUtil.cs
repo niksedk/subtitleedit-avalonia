@@ -1180,6 +1180,12 @@ public static class UiUtil
         return control;
     }
 
+    public static Label WithAlignmentBottom(this Label control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Bottom;
+        return control;
+    }
+
     public static Label WithAlignmentRight(this Label control)
     {
         control.HorizontalAlignment = HorizontalAlignment.Right;
@@ -1220,6 +1226,12 @@ public static class UiUtil
     public static Label WithMinWidth(this Label control, int minWidth)
     {
         control.MinWidth = minWidth;
+        return control;
+    }
+
+    public static Label WithMinHeight(this Label control, int minHeight)
+    {
+        control.MinHeight = minHeight;
         return control;
     }
 

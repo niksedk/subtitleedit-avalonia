@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +24,8 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private CancellationToken _cancellationToken;
     private CancellationTokenSource _cancellationTokenSource;
     private IAdjustCallback? _adjustCallback;
+    private readonly List<StatusMessage> _statusMessages = new();
+    private readonly object _statusLock = new();
 
     public Window? Window { get; set; }
 
@@ -90,7 +93,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowEarlier()
     {
         _totalAdjustment -= Adjustment.TotalSeconds;
-        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
+        ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -100,7 +103,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     {
         Adjustment = ts;
         _totalAdjustment -= ts.TotalSeconds;
-        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
+        ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, "-" + new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -114,7 +117,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     private void ShowLater()
     {
         _totalAdjustment += Adjustment.TotalSeconds;
-        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
+        ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -124,7 +127,7 @@ public partial class AdjustAllTimesViewModel : ObservableObject
     {
         Adjustment = ts;
         _totalAdjustment += ts.TotalSeconds;
-        _ = ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
+        ShowStatus(string.Format(Se.Language.Sync.AdjustmentX, new TimeCode(Adjustment).ToShortDisplayString()));
         Apply();
         ShowTotalAdjustmentInfo();
     }
@@ -158,19 +161,60 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         Window?.Close();
     }
 
-    private Lock _statusLock = new Lock();
-    private async Task ShowStatus(string statusText)
+    private void ShowStatus(string statusText)
     {
+        var statusMessage = new StatusMessage
+        {
+            Text = statusText,
+            Timestamp = DateTime.Now
+        };
+
         lock (_statusLock)
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationToken = _cancellationTokenSource.Token;
+            _statusMessages.Add(statusMessage);
+            UpdateStatusDisplay();
         }
 
-        StatusText = statusText;
-        await Task.Delay(2000, _cancellationToken);
-        StatusText = string.Empty;
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(1000, _cancellationToken);
+            
+            lock (_statusLock)
+            {
+                _statusMessages.Remove(statusMessage);
+                UpdateStatusDisplay();
+            }
+        });
+    }
+
+    private void UpdateStatusDisplay()
+    {
+        if (_statusMessages.Count == 0)
+        {
+            StatusText = string.Empty;
+            return;
+        }
+
+        if (_statusMessages.Count == 1)
+        {
+            StatusText = _statusMessages[0].Text;
+            return;
+        }
+
+        // Stack messages with line breaks
+        var stackedMessages = new List<string>();
+        foreach (var msg in _statusMessages)
+        {
+            stackedMessages.Add(msg.Text);
+        }
+
+        StatusText = string.Join(Environment.NewLine, stackedMessages);
+    }
+
+    private class StatusMessage
+    {
+        public string Text { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
     }
 
     private void InvokeAdjustCallback()

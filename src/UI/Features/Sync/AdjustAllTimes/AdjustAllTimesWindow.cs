@@ -160,8 +160,24 @@ public class AdjustAllTimesWindow : Window
             },
         };
 
-        var buttonOk = UiUtil.MakeButtonDone(vm.OkCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
+        var buttonOk = UiUtil.MakeButtonDone(vm.OkCommand).WithBottomAlignment();
+        
+        var labelStatus = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.StatusText));
+        
+        var bottomPanel = new DockPanel
+        {
+            MinHeight = 90,
+            LastChildFill = false,
+            Children =
+            {
+                labelStatus,
+                buttonOk,
+            }
+        };
+        
+        DockPanel.SetDock(labelStatus, Dock.Left);
+        DockPanel.SetDock(buttonOk, Dock.Right);
+        
         var grid = new Grid
         {
             RowDefinitions =
@@ -181,12 +197,9 @@ public class AdjustAllTimesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        var labelStatus = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.StatusText));
-
         grid.Add(panelAdjustment, 0);
         grid.Add(panelRadioButtons, 1);
-        grid.Add(buttonPanel, 2);
-        grid.Add(labelStatus, 2);
+        grid.Add(bottomPanel, 2);
 
         Content = grid;
 
