@@ -87,6 +87,8 @@ public class LanguageMain
     public string VideoOpenedChangeLayoutQuestion { get; set; }
     public string SortedByStartTime { get; set; }
     public string SortedByEndTime { get; set; }
+    public string ColorHint { get; set; }
+    public string RemoveFormattingHint { get; set; }
 
     public LanguageMain()
     {
@@ -168,5 +170,7 @@ public class LanguageMain
         VideoOpenedChangeLayoutQuestion = "A video file has been opened.\n\nDo you want to change the layout to show the video panel?";
         SortedByStartTime = "Sorted by \"Show\" time";
         SortedByEndTime = "Sorted by \"Hide\" time";
+        ColorHint = "Color selected lines";
+        RemoveFormattingHint = "Remove formatting from selected lines";
     }
 }

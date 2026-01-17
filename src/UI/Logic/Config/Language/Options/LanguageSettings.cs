@@ -242,6 +242,11 @@ public class LanguageSettings
     public string ForceCrLfOnSave { get; set; }
     public string ShowWaveformToolbarPlayNext { get; set; }
     public string ShowWaveformToolbarPlaySelection { get; set; }
+    public string TextBoxButtonShowAutoBreak { get; set; }
+    public string TextBoxButtonShowUnbreak { get; set; }
+    public string TextBoxButtonShowItalic { get; set; }
+    public string TextBoxButtonShowColor { get; set; }
+    public string TextBoxButtonShowRemoveFormatting { get; set; }
 
     public LanguageSettings()
     {
@@ -480,6 +485,11 @@ public class LanguageSettings
         ForceCrLfOnSave = "Force CR+LF on save (text subtitle files)";
         ShowWaveformToolbarPlayNext = "Toolbar: show play next button";
         ShowWaveformToolbarPlaySelection = "Toolbar: show play selection button";
+        TextBoxButtonShowAutoBreak = "Text box: show auto-break button";
+        TextBoxButtonShowUnbreak = "Text box: show unbreak button";
+        TextBoxButtonShowItalic = "Text box: show italic button";
+        TextBoxButtonShowColor = "Text box: show color button";
+        TextBoxButtonShowRemoveFormatting = "Text box: show remove formatting button";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

@@ -62,7 +62,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     {
         _isLoaded = true;
         var twoLetterIsoLanguageName = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(threeLetterIsoLanguageName);
-        _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, threeLetterIsoLanguageName);
+        _spellCheckManager.Initialize(spellCheckDictionary.DictionaryFileName, twoLetterIsoLanguageName);
         _ocrFixReplaceList = OcrFixReplaceList2.FromLanguageId(threeLetterIsoLanguageName);
 
         var fiveLetterName = Path.GetFileNameWithoutExtension(spellCheckDictionary.DictionaryFileName);

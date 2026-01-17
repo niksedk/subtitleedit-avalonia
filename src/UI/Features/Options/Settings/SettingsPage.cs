@@ -530,6 +530,13 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxColorTags, nameof(_vm.TextBoxColorTags)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText), new Binding(nameof(_vm.TextBoxColorTags)) { Source =  _vm,  Converter = new InverseBooleanConverter(), Mode = BindingMode.OneWay }),
+
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowAutoBreak, nameof(_vm.TextBoxButtonShowAutoBreak)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowUnbreak, nameof(_vm.TextBoxButtonShowUnbreak)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowItalic, nameof(_vm.TextBoxButtonShowItalic)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowColor, nameof(_vm.TextBoxButtonShowColor)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowRemoveFormatting, nameof(_vm.TextBoxButtonShowRemoveFormatting)),
+
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownStartTime, nameof(_vm.ShowUpDownStartTime)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownEndTime, nameof(_vm.ShowUpDownEndTime)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowUpDownDuration, nameof(_vm.ShowUpDownDuration)),

@@ -118,6 +118,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showToolbarHelp;
     [ObservableProperty] private bool _showToolbarEncoding;
 
+    [ObservableProperty] private bool _textBoxButtonShowAutoBreak;
+    [ObservableProperty] private bool _textBoxButtonShowUnbreak;
+    [ObservableProperty] private bool _textBoxButtonShowItalic;
+    [ObservableProperty] private bool _textBoxButtonShowColor;
+    [ObservableProperty] private bool _textBoxButtonShowRemoveFormatting;
+
     [ObservableProperty] private bool _colorDurationTooShort;
     [ObservableProperty] private bool _colorDurationTooLong;
     [ObservableProperty] private bool _colorTextTooLong;
@@ -519,6 +525,11 @@ public partial class SettingsViewModel : ObservableObject
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         TextBoxColorTags = appearance.SubtitleTextBoxColorTags;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
+        TextBoxButtonShowAutoBreak = appearance.TextBoxShowButtonAutoBreak;
+        TextBoxButtonShowUnbreak = appearance.TextBoxShowButtonUnbreak;
+        TextBoxButtonShowItalic = appearance.TextBoxShowButtonItalic;
+        TextBoxButtonShowColor = appearance.TextBoxShowButtonColor;
+        TextBoxButtonShowRemoveFormatting = appearance.TextBoxShowButtonRemoveFormatting;
         ShowButtonHints = appearance.ShowHints;
         GridCompactMode = appearance.GridCompactMode;
         ShowAssaLayer = appearance.ShowLayer;
@@ -935,6 +946,11 @@ public partial class SettingsViewModel : ObservableObject
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         appearance.SubtitleTextBoxColorTags = TextBoxColorTags;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
+        appearance.TextBoxShowButtonAutoBreak = TextBoxButtonShowAutoBreak;
+        appearance.TextBoxShowButtonUnbreak = TextBoxButtonShowUnbreak;
+        appearance.TextBoxShowButtonItalic = TextBoxButtonShowItalic;
+        appearance.TextBoxShowButtonColor = TextBoxButtonShowColor;
+        appearance.TextBoxShowButtonRemoveFormatting = TextBoxButtonShowRemoveFormatting;
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
         appearance.UseFocusedButtonBackgroundColor = UseFocusedButtonBackgroundColor;

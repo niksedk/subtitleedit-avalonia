@@ -31,11 +31,11 @@ public static class InitListViewAndEditBox
             vm.SubtitleGrid.DoubleTapped -= vm.OnSubtitleGridDoubleTapped;
             vm.SubtitleGrid.PointerPressed -= vm.SubtitleGrid_PointerPressed;
             vm.SubtitleGrid.PointerReleased -= vm.SubtitleGrid_PointerReleased;
-            
+
             // Remove handlers added with AddHandler
             vm.SubtitleGrid.RemoveHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed);
             vm.SubtitleGrid.RemoveHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased);
-            
+
             // Clear the grid to help with garbage collection
             vm.SubtitleGrid.ItemsSource = null;
             vm.SubtitleGrid.ContextFlyout = null;
@@ -247,7 +247,7 @@ public static class InitListViewAndEditBox
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
-        
+
         var styleColumnMultiBinding = new MultiBinding
         {
             Converter = booleanAndConverter,
@@ -1254,30 +1254,55 @@ public static class InitListViewAndEditBox
             Margin = new Thickness(3)
         };
 
-        // Auto Break button
-        var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.ScaleBalance);
-        if (Se.Settings.Appearance.ShowHints)
+        if (Se.Settings.Appearance.TextBoxShowButtonAutoBreak)
         {
-            ToolTip.SetTip(autoBreakButton, Se.Language.Main.AutoBreakHint);
+            var autoBreakButton = UiUtil.MakeButton(vm.AutoBreakCommand, IconNames.ScaleBalance);
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(autoBreakButton, Se.Language.Main.AutoBreakHint);
+            }
+            buttonPanel.Children.Add(autoBreakButton);
         }
-        buttonPanel.Children.Add(autoBreakButton);
 
-        // Unbreak button
-        var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.SetMerge);
-        if (Se.Settings.Appearance.ShowHints)
+        if (Se.Settings.Appearance.TextBoxShowButtonUnbreak)
         {
-            ToolTip.SetTip(unbreakButton, Se.Language.Main.UnbreakHint);
+            var unbreakButton = UiUtil.MakeButton(vm.UnbreakCommand, IconNames.SetMerge);
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(unbreakButton, Se.Language.Main.UnbreakHint);
+            }
+            buttonPanel.Children.Add(unbreakButton);
         }
-        buttonPanel.Children.Add(unbreakButton);
 
-
-        var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicOrSelectedTextCommand, IconNames.Italic);
-        if (Se.Settings.Appearance.ShowHints)
+        if (Se.Settings.Appearance.TextBoxShowButtonItalic)
         {
-            ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);
+            var italicButton = UiUtil.MakeButton(vm.ToggleLinesItalicOrSelectedTextCommand, IconNames.Italic);
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(italicButton, Se.Language.Main.ItalicHint);
+            }
+            buttonPanel.Children.Add(italicButton);
         }
-        buttonPanel.Children.Add(italicButton);
 
+        if (Se.Settings.Appearance.TextBoxShowButtonColor)
+        {
+            var colorButton = UiUtil.MakeButton(vm.ShowColorPickerCommand, IconNames.Palette);
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(colorButton, Se.Language.Main.ColorHint);
+            }
+            buttonPanel.Children.Add(colorButton);
+        }
+
+        if (Se.Settings.Appearance.TextBoxShowButtonRemoveFormatting)
+        {
+            var removeFormattingButton = UiUtil.MakeButton(vm.RemoveFormattingAllCommand, IconNames.FormatClear);
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(removeFormattingButton, Se.Language.Main.RemoveFormattingHint);
+            }
+            buttonPanel.Children.Add(removeFormattingButton);
+        }
 
         textEditGrid.Add(buttonPanel, 1, 2);
 

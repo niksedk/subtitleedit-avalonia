@@ -48,6 +48,11 @@ public class SeAppearance
     public bool ShowUpDownLabels { get; set; }
 
     public LayoutPositions CurrentLayoutPositions { get; set; }
+    public bool TextBoxShowButtonAutoBreak { get; set; }
+    public bool TextBoxShowButtonUnbreak { get; set; }
+    public bool TextBoxShowButtonItalic { get; set; }
+    public bool TextBoxShowButtonColor { get; set; }
+    public bool TextBoxShowButtonRemoveFormatting { get; set; }
 
     public SeAppearance()
     {
@@ -88,5 +93,11 @@ public class SeAppearance
         ToolbarShowLayout = true;
         ToolbarShowHelp = true;
         ToolbarShowEncoding = false;
+
+        TextBoxShowButtonAutoBreak = true;
+        TextBoxShowButtonUnbreak = true;
+        TextBoxShowButtonItalic = true;
+        TextBoxShowButtonColor = false;
+        TextBoxShowButtonRemoveFormatting = false;
     }
 }
