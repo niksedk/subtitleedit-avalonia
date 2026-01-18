@@ -200,6 +200,7 @@ public partial class OcrViewModel : ObservableObject
         TextBoxFontFamily = new FontFamily(FontHelper.GetSystemFonts().First());
         TextBoxFontSize = 14;
         TextBoxFontWeight = FontWeight.Regular;
+        PaddleUseGpu = true;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
