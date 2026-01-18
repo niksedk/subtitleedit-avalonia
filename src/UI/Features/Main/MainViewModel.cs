@@ -1676,6 +1676,16 @@ public partial class MainViewModel :
         ShowStatus($"File exported in format \"{format.Name}\" to file \"{fileName}\"");
     }
 
+    [RelayCommand]
+    private async Task ImportPlainText()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>();
+    }
 
     [RelayCommand]
     private async Task ImportImages()

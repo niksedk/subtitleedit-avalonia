@@ -280,6 +280,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ImageBasedProfileViewModel>();
         collection.AddTransient<ImportImagesViewModel>();
         collection.AddTransient<InterjectionsViewModel>();
+        collection.AddTransient<ImportPlainTextViewModel>();
         collection.AddTransient<JoinSubtitlesViewModel>();
         collection.AddTransient<LanguageViewModel>();
         collection.AddTransient<LayoutViewModel>();

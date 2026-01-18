@@ -3,6 +3,8 @@
 public class LanguageImport
 {
     public string ImportTimeCodes { get; set; }
+    public string PlainTextDotDotDot { get; set; }
+    public string TitleImportPlainText { get; set; }
     public string ImagesDotDotDot { get; set; }
     public string TimeCodesDotDotDot { get; set; }
     public string SubtitleWithManuallyChosenEncodingDotDotDot { get; set; }
@@ -16,6 +18,8 @@ public class LanguageImport
 
     public LanguageImport()
     {
+        PlainTextDotDotDot = "Plain text...";
+        TitleImportPlainText = "Import plain text";
         ImportTimeCodes = "Import time codes...";
         ImagesDotDotDot = "Images...";
         TitleImportImages = "Import images";

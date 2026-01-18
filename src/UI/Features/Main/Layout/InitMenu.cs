@@ -128,11 +128,6 @@ public static class InitMenu
                         new Separator(),
                         new MenuItem
                         {
-                            Header = Se.Language.File.Import.ImagesDotDotDot,
-                            Command = vm.ImportImagesCommand,
-                        },
-                        new MenuItem
-                        {
                             Header = Se.Language.File.Import.ImagedBasedSubtitleForOcrDotDotDot,
                             Command = vm.ImportImageSubtitleForOcrCommand,
                         },
@@ -140,6 +135,16 @@ public static class InitMenu
                         {
                             Header = Se.Language.File.Import.ImagedBasedSubtitleForEditDotDotDot,
                             Command = vm.ImportImageSubtitleForEditCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Import.ImagesDotDotDot,
+                            Command = vm.ImportImagesCommand,
+                        },
+                        new MenuItem
+                        {
+                            Header = Se.Language.File.Import.PlainTextDotDotDot,
+                            Command = vm.ImportPlainTextCommand,
                         },
                         new Separator(),
                         new MenuItem
