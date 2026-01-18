@@ -703,6 +703,13 @@ public partial class TextToSpeechViewModel : ObservableObject
                 return null;
             }
 
+            bool forceStereo = false;
+            var useCustomAudioEncoding = !string.IsNullOrEmpty(Se.Settings.Video.TextToSpeech.CustomAudioEncoding);
+            if (Se.Settings.Video.TextToSpeech.CustomAudioStereo && useCustomAudioEncoding)
+            {
+                forceStereo = true;
+            }
+
             var silenceFileName = await GenerateSilenceWaveFile(cancellationToken);
 
             var outputFileName = string.Empty;
@@ -719,7 +726,7 @@ public partial class TextToSpeechViewModel : ObservableObject
                     outputFileName = Path.Combine(_waveFolder, $"silence_{Guid.NewGuid()}.wav");
                 }
 
-                var mergeProcess = FfmpegGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds);
+                var mergeProcess = FfmpegGenerator.MergeAudioTracks(inputFileName, item.CurrentFileName, outputFileName, (float)item.Paragraph.StartTime.TotalSeconds, forceStereo);
                 var fileNameToDelete = inputFileName;
                 inputFileName = outputFileName;
 #pragma warning disable CA1416 // Validate platform compatibility

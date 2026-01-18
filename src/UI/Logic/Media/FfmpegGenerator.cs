@@ -33,14 +33,17 @@ public class FfmpegGenerator
         return processMakeVideo;
     }
 
-    public static Process MergeAudioTracks(string inputFileName1, string inputFileName2, string outputFileName, float startSeconds, DataReceivedEventHandler? dataReceivedHandler = null)
+    public static Process MergeAudioTracks(string inputFileName1, string inputFileName2, string outputFileName, float startSeconds, bool forceStereo, DataReceivedEventHandler? dataReceivedHandler = null)
     {
+        var filterSuffix = forceStereo ? ",aformat=channel_layouts=stereo" : string.Empty;
+        var stereoParameter = forceStereo ? " -ac 2" : string.Empty;
+
         var processMakeVideo = new Process
         {
             StartInfo =
             {
                 FileName = GetFfmpegLocation(),
-                Arguments = $"-i \"{inputFileName1}\" -i \"{inputFileName2}\" -filter_complex \"aevalsrc=0:d={startSeconds.ToString(CultureInfo.InvariantCulture)}[s1];[s1][1:a]concat=n=2:v=0:a=1[ac1];[0:a][ac1]amix=2:normalize=false[aout]\" -map [aout] \"{outputFileName}\"",
+                Arguments = $"-i \"{inputFileName1}\" -i \"{inputFileName2}\" -filter_complex \"aevalsrc=0:d={startSeconds.ToString(CultureInfo.InvariantCulture)}[s1];[s1][1:a]concat=n=2:v=0:a=1[ac1];[0:a][ac1]amix=2:normalize=false{filterSuffix}[aout]\" -map [aout]{stereoParameter} \"{outputFileName}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
@@ -779,7 +782,7 @@ public class FfmpegGenerator
 
         // Build list of output subtitle tracks: non-deleted original tracks, then new tracks
         var outputSubs = new List<EmbeddedTrack>();
-        
+
         // Find non-deleted original subtitle tracks
         foreach (var track in embeddedTracks)
         {
@@ -787,16 +790,16 @@ public class FfmpegGenerator
             {
                 continue; // Handle new tracks separately
             }
-            
+
             if (track.Deleted)
             {
                 continue; // Skip deleted tracks
             }
-            
+
             // This is an existing track that should be kept
             outputSubs.Add(track);
         }
-        
+
         // Add new subtitle tracks
         foreach (var track in embeddedTracks)
         {
@@ -813,7 +816,7 @@ public class FfmpegGenerator
             {
                 continue;
             }
-            
+
             args.Add($"-map 0:s:{track.Number}");
         }
 
@@ -826,7 +829,7 @@ public class FfmpegGenerator
 
         // Copy all codecs
         args.Add("-c copy");
-        
+
         // Fix timestamp issues when copying streams
         args.Add("-avoid_negative_ts make_zero");
         args.Add("-max_interleave_delta 0");
