@@ -111,7 +111,7 @@ public static class InitListViewAndEditBox
                             VerticalAlignment = VerticalAlignment.Center,
                             [!Visual.IsVisibleProperty] = new Binding(nameof(SubtitleLineViewModel.Bookmark)) { Converter = notNullConverter },
                          },
-                         UiUtil.MakeLabel().WithBindText(value, new Binding(nameof(SubtitleLineViewModel.Number)))
+                         UiUtil.MakeLabel().WithBindText(value, new Binding(nameof(SubtitleLineViewModel.Number)))      
                     }
                 })
         });
@@ -119,7 +119,7 @@ public static class InitListViewAndEditBox
         vm.SubtitleGrid.Columns.Add(new DataGridTextColumn
         {
             Header = Se.Language.General.Show,
-            Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter },
+            Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter, Mode = BindingMode.OneWay },
             Width = new DataGridLength(120),
             MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -128,7 +128,7 @@ public static class InitListViewAndEditBox
         var hideColumn = new DataGridTextColumn
         {
             Header = Se.Language.General.Hide,
-            Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter },
+            Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter, Mode = BindingMode.OneWay },
             Width = new DataGridLength(120),
             MinWidth = 100,
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
@@ -158,7 +158,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter, Mode = BindingMode.OneWay },
                 };
 
                 border.Child = textBlock;
@@ -190,7 +190,7 @@ public static class InitListViewAndEditBox
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = syntaxHighlightingConverter },
+                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.Text)) { Converter = syntaxHighlightingConverter, Mode = BindingMode.OneWay },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -214,14 +214,13 @@ public static class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    //[!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.TextBackgroundBrush))
                 };
 
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.NoWrap,
-                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = syntaxHighlightingConverter },
+                    [!TextBlock.InlinesProperty] = new Binding(nameof(SubtitleLineViewModel.OriginalText)) { Converter = syntaxHighlightingConverter, Mode = BindingMode.OneWay },
                 };
 
                 if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
@@ -270,14 +269,14 @@ public static class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.GapBackgroundBrush))
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.GapBackgroundBrush), BindingMode.OneWay)
                 };
 
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Gap)) { Converter = gapConverter },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.Gap)) { Converter = gapConverter, Mode = BindingMode.OneWay },
                 };
 
                 border.Child = textBlock;
@@ -294,7 +293,7 @@ public static class InitListViewAndEditBox
         var actorColumn = new DataGridTextColumn
         {
             Header = Se.Language.General.Actor,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Actor)),
+            Binding = new Binding(nameof(SubtitleLineViewModel.Actor), BindingMode.OneWay),
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
@@ -315,14 +314,14 @@ public static class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.CpsBackgroundBrush))
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.CpsBackgroundBrush), BindingMode.OneWay)
                 };
 
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = cpsWmpConverter },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.CharactersPerSecond)) { Converter = cpsWmpConverter, Mode = BindingMode.OneWay },
                 };
 
                 border.Child = textBlock;
@@ -346,14 +345,14 @@ public static class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.WpmBackgroundBrush))
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.WpmBackgroundBrush), BindingMode.OneWay)
                 };
 
                 var textBlock = new TextBlock
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     TextWrapping = TextWrapping.Wrap,
-                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)) { Converter = cpsWmpConverter },
+                    [!TextBlock.TextProperty] = new Binding(nameof(SubtitleLineViewModel.WordsPerMinute)) { Converter = cpsWmpConverter, Mode = BindingMode.OneWay },
                 };
 
                 border.Child = textBlock;
