@@ -162,7 +162,7 @@ public partial class PaddleOcr
     }
 
 
-    public async Task OcrBatch(OcrEngineType engineType, List<PaddleOcrBatchInput> bitmaps, string language, bool useGpu, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(OcrEngineType engineType, List<PaddleOcrBatchInput> bitmaps, string language, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
@@ -217,7 +217,6 @@ public partial class PaddleOcr
                     "--use_textline_orientation true " +
                     "--use_doc_orientation_classify false " +
                     "--use_doc_unwarping false " +
-                    $"--device {(useGpu ? "gpu" : "cpu")} " +
                     $"--lang {language} " +
                     $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
                     $"--text_detection_model_name \"{detName}\" " +

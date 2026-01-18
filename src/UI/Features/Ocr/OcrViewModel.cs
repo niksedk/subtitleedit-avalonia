@@ -101,7 +101,6 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private OcrLanguage2 _selectedGoogleLensLanguage;
     [ObservableProperty] private ObservableCollection<OcrLanguage2> _paddleOcrLanguages;
     [ObservableProperty] private OcrLanguage2? _selectedPaddleOcrLanguage;
-    [ObservableProperty] private bool _paddleUseGpu;
     [ObservableProperty] private bool _showContextMenu;
     [ObservableProperty] private ObservableCollection<SpellCheckDictionaryDisplay> _dictionaries;
     [ObservableProperty] private SpellCheckDictionaryDisplay? _selectedDictionary;
@@ -200,7 +199,6 @@ public partial class OcrViewModel : ObservableObject
         TextBoxFontFamily = new FontFamily(FontHelper.GetSystemFonts().First());
         TextBoxFontSize = 14;
         TextBoxFontWeight = FontWeight.Regular;
-        PaddleUseGpu = true;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
@@ -1515,7 +1513,7 @@ public partial class OcrViewModel : ObservableObject
 
         _ = Task.Run(async () =>
         {
-            await ocrEngine.OcrBatch(engineType, batchImages, language, PaddleUseGpu, mode, ocrProgress, cancellationToken);
+            await ocrEngine.OcrBatch(engineType, batchImages, language, mode, ocrProgress, cancellationToken);
             IsOcrRunning = false;
         });
     }

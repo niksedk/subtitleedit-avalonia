@@ -776,8 +776,8 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             }
         });
 
-        item.Status = "OCR...";
-        await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, true, mode, ocrProgress, cancellationToken);
+        item.Status = Se.Language.General.OcrDotDotDot;
+        await ocrEngine.OcrBatch(OcrEngineType.PaddleOcrStandalone, batchImages, language, mode, ocrProgress, cancellationToken);
         var checkCount = 0;
         while (ocrCount < numberOfImages && checkCount < 100)
         {
