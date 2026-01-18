@@ -1109,59 +1109,90 @@ public class AudioVisualizer : Control
 
     private SubtitleLineViewModel? HitTestParagraph(Point point)
     {
-        // First pass: Find the closest edge among all paragraphs
+        var pointX = point.X;
+        var startPosSeconds = StartPositionSeconds;
+        
+        // Check NewSelectionParagraph first as it's typically the active interaction target
+        var newSelection = NewSelectionParagraph;
+        if (newSelection != null)
+        {
+            var left = SecondsToXPosition(newSelection.StartTime.TotalSeconds - startPosSeconds);
+            var right = SecondsToXPosition(newSelection.EndTime.TotalSeconds - startPosSeconds);
+
+            if (pointX >= left - ResizeMargin && pointX <= right + ResizeMargin)
+            {
+                return newSelection;
+            }
+        }
+
+        // Early exit if no displayable paragraphs
+        if (_displayableParagraphs.Count == 0)
+        {
+            return null;
+        }
+
+        // Single pass: Find closest edge or middle paragraph
         SubtitleLineViewModel? closestEdgeParagraph = null;
+        SubtitleLineViewModel? middleParagraph = null;
         double closestEdgeDistance = double.MaxValue;
-        bool isClosestLeft = false;
+        bool isClosestEdgeLeft = false;
+        int closestEdgeIndex = -1;
 
         for (var i = 0; i < _displayableParagraphs.Count; i++)
         {
-            SubtitleLineViewModel p = _displayableParagraphs[i];
-            double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
-            double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+            var p = _displayableParagraphs[i];
+            var left = SecondsToXPosition(p.StartTime.TotalSeconds - startPosSeconds);
+            var right = SecondsToXPosition(p.EndTime.TotalSeconds - startPosSeconds);
 
-            // Check distance to left edge
-            double distToLeft = Math.Abs(point.X - left);
+            // Check if in middle (not near edges)
+            if (pointX >= left + ResizeMargin && pointX <= right - ResizeMargin)
+            {
+                middleParagraph = p;
+                // Don't break - continue checking for closer edges
+            }
+
+            // Check left edge distance
+            var distToLeft = Math.Abs(pointX - left);
             if (distToLeft <= ResizeMargin && distToLeft < closestEdgeDistance)
             {
                 closestEdgeDistance = distToLeft;
                 closestEdgeParagraph = p;
-                isClosestLeft = true;
+                closestEdgeIndex = i;
+                isClosestEdgeLeft = true;
             }
 
-            // Check distance to right edge
-            double distToRight = Math.Abs(point.X - right);
+            // Check right edge distance
+            var distToRight = Math.Abs(pointX - right);
             if (distToRight <= ResizeMargin && distToRight < closestEdgeDistance)
             {
                 closestEdgeDistance = distToRight;
                 closestEdgeParagraph = p;
-                isClosestLeft = false;
+                closestEdgeIndex = i;
+                isClosestEdgeLeft = false;
             }
         }
 
-        // If we found a paragraph edge within ResizeMargin, check for adjacent paragraphs
+        // If we found an edge, check for adjacent paragraphs that might be closer
         if (closestEdgeParagraph != null)
         {
-            int idx = _displayableParagraphs.IndexOf(closestEdgeParagraph);
-            
-            if (isClosestLeft && idx > 0)
+            if (isClosestEdgeLeft && closestEdgeIndex > 0)
             {
-                // Near left edge - check if previous paragraph's right edge is closer
-                var prev = _displayableParagraphs[idx - 1];
-                double prevRight = SecondsToXPosition(prev.EndTime.TotalSeconds - StartPositionSeconds);
-                double distToPrevRight = Math.Abs(point.X - prevRight);
+                // Check if previous paragraph's right edge is closer
+                var prev = _displayableParagraphs[closestEdgeIndex - 1];
+                var prevRight = SecondsToXPosition(prev.EndTime.TotalSeconds - startPosSeconds);
+                var distToPrevRight = Math.Abs(pointX - prevRight);
                 
                 if (distToPrevRight <= ResizeMargin && distToPrevRight < closestEdgeDistance)
                 {
                     return prev;
                 }
             }
-            else if (!isClosestLeft && idx < _displayableParagraphs.Count - 1)
+            else if (!isClosestEdgeLeft && closestEdgeIndex < _displayableParagraphs.Count - 1)
             {
-                // Near right edge - check if next paragraph's left edge is closer
-                var next = _displayableParagraphs[idx + 1];
-                double nextLeft = SecondsToXPosition(next.StartTime.TotalSeconds - StartPositionSeconds);
-                double distToNextLeft = Math.Abs(point.X - nextLeft);
+                // Check if next paragraph's left edge is closer
+                var next = _displayableParagraphs[closestEdgeIndex + 1];
+                var nextLeft = SecondsToXPosition(next.StartTime.TotalSeconds - startPosSeconds);
+                var distToNextLeft = Math.Abs(pointX - nextLeft);
                 
                 if (distToNextLeft <= ResizeMargin && distToNextLeft < closestEdgeDistance)
                 {
@@ -1172,105 +1203,39 @@ public class AudioVisualizer : Control
             return closestEdgeParagraph;
         }
 
-        // Second pass: Check if we're in the middle of any paragraph
-        for (var i = 0; i < _displayableParagraphs.Count; i++)
-        {
-            SubtitleLineViewModel p = _displayableParagraphs[i];
-            double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
-            double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
-
-            if (point.X >= left + ResizeMargin && point.X <= right - ResizeMargin)
-            {
-                return p;
-            }
-        }
-
-        // Check NewSelectionParagraph
-        var newSelection = NewSelectionParagraph;
-        if (newSelection != null)
-        {
-            double left = SecondsToXPosition(newSelection.StartTime.TotalSeconds - StartPositionSeconds);
-            double right = SecondsToXPosition(newSelection.EndTime.TotalSeconds - StartPositionSeconds);
-
-            if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
-            {
-                return newSelection;
-            }
-        }
-
-        return null;
+        // Return middle paragraph if found (no edges were close)
+        return middleParagraph;
     }
 
-    private SubtitleLineViewModel? HitTestParagraph(Point point, List<SubtitleLineViewModel> subtitles, int index)
-    {
-        if (subtitles == null || index < 0 || index > subtitles.Count - 1)
-        {
-            return null;
-        }
-
-        var p = subtitles[index];
-
-        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
-        double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
-
-        if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
-        {
-            return p;
-        }
-
-        //var newSelection = NewSelectionParagraph;
-        //if (newSelection != null)
-        //{
-        //    double left = SecondsToXPosition(newSelection.StartTime.TotalSeconds - StartPositionSeconds);
-        //    double right = SecondsToXPosition(newSelection.EndTime.TotalSeconds - StartPositionSeconds);
-
-        //    if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
-        //    {
-        //        return newSelection;
-        //    }
-        //}
-
-        return null;
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SubtitleLineViewModel? HitTestParagraph(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
     {
-        if (subtitles == null || index < 0 || index > subtitles.Count - 1)
+        if (index < 0 || index >= subtitles.Count)
         {
             return null;
         }
 
         var p = subtitles[index];
+        var left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+        var right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+        var pointX = point.X;
 
-        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
-        double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
-
-        if (point.X >= left - ResizeMargin && point.X <= right + resizeMargin)
-        {
-            return p;
-        }
-
-        return null;
+        return pointX >= left - ResizeMargin && pointX <= right + resizeMargin ? p : null;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SubtitleLineViewModel? HitTestParagraphRight(Point point, List<SubtitleLineViewModel> subtitles, int index, double resizeMargin)
     {
-        if (index < 0 || index > subtitles.Count - 1)
+        if (index < 0 || index >= subtitles.Count)
         {
             return null;
         }
 
         var p = subtitles[index];
+        var leftEdge = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+        var pointX = point.X;
 
-        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds) - resizeMargin;
-        double right = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds) + resizeMargin;
-
-        if (point.X >= left && point.X <= right)
-        {
-            return p;
-        }
-
-        return null;
+        return pointX >= leftEdge - resizeMargin && pointX <= leftEdge + resizeMargin ? p : null;
     }
 
     //Queue<double> _renderTimes = new Queue<double>();
