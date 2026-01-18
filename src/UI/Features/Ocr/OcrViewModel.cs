@@ -1333,17 +1333,21 @@ public partial class OcrViewModel : ObservableObject
                     Window!,
                     "Download Paddle OCR?",
                     $"{Environment.NewLine}\"Paddle OCR\" requires downloading Paddle OCR.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR?",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question);
+                    MessageBoxButtons.Cancel,
+                    MessageBoxIcon.Question,
+                    "CPU",
+                    "GPU");
 
-                if (answer != MessageBoxResult.Yes)
+                if (answer == MessageBoxResult.Cancel)
                 {
                     PauseOcr();
                     return;
                 }
 
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
-                    vm => { vm.Initialize(PaddleOcrDownloadType.EngineCpu); });
+                    vm => { vm.Initialize(answer == MessageBoxResult.Custom1 
+                        ? PaddleOcrDownloadType.EngineCpu
+                        : PaddleOcrDownloadType.EngineGpu); });
 
                 _isCtrlDown = false;
 

@@ -17,7 +17,9 @@ public enum MessageBoxResult
     OK,
     Cancel,
     Yes,
-    No
+    No,
+    Custom1,
+    Custom2,
 }
 
 public enum MessageBoxButtons
@@ -25,7 +27,10 @@ public enum MessageBoxButtons
     OK,
     OKCancel,
     YesNo,
-    YesNoCancel
+    YesNoCancel,
+    Cancel,
+    Custom1,
+    Custom2,
 }
 
 public enum MessageBoxIcon
@@ -39,11 +44,13 @@ public enum MessageBoxIcon
 
 public class MessageBox : Window
 {
+    private static string CustomButton1Text { get; set; } = string.Empty;
+    private static string CustomButton2Text { get; set; } = string.Empty;
     private MessageBoxResult _result = MessageBoxResult.None;
     private readonly bool _hasCancel;
-    private readonly bool _hasOnlyOk;
+    private readonly bool _hasOnlyOk;    
 
-    private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon)
+    private MessageBox(string title, string message, MessageBoxButtons buttons, MessageBoxIcon icon, string? custom1 = null, string? custom2 = null)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Width = 400;
@@ -147,6 +154,16 @@ public class MessageBox : Window
             buttonPanel.Children.Add(btn);
         }
 
+        if (!string.IsNullOrEmpty(custom1))
+        {
+            AddButton(custom1, MessageBoxResult.Custom1);
+        }
+
+        if (!string.IsNullOrEmpty(custom2))
+        {
+            AddButton(custom2, MessageBoxResult.Custom2);
+        }
+
         // Add buttons based on MessageBoxButtons
         switch (buttons)
         {
@@ -169,12 +186,21 @@ public class MessageBox : Window
                 AddButton(Se.Language.General.Cancel, MessageBoxResult.Cancel);
                 _hasCancel = true;
                 break;
+            case MessageBoxButtons.Cancel:
+                AddButton(Se.Language.General.Cancel, MessageBoxResult.Cancel);
+                _hasCancel = true;
+                break;
         }
 
         grid.Children.Add(buttonPanel);
         Grid.SetRow(buttonPanel, 2);
         Grid.SetColumn(buttonPanel, 0);
         Grid.SetColumnSpan(buttonPanel, 2);
+
+        if (!string.IsNullOrEmpty(custom1) ||  !string.IsNullOrEmpty(custom2))
+        {
+            _hasOnlyOk = false;
+        }
 
         Content = grid;
 
@@ -202,9 +228,11 @@ public class MessageBox : Window
         string title,
         string message,
         MessageBoxButtons buttons = MessageBoxButtons.OK,
-        MessageBoxIcon icon = MessageBoxIcon.None)
+        MessageBoxIcon icon = MessageBoxIcon.None,
+        string? custom1 = null,
+        string? custom2 = null)
     {
-        var msgBox = new MessageBox(title, message, buttons, icon);
+        var msgBox = new MessageBox(title, message, buttons, icon, custom1, custom2);
         return await msgBox.ShowDialog<MessageBoxResult>(owner);
     }
 
