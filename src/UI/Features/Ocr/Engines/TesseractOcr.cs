@@ -25,34 +25,31 @@ public class TesseractOcr
 
     public static string GetExecutablePath()
     {
-        string path;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            path = Path.Combine(Se.TesseractFolder, "tesseract.exe");
-            if (File.Exists(path))
-            {
-                return path; 
-            }
-            
-            return "tesseract.exe";
+            var windowsPath = Path.Combine(Se.TesseractFolder, "tesseract.exe");
+            return File.Exists(windowsPath) ? windowsPath : "tesseract.exe";
         }
 
-        path = "/opt/homebrew/bin/tesseract";
-        if (File.Exists(path))
+        ReadOnlySpan<string> unixPaths =
+        [
+            "/opt/homebrew/bin/tesseract",
+            "/opt/local/bin/tesseract",
+            "/usr/local/bin/tesseract",
+            "/usr/bin/tesseract",
+            "/snap/bin/tesseract",
+            "/opt/tesseract/bin/tesseract",
+            "/home/linuxbrew/.linuxbrew/bin/tesseract",
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/bin/tesseract"),
+            "/app/bin/tesseract"
+        ];
+
+        foreach (var path in unixPaths)
         {
-            return path;
-        }
-        
-        path = "/opt/local/bin/tesseract";
-        if (File.Exists(path))
-        {
-            return path;
-        }
-        
-        path = "/usr/bin/tesseract";
-        if (File.Exists(path))
-        {
-            return path;
+            if (File.Exists(path))
+            {
+                return path;
+            }
         }
 
         return "tesseract";
