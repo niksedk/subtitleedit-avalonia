@@ -291,6 +291,9 @@ public class AudioVisualizer : Control
     private double _originalPreviousEndSeconds;
     private double _originalNextStartSeconds;
     private long _audioVisualizerLastScroll;
+    private SubtitleLineViewModel? _cachedHitParagraph;
+    private bool _cachedIsNearLeftEdge;
+    private bool _cachedIsNearRightEdge;
     private long _lastPointerPressed = -1;
     private WaveformDisplayMode _displayMode = WaveformDisplayMode.OnlyWaveform;
     private SpectrogramData2? _spectrogram;
@@ -703,7 +706,7 @@ public class AudioVisualizer : Control
             return;
         }
 
-        var p = HitTestParagraph(point);
+        var p = _cachedHitParagraph;
         if (p == null)
         {
             _interactionMode = InteractionMode.New;
@@ -724,9 +727,6 @@ public class AudioVisualizer : Control
             NewSelectionParagraph = null;
         }
 
-        double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
-        double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
-
         _activeParagraph = p;
         _originalStartSeconds = p.StartTime.TotalSeconds;
         _originalEndSeconds = p.EndTime.TotalSeconds;
@@ -738,54 +738,76 @@ public class AudioVisualizer : Control
             return;
         }
 
-        if (Math.Abs(point.X - left) <= ResizeMargin)
+        // Determine which edge we're actually near based on distance
+        double leftEdgePos = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+        double rightEdgePos = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+        double distToLeft = Math.Abs(point.X - leftEdgePos);
+        double distToRight = Math.Abs(point.X - rightEdgePos);
+        
+        bool isActuallyNearLeft = _cachedIsNearLeftEdge && (!_cachedIsNearRightEdge || distToLeft <= distToRight);
+        bool isActuallyNearRight = _cachedIsNearRightEdge && (!_cachedIsNearLeftEdge || distToRight < distToLeft);
+
+        if (isActuallyNearLeft)
         {
             _interactionMode = InteractionMode.ResizingLeft;
 
             var idx = displayableParagraphs.IndexOf(p);
-            var p2 = HitTestParagraph(point, displayableParagraphs, idx - 1);
-            if (p2 != null)
+            if (idx > 0)
             {
-                _activeParagraphPrevious = p2;
-                _interactionMode = InteractionMode.ResizingLeftOr;
+                var prevParagraph = displayableParagraphs[idx - 1];
+                double prevRightPos = SecondsToXPosition(prevParagraph.EndTime.TotalSeconds - StartPositionSeconds);
+                
+                // Only consider "Or" mode if the previous paragraph's right edge is very close
+                if (Math.Abs(point.X - prevRightPos) <= ResizeMargin)
+                {
+                    _activeParagraphPrevious = prevParagraph;
+                    _interactionMode = InteractionMode.ResizingLeftOr;
+                }
             }
 
-            if (_isAltDown)
+            if (_isAltDown && idx > 0)
             {
-                p2 = HitTestParagraph(point, displayableParagraphs, idx - 1, 100);
+                var p2 = HitTestParagraph(point, displayableParagraphs, idx - 1, 100);
                 if (p2 != null)
                 {
                     _activeParagraphPrevious = p2;
                     _originalPreviousEndSeconds = p2.EndTime.TotalSeconds;
-                    _interactionMode = InteractionMode.ResizeLeftAnd; // move the prev end too
+                    _interactionMode = InteractionMode.ResizeLeftAnd;
                 }
             }
         }
-        else if (Math.Abs(point.X - right) <= ResizeMargin)
+        else if (isActuallyNearRight)
         {
             _interactionMode = InteractionMode.ResizingRight;
 
             var idx = displayableParagraphs.IndexOf(p);
-            var p2 = HitTestParagraph(point, displayableParagraphs, idx + 1);
-            if (p2 != null)
+            if (idx < displayableParagraphs.Count - 1)
             {
-                _activeParagraphNext = p2;
-                _interactionMode = InteractionMode.ResizingRightOr;
+                var nextParagraph = displayableParagraphs[idx + 1];
+                double nextLeftPos = SecondsToXPosition(nextParagraph.StartTime.TotalSeconds - StartPositionSeconds);
+                
+                // Only consider "Or" mode if the next paragraph's left edge is very close
+                if (Math.Abs(point.X - nextLeftPos) <= ResizeMargin)
+                {
+                    _activeParagraphNext = nextParagraph;
+                    _interactionMode = InteractionMode.ResizingRightOr;
+                }
             }
 
-            if (_isAltDown)
+            if (_isAltDown && idx < displayableParagraphs.Count - 1)
             {
-                p2 = HitTestParagraphRight(point, displayableParagraphs, idx + 1, 100);
+                var p2 = HitTestParagraphRight(point, displayableParagraphs, idx + 1, 100);
                 if (p2 != null)
                 {
                     _activeParagraphNext = p2;
                     _originalNextStartSeconds = p2.StartTime.TotalSeconds;
-                    _interactionMode = InteractionMode.ResizeRightAnd; // move the prev end too
+                    _interactionMode = InteractionMode.ResizeRightAnd;
                 }
             }
         }
-        else if (point.X > left && point.X < right)
+        else
         {
+            // Not near an edge, so it's a move operation
             if (_isCtrlDown || _isAltDown)
             {
                 _interactionMode = InteractionMode.None;
@@ -1049,14 +1071,23 @@ public class AudioVisualizer : Control
     private void UpdateCursor(Point point)
     {
         var p = HitTestParagraph(point);
+        _cachedHitParagraph = p;
+        _cachedIsNearLeftEdge = false;
+        _cachedIsNearRightEdge = false;
+
         if (p != null)
         {
             double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
             double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+            var distToLeft = Math.Abs(point.X - left);
+            var distToRight = Math.Abs(point.X - right);
 
-            if (Math.Abs(point.X - left) <= ResizeMargin || Math.Abs(point.X - right) <= ResizeMargin)
+            _cachedIsNearLeftEdge = distToLeft <= ResizeMargin;
+            _cachedIsNearRightEdge = distToRight <= ResizeMargin;
+
+            if ((_cachedIsNearLeftEdge && distToLeft <= distToRight) || (_cachedIsNearRightEdge && distToRight < distToLeft))
             {
-                if (p == NewSelectionParagraph && NewSelectionParagraph.Duration.TotalMilliseconds < 10)
+                if (p == NewSelectionParagraph && NewSelectionParagraph?.Duration.TotalMilliseconds < 10)
                 {
                     Cursor = new Cursor(StandardCursorType.Arrow);
                 }
@@ -1078,32 +1109,83 @@ public class AudioVisualizer : Control
 
     private SubtitleLineViewModel? HitTestParagraph(Point point)
     {
+        // First pass: Find the closest edge among all paragraphs
+        SubtitleLineViewModel? closestEdgeParagraph = null;
+        double closestEdgeDistance = double.MaxValue;
+        bool isClosestLeft = false;
+
         for (var i = 0; i < _displayableParagraphs.Count; i++)
         {
             SubtitleLineViewModel p = _displayableParagraphs[i];
             double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
             double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
 
-            if (point.X >= left - ResizeMargin && point.X <= right + ResizeMargin)
+            // Check distance to left edge
+            double distToLeft = Math.Abs(point.X - left);
+            if (distToLeft <= ResizeMargin && distToLeft < closestEdgeDistance)
             {
-                if (i < _displayableParagraphs.Count - 1)
-                {
-                    var p2 = _displayableParagraphs[i + 1];
-                    double left2 = SecondsToXPosition(p2.StartTime.TotalSeconds - StartPositionSeconds);
-                    double right2 = SecondsToXPosition(p2.EndTime.TotalSeconds - StartPositionSeconds);
-                    if (point.X >= left2 - ResizeMargin && point.X <= right2 + ResizeMargin)
-                    {
-                        if (AllSelectedParagraphs.Contains(p2))
-                        {
-                            return p2;
-                        }
-                    }
-                }
+                closestEdgeDistance = distToLeft;
+                closestEdgeParagraph = p;
+                isClosestLeft = true;
+            }
 
+            // Check distance to right edge
+            double distToRight = Math.Abs(point.X - right);
+            if (distToRight <= ResizeMargin && distToRight < closestEdgeDistance)
+            {
+                closestEdgeDistance = distToRight;
+                closestEdgeParagraph = p;
+                isClosestLeft = false;
+            }
+        }
+
+        // If we found a paragraph edge within ResizeMargin, check for adjacent paragraphs
+        if (closestEdgeParagraph != null)
+        {
+            int idx = _displayableParagraphs.IndexOf(closestEdgeParagraph);
+            
+            if (isClosestLeft && idx > 0)
+            {
+                // Near left edge - check if previous paragraph's right edge is closer
+                var prev = _displayableParagraphs[idx - 1];
+                double prevRight = SecondsToXPosition(prev.EndTime.TotalSeconds - StartPositionSeconds);
+                double distToPrevRight = Math.Abs(point.X - prevRight);
+                
+                if (distToPrevRight <= ResizeMargin && distToPrevRight < closestEdgeDistance)
+                {
+                    return prev;
+                }
+            }
+            else if (!isClosestLeft && idx < _displayableParagraphs.Count - 1)
+            {
+                // Near right edge - check if next paragraph's left edge is closer
+                var next = _displayableParagraphs[idx + 1];
+                double nextLeft = SecondsToXPosition(next.StartTime.TotalSeconds - StartPositionSeconds);
+                double distToNextLeft = Math.Abs(point.X - nextLeft);
+                
+                if (distToNextLeft <= ResizeMargin && distToNextLeft < closestEdgeDistance)
+                {
+                    return next;
+                }
+            }
+            
+            return closestEdgeParagraph;
+        }
+
+        // Second pass: Check if we're in the middle of any paragraph
+        for (var i = 0; i < _displayableParagraphs.Count; i++)
+        {
+            SubtitleLineViewModel p = _displayableParagraphs[i];
+            double left = SecondsToXPosition(p.StartTime.TotalSeconds - StartPositionSeconds);
+            double right = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
+
+            if (point.X >= left + ResizeMargin && point.X <= right - ResizeMargin)
+            {
                 return p;
             }
         }
 
+        // Check NewSelectionParagraph
         var newSelection = NewSelectionParagraph;
         if (newSelection != null)
         {

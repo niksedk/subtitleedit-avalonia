@@ -595,7 +595,8 @@
     "fiveSeconds": "Five seconds",
     "toggleDirection": "Toggle direction",
     "property": "Property",
-    "ascending": "Ascending"
+    "ascending": "Ascending",
+    "question": "Question"
   },
   "main": {
     "menu": {
@@ -801,7 +802,9 @@
     "importXMatchingOriginalLines": "Import {0} matching original subtitles?",
     "videoOpenedChangeLayoutQuestion": "A video file has been opened.\n\nDo you want to change the layout to show the video panel?",
     "sortedByStartTime": "Sorted by \u0022Show\u0022 time",
-    "sortedByEndTime": "Sorted by \u0022Hide\u0022 time"
+    "sortedByEndTime": "Sorted by \u0022Hide\u0022 time",
+    "colorHint": "Color selected lines",
+    "removeFormattingHint": "Remove formatting from selected lines"
   },
   "file": {
     "ebuSaveOptions": {
@@ -1489,7 +1492,9 @@
     "setSyncPoint": "Set sync point",
     "syncPoints": "Sync points",
     "pointSync": "Point sync",
-    "pointSyncViaOther": "Point sync via other subtitle"
+    "pointSyncViaOther": "Point sync via other subtitle",
+    "adjustmentX": "Adjustment: {0}",
+    "adjustAllShortcuts": "Keyboard shortcuts:\r\n\r\n\u2022 Shift \u002B Left/Right: Move 10 ms\r\n\u2022 Ctrl \u002B Left/Right: Move 100 ms\r\n\u2022 Alt \u002B Left/Right: Move 500 ms"
   },
   "translate": {
     "translateViaCopyPaste": "Auto-translate via copy/paste",
@@ -1725,7 +1730,12 @@
       "focusedButtonBackgroundColor": "Focused button background color",
       "forceCrLfOnSave": "Force CR\u002BLF on save (text subtitle files)",
       "showWaveformToolbarPlayNext": "Toolbar: show play next button",
-      "showWaveformToolbarPlaySelection": "Toolbar: show play selection button"
+      "showWaveformToolbarPlaySelection": "Toolbar: show play selection button",
+      "textBoxButtonShowAutoBreak": "Text box: show auto-break button",
+      "textBoxButtonShowUnbreak": "Text box: show unbreak button",
+      "textBoxButtonShowItalic": "Text box: show italic button",
+      "textBoxButtonShowColor": "Text box: show color button",
+      "textBoxButtonShowRemoveFormatting": "Text box: show remove formatting button"
     },
     "shortcuts": {
       "title": "Shortcuts",
@@ -1957,7 +1967,8 @@
       "copySubtitleOriginalPathToClipboard": "Copy subtitle path of original to clipboard",
       "focusTextBox": "Focus text box",
       "sortByStartTime": "Sort by \u0022Show\u0022 time",
-      "sortByEndTime": "Sort by \u0022Hide\u0022 time"
+      "sortByEndTime": "Sort by \u0022Hide\u0022 time",
+      "duplicatesFound": "The following duplicate shortcuts were found:"
     },
     "wordLists": {
       "title": "Word lists",
