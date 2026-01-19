@@ -3307,6 +3307,7 @@ public partial class MainViewModel :
             {
                 _audioVisualizerUndockedViewModel = vm;
                 vm.Initialize(AudioVisualizer, this);
+                ReloadAudioVisualizer();
             });
 
             InitLayout.MakeLayout12KeepVideo(MainView!, this);
