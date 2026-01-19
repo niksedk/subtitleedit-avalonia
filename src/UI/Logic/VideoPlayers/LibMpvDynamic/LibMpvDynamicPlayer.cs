@@ -893,10 +893,10 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
             // Clamp speed to reasonable values (0.25x to 4x)
             var clampedSpeed = Math.Max(0.25, Math.Min(4.0, value));
             var err = DoMpvCommand("set", "speed", clampedSpeed.ToString(CultureInfo.InvariantCulture));
-            if (err < 0)
-            {
-                Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Speed set");
-            }
+            //if (err < 0)
+            //{
+            //    Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer Speed set");
+            //}
         }
     }
 
