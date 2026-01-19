@@ -429,7 +429,24 @@ public partial class MainViewModel :
         PanelSingleLineLengthsOriginal = new StackPanel();
         IsWaveformToolbarVisible = Se.Settings.Waveform.ShowToolbar;
         _videoOpenTokenSource = new CancellationTokenSource();
-        Speeds = new ObservableCollection<string>(new[] { "0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "1.75x", "2.0x", "3.0x" });
+        Speeds = new ObservableCollection<string>(new[]
+        {
+            "0.2x", 
+            "0.4x", 
+            "0.6x", 
+            "0.8x", 
+            "1.0x",
+            "1.2x", 
+            "1.4x", 
+            "1.6x", 
+            "1.8x", 
+            "2.0x",
+            "2.2x", 
+            "2.4x", 
+            "2.6x", 
+            "2.8x", 
+            "3.0x"
+        });
         SelectedSpeed = "1.0x";
         VideoOffsetText = string.Empty;
         SetVideoOffsetText = Se.Language.Main.Menu.SetVideoOffset;
