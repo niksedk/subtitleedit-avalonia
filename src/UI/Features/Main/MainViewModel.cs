@@ -4693,10 +4693,11 @@ public partial class MainViewModel :
             {
                 item.Bookmark = result.BookmarkText;
             }
-
-            new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
         }
-        else if (result.ListPressed)
+        
+        new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+
+        if (result.ListPressed)
         {
             await ListBookmarks();
         }
@@ -4747,6 +4748,8 @@ public partial class MainViewModel :
 
         var result = await ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
+        new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
+        
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
             SelectAndScrollToSubtitle(result.SelectedSubtitle);
