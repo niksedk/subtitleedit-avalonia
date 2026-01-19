@@ -30,23 +30,7 @@ public class InitWaveform
             VerticalAlignment = VerticalAlignment.Stretch,
             Height = double.NaN, // Auto height
         };
-
-        // Unhook events from the old AudioVisualizer if it exists
-        if (vm.AudioVisualizer != null)
-        {
-            vm.AudioVisualizer.OnNewSelectionInsert -= vm.AudioVisualizerOnNewSelectionInsert;
-            vm.AudioVisualizer.OnVideoPositionChanged -= vm.AudioVisualizerOnVideoPositionChanged;
-            vm.AudioVisualizer.OnToggleSelection -= vm.AudioVisualizerOnToggleSelection;
-            vm.AudioVisualizer.OnParagraphDoubleTapped -= vm.OnWaveformDoubleTapped;
-            vm.AudioVisualizer.OnDeletePressed -= vm.AudioVisualizerOnDeletePressed;
-            vm.AudioVisualizer.PointerReleased -= vm.ControlMacPointerReleased;
-            vm.AudioVisualizer.FlyoutMenuOpening -= vm.AudioVisualizerFlyoutMenuOpening;
-            vm.AudioVisualizer.OnSelectRequested -= vm.AudioVisualizerSelectRequested;
-
-            // Clear the flyout menu to help with garbage collection
-            vm.AudioVisualizer.MenuFlyout.Items.Clear();
-        }
-
+        
         // waveform area
         if (vm.AudioVisualizer == null)
         {
