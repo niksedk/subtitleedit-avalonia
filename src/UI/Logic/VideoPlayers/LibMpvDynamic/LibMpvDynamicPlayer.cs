@@ -806,7 +806,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-    public int VolumeMaximum => 100;
+    public int VolumeMaximum => 130;
 
     public double Volume
     {

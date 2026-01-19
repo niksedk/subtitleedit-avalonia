@@ -360,7 +360,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             var sliderVolume = new Slider
             {
                 Minimum = 0,
-                Maximum = 100,
+                Maximum =  videoPlayerInstance.VolumeMaximum,
                 Width = 80,
                 VerticalAlignment = VerticalAlignment.Center
             };
