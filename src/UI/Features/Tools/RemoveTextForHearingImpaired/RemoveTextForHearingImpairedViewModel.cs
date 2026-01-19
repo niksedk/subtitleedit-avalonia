@@ -172,7 +172,7 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
         {
             var p = _subtitle.Paragraphs[index];
             var fixedParagraph = Fixes.FirstOrDefault(ri => ri.Index == index);
-            if (fixedParagraph != null)
+            if (fixedParagraph is { Apply: true })
             {
                 p.Text = fixedParagraph.After;
             }
