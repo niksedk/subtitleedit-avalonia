@@ -56,6 +56,7 @@ public class SeGeneral
     public string DefaultSaveAsFormat { get; set; }
     public string FavoriteSubtitleFormats { get; set; }
     public string DefaultEncoding { get; set; }
+    public string SubtitleEnterKeyAction { get; set; }
     public string SubtitleSingleClickAction { get; set; }
     public string SubtitleDoubleClickAction { get; set; }
     public string SaveAsBehavior { get; set; }
@@ -169,6 +170,7 @@ public class SeGeneral
         SubtitleLineMaximumPixelWidth = 576;
         DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
+        SubtitleEnterKeyAction = nameof(SubtitleEnterKeyActionType.GoToSubtitleAndSetVideoPosition);
         SubtitleSingleClickAction = nameof(SubtitleSingleClickActionType.GoToWaveformOnly);
         SubtitleDoubleClickAction = nameof(SubtitleDoubleClickActionType.GoToSubtitleAndPause);
         SaveAsBehavior = nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName);

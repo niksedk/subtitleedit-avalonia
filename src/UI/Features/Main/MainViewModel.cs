@@ -622,6 +622,7 @@ public partial class MainViewModel :
             }
 
             Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
+            AutoFitColumns();
         }
     }
 
@@ -8100,7 +8101,18 @@ public partial class MainViewModel :
             var column = columns[i];
 
             var originalWidth = column.Width;
-            column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+
+            if (column.Header.ToString() == Se.Language.General.Show ||
+                column.Header.ToString() == Se.Language.General.Hide)
+            {
+                column.Width = new DataGridLength(column.MinWidth, DataGridLengthUnitType.Pixel);
+                continue;
+            }
+            else
+            {
+                column.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+            }
+
             SubtitleGrid.UpdateLayout();
 
             if (column.Header.ToString() == Se.Language.General.OriginalText ||
@@ -11272,16 +11284,25 @@ public partial class MainViewModel :
                 }
                 else if (keyEventArgs.Key == Key.Enter && keyEventArgs.KeyModifiers == KeyModifiers.None)
                 {
-                    //TODO: add options for enter in grid?
-                    keyEventArgs.Handled = true;
-                    var idx = SelectedSubtitleIndex;
-                    var item = SelectedSubtitle;
-                    var vp = GetVideoPlayerControl();
-                    if (idx.HasValue && idx >= 0 && item != null && vp != null)
+                    if (Se.Settings.General.SubtitleEnterKeyAction == SubtitleEnterKeyActionType.GoToSubtitleAndSetVideoPosition.ToString())
                     {
-                        vp.Position = item.StartTime.TotalSeconds;
-                        SelectAndScrollToRow(idx.Value);
-                    }                    
+                        keyEventArgs.Handled = true;
+                        var idx = SelectedSubtitleIndex;
+                        var item = SelectedSubtitle;
+                        var vp = GetVideoPlayerControl();
+                        if (idx.HasValue && idx >= 0 && item != null && vp != null)
+                        {
+                            vp.Position = item.StartTime.TotalSeconds;
+                            SelectAndScrollToRow(idx.Value);
+                            if (AudioVisualizer != null &&
+                                (item.StartTime.TotalSeconds < AudioVisualizer.StartPositionSeconds ||
+                                 item.StartTime.TotalSeconds + 0.2 > AudioVisualizer.EndPositionSeconds))
+                            {
+                                AudioVisualizer.CenterOnPosition(item);
+                            }
+                            _updateAudioVisualizer = true;
+                        }
+                    }
                     return;
                 }
 
@@ -12347,7 +12368,6 @@ public partial class MainViewModel :
         }
 
         AutoFitColumns();
-
 
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)
         {

@@ -87,6 +87,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _forceCrLfOnSave;
     [ObservableProperty] private bool _autoTrimWhiteSpace;
 
+    [ObservableProperty] private ObservableCollection<string> _subtitleEnterKeyActionTypes;
+    [ObservableProperty] private string _selectedSubtitleEnterKeyActionType;
+
     [ObservableProperty] private ObservableCollection<string> _subtitleSingleClickActionTypes;
     [ObservableProperty] private string _selectedSubtitleSingleClickActionType;
 
@@ -343,6 +346,13 @@ public partial class SettingsViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
 
+        SubtitleEnterKeyActionTypes =
+        [
+            Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition,
+            Se.Language.Options.Settings.GridGoToNextLine,
+        ];
+        SelectedSubtitleEnterKeyActionType = SubtitleEnterKeyActionTypes[0];
+
         SubtitleSingleClickActionTypes =
         [
             Se.Language.General.None,
@@ -496,6 +506,7 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
+        SelectedSubtitleEnterKeyActionType = MapFromSelectedSubtitleEnterKeyAction(Se.Settings.General.SubtitleEnterKeyAction);
         SelectedSubtitleSingleClickActionType = MapFromSelectedSubtitleSingleClickAction(Se.Settings.General.SubtitleSingleClickAction);
         SelectedSubtitleDoubleClickActionType = MapFromSelectedSubtitleDoubleClickAction(Se.Settings.General.SubtitleDoubleClickAction);
         SelectedSaveAsBehaviorType = MapFromSelectedSaveAsBehavior(Se.Settings.General.SaveAsBehavior);
@@ -861,6 +872,38 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    private static readonly Dictionary<string, string> _keyEnterActionToTextMap = new Dictionary<string, string>
+    {
+        { SubtitleEnterKeyActionType.GoToSubtitleAndSetVideoPosition.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition },
+        { SubtitleEnterKeyActionType.GoToNextLine.ToString(), Se.Language.Options.Settings.GridGoToNextLine },
+    };
+
+    private static Dictionary<string, string> KeyEnterTextToActionMap => _keyEnterActionToTextMap.ToDictionary(x => x.Value, x => x.Key);
+
+    private static string MapFromSelectedSubtitleEnterKeyAction(string action)
+    {
+        if (string.IsNullOrEmpty(action))
+        {
+            return Se.Language.General.None;
+        }
+
+        return _keyEnterActionToTextMap.TryGetValue(action, out var text)
+            ? text
+            : Se.Language.General.None; ;
+    }
+
+    public static string MapToSelectedSubtitleEnterKeyAction(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return SubtitleSingleClickActionType.None.ToString();
+        }
+
+        return KeyEnterTextToActionMap.TryGetValue(text, out var action)
+            ? action
+            : SubtitleSingleClickActionType.None.ToString();
+    }
+
     private static readonly Dictionary<string, string> _singleClickActionToTextMap = new Dictionary<string, string>
     {
         { SubtitleSingleClickActionType.None.ToString(), Se.Language.General.None },
@@ -961,6 +1004,7 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes ?? general.AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
+        general.SubtitleEnterKeyAction = MapToSelectedSubtitleEnterKeyAction(SelectedSubtitleEnterKeyActionType);
         general.SubtitleSingleClickAction = MapToSelectedSubtitleSingleClickAction(SelectedSubtitleSingleClickActionType);
         general.SubtitleDoubleClickAction = MapToSelectedSubtitleDoubleClickAction(SelectedSubtitleDoubleClickActionType);
         general.SaveAsBehavior = MapToSaveAsBehavior(SelectedSaveAsBehaviorType);
