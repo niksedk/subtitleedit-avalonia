@@ -596,7 +596,8 @@
     "toggleDirection": "Toggle direction",
     "property": "Property",
     "ascending": "Ascending",
-    "question": "Question"
+    "question": "Question",
+    "auto": "Auto"
   },
   "main": {
     "menu": {
@@ -854,6 +855,8 @@
     },
     "import": {
       "importTimeCodes": "Import time codes...",
+      "plainTextDotDotDot": "Plain text...",
+      "titleImportPlainText": "Import plain text",
       "imagesDotDotDot": "Images...",
       "timeCodesDotDotDot": "Time codes...",
       "subtitleWithManuallyChosenEncodingDotDotDot": "_Subtitle with manually chosen encoding...",
@@ -862,7 +865,13 @@
       "importFilesInfo": "Use time-coded filenames:\r\nstart_HH_MM_SS_MMM__end_HH_MM_SS_MMM[_index].ext\r\n\r\nExamples:\r\n0_00_01_042__0_00_03_919_0001.png\r\n0_00_01_042__0_00_03_919.png\r\n\r\nRules:\r\n\u2022 HH_MM_SS_MMM for start and end times\r\n\u2022 Double underscore separates start/end\r\n\u2022 Optional index after end time",
       "formattingDotDotDot": "Formatting...",
       "imagedBasedSubtitleForEditDotDotDot": "Imaged-based subtitle for edit...",
-      "imagedBasedSubtitleForOcrDotDotDot": "Imaged-based subtitle for OCR..."
+      "imagedBasedSubtitleForOcrDotDotDot": "Imaged-based subtitle for OCR...",
+      "splitTextAt": "Split text at",
+      "blankLines": "Blank lines",
+      "oneLineIsOneSubtitle": "One line is one subtitle",
+      "twoLinesAreOneSubtitle": "Two lines are one subtitle",
+      "importFilesDotDotDot": "Import files...",
+      "multipleFiles": "Import from multiple text files (one file is one subtitle)"
     },
     "export": {
       "exportImagesProfiles": "Export images profiles",
@@ -1703,9 +1712,14 @@
       "waveformPauseOnSingleClick": "Pause on single click",
       "waveformDrawStyle": "Waveform draw style",
       "vlcWidRendering": "libVLC - Native Window ID rendering",
+      "subtitleSEnterKeyAction": "Subtitle grid Enter-key action",
+      "subtitleSingleClickAction": "Subtitle grid single-click action",
       "subtitleDoubleClickAction": "Subtitle grid double-click action",
       "saveAsBehavior": "\u0022Save as\u0022 behavior",
       "saveAsAppendLanguageCode": "\u0022Save as\u0022 append language code",
+      "gridGoToSubtitleAndSetVideoPosition": "Go to subtitle and set video position",
+      "gridGoToNextLine": "Go to next line",
+      "gridGoToSubtitleOnlyWaveformOnly": "Go to subtitle only (waveform only)",
       "gridGoToSubtitleAndPause": "Go to subtitle and pause",
       "gridGoToSubtitleAndPlay": "Go to subtitle and play",
       "gridGoToSubtitleOnly": "Go to subtitle only",
