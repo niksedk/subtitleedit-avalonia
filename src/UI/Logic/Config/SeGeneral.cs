@@ -56,6 +56,7 @@ public class SeGeneral
     public string DefaultSaveAsFormat { get; set; }
     public string FavoriteSubtitleFormats { get; set; }
     public string DefaultEncoding { get; set; }
+    public string SubtitleSingleClickAction { get; set; }
     public string SubtitleDoubleClickAction { get; set; }
     public string SaveAsBehavior { get; set; }
     public string SaveAsAppendLanguageCode { get; set; }
@@ -168,7 +169,8 @@ public class SeGeneral
         SubtitleLineMaximumPixelWidth = 576;
         DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
-        SubtitleDoubleClickAction = nameof(SubtitleDoubleClickActionType.GoToSubtitleAndPause);
+        SubtitleSingleClickAction = nameof(SubtitleDoubleClickActionType.GoToSubtitleAndPause);
+        SubtitleDoubleClickAction = nameof(SubtitleSingleClickActionType.GoToWaveformOnly);
         SaveAsBehavior = nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName);
         SaveAsAppendLanguageCode = nameof(SaveAsLanguageAppendType.None);
         AutoConvertToUtf8 = false;

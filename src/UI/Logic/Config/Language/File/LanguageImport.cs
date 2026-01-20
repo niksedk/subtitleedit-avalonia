@@ -14,7 +14,12 @@ public class LanguageImport
     public string FormattingDotDotDot { get; set; }
     public string ImagedBasedSubtitleForEditDotDotDot { get;  set; }
     public string ImagedBasedSubtitleForOcrDotDotDot { get;  set; }
-
+    public string SplitTextAt { get; set; }
+    public string BlankLines { get; set; }
+    public string OneLineIsOneSubtitle { get; set; }
+    public string TwoLinesAreOneSubtitle { get; set; }
+    public string ImportFilesDotDotDot { get; set; }
+    public string MultipleFiles { get; set; }
 
     public LanguageImport()
     {
@@ -40,5 +45,11 @@ Rules:
 • Optional index after end time";
         ImagedBasedSubtitleForEditDotDotDot = "Imaged-based subtitle for edit...";
         ImagedBasedSubtitleForOcrDotDotDot = "Imaged-based subtitle for OCR...";
+        SplitTextAt = "Split text at";
+        BlankLines = "Blank lines";
+        OneLineIsOneSubtitle = "One line is one subtitle";
+        TwoLinesAreOneSubtitle = "Two lines are one subtitle";
+        ImportFilesDotDotDot = "Import files...";
+        MultipleFiles = "Import from multiple text files (one file is one subtitle)";
     }
 }

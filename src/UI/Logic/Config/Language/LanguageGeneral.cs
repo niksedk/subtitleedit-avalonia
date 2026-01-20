@@ -597,6 +597,7 @@ public class LanguageGeneral
     public string Property { get; set; }
     public string Ascending { get; set; }
     public string Question { get; set; }
+    public string Auto { get; set; }
 
     public LanguageGeneral()
     {
@@ -1193,5 +1194,6 @@ public class LanguageGeneral
         Property = "Property";
         Ascending = "Ascending";
         Question = "Question";
+        Auto = "Auto";
     }
 }

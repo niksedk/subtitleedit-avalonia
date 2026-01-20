@@ -87,6 +87,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _forceCrLfOnSave;
     [ObservableProperty] private bool _autoTrimWhiteSpace;
 
+    [ObservableProperty] private ObservableCollection<string> _subtitleSingleClickActionTypes;
+    [ObservableProperty] private string _selectedSubtitleSingleClickActionType;
+
     [ObservableProperty] private ObservableCollection<string> _subtitleDoubleClickActionTypes;
     [ObservableProperty] private string _selectedSubtitleDoubleClickActionType;
 
@@ -340,8 +343,20 @@ public partial class SettingsViewModel : ObservableObject
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         DefaultEncoding = Encodings.First();
 
+        SubtitleSingleClickActionTypes =
+        [
+            Se.Language.General.None,
+            Se.Language.Options.Settings.GridGoToSubtitleOnlyWaveformOnly,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPause,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
+            Se.Language.Options.Settings.GridGoToSubtitleOnly,
+            Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox
+        ];
+        SelectedSubtitleSingleClickActionType = SubtitleSingleClickActionTypes[0];
+
         SubtitleDoubleClickActionTypes =
         [
+            Se.Language.General.None,
             Se.Language.Options.Settings.GridGoToSubtitleAndPause,
             Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
             Se.Language.Options.Settings.GridGoToSubtitleOnly,
@@ -481,6 +496,7 @@ public partial class SettingsViewModel : ObservableObject
         AutoBackupIntervalMinutes = general.AutoBackupIntervalMinutes;
         AutoBackupDeleteAfterDays = general.AutoBackupDeleteAfterDays;
         DefaultEncoding = Encodings.FirstOrDefault(e => e.DisplayName == general.DefaultEncoding) ?? Encodings.First();
+        SelectedSubtitleSingleClickActionType = MapFromSelectedSubtitleSingleClickAction(Se.Settings.General.SubtitleSingleClickAction);
         SelectedSubtitleDoubleClickActionType = MapFromSelectedSubtitleDoubleClickAction(Se.Settings.General.SubtitleDoubleClickAction);
         SelectedSaveAsBehaviorType = MapFromSelectedSaveAsBehavior(Se.Settings.General.SaveAsBehavior);
         SelectedSaveAsAppendLanguageCode = MapFromSelectedSaveAsAppendLanguageCode(Se.Settings.General.SaveAsAppendLanguageCode);
@@ -845,8 +861,45 @@ public partial class SettingsViewModel : ObservableObject
         }
     }
 
+    private static readonly Dictionary<string, string> _singleClickActionToTextMap = new Dictionary<string, string>
+    {
+        { SubtitleSingleClickActionType.None.ToString(), Se.Language.General.None },
+        { SubtitleSingleClickActionType.GoToWaveformOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnlyWaveformOnly },
+        { SubtitleSingleClickActionType.GoToSubtitleAndPause.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPause },
+        { SubtitleSingleClickActionType.GoToSubtitleAndPlay.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPlay },
+        { SubtitleSingleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
+        { SubtitleSingleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
+    };
+
+    private static Dictionary<string, string> SingleClickTextToActionMap => _singleClickActionToTextMap.ToDictionary(x => x.Value, x => x.Key);
+
+    private static string MapFromSelectedSubtitleSingleClickAction(string action)
+    {
+        if (string.IsNullOrEmpty(action))
+        {
+            return Se.Language.General.None;
+        }
+
+        return _singleClickActionToTextMap.TryGetValue(action, out var text)
+            ? text
+            : Se.Language.General.None; ;
+    }
+
+    public static string MapToSelectedSubtitleSingleClickAction(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return SubtitleSingleClickActionType.None.ToString();
+        }
+
+        return SingleClickTextToActionMap.TryGetValue(text, out var action)
+            ? action
+            : SubtitleSingleClickActionType.None.ToString();
+    }    
+
     private static readonly Dictionary<string, string> _actionToTextMap = new Dictionary<string, string>
     {
+        { SubtitleDoubleClickActionType.None.ToString(), Se.Language.General.None },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPause },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPlay.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPlay },
         { SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
@@ -879,7 +932,6 @@ public partial class SettingsViewModel : ObservableObject
             : SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString();
     }
 
-
     private void SaveSettings()
     {
         var general = Se.Settings.General;
@@ -909,6 +961,7 @@ public partial class SettingsViewModel : ObservableObject
         general.AutoBackupIntervalMinutes = AutoBackupIntervalMinutes ?? general.AutoBackupIntervalMinutes;
         general.AutoBackupDeleteAfterDays = AutoBackupDeleteAfterDays ?? general.AutoBackupDeleteAfterDays;
         general.DefaultEncoding = DefaultEncoding?.DisplayName ?? Encodings.First().DisplayName;
+        general.SubtitleSingleClickAction = MapToSelectedSubtitleSingleClickAction(SelectedSubtitleSingleClickActionType);
         general.SubtitleDoubleClickAction = MapToSelectedSubtitleDoubleClickAction(SelectedSubtitleDoubleClickActionType);
         general.SaveAsBehavior = MapToSaveAsBehavior(SelectedSaveAsBehaviorType);
         general.SaveAsAppendLanguageCode = MapToSaveAsAppendLanguageCode(SelectedSaveAsAppendLanguageCode);

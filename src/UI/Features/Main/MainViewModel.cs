@@ -431,20 +431,20 @@ public partial class MainViewModel :
         _videoOpenTokenSource = new CancellationTokenSource();
         Speeds = new ObservableCollection<string>(new[]
         {
-            "0.2x", 
-            "0.4x", 
-            "0.6x", 
-            "0.8x", 
+            "0.2x",
+            "0.4x",
+            "0.6x",
+            "0.8x",
             "1.0x",
-            "1.2x", 
-            "1.4x", 
-            "1.6x", 
-            "1.8x", 
+            "1.2x",
+            "1.4x",
+            "1.6x",
+            "1.8x",
             "2.0x",
-            "2.2x", 
-            "2.4x", 
-            "2.6x", 
-            "2.8x", 
+            "2.2x",
+            "2.4x",
+            "2.6x",
+            "2.8x",
             "3.0x"
         });
         SelectedSpeed = "1.0x";
@@ -4712,7 +4712,7 @@ public partial class MainViewModel :
                 item.Bookmark = result.BookmarkText;
             }
         }
-        
+
         new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
 
         if (result.ListPressed)
@@ -4767,7 +4767,7 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<BookmarksListWindow, BookmarksListViewModel>(vm => { vm.Initialize(Subtitles.Where(p => p.Bookmark != null).ToList()); });
 
         new BookmarkPersistence(GetUpdateSubtitle(), _subtitleFileName).Save();
-        
+
         if (result.GoToPressed && result.SelectedSubtitle != null)
         {
             SelectAndScrollToSubtitle(result.SelectedSubtitle);
@@ -11906,6 +11906,11 @@ public partial class MainViewModel :
 
         if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
         {
+            if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.None.ToString())
+            {
+                return;
+            }
+
             var vp = GetVideoPlayerControl();
             if (vp == null)
             {
@@ -11945,6 +11950,77 @@ public partial class MainViewModel :
             AudioVisualizer?.CenterOnPosition(selectedItem);
             _updateAudioVisualizer = true;
             return;
+        }
+    }
+
+    internal void OnSubtitleGridSingleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not DataGrid grid || grid.SelectedItem == null)
+        {
+            return;
+        }
+
+        if (grid.SelectedItem is SubtitleLineViewModel selectedItem)
+        {
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.None.ToString())
+            {
+                return;
+            }
+
+            var vp = GetVideoPlayerControl();
+            if (vp == null)
+            {
+                return;
+            }
+
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToWaveformOnly.ToString())
+            {
+                if (AudioVisualizer != null)
+                {
+                    var startSeconds = selectedItem.StartTime.TotalSeconds;
+                    if (startSeconds < AudioVisualizer.StartPositionSeconds ||
+                        startSeconds > AudioVisualizer.EndPositionSeconds)
+                    {
+                        AudioVisualizer.StartPositionSeconds = Math.Max(0, startSeconds - 1.0);
+                        _updateAudioVisualizer = true;
+                    }
+                }
+            }
+
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPause.ToString())
+            {
+                vp.VideoPlayerInstance.Pause();
+                vp.Position = selectedItem.StartTime.TotalSeconds;
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+            }
+
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleOnly.ToString())
+            {
+                vp.Position = selectedItem.StartTime.TotalSeconds;
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+                return;
+            }
+
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPlay.ToString())
+            {
+                vp.Position = selectedItem.StartTime.TotalSeconds;
+                vp.VideoPlayerInstance.Play();
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+                return;
+            }
+
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString())
+            {
+                vp.VideoPlayerInstance.Pause();
+                vp.Position = selectedItem.StartTime.TotalSeconds;
+                AudioVisualizer?.CenterOnPosition(selectedItem);
+                FocusEditTextBox();
+                _updateAudioVisualizer = true;
+                return;
+            }
         }
     }
 

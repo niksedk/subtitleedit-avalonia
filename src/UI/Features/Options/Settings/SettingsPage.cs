@@ -220,6 +220,16 @@ public class SettingsPage : UserControl
                 ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                     new TextBlock { Text = f?.Name }, true)
             }),
+            new SettingsItem(Se.Language.Options.Settings.SubtitleSingleClickAction, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.SubtitleSingleClickActionTypes)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedSubtitleSingleClickActionType))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
             new SettingsItem(Se.Language.Options.Settings.SubtitleDoubleClickAction, () => new ComboBox
             {
                 MinWidth = 200,

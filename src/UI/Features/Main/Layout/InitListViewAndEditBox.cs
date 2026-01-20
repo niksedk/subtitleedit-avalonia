@@ -28,6 +28,7 @@ public static class InitListViewAndEditBox
         if (vm.SubtitleGrid != null)
         {
             vm.SubtitleGrid.SelectionChanged -= vm.SubtitleGrid_SelectionChanged;
+            vm.SubtitleGrid.Tapped -= vm.OnSubtitleGridSingleTapped;
             vm.SubtitleGrid.DoubleTapped -= vm.OnSubtitleGridDoubleTapped;
             vm.SubtitleGrid.PointerPressed -= vm.SubtitleGrid_PointerPressed;
             vm.SubtitleGrid.PointerReleased -= vm.SubtitleGrid_PointerReleased;
@@ -77,6 +78,7 @@ public static class InitListViewAndEditBox
         dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
+        vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
