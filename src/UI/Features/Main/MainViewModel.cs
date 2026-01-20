@@ -11627,58 +11627,19 @@ public partial class MainViewModel :
             : new SolidColorBrush(Colors.Transparent);
     }
 
+    private bool _avLastScrolling = false;
     private void StartTimers()
     {
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
         _positionTimer.Tick += (s, e) =>
         {
-            var text = Se.Language.General.Untitled;
-            if (!string.IsNullOrEmpty(_subtitleFileName))
-            {
-                text = Configuration.Settings.General.TitleBarFullFileName
-                    ? _subtitleFileName
-                    : Path.GetFileName(_subtitleFileName);
-            }
-
-            if (ShowColumnOriginalText)
-            {
-                text += " + ";
-
-                if (_changeSubtitleHashOriginal != GetFastHashOriginal())
-                {
-                    text += "*";
-                }
-
-                if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
-                {
-                    text += Se.Language.General.Untitled;
-                }
-                else
-                {
-                    text += Configuration.Settings.General.TitleBarFullFileName
-                        ? _subtitleFileNameOriginal
-                        : Path.GetFileName(_subtitleFileNameOriginal);
-                }
-            }
-
-            text = text + " - " + Se.Language.Title + " " + Se.Version;
-            if (_changeSubtitleHash != GetFastHash())
-            {
-                text = "*" + text;
-            }
-
-            if (Window != null)
-            {
-                Window.Title = text;
-            }
-
             // update audio visualizer position if available
             var av = AudioVisualizer;
             var vp = GetVideoPlayerControl();
-
-
             if (av != null && vp != null && !string.IsNullOrEmpty(_videoFileName))
             {
+                var isAvScrolloing = av.IsScrolling;
+
                 if (_setEndAtKeyUpLine != null)
                 {
                     _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
@@ -11708,11 +11669,14 @@ public partial class MainViewModel :
                     av.SetPosition(Math.Max(0, mediaPlayerSeconds - waveformHalfSeconds), subtitle, mediaPlayerSeconds,
                         firstSelectedIndex, _selectedSubtitles ?? []);
                 }
-                else if ((isPlaying || !av.IsScrolling) && (mediaPlayerSeconds > av.EndPositionSeconds ||
-                                                            mediaPlayerSeconds < av.StartPositionSeconds))
+                else if (isPlaying && _avLastScrolling && !isAvScrolloing)
                 {
-                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0,
-                        _selectedSubtitles ?? []);
+                    vp.Position = av.StartPositionSeconds + 0.1;
+                }
+                else if ((isPlaying || !isAvScrolloing) &&
+                         (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds))
+                {
+                    av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, _selectedSubtitles ?? []);
                 }
                 else
                 {
@@ -11793,6 +11757,8 @@ public partial class MainViewModel :
                     Projektanker.Icons.Avalonia.Attached.SetIcon(ButtonWaveformPlay, IconNames.Play);
                     ResetPlaySelection();
                 }
+
+                _avLastScrolling = isAvScrolloing;
             }
         };
         _positionTimer.Start();
@@ -11800,6 +11766,7 @@ public partial class MainViewModel :
         _slowTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
         _slowTimer.Tick += (s, e) =>
         {
+            UpdateTitleStatus();
             UpdateGaps();
             var vp = GetVideoPlayerControl();
             if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
@@ -11808,6 +11775,49 @@ public partial class MainViewModel :
             }
         };
         _slowTimer.Start();
+    }
+
+    private void UpdateTitleStatus()
+    {
+        var text = Se.Language.General.Untitled;
+        if (!string.IsNullOrEmpty(_subtitleFileName))
+        {
+            text = Configuration.Settings.General.TitleBarFullFileName
+                ? _subtitleFileName
+                : Path.GetFileName(_subtitleFileName);
+        }
+
+        if (ShowColumnOriginalText)
+        {
+            text += " + ";
+
+            if (_changeSubtitleHashOriginal != GetFastHashOriginal())
+            {
+                text += "*";
+            }
+
+            if (string.IsNullOrEmpty(_subtitleFileNameOriginal))
+            {
+                text += Se.Language.General.Untitled;
+            }
+            else
+            {
+                text += Configuration.Settings.General.TitleBarFullFileName
+                    ? _subtitleFileNameOriginal
+                    : Path.GetFileName(_subtitleFileNameOriginal);
+            }
+        }
+
+        text = text + " - " + Se.Language.Title + " " + Se.Version;
+        if (_changeSubtitleHash != GetFastHash())
+        {
+            text = "*" + text;
+        }
+
+        if (Window != null)
+        {
+            Window.Title = text;
+        }
     }
 
     private void UpdateGaps()
@@ -11949,7 +11959,6 @@ public partial class MainViewModel :
             vp.Position = selectedItem.StartTime.TotalSeconds;
             AudioVisualizer?.CenterOnPosition(selectedItem);
             _updateAudioVisualizer = true;
-            return;
         }
     }
 
@@ -11985,6 +11994,8 @@ public partial class MainViewModel :
                         _updateAudioVisualizer = true;
                     }
                 }
+
+                return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPause.ToString())
@@ -11993,6 +12004,7 @@ public partial class MainViewModel :
                 vp.Position = selectedItem.StartTime.TotalSeconds;
                 AudioVisualizer?.CenterOnPosition(selectedItem);
                 _updateAudioVisualizer = true;
+                return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleOnly.ToString())
@@ -12019,7 +12031,6 @@ public partial class MainViewModel :
                 AudioVisualizer?.CenterOnPosition(selectedItem);
                 FocusEditTextBox();
                 _updateAudioVisualizer = true;
-                return;
             }
         }
     }

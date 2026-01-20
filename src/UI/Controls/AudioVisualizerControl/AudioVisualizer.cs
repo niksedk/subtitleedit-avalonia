@@ -313,7 +313,7 @@ public class AudioVisualizer : Control
     private InteractionMode _interactionMode = InteractionMode.None;
 
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
-    public bool IsScrolling => _audioVisualizerLastScroll > 0;
+    public bool IsScrolling => (Environment.TickCount64 - _audioVisualizerLastScroll) < 100;
 
     public class PositionEventArgs : EventArgs
     {
