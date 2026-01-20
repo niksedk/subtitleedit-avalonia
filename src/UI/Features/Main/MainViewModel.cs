@@ -11270,6 +11270,20 @@ public partial class MainViewModel :
                     SelectAndScrollToRow(Subtitles.Count - 1);
                     return;
                 }
+                else if (keyEventArgs.Key == Key.Enter && keyEventArgs.KeyModifiers == KeyModifiers.None)
+                {
+                    //TODO: add options for enter in grid?
+                    keyEventArgs.Handled = true;
+                    var idx = SelectedSubtitleIndex;
+                    var item = SelectedSubtitle;
+                    var vp = GetVideoPlayerControl();
+                    if (idx.HasValue && idx >= 0 && item != null && vp != null)
+                    {
+                        vp.Position = item.StartTime.TotalSeconds;
+                        SelectAndScrollToRow(idx.Value);
+                    }                    
+                    return;
+                }
 
                 var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGrid.ToString());
                 if (relayCommand == null)
@@ -11673,7 +11687,7 @@ public partial class MainViewModel :
                 {
                     vp.Position = av.StartPositionSeconds + 0.1;
                 }
-                else if ((isPlaying || !isAvScrolloing) &&
+                else if ((isPlaying) &&
                          (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds))
                 {
                     av.SetPosition(startPos, subtitle, mediaPlayerSeconds, 0, _selectedSubtitles ?? []);

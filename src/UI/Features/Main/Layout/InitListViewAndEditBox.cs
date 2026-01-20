@@ -60,7 +60,7 @@ public static class InitListViewAndEditBox
             GridLinesVisibility = UiUtil.GetGridLinesVisibility(),
             VerticalGridLinesBrush = UiUtil.GetBorderBrush(),
             HorizontalGridLinesBrush = UiUtil.GetBorderBrush(),
-            FontSize = Se.Settings.Appearance.SubtitleGridFontSize,
+            FontSize = Se.Settings.Appearance.SubtitleGridFontSize,            
         };
         if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
         {
@@ -78,7 +78,7 @@ public static class InitListViewAndEditBox
         dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
-        vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
+        vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped; 
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
