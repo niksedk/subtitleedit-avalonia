@@ -105,7 +105,11 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 {
                     Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files");
                 }
-                else
+                else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+                {
+                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8");
+                }
+                else if (_downloadType == PaddleOcrDownloadType.Models)
                 {
                     Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.2");
                 }
