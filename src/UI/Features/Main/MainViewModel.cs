@@ -11710,7 +11710,14 @@ public partial class MainViewModel :
                 }
                 else if (isPlaying && _avLastScrolling && !isAvScrolloing)
                 {
-                    vp.Position = av.StartPositionSeconds + 0.1;
+                    if (vp.Position < av.StartPositionSeconds) // scrolling forward
+                    {
+                        vp.Position = av.StartPositionSeconds + 0.1;
+                    }
+                    else if (vp.Position > av.EndPositionSeconds) // scrolling backward
+                    {
+                        vp.Position = av.StartPositionSeconds + ((av.EndPositionSeconds - av.StartPositionSeconds) / 2.0);
+                    }
                 }
                 else if ((isPlaying) &&
                          (mediaPlayerSeconds > av.EndPositionSeconds || mediaPlayerSeconds < av.StartPositionSeconds))
