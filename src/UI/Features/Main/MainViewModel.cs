@@ -11962,38 +11962,47 @@ public partial class MainViewModel :
                 return;
             }
 
+            var seconds = selectedItem.StartTime.TotalSeconds;
             if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString())
             {
-                vp.Position = selectedItem.StartTime.TotalSeconds;
-                AudioVisualizer?.CenterOnPosition(selectedItem);
-                _updateAudioVisualizer = true;
+                vp.Position = seconds;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleAndPlay.ToString())
             {
-                vp.Position = selectedItem.StartTime.TotalSeconds;
+                vp.Position = seconds;
                 vp.VideoPlayerInstance.Play();
-                AudioVisualizer?.CenterOnPosition(selectedItem);
-                _updateAudioVisualizer = true;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleDoubleClickAction == SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString())
             {
                 vp.VideoPlayerInstance.Pause();
-                vp.Position = selectedItem.StartTime.TotalSeconds;
-                AudioVisualizer?.CenterOnPosition(selectedItem);
+                vp.Position = seconds;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 FocusEditTextBox();
-                _updateAudioVisualizer = true;
                 return;
             }
 
             // SubtitleDoubleClickActionType.GoToSubtitleAndPause
             vp.VideoPlayerInstance.Pause();
-            vp.Position = selectedItem.StartTime.TotalSeconds;
-            AudioVisualizer?.CenterOnPosition(selectedItem);
-            _updateAudioVisualizer = true;
+            AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
+        }
+    }
+    
+    private void AudioVisualizerCenterOnPositionIfNeeded(SubtitleLineViewModel selectedItem, double seconds)
+    {
+        if (AudioVisualizer != null)
+        {
+            if (seconds <= AudioVisualizer.StartPositionSeconds ||
+                seconds + 0.2 >= AudioVisualizer.EndPositionSeconds)
+            {
+                AudioVisualizer.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+            }
         }
     }
 
@@ -12017,55 +12026,42 @@ public partial class MainViewModel :
                 return;
             }
 
+            var seconds = selectedItem.StartTime.TotalSeconds;
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToWaveformOnly.ToString())
             {
-                if (AudioVisualizer != null)
-                {
-                    var startSeconds = selectedItem.StartTime.TotalSeconds;
-                    if (startSeconds < AudioVisualizer.StartPositionSeconds ||
-                        startSeconds > AudioVisualizer.EndPositionSeconds)
-                    {
-                        AudioVisualizer.StartPositionSeconds = Math.Max(0, startSeconds - 1.0);
-                        _updateAudioVisualizer = true;
-                    }
-                }
-
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPause.ToString())
             {
                 vp.VideoPlayerInstance.Pause();
-                vp.Position = selectedItem.StartTime.TotalSeconds;
-                AudioVisualizer?.CenterOnPosition(selectedItem);
-                _updateAudioVisualizer = true;
+                vp.Position = seconds;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleOnly.ToString())
             {
-                vp.Position = selectedItem.StartTime.TotalSeconds;
-                AudioVisualizer?.CenterOnPosition(selectedItem);
-                _updateAudioVisualizer = true;
+                vp.Position = seconds;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPlay.ToString())
             {
-                vp.Position = selectedItem.StartTime.TotalSeconds;
+                vp.Position = seconds;
                 vp.VideoPlayerInstance.Play();
-                AudioVisualizer?.CenterOnPosition(selectedItem);
-                _updateAudioVisualizer = true;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
             }
 
             if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString())
             {
                 vp.VideoPlayerInstance.Pause();
-                vp.Position = selectedItem.StartTime.TotalSeconds;
-                AudioVisualizer?.CenterOnPosition(selectedItem);
+                vp.Position = seconds;
+                AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 FocusEditTextBox();
-                _updateAudioVisualizer = true;
             }
         }
     }
