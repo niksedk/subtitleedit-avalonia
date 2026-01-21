@@ -11370,10 +11370,29 @@ public partial class MainViewModel :
 
     public void SubtitleGrid_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        if (sender is not Control senderControl)
+            return;
+
         _subtitleGridIsControlPressed = false;
         _subtitleGridIsLeftClick = false;
         _subtitleGridIsRightClick = false;
         IsSubtitleGridFlyoutHeaderVisible = false;
+
+
+        var point = e.GetCurrentPoint(senderControl);
+        var leftClicked = point.Properties.IsLeftButtonPressed;
+        if (leftClicked)
+        {
+            if (e.ClickCount == 2)
+            {
+
+                OnSubtitleGridDoubleTapped(sender);
+            }
+            else if (e.ClickCount == 1)
+            {
+                OnSubtitleGridSingleTapped(sender);
+            }
+        }
 
         if (sender is Control { ContextFlyout: not null } control)
         {
@@ -11942,7 +11961,7 @@ public partial class MainViewModel :
         ShowStatus(e.Paragraph.Text, 3000);
     }
 
-    internal void OnSubtitleGridDoubleTapped(object? sender, TappedEventArgs e)
+    internal void OnSubtitleGridDoubleTapped(object? sender) //, TappedEventArgs e)
     {
         if (sender is not DataGrid grid || grid.SelectedItem == null)
         {
@@ -12006,7 +12025,7 @@ public partial class MainViewModel :
         }
     }
 
-    internal void OnSubtitleGridSingleTapped(object? sender, TappedEventArgs e)
+    internal void OnSubtitleGridSingleTapped(object? sender) //, TappedEventArgs e)
     {
         if (sender is not DataGrid grid || grid.SelectedItem == null)
         {
