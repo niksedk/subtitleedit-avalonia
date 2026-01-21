@@ -1,5 +1,6 @@
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media.Optimized;
 using SkiaSharp;
 using System;
 using System.Collections.Concurrent;
@@ -321,12 +322,26 @@ public class SpectrogramData2 : IDisposable
             ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
             SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
+            // Try binary format first (faster)
+            if (BinarySpectrogramFormat.Exists(directory))
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var memBefore = GC.GetTotalMemory(false);
+                Images = BinarySpectrogramFormat.Load(directory);
+                sw.Stop();
+                var memAfter = GC.GetTotalMemory(false);
+                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load (binary): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                System.Diagnostics.Debug.WriteLine($"[MEM] Spectrogram load: {(memAfter - memBefore) / (1024.0 * 1024.0):F1}MB allocated");
+                return;
+            }
+
+            // Fall back to JPEG files
             var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
                 .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
                 .ToList();
 
             var images = new List<SKBitmap>(fileNames.Count);
-            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var swJpeg = System.Diagnostics.Stopwatch.StartNew();
             foreach (string fileName in fileNames)
             {
                 using (var fileStream = File.OpenRead(fileName))
@@ -336,8 +351,8 @@ public class SpectrogramData2 : IDisposable
                 }
             }
             Images = images;
-            sw.Stop();
-            System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load: {fileNames.Count} images in {sw.ElapsedMilliseconds}ms (avg: {sw.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image)");
+            swJpeg.Stop();
+            System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load (JPEG): {fileNames.Count} images in {swJpeg.ElapsedMilliseconds}ms (avg: {swJpeg.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image)");
             if (Images.Count == 0)
             {
                 Se.LogError($"No spectrogram images found in {directory}");
@@ -378,12 +393,25 @@ public class SpectrogramData2 : IDisposable
             SampleDuration =
                 Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
-            var imageExtension = "*.jpg";
-            var fileNames = Directory.EnumerateFiles(directory, imageExtension)
+            // Try binary format first (faster)
+            if (BinarySpectrogramFormat.Exists(directory))
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var memBefore = GC.GetTotalMemory(false);
+                Images = await Task.Run(() => BinarySpectrogramFormat.Load(directory), cancellationToken);
+                sw.Stop();
+                var memAfter = GC.GetTotalMemory(false);
+                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram async load (binary): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                System.Diagnostics.Debug.WriteLine($"[MEM] Spectrogram load: {(memAfter - memBefore) / (1024.0 * 1024.0):F1}MB allocated");
+                return;
+            }
+
+            // Fall back to JPEG files
+            var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
                 .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
                 .ToList();
 
-            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var sw2 = System.Diagnostics.Stopwatch.StartNew();
             var images = new SKBitmap[fileNames.Count];
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken };
             
@@ -401,9 +429,9 @@ public class SpectrogramData2 : IDisposable
                 });
 
             Images = images.ToList();
-            sw.Stop();
+            sw2.Stop();
             System.Diagnostics.Debug.WriteLine(
-                $"[PERF] Spectrogram async load: {fileNames.Count} images in {sw.ElapsedMilliseconds}ms (avg: {sw.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image, max 10 parallel)");
+                $"[PERF] Spectrogram async load (JPEG): {fileNames.Count} images in {sw2.ElapsedMilliseconds}ms (avg: {sw2.ElapsedMilliseconds / (double)fileNames.Count:F2}ms/image, max 10 parallel)");
 
             if (Images.Count == 0)
             {

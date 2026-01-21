@@ -445,6 +445,16 @@ public class SettingsPage : UserControl
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = 500,
             }),
+            MakeCheckboxSetting("Use Binary Spectrogram Format (faster save/load)", nameof(_vm.UseBinarySpectrogramFormat)),
+            new SettingsItem("", () => new TextBlock
+            {
+                Text = "⚠️ Uses ~2x more memory but 2x faster. Requires experimental renderer. Delete spectrogram folder to regenerate.",
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Color.FromRgb(255, 165, 0)),
+                Margin = new Thickness(20, 0, 0, 5),
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = 500,
+            }),
             MakeSeparator(),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),

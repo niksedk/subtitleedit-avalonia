@@ -73,27 +73,37 @@ public class SpectrogramGeneratorOptimized
         
         if (token.IsCancellationRequested) return CreateEmptyResult();
         
-        // Phase 3: Save images in parallel
+        // Phase 3: Save images
         var saveSw = System.Diagnostics.Stopwatch.StartNew();
-        var saveOptions = new ParallelOptions 
-        { 
-            MaxDegreeOfParallelism = 4, // Limit disk I/O parallelism
-            CancellationToken = token 
-        };
         
-        try
+        if (Configuration.Settings.VideoControls.UseBinarySpectrogramFormat)
         {
-            Parallel.For(0, chunkCount, saveOptions, chunkIndex =>
-            {
-                string imagePath = Path.Combine(spectrogramDirectory, chunkIndex + ".jpg");
-                using var stream = File.OpenWrite(imagePath);
-                using var imageData = images[chunkIndex].Encode(SKEncodedImageFormat.Jpeg, 50);
-                imageData.SaveTo(stream);
-            });
+            // Binary format: single file, no encoding overhead
+            BinarySpectrogramFormat.Save(images, spectrogramDirectory);
         }
-        catch (OperationCanceledException)
+        else
         {
-            return CreateEmptyResult();
+            // Legacy JPEG format: multiple files
+            var saveOptions = new ParallelOptions 
+            { 
+                MaxDegreeOfParallelism = 4,
+                CancellationToken = token 
+            };
+            
+            try
+            {
+                Parallel.For(0, chunkCount, saveOptions, chunkIndex =>
+                {
+                    string imagePath = Path.Combine(spectrogramDirectory, chunkIndex + ".jpg");
+                    using var stream = File.OpenWrite(imagePath);
+                    using var imageData = images[chunkIndex].Encode(SKEncodedImageFormat.Jpeg, 50);
+                    imageData.SaveTo(stream);
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                return CreateEmptyResult();
+            }
         }
         saveSw.Stop();
         System.Diagnostics.Debug.WriteLine($"[PERF] Optimized: Saved {chunkCount} images in {saveSw.ElapsedMilliseconds}ms");

@@ -53,6 +53,7 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public bool WaveformUnwrapText { get; set; }
         public bool WaveformHideWpmCpsLabels { get; set; }
         public bool UseExperimentalRenderer { get; set; }
+        public bool UseBinarySpectrogramFormat { get; set; }
 
 
         public VideoControlsSettings()
