@@ -9,6 +9,8 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
 public class LibMpvDynamicOpenGlControl : OpenGlControlBase
 {
+    public static bool VerboseRenderLogging { get; set; } = false;
+    
     public LibMpvDynamicPlayer? _mpvPlayer;
     private bool _isInitialized;
 
@@ -95,18 +97,18 @@ public class LibMpvDynamicOpenGlControl : OpenGlControlBase
 
         if (!_isInitialized || _mpvPlayer == null)
         {
-            System.Diagnostics.Debug.WriteLine("Render: Not initialized or no player");
+            if (VerboseRenderLogging) System.Diagnostics.Debug.WriteLine("Render: Not initialized or no player");
             return;
         }
 
         // If no file is loaded, keep the black screen and don't render
         if (string.IsNullOrEmpty(_mpvPlayer.FileName))
         {
-            System.Diagnostics.Debug.WriteLine("Render: No file loaded - showing black");
+            if (VerboseRenderLogging) System.Diagnostics.Debug.WriteLine("Render: No file loaded - showing black");
             return;
         }
 
-        System.Diagnostics.Debug.WriteLine($"Render: Rendering file {_mpvPlayer.FileName}");
+        if (VerboseRenderLogging) System.Diagnostics.Debug.WriteLine($"Render: Rendering file {_mpvPlayer.FileName}");
 
 
         var scaling = VisualRoot?.RenderScaling ?? 1.0;

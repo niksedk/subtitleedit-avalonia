@@ -525,6 +525,7 @@ public class WavePeakGenerator2 : IDisposable
     /// <param name="peakFileName">Path of the output file (writing is skipped if null/empty)</param>
     public WavePeakData2 GeneratePeaks(int delayInMilliseconds, string peakFileName)
     {
+        var totalSw = System.Diagnostics.Stopwatch.StartNew();
         int peaksPerSecond = Math.Min(Configuration.Settings.VideoControls.WaveformMinimumSampleRate, Header.SampleRate);
 
         // ensure that peaks per second is a factor of the sample rate
@@ -615,6 +616,8 @@ public class WavePeakGenerator2 : IDisposable
             }
         }
 
+        totalSw.Stop();
+        System.Diagnostics.Debug.WriteLine($"[PERF] Peak generation (Legacy): {peaks.Count} peaks in {totalSw.ElapsedMilliseconds}ms ({Header.LengthInSeconds:F1}s audio)");
         return new WavePeakData2(peaksPerSecond, peaks);
     }
 
@@ -1003,7 +1006,7 @@ public class WavePeakGenerator2 : IDisposable
         }
 
         totalSw.Stop();
-        var mode = Configuration.Settings.VideoControls.UseExperimentalRenderer ? "Experimental (Modern FFT, JPEG)" : "Legacy (RealFFT, JPEG)";
+        var mode = Configuration.Settings.VideoControls.UseExperimentalRenderer ? "Experimental (Cached Rendering)" : "Legacy";
         System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram generation ({mode}): {chunkCount} chunks in {totalSw.ElapsedMilliseconds}ms (avg: {totalSw.ElapsedMilliseconds / (double)chunkCount:F2}ms/chunk, {Header.LengthInSeconds:F1}s audio)");
 
         return new SpectrogramData2(fftSize, imageWidth, sampleDuration, images);
@@ -1017,7 +1020,6 @@ public class WavePeakGenerator2 : IDisposable
         private readonly int _nfft;
         private readonly MagnitudeToIndexMapper _mapper;
         private readonly RealFFT _fft;
-        private readonly SimdFFT? _simdFft;
         private readonly SKColor[] _palette;
         private readonly double[] _segment;
         private readonly double[] _window;
@@ -1062,15 +1064,9 @@ public class WavePeakGenerator2 : IDisposable
             _mapper = new MagnitudeToIndexMapper(100.0, MagnitudeIndexRange - 1);
             _fft = new RealFFT(nfft);
             
-            if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
-            {
-                _simdFft = new SimdFFT(nfft);
-                System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with SIMD FFT (size: {nfft})");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with legacy RealFFT (size: {nfft})");
-            }
+            // Phase 2: Always use legacy RealFFT - SIMD FFT has overhead for small 256-point FFTs
+            // and was measured to be 2.7x SLOWER than the optimized RealFFT implementation
+            System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with RealFFT (size: {nfft})");
             
             _palette = GeneratePalette();
             _segment = new double[nfft];
@@ -1125,8 +1121,7 @@ public class WavePeakGenerator2 : IDisposable
             {
                 var totalFftMs = (_fftTotalTicks * 1000.0) / System.Diagnostics.Stopwatch.Frequency;
                 var avgFftMs = totalFftMs / _fftCallCount;
-                var fftType = _simdFft != null ? "SIMD" : "Legacy";
-                System.Diagnostics.Debug.WriteLine($"[PERF] Draw: {width}x{height} bitmap in {drawSw.ElapsedMilliseconds}ms | FFT ({fftType}): {_fftCallCount} calls, {totalFftMs:F3}ms total, {avgFftMs:F3}ms avg");
+                System.Diagnostics.Debug.WriteLine($"[PERF] Draw: {width}x{height} bitmap in {drawSw.ElapsedMilliseconds}ms | FFT: {_fftCallCount} calls, {totalFftMs:F3}ms total, {avgFftMs:F3}ms avg");
             }
             
             return bmp;
@@ -1140,16 +1135,9 @@ public class WavePeakGenerator2 : IDisposable
                 _segment[i] = samples[offset + i] * _window[i];
             }
 
-            // transform to the frequency domain
+            // transform to the frequency domain using optimized RealFFT
             var fftSw = System.Diagnostics.Stopwatch.StartNew();
-            if (_simdFft != null)
-            {
-                _simdFft.ComputeForward(_segment);
-            }
-            else
-            {
-                _fft.ComputeForward(_segment);
-            }
+            _fft.ComputeForward(_segment);
             fftSw.Stop();
             _fftCallCount++;
             _fftTotalTicks += fftSw.ElapsedTicks;

@@ -2,7 +2,9 @@
 
 ## Overview
 
-Performance metrics have been added to measure the impact of Phase 1 optimizations. All metrics are logged to the Debug output and can be viewed in your IDE's debug console or system logs.
+Performance metrics have been added to measure the impact of Phase 1-3 optimizations. All metrics are logged to the Debug output and can be viewed in your IDE's debug console or system logs.
+
+**Note:** On Apple Silicon Macs, macOS may schedule parallel work on efficiency cores only, limiting speedup. This is OS-level scheduling behavior.
 
 ## Metrics Categories
 
@@ -31,9 +33,39 @@ Performance metrics have been added to measure the impact of Phase 1 optimizatio
 
 ---
 
-### 2. Spectrogram Generation Metrics
+### 2. Peak Generation Metrics (Phase 3)
 
-**Location:** `WaveToVisualizer2.cs:GenerateSpectrogram()`
+**Location:** 
+- Legacy: `WaveToVisualizer2.cs:GeneratePeaks()`
+- Optimized: `Logic/Media/Optimized/PeakGeneratorOptimized.cs`
+
+**Logged When:** Generating waveform peaks from audio file
+
+**Metrics:**
+- Total generation time (milliseconds)
+- Number of peaks processed
+- Audio duration (seconds)
+- Thread count (optimized only)
+
+**Output:**
+```
+[PERF] Peak generation (Legacy): 1023212 peaks in 11691ms (6821,4s audio)
+
+[PERF] Optimized Peaks: Read 639506KB in 99ms
+[PERF] Optimized Peaks: Processed 1023212 peaks in 5815ms (16 threads)
+[PERF] Optimized Peaks: Saved in 84ms
+[PERF] Optimized Peaks TOTAL: 1023212 peaks in 6027ms (6821,4s audio)
+```
+
+**Measured Improvement:** **1.9x faster** (11.7s → 6.0s)
+
+---
+
+### 3. Spectrogram Generation Metrics (Phase 3)
+
+**Location:** 
+- Legacy: `WaveToVisualizer2.cs:GenerateSpectrogram()`
+- Optimized: `Logic/Media/Optimized/SpectrogramGeneratorOptimized.cs`
 
 **Logged When:** Generating new spectrogram from audio file
 
@@ -42,20 +74,23 @@ Performance metrics have been added to measure the impact of Phase 1 optimizatio
 - Number of chunks processed
 - Average time per chunk (ms/chunk)
 - Audio duration (seconds)
-- Mode: Experimental (SIMD FFT, PNG) vs Legacy (RealFFT, JPEG)
+- Thread count (optimized only)
 
 **Output:**
 ```
-[PERF] Spectrogram generation (Experimental (SIMD FFT, PNG)): 625 chunks in 23006ms (avg: 36,81ms/chunk, 6821,4s audio)
-[PERF] Spectrogram generation (Experimental (SIMD FFT, WebP)): 625 chunks in 23106ms (avg: 36,97ms/chunk, 6821,4s audio)
-[PERF] Spectrogram generation (Legacy (RealFFT, JPEG)): 625 chunks in 8499ms (avg: 13,60ms/chunk, 6821,4s audio)
+[PERF] Spectrogram generation (Legacy): 625 chunks in 29094ms (avg: 46,55ms/chunk, 6821,4s audio)
+
+[PERF] Optimized: Read 625 chunks (163840000 samples) in 6998ms
+[PERF] Optimized: Generated 625 spectrograms in 7954ms (16 threads)
+[PERF] Optimized: Saved 625 images in 418ms
+[PERF] Optimized TOTAL: 625 chunks in 15409ms (avg: 24,65ms/chunk, 6821,4s audio)
 ```
 
-**Expected Improvement:** 2-3x faster with SIMD FFT
+**Measured Improvement:** **1.9x faster** (29s → 15s)
 
 ---
 
-### 3. FFT Processing Metrics
+### 4. FFT Processing Metrics
 
 **Location:** `WaveToVisualizer2.cs:SpectrogramDrawer`
 
@@ -165,14 +200,20 @@ log stream --predicate 'eventMessage contains "[PERF]"' --level debug
 
 ## Performance Baseline (Reference)
 
-Based on a typical 3-minute video (180 seconds):
+### Phase 3 Results (2-hour audio file, ~6821s)
+
+| Component | Legacy | Optimized | Improvement |
+|-----------|--------|-----------|-------------|
+| Peak Generation | 11,691ms | 6,027ms | **1.9x faster** |
+| Spectrogram Generation | 29,094ms | 15,409ms | **1.9x faster** |
+| **Combined Total** | ~41s | ~21s | **~2x faster** |
+
+### Phase 1 Results (3-minute video)
 
 | Metric | Legacy | Experimental | Improvement |
 |--------|--------|--------------|-------------|
 | Spectrogram Load | ~900ms | ~250ms | **3.6x faster** |
-| Spectrogram Generation | ~8000ms | ~3500ms | **2.3x faster** |
 | FFT per call | ~0.025ms | ~0.006ms | **4.2x faster** |
-| Total workflow | ~9s | ~4s | **2.25x faster** |
 
 ---
 
@@ -243,22 +284,21 @@ Examples:
 
 ## Future Enhancements
 
-### Planned Metrics (Phase 2)
+### Completed (Phase 2-3)
 
-1. **Render Frequency Metrics**
-   - Frames rendered per second
-   - Frames skipped due to throttling
-   - Average render time per frame
+1. **Waveform Cache Metrics**
+   - Cache hit/miss logging
+   - Overscan buffer rendering
 
-2. **Waveform Generation Metrics**
-   - Peak extraction time
-   - File I/O time
-   - Cache hit/miss rates
+2. **Parallel Processing Metrics**
+   - Thread count used
+   - Per-stage timing (read/process/save)
 
-3. **Memory Usage Metrics**
+### Planned (Future)
+
+1. **Memory Usage Metrics**
    - Bitmap memory consumption
    - Peak memory during generation
-   - Memory saved with optimizations
 
 ### Aggregated Statistics
 
@@ -288,3 +328,8 @@ When adding new performance metrics:
 - Phase 1 Implementation: `PHASE1_COMPLETION_STATUS.md`
 - Performance Plan: `PERFORMANCE_IMPROVEMENT_PLAN.md`
 - SIMD FFT Implementation: `src/libse/Common/SimdFFT.cs`
+- **Phase 3 Optimized Classes:**
+  - `src/UI/Logic/Media/Optimized/PeakGeneratorOptimized.cs`
+  - `src/UI/Logic/Media/Optimized/SpectrogramGeneratorOptimized.cs`
+  - `src/UI/Logic/Media/Optimized/SpectrogramDrawerOptimized.cs`
+  - `src/UI/Logic/Media/Optimized/WaveProcessorFactory.cs`

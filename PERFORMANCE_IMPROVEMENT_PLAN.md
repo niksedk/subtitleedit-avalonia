@@ -19,12 +19,30 @@ This ensures:
 
 ---
 
-## Current Status (Phase 1 Outcome)
+## Current Status (Phase 1-3 Outcome)
 
-- Phase 1 experiments completed, **no measurable performance improvement** on ARM or Intel so far.
-- SIMD/experimental FFT path did not outperform legacy; kept only for further Intel testing.
-- End-to-end spectrogram generation timings remain comparable to legacy; see `PERFORMANCE_METRICS.md` for raw measurements.
-- Next steps: focus on alternative optimizations (Phase 2+ items) since quick wins were ineffective.
+### Phase 1 (SIMD FFT) - ❌ No Improvement
+- SIMD/experimental FFT path did not outperform legacy RealFFT
+- Kept only for further testing; reverted to RealFFT as default
+
+### Phase 2 (Waveform Caching) - ✅ Completed
+- Implemented bitmap caching with 3x overscan buffer
+- Cache invalidation on zoom/scroll changes
+- Result: Eliminates redundant per-frame rendering
+
+### Phase 3 (Parallel Processing) - ✅ Completed  
+- **Peak Generation**: Parallel.For with 16 threads → **1.9x faster** (11.7s → 6.0s)
+- **Spectrogram Generation**: Parallel chunk processing → **1.9x faster** (29s → 15s)
+- **Combined**: ~2x overall speedup for 2-hour audio files
+- New files: `src/UI/Logic/Media/Optimized/`
+  - `PeakGeneratorOptimized.cs`
+  - `SpectrogramGeneratorOptimized.cs`
+  - `SpectrogramDrawerOptimized.cs`
+  - `WaveProcessorFactory.cs`
+
+### Next Steps: Phase 4 - I/O Reduction
+- Current: 625 individual JPEG files for 2-hour video
+- Goal: Reduce file count and I/O overhead
 
 ---
 
@@ -675,6 +693,154 @@ private void ConfigureHardwareAcceleration()
 
 ---
 
+## Phase 4: I/O Reduction & File Consolidation (5-7 days) 🎯 NEXT
+
+### Current Problem
+- **625 individual JPEG files** for a 2-hour video
+- Each file: ~15-30KB, total ~15-20MB
+- **625 file system operations** for save and load
+- JPEG encode/decode overhead on each chunk
+
+### 4.0 **Spectrogram Atlas (Texture Atlas)** 🖼️
+**Concept:** Combine multiple spectrogram chunks into a single large image
+
+**Implementation:**
+```csharp
+public class SpectrogramAtlas
+{
+    private const int ChunksPerAtlas = 64;  // 64 chunks = 64KB x 128px
+    private const int AtlasWidth = 1024;     // 64 * 1024px = 65536px → tile 8x8
+    private const int AtlasHeight = 1024;    // 8 rows * 128px = 1024px
+    
+    public void SaveAtlas(List<SKBitmap> chunks, string atlasPath)
+    {
+        // Create atlas bitmap (1024x1024 or 2048x2048)
+        using var atlas = new SKBitmap(AtlasWidth, AtlasHeight);
+        using var canvas = new SKCanvas(atlas);
+        
+        for (int i = 0; i < chunks.Count && i < ChunksPerAtlas; i++)
+        {
+            int row = i / 8;
+            int col = i % 8;
+            canvas.DrawBitmap(chunks[i], col * 1024, row * 128);
+        }
+        
+        // Save single atlas file
+        using var stream = File.Create(atlasPath);
+        atlas.Encode(stream, SKEncodedImageFormat.Png, 100);
+    }
+    
+    public SKBitmap GetChunk(int chunkIndex)
+    {
+        int atlasIndex = chunkIndex / ChunksPerAtlas;
+        int localIndex = chunkIndex % ChunksPerAtlas;
+        int row = localIndex / 8;
+        int col = localIndex % 8;
+        
+        var atlas = _atlases[atlasIndex];
+        return atlas.Subset(new SKRectI(col * 1024, row * 128, (col + 1) * 1024, (row + 1) * 128));
+    }
+}
+```
+
+**Impact:** 
+- 625 files → **10 atlas files** (64 chunks each)
+- 98% reduction in file count
+- Faster loading (fewer file handles)
+
+---
+
+### 4.1 **Binary Spectrogram Format** 📦
+**Concept:** Skip image encoding entirely, store raw pixel data
+
+**Implementation:**
+```csharp
+public class BinarySpectrogramFormat
+{
+    // File format: [Header][Chunk1 pixels][Chunk2 pixels]...
+    // Header: magic(4) + version(4) + chunkCount(4) + chunkWidth(4) + chunkHeight(4)
+    // Chunk: raw RGBA pixels (width * height * 4 bytes)
+    
+    public void Save(List<SKBitmap> chunks, string path)
+    {
+        using var stream = File.Create(path);
+        using var writer = new BinaryWriter(stream);
+        
+        // Header
+        writer.Write(0x53504543); // "SPEC" magic
+        writer.Write(1);          // version
+        writer.Write(chunks.Count);
+        writer.Write(chunks[0].Width);
+        writer.Write(chunks[0].Height);
+        
+        // Raw pixel data (no compression)
+        foreach (var chunk in chunks)
+        {
+            var pixels = chunk.GetPixelSpan();
+            writer.Write(MemoryMarshal.AsBytes(pixels));
+        }
+    }
+    
+    public SKBitmap LoadChunk(BinaryReader reader, int width, int height)
+    {
+        var bitmap = new SKBitmap(width, height);
+        var pixels = bitmap.GetPixels();
+        var size = width * height * 4;
+        reader.BaseStream.Read(new Span<byte>((void*)pixels, size));
+        return bitmap;
+    }
+}
+```
+
+**Impact:**
+- No JPEG/PNG encode/decode (saves ~30% generation time)
+- Larger file size but faster I/O
+- Single file for all spectrograms
+
+---
+
+### 4.2 **Memory-Mapped Spectrogram** 🗺️
+**Concept:** Use memory-mapped files for instant random access
+
+```csharp
+public class MemoryMappedSpectrogram : IDisposable
+{
+    private MemoryMappedFile _mmf;
+    private MemoryMappedViewAccessor _accessor;
+    private readonly int _chunkWidth, _chunkHeight, _chunkCount;
+    private readonly long _dataOffset;
+    
+    public SKBitmap GetChunk(int index)
+    {
+        var offset = _dataOffset + (long)index * _chunkWidth * _chunkHeight * 4;
+        var bitmap = new SKBitmap(_chunkWidth, _chunkHeight);
+        var pixels = bitmap.GetPixels();
+        _accessor.ReadArray(offset, (byte*)pixels, 0, _chunkWidth * _chunkHeight * 4);
+        return bitmap;
+    }
+}
+```
+
+**Impact:**
+- Zero load time (on-demand paging by OS)
+- Lower memory usage (only loaded chunks in RAM)
+
+---
+
+### 4.3 **Comparison: Current vs Proposed**
+
+| Metric | Current (JPEG) | Atlas (PNG) | Binary | Memory-Mapped |
+|--------|---------------|-------------|--------|---------------|
+| **File Count** | 625 | 10 | 1 | 1 |
+| **Total Size** | ~18MB | ~25MB | ~80MB | ~80MB |
+| **Save Time** | 385ms | ~100ms | ~50ms | ~50ms |
+| **Load Time** | 200ms | ~80ms | ~30ms | 0ms* |
+| **Complexity** | Low | Medium | Medium | High |
+
+*Memory-mapped has zero explicit load - OS handles paging
+
+---
+
 ## Phase 4: Memory & Architecture (5-7 days)
 
 ### 4.1 **Virtual Scrolling for Waveform** 📜
@@ -928,19 +1094,23 @@ public class SafeExperimentalRenderer : IWaveformRenderer
 5. ✅ Reduce render frequency
 6. ✅ Incremental waveform generation
 
-### **Phase 2 (High Priority)** - 3-5 days
-7. Dirty rectangle rendering
-8. Waveform render caching
-9. SkiaSharp GPU rendering
+### **Phase 2 (High Priority)** - ✅ COMPLETED
+7. ~~Dirty rectangle rendering~~ (skipped - caching approach better)
+8. ✅ Waveform render caching (bitmap cache with overscan)
+9. ~~SkiaSharp GPU rendering~~ (already using SkiaSharp)
 
-### **Phase 3 (Medium Priority)** - 3-4 days
-10. Event-driven video updates
-11. Hardware video decode
+### **Phase 3 (Medium Priority)** - ✅ COMPLETED (Parallel Processing)
+10. ✅ Parallel peak generation (Parallel.For, 16 threads)
+11. ✅ Parallel spectrogram generation (parallel chunks + parallel save)
+12. Event-driven video updates (not yet implemented)
+13. Hardware video decode (not yet implemented)
 
-### **Phase 4 (Nice to Have)** - 5-7 days
-12. Virtual scrolling
-13. Memory-mapped files
-14. Level of detail
+### **Phase 4 (Nice to Have)** - 5-7 days - 🎯 NEXT TARGET
+14. **Spectrogram Atlas** - Combine images into single file (reduce 625 files → 1-10)
+15. **Binary Spectrogram Format** - Skip JPEG encode/decode entirely
+16. Memory-mapped files for peak data
+17. Virtual scrolling
+18. Level of detail (LOD) for zoomed-out views
 
 ---
 

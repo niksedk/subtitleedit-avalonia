@@ -124,6 +124,7 @@ using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.Media.Optimized;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
@@ -11298,13 +11299,19 @@ public partial class MainViewModel :
             if (File.Exists(tempWaveFileName))
             {
                 WaveformGeneratingText = Se.Language.Main.GeneratingWaveformDotDotDot;
-                using var waveFile = new WavePeakGenerator2(tempWaveFileName);
-                var wavePeaks = waveFile.GeneratePeaks(0, peakWaveFileName);
-
-                if (Se.Settings.Waveform.GenerateSpectrogram)
+                var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName);
+                var generateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
+                
+                var (wavePeaks, spectrogram) = WaveProcessorFactory.GeneratePeaksAndSpectrogram(
+                    tempWaveFileName,
+                    0,
+                    peakWaveFileName,
+                    spectrogramFolder,
+                    generateSpectrogram,
+                    _videoOpenTokenSource.Token);
+                
+                if (spectrogram != null)
                 {
-                    WaveformGeneratingText = Se.Language.Main.GeneratingSpectrogramDotDotDot;
-                    var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
                     AudioVisualizer?.SetSpectrogram(spectrogram);
                 }
 
