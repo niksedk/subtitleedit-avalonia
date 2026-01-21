@@ -1737,7 +1737,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml", Se.Language.General.AllFiles, "*.*");
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
+            Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
@@ -1756,7 +1757,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml", Se.Language.General.AllFiles, "*.*");
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
+            Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
             _shortcutManager.ClearKeys();
@@ -1874,11 +1876,11 @@ public partial class MainViewModel :
         if (subtitle.Paragraphs.Count != Subtitles.Count)
         {
             var message = "The style import subtitle does not have the same number of lines as the current subtitle." + Environment.NewLine
-                        + "Imported lines: " + subtitle.Paragraphs.Count +
-                        Environment.NewLine
-                        + "Current lines: " + Subtitles.Count + Environment.NewLine
-                        + Environment.NewLine +
-                        "Do you want to continue anyway?";
+                                                                                                                      + "Imported lines: " + subtitle.Paragraphs.Count +
+                                                                                                                      Environment.NewLine
+                                                                                                                      + "Current lines: " + Subtitles.Count + Environment.NewLine
+                                                                                                                      + Environment.NewLine +
+                                                                                                                      "Do you want to continue anyway?";
 
             var answer = await MessageBox.Show(Window, Se.Language.General.Import, message, MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Error);
@@ -3126,10 +3128,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm =>
-        {
-            vm.Initialize(SelectedSubtitleFormat, GetUpdateSubtitle());
-        });
+        var viewModel = await ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(vm => { vm.Initialize(SelectedSubtitleFormat, GetUpdateSubtitle()); });
 
         if (viewModel.OkPressed)
         {
@@ -4103,10 +4102,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(vm =>
-        {
-            vm.Initialize(Subtitles);
-        });
+        var result = await ShowDialogAsync<ChangeSpeedWindow, ChangeSpeedViewModel>(vm => { vm.Initialize(Subtitles); });
         if (result.OkPressed)
         {
             ChangeSpeedViewModel.ChangeSpeed(Subtitles, result.SpeedPercent);
@@ -4902,6 +4898,7 @@ public partial class MainViewModel :
             {
                 Subtitles.Add(s);
             }
+
             Renumber();
 
             if (selectedSubtitle != null)
@@ -6952,6 +6949,7 @@ public partial class MainViewModel :
                                                                  Se.Settings.General.MinimumMillisecondsBetweenLines);
             }
         }
+
         _undoRedoManager.StartChangeDetection();
 
         AudioVisualizer.NewSelectionParagraph = null;
@@ -6990,6 +6988,7 @@ public partial class MainViewModel :
                                                                  Se.Settings.General.MinimumMillisecondsBetweenLines);
             }
         }
+
         _undoRedoManager.StartChangeDetection();
 
         AudioVisualizer.NewSelectionParagraph = null;
@@ -9590,6 +9589,7 @@ public partial class MainViewModel :
             {
                 sb.Append(line + "\r\n");
             }
+
             text = sb.ToString();
         }
 
@@ -9708,6 +9708,7 @@ public partial class MainViewModel :
             {
                 newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
             }
+
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
                 newFileName = Utilities.GetFileNameWithoutExtension(_subtitleFileName);
@@ -11300,9 +11301,11 @@ public partial class MainViewModel :
                             {
                                 AudioVisualizer.CenterOnPosition(item);
                             }
+
                             _updateAudioVisualizer = true;
                         }
                     }
+
                     return;
                 }
 
@@ -11370,29 +11373,10 @@ public partial class MainViewModel :
 
     public void SubtitleGrid_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is not Control senderControl)
-            return;
-
         _subtitleGridIsControlPressed = false;
         _subtitleGridIsLeftClick = false;
         _subtitleGridIsRightClick = false;
         IsSubtitleGridFlyoutHeaderVisible = false;
-
-
-        var point = e.GetCurrentPoint(senderControl);
-        var leftClicked = point.Properties.IsLeftButtonPressed;
-        if (leftClicked)
-        {
-            if (e.ClickCount == 2)
-            {
-
-                OnSubtitleGridDoubleTapped(sender);
-            }
-            else if (e.ClickCount == 1)
-            {
-                OnSubtitleGridSingleTapped(sender);
-            }
-        }
 
         if (sender is Control { ContextFlyout: not null } control)
         {
@@ -11682,6 +11666,7 @@ public partial class MainViewModel :
     }
 
     private bool _avLastScrolling = false;
+
     private void StartTimers()
     {
         _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
@@ -11764,10 +11749,7 @@ public partial class MainViewModel :
                                 vp.Position = p.StartTime.TotalSeconds;
                             }
 
-                            Dispatcher.UIThread.Post(() =>
-                            {
-                                SubtitleGrid.ScrollIntoView(p, null);
-                            });
+                            Dispatcher.UIThread.Post(() => { SubtitleGrid.ScrollIntoView(p, null); });
                         }
                     }
 
@@ -11961,7 +11943,14 @@ public partial class MainViewModel :
         ShowStatus(e.Paragraph.Text, 3000);
     }
 
-    internal void OnSubtitleGridDoubleTapped(object? sender) //, TappedEventArgs e)
+
+    internal void OnSubtitleGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        _tapCts?.Cancel();
+        OnSubtitleGridDoubleTapped(sender);
+    }
+
+    internal void OnSubtitleGridDoubleTapped(object? sender)
     {
         if (sender is not DataGrid grid || grid.SelectedItem == null)
         {
@@ -12008,10 +11997,11 @@ public partial class MainViewModel :
 
             // SubtitleDoubleClickActionType.GoToSubtitleAndPause
             vp.VideoPlayerInstance.Pause();
+            vp.Position = seconds;
             AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
         }
     }
-    
+
     private void AudioVisualizerCenterOnPositionIfNeeded(SubtitleLineViewModel selectedItem, double seconds)
     {
         if (AudioVisualizer != null)
@@ -12025,7 +12015,28 @@ public partial class MainViewModel :
         }
     }
 
-    internal void OnSubtitleGridSingleTapped(object? sender) //, TappedEventArgs e)
+
+    private CancellationTokenSource? _tapCts;
+
+    internal async void OnSubtitleGridSingleTapped(object? sender, TappedEventArgs e)
+    {
+        _tapCts?.Cancel();
+        var cts = _tapCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(250, cts.Token); // double-tap threshold
+
+            // Single-tap logic here
+            OnSubtitleGridSingleTapped(sender);
+        }
+        catch (TaskCanceledException)
+        {
+            // ignore
+        }
+    }
+
+    internal void OnSubtitleGridSingleTapped(object? sender)
     {
         if (sender is not DataGrid grid || grid.SelectedItem == null)
         {
@@ -12657,10 +12668,7 @@ public partial class MainViewModel :
     {
         if (e.GetCurrentPoint(null).Properties.IsRightButtonPressed)
         {
-            Dispatcher.UIThread.Post(async () =>
-            {
-                await ShowSubtitleFormatPicker();
-            });
+            Dispatcher.UIThread.Post(async () => { await ShowSubtitleFormatPicker(); });
             e.Handled = true;
         }
     }
