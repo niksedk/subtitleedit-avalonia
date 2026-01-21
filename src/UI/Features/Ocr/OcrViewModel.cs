@@ -1299,6 +1299,7 @@ public partial class OcrViewModel : ObservableObject
         SaveSettings();
         _cancellationTokenSource = new CancellationTokenSource();
         IsOcrRunning = true;
+        UnknownWords.Clear();
 
         var startFromIndex = SelectedOcrSubtitleItem == null ? 0 : OcrSubtitleItems.IndexOf(SelectedOcrSubtitleItem);
         if (selectedIndices == null)
