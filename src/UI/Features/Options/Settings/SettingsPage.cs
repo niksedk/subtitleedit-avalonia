@@ -412,10 +412,14 @@ public class SettingsPage : UserControl
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.WaveformSpectrogram,
         [
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
             new SettingsItem(Se.Language.Options.Settings.WaveformDrawStyle,
                 () => UiUtil.MakeComboBox(_vm.WaveformDrawStyles, _vm, nameof(_vm.SelectedWaveformDrawStyle))),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformGenerateSpectrogram, nameof(_vm.WaveformGenerateSpectrogram)),
+            new SettingsItem(Se.Language.Options.Settings.WaveformSpectrogramMode,
+                () => UiUtil.MakeComboBox(_vm.WaveformSpectrogramStyles, _vm, nameof(_vm.SelectedWaveformSpectrogramStyle))),
+            MakeNumericSettingInt(Se.Language.Options.Settings.WaveformSpectrogramCombinedWaveformHeight, nameof(_vm.WaveformSpectrogramCombinedWaveformHeight), 10, 90),
 
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShowToolbar, nameof(_vm.WaveformShowToolbar)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlay, nameof(_vm.ShowWaveformToolbarPlay)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlayNext, nameof(_vm.ShowWaveformToolbarPlayNext)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlaySelection, nameof(_vm.ShowWaveformToolbarPlaySelection)),
@@ -430,14 +434,10 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarVideoPositionSlider, nameof(_vm.ShowWaveformToolbarVideoPositionSlider)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlaybackSpeed, nameof(_vm.ShowWaveformToolbarPlaybackSpeed)),
 
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformGenerateSpectrogram, nameof(_vm.WaveformGenerateSpectrogram)),
-            new SettingsItem(Se.Language.Options.Settings.WaveformSpectrogramMode,
-                () => UiUtil.MakeComboBox(_vm.WaveformSpectrogramStyles, _vm, nameof(_vm.SelectedWaveformSpectrogramStyle))),
-            MakeNumericSettingInt(Se.Language.Options.Settings.WaveformSpectrogramCombinedWaveformHeight, nameof(_vm.WaveformSpectrogramCombinedWaveformHeight), 10, 90),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterOnSingleClick, nameof(_vm.WaveformCenterOnSingleClick)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAllowOverlap, nameof(_vm.WaveformAllowOverlap)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterOnSingleClick, nameof(_vm.WaveformCenterOnSingleClick)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSingleClickSelectsSubtitle, nameof(_vm.WaveformSingleClickSelectsSubtitle)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformRightClickSelectsSubtitle, nameof(_vm.WaveformRightClickSelectsSubtitle)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformPauseOnSingleClick, nameof(_vm.WaveformPauseOnSingleClick)),
