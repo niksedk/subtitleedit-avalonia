@@ -203,10 +203,7 @@ public class AudioVisualizer : Control
     public List<double> ShotChanges
     {
         get => _shotChanges;
-        set
-        {
-            _shotChanges = value;
-        }
+        set { _shotChanges = value; }
     }
 
     public void UseSmpteDropFrameTime()
@@ -310,6 +307,7 @@ public class AudioVisualizer : Control
         ResizeRightAnd,
         New,
     }
+
     private InteractionMode _interactionMode = InteractionMode.None;
 
     public readonly double ResizeMargin = 5.0; // Margin for resizing paragraphs
@@ -327,8 +325,11 @@ public class AudioVisualizer : Control
     }
 
     public delegate void PositionEventHandler(object sender, PositionEventArgs e);
+
     public delegate void ContextEventHandler(object sender, ContextEventArgs e);
+
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
+
     public event PositionEventHandler? OnVideoPositionChanged;
     public event ContextEventHandler? FlyoutMenuOpening;
     public event ParagraphEventHandler? OnToggleSelection;
@@ -337,6 +338,8 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnNewSelectionInsert;
     public event ParagraphEventHandler? OnDeletePressed;
     public event ParagraphEventHandler? OnSelectRequested;
+
+    private CancellationTokenSource? _singleTapCancellationTokenSource;
 
     public AudioVisualizer()
     {
@@ -360,67 +363,10 @@ public class AudioVisualizer : Control
         PointerPressed += OnPointerPressed;
         PointerReleased += OnPointerReleased;
         PointerWheelChanged += OnPointerWheelChanged;
-        Tapped += (sender, e) =>
-        {
-            var point = e.GetPosition(this);
-            if (Se.Settings.Waveform.SingleClickSelectsSubtitle && !_isCtrlDown && !_isAltDown && !_isShiftDown)
-            {
-                var p = HitTestParagraph(point);
-                if (p != null && OnParagraphDoubleTapped != null)
-                {
-                    var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
-                    e.Handled = true;
-                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
-                }
-            }
-
-            if (_isShiftDown && !_isCtrlDown)
-            {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
-                {
-                    if (seconds < firstSelected.EndTime.TotalSeconds - 0.01)
-                    {
-                        firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
-                    }
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
-                }
-            }
-
-            if (_isCtrlDown || (OperatingSystem.IsMacOS() && _isShiftDown))
-            {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
-                {
-                    if (seconds > firstSelected.StartTime.TotalSeconds + 0.01)
-                    {
-                        firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
-                    }
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
-                }
-            }
-
-            if (_isAltDown)
-            {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
-                {
-                    firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
-                }
-            }
-        };
+        Tapped += OnTapped;
         DoubleTapped += (sender, e) =>
         {
+            _singleTapCancellationTokenSource?.Cancel();
             if (OnParagraphDoubleTapped != null)
             {
                 var point = e.GetPosition(this);
@@ -434,10 +380,7 @@ public class AudioVisualizer : Control
         };
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
-        LostFocus += (sender, e) =>
-        {
-            InvalidateVisual();
-        };
+        LostFocus += (sender, e) => { InvalidateVisual(); };
     }
 
     public void UpdateTheme()
@@ -499,14 +442,110 @@ public class AudioVisualizer : Control
         {
             _isShiftDown = true;
         }
-        else if (e.Key == Key.Delete && !e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Alt) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        else if (e.Key == Key.Delete && !e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Alt) &&
+                 !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
         {
             OnDeletePressed?.Invoke(this, new ParagraphEventArgs(0, _activeParagraph));
         }
     }
 
+    private async void OnTapped(object? sender, TappedEventArgs e)
+    {
+        _singleTapCancellationTokenSource?.Cancel();
+        var cts = _singleTapCancellationTokenSource = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(250, cts.Token); // double-tap threshold
+
+            // Single-tap logic here
+            var point = e.GetPosition(this);
+            if (!_isCtrlDown && !_isAltDown && !_isShiftDown)
+            {
+                var p = HitTestParagraph(point);
+                var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
+                
+                if (_interactionMode is InteractionMode.None or InteractionMode.New)
+                {
+                    if (OnVideoPositionChanged != null)
+                    {
+                        _audioVisualizerLastScroll = 0;
+                        OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = position });
+                    }
+
+                    _activeParagraph = null;
+                }
+                
+                if (Se.Settings.Waveform.SingleClickSelectsSubtitle && p != null && OnParagraphDoubleTapped != null)
+                {
+                    e.Handled = true;
+                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
+                }
+                
+                if (Se.Settings.Waveform.CenterOnSingleClick)
+                {
+                    CenterOnPosition(position);
+                }
+
+                return;
+            }
+
+            if (_isShiftDown && !_isCtrlDown)
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    if (seconds < firstSelected.EndTime.TotalSeconds - 0.01)
+                    {
+                        firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
+                    }
+
+                    e.Handled = true;
+                    InvalidateVisual();
+                    return;
+                }
+            }
+
+            if (_isCtrlDown || (OperatingSystem.IsMacOS() && _isShiftDown))
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    if (seconds > firstSelected.StartTime.TotalSeconds + 0.01)
+                    {
+                        firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
+                    }
+
+                    e.Handled = true;
+                    InvalidateVisual();
+                    return;
+                }
+            }
+
+            if (_isAltDown)
+            {
+                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+                var seconds = RelativeXPositionToSeconds(point.X);
+                if (firstSelected != null)
+                {
+                    firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
+                    e.Handled = true;
+                    InvalidateVisual();
+                    return;
+                }
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // ignore
+        }
+    }
+
     public const double MinZoomFactor = 0.1;
     public const double MaxZoomFactor = 20.0;
+
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         _lastMouseWheelScroll = Environment.TickCount64;
@@ -568,6 +607,7 @@ public class AudioVisualizer : Control
         {
             OnHorizontalScroll.Invoke(this, new PositionEventArgs { PositionInSeconds = newStart });
         }
+
         InvalidateVisual();
     }
 
@@ -635,18 +675,20 @@ public class AudioVisualizer : Control
 
         if (_interactionMode is InteractionMode.None or InteractionMode.New)
         {
-            if (OnVideoPositionChanged != null)
-            {
-                var videoPosition = RelativeXPositionToSeconds(pos.X);
-                _audioVisualizerLastScroll = 0;
-                OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
-            }
+            // if (OnVideoPositionChanged != null)
+            // {
+            //     var videoPosition = RelativeXPositionToSeconds(pos.X);
+            //     _audioVisualizerLastScroll = 0;
+            //     OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
+            // }
+
             _activeParagraph = null;
             return;
         }
 
         if (_interactionMode == InteractionMode.Moving)
-        { // click on paragraph, but with no move
+        {
+            // click on paragraph, but with no move
             var ms = Environment.TickCount64 - _lastPointerPressed;
             if (ms < 100 ||
                 (
@@ -671,11 +713,13 @@ public class AudioVisualizer : Control
                     _audioVisualizerLastScroll = 0;
                     OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
                 }
+
                 _activeParagraph = null;
                 return;
             }
         }
-        else if ((_interactionMode == InteractionMode.ResizingLeft || _interactionMode == InteractionMode.ResizingRight) && _activeParagraph != null && _activeParagraph.Duration.TotalMilliseconds < 10)
+        else if ((_interactionMode == InteractionMode.ResizingLeft || _interactionMode == InteractionMode.ResizingRight) && _activeParagraph != null &&
+                 _activeParagraph.Duration.TotalMilliseconds < 10)
         {
             if (OnVideoPositionChanged != null)
             {
@@ -683,6 +727,7 @@ public class AudioVisualizer : Control
                 _audioVisualizerLastScroll = 0;
                 OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
             }
+
             _interactionMode = InteractionMode.None;
             _activeParagraph = null;
             return;
@@ -743,7 +788,7 @@ public class AudioVisualizer : Control
         double rightEdgePos = SecondsToXPosition(p.EndTime.TotalSeconds - StartPositionSeconds);
         double distToLeft = Math.Abs(point.X - leftEdgePos);
         double distToRight = Math.Abs(point.X - rightEdgePos);
-        
+
         bool isActuallyNearLeft = _cachedIsNearLeftEdge && (!_cachedIsNearRightEdge || distToLeft <= distToRight);
         bool isActuallyNearRight = _cachedIsNearRightEdge && (!_cachedIsNearLeftEdge || distToRight < distToLeft);
 
@@ -756,7 +801,7 @@ public class AudioVisualizer : Control
             {
                 var prevParagraph = displayableParagraphs[idx - 1];
                 double prevRightPos = SecondsToXPosition(prevParagraph.EndTime.TotalSeconds - StartPositionSeconds);
-                
+
                 // Only consider "Or" mode if the previous paragraph's right edge is very close
                 if (Math.Abs(point.X - prevRightPos) <= ResizeMargin)
                 {
@@ -785,7 +830,7 @@ public class AudioVisualizer : Control
             {
                 var nextParagraph = displayableParagraphs[idx + 1];
                 double nextLeftPos = SecondsToXPosition(nextParagraph.StartTime.TotalSeconds - StartPositionSeconds);
-                
+
                 // Only consider "Or" mode if the next paragraph's left edge is very close
                 if (Math.Abs(point.X - nextLeftPos) <= ResizeMargin)
                 {
@@ -813,6 +858,7 @@ public class AudioVisualizer : Control
                 _interactionMode = InteractionMode.None;
                 return;
             }
+
             _interactionMode = InteractionMode.Moving;
         }
     }
@@ -956,7 +1002,8 @@ public class AudioVisualizer : Control
                 if (availableSpace + 0.001 < _originalDurationSeconds ||
                     (previous != null && _originalStartSeconds < previous.EndTime.TotalSeconds) ||
                     (next != null && _originalEndSeconds > next.StartTime.TotalSeconds))
-                { // overlap - keep current duration
+                {
+                    // overlap - keep current duration
                     if (newStart < 0 && _originalStartSeconds >= 0)
                     {
                         break;
@@ -994,6 +1041,7 @@ public class AudioVisualizer : Control
                     _activeParagraph.SetStartTimeOnly(TimeSpan.FromSeconds(newStart));
                     _activeParagraphPrevious.EndTime = TimeSpan.FromSeconds(newPrevEnd);
                 }
+
                 break;
             case InteractionMode.ResizeRightAnd:
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
@@ -1003,6 +1051,7 @@ public class AudioVisualizer : Control
                     _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                     _activeParagraphNext.SetStartTimeOnly(TimeSpan.FromSeconds(newNextStart));
                 }
+
                 break;
             case InteractionMode.ResizingLeft:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
@@ -1062,6 +1111,7 @@ public class AudioVisualizer : Control
                 {
                     _activeParagraph.EndTime = TimeSpan.FromSeconds(newEnd);
                 }
+
                 break;
         }
 
@@ -1111,7 +1161,7 @@ public class AudioVisualizer : Control
     {
         var pointX = point.X;
         var startPosSeconds = StartPositionSeconds;
-        
+
         // Check NewSelectionParagraph first as it's typically the active interaction target
         var newSelection = NewSelectionParagraph;
         if (newSelection != null)
@@ -1181,7 +1231,7 @@ public class AudioVisualizer : Control
                 var prev = _displayableParagraphs[closestEdgeIndex - 1];
                 var prevRight = SecondsToXPosition(prev.EndTime.TotalSeconds - startPosSeconds);
                 var distToPrevRight = Math.Abs(pointX - prevRight);
-                
+
                 if (distToPrevRight <= ResizeMargin && distToPrevRight < closestEdgeDistance)
                 {
                     return prev;
@@ -1193,13 +1243,13 @@ public class AudioVisualizer : Control
                 var next = _displayableParagraphs[closestEdgeIndex + 1];
                 var nextLeft = SecondsToXPosition(next.StartTime.TotalSeconds - startPosSeconds);
                 var distToNextLeft = Math.Abs(pointX - nextLeft);
-                
+
                 if (distToNextLeft <= ResizeMargin && distToNextLeft < closestEdgeDistance)
                 {
                     return next;
                 }
             }
-            
+
             return closestEdgeParagraph;
         }
 
@@ -1291,7 +1341,6 @@ public class AudioVisualizer : Control
 
         using (context.PushClip(boundsRect))
         {
-
             DrawAllGridLines(context, ref renderCtx);
             DrawWaveForm(context, ref renderCtx);
             DrawSpectrogram(context, ref renderCtx);
@@ -1487,9 +1536,10 @@ public class AudioVisualizer : Control
             var xPosition = SecondsToXPositionOptimized(seconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
             var yPosition = 0;
             var yCounter = 0d;
-            var interval = renderCtx.ZoomFactor >= 0.4d ?
-                0.1d : // a pixel is 0.1 second
-                1.0d;  // a pixel is 1.0 second
+            var interval = renderCtx.ZoomFactor >= 0.4d
+                ? 0.1d
+                : // a pixel is 0.1 second
+                1.0d; // a pixel is 1.0 second
 
             while (xPosition < width)
             {
@@ -1538,6 +1588,7 @@ public class AudioVisualizer : Control
             pen = new Pen(gradient, 1.5);
             _fancyWaveformPenCache[colorKey] = pen;
         }
+
         return pen;
     }
 
@@ -1558,6 +1609,7 @@ public class AudioVisualizer : Control
             };
             _fancyWaveformGradientCache[colorKey] = gradient;
         }
+
         return gradient;
     }
 
@@ -1568,6 +1620,7 @@ public class AudioVisualizer : Control
             pen = new Pen(new SolidColorBrush(color), width);
             _fancyWaveformGlowPenCache[colorKey] = pen;
         }
+
         return pen;
     }
 
@@ -1915,8 +1968,10 @@ public class AudioVisualizer : Control
             return;
         }
 
-        double currentRegionLeft = SecondsToXPositionOptimized(NewSelectionParagraph.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
-        double currentRegionRight = SecondsToXPositionOptimized(NewSelectionParagraph.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        double currentRegionLeft =
+            SecondsToXPositionOptimized(NewSelectionParagraph.StartTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
+        double currentRegionRight =
+            SecondsToXPositionOptimized(NewSelectionParagraph.EndTime.TotalSeconds - renderCtx.StartPositionSeconds, renderCtx.SampleRate, renderCtx.ZoomFactor);
         var currentRegionWidth = currentRegionRight - currentRegionLeft;
 
         if (currentRegionRight >= 0 && currentRegionLeft <= renderCtx.Width)
@@ -1945,6 +2000,7 @@ public class AudioVisualizer : Control
         {
             return 0;
         }
+
         return StartPositionSeconds + (double)x / WavePeaks.SampleRate / ZoomFactor;
     }
 
@@ -1989,6 +2045,7 @@ public class AudioVisualizer : Control
         {
             return 0;
         }
+
         return (int)Math.Round(seconds * sampleRate * zoomFactor, MidpointRounding.AwayFromZero);
     }
 
@@ -2014,12 +2071,15 @@ public class AudioVisualizer : Control
         return (double)index / WavePeaks.SampleRate;
     }
 
-    public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex, List<SubtitleLineViewModel> selectedIndexes)
+    public void SetPosition(double startPositionSeconds, ObservableCollection<SubtitleLineViewModel> subtitle, double currentVideoPositionSeconds, int subtitleIndex,
+        List<SubtitleLineViewModel> selectedIndexes)
     {
         if (TimeSpan.FromMilliseconds(Environment.TickCount64 - _lastMouseWheelScroll).TotalSeconds > 0.25)
-        { // don't set start position when scrolling with mouse wheel as it will make a bad (jumping back) forward scrolling
+        {
+            // don't set start position when scrolling with mouse wheel as it will make a bad (jumping back) forward scrolling
             StartPositionSeconds = startPositionSeconds;
         }
+
         CurrentVideoPositionSeconds = currentVideoPositionSeconds;
         LoadParagraphs(subtitle, subtitleIndex, selectedIndexes);
     }
@@ -2085,7 +2145,8 @@ public class AudioVisualizer : Control
 
             // 4. Optimized Selection Handling
             var primaryParagraph = (primarySelectedIndex >= 0 && primarySelectedIndex < subtitle.Count)
-                ? subtitle[primarySelectedIndex] : null;
+                ? subtitle[primarySelectedIndex]
+                : null;
 
             if (primaryParagraph != null && !primaryParagraph.StartTime.IsMaxTime())
             {
@@ -2174,10 +2235,7 @@ public class AudioVisualizer : Control
             Task.Factory.StartNew(() =>
             {
                 spectrogram.Load();
-                Dispatcher.UIThread.Post(() =>
-                {
-                    InitializeSpectrogramInternal(spectrogram);
-                });
+                Dispatcher.UIThread.Post(() => { InitializeSpectrogramInternal(spectrogram); });
             });
         }
     }
@@ -2327,6 +2385,7 @@ public class AudioVisualizer : Control
                 {
                     break;
                 }
+
                 hitCount = length / 2;
             }
         }
@@ -2381,6 +2440,7 @@ public class AudioVisualizer : Control
             {
                 minPeak = v;
             }
+
             if (v > maxPeak)
             {
                 maxPeak = v;
@@ -2390,7 +2450,8 @@ public class AudioVisualizer : Control
         return new MinMax { Min = minPeak, Max = maxPeak, Avg = total / (endIndex - startIndex) };
     }
 
-    internal void GenerateTimeCodes(Subtitle subtitle, double startFromSeconds, int blockSizeMilliseconds, int minimumVolumePercent, int maximumVolumePercent, int defaultMilliseconds)
+    internal void GenerateTimeCodes(Subtitle subtitle, double startFromSeconds, int blockSizeMilliseconds, int minimumVolumePercent, int maximumVolumePercent,
+        int defaultMilliseconds)
     {
         if (WavePeaks == null || WavePeaks.Peaks.Count == 0)
         {
@@ -2429,6 +2490,7 @@ public class AudioVisualizer : Control
                         i = begin;
                     }
                 }
+
                 if (subtitleOn && currentLengthInSeconds >= secondsPerParagraph)
                 {
                     for (int j = 0; j < 20; j++)
@@ -2461,6 +2523,7 @@ public class AudioVisualizer : Control
                     begin = i;
                 }
             }
+
             i++;
         }
 

@@ -11937,11 +11937,6 @@ public partial class MainViewModel :
             vp.SetPosition(newPosition);
         }
 
-        if (Se.Settings.Waveform.CenterOnSingleClick)
-        {
-            AudioVisualizer?.CenterOnPosition(newPosition);
-        }
-
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
 
@@ -11953,7 +11948,7 @@ public partial class MainViewModel :
 
     internal void OnSubtitleGridDoubleTapped(object? sender, TappedEventArgs e)
     {
-        _tapCts?.Cancel();
+        _singleTapCancellationTokenSource?.Cancel();
         OnSubtitleGridDoubleTapped(sender);
     }
 
@@ -12023,12 +12018,12 @@ public partial class MainViewModel :
     }
 
 
-    private CancellationTokenSource? _tapCts;
+    private CancellationTokenSource? _singleTapCancellationTokenSource;
 
     internal async void OnSubtitleGridSingleTapped(object? sender, TappedEventArgs e)
     {
-        _tapCts?.Cancel();
-        var cts = _tapCts = new CancellationTokenSource();
+        _singleTapCancellationTokenSource?.Cancel();
+        var cts = _singleTapCancellationTokenSource = new CancellationTokenSource();
 
         try
         {
