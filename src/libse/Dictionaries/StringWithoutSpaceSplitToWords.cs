@@ -49,7 +49,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 input.StartsWith(input[0].ToString().ToUpperInvariant()) &&
                 input != input.ToLowerInvariant() && input != input.ToUpperInvariant() &&
                 input.Length < 12)
-            { 
+            {
                 //TODO: Improve... some better way to detect uncommon/special names
                 return input;
             }
@@ -94,9 +94,9 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             return s.Trim();
         }
 
-        public static string[] LoadWordSplitList(string threeLetterIsoLanguageName, NameList nameList)
+        public static string[] LoadWordSplitList(string dictionaryFolder, string threeLetterIsoLanguageName, List<string> names)
         {
-            var fileName = $"{Configuration.DictionariesDirectory}{threeLetterIsoLanguageName}_WordSplitList.txt";
+            var fileName = $"{dictionaryFolder}{threeLetterIsoLanguageName}_WordSplitList.txt";
             if (!File.Exists(fileName))
             {
                 return Array.Empty<string>();
@@ -110,15 +110,12 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 {
                     // Ignore list
                     "Andor", "honour", "honours", "putain", "whoah", "eastside", "Starpath", "comlink", "Taamet",
-                    "Atwater", "Lakeview", "Glassman", "Starfleet", "Coulda", "Woulda", "percenters", 
+                    "Atwater", "Lakeview", "Glassman", "Starfleet", "Coulda", "Woulda", "percenters",
                     "starbase", "damnit", "Goddamnit", "Goodfellas", "Stillwater", "ahold", "Coldplay",
                 });
             }
 
-            if (nameList != null)
-            {
-                wordList.AddRange(nameList.GetNames().Where(p => p.Length > 4));
-            }
+            wordList.AddRange(names.Where(p => p.Length > 4));
 
             return wordList.OrderByDescending(p => p.Length).ToArray();
         }

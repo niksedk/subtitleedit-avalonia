@@ -2,6 +2,8 @@
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Dictionaries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +28,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private bool _isLoaded;
     private OcrFixReplaceList2 _ocrFixReplaceList;
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
-    //private string[] _wordSplitList;
+    private string[] _wordSplitList;
+    private NameList _nameListObj;
     private SpellCheckWordLists2 _spellCheckWordLists;
     //private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
@@ -71,6 +74,10 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _subtitles = subtitles;
         _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
         _subtitle = GetSubtitle(subtitles);
+
+        _nameListObj = new NameList(Se.DictionariesFolder, fiveLetterName, false, string.Empty);
+        var names = _nameListObj.GetAllNames();
+        _wordSplitList = StringWithoutSpaceSplitToWords.LoadWordSplitList(Se.DictionariesFolder, threeLetterIsoLanguageName, names);
     }
 
     public OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords)
