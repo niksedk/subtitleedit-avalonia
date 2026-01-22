@@ -106,6 +106,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _adjustAllTimesRememberLineSelectionChoice;
     [ObservableProperty] private ObservableCollection<string> _splitOddNumberOfLinesActions;
     [ObservableProperty] private string _selectedSplitOddNumberOfLinesAction;
+    [ObservableProperty] private bool _ocrUseWordSplitList;
 
     [ObservableProperty] private bool _showUpDownStartTime;
     [ObservableProperty] private bool _showUpDownEndTime;
@@ -530,6 +531,7 @@ public partial class SettingsViewModel : ObservableObject
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
         AdjustAllTimesRememberLineSelectionChoice = Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice;
         SelectedSplitOddNumberOfLinesAction = MapFromSplitOddActionToLanguageCode(Se.Settings.Tools.SplitOddLinesAction);
+        OcrUseWordSplitList = Se.Settings.Ocr.UseWordSplitList;
 
         SelectedTheme = MapThemeToTranslation(appearance.Theme);
         SelectedFontName = FontNames.FirstOrDefault(p => p == appearance.FontName) ?? FontNames.First();
@@ -1019,6 +1021,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
         Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;
         Se.Settings.Tools.SplitOddLinesAction = MapFromSplitOddActionTranslationToCode(SelectedSplitOddNumberOfLinesAction);
+        Se.Settings.Ocr.UseWordSplitList = OcrUseWordSplitList;
 
         appearance.Theme = MapThemeFromTranslation(SelectedTheme);
         appearance.FontName = SelectedFontName == FontNames.First()

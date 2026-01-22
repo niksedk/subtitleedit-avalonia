@@ -516,6 +516,7 @@ public class SettingsPage : UserControl
                     Mode = BindingMode.TwoWay,
                 }
             }),
+            MakeCheckboxSetting(Se.Language.Options.Settings.OcrUseWordSplitList, nameof(_vm.OcrUseWordSplitList)),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.General.Appearance,

@@ -261,6 +261,8 @@ public class LanguageGeneral
     public string MergeWithLineAfterKeepBreaks { get; set; }
     public string MergeWithLineBeforeAndAutoBreak { get; set; }
     public string MergeWithLineBeforeKeepBreaks { get; set; }
+    public string ExtendAfter { get; set; }
+    public string ExtendBefore { get; set; }
     public string MiddleCenter { get; set; }
     public string MiddleLeft { get; set; }
     public string MiddleRight { get; set; }
@@ -858,6 +860,8 @@ public class LanguageGeneral
         MergeWithLineAfterKeepBreaks = "Merge with line after (keep breaks)";
         MergeWithLineBeforeAndAutoBreak = "Merge with line before and auto-break";
         MergeWithLineBeforeKeepBreaks = "Merge with line before (keep breaks)";
+        ExtendBefore = "Extend/shorten to line before";
+        ExtendAfter = "Extend/shorten to line after";
         MiddleCenter = "Middle-Center";
         MiddleLeft = "Middle-Left";
         MiddleRight = "Middle-Right";

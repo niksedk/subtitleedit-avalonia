@@ -288,6 +288,8 @@ public partial class MainViewModel :
     public Border Toolbar { get; internal set; }
     public StackPanel PanelSingleLineLengths { get; internal set; }
     public MenuItem MenuItemMergeAsDialog { get; internal set; }
+    public MenuItem MenuItemExtendToLineBefore { get; internal set; }
+    public MenuItem MenuItemExtendToLineAfter { get; internal set; }
     public MenuItem MenuItemMerge { get; internal set; }
     public MenuItem MenuItemAudioVisualizerInsertNewSelection { get; set; }
     public MenuItem MenuItemAudioVisualizerPasteNewSelection { get; set; }
@@ -367,6 +369,8 @@ public partial class MainViewModel :
         Menu = new Menu();
         PanelSingleLineLengths = new StackPanel();
         MenuItemMergeAsDialog = new MenuItem();
+        MenuItemExtendToLineBefore = new MenuItem();
+        MenuItemExtendToLineAfter = new MenuItem();
         MenuItemMerge = new MenuItem();
         MenuItemAudioVisualizerInsertNewSelection = new MenuItem();
         MenuItemAudioVisualizerPasteNewSelection = new MenuItem();
@@ -11088,8 +11092,12 @@ public partial class MainViewModel :
 
     public void SubtitleContextOpening(object? sender, EventArgs e)
     {
+        var idx = SubtitleGrid.SelectedIndex;
+        var count = Subtitles.Count;
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
+        MenuItemExtendToLineBefore.IsVisible = SubtitleGrid.SelectedItems.Count == 1 && Subtitles.Count > 1 && idx > 0;
+        MenuItemExtendToLineAfter.IsVisible = SubtitleGrid.SelectedItems.Count == 1 && Subtitles.Count > 1 && idx < count-1;
         AreAssaContentMenuItemsVisible = false;
         ShowAutoTranslateSelectedLines = SubtitleGrid.SelectedItems.Count > 0 && ShowColumnOriginalText;
         ShowColumnLayerFlyoutMenuItem = IsFormatAssa;

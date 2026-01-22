@@ -242,6 +242,7 @@ public class LanguageSettings
     public string SplitOddLineActionWeightTop { get; set; }
     public string SplitOddLineActionWeightBottom { get; set; }
     public string SplitOddLinesAction { get; set; }
+    public string OcrUseWordSplitList { get; set; }
     public string UseFocusedButtonBackgroundColor { get; set; }
     public string FocusedButtonBackgroundColor { get; set; }
     public string ForceCrLfOnSave { get; set; }
@@ -490,6 +491,7 @@ public class LanguageSettings
         SplitOddLineActionWeightTop = "Weight top";
         SplitOddLineActionWeightBottom = "Weight bottom";
         SplitOddLinesAction = "Split odd lines action";
+        OcrUseWordSplitList = "OCR: use word split list";
         UseFocusedButtonBackgroundColor = "Use focused button background color";
         FocusedButtonBackgroundColor = "Focused button background color";
         ForceCrLfOnSave = "Force CR+LF on save (text subtitle files)";
