@@ -96,7 +96,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
 
         public static string[] LoadWordSplitList(string dictionaryFolder, string threeLetterIsoLanguageName, List<string> names)
         {
-            var fileName = $"{dictionaryFolder}{threeLetterIsoLanguageName}_WordSplitList.txt";
+            var fileName = Path.Combine(dictionaryFolder, $"{threeLetterIsoLanguageName}_WordSplitList.txt");
             if (!File.Exists(fileName))
             {
                 return Array.Empty<string>();

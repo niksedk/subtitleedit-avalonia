@@ -281,6 +281,12 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             isWordCorrect = _spellCheckManager.IsWordCorrect(result);
+            if (result.Contains(' '))  // we trust replacements
+            {
+                word.FixedWord = result;
+                word.IsSpellCheckedOk = IsSpelledCorrect(result);
+                return;
+            }
 
             if (!isWordCorrect && _wordSkipList.Contains(s))
             {
@@ -330,8 +336,28 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
             if (!string.IsNullOrEmpty(result) && !isWordCorrect && doTryToGuessUnknownWords)
             {
-                StringWithoutSpaceSplitToWords.SplitWord()
-                var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
+                var guesses = new List<string>();   
+
+                if (w.Length > 4 && Se.Settings.Ocr.UseWordSplitList)
+                {
+                    if (_threeLetterIsoLanguageName == "eng" &&
+                        w.EndsWith("in", StringComparison.Ordinal) &&
+                        w.Contains(word + "'") &&
+                        DoSpell(word + "g"))
+                    {
+                        // avoid words like "workin'" or "holdin'"
+                    }
+                    else
+                    {
+                        var splitWords = StringWithoutSpaceSplitToWords.SplitWord(_wordSplitList, w);
+                        if (splitWords != w)
+                        {
+                            guesses.Add(splitWords);
+                        }
+                    }
+                }
+                
+                guesses.AddRange(_ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName));
                 foreach (var g in guesses)
                 {
                     w = g.Trim('\'', '"', '-');

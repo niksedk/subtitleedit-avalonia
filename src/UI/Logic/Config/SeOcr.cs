@@ -35,6 +35,7 @@ public class SeOcr
     public decimal TextBoxFontSize { get; set; }
     public bool TextBoxFontBold { get; set; }
     public string TextBoxFontName { get; set; }
+    public bool UseWordSplitList { get; set; }
 
     public SeOcr()
     {
@@ -72,5 +73,7 @@ public class SeOcr
 
         TextBoxFontSize = 14;
         TextBoxFontName = string.Empty;
+
+        UseWordSplitList = true;
     }
 }
