@@ -29,7 +29,6 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private OcrFixReplaceList2 _ocrFixReplaceList;
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
     private string[] _wordSplitList;
-    private NameList _nameListObj;
     private SpellCheckWordLists2 _spellCheckWordLists;
     //private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
@@ -75,8 +74,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _threeLetterIsoLanguageName = threeLetterIsoLanguageName;
         _subtitle = GetSubtitle(subtitles);
 
-        _nameListObj = new NameList(Se.DictionariesFolder, fiveLetterName, false, string.Empty);
-        var names = _nameListObj.GetAllNames();
+        var names = _spellCheckWordLists.GetAllNames();
         _wordSplitList = StringWithoutSpaceSplitToWords.LoadWordSplitList(Se.DictionariesFolder, threeLetterIsoLanguageName, names);
     }
 
@@ -332,6 +330,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
             if (!string.IsNullOrEmpty(result) && !isWordCorrect && doTryToGuessUnknownWords)
             {
+                StringWithoutSpaceSplitToWords.SplitWord()
                 var guesses = _ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
                 foreach (var g in guesses)
                 {

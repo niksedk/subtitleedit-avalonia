@@ -528,4 +528,8 @@ public class SpellCheckWordLists2
         return list;
     }
 
+    public List<string> GetAllNames()
+    {
+        return _nameList.GetAllNames();
+    }
 }
