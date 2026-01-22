@@ -58,6 +58,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _isLoaded = false;
         _ocrFixReplaceList = new OcrFixReplaceList2(string.Empty);
         _spellCheckWordLists = new SpellCheckWordLists2(string.Empty, this);
+        _wordSplitList = new string[0];
     }
 
     void IOcrFixEngine2.Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
