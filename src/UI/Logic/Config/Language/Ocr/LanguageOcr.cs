@@ -67,6 +67,7 @@ public class LanguageOcr
     public string EditExportDotDotDot { get; set; }
     public string EditBinaryOcrDatabase { get; set; }
     public string BinaryImageCompareDatabase { get; set; }
+    public string RemoveXFromUnknownWordsList { get; set; }
 
     public LanguageOcr()
     {
@@ -133,5 +134,6 @@ public class LanguageOcr
         EditExportDotDotDot = "Edit/export...";
         EditBinaryOcrDatabase = "Edit \"Binary image compare\" database";
         BinaryImageCompareDatabase = "\"Binary image compare\" database";
+        RemoveXFromUnknownWordsList = "Remove \"{0}\" from unknown words list";
     }
 }

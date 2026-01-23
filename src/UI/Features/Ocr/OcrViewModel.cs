@@ -121,6 +121,7 @@ public partial class OcrViewModel : ObservableObject
     [ObservableProperty] private FontFamily _textBoxFontFamily;
     [ObservableProperty] private decimal _textBoxFontSize;
     [ObservableProperty] private FontWeight _textBoxFontWeight;
+    [ObservableProperty] string _unknownWordsRemoveCurrentText;
 
     public Window? Window { get; set; }
     public DataGrid SubtitleGrid { get; set; }
@@ -199,6 +200,7 @@ public partial class OcrViewModel : ObservableObject
         TextBoxFontFamily = new FontFamily(FontHelper.GetSystemFonts().First());
         TextBoxFontSize = 14;
         TextBoxFontWeight = FontWeight.Regular;
+        UnknownWordsRemoveCurrentText = string.Empty;
         LoadSettings();
         EngineSelectionChanged();
         LoadDictionaries();
@@ -382,6 +384,31 @@ public partial class OcrViewModel : ObservableObject
                 SelectedDictionary = Dictionaries.FirstOrDefault();
             }
         }
+    }
+
+    [RelayCommand]
+    private void UnknownWordsClear()
+    {
+        UnknownWords.Clear();
+        IsUnknownWordSelected = false;
+    }
+
+    [RelayCommand]
+    private void UnknownWordsRemoveCurrent()
+    {
+        var word = SelectedUnknownWord?.Word.Word ?? string.Empty;
+        if (string.IsNullOrEmpty(word))
+        {
+            return;
+        }
+
+        var itemsToRemove = UnknownWords.Where(uw => uw.Word.Word.Equals(word, StringComparison.Ordinal)).ToList();
+        foreach (var item in itemsToRemove)
+        {
+            UnknownWords.Remove(item);
+        }
+
+        IsUnknownWordSelected = false;
     }
 
     [RelayCommand]
@@ -2804,6 +2831,16 @@ public partial class OcrViewModel : ObservableObject
     internal void UnknownWordSelectionChanged()
     {
         IsUnknownWordSelected = SelectedUnknownWord != null;
+        if (IsUnknownWordSelected)
+        {
+            UnknownWordsRemoveCurrentText = string.Format(
+                Se.Language.Ocr.RemoveXFromUnknownWordsList,
+                SelectedUnknownWord?.Word.FixedWord);
+        }
+        else
+        {
+            UnknownWordsRemoveCurrentText = string.Empty;
+        }
     }
 
     internal void UnknownWordSelectionTapped()

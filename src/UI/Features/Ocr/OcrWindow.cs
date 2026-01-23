@@ -605,6 +605,29 @@ public class OcrWindow : Window
         listBox.Tapped += (s, e) => vm.UnknownWordSelectionTapped();
         listBox.KeyDown += (s, e) => vm.UnknownWordListKeyDown(e);
 
+
+        var flyout = new MenuFlyout();
+        var menuItemClear = new MenuItem
+        {
+            Header = Se.Language.General.Clear,
+            DataContext = vm,
+            Command = vm.UnknownWordsClearCommand,
+        };
+        flyout.Items.Add(menuItemClear);
+
+        var menuItemRemoveCurrent = new MenuItem
+        {
+            DataContext = vm,
+            Command = vm.UnknownWordsRemoveCurrentCommand,
+        };
+        menuItemRemoveCurrent.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsUnknownWordSelected), BindingMode.OneWay));
+        menuItemRemoveCurrent.Bind(MenuItem.HeaderProperty, new Binding(nameof(vm.UnknownWordsRemoveCurrentText), BindingMode.OneWay));
+
+        flyout.Items.Add(menuItemRemoveCurrent);
+
+        listBox.ContextFlyout = flyout;
+
+
         var buttonAddToNamesList = UiUtil.MakeButton(Se.Language.General.AddToNamesListCaseSensitive, vm.AddUnknownWordToNamesCommand)
             .WithBindEnabled(nameof(vm.IsUnknownWordSelected))
             .WithHorizontalAlignmentStretch();
