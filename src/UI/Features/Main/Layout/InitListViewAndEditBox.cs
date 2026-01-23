@@ -1338,6 +1338,8 @@ public static class InitListViewAndEditBox
 
     private static Control MakeTextBox(MainViewModel vm)
     {
+        UiUtil.RemoveControlFromParent(vm.EditTextBox.ContentControl);
+
         if (Se.Settings.Appearance.SubtitleTextBoxColorTags)
         {
             return MakeTextEditor(vm);
