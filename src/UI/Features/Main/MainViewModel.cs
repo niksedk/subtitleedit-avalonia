@@ -628,9 +628,16 @@ public partial class MainViewModel :
                 VideoRedockControls();
             }
 
-            Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, vm.SelectedLayout.Value);
+            SetLayout(vm.SelectedLayout.Value);
             AutoFitColumns();
         }
+    }
+
+    private void SetLayout(int layoutNumber)
+    {
+        var idx = SubtitleGrid.SelectedIndex;
+        Se.Settings.General.LayoutNumber = InitLayout.MakeLayout(MainView!, this, layoutNumber);
+        SelectAndScrollToRow(Math.Max(0, idx));
     }
 
     [RelayCommand]
@@ -3358,7 +3365,7 @@ public partial class MainViewModel :
         }
 
         VideoPlayerControl = null;
-        InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+        SetLayout(Se.Settings.General.LayoutNumber);
 
         if (!string.IsNullOrEmpty(videoFileName))
         {
@@ -4633,6 +4640,7 @@ public partial class MainViewModel :
             Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
             InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
             InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+            SetLayout(Se.Settings.General.LayoutNumber);
         }
 
         _autoBackupService.StopAutobackup();
@@ -5044,7 +5052,7 @@ public partial class MainViewModel :
 
             // reload current layout
             InitMenu.Make(this);
-            InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
+            SetLayout(Se.Settings.General.LayoutNumber);
         }
     }
 
