@@ -106,7 +106,7 @@ public class OcrWindow : Window
 
         var splitter = new GridSplitter
         {
-            Background = Avalonia.Media.Brushes.Gray,
+            Height = UiUtil.SplitterWidthOrHeight,
             ResizeDirection = GridResizeDirection.Rows,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -502,9 +502,10 @@ public class OcrWindow : Window
         var textBoxText = new TextBox
         {
             Width = 320,
-            Height = 80,
+            Height = double.NaN,
+            MinHeight = 80,
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Stretch,
             AcceptsReturn = true,
             TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
             Margin = new Thickness(0, 0, 10, 0),
@@ -646,7 +647,6 @@ public class OcrWindow : Window
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUnknownWord), BindingMode.TwoWay),
             Width = double.NaN,
             Height = double.NaN,
-            MaxHeight = 130,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
@@ -734,7 +734,6 @@ public class OcrWindow : Window
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllFix), BindingMode.TwoWay),
             Width = double.NaN,
             Height = double.NaN,
-            MaxHeight = 130,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
@@ -776,7 +775,6 @@ public class OcrWindow : Window
             [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllGuess), BindingMode.TwoWay),
             Width = double.NaN,
             Height = double.NaN,
-            MaxHeight = 130,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
