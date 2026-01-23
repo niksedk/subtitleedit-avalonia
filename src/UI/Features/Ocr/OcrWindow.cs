@@ -36,13 +36,17 @@ public class OcrWindow : Window
         var editView = MakeEditView(vm);
         var buttonView = MakeBottomView(vm);
 
+        int editViewHeight = 215;
+        var editViewRow = new RowDefinition { Height = new GridLength(editViewHeight, GridUnitType.Pixel), MinHeight = editViewHeight };
+
         var grid = new Grid
         {
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star), MinHeight = 100 },
+                new RowDefinition { Height = new GridLength(5, GridUnitType.Pixel) },
+                editViewRow,
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -55,10 +59,64 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        // Store and restore editView row height when OCR starts/stops
+        double savedEditViewHeightPixels = 0;
+        
+        // Set initial value
+        if (vm.IsOcrRunning)
+        {
+            editViewRow.Height = new GridLength(1, GridUnitType.Auto);
+            editViewRow.MinHeight = 0;
+        }
+        else
+        {
+            editViewRow.MinHeight = editViewHeight;
+        }
+        
+        // Update when property changes
+        vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(vm.IsOcrRunning))
+            {
+                if (vm.IsOcrRunning)
+                {
+                    // Save current actual pixel height before collapsing
+                    if (editView.Bounds.Height > 0)
+                    {
+                        savedEditViewHeightPixels = editView.Bounds.Height;
+                    }
+                    editViewRow.Height = new GridLength(1, GridUnitType.Auto);
+                    editViewRow.MinHeight = 0;
+                }
+                else
+                {
+                    // Restore saved height as pixel value, or use Star if no saved value
+                    if (savedEditViewHeightPixels > 0)
+                    {
+                        editViewRow.Height = new GridLength(savedEditViewHeightPixels, GridUnitType.Pixel);
+                    }
+                    else
+                    {
+                        editViewRow.Height = new GridLength(1, GridUnitType.Star);
+                    }
+                    editViewRow.MinHeight = 150;
+                }
+            }
+        };
+
+        var splitter = new GridSplitter
+        {
+            Background = Avalonia.Media.Brushes.Gray,
+            ResizeDirection = GridResizeDirection.Rows,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        splitter.Bind(GridSplitter.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
+
         grid.Add(topControlsView, 0, 0);
         grid.Add(subtitleView, 1, 0);
-        grid.Add(editView, 2, 0);
-        grid.Add(buttonView, 3, 0);
+        grid.Add(splitter, 2, 0);
+        grid.Add(editView, 3, 0);
+        grid.Add(buttonView, 4, 0);
 
         Content = grid;
 
