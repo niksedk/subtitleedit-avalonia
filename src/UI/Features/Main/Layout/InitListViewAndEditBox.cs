@@ -48,6 +48,10 @@ public static partial class InitListViewAndEditBox
             if (vm.EditTextBoxBindingCoordinator is TextEditorBindingCoordinator oldCoordinator)
             {
                 oldCoordinator.DeInitialize();
+                if (vm.EditTextBox?.ContentControl != null)
+                {
+                    UiUtil.RemoveControlFromParent(vm.EditTextBox.ContentControl);
+                }
             }
             vm.EditTextBoxBindingCoordinator = null;
         }
