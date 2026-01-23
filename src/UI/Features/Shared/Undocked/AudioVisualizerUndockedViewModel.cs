@@ -88,7 +88,7 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
 
     internal void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        MainViewModel?.OnKeyDownHandler(sender, e);
+        MainViewModel?.OnKeyUpHandler(sender, e);
     }
 
     internal void Onloaded(object? sender, RoutedEventArgs e)
