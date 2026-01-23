@@ -307,6 +307,9 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerMergeWithNext { get; set; }
     public ITextBoxWrapper EditTextBoxOriginal { get; set; }
     public ITextBoxWrapper EditTextBox { get; set; }
+    public object? EditTextBoxHelper { get; set; }
+    public object? EditTextBoxOriginalHelper { get; set; }
+    public object? EditTextBoxBindingCoordinator { get; set; }
     public StackPanel PanelSingleLineLengthsOriginal { get; set; }
     public MenuItem MenuItemStyles { get; set; }
     public MenuItem MenuItemActors { get; set; }

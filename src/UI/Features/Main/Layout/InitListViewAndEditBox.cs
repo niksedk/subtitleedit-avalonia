@@ -13,13 +13,13 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
-using System.ComponentModel;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
-public static class InitListViewAndEditBox
+public static partial class InitListViewAndEditBox
 {
+
     public static Grid MakeLayoutListViewAndEditBox(MainView mainPage, MainViewModel vm)
     {
         mainPage.DataContext = vm;
@@ -40,6 +40,28 @@ public static class InitListViewAndEditBox
             // Clear the grid to help with garbage collection
             vm.SubtitleGrid.ItemsSource = null;
             vm.SubtitleGrid.ContextFlyout = null;
+        }
+
+        // Unhook events from old text editors if they exist
+        if (vm.EditTextBoxBindingCoordinator != null)
+        {
+            if (vm.EditTextBoxBindingCoordinator is TextEditorBindingCoordinator oldCoordinator)
+            {
+                oldCoordinator.DeInitialize();
+            }
+            vm.EditTextBoxBindingCoordinator = null;
+        }
+
+        if (vm.EditTextBoxHelper is TextEditorBindingHelper helper)
+        {
+            helper.DeInitialize();
+            vm.EditTextBoxHelper = null;
+        }
+
+        if (vm.EditTextBoxOriginalHelper is TextEditorBindingHelper helperOriginal)
+        {
+            helperOriginal.DeInitialize();
+            vm.EditTextBoxOriginalHelper = null;
         }
 
         var mainGrid = new Grid
@@ -1333,6 +1355,13 @@ public static class InitListViewAndEditBox
             Converter = booleanToGridLengthConverter
         });
 
+        // Set up coordinator to handle vm.PropertyChanged once for both text editors
+        var textEditorHelper = vm.EditTextBoxHelper as TextEditorBindingHelper;
+        var originalTextEditorHelper = vm.EditTextBoxOriginalHelper as TextEditorBindingHelper;
+        var coordinator = new TextEditorBindingCoordinator(vm, textEditorHelper, originalTextEditorHelper);
+        coordinator.Initialize();
+        vm.EditTextBoxBindingCoordinator = coordinator;
+
         return mainGrid;
     }
 
@@ -1397,120 +1426,9 @@ public static class InitListViewAndEditBox
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
         vm.EditTextBox = wrapper;
 
-        // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
-        textEditor.Loaded += (s, e) =>
-        {
-            var textArea = textEditor.TextArea;
-            if (textArea != null)
-            {
-                textArea.GotFocus += (_, __) =>
-                {
-                    textEditorBorder.BorderBrush = focusedBorderBrush;
-                    wrapper.HasFocus = true;
-                };
-
-                textArea.LostFocus += (_, __) =>
-                {
-                    textEditorBorder.BorderBrush = defaultBorderBrush;
-                    //wrapper.HasFocus = false;
-                };
-            }
-        };
-
-
-        // Setup two-way binding manually since TextEditor doesn't support direct binding
-        var isUpdatingFromViewModel = false;
-        var isUpdatingFromEditor = false;
-        SubtitleLineViewModel? currentSubtitle = null;
-
-        void UpdateEditorFromViewModel()
-        {
-            if (isUpdatingFromEditor)
-            {
-                return;
-            }
-
-            isUpdatingFromViewModel = true;
-            try
-            {
-                var text = vm.SelectedSubtitle?.Text ?? string.Empty;
-                if (textEditor.Text != text)
-                {
-                    textEditor.Text = text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromViewModel = false;
-            }
-        }
-
-        void UpdateViewModelFromEditor()
-        {
-            if (isUpdatingFromViewModel)
-            {
-                return;
-            }
-
-            isUpdatingFromEditor = true;
-            try
-            {
-                if (vm.SelectedSubtitle != null && vm.SelectedSubtitle.Text != textEditor.Text)
-                {
-                    vm.SelectedSubtitle.Text = textEditor.Text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromEditor = false;
-            }
-        }
-
-        void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(SubtitleLineViewModel.Text))
-            {
-                UpdateEditorFromViewModel();
-            }
-        }
-
-        // Listen to SelectedSubtitle changes
-        vm.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(vm.SelectedSubtitle))
-            {
-                // Unsubscribe from old subtitle
-                if (currentSubtitle != null)
-                {
-                    currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
-                }
-
-                // Subscribe to new subtitle
-                currentSubtitle = vm.SelectedSubtitle;
-                if (currentSubtitle != null)
-                {
-                    currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-                }
-
-                UpdateEditorFromViewModel();
-            }
-        };
-
-        // Initial text load and subscription
-        currentSubtitle = vm.SelectedSubtitle;
-        if (currentSubtitle != null)
-        {
-            currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-        }
-        UpdateEditorFromViewModel();
-
-        textEditor.TextChanged += (s, e) =>
-        {
-            UpdateViewModelFromEditor();
-            vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("TextChanged", RoutingStrategies.Bubble)));
-        };
-
-        textEditor.Tapped += (_, _) => vm.SubtitleTextBoxGotFocus();
+        var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: false);
+        helper.Initialize();
+        vm.EditTextBoxHelper = helper;
 
         return textEditorBorder;
     }
@@ -1598,120 +1516,9 @@ public static class InitListViewAndEditBox
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
         vm.EditTextBoxOriginal = wrapper;
 
-        // TextEditor's internal TextArea handles focus, so we need to hook into it after the control is loaded
-        textEditor.Loaded += (s, e) =>
-        {
-            var textArea = textEditor.TextArea;
-            if (textArea != null)
-            {
-                textArea.GotFocus += (_, __) =>
-                {
-                    textEditorBorder.BorderBrush = focusedBorderBrush;
-                    wrapper.HasFocus = true;
-                };
-
-                textArea.LostFocus += (_, __) =>
-                {
-                    textEditorBorder.BorderBrush = defaultBorderBrush;
-                    wrapper.HasFocus = false;
-                };
-            }
-        };
-
-
-        // Setup two-way binding manually since TextEditor doesn't support direct binding
-        var isUpdatingFromViewModel = false;
-        var isUpdatingFromEditor = false;
-        SubtitleLineViewModel? currentSubtitle = null;
-
-        void UpdateEditorFromViewModel()
-        {
-            if (isUpdatingFromEditor)
-            {
-                return;
-            }
-
-            isUpdatingFromViewModel = true;
-            try
-            {
-                var text = vm.SelectedSubtitle?.OriginalText ?? string.Empty;
-                if (textEditor.Text != text)
-                {
-                    textEditor.Text = text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromViewModel = false;
-            }
-        }
-
-        void UpdateViewModelFromEditor()
-        {
-            if (isUpdatingFromViewModel)
-            {
-                return;
-            }
-
-            isUpdatingFromEditor = true;
-            try
-            {
-                if (vm.SelectedSubtitle != null && vm.SelectedSubtitle.OriginalText != textEditor.Text)
-                {
-                    vm.SelectedSubtitle.OriginalText = textEditor.Text;
-                }
-            }
-            finally
-            {
-                isUpdatingFromEditor = false;
-            }
-        }
-
-        void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(SubtitleLineViewModel.OriginalText))
-            {
-                UpdateEditorFromViewModel();
-            }
-        }
-
-        // Listen to SelectedSubtitle changes
-        vm.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(vm.SelectedSubtitle))
-            {
-                // Unsubscribe from old subtitle
-                if (currentSubtitle != null)
-                {
-                    currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
-                }
-
-                // Subscribe to new subtitle
-                currentSubtitle = vm.SelectedSubtitle;
-                if (currentSubtitle != null)
-                {
-                    currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-                }
-
-                UpdateEditorFromViewModel();
-            }
-        };
-
-        // Initial text load and subscription
-        currentSubtitle = vm.SelectedSubtitle;
-        if (currentSubtitle != null)
-        {
-            currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-        }
-        UpdateEditorFromViewModel();
-
-        textEditor.TextChanged += (s, e) =>
-        {
-            UpdateViewModelFromEditor();
-            vm.SubtitleTextChanged(s, new TextChangedEventArgs(RoutedEvent.Register<TextEditor, TextChangedEventArgs>("OriginalTextChanged", RoutingStrategies.Bubble)));
-        };
-
-        textEditor.Tapped += (_, _) => vm.SubtitleTextBoxGotFocus();
+        var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: true);
+        helper.Initialize();
+        vm.EditTextBoxOriginalHelper = helper;
 
         return textEditorBorder;
     }
