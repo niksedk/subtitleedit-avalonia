@@ -3,7 +3,6 @@ using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Dictionaries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,7 +57,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _isLoaded = false;
         _ocrFixReplaceList = new OcrFixReplaceList2(string.Empty);
         _spellCheckWordLists = new SpellCheckWordLists2(string.Empty, this);
-        _wordSplitList = new string[0];
+        _wordSplitList = Array.Empty<string>();
     }
 
     void IOcrFixEngine2.Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary)
@@ -337,7 +336,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
             if (!string.IsNullOrEmpty(result) && !isWordCorrect && doTryToGuessUnknownWords)
             {
-                var guesses = new List<string>();   
+                var guesses = new List<string>();
 
                 if (w.Length > 4 && Se.Settings.Ocr.UseWordSplitList)
                 {
@@ -350,14 +349,14 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                     }
                     else
                     {
-                        var splitWords = StringWithoutSpaceSplitToWords.SplitWord(_wordSplitList, w);
+                        var splitWords = StringWithoutSpaceSplitToWords.SplitWord(_wordSplitList, w, _threeLetterIsoLanguageName);
                         if (splitWords != w)
                         {
                             guesses.Add(splitWords);
                         }
                     }
                 }
-                
+
                 guesses.AddRange(_ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName));
                 foreach (var g in guesses)
                 {
