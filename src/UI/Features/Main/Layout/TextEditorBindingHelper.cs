@@ -3,7 +3,6 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using AvaloniaEdit;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
-using System.ComponentModel;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -20,7 +19,7 @@ public static partial class InitListViewAndEditBox
         private readonly bool _isOriginal;
         private bool _isUpdatingFromViewModel;
         private bool _isUpdatingFromEditor;
-        private SubtitleLineViewModel? _currentSubtitle;
+
 
         public TextEditorBindingHelper(
             MainViewModel vm,
@@ -46,11 +45,6 @@ public static partial class InitListViewAndEditBox
             _textEditor.TextChanged += OnTextEditorTextChanged;
             _textEditor.Tapped += OnTextEditorTapped;
 
-            _currentSubtitle = _vm.SelectedSubtitle;
-            if (_currentSubtitle != null)
-            {
-                _currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-            }
             UpdateEditorFromViewModel();
         }
 
@@ -59,12 +53,6 @@ public static partial class InitListViewAndEditBox
             _textEditor.Loaded -= OnTextEditorLoaded;
             _textEditor.TextChanged -= OnTextEditorTextChanged;
             _textEditor.Tapped -= OnTextEditorTapped;
-
-            if (_currentSubtitle != null)
-            {
-                _currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
-                _currentSubtitle = null;
-            }
 
             var textArea = _textEditor.TextArea;
             if (textArea != null)
@@ -76,17 +64,11 @@ public static partial class InitListViewAndEditBox
 
         public void OnSelectedSubtitleChanged()
         {
-            if (_currentSubtitle != null)
-            {
-                _currentSubtitle.PropertyChanged -= OnSubtitlePropertyChanged;
-            }
+            UpdateEditorFromViewModel();
+        }
 
-            _currentSubtitle = _vm.SelectedSubtitle;
-            if (_currentSubtitle != null)
-            {
-                _currentSubtitle.PropertyChanged += OnSubtitlePropertyChanged;
-            }
-
+        public void OnSubtitleTextPropertyChanged()
+        {
             UpdateEditorFromViewModel();
         }
 
@@ -127,15 +109,6 @@ public static partial class InitListViewAndEditBox
         private void OnTextEditorTapped(object? sender, RoutedEventArgs e)
         {
             _vm.SubtitleTextBoxGotFocus();
-        }
-
-        private void OnSubtitlePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var propertyName = _isOriginal ? nameof(SubtitleLineViewModel.OriginalText) : nameof(SubtitleLineViewModel.Text);
-            if (e.PropertyName == propertyName)
-            {
-                UpdateEditorFromViewModel();
-            }
         }
 
         private void UpdateEditorFromViewModel()
