@@ -11,19 +11,28 @@ public static class FindVideoFileName
 {
     public static bool TryFindVideoFileName(string inputFileName, out string videoFileName)
     {
-        var result = TryFindVideoFileNameInner(inputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        videoFileName = string.Empty;
 
-        if (result == false && Se.Settings.Video.OpenSearchParentFolder)
-        { 
-            // try again with the folder, one folder up (if any)
+        if (string.IsNullOrWhiteSpace(inputFileName))
+        {
+            return false;
+        }
+
+        var visitedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var result = TryFindVideoFileNameInner(inputFileName, out videoFileName, visitedPaths);
+
+        if (!result && Se.Settings.Video.OpenSearchParentFolder)
+        {
+            // Try again with the folder one level up (if any)
             var directory = Path.GetDirectoryName(inputFileName);
             if (!string.IsNullOrEmpty(directory))
             {
                 var parentDirectory = Path.GetDirectoryName(directory);
                 if (!string.IsNullOrEmpty(parentDirectory))
                 {
-                    var newInputFileName = Path.Combine(parentDirectory, Path.GetFileName(inputFileName));
-                    result = TryFindVideoFileNameInner(newInputFileName, out videoFileName, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+                    var fileName = Path.GetFileName(inputFileName);
+                    var newInputFileName = Path.Combine(parentDirectory, fileName);
+                    result = TryFindVideoFileNameInner(newInputFileName, out videoFileName, visitedPaths);
                 }
             }
         }
@@ -31,41 +40,53 @@ public static class FindVideoFileName
         return result;
     }
 
-    public static bool TryFindVideoFileNameInner(string inputFileName, out string videoFileName, HashSet<string> videoFileNamesTried)
+    private static bool TryFindVideoFileNameInner(string inputFileName, out string videoFileName, HashSet<string> visitedPaths)
     {
         videoFileName = string.Empty;
 
-        if (string.IsNullOrEmpty(inputFileName))
+        if (string.IsNullOrWhiteSpace(inputFileName))
         {
             return false;
         }
 
-        if (videoFileNamesTried.Contains(inputFileName))
+        // Prevent infinite recursion
+        if (visitedPaths.Contains(inputFileName))
         {
             return false;
         }
-        videoFileNamesTried.Add(inputFileName);
+        visitedPaths.Add(inputFileName);
 
+        // Try appending video/audio extensions to the input file name
         foreach (var extension in Utilities.VideoFileExtensions.Concat(Utilities.AudioFileExtensions))
         {
-            var fileName = inputFileName + extension;
-            if (File.Exists(fileName))
+            var candidateFileName = inputFileName + extension;
+            if (File.Exists(candidateFileName))
             {
-                videoFileName = fileName;
+                videoFileName = candidateFileName;
                 return true;
             }
         }
 
-        var index = inputFileName.LastIndexOf('.');
-        if (index > 0 && TryFindVideoFileName(inputFileName.Remove(index), out videoFileName))
+        // Try removing file extension (e.g., "movie.en.srt" -> "movie.en")
+        var lastDotIndex = inputFileName.LastIndexOf('.');
+        if (lastDotIndex > 0)
         {
-            return true;
+            var withoutExtension = inputFileName.Substring(0, lastDotIndex);
+            if (TryFindVideoFileNameInner(withoutExtension, out videoFileName, visitedPaths))
+            {
+                return true;
+            }
         }
 
-        index = inputFileName.LastIndexOf('_');
-        if (index > 0 && TryFindVideoFileName(inputFileName.Remove(index), out videoFileName))
+        // Try removing suffix after underscore (e.g., "movie_en" -> "movie")
+        var lastUnderscoreIndex = inputFileName.LastIndexOf('_');
+        if (lastUnderscoreIndex > 0)
         {
-            return true;
+            var withoutSuffix = inputFileName.Substring(0, lastUnderscoreIndex);
+            if (TryFindVideoFileNameInner(withoutSuffix, out videoFileName, visitedPaths))
+            {
+                return true;
+            }
         }
 
         return false;
