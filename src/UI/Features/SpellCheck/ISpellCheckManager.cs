@@ -1,5 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.SpellCheck;
-using Nikse.SubtitleEdit.Features.Main;
+﻿using Nikse.SubtitleEdit.Features.Main;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 

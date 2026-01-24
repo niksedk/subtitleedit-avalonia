@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace SevenZipExtractor
 {
@@ -14,10 +13,6 @@ namespace SevenZipExtractor
         }
 
         public SevenZipException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected SevenZipException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
