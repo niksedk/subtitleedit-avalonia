@@ -16,7 +16,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public class InitWaveform
 {
-    public static Grid MakeWaveform(MainViewModel vm)
+    public static Grid MakeWaveform(MainViewModel vm, Shared.Undocked.VideoPlayerUndockedViewModel? videoPlayerUndockedViewModel = null)
     {
         var languageHints = Se.Language.Main.Waveform;
         var settings = Se.Settings.Waveform;
@@ -395,8 +395,18 @@ public class InitWaveform
                 thumb.Height = 14;
             }
         };
-        sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
-        sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
+
+        if (videoPlayerUndockedViewModel == null)
+        {
+            sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
+            sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
+        }
+        else
+        {
+            sliderPosition.DataContext = videoPlayerUndockedViewModel;
+            sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(videoPlayerUndockedViewModel.VideoPlayerControl) + "." + nameof(videoPlayerUndockedViewModel.VideoPlayerControl.Duration)));
+            sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(videoPlayerUndockedViewModel.VideoPlayerControl) + "." + nameof(videoPlayerUndockedViewModel.VideoPlayerControl.Position)));
+        }
 
         var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);
         var comboBoxSpeed = new ComboBox

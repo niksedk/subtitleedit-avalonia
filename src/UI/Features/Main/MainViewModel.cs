@@ -3355,7 +3355,7 @@ public partial class MainViewModel :
             _windowService.ShowWindow<AudioVisualizerUndockedWindow, AudioVisualizerUndockedViewModel>(Window, (window, vm) =>
             {
                 _audioVisualizerUndockedViewModel = vm;
-                vm.Initialize(AudioVisualizer, this);
+                vm.Initialize(AudioVisualizer, this, _videoPlayerUndockedViewModel);
                 ReloadAudioVisualizer();
             });
 
