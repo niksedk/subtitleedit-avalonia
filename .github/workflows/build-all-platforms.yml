@@ -155,6 +155,38 @@ jobs:
           unzip libmpv-mac-arm.zip -d libmpv-temp
           rm libmpv-mac-arm.zip  # Clean up immediately after extraction
 
+      - name: Free disk space before builds
+        run: |
+          echo "Before cleanup:"; df -h /
+      
+          # Clear NuGet caches
+          #dotnet nuget locals all --clear
+      
+          # Remove Homebrew caches 
+          brew cleanup --prune=all -s
+          rm -rf ~/Library/Caches/Homebrew/* 2>/dev/null || true
+      
+          # Remove Xcode/iOS dev files (not needed for .NET)
+          rm -rf ~/Library/Developer/Xcode/DerivedData/* 2>/dev/null || true
+          rm -rf ~/Library/Developer/CoreSimulator/* 2>/dev/null || true
+          rm -rf ~/Library/Developer/Xcode/Archives/* 2>/dev/null || true
+      
+          # Remove Android SDK files if present (not needed for .NET)
+          rm -rf ~/Library/Android/sdk/build-tools/* 2>/dev/null || true
+          rm -rf ~/Library/Android/sdk/platforms/* 2>/dev/null || true
+      
+          # Remove CocoaPods cache (iOS dev tool, not needed)
+          rm -rf ~/Library/Caches/CocoaPods/* 2>/dev/null || true
+      
+          # Remove Carthage cache (Mac dev tool, not needed)
+          rm -rf ~/Library/Caches/org.carthage.CarthageKit/* 2>/dev/null || true
+      
+          # Remove pip/Python caches (not needed for .NET)
+          rm -rf ~/Library/Caches/pip/* 2>/dev/null || true
+          rm -rf ~/Library/Caches/pypoetry/* 2>/dev/null || true
+      
+          echo "After cleanup:"; df -h /
+
       # Setup signing environment if certificates are available
       - name: Setup code signing (if certificates available)
         run: |
@@ -214,46 +246,8 @@ jobs:
           ln -s /Applications "./dmg-temp-x64/Applications"
           hdiutil create -volname "SubtitleEdit x64" -srcfolder "./dmg-temp-x64" -ov -format UDZO "./SubtitleEdit-macOS-x64.dmg"
       
-          # Immediate cleanup of x64 artifacts
+      # Immediate cleanup of x64 artifacts
           rm -rf "./dmg-temp-x64" "./SubtitleEdit-x64.app" "./publish/macos-x64"
-
-      - name: Major disk cleanup before ARM64 build
-        run: |
-          echo "Before major cleanup:"; df -h /
-      
-          # Clear all .NET caches and temp files
-          dotnet nuget locals all --clear
-          rm -rf ~/.nuget/packages/*
-          rm -rf /tmp/NuGet*
-          rm -rf /var/folders/*/T/NuGetScratch* 2>/dev/null || true
-      
-          # Aggressive Homebrew cleanup
-          brew cleanup --prune=all -s
-          rm -rf $(brew --cache)
-          rm -rf /opt/homebrew/var/homebrew/locks/* 2>/dev/null || true
-      
-          # Remove Docker if present (common space hog)
-          docker system prune -af 2>/dev/null || true
-      
-          # Clean system temp directories
-          sudo rm -rf /tmp/* 2>/dev/null || true
-          rm -rf ~/Library/Caches/* 2>/dev/null || true
-          rm -rf ~/Library/Developer/Xcode/DerivedData/* 2>/dev/null || true
-          rm -rf ~/Library/Developer/CoreSimulator/* 2>/dev/null || true
-      
-          # Remove large system files that are often cached
-          sudo rm -rf /System/Library/Caches/* 2>/dev/null || true
-          sudo rm -rf /var/vm/sleepimage 2>/dev/null || true
-      
-          # Clean up any remaining build artifacts
-          find . -name "*.log" -type f -delete 2>/dev/null || true
-          find . -name "bin" -type d -exec rm -rf {} + 2>/dev/null || true
-          find . -name "obj" -type d -exec rm -rf {} + 2>/dev/null || true
-      
-          # Force garbage collection
-          sync && sudo purge
-      
-          echo "After major cleanup:"; df -h /
 
       - name: Publish macOS ARM64 app
         run: |
