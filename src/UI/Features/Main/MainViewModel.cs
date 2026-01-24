@@ -9779,7 +9779,7 @@ public partial class MainViewModel :
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = GetFileNameWithoutExtension(_videoFileName);
+                newFileName = GetFileNameWithoutExtension(_subtitleFileName);
             }
         }
 

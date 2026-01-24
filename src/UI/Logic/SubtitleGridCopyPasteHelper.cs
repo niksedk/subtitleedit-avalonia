@@ -69,7 +69,7 @@ internal static class SubtitleGridCopyPasteHelper
 
         foreach (SubtitleFormat item in SubtitleFormat.AllSubtitleFormats)
         {
-            if (item.IsMine(lines, string.Empty))
+            if (item.IsMine(lines, string.Empty) && subtitle != null)
             {
                 item.LoadSubtitle(subtitle, lines, string.Empty);
                 var firstSubtitleTime = subtitle.Paragraphs[0].StartTime.TotalMilliseconds;
