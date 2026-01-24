@@ -8399,6 +8399,7 @@ public partial class MainViewModel :
                         if (result.OkPressed)
                         {
                             _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                            _converted = true;
                             Subtitles.Clear();
                             Subtitles.AddRange(result.OcredSubtitle);
                         }
@@ -8967,6 +8968,7 @@ public partial class MainViewModel :
                                     SelectedSubtitleFormat.Extension;
                 Subtitles.AddRange(
                     _subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+                _converted = true;
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
@@ -8981,6 +8983,7 @@ public partial class MainViewModel :
                                     SelectedSubtitleFormat.Extension;
                 Subtitles.AddRange(
                     _subtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, SelectedSubtitleFormat)));
+                _converted = true;
                 ShowStatus(string.Format(Se.Language.General.SubtitleLoadedX, fileName));
                 SelectAndScrollToRow(0);
                 return;
@@ -9023,6 +9026,7 @@ public partial class MainViewModel :
                 {
                     ResetSubtitle();
                     _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                    _converted = true;
                     Subtitles.Clear();
                     Subtitles.AddRange(result.OcredSubtitle);
                     Renumber();
@@ -9034,6 +9038,8 @@ public partial class MainViewModel :
         else
         {
             ResetSubtitle();
+            _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+            _converted = true;
             _subtitle.Paragraphs.Clear();
             _subtitle.Paragraphs.AddRange(mp4SubtitleTrack.Mdia.Minf.Stbl.GetParagraphs());
             Subtitles.Clear();
@@ -9082,8 +9088,9 @@ public partial class MainViewModel :
                 {
                     if (await LoadMatroskaSubtitle(result.SelectedMatroskaTrack, matroska, fileName))
                     {
-                        SelectAndScrollToRow(0);
                         _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                        _converted = true;
+                        SelectAndScrollToRow(0);
 
                         if (Se.Settings.General.AutoOpenVideo)
                         {
@@ -9168,6 +9175,7 @@ public partial class MainViewModel :
                 if (result.OkPressed)
                 {
                     _subtitleFileName = Path.GetFileNameWithoutExtension(fileName);
+                    _converted = true;
                     Subtitles.Clear();
                     Subtitles.AddRange(result.OcredSubtitle);
                     Renumber();
@@ -9392,6 +9400,7 @@ public partial class MainViewModel :
         SelectedSubtitleFormat =
             SubtitleFormats.FirstOrDefault(p => p.Name == Se.Settings.General.DefaultSubtitleFormat) ??
             SelectedSubtitleFormat;
+        _converted = true;
         ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
         _subtitle.Renumber();
         Subtitles.Clear();
@@ -9483,6 +9492,7 @@ public partial class MainViewModel :
         if (result.OkPressed)
         {
             _subtitleFileName = Path.GetFileNameWithoutExtension(vobSubFileName);
+            _converted = true;
             Subtitles.Clear();
             Subtitles.AddRange(result.OcredSubtitle);
             return true;
@@ -9739,37 +9749,37 @@ public partial class MainViewModel :
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_subtitleFileName);
+                newFileName = GetFileNameWithoutExtension(_subtitleFileName);
             }
             else if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
 
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_subtitleFileName);
+                newFileName = GetFileNameWithoutExtension(_subtitleFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
         }
         else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
-                newFileName = Utilities.GetFileNameWithoutExtension(_videoFileName);
+                newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
         }
 
@@ -9839,6 +9849,28 @@ public partial class MainViewModel :
         var result = await SaveSubtitle();
         AddToRecentFiles(true);
         return result;
+    }
+
+    private string GetFileNameWithoutExtension(string fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return fileName;
+        }
+
+        var allowedExtensions = SubtitleFormats.Select(f => f.Extension).ToList();
+        allowedExtensions.AddRange(Utilities.VideoFileExtensions);
+        allowedExtensions.AddRange(Utilities.AudioFileExtensions);
+        foreach (var ext in allowedExtensions)
+        {
+            if (fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+            {
+                fileName = fileName.Substring(0, fileName.Length - ext.Length);
+                break;
+            }
+        }
+
+        return fileName;
     }
 
     private async Task<bool> SaveSubtitleOriginalAs()
