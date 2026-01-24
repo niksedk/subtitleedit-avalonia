@@ -993,8 +993,8 @@ public class LanguageGeneral
         SaveChangesTitle = "Save changes?";
         SaveChangesToX = "Do you want to save changes to \"{0}\"?";
         SaveChangesToXOriginal = "Do you want to save changes to the original subtitle file \"{0}\"?";
-        SavedChangesToXAndY = "Saved changes to \"{0}\" and \"{1}\"";
-        SavedChangesToX = "Saved changes to \"{0}\"";
+        SavedChangesToXAndY = "Saved \"{0}\" and \"{1}\"";
+        SavedChangesToX = "Saved \"{0}\"";
         SaveDotDotDot = "Save...";
         SaveFileAsTitle = "Save file as";
         SaveImageAs = "Save image as";
