@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "src\UI\UI.csproj", "{C27E3654-FA0B-41EB-87C2-9B9A6B27566F}"
 EndProject
@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "macBundle", "macBundle", "{20ABFC11-A537-4519-BC53-961E337091C3}"
 	ProjectSection(SolutionItems) = preProject
 		installer\macBundle\SubtitleEdit.app\Contents\Info.plist = installer\macBundle\SubtitleEdit.app\Contents\Info.plist
+		installer\macBundle\update-plist-version.sh = installer\macBundle\update-plist-version.sh
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSE", "src\libse\LibSE.csproj", "{28555E54-253F-6C49-5DB8-4B2C88F26731}"

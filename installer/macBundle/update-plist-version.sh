@@ -23,7 +23,7 @@ echo "Extracted version from Se.cs: $VERSION"
 
 # Convert version to CFBundleShortVersionString format
 # "5.0.0-preview95" -> "5.0.0-preview.95"
-SHORT_VERSION=$(echo "$VERSION" | sed 's/preview/-preview./')
+SHORT_VERSION=$(echo "$VERSION" | sed 's/preview/preview./')
 echo "CFBundleShortVersionString: $SHORT_VERSION"
 
 # Convert version to CFBundleVersion format (only numbers)
