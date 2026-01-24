@@ -300,23 +300,56 @@ namespace SevenZipExtractor
 
             if (string.IsNullOrWhiteSpace(_libraryFilePath))
             {
-                var paths = new[]
+                // Platform-specific library search
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    Path.Combine(Se.SevenZipFolder, "7zxa.dll"),
-                    Path.Combine(Se.SevenZipFolder, "7z.dll"),
-                };
+                    var paths = new[]
+                    {
+                        Path.Combine(Se.SevenZipFolder, "7zxa.dll"),
+                        Path.Combine(Se.SevenZipFolder, "7z.dll"),
+                    };
 
-                _libraryFilePath = paths.FirstOrDefault(File.Exists);
+                    _libraryFilePath = paths.FirstOrDefault(File.Exists);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    // On Linux, try bundled first, then fall back to system libraries
+                    var paths = new[]
+                    {
+                        Path.Combine(Se.SevenZipFolder, "7z.so"),
+                        Path.Combine(Se.SevenZipFolder, "lib7z.so"),
+                        "7z.so",  // Let system resolve
+                        "lib7z.so",
+                    };
+
+                    _libraryFilePath = paths.FirstOrDefault(p => 
+                        Path.IsPathRooted(p) ? File.Exists(p) : !string.IsNullOrEmpty(p));
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // On macOS, try bundled first, then fall back to system libraries
+                    var paths = new[]
+                    {
+                        Path.Combine(Se.SevenZipFolder, "7z.dylib"),
+                        Path.Combine(Se.SevenZipFolder, "lib7z.dylib"),
+                        "7z.dylib",  // Let system resolve
+                        "lib7z.dylib",
+                    };
+
+                    _libraryFilePath = paths.FirstOrDefault(p => 
+                        Path.IsPathRooted(p) ? File.Exists(p) : !string.IsNullOrEmpty(p));
+                }
             }
 
             if (string.IsNullOrWhiteSpace(_libraryFilePath))
             {
-                throw new SevenZipException("libraryFilePath not set");
+                throw new SevenZipException("7-Zip library not found. Please install p7zip or provide library path.");
             }
 
-            if (!File.Exists(_libraryFilePath))
+            // Don't check file existence for non-absolute paths (system will resolve them)
+            if (Path.IsPathRooted(_libraryFilePath) && !File.Exists(_libraryFilePath))
             {
-                throw new SevenZipException("7zxa.dll not found");
+                throw new SevenZipException($"7-Zip library not found at: {_libraryFilePath}");
             }
 
             try

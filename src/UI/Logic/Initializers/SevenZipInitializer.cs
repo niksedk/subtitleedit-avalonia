@@ -15,9 +15,10 @@ public class SevenZipInitializer : ISevenZipInitializer
 {
     public async Task UpdateSevenZipIfNeeded()
     {
+        // On Windows, we bundle 7zxa.dll; on Linux/macOS, use system libraries
         if (!OperatingSystem.IsWindows())
         {
-            return; // only Windows support for now
+            return; // Linux/macOS will use system-installed p7zip
         }
 
         string outputDir = Se.SevenZipFolder;

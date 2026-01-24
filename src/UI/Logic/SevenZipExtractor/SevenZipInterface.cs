@@ -1,11 +1,8 @@
 // Version 25.1
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Threading;
 
 namespace SevenZipExtractor
 {

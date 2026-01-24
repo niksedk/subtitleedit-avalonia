@@ -1,18 +1,47 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace SevenZipExtractor
 {
-    internal sealed class SafeLibraryHandle : SafeHandleZeroOrMinusOneIsInvalid
+    /// <summary>
+    /// Safe handle for native library loaded via NativeLibrary
+    /// </summary>
+    internal sealed class SafeLibraryHandle : IDisposable
     {
-        public SafeLibraryHandle() : base(true)
+        private IntPtr _handle;
+        private bool _disposed;
+
+        public SafeLibraryHandle(IntPtr handle)
         {
+            _handle = handle;
         }
 
+        public bool IsInvalid => _handle == IntPtr.Zero;
+
+        public bool IsClosed => _handle == IntPtr.Zero;
+
+        public IntPtr DangerousGetHandle() => _handle;
+
         /// <summary>Release library handle</summary>
-        /// <returns>true if the handle was released</returns>
-        protected override bool ReleaseHandle()
+        public void Dispose()
         {
-            return Kernel32Dll.FreeLibrary(this.handle);
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (_handle != IntPtr.Zero)
+            {
+                NativeLibraryLoader.FreeLibrary(_handle);
+                _handle = IntPtr.Zero;
+            }
+
+            _disposed = true;
+        }
+
+        public void Close()
+        {
+            Dispose();
         }
     }
 }
