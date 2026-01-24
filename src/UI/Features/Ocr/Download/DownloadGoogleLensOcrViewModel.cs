@@ -5,9 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
-using SharpCompress.Archives.SevenZip;
-using SharpCompress.Common;
-using SharpCompress.Readers;
+using Nikse.SubtitleEdit.Logic.SevenZipExtractor;
 using System;
 using System.Globalization;
 using System.IO;
@@ -82,7 +80,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
                     return;
                 }
 
-                Extract7Zip(_tempFileName, Se.GoogleLensOcrFolder, "Chrome-Lens-CLI-v3.3.0");
+                Unpacker.Extract7Zip(_tempFileName, Se.GoogleLensOcrFolder, "Chrome-Lens-CLI-v3.3.0", _cancellationTokenSource, text => ProgressText = text); 
 
                 OkPressed = true;
                 Close();
@@ -104,75 +102,7 @@ public partial class DownloadGoogleLensOcrViewModel : ObservableObject
                 }
             }
         }
-    }
-
-    private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
-    {
-        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
-        using Stream stream = File.OpenRead(tempFileName);
-        using var archive = SevenZipArchive.Open(stream);
-        double totalSize = archive.TotalUncompressSize;
-        double unpackedSize = 0;
-
-        var reader = archive.ExtractAllEntries();
-        while (reader.MoveToNextEntry())
-        {
-            if (_cancellationTokenSource.IsCancellationRequested)
-            {
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(reader.Entry.Key))
-            {
-                var entryFullName = reader.Entry.Key;
-                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
-                {
-                    entryFullName = entryFullName[skipFolderLevel.Length..];
-                }
-
-                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
-                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
-
-                var fullFileName = Path.Combine(dir, entryFullName);
-
-                if (reader.Entry.IsDirectory)
-                {
-                    if (!Directory.Exists(fullFileName))
-                    {
-                        Directory.CreateDirectory(fullFileName);
-                    }
-
-                    continue;
-                }
-
-                var fullPath = Path.GetDirectoryName(fullFileName);
-                if (fullPath == null)
-                {
-                    continue;
-                }
-
-                var displayName = entryFullName;
-                if (displayName.Length > 30)
-                {
-                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
-                }
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    ProgressText = string.Format(Se.Language.General.UnpackingX, displayName);
-                });
-
-                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
-                {
-                    ExtractFullPath = false,
-                    Overwrite = true
-                });
-                unpackedSize += reader.Entry.Size;
-            }
-        }
-
-        ProgressValue = 100.0f;
-    }
+    }    
 
     private void Close()
     {

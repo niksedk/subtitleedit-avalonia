@@ -3,12 +3,10 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
-using SevenZipExtractor;
-using SharpCompress.Archives.SevenZip;
-using SharpCompress.Common;
-using SharpCompress.Readers;
+using Nikse.SubtitleEdit.Logic.SevenZipExtractor;
 using System;
 using System.Globalization;
 using System.IO;
@@ -23,6 +21,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 {
     [ObservableProperty] private double _progressValue;
     [ObservableProperty] private string _progressText;
+    [ObservableProperty] private double _progressOpacity;
     [ObservableProperty] private string _statusText;
     [ObservableProperty] private string _error;
 
@@ -36,6 +35,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private PaddleOcrDownloadType _downloadType;
+    private IndeterminateProgressHelper? _indeterminateProgressHelper;
 
     public DownloadPaddleOcrViewModel(IPaddleOcrDownloadService paddleOcrDownloadService)
     {
@@ -98,22 +98,24 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                     return;
                 }
 
+                StartIndeterminateProgress();
                 if (_downloadType == PaddleOcrDownloadType.Models)
                 {
                     StatusText = "Unpacking Paddle OCR models...";
-                    Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files");
+                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files", _cancellationTokenSource, text => ProgressText = text);
                 }
                 else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
                 {
                     StatusText = "Unpacking Paddle OCR GPU...";
-                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8");
+                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8", _cancellationTokenSource, text => ProgressText = text);
                 }
                 else if (_downloadType == PaddleOcrDownloadType.EngineCpu)
                 {
                     StatusText = "Unpacking Paddle OCR CPU...";
-                    Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.2");
+                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.2", _cancellationTokenSource, text => ProgressText = text);
                 }
 
+                StopIndeterminateProgress();
                 OkPressed = true;
                 Close();
             }
@@ -136,125 +138,19 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         }
     }
 
-    private void Extract7Zip(string tempFileName, string dir, string skipFolderLevel)
+    private void StartIndeterminateProgress()
     {
-        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
-        if (!OperatingSystem.IsWindows())
-        {
-            Extract7ZipSlow(tempFileName, dir, skipFolderLevel);
-            return; 
-        }
-
-        using (var archiveFile = new ArchiveFile(tempFileName))
-        {
-            archiveFile.Extract(entry =>
-            {
-                if (_cancellationTokenSource.IsCancellationRequested)
-                {
-                    return null;
-                }
-
-                var entryFullName = entry.FileName;
-                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
-                {
-                    entryFullName = entryFullName.Substring(skipFolderLevel.Length);
-                }
-
-                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
-                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
-
-                var fullFileName = Path.Combine(dir, entryFullName);
-
-                var fullPath = Path.GetDirectoryName(fullFileName);
-                if (fullPath == null)
-                {
-                    return null;
-                }
-
-
-                var displayName = entryFullName;
-                if (displayName.Length > 30)
-                {
-                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
-                }
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    ProgressText = string.Format(Se.Language.General.UnpackingX, displayName);
-                });
-
-                return fullFileName;
-            });
-        }
-
-        ProgressValue = 100.0f;
+        _indeterminateProgressHelper?.Dispose();
+        _indeterminateProgressHelper = new IndeterminateProgressHelper(
+            value => ProgressValue = value,
+            opacity => ProgressOpacity = opacity,
+            () => _cancellationTokenSource.IsCancellationRequested);
+        _indeterminateProgressHelper.Start();
     }
 
-    private void Extract7ZipSlow(string tempFileName, string dir, string skipFolderLevel)
+    private void StopIndeterminateProgress()
     {
-        StatusText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
-        using Stream stream = File.OpenRead(tempFileName);
-        using var archive = SevenZipArchive.Open(stream);
-        double totalSize = archive.TotalUncompressSize;
-        double unpackedSize = 0;
-
-        var reader = archive.ExtractAllEntries();
-        while (reader.MoveToNextEntry())
-        {
-            if (_cancellationTokenSource.IsCancellationRequested)
-            {
-                return;
-            }
-
-            if (!string.IsNullOrEmpty(reader.Entry.Key))
-            {
-                var entryFullName = reader.Entry.Key;
-                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
-                {
-                    entryFullName = entryFullName[skipFolderLevel.Length..];
-                }
-
-                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
-                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
-
-                var fullFileName = Path.Combine(dir, entryFullName);
-
-                if (reader.Entry.IsDirectory)
-                {
-                    if (!Directory.Exists(fullFileName))
-                    {
-                        Directory.CreateDirectory(fullFileName);
-                    }
-
-                    continue;
-                }
-
-                var fullPath = Path.GetDirectoryName(fullFileName);
-                if (fullPath == null)
-                {
-                    continue;
-                }
-
-                var displayName = entryFullName;
-                if (displayName.Length > 30)
-                {
-                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
-                }
-                Dispatcher.UIThread.Post(() =>
-                {
-                    ProgressText = string.Format(Se.Language.General.UnpackingX, displayName);
-                });
-
-                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
-                {
-                    ExtractFullPath = false,
-                    Overwrite = true
-                });
-                unpackedSize += reader.Entry.Size;
-            }
-        }
-
-        ProgressValue = 100.0f;
+        _indeterminateProgressHelper?.Stop();
     }
 
     private void Close()
