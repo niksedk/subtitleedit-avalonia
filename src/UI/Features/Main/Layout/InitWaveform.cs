@@ -4,19 +4,21 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Projektanker.Icons.Avalonia;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
 public class InitWaveform
 {
-    public static Grid MakeWaveform(MainViewModel vm, Shared.Undocked.VideoPlayerUndockedViewModel? videoPlayerUndockedViewModel = null)
+    public static Grid MakeWaveform(MainViewModel vm)
     {
         var languageHints = Se.Language.Main.Waveform;
         var settings = Se.Settings.Waveform;
@@ -396,16 +398,25 @@ public class InitWaveform
             }
         };
 
-        if (videoPlayerUndockedViewModel == null)
+        if (vm.VideoPlayerControl != null)
         {
             sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Duration)));
             sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.VideoPlayerControl) + "." + nameof(vm.VideoPlayerControl.Position)));
         }
         else
         {
-            sliderPosition.DataContext = videoPlayerUndockedViewModel;
-            sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(videoPlayerUndockedViewModel.VideoPlayerControl) + "." + nameof(videoPlayerUndockedViewModel.VideoPlayerControl.Duration)));
-            sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(videoPlayerUndockedViewModel.VideoPlayerControl) + "." + nameof(videoPlayerUndockedViewModel.VideoPlayerControl.Position)));
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2000);
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    var vp = vm.GetVideoPlayerControl(); // videoPlayerUndockedViewModel.VideoPlayerControl;
+                    sliderPosition.DataContext = vp;
+                    sliderPosition.Bind(RangeBase.MaximumProperty, new Binding(nameof(vp.Duration)));
+                    sliderPosition.Bind(RangeBase.ValueProperty, new Binding(nameof(vp.Position)));
+                });
+            });
+
         }
 
         var labelSpeed = UiUtil.MakeLabel(Se.Language.General.Speed);

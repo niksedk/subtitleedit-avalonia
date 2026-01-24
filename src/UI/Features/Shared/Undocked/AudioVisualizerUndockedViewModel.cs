@@ -21,9 +21,9 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     public Main.MainViewModel? MainViewModel { get; set; }
     public bool AllowClose { get; set; }
 
-    internal void Initialize(AudioVisualizer? audioVisualizer, Main.MainViewModel mainViewModel, VideoPlayerUndockedViewModel? videoPlayerUndockedViewModel = null)
+    internal void Initialize(AudioVisualizer? audioVisualizer, Main.MainViewModel mainViewModel)
     {
-        AudioVisualizer = InitWaveform.MakeWaveform(mainViewModel, videoPlayerUndockedViewModel);
+        AudioVisualizer = InitWaveform.MakeWaveform(mainViewModel);
         AudioVisualizer.DataContext = mainViewModel;
 
         if (mainViewModel.AudioVisualizer != null && audioVisualizer != null)
