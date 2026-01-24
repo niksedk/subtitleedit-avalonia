@@ -16,13 +16,11 @@ namespace SevenZipExtractor
     [StructLayout(LayoutKind.Explicit)]
     internal struct PropVariant
     {
-        [DllImport("ole32.dll")]
-        private static extern int PropVariantClear(ref PropVariant pvar);
-
         [FieldOffset(0)] public ushort vt;
         [FieldOffset(8)] public IntPtr pointerValue;
         [FieldOffset(8)] public byte byteValue;
         [FieldOffset(8)] public long longValue;
+        [FieldOffset(8)] public ulong ulongValue;
         [FieldOffset(8)] public System.Runtime.InteropServices.ComTypes.FILETIME filetime;
         [FieldOffset(8)] public PropArray propArray;
 
@@ -34,13 +32,14 @@ namespace SevenZipExtractor
             }
         }
 
+        /// <summary>
+        /// Cross-platform PropVariant cleanup without ole32.dll dependency
+        /// </summary>
         public void Clear()
         {
             switch (this.VarType)
             {
                 case VarEnum.VT_EMPTY:
-                    break;
-
                 case VarEnum.VT_NULL:
                 case VarEnum.VT_I2:
                 case VarEnum.VT_I4:
@@ -50,7 +49,6 @@ namespace SevenZipExtractor
                 case VarEnum.VT_DATE:
                 case VarEnum.VT_ERROR:
                 case VarEnum.VT_BOOL:
-                //case VarEnum.VT_DECIMAL:
                 case VarEnum.VT_I1:
                 case VarEnum.VT_UI1:
                 case VarEnum.VT_UI2:
@@ -61,15 +59,53 @@ namespace SevenZipExtractor
                 case VarEnum.VT_UINT:
                 case VarEnum.VT_HRESULT:
                 case VarEnum.VT_FILETIME:
+                    // Simple types, just clear the variant type
+                    this.vt = 0;
+                    break;
+
+                case VarEnum.VT_BSTR:
+                    // Free BSTR
+                    if (this.pointerValue != IntPtr.Zero)
+                    {
+                        Marshal.FreeBSTR(this.pointerValue);
+                        this.pointerValue = IntPtr.Zero;
+                    }
+                    this.vt = 0;
+                    break;
+
+                case VarEnum.VT_LPSTR:
+                case VarEnum.VT_LPWSTR:
+                    // Free string pointer
+                    if (this.pointerValue != IntPtr.Zero)
+                    {
+                        Marshal.FreeCoTaskMem(this.pointerValue);
+                        this.pointerValue = IntPtr.Zero;
+                    }
                     this.vt = 0;
                     break;
 
                 default:
-                    PropVariantClear(ref this);
+                    // For complex types, free pointer if allocated
+                    if (this.pointerValue != IntPtr.Zero)
+                    {
+                        try
+                        {
+                            Marshal.FreeCoTaskMem(this.pointerValue);
+                        }
+                        catch
+                        {
+                            // Ignore cleanup errors
+                        }
+                        this.pointerValue = IntPtr.Zero;
+                    }
+                    this.vt = 0;
                     break;
             }
         }
 
+        /// <summary>
+        /// Cross-platform PropVariant to object conversion
+        /// </summary>
         public object GetObject()
         {
             switch (this.VarType)
@@ -77,20 +113,65 @@ namespace SevenZipExtractor
                 case VarEnum.VT_EMPTY:
                     return null;
 
+                case VarEnum.VT_NULL:
+                    return null;
+
+                case VarEnum.VT_I1:
+                    return (sbyte)this.byteValue;
+
+                case VarEnum.VT_UI1:
+                    return this.byteValue;
+
+                case VarEnum.VT_I2:
+                    return (short)this.longValue;
+
+                case VarEnum.VT_UI2:
+                    return (ushort)this.longValue;
+
+                case VarEnum.VT_I4:
+                case VarEnum.VT_INT:
+                    return (int)this.longValue;
+
+                case VarEnum.VT_UI4:
+                case VarEnum.VT_UINT:
+                    return (uint)this.longValue;
+
+                case VarEnum.VT_I8:
+                    return this.longValue;
+
+                case VarEnum.VT_UI8:
+                    return this.ulongValue;
+
+                case VarEnum.VT_R4:
+                    return BitConverter.ToSingle(BitConverter.GetBytes((int)this.longValue), 0);
+
+                case VarEnum.VT_R8:
+                    return BitConverter.Int64BitsToDouble(this.longValue);
+
+                case VarEnum.VT_BOOL:
+                    return this.longValue != 0;
+
                 case VarEnum.VT_FILETIME:
                     return DateTime.FromFileTime(this.longValue);
 
-                default:
-                    GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
+                case VarEnum.VT_BSTR:
+                    return this.pointerValue != IntPtr.Zero 
+                        ? Marshal.PtrToStringBSTR(this.pointerValue) 
+                        : null;
 
-                    try
-                    {
-                        return Marshal.GetObjectForNativeVariant(PropHandle.AddrOfPinnedObject());
-                    }
-                    finally
-                    {
-                        PropHandle.Free();
-                    }
+                case VarEnum.VT_LPSTR:
+                    return this.pointerValue != IntPtr.Zero 
+                        ? Marshal.PtrToStringAnsi(this.pointerValue) 
+                        : null;
+
+                case VarEnum.VT_LPWSTR:
+                    return this.pointerValue != IntPtr.Zero 
+                        ? Marshal.PtrToStringUni(this.pointerValue) 
+                        : null;
+
+                default:
+                    // For unknown types, try to return the raw value
+                    return this.longValue;
             }
         }
     }
