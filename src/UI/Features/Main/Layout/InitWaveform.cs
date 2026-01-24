@@ -353,6 +353,25 @@ public class InitWaveform
         };
         sliderHorizontalZoom.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.ZoomFactor)));
 
+        var labelHorizontalZoom = new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            FontSize = 10,
+            Margin = new Thickness(0, -15, 0, 0)
+        };
+        labelHorizontalZoom.Bind(TextBlock.TextProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.ZoomFactor))
+        {
+            StringFormat = "{0:0}%",
+            Converter = new Avalonia.Data.Converters.FuncValueConverter<double, int>(v => (int)(v * 100))
+        });
+
+        var panelHorizontalZoom = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children = { sliderHorizontalZoom, labelHorizontalZoom }
+        };
+
         var iconVertical = new Icon
         {
             Value = IconNames.ArrowUpDownBold,
@@ -365,7 +384,7 @@ public class InitWaveform
             Maximum = 20.0,
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(0, 0, 10, 0),
+            Margin = new Thickness(0, 0, 0, 0),
             Value = 1,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.ZoomVerticalHint, shortcuts),
         };
@@ -378,6 +397,26 @@ public class InitWaveform
             }
         };
         sliderVerticalZoom.Bind(RangeBase.ValueProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.VerticalZoomFactor)));
+
+        var labelVerticalZoom = new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            FontSize = 10,
+            Margin = new Thickness(0, -15, 0, 0)
+        };
+        labelVerticalZoom.Bind(TextBlock.TextProperty, new Binding(nameof(vm.AudioVisualizer) + "." + nameof(vm.AudioVisualizer.VerticalZoomFactor))
+        {
+            StringFormat = "{0:0}%",
+            Converter = new Avalonia.Data.Converters.FuncValueConverter<double, int>(v => (int)(v * 100))
+        });
+
+        var panelVerticalZoom = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+            Children = { sliderVerticalZoom, labelVerticalZoom }
+        };
 
         var sliderPosition = new Slider
         {
@@ -545,13 +584,13 @@ public class InitWaveform
         if (settings.ShowToolbarHorizontalZoom)
         {
             controlsPanel.Children.Add(iconHorizontal);
-            controlsPanel.Children.Add(sliderHorizontalZoom);
+            controlsPanel.Children.Add(panelHorizontalZoom);
         }
 
         if (settings.ShowToolbarVerticalZoom)
         {
             controlsPanel.Children.Add(iconVertical);
-            controlsPanel.Children.Add(sliderVerticalZoom);
+            controlsPanel.Children.Add(panelVerticalZoom);
         }
 
         if (settings.ShowToolbarVideoPositionSlider)
