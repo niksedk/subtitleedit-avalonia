@@ -24,6 +24,8 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     internal void Initialize(AudioVisualizer? audioVisualizer, Main.MainViewModel mainViewModel)
     {
         AudioVisualizer = InitWaveform.MakeWaveform(mainViewModel);
+        AudioVisualizer.DataContext = mainViewModel;
+
         if (mainViewModel.AudioVisualizer != null && audioVisualizer != null)
         {
             mainViewModel.AudioVisualizer.WavePeaks = audioVisualizer.WavePeaks;
