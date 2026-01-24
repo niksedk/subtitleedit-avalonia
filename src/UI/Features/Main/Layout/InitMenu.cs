@@ -138,7 +138,7 @@ public static class InitMenu
                         },
                         new MenuItem
                         {
-                            Header = Se.Language.File.Import.ImagesDotDotDot,
+                            Header = Se.Language.File.Import.ImagesForOcrDotDotDot,
                             Command = vm.ImportImagesCommand,
                         },
                         new MenuItem
