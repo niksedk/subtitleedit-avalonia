@@ -17,7 +17,8 @@ if [ -z "$VERSION_LINE" ]; then
 fi
 
 # Extract version string (e.g., "v5.0.0-preview95" -> "5.0.0-preview95")
-VERSION=$(echo "$VERSION_LINE" | grep -oP 'v\K[^"]+')
+# Using sed instead of grep -P for BSD compatibility
+VERSION=$(echo "$VERSION_LINE" | sed -n 's/.*"v\([^"]*\)".*/\1/p')
 echo "Extracted version from Se.cs: $VERSION"
 
 # Convert version to CFBundleShortVersionString format
