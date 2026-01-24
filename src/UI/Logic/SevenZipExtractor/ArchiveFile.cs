@@ -1,23 +1,24 @@
-using Nikse.SubtitleEdit.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace SevenZipExtractor
 {
     public class ArchiveFile : IDisposable
     {
-        private SevenZipHandle? _sevenZipHandle;
-        private readonly IInArchive? _archive;
-        private readonly InStreamWrapper? _archiveStream;
-        private IList<Entry>? _entries = new List<Entry>();
+        private SevenZipHandle _sevenZipHandle;
+        private readonly IInArchive _archive;
+        private readonly InStreamWrapper _archiveStream;
+        private IList<Entry> _entries;
 
-        private string? _libraryFilePath;
+        private string _libraryFilePath;
 
-        public ArchiveFile(string archiveFilePath, string? libraryFilePath = null)
+        public ArchiveFile(string archiveFilePath, string libraryFilePath = null)
         {
             _libraryFilePath = libraryFilePath;
 
@@ -45,11 +46,11 @@ namespace SevenZipExtractor
 
             Format = format;
 
-            _archive = _sevenZipHandle?.CreateInArchive(Formats.FormatGuidMapping[format]);
+            _archive = _sevenZipHandle.CreateInArchive(Formats.FormatGuidMapping[format]);
             _archiveStream = new InStreamWrapper(File.OpenRead(archiveFilePath));
         }
 
-        public ArchiveFile(Stream archiveStream, SevenZipFormat? format = null, string? libraryFilePath = null)
+        public ArchiveFile(Stream archiveStream, SevenZipFormat? format = null, string libraryFilePath = null)
         {
             _libraryFilePath = libraryFilePath;
 
@@ -73,7 +74,7 @@ namespace SevenZipExtractor
             }
             Format = format.Value;
 
-            _archive = _sevenZipHandle?.CreateInArchive(Formats.FormatGuidMapping[format.Value]);
+            _archive = _sevenZipHandle.CreateInArchive(Formats.FormatGuidMapping[format.Value]);
             _archiveStream = new InStreamWrapper(archiveStream);
         }
 
@@ -132,7 +133,7 @@ namespace SevenZipExtractor
                     fileStreams.Add(File.Create(outputPath));
                 }
 
-                _archive?.Extract(null, 0xFFFFFFFF, 0, new ArchiveStreamsCallback(fileStreams, password));
+                _archive.Extract(null, 0xFFFFFFFF, 0, new ArchiveStreamsCallback(fileStreams, password));
             }
             finally
             {
@@ -156,20 +157,20 @@ namespace SevenZipExtractor
                 }
 
                 ulong checkPos = 32 * 1024;
-                var open = _archive?.Open(_archiveStream!, ref checkPos, null) ?? -1;
+                var open = _archive.Open(_archiveStream, ref checkPos, null);
 
                 if (open != 0)
                 {
                     throw new SevenZipException("Unable to open archive");
                 }
 
-                var itemsCount = _archive?.GetNumberOfItems() ?? 0;
+                var itemsCount = _archive.GetNumberOfItems();
 
                 _entries = new List<Entry>();
 
                 for (uint fileIndex = 0; fileIndex < itemsCount; fileIndex++)
                 {
-                    var fileName = GetProperty<string?>(fileIndex, ItemPropId.kpidPath) ?? string.Empty;
+                    var fileName = GetProperty<string>(fileIndex, ItemPropId.kpidPath);
                     var isFolder = GetProperty<bool>(fileIndex, ItemPropId.kpidIsFolder);
                     var isEncrypted = GetProperty<bool>(fileIndex, ItemPropId.kpidEncrypted);
                     var size = GetProperty<ulong>(fileIndex, ItemPropId.kpidSize);
@@ -212,7 +213,7 @@ namespace SevenZipExtractor
 
         private DateTime GetDate(uint fileIndex, ItemPropId id)
         {
-            var dateString = GetProperty<string?>(fileIndex, id);
+            var dateString = GetProperty<string>(fileIndex, id);
             if (string.IsNullOrEmpty(dateString))
             {
                 return new DateTime();
@@ -246,7 +247,7 @@ namespace SevenZipExtractor
             return new DateTime();
         }
 
-        private T? GetPropertySafe<T>(uint fileIndex, ItemPropId name)
+        private T GetPropertySafe<T>(uint fileIndex, ItemPropId name)
         {
             try
             {
@@ -254,27 +255,27 @@ namespace SevenZipExtractor
             }
             catch (InvalidCastException)
             {
-                return default;
+                return default(T);
             }
         }
 
-        private T? GetProperty<T>(uint fileIndex, ItemPropId name)
+        private T GetProperty<T>(uint fileIndex, ItemPropId name)
         {
             var propVariant = new PropVariant();
-            _archive?.GetProperty(fileIndex, name, ref propVariant);
+            _archive.GetProperty(fileIndex, name, ref propVariant);
             var value = propVariant.GetObject();
 
             if (propVariant.VarType == VarEnum.VT_EMPTY)
             {
                 propVariant.Clear();
-                return default;
+                return default(T);
             }
 
             propVariant.Clear();
 
             if (value == null)
             {
-                return default;
+                return default(T);
             }
 
             var type = typeof(T);
@@ -288,31 +289,19 @@ namespace SevenZipExtractor
                 return (T)(object)dateTimeValue;
             }
 
-            if (underlyingType != null && value.ToString() != null)
-            {
-                var result = (T?)Convert.ChangeType(value.ToString(), underlyingType);
-                return result;
-            }
+            var result = (T)Convert.ChangeType(value.ToString(), underlyingType);
 
-            return default;
+            return result;
         }
 
         private void InitializeAndValidateLibrary()
         {
             if (string.IsNullOrWhiteSpace(_libraryFilePath))
             {
-                var currentArchitecture = IntPtr.Size == 4 ? "x86" : "x64"; // magic check
                 var paths = new[]
                 {
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, currentArchitecture, "7zxa.dll"),
-                    Path.Combine(Configuration.BaseDirectory, currentArchitecture, "7zxa.dll"),
-                    Path.Combine(Configuration.BaseDirectory, currentArchitecture, "7z.dll"),
-                    Path.Combine(Configuration.BaseDirectory, "7zxa.dll"),
-                    Path.Combine(Configuration.BaseDirectory, "7z.dll"),
-                    Path.Combine(Configuration.DataDirectory, currentArchitecture, "7zxa.dll"),
-                    Path.Combine(Configuration.DataDirectory, currentArchitecture, "7z.dll"),
-                    Path.Combine(Configuration.DataDirectory, "7zxa.dll"),
-                    Path.Combine(Configuration.DataDirectory, "7z.dll"),
+                    Path.Combine(Se.SevenZipFolder, "7zxa.dll"),
+                    Path.Combine(Se.SevenZipFolder, "7z.dll"),
                 };
 
                 _libraryFilePath = paths.FirstOrDefault(File.Exists);
@@ -421,9 +410,7 @@ namespace SevenZipExtractor
 
             if (_archive != null)
             {
-#pragma warning disable CA1416 // Validate platform compatibility
                 Marshal.ReleaseComObject(_archive);
-#pragma warning restore CA1416 // Validate platform compatibility
             }
 
             if (_sevenZipHandle != null)

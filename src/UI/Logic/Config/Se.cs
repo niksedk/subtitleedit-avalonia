@@ -93,6 +93,7 @@ public class Se
     public static string PaddleOcrModelsFolder => Path.Combine(PaddleOcrFolder, "models");
     public static string GoogleLensOcrFolder => Path.Combine(OcrFolder, "Google-Lens");
     public static string VlcFolder => Path.Combine(DataFolder, "VLC");
+    public static string SevenZipFolder => Path.Combine(DataFolder, "7Zip");
     public static string TesseractFolder
     {
         get

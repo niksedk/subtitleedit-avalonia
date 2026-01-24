@@ -74,6 +74,7 @@
 		<None Remove="Assets\Languages\French.json" />
 		<None Remove="Assets\Languages\German.json" />
 		<None Remove="Assets\NetflixGlyphs.zip" />
+		<None Remove="Assets\SevenZip\7zxa.dll" />
 		<None Remove="Assets\TextToSpeech\AllTalkVoices.json" />
 		<None Remove="Assets\TextToSpeech\AzureVoices.json" />
 		<None Remove="Assets\TextToSpeech\ElevenLabsVoices.json" />
@@ -108,6 +109,7 @@
 		<AvaloniaResource Include="Assets\Layout\Layout11.png" />
 		<AvaloniaResource Include="Assets\Layout\Layout12.png" />
 		<AvaloniaResource Include="Assets\NetflixGlyphs.zip" />
+		<AvaloniaResource Include="Assets\SevenZip\7zxa.dll" />
 		<AvaloniaResource Include="Assets\Themes.zip" />
 		<AvaloniaResource Include="Assets\Whisper\PurfviewFasterWhisper.txt">
 			<CopyToOutputDirectory></CopyToOutputDirectory>

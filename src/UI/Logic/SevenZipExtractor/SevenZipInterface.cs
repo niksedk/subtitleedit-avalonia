@@ -1,7 +1,11 @@
-// version 1.5
+// Version 1.5
+
 using System;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Threading;
 
 namespace SevenZipExtractor
 {
@@ -29,7 +33,7 @@ namespace SevenZipExtractor
         {
             get
             {
-                return (VarEnum)this.vt;
+                return (VarEnum) this.vt;
             }
         }
 
@@ -69,7 +73,7 @@ namespace SevenZipExtractor
             }
         }
 
-        public object? GetObject()
+        public object GetObject()
         {
             switch (this.VarType)
             {
@@ -84,9 +88,7 @@ namespace SevenZipExtractor
 
                     try
                     {
-#pragma warning disable CA1416 // Validate platform compatibility
                         return Marshal.GetObjectForNativeVariant(PropHandle.AddrOfPinnedObject());
-#pragma warning restore CA1416 // Validate platform compatibility
                     }
                     finally
                     {
@@ -331,7 +333,7 @@ namespace SevenZipExtractor
         int Open(
             IInStream stream,
             /*[MarshalAs(UnmanagedType.U8)]*/ [In] ref ulong maxCheckStartPosition,
-            [MarshalAs(UnmanagedType.Interface)] IArchiveOpenCallback? openArchiveCallback);
+            [MarshalAs(UnmanagedType.Interface)] IArchiveOpenCallback openArchiveCallback);
 
         void Close();
         //void GetNumberOfItems([In] ref uint numItem);
@@ -344,7 +346,7 @@ namespace SevenZipExtractor
 
         [PreserveSig]
         int Extract(
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] uint[]? indices, //[In] ref uint indices,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] uint[] indices, //[In] ref uint indices,
             uint numItems,
             int testMode,
             [MarshalAs(UnmanagedType.Interface)] IArchiveExtractCallback extractCallback);
@@ -426,7 +428,7 @@ namespace SevenZipExtractor
 
         public virtual void Seek(long offset, uint seekOrigin, IntPtr newPosition)
         {
-            long Position = this.BaseStream.Seek(offset, (SeekOrigin)seekOrigin);
+            long Position = this.BaseStream.Seek(offset, (SeekOrigin) seekOrigin);
 
             if (newPosition != IntPtr.Zero)
             {
@@ -443,7 +445,7 @@ namespace SevenZipExtractor
 
         public uint Read(byte[] data, uint size)
         {
-            return (uint)this.BaseStream.Read(data, 0, (int)size);
+            return (uint) this.BaseStream.Read(data, 0, (int) size);
         }
     }
 
@@ -461,11 +463,11 @@ namespace SevenZipExtractor
 
         public int Write(byte[] data, uint size, IntPtr processedSize)
         {
-            this.BaseStream.Write(data, 0, (int)size);
+            this.BaseStream.Write(data, 0, (int) size);
 
             if (processedSize != IntPtr.Zero)
             {
-                Marshal.WriteInt32(processedSize, (int)size);
+                Marshal.WriteInt32(processedSize, (int) size);
             }
 
             return 0;

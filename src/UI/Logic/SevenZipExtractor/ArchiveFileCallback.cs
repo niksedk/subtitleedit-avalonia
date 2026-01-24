@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace SevenZipExtractor
@@ -6,7 +7,7 @@ namespace SevenZipExtractor
     {
         private readonly string fileName;
         private readonly uint fileNumber;
-        private OutStreamWrapper? fileStream;
+        private OutStreamWrapper fileStream; // to be removed
 
         public ArchiveFileCallback(uint fileNumber, string fileName)
         {
@@ -22,7 +23,7 @@ namespace SevenZipExtractor
         {
         }
 
-        public int GetStream(uint index, out ISequentialOutStream? outStream, AskMode askExtractMode)
+        public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
             if ((index != this.fileNumber) || (askExtractMode != AskMode.kExtract))
             {
@@ -30,7 +31,7 @@ namespace SevenZipExtractor
                 return 0;
             }
 
-            string? fileDir = Path.GetDirectoryName(this.fileName);
+            string fileDir = Path.GetDirectoryName(this.fileName);
 
             if (!string.IsNullOrEmpty(fileDir))
             {
@@ -50,7 +51,7 @@ namespace SevenZipExtractor
 
         public void SetOperationResult(OperationResult resultEOperationResult)
         {
-            this.fileStream?.Dispose();
+            this.fileStream.Dispose();
         }
     }
 }

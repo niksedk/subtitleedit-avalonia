@@ -9,11 +9,11 @@ namespace SevenZipExtractor
 
         public string Password { get; }
 
-        public ArchiveStreamCallback(uint fileNumber, Stream stream, string? password = null)
+        public ArchiveStreamCallback(uint fileNumber, Stream stream, string password = null)
         {
             this.fileNumber = fileNumber;
             this.stream = stream;
-            Password = password ?? string.Empty;
+            Password = password ?? "";
         }
 
         public void SetTotal(ulong total)
@@ -30,7 +30,7 @@ namespace SevenZipExtractor
             return 0;
         }
 
-        public int GetStream(uint index, out ISequentialOutStream? outStream, AskMode askExtractMode)
+        public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
             if ((index != this.fileNumber) || (askExtractMode != AskMode.kExtract))
             {

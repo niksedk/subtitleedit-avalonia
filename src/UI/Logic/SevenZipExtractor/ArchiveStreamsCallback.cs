@@ -5,14 +5,14 @@ namespace SevenZipExtractor
 {
     internal class ArchiveStreamsCallback : IArchiveExtractCallback, ICryptoGetTextPassword
     {
-        private readonly IList<Stream?> streams;
+        private readonly IList<Stream> streams;
 
         public string Password { get; }
 
-        public ArchiveStreamsCallback(IList<Stream?> streams, string? password = null)
+        public ArchiveStreamsCallback(IList<Stream> streams, string password = null)
         {
             this.streams = streams;
-            Password = password ?? string.Empty;
+            Password = password;
         }
         public int CryptoGetTextPassword(out string password)
         {
@@ -28,7 +28,7 @@ namespace SevenZipExtractor
         {
         }
 
-        public int GetStream(uint index, out ISequentialOutStream? outStream, AskMode askExtractMode)
+        public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
             if (askExtractMode != AskMode.kExtract)
             {
@@ -42,7 +42,7 @@ namespace SevenZipExtractor
                 return 0;
             }
 
-            Stream? stream = this.streams[(int)index];
+            Stream stream = this.streams[(int) index];
 
             if (stream == null)
             {

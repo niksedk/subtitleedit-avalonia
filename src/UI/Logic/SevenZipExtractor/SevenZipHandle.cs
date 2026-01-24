@@ -6,7 +6,7 @@ namespace SevenZipExtractor
 {
     internal class SevenZipHandle : IDisposable
     {
-        private SafeLibraryHandle? sevenZipSafeHandle;
+        private SafeLibraryHandle sevenZipSafeHandle;
 
         public SevenZipHandle(string sevenZipLibPath)
         {
@@ -39,7 +39,7 @@ namespace SevenZipExtractor
                 this.sevenZipSafeHandle.Close();
             }
 
-            sevenZipSafeHandle = null;
+            this.sevenZipSafeHandle = null;
         }
 
         public void Dispose()
@@ -48,19 +48,19 @@ namespace SevenZipExtractor
             GC.SuppressFinalize(this);
         }
 
-        public IInArchive? CreateInArchive(Guid classId)
+        public IInArchive CreateInArchive(Guid classId)
         {
-            if (sevenZipSafeHandle == null)
+            if (this.sevenZipSafeHandle == null)
             {
                 throw new ObjectDisposedException("SevenZipHandle");
             }
 
-            IntPtr procAddress = Kernel32Dll.GetProcAddress(sevenZipSafeHandle, "CreateObject");
-            CreateObjectDelegate? createObject = Marshal.GetDelegateForFunctionPointer(procAddress, typeof(CreateObjectDelegate)) as CreateObjectDelegate;
+            IntPtr procAddress = Kernel32Dll.GetProcAddress(this.sevenZipSafeHandle, "CreateObject");
+            CreateObjectDelegate createObject = (CreateObjectDelegate) Marshal.GetDelegateForFunctionPointer(procAddress, typeof (CreateObjectDelegate));
 
-            object? result = null;
-            Guid interfaceId = typeof(IInArchive).GUID;
-            createObject?.Invoke(ref classId, ref interfaceId, out result);
+            object result;
+            Guid interfaceId = typeof (IInArchive).GUID;
+            createObject(ref classId, ref interfaceId, out result);
 
             return result as IInArchive;
         }

@@ -5,10 +5,10 @@ namespace SevenZipExtractor
 {
     public class Entry
     {
-        private readonly IInArchive? archive;
+        private readonly IInArchive archive;
         private readonly uint index;
 
-        internal Entry(IInArchive? archive, uint index)
+        internal Entry(IInArchive archive, uint index)
         {
             this.archive = archive;
             this.index = index;
@@ -17,7 +17,7 @@ namespace SevenZipExtractor
         /// <summary>
         /// Name of the file with its relative path within the archive
         /// </summary>
-        public string FileName { get; internal set; } = string.Empty;
+        public string FileName { get; internal set; }
         /// <summary>
         /// True if entry is a folder, false if it is a file
         /// </summary>
@@ -45,7 +45,7 @@ namespace SevenZipExtractor
         /// Date and time of the last access of the file (entry)
         /// </summary>
         public DateTime LastAccessTime { get; internal set; }
-
+        
         /// <summary>
         /// CRC hash of the entry
         /// </summary>
@@ -64,17 +64,17 @@ namespace SevenZipExtractor
         /// <summary>
         /// Comment of the entry
         /// </summary>
-        public string? Comment { get; internal set; }
+        public string Comment { get; internal set; }
 
         /// <summary>
         /// Compression method of the entry
         /// </summary>
-        public string? Method { get; internal set; }
+        public string Method { get; internal set; }
 
         /// <summary>
         /// Host operating system of the entry
         /// </summary>
-        public string? HostOS { get; internal set; }
+        public string HostOS { get; internal set; }
 
         /// <summary>
         /// True if there are parts of this file in previous split archive parts
@@ -94,7 +94,7 @@ namespace SevenZipExtractor
                 return;
             }
 
-            string? directoryName = Path.GetDirectoryName(fileName);
+            string directoryName = Path.GetDirectoryName(fileName);
 
             if (!string.IsNullOrWhiteSpace(directoryName))
             {
@@ -111,9 +111,9 @@ namespace SevenZipExtractor
                 File.SetLastWriteTime(fileName, this.LastWriteTime);
             }
         }
-        public void Extract(Stream stream, string? password = null)
+        public void Extract(Stream stream, string password = null)
         {
-            this.archive?.Extract(new[] { this.index }, 1, 0, new ArchiveStreamCallback(this.index, stream, password));
+            this.archive.Extract(new[] { this.index }, 1, 0, new ArchiveStreamCallback(this.index, stream, password));
         }
     }
 }
