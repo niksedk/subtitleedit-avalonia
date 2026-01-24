@@ -181,6 +181,10 @@ jobs:
             -o ./publish/macos-x64
       - name: Remove PDB files from x64 build
         run: find "./publish/macos-x64/" -name "*.pdb" -type f -delete
+      - name: Update Info.plist with version from Se.cs
+        run: |
+          chmod +x ./installer/macBundle/update-plist-version.sh
+          ./installer/macBundle/update-plist-version.sh
       - name: Create, sign, and package x64 DMG
         run: |
           # Copy template for x64
