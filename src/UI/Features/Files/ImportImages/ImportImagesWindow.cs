@@ -54,14 +54,16 @@ public class ImportImagesWindow : Window
             ToolTip.SetTip(labelImportInfo, Se.Language.File.Import.ImportFilesInfo);
         }
 
-        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand);
+        var buttonImport = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand).WithLeftAlignment();
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonImport, buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         grid.Add(labelImportInfo, 0);
         grid.Add(MakeImagesView(vm), 1);
         grid.Add(panelButtons, 3, 0);
+        grid.Add(buttonImport, 3, 0);
 
         Content = grid;
 
