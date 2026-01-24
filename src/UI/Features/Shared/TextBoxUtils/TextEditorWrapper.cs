@@ -1,14 +1,17 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Media;
 using AvaloniaEdit;
+using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 
 public class TextEditorWrapper : ITextBoxWrapper
 {
+    private static int Counter = 0;
+
     private readonly TextEditor _textEditor;
     private readonly Border _border;
+    private readonly int _instanceId = Counter++;
 
     public bool HasFocus { get; set; }
 

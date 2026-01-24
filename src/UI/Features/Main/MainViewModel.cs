@@ -1144,11 +1144,25 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task CommandFileSave()
     {
-        await SaveSubtitle();
+        var saved = await SaveSubtitle();
+        var savedOriginal = false;
 
         if (ShowColumnOriginalText)
         {
-            await SaveSubtitleOriginal();
+            savedOriginal = await SaveSubtitleOriginal();
+        }
+
+        if (saved && savedOriginal)
+        {
+            ShowStatus(string.Format(Se.Language.General.SavedChangesToXAndY, _subtitleFileName, _subtitleFileNameOriginal));
+        }
+        else if (saved)
+        {
+            ShowStatus(string.Format(Se.Language.General.SavedChangesToX, _subtitleFileName));
+        }
+        else if (savedOriginal)
+        {
+            ShowStatus(string.Format(Se.Language.General.SavedChangesToX, _subtitleFileNameOriginal));
         }
     }
 
@@ -1166,7 +1180,11 @@ public partial class MainViewModel :
             return;
         }
 
-        await SaveSubtitleAs();
+        var saved = await SaveSubtitleAs();
+        if (saved)
+        {
+            ShowStatus(string.Format(Se.Language.General.SavedChangesToX, _subtitleFileName));
+        }
     }
 
     [RelayCommand]
@@ -5848,13 +5866,25 @@ public partial class MainViewModel :
 
             Dispatcher.UIThread.Post(() =>
             {
+                var subtitle = Subtitles.GetOrNull(idx);
+                if (subtitle == null)
+                {
+                    return;
+                }
+
                 SubtitleGrid.SelectedIndex = idx;
-                SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
+                SubtitleGrid.SelectedItem = subtitle;
+                SubtitleGrid.ScrollIntoView(subtitle, null);
 
                 ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1, _findService.CurrentTextIndex + 1));
 
                 // wait for text box to update
-                Task.Delay(50);
+                Task.Delay(75);
+
+                if (EditTextBox.Text == string.Empty)
+                {
+                    EditTextBox.Text = Subtitles[idx].Text;
+                }
 
                 EditTextBox.CaretIndex = _findService.CurrentTextIndex;
                 EditTextBox.SelectionStart = _findService.CurrentTextIndex;
@@ -9637,24 +9667,22 @@ public partial class MainViewModel :
         return true;
     }
 
-    private async Task SaveSubtitleOriginal()
+    private async Task<bool> SaveSubtitleOriginal()
     {
         if (Subtitles == null || !Subtitles.Any())
         {
             ShowStatus("Nothing to save (original)");
-            return;
+            return false;
         }
 
         if (string.IsNullOrEmpty(_subtitleFileNameOriginal) || _converted)
         {
-            await SaveSubtitleOriginalAs();
-            return;
+            return await SaveSubtitleOriginalAs();
         }
 
         if (_lastOpenSaveFormat == null || _lastOpenSaveFormat.Name != SelectedSubtitleFormat.Name)
         {
-            await SaveSubtitleOriginalAs();
-            return;
+            return await SaveSubtitleOriginalAs();
         }
 
         var text = GetUpdateSubtitleOriginal(true).ToText(SelectedSubtitleFormat);
@@ -9674,6 +9702,7 @@ public partial class MainViewModel :
 
         _changeSubtitleHashOriginal = GetFastHashOriginal();
         _lastOpenSaveFormat = SelectedSubtitleFormat;
+        return true;
     }
 
     public Subtitle GetUpdateSubtitle(bool subtractVideoOffset = false)
@@ -11108,7 +11137,7 @@ public partial class MainViewModel :
         MenuItemMergeAsDialog.IsVisible = SubtitleGrid.SelectedItems.Count == 2;
         MenuItemMerge.IsVisible = SubtitleGrid.SelectedItems.Count > 1;
         MenuItemExtendToLineBefore.IsVisible = SubtitleGrid.SelectedItems.Count == 1 && Subtitles.Count > 1 && idx > 0;
-        MenuItemExtendToLineAfter.IsVisible = SubtitleGrid.SelectedItems.Count == 1 && Subtitles.Count > 1 && idx < count-1;
+        MenuItemExtendToLineAfter.IsVisible = SubtitleGrid.SelectedItems.Count == 1 && Subtitles.Count > 1 && idx < count - 1;
         AreAssaContentMenuItemsVisible = false;
         ShowAutoTranslateSelectedLines = SubtitleGrid.SelectedItems.Count > 0 && ShowColumnOriginalText;
         ShowColumnLayerFlyoutMenuItem = IsFormatAssa;

@@ -58,7 +58,7 @@ internal static class SubtitleGridCopyPasteHelper
 
         var lines = text.SplitToLines();
         var subtitle = Subtitle.Parse(lines, subtitleFormat.Extension);
-        if (subtitle.Paragraphs.Count > 0)
+        if (subtitle?.Paragraphs.Count > 0)
         {
             var firstSubtitleTime = subtitle.Paragraphs[0].StartTime.TotalMilliseconds;
             var adjust = addTimeMilliseconds - firstSubtitleTime;

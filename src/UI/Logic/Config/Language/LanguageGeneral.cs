@@ -392,6 +392,8 @@ public class LanguageGeneral
     public string SaveChangesTitle { get; set; }
     public string SaveChangesToX { get; set; }
     public string SaveChangesToXOriginal { get; set; }
+    public string SavedChangesToXAndY { get; set; }
+    public string SavedChangesToX { get; set; }
     public string SaveDotDotDot { get; set; }
     public string SaveFileAsTitle { get; set; }
     public string SaveImageAs { get; set; }
@@ -991,6 +993,8 @@ public class LanguageGeneral
         SaveChangesTitle = "Save changes?";
         SaveChangesToX = "Do you want to save changes to \"{0}\"?";
         SaveChangesToXOriginal = "Do you want to save changes to the original subtitle file \"{0}\"?";
+        SavedChangesToXAndY = "Saved changes to \"{0}\" and \"{1}\"";
+        SavedChangesToX = "Saved changes to \"{0}\"";
         SaveDotDotDot = "Save...";
         SaveFileAsTitle = "Save file as";
         SaveImageAs = "Save image as";
