@@ -246,7 +246,7 @@ jobs:
           ln -s /Applications "./dmg-temp-x64/Applications"
           hdiutil create -volname "SubtitleEdit x64" -srcfolder "./dmg-temp-x64" -ov -format UDZO "./SubtitleEdit-macOS-x64.dmg"
       
-      # Immediate cleanup of x64 artifacts
+          # Immediate cleanup of x64 artifacts
           rm -rf "./dmg-temp-x64" "./SubtitleEdit-x64.app" "./publish/macos-x64"
 
       - name: Publish macOS ARM64 app
