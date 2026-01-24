@@ -1,4 +1,5 @@
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Initializers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -295,6 +296,8 @@ namespace SevenZipExtractor
 
         private void InitializeAndValidateLibrary()
         {
+            new SevenZipInitializer().UpdateSevenZipIfNeeded().Wait();
+
             if (string.IsNullOrWhiteSpace(_libraryFilePath))
             {
                 var paths = new[]
