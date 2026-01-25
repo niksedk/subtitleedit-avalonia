@@ -77,9 +77,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             }
 
             // Round & clamp
-            int ir = (int)Math.Round(r);
-            int ig = (int)Math.Round(g);
-            int ib = (int)Math.Round(b);
+            int ir = (int)Math.Round(r, MidpointRounding.AwayFromZero);
+            int ig = (int)Math.Round(g, MidpointRounding.AwayFromZero);
+            int ib = (int)Math.Round(b, MidpointRounding.AwayFromZero);
 
             if (ir < 0) ir = 0; else if (ir > 255) ir = 255;
             if (ig < 0) ig = 0; else if (ig > 255) ig = 255;
@@ -109,9 +109,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
                 return new[]
                 {
-                    (int)Math.Round(y),
-                    (int)Math.Round(cb),
-                    (int)Math.Round(cr)
+                    (int)Math.Round(y, MidpointRounding.AwayFromZero),
+                    (int)Math.Round(cb, MidpointRounding.AwayFromZero),
+                    (int)Math.Round(cr, MidpointRounding.AwayFromZero)
                 };
             }
             else
@@ -122,9 +122,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
                 return new[]
                 {
-                    (int)Math.Round(y),
-                    (int)Math.Round(cb),
-                    (int)Math.Round(cr)
+                    (int)Math.Round(y, MidpointRounding.AwayFromZero),
+                    (int)Math.Round(cb, MidpointRounding.AwayFromZero),
+                    (int)Math.Round(cr, MidpointRounding.AwayFromZero)
                 };
             }
         }
