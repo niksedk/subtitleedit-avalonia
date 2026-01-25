@@ -102,7 +102,8 @@ public class LanguageMainMenu
     public string ReverseRightToLeftStartEnd { get; set; }
     public string PointSync { get; set; }
     public string PointSyncViaOther { get; set; }
-    public object SortSubtitles { get; set; }
+    public string SortSubtitles { get; set; }
+    public string SetLayer { get; set; }
 
     public LanguageMainMenu()
     {
@@ -204,5 +205,6 @@ public class LanguageMainMenu
         RemoveUnicodeControlCharacters = "Remove Unicode control chars (selected lines)";
         ReverseRightToLeftStartEnd = "Reverse RTL start/end (selected lines)";
         SortSubtitles = "_Sort subtitles...";
+        SetLayer = "Set layer...";
     }
 }

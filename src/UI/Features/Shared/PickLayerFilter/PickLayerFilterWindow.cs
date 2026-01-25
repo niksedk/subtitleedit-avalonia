@@ -8,11 +8,11 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Shared.PickLayers;
+namespace Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
 
-public class PickLayersWindow : Window
+public class PickLayerFilterWindow : Window
 {
-    public PickLayersWindow(PickLayersViewModel vm)
+    public PickLayerFilterWindow(PickLayerFilterViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.PickLayersTitle;
@@ -63,7 +63,7 @@ public class PickLayersWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private Border MakeLayersView(PickLayersViewModel vm)
+    private Border MakeLayersView(PickLayerFilterViewModel vm)
     {
         var dataGrid = new DataGrid
         {

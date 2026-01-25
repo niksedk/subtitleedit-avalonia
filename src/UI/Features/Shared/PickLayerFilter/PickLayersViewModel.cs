@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Nikse.SubtitleEdit.Features.Shared.PickLayers;
+namespace Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
 
-public partial class PickLayersViewModel : ObservableObject
+public partial class PickLayerFilterViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<LayerItem> _layers;
     [ObservableProperty] private LayerItem? _selectedLayer;
@@ -19,7 +19,7 @@ public partial class PickLayersViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public List<int>? SelectedLayers { get; private set; }
 
-    public PickLayersViewModel()
+    public PickLayerFilterViewModel()
     {
         Layers = new ObservableCollection<LayerItem>();
         SelectedLayers = new List<int>();

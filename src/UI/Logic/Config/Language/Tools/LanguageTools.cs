@@ -23,6 +23,7 @@ public class LanguageTools
     public string ColorPickerTitle { get; set; }
     public string PickLayersTitle { get; set; }
     public string PickSubtitleFormat { get; set; }
+    public string PickLayerTitle { get; set; }
 
     public LanguageTools()
     {
@@ -31,5 +32,6 @@ public class LanguageTools
         ColorPickerTitle = "Choose color";
         PickLayersTitle = "Choose layers to display in audio waveform/spectrogram";
         PickSubtitleFormat = "Choose subtitle format";
+        PickLayerTitle = "Set layer";
     }
 }

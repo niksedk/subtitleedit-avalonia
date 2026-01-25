@@ -57,7 +57,8 @@ using Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
 using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
-using Nikse.SubtitleEdit.Features.Shared.PickLayers;
+using Nikse.SubtitleEdit.Features.Shared.PickLayer;
+using Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
@@ -2185,6 +2186,31 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task ShowPickLayer()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || AudioVisualizer?.WavePeaks == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var result =
+            await ShowDialogAsync<PickLayerWindow, PickLayerViewModel>(vm => { vm.Initialize(selectedItems); });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        foreach (var item in selectedItems)
+        {
+            item.Layer = result.Layer;
+        }   
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private async Task ShowPickLayerFilter()
     {
         if (Window == null || AudioVisualizer?.WavePeaks == null)
@@ -2193,7 +2219,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<PickLayersWindow, PickLayersViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
+            await ShowDialogAsync<PickLayerFilterWindow, PickLayerFilterViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
 
         if (!result.OkPressed)
         {

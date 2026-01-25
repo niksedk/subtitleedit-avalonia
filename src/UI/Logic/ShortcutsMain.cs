@@ -299,6 +299,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.FocusTextBoxCommand), Se.Language.Options.Shortcuts.FocusTextBox },
         { nameof(MainViewModel.SortByStartTimeCommand), Se.Language.Options.Shortcuts.SortByStartTime },
         { nameof(MainViewModel.SortByEndTimeCommand), Se.Language.Options.Shortcuts.SortByEndTime },
+        { nameof(MainViewModel.ShowPickLayerFilterCommand), Se.Language.General.FilterByLayer },
+        { nameof(MainViewModel.ShowPickLayerCommand), Se.Language.General.PickLayer },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -547,6 +549,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.FocusTextBoxCommand, nameof(vm.FocusTextBoxCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SortByStartTimeCommand, nameof(vm.SortByStartTimeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SortByEndTimeCommand, nameof(vm.SortByEndTimeCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowPickLayerFilterCommand, nameof(vm.ShowPickLayerFilterCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowPickLayerCommand, nameof(vm.ShowPickLayerCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

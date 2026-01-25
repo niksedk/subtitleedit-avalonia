@@ -798,6 +798,13 @@ public static partial class InitListViewAndEditBox
                 },
                 new MenuItem
                 {
+                    Header = Se.Language.Main.Menu.SetLayer,
+                    Command = vm.ShowPickLayerCommand,
+                    DataContext = vm,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowLayer)),
+                },
+                new MenuItem
+                {
                     Header = Se.Language.Main.Menu.FixCommonErrors,
                     Command = vm.FixCommonErrorsSelectedLinesCommand,
                     DataContext = vm,

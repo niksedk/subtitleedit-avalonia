@@ -604,6 +604,7 @@ public class LanguageGeneral
     public string Auto { get; set; }
     public string SelectSubtitle { get; set; }
     public string Center { get; set; }
+    public string PickLayer { get; set; }
 
     public LanguageGeneral()
     {
@@ -1207,5 +1208,6 @@ public class LanguageGeneral
         Auto = "Auto";
         SelectSubtitle = "Select subtitle";
         Center = "Center";
+        PickLayer = "Set layer";
     }
 }

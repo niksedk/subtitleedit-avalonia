@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Nikse.SubtitleEdit.Features.Shared.PickLayers;
+namespace Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
 public partial class LayerItem : ObservableObject
 {
     [ObservableProperty] private bool _isSelected;
