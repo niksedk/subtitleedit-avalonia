@@ -601,7 +601,10 @@
     "property": "Property",
     "ascending": "Ascending",
     "question": "Question",
-    "auto": "Auto"
+    "auto": "Auto",
+    "selectSubtitle": "Select subtitle",
+    "center": "Center",
+    "pickLayer": "Set layer"
   },
   "main": {
     "menu": {
@@ -693,7 +696,8 @@
       "reverseRightToLeftStartEnd": "Reverse RTL start/end (selected lines)",
       "pointSync": "_Point sync...",
       "pointSyncViaOther": "Point sync via _other subtitle...",
-      "sortSubtitles": "_Sort subtitles..."
+      "sortSubtitles": "_Sort subtitles...",
+      "setLayer": "Set layer..."
     },
     "toolbar": {
       "newHint": "Start a new subtitle file {0}",
@@ -1038,7 +1042,7 @@
       "caseInsensitive": "Case insensitive",
       "findPrevious": "Find _previous",
       "findNext": "_Find next",
-      "replaceNext": "_Replace next",
+      "replaceAndFindNext": "_Replace \u0026 find next",
       "replaceAll": "Replace _all",
       "replaceTitle": "Replace",
       "replaceWith": "Replace with",
@@ -1303,7 +1307,8 @@
     "pickFontNameTitle": "Choose font name",
     "colorPickerTitle": "Choose color",
     "pickLayersTitle": "Choose layers to display in audio waveform/spectrogram",
-    "pickSubtitleFormat": "Choose subtitle format"
+    "pickSubtitleFormat": "Choose subtitle format",
+    "pickLayerTitle": "Set layer"
   },
   "spellCheck": {
     "spellCheck": "Spell check",
@@ -1478,7 +1483,12 @@
     "spectrogramClassicInferno": "Inferno",
     "spectrogramClassicTurbo": "Turbo",
     "waveformDrawStyleClassic": "Classic",
-    "waveformDrawStyleFancy": "Fancy"
+    "waveformDrawStyleFancy": "Fancy",
+    "setVideoPositionAndPauseAndSelectSubtitle": "Set video position, pause, and select subtitle",
+    "setVideopositionAndPauseAndSelectSubtitleAndCenter": "Set video position, pause, select subtitle, and center",
+    "setVideoPositionAndPause": "Set video position and pause",
+    "setVideopositionAndPauseAndCenter": "Set video position, pause, and center",
+    "setVideoposition": "Set video position"
   },
   "sync": {
     "visualSync": "Visual Sync",
@@ -1754,7 +1764,9 @@
       "textBoxButtonShowUnbreak": "Text box: show unbreak button",
       "textBoxButtonShowItalic": "Text box: show italic button",
       "textBoxButtonShowColor": "Text box: show color button",
-      "textBoxButtonShowRemoveFormatting": "Text box: show remove formatting button"
+      "textBoxButtonShowRemoveFormatting": "Text box: show remove formatting button",
+      "waveformSingleClickAction": "Waveform single-click action",
+      "waveformDoubleClickAction": "Waveform double-click action (after single-click action)"
     },
     "shortcuts": {
       "title": "Shortcuts",

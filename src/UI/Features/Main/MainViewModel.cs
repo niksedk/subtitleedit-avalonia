@@ -2205,7 +2205,7 @@ public partial class MainViewModel :
         foreach (var item in selectedItems)
         {
             item.Layer = result.Layer;
-        }   
+        }
 
         _updateAudioVisualizer = true;
     }
