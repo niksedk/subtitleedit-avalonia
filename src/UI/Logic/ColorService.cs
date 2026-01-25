@@ -13,7 +13,9 @@ public interface IColorService
     void RemoveColorTags(List<SubtitleLineViewModel> subtitles);
     void SetColor(List<SubtitleLineViewModel> subtitles, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat);
     string SetColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle);
+    string RemoveColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle);
     bool ContainsColor(Color color, SubtitleLineViewModel subtitleLineViewModel, SubtitleFormat selectedSubtitleFormat);
+    bool ContainsColor(Color color, string text, SubtitleFormat selectedSubtitleFormat);
 }
 
 public class ColorService : IColorService
@@ -142,6 +144,65 @@ public class ColorService : IColorService
         return $"{pre}<font color=\"{ToHex(color)}\">{text}</font>";
     }
 
+    public string RemoveColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return input;
+        }
+
+        var text = input;
+        if (isAssa)
+        {
+            try
+            {
+                text = HtmlUtil.RemoveAssaColor(text);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return text;
+        }
+
+        if (isWebVtt)
+        {
+            try
+            {
+                text = WebVttHelper.RemoveColorTag(text, color.ToSKColor(), WebVttHelper.GetStyles(subtitle.Header));
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return text;
+        }
+
+        string pre = string.Empty;
+        if (text.StartsWith("{\\", StringComparison.Ordinal) && text.IndexOf('}') >= 0)
+        {
+            int endIndex = text.IndexOf('}') + 1;
+            pre = text.Substring(0, endIndex);
+            text = text.Remove(0, endIndex);
+        }
+
+        string s = text;
+        if (s.StartsWith("<font ", StringComparison.OrdinalIgnoreCase) && s.EndsWith("</font>"))
+        {
+            s = s.Substring(0, s.Length - 7);
+            int end = s.IndexOf('>');
+            if (end > 0)
+            {
+                var content = s.Remove(0, end + 1);
+                return content;
+            }
+        }
+
+        return text;
+    }
+
     private string ToHex(Color color)
     {
         return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
@@ -149,11 +210,16 @@ public class ColorService : IColorService
 
     public bool ContainsColor(Color color, SubtitleLineViewModel subtitleLineViewModel, SubtitleFormat subtitleFormat)
     {
+        return ContainsColor(color, subtitleLineViewModel.Text, subtitleFormat);
+    }
+
+    public bool ContainsColor(Color color, string text, SubtitleFormat subtitleFormat)
+    {
         var isAssa = subtitleFormat is AdvancedSubStationAlpha;
         var isWebVtt = subtitleFormat is WebVTT;
 
         var tag = SetColorTag("ø", color, isAssa, isWebVtt, new Subtitle());
-        var colorStart = tag.Substring(0, tag.IndexOf('ø', StringComparison.Ordinal));  
-        return subtitleLineViewModel.Text.Contains(colorStart, StringComparison.OrdinalIgnoreCase);
+        var colorStart = tag.Substring(0, tag.IndexOf('ø', StringComparison.Ordinal));
+        return text.Contains(colorStart, StringComparison.OrdinalIgnoreCase);
     }
 }

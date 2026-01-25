@@ -5458,21 +5458,45 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>(vm =>
+        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>();
+        if (!result.OkPressed)
         {
-            // vm.Initialize();
-        });
-
-        if (result.OkPressed)
-        {
-            _colorService.SetColor(selectedItems, result.SelectedColor, GetUpdateSubtitle(), SelectedSubtitleFormat);
+            return;
         }
+
+        if (ColorTextBoxIfSelected(result.SelectedColor))
+        {
+            return;
+        }
+
+        _colorService.SetColor(selectedItems, result.SelectedColor, GetUpdateSubtitle(), SelectedSubtitleFormat);
+        _updateAudioVisualizer = true;
+    }
+
+    private ITextBoxWrapper? GetFocusedTextBoxWrapper()
+    {
+        if (EditTextBox.IsFocused)
+        {
+            return EditTextBox;
+        }
+
+        if (EditTextBoxOriginal.IsFocused)
+        {
+            return EditTextBoxOriginal;
+        }
+
+        return null;
     }
 
     private void ToggleColor(Color color)
     {
         var selectedItems = _selectedSubtitles?.ToList() ?? [];
         if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        if (selectedItems.Count == 1 && ColorTextBoxIfSelected(color))
         {
             return;
         }
@@ -5488,6 +5512,44 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
+    }
+
+    private bool ColorTextBoxIfSelected(Color color)
+    {
+        var tb = GetFocusedTextBoxWrapper();
+        if (tb != null)
+        {
+            var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+            var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+            var selectionLength = selectionEnd - selectionStart;
+            if (selectionLength > 0 && selectionLength != tb.Text.Length)
+            {
+                var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+                var isWebVtt = SelectedSubtitleFormat is WebVTT;
+                var selectedText = tb.Text.Substring(selectionStart, selectionLength);
+
+                if (_colorService.ContainsColor(color, selectedText, SelectedSubtitleFormat))
+                {
+                    selectedText = _colorService.RemoveColorTag(selectedText, color, isAssa, isWebVtt, GetUpdateSubtitle());
+                    tb.SelectedText = selectedText;
+                    tb.SelectionStart = selectionStart;
+                    tb.SelectionEnd = selectionStart + selectedText.Length;
+                }
+                else
+                {
+                    selectedText = _colorService.SetColorTag(selectedText, color, isAssa, isWebVtt,
+                                        GetUpdateSubtitle());
+                    tb.SelectedText = selectedText;
+                    tb.SelectionStart = selectionStart;
+                    tb.SelectionEnd = selectionStart + selectedText.Length;
+                }
+
+                _updateAudioVisualizer = true;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [RelayCommand]
