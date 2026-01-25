@@ -19,9 +19,8 @@
 
 using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
-using System.Collections.Generic;
 using System;
-using Nikse.SubtitleEdit.Core.BluRaySup;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Core.BluRaySup
 {
@@ -122,6 +121,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                 }
             }
 
+            var transparentColor = (byte)palette[palette.Count - 1];
             var bytes = new List<byte>();
             for (var y = 0; y < bm.Height; y++)
             {
@@ -130,8 +130,13 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
                 for (x = 0; x < bm.Width; x += len)
                 {
                     var c = bm.GetPixel(x, y);
+
                     byte color;
-                    if (lookup.TryGetValue(c, out var intC))
+                    if (c.Alpha == 0)
+                    {
+                        color = transparentColor;
+                    }
+                    else if (lookup.TryGetValue(c, out var intC))
                     {
                         color = (byte)intC;
                     }
@@ -251,7 +256,7 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             // Add font color as first entry
             pal.Add(fontColor);
             lookup.Add(fontColor);
-            
+
             // first we try with exact colors
             for (var y = 0; y < bitmap.Height; y++)
             {
@@ -390,7 +395,6 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
         public static byte[] CreateSupFrame(BluRaySupPicture pic, SKBitmap bmp, SKColor fontColor, double fps, int bottomMargin, int leftOrRightMargin, BluRayContentAlignment alignment, BluRayPoint overridePosition = null)
         {
             var bm = bmp.Copy();
-            // bm.SetTransparentTo(SKColors.FromArgb(0, 0, 0, 0));
             var colorPalette = GetBitmapPalette(bm, fontColor);
             var pal = new BluRaySupPalette(colorPalette.Count);
             for (var i = 0; i < colorPalette.Count; i++)
