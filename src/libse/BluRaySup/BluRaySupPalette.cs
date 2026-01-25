@@ -77,6 +77,12 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             }
 
             // Round & clamp
+
+            // Add small bias for values very close to 255 to compensate for YCbCr rounding losses
+            if (r > 254.0) r += 0.35;
+            if (g > 254.0) g += 0.35;
+            if (b > 254.0) b += 0.35;
+            
             int ir = (int)Math.Round(r, MidpointRounding.AwayFromZero);
             int ig = (int)Math.Round(g, MidpointRounding.AwayFromZero);
             int ib = (int)Math.Round(b, MidpointRounding.AwayFromZero);
