@@ -11326,6 +11326,7 @@ public partial class MainViewModel :
     {
         lock (_onKeyDownHandlerLock)
         {
+            AudioVisualizer?.SetKeyModifiers(keyEventArgs);
             var ms = Environment.TickCount64;
             var msDiff = ms - _lastKeyPressedMs;
             var k = keyEventArgs.Key;
@@ -11507,6 +11508,7 @@ public partial class MainViewModel :
         }
 
         _shortcutManager.OnKeyReleased(this, e);
+        AudioVisualizer?.SetKeyModifiers(e);
     }
 
     private bool _subtitleGridIsRightClick = false;

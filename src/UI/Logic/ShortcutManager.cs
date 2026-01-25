@@ -60,6 +60,7 @@ public class ShortcutManager : IShortcutManager
     {
         _activeKeys.Clear();
         _isControlPressed = false;
+        _isShiftPressed = false;
     }
 
     public void RegisterShortcut(ShortCut shortcut)

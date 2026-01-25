@@ -2607,4 +2607,11 @@ public class AudioVisualizer : Control
         _fancyWaveformGlowPenCache.Clear();
         _fancyWaveformGradientCache.Clear();
     }
+
+    internal void SetKeyModifiers(KeyEventArgs e)
+    {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+    }
 }
