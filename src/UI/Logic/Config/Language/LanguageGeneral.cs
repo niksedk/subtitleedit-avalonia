@@ -602,6 +602,8 @@ public class LanguageGeneral
     public string Ascending { get; set; }
     public string Question { get; set; }
     public string Auto { get; set; }
+    public string SelectSubtitle { get; set; }
+    public string Center { get; set; }
 
     public LanguageGeneral()
     {
@@ -1203,5 +1205,7 @@ public class LanguageGeneral
         Ascending = "Ascending";
         Question = "Question";
         Auto = "Auto";
+        SelectSubtitle = "Select subtitle";
+        Center = "Center";
     }
 }

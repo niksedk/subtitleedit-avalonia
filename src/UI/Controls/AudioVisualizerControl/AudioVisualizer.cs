@@ -329,17 +329,17 @@ public class AudioVisualizer : Control
     public delegate void ContextEventHandler(object sender, ContextEventArgs e);
 
     public delegate void ParagraphEventHandler(object sender, ParagraphEventArgs e);
+    public delegate void ParagraphNullableEventHandler(object sender, ParagraphNullableEventArgs e);
 
     public event PositionEventHandler? OnVideoPositionChanged;
     public event ContextEventHandler? FlyoutMenuOpening;
     public event ParagraphEventHandler? OnToggleSelection;
     public event PositionEventHandler? OnHorizontalScroll;
-    public event ParagraphEventHandler? OnParagraphDoubleTapped;
     public event ParagraphEventHandler? OnNewSelectionInsert;
     public event ParagraphEventHandler? OnDeletePressed;
     public event ParagraphEventHandler? OnSelectRequested;
-
-    private CancellationTokenSource? _singleTapCancellationTokenSource;
+    public event ParagraphNullableEventHandler? OnPrimarySingleClicked;
+    public event ParagraphNullableEventHandler? OnPrimaryDoubleClicked;
 
     public AudioVisualizer()
     {
@@ -366,16 +366,12 @@ public class AudioVisualizer : Control
         Tapped += OnTapped;
         DoubleTapped += (sender, e) =>
         {
-            _singleTapCancellationTokenSource?.Cancel();
-            if (OnParagraphDoubleTapped != null)
+            if (OnPrimaryDoubleClicked != null && e.Pointer.IsPrimary)
             {
                 var point = e.GetPosition(this);
+                var position = RelativeXPositionToSeconds(point.X);
                 var p = HitTestParagraph(point);
-                if (p != null)
-                {
-                    var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
-                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
-                }
+                OnPrimaryDoubleClicked?.Invoke(this, new ParagraphNullableEventArgs(position, p));
             }
         };
         KeyDown += OnKeyDown;
@@ -451,95 +447,67 @@ public class AudioVisualizer : Control
 
     private async void OnTapped(object? sender, TappedEventArgs e)
     {
-        _singleTapCancellationTokenSource?.Cancel();
-        var cts = _singleTapCancellationTokenSource = new CancellationTokenSource();
-
-        try
+        var point = e.GetPosition(this);
+        if (!_isCtrlDown && !_isAltDown && !_isShiftDown && e.Pointer.IsPrimary)
         {
-            await Task.Delay(250, cts.Token); // double-tap threshold
+            var p = HitTestParagraph(point);
+            var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
 
-            // Single-tap logic here
-            var point = e.GetPosition(this);
-            if (!_isCtrlDown && !_isAltDown && !_isShiftDown)
+            if (OnVideoPositionChanged != null)
             {
-                var p = HitTestParagraph(point);
-                var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
-                
-                if (_interactionMode is InteractionMode.None or InteractionMode.New)
-                {
-                    if (OnVideoPositionChanged != null)
-                    {
-                        _audioVisualizerLastScroll = 0;
-                        OnVideoPositionChanged.Invoke(this, new PositionEventArgs { PositionInSeconds = position });
-                    }
+                _audioVisualizerLastScroll = 0;
+                OnPrimarySingleClicked?.Invoke(this, new ParagraphNullableEventArgs(position, p));
+            }
 
-                    _activeParagraph = null;
-                }
-                
-                if (Se.Settings.Waveform.SingleClickSelectsSubtitle && p != null && OnParagraphDoubleTapped != null)
+            _activeParagraph = null;
+            return;
+        }
+
+        if (_isShiftDown && !_isCtrlDown)
+        {
+            var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+            var seconds = RelativeXPositionToSeconds(point.X);
+            if (firstSelected != null)
+            {
+                if (seconds < firstSelected.EndTime.TotalSeconds - 0.01)
                 {
-                    e.Handled = true;
-                    OnParagraphDoubleTapped.Invoke(this, new ParagraphEventArgs(position, p));
-                }
-                
-                if (Se.Settings.Waveform.CenterOnSingleClick)
-                {
-                    CenterOnPosition(position);
+                    firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
                 }
 
+                e.Handled = true;
+                InvalidateVisual();
                 return;
             }
+        }
 
-            if (_isShiftDown && !_isCtrlDown)
+        if (_isCtrlDown || (OperatingSystem.IsMacOS() && _isShiftDown))
+        {
+            var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+            var seconds = RelativeXPositionToSeconds(point.X);
+            if (firstSelected != null)
             {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
+                if (seconds > firstSelected.StartTime.TotalSeconds + 0.01)
                 {
-                    if (seconds < firstSelected.EndTime.TotalSeconds - 0.01)
-                    {
-                        firstSelected.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
-                    }
-
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
+                    firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
                 }
-            }
 
-            if (_isCtrlDown || (OperatingSystem.IsMacOS() && _isShiftDown))
-            {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
-                {
-                    if (seconds > firstSelected.StartTime.TotalSeconds + 0.01)
-                    {
-                        firstSelected.EndTime = TimeSpan.FromSeconds(seconds);
-                    }
-
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
-                }
-            }
-
-            if (_isAltDown)
-            {
-                var firstSelected = AllSelectedParagraphs.FirstOrDefault();
-                var seconds = RelativeXPositionToSeconds(point.X);
-                if (firstSelected != null)
-                {
-                    firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
-                    e.Handled = true;
-                    InvalidateVisual();
-                    return;
-                }
+                e.Handled = true;
+                InvalidateVisual();
+                return;
             }
         }
-        catch (TaskCanceledException)
+
+        if (_isAltDown)
         {
-            // ignore
+            var firstSelected = AllSelectedParagraphs.FirstOrDefault();
+            var seconds = RelativeXPositionToSeconds(point.X);
+            if (firstSelected != null)
+            {
+                firstSelected.StartTime = TimeSpan.FromSeconds(seconds);
+                e.Handled = true;
+                InvalidateVisual();
+                return;
+            }
         }
     }
 

@@ -253,6 +253,8 @@ public class LanguageSettings
     public string TextBoxButtonShowItalic { get; set; }
     public string TextBoxButtonShowColor { get; set; }
     public string TextBoxButtonShowRemoveFormatting { get; set; }
+    public string WaveformSingleClickAction { get; set; }
+    public string WaveformDoubleClickAction { get; set; }
 
     public LanguageSettings()
     {
@@ -502,6 +504,8 @@ public class LanguageSettings
         TextBoxButtonShowItalic = "Text box: show italic button";
         TextBoxButtonShowColor = "Text box: show color button";
         TextBoxButtonShowRemoveFormatting = "Text box: show remove formatting button";
+        WaveformSingleClickAction = "Waveform single-click action";
+        WaveformDoubleClickAction = "Waveform double-click action (after single-click action)";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

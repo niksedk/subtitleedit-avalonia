@@ -58,7 +58,9 @@ public class InitWaveform
             vm.AudioVisualizer.OnNewSelectionInsert += vm.AudioVisualizerOnNewSelectionInsert;
             vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerOnVideoPositionChanged;
             vm.AudioVisualizer.OnToggleSelection += vm.AudioVisualizerOnToggleSelection;
-            vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
+            //vm.AudioVisualizer.OnParagraphDoubleTapped += vm.OnWaveformDoubleTapped;
+            vm.AudioVisualizer.OnPrimarySingleClicked += vm.AudioVisualizerOnPrimarySingleClicked;
+            vm.AudioVisualizer.OnPrimaryDoubleClicked += vm.AudioVisualizerOnPrimaryDoubleClicked;
             vm.AudioVisualizer.OnDeletePressed += vm.AudioVisualizerOnDeletePressed;
             vm.AudioVisualizer.PointerReleased += vm.ControlMacPointerReleased;
             vm.AudioVisualizer.OnSelectRequested += vm.AudioVisualizerSelectRequested;

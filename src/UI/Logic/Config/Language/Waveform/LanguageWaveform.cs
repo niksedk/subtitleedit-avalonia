@@ -24,6 +24,11 @@ public class LanguageWaveform
     public string SpectrogramClassicTurbo { get; set; }
     public string WaveformDrawStyleClassic { get; set; }
     public string WaveformDrawStyleFancy { get; set; }
+    public string SetVideoPositionAndPauseAndSelectSubtitle { get; set; }
+    public string SetVideopositionAndPauseAndSelectSubtitleAndCenter { get; set; }
+    public string SetVideoPositionAndPause { get; set; }
+    public string SetVideopositionAndPauseAndCenter { get; set; }
+    public string SetVideoposition { get; set; }
 
     public LanguageWaveform()
     {
@@ -50,5 +55,11 @@ public class LanguageWaveform
         SpectrogramClassicTurbo = "Turbo";
         WaveformDrawStyleClassic = "Classic";
         WaveformDrawStyleFancy = "Fancy";
+
+        SetVideoPositionAndPauseAndSelectSubtitle = "Set video position, pause, and select subtitle";
+        SetVideopositionAndPauseAndSelectSubtitleAndCenter = "Set video position, pause, select subtitle, and center";
+        SetVideoPositionAndPause = "Set video position and pause";
+        SetVideopositionAndPauseAndCenter = "Set video position, pause, and center";
+        SetVideoposition = "Set video position";
     }
 }

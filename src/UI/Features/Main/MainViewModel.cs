@@ -12075,12 +12075,6 @@ public partial class MainViewModel :
         newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
 
-        if (Se.Settings.Waveform.PauseOnSingleClick)
-        {
-            vp.VideoPlayerInstance.Pause();
-            vp.SetPosition(newPosition);
-        }
-
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
 
@@ -12238,21 +12232,6 @@ public partial class MainViewModel :
                 vp.Position = seconds;
                 AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 FocusEditTextBox();
-            }
-        }
-    }
-
-    internal void OnWaveformDoubleTapped(object sender, ParagraphEventArgs e)
-    {
-        var vp = GetVideoPlayerControl();
-        if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
-        {
-            vp.Position = e.Seconds;
-            var p = Subtitles.FirstOrDefault(p =>
-                Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
-            if (p != null)
-            {
-                SelectAndScrollToSubtitle(p);
             }
         }
     }
@@ -12825,6 +12804,119 @@ public partial class MainViewModel :
         if (s != null)
         {
             SubtitleGrid.SelectedItem = s;
+        }
+    }
+
+    internal void OnWaveformDoubleTapped(object sender, ParagraphEventArgs e)
+    {
+        var vp = GetVideoPlayerControl();
+        if (!string.IsNullOrEmpty(_videoFileName) && vp != null)
+        {
+            vp.Position = e.Seconds;
+            var p = Subtitles.FirstOrDefault(p =>
+                Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
+            if (p != null)
+            {
+                SelectAndScrollToSubtitle(p);
+            }
+        }
+    }
+
+    internal void AudioVisualizerOnPrimarySingleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null || string.IsNullOrEmpty(_videoFileName) || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        if (Enum.TryParse<WaveformSingleClickActionType>(Se.Settings.Waveform.SingleClickAction, out var action))
+        {
+            switch (action)
+            {
+                case WaveformSingleClickActionType.SetVideoPositionAndPauseAndSelectSubtitle:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        var p1 = Subtitles.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+                        if (p1 != null)
+                        {
+                            SelectAndScrollToSubtitle(p1);
+                        }
+                    }
+                    break;
+                case WaveformSingleClickActionType.SetVideopositionAndPauseAndSelectSubtitleAndCenter:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        var p2 = Subtitles.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+                        if (p2 != null)
+                        {
+                            SelectAndScrollToSubtitle(p2);
+                            AudioVisualizer.CenterOnPosition(e.Seconds);
+                        }
+                    }
+                    break;
+                case WaveformSingleClickActionType.SetVideoPositionAndPause:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    break;
+                case WaveformSingleClickActionType.SetVideopositionAndPauseAndCenter:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        AudioVisualizer.CenterOnPosition(e.Seconds);
+                    }
+                    break;
+                case WaveformSingleClickActionType.SetVideoposition:
+                    vp.Position = e.Seconds;
+                    break;
+            }
+
+            _updateAudioVisualizer = true;
+        }
+    }
+
+    internal void AudioVisualizerOnPrimaryDoubleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        if (Enum.TryParse<WaveformDoubleClickActionType>(Se.Settings.Waveform.DoubleClickAction, out var action))
+        {
+            switch (action)
+            {
+                case WaveformDoubleClickActionType.SelectSubtitle:
+                    if (e.Paragraph != null)
+                    {
+                        var p = Subtitles.FirstOrDefault(p => Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
+                        if (p != null)
+                        {
+                            SelectAndScrollToSubtitle(p);
+                        }
+                    }
+                    break;
+                case WaveformDoubleClickActionType.Center:
+                    if (e.Paragraph != null)
+                    {
+                        AudioVisualizerCenterOnPositionIfNeeded(e.Paragraph, e.Seconds);
+                    }
+                    break;
+                case WaveformDoubleClickActionType.Pause:
+                    vp.VideoPlayerInstance.Pause();
+                    break;
+                case WaveformDoubleClickActionType.Play:
+                    vp.VideoPlayerInstance.Play();
+                    break;
+            }
+
+            _updateAudioVisualizer = true;
         }
     }
 }

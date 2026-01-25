@@ -2,21 +2,26 @@
 
 namespace Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 
-public class ParagraphEventArgs
+public class ParagraphNullableEventArgs
 {
-    public SubtitleLineViewModel Paragraph { get; }
+    public SubtitleLineViewModel? Paragraph { get; }
     public double Seconds { get; }
     public SubtitleLineViewModel? BeforeParagraph { get; set; }
     public MouseDownParagraphType MouseDownParagraphType { get; set; }
     public bool MovePreviousOrNext { get; set; }
     public double AdjustMs { get; set; }
 
-    public ParagraphEventArgs(SubtitleLineViewModel p)
+    public ParagraphNullableEventArgs(SubtitleLineViewModel? p)
     {
+        if (p == null)
+        {
+            return;
+        }
+
         Paragraph = new SubtitleLineViewModel(p);
     }
 
-    public ParagraphEventArgs(double seconds, SubtitleLineViewModel? p)
+    public ParagraphNullableEventArgs(double seconds, SubtitleLineViewModel? p)
     {
         Seconds = seconds;
         if (p == null)

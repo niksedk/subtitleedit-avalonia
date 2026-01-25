@@ -437,10 +437,31 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAllowOverlap, nameof(_vm.WaveformAllowOverlap)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterOnSingleClick, nameof(_vm.WaveformCenterOnSingleClick)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSingleClickSelectsSubtitle, nameof(_vm.WaveformSingleClickSelectsSubtitle)),
+
+
+            new SettingsItem(Se.Language.Options.Settings.WaveformSingleClickAction, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.WaveformSingleClickActionTypes)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedWaveformSingleClickActionType))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
+
+            new SettingsItem(Se.Language.Options.Settings.WaveformDoubleClickAction, () => new ComboBox
+            {
+                MinWidth = 200,
+                DataContext = _vm,
+                [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(_vm.WaveformDoubleClickActionTypes)),
+                [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(_vm.SelectedWaveformDoubleClickActionType))
+                {
+                    Mode = BindingMode.TwoWay,
+                }
+            }),
+
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformRightClickSelectsSubtitle, nameof(_vm.WaveformRightClickSelectsSubtitle)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.WaveformPauseOnSingleClick, nameof(_vm.WaveformPauseOnSingleClick)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformSnapToShotChanges, nameof(_vm.WaveformSnapToShotChanges)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformShotChangesAutoGenerate, nameof(_vm.WaveformShotChangesAutoGenerate)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusTextboxAfterInsertNew, nameof(_vm.WaveformFocusTextboxAfterInsertNew)),

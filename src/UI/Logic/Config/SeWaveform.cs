@@ -51,11 +51,10 @@ public class SeWaveform
     public string SpectrogramStyle { get; set; }
     public string WaveformDrawStyle { get; set; }
     public string LastDisplayMode { get; set; }
-    public bool PauseOnSingleClick { get; set; }
-    public bool CenterOnSingleClick { get; set; }
-    public bool SingleClickSelectsSubtitle { get; set; }
     public bool RightClickSelectsSubtitle { get; set; }
     public bool AllowOverlap { get; set; }
+    public string SingleClickAction { get; set; }
+    public string DoubleClickAction { get; set; }
 
     public SeWaveform()
     {
@@ -93,9 +92,9 @@ public class SeWaveform
         SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
         LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();
         WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Fancy.ToString();
-        PauseOnSingleClick = true;
-        CenterOnSingleClick = false;
         RightClickSelectsSubtitle = true;
+        SingleClickAction = WaveformSingleClickActionType.SetVideoPositionAndPauseAndSelectSubtitle.ToString();
+        DoubleClickAction = WaveformDoubleClickActionType.None.ToString();
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;
