@@ -250,8 +250,8 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
 
         private static List<SKColor> GetBitmapPalette(SKBitmap bitmap, SKColor fontColor)
         {
-            var pal = new List<SKColor>(250);
-            var lookup = new HashSet<SKColor>(250);
+            var pal = new List<SKColor>(255);
+            var lookup = new HashSet<SKColor>(255);
 
             // Add font color as first entry
             pal.Add(fontColor);
