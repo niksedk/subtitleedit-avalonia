@@ -9,6 +9,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.VideoPlayers;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
@@ -360,7 +361,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             var sliderVolume = new Slider
             {
                 Minimum = 0,
-                Maximum =  videoPlayerInstance.VolumeMaximum,
+                Maximum = videoPlayerInstance.VolumeMaximum,
                 Width = 80,
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -424,9 +425,9 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 FontSize = 8,
                 FontWeight = FontWeight.Bold,
                 Opacity = 0.4,
+                TextAlignment = TextAlignment.Right,
             };
-            _gridProgress.Children.Add(_textBlockVideoFileName);
-            Grid.SetColumn(_textBlockVideoFileName, 3);
+            _gridProgress.Add(_textBlockVideoFileName, 0, 1, 1, 3);
             _textBlockVideoFileName.PointerPressed += (_, e) => { VideoFileNamePointerPressed?.Invoke(e); };
 
             Content = mainGrid;
@@ -529,7 +530,13 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance.Pause();
             _textBlockPlayerName.Text = _videoPlayerInstance.Name;
             _videoFileName = videoFileName;
-            _textBlockVideoFileName.Text = System.IO.Path.GetFileName(videoFileName);
+
+            var shortName = System.IO.Path.GetFileName(videoFileName);
+            if (shortName.Length > 55)
+            {
+                shortName = "..." + shortName[^50..];
+            }
+            _textBlockVideoFileName.Text = shortName;
         }
 
         internal void Close()
@@ -581,7 +588,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 var pos = _videoPlayerInstance.Position;
                 if (IsSmpteTimingEnabled)
                 {
-                     pos = pos * 1000.0 / 1001.0; // SMPTE timing adjustment 
+                    pos = pos * 1000.0 / 1001.0; // SMPTE timing adjustment 
                 }
 
                 SetPositionDisplayOnly(pos);
