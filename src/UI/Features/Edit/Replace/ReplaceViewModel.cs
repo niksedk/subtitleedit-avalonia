@@ -6,7 +6,6 @@ using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using static Nikse.SubtitleEdit.Logic.FindService;
@@ -27,7 +26,7 @@ public partial class ReplaceViewModel : ObservableObject
     public Window? Window { get; set; }
 
     public bool FindNextPressed { get; private set; }
-    public bool ReplaceNextPressed { get; private set; }
+    public bool ReplacePressed { get; private set; }
     public bool ReplaceAllPressed { get; private set; }
 
     private IFindService? _findService;
@@ -65,7 +64,7 @@ public partial class ReplaceViewModel : ObservableObject
     [RelayCommand]
     private void Replace()
     {
-        ReplaceNextPressed = true;
+        ReplacePressed = true;
         ReplaceAllPressed = false;
         FindNextPressed = false;
         _findResult?.HandleReplaceResult(this);
@@ -74,7 +73,7 @@ public partial class ReplaceViewModel : ObservableObject
     [RelayCommand]
     private void ReplaceAll()
     {
-        ReplaceNextPressed = false;
+        ReplacePressed = false;
         ReplaceAllPressed = true;
         FindNextPressed = false;
         _findResult?.HandleReplaceResult(this);
@@ -83,7 +82,7 @@ public partial class ReplaceViewModel : ObservableObject
     [RelayCommand]
     private void FindNext()
     {
-        ReplaceNextPressed = false;
+        ReplacePressed = false;
         ReplaceAllPressed = false;
         FindNextPressed = true;
         _findResult?.HandleReplaceResult(this);

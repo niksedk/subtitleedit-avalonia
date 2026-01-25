@@ -8,7 +8,7 @@ public class LanguageEditFind
     public string CaseInsensitive { get; set; }
     public string FindPrevious { get; set; }
     public string FindNext { get; set; }
-    public string ReplaceNext { get; set; }
+    public string ReplaceAndFindNext { get; internal set; }
     public string ReplaceAll { get; set; }
     public string ReplaceTitle { get; set; }
     public string ReplaceWith { get; set; }
@@ -23,7 +23,7 @@ public class LanguageEditFind
         CaseInsensitive = "Case insensitive";
         FindPrevious = "Find _previous";
         FindNext = "_Find next";
-        ReplaceNext = "_Replace next";
+        ReplaceAndFindNext = "_Replace & find next";
         ReplaceAll = "Replace _all";
         ReplaceTitle = "Replace";
         ReplaceWith = "Replace with";

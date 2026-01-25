@@ -6081,7 +6081,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if ((result.FindNextPressed || result.ReplaceNextPressed || result.ReplaceAllPressed) && !string.IsNullOrEmpty(result.SearchText))
+        if ((result.FindNextPressed || result.ReplacePressed || result.ReplaceAllPressed) && !string.IsNullOrEmpty(result.SearchText))
         {
             var findMode = FindService.FindMode.CaseSensitive;
             if (result.FindTypeCanseInsensitive)
@@ -6120,38 +6120,15 @@ public partial class MainViewModel :
                 ShowStatus(string.Format(Se.Language.Main.ReplacedXWithYCountZ, result.SearchText, result.ReplaceText, replaceCount));
                 return;
             }
-            else
+            else // replace requested
             {
-                idx = _findService.ReplaceNext(result.SearchText, result.ReplaceText, subs, currentLineIndex, currentCharIndex);
-                if (idx >= 0)
+                var selectedText = EditTextBox.SelectedText;
+                if (selectedText == result.SearchText)
                 {
-                    var s = Subtitles[idx];
-                    var newText = subs[idx];
-                    if (newText != s.Text)
-                    {
-                        s.Text = newText;
-                        ShowStatus(string.Format(Se.Language.Main.ReplacedXWithYInLineZ, result.SearchText, result.ReplaceText, idx));
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            SubtitleGrid.SelectedIndex = idx;
-                            SubtitleGrid.ScrollIntoView(SubtitleGrid.SelectedItem, null);
-
-                            ShowStatus(string.Format(Se.Language.General.FoundXInLineYZ, _findService.CurrentTextFound, _findService.CurrentLineNumber + 1,
-                                _findService.CurrentTextIndex + 1));
-
-                            // wait for text box to update
-                            Task.Delay(50);
-
-                            EditTextBox.CaretIndex = _findService.CurrentTextIndex;
-                            EditTextBox.SelectionStart = _findService.CurrentTextIndex;
-                            EditTextBox.SelectionEnd = _findService.CurrentTextIndex + _findService.CurrentTextFound.Length;
-                        });
-                        return;
-                    }
+                    EditTextBox.SelectedText = result.ReplaceText;
                 }
 
-                ShowStatus(string.Format(Se.Language.General.XNotFound, _findService.SearchText));
-                return;
+                idx = _findService.FindNext(result.SearchText, subs, currentLineIndex, currentCharIndex + 1);
             }
 
             if (idx < 0)

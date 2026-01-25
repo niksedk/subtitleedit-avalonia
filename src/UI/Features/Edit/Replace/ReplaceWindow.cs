@@ -120,7 +120,7 @@ public class ReplaceWindow : Window
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
-        var buttonReplaceNext = UiUtil.MakeButton(Se.Language.Edit.Find.ReplaceNext, vm.ReplaceCommand)
+        var buttonReplace = UiUtil.MakeButton(Se.Language.Edit.Find.ReplaceAndFindNext, vm.ReplaceCommand)
             .WithLeftAlignment()
             .WithMinWidth(150)
             .WithMargin(0, 0, 0, 10);
@@ -147,7 +147,7 @@ public class ReplaceWindow : Window
             Children =
             {
                 buttonFindNext,
-                buttonReplaceNext,
+                buttonReplace,
                 buttonReplaceAll,
                 buttonCount,
                 textBlockCountResult,
