@@ -95,6 +95,46 @@ public partial class ShortcutsViewModel : ObservableObject
         _surround3Right = Se.Settings.Surround3Right;
     }
 
+    partial void OnCtrlIsSelectedChanged(bool value)
+    {
+        if (!_isLoadingSelection)
+        {
+            UpdateShortcutDo();
+        }
+    }
+
+    partial void OnAltIsSelectedChanged(bool value)
+    {
+        if (!_isLoadingSelection)
+        {
+            UpdateShortcutDo();
+        }
+    }
+
+    partial void OnShiftIsSelectedChanged(bool value)
+    {
+        if (!_isLoadingSelection)
+        {
+            UpdateShortcutDo();
+        }
+    }
+
+    partial void OnWinIsSelectedChanged(bool value)
+    {
+        if (!_isLoadingSelection)
+        {
+            UpdateShortcutDo();
+        }
+    }
+
+    partial void OnSelectedShortcutChanged(string? value)
+    {
+        if (!_isLoadingSelection)
+        {
+            UpdateShortcutDo();
+        }
+    }
+
     private static List<string> GetShortcutKeys()
     {
         var result = new List<string>();
@@ -698,19 +738,12 @@ public partial class ShortcutsViewModel : ObservableObject
             AltIsSelected = result.IsAltPressed;
             ShiftIsSelected = result.IsShiftPressed;
             WinIsSelected = result.IsWinPressed;
-            UpdateShortcut();
+            UpdateShortcutDo();
         }
     }
 
-    [RelayCommand]
-    private void UpdateShortcut()
+    private void UpdateShortcutDo()
     {
-        // Don't update if we're loading a new selection
-        if (_isLoadingSelection)
-        {
-            return;
-        }
-
         var shortcut = SelectedShortcut;
         var node = SelectedNode;
         if (node == null || node.ShortCut is null)
@@ -766,7 +799,7 @@ public partial class ShortcutsViewModel : ObservableObject
         ShiftIsSelected = false;
         WinIsSelected = false;
         SelectedShortcut = null;
-        UpdateShortcut();
+        UpdateShortcutDo();
     }
 
     [RelayCommand]
