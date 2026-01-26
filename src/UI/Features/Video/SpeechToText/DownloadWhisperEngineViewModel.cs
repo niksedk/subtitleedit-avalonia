@@ -94,7 +94,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
                     TitleText = Se.Language.General.Unpacking7ZipArchiveDotDotDot;
                     StartIndeterminateProgress();
-                    Unpacker.Extract7Zip(tempFileName, dir, string.Empty, _cancellationTokenSource, text => ProgressText = text);
+                    Unpacker.Extract7Zip(tempFileName, dir, "Faster-Whisper-XXL", _cancellationTokenSource, text => ProgressText = text);
                     StopIndeterminateProgress();
 
                     try
