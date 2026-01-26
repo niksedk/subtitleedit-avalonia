@@ -52,6 +52,11 @@ public partial class GetAudioClipsViewModel : ObservableObject
         var count = 0;
         foreach (var line in _lines)
         {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                return;
+            }
+
             count++;
             var pecentage = (double)count / _lines.Count * 100.0;
             Progress = pecentage;
@@ -61,7 +66,22 @@ public partial class GetAudioClipsViewModel : ObservableObject
             var process = GetExtractProcess(_videoFileName, line, outputFileName);
             process.Start();
             process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
+            
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    process.Kill();
+                }
+                catch
+                {
+                    // Process may have already exited
+                }
+                return;
+            }
+
             if (process.ExitCode == 0 && File.Exists(outputFileName))
             {
                 AudioClips.Add(new AudioClip(outputFileName, line));
