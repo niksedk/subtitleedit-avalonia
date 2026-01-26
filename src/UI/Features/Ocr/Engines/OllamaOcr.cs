@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Logic;
+using SkiaSharp;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic;
-using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.Engines;
 
@@ -29,10 +29,17 @@ public class OllamaOcr
     {
         try
         {
-            var modelJson = "\"model\": \"" + model + "\",";
+            // Pad to square to improve OCR accuracy
+            using var paddedBitmap = PreprocessImage(bitmap);
+            string base64Image = paddedBitmap.ToBase64String();
 
-            var prompt = string.Format("Get the text (use '\\n' for new line) from this image in {0}. Return only the text - no comments or notes. For new line, use '\\n'.", language);
-            var input = "{ " + modelJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + bitmap.ToBase64String() + "\"] } ] }";
+            //var pngBytes = paddedBitmap.ToPngArray();
+            //System.IO.File.WriteAllBytes("c:\\temp\\ollama-ocr-image.png", pngBytes);
+
+            var modelJson = "\"model\": \"" + model + "\",";
+            var optionsJson = string.Empty; // "\"options\": { \"temperature\": 0, \"repeat_penalty\": 1.0 },";
+            var prompt = string.Format("Act as a precise OCR engine. Transcribe every line of text from this image exactly as it appears. The language is {0}. Maintain the vertical order. Use a single '\\n' to separate each line. Do not skip any text. Output only the transcribed text", language);
+            var input = "{ " + modelJson + optionsJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + base64Image + "\"] } ] }";
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             var result = await _httpClient.PostAsync(url, content, cancellationToken);
@@ -72,5 +79,30 @@ public class OllamaOcr
             SeLogger.Error(ex, "Error calling Ollama for OCR");
             return string.Empty;
         }
+    }
+
+    public SKBitmap PreprocessImage(SKBitmap source)
+    {
+        int margin = (int)(Math.Max(source.Width, source.Height) * 0.2);
+        int side = Math.Max(source.Width, source.Height) + margin;
+        var info = new SKImageInfo(side, side, SKColorType.Rgba8888, SKAlphaType.Opaque);
+        var squareBitmap = new SKBitmap(info);
+
+        using (var canvas = new SKCanvas(squareBitmap))
+        {
+            canvas.Clear(SKColors.Black);
+            using (var image = SKImage.FromBitmap(source))
+            {
+                float left = (side - source.Width) / 2f;
+                float top = (side - source.Height) / 2f;
+                var destRect = new SKRect(left, top, left + source.Width, top + source.Height);
+                var sampling = new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.None);
+                canvas.DrawImage(image, destRect, sampling, null);
+            }
+
+            canvas.Flush();
+        }
+
+        return squareBitmap;
     }
 }
