@@ -7,7 +7,6 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Styling;
-using AvaloniaEdit;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -97,8 +96,9 @@ public class OcrWindow : Window
                     }
                     else
                     {
-                        editViewRow.Height = new GridLength(1, GridUnitType.Star);
+                        editViewRow.Height = new GridLength(editViewHeight, GridUnitType.Pixel);
                     }
+
                     editViewRow.MinHeight = 150;
                 }
             }

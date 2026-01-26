@@ -302,6 +302,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             }
 
             var lineText = splitLine.GetText();
+            if (!isWordCorrect && _spellCheckWordLists.HasNameExtended(result, lineText))
+            {
+                isWordCorrect = true;
+            }
+            
             var w = result.Trim('-');
             if (!isWordCorrect && w != result &&
                 (_wordSkipList.Contains(w) ||
@@ -355,7 +360,12 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
                     }
                 }
 
-                guesses.AddRange(_ocrFixReplaceList.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName));
+                var autoSplitGuesses = UnknownWordGuesser.CreateGuessesFromLetters(result, _threeLetterIsoLanguageName);
+                if (autoSplitGuesses.Count() > 0)
+                {
+                    guesses.AddRange(autoSplitGuesses);
+                }
+
                 foreach (var g in guesses)
                 {
                     w = g.Trim('\'', '"', '-');

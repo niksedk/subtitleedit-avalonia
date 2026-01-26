@@ -448,7 +448,6 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 {
                     if (word.Substring(i).StartsWith(letter, StringComparison.Ordinal))
                     {
-
                         if (i == word.Length - letter.Length && !_partialWordReplaceList[letter].Contains(' '))
                         {
                             var guess = word.Remove(i, letter.Length).Insert(i, _partialWordReplaceList[letter]);

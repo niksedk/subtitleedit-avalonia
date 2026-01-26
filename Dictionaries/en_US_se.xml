@@ -53,6 +53,7 @@
 	<word>accelerant</word>
 	<word>acidotic</word>
 	<word>actinium</word>
+	<word>adenocarcinoma</word>
 	<word>adenosine</word>
 	<word>adjustability</word>
 	<word>adorkable</word>
@@ -97,6 +98,7 @@
 	<word>arsons</word>
 	<word>arteritis</word>
 	<word>arthralgia</word>
+	<word>arthroplasty</word>
 	<word>artisanal</word>
 	<word>asshat</word>
 	<word>asshats</word>
@@ -123,6 +125,7 @@
 	<word>backways</word>
 	<word>badass</word>
 	<word>badasses</word>
+	<word>bam</word>
 	<word>barcode</word>
 	<word>barista</word>
 	<word>barium</word>
@@ -220,6 +223,7 @@
 	<word>cluelessness</word>
 	<word>co2</word>
 	<word>cobalt</word>
+	<word>codenames</word>
 	<word>colectomy</word>
 	<word>collywobbles</word>
 	<word>colonoscopy</word>
@@ -305,7 +309,6 @@
 	<word>dysesthesia</word>
 	<word>dysprosium</word>
 	<word>déjà vu</word>
-	<word>émigré</word>
 	<word>easy-peasy</word>
 	<word>einsteinium</word>
 	<word>electrocautery</word>
@@ -318,6 +321,7 @@
 	<word>enzymatically</word>
 	<word>episiotomy</word>
 	<word>erbium</word>
+	<word>esophagectomy</word>
 	<word>esophaguses</word>
 	<word>et cetera</word>
 	<word>euro</word>
@@ -432,8 +436,10 @@
 	<word>helium</word>
 	<word>heloooooo</word>
 	<word>hematoma</word>
+	<word>hemodynamically</word>
 	<word>hemodynamics</word>
 	<word>hemostasis</word>
+	<word>hemothorax</word>
 	<word>hentai</word>
 	<word>hiei</word>
 	<word>hijab</word>
@@ -537,6 +543,7 @@
 	<word>magnesium</word>
 	<word>magnetar</word>
 	<word>majordome</word>
+	<word>malunion</word>
 	<word>malware</word>
 	<word>manganese</word>
 	<word>manmade</word>
@@ -557,6 +564,7 @@
 	<word>meself</word>
 	<word>mesenteric</word>
 	<word>mesentery</word>
+	<word>mesocaval</word>
 	<word>mesothelioma</word>
 	<word>metadata</word>
 	<word>methodic</word>
@@ -599,6 +607,7 @@
 	<word>neighbour</word>
 	<word>neighbourhood</word>
 	<word>neighbours</word>
+	<word>neoadjuvant</word>
 	<word>neodymium</word>
 	<word>neon</word>
 	<word>nephrologist</word>
@@ -649,6 +658,7 @@
 	<word>osmium</word>
 	<word>osseointegrated</word>
 	<word>osseointegration</word>
+	<word>osteotomy</word>
 	<word>other's</word>
 	<word>otolaryngologist</word>
 	<word>oughta</word>
@@ -669,6 +679,7 @@
 	<word>p.m.</word>
 	<word>paddleboarding</word>
 	<word>palladium</word>
+	<word>pancreatitis</word>
 	<word>paprikash</word>
 	<word>paralyze</word>
 	<word>parents'</word>
@@ -678,6 +689,7 @@
 	<word>percutaneous</word>
 	<word>percutaneously</word>
 	<word>perfusionist</word>
+	<word>periarterial</word>
 	<word>pericardial</word>
 	<word>perimortem</word>
 	<word>periorbital</word>
@@ -762,6 +774,7 @@
 	<word>repurposed</word>
 	<word>repurposing</word>
 	<word>resect</word>
+	<word>resected</word>
 	<word>resecting</word>
 	<word>retargeting</word>
 	<word>retractor</word>
@@ -785,7 +798,9 @@
 	<word>saké</word>
 	<word>saltimbocca</word>
 	<word>samarium</word>
+	<word>saphenous</word>
 	<word>sayonara</word>
+	<word>scammer</word>	
 	<word>scandium</word>
 	<word>scarecop</word>
 	<word>scattershot</word>
@@ -918,9 +933,9 @@
 	<word>taxies</word>
 	<word>teardown</word>
 	<word>technetium</word>
-	<word>teleportation</word>
-	<word>teleportation</word>
 	<word>teleport</word>
+	<word>teleportation</word>
+	<word>teleportation</word>
 	<word>teleporting</word>
 	<word>tellurium</word>
 	<word>temporoparietal</word>
@@ -1075,37 +1090,23 @@
 	<word>zinc</word>
 	<word>zipline</word>
 	<word>zirconium</word>
-	<word>bam</word>
+	<word>émigré</word>
   	<word>besties</word>
+  	<word>chatbot</word>
+  	<word>chatbots</word>
   	<word>cholangitis</word>
   	<word>crepitus</word>
+  	<word>hybristophilia</word>
   	<word>hydrocelectomy</word>
+  	<word>hyperviolent</word>
+  	<word>impulsivity</word>
   	<word>joined'ed</word>
   	<word>mentation</word>
   	<word>mercs</word>
   	<word>nannied</word>
+  	<word>noogie</word>
   	<word>stents</word>
   	<word>tamponade</word>
   	<word>thoracolumbar</word>
-  	<word>chatbot</word>
-  	<word>chatbots</word>
-  	<word>hybristophilia</word>
-  	<word>hyperviolent</word>
-  	<word>impulsivity</word>
-  	<word>noogie</word>
-  	<word>videographer</word>	
-	<word>adenocarcinoma</word>
-	<word>arthroplasty</word>
-	<word>esophagectomy</word>
-	<word>hemodynamically</word>
-	<word>hemothorax</word>
-	<word>malunion</word>
-	<word>mesocaval</word>
-	<word>neoadjuvant</word>
-	<word>osteotomy</word>
-	<word>pancreatitis</word>
-	<word>periarterial</word>
-	<word>resected</word>
-	<word>saphenous</word>
-	<word>scammer</word>	
+  	<word>videographer</word>
 </words>
