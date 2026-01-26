@@ -116,4 +116,16 @@ public partial class OcrSubtitleItem : ObservableObject
         Text = string.Empty;
         _bitmap = null;
     }
+
+    public OcrSubtitleItem(OcrSubtitleItem ocrSubtitle, string text)
+    {
+        _ocrSubtitle = ocrSubtitle._ocrSubtitle;
+        _index = ocrSubtitle._index;
+        Number = ocrSubtitle.Number;;
+        StartTime = ocrSubtitle.StartTime;
+        EndTime = ocrSubtitle.EndTime;
+        Duration = ocrSubtitle.Duration;
+        Text = text;
+        _bitmap = ocrSubtitle._bitmap;
+    }
 }

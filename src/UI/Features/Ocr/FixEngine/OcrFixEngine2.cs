@@ -13,7 +13,7 @@ namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 public interface IOcrFixEngine2
 {
     void Initialize(List<OcrSubtitleItem> subtitles, string threeLetterIsoLanguageName, SpellCheckDictionaryDisplay spellCheckDictionary);
-    OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords);
+    OcrFixLineResult FixOcrErrors(int index, OcrSubtitleItem item, bool doTryToGuessUnknownWords);
     void Unload();
     bool IsLoaded();
     List<string> GetSpellCheckSuggestions(string word);
@@ -78,16 +78,15 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _wordSplitList = StringWithoutSpaceSplitToWords.LoadWordSplitList(Se.DictionariesFolder, threeLetterIsoLanguageName, names);
     }
 
-    public OcrFixLineResult FixOcrErrors(int index, bool doTryToGuessUnknownWords)
+    public OcrFixLineResult FixOcrErrors(int index, OcrSubtitleItem item, bool doTryToGuessUnknownWords)
     {
-        var p = _subtitles[index];
         var wordsToIgnore = new List<string>();
 
-        var replacedLine = ReplaceLineFixes(index, wordsToIgnore);
-        var splitLine = SplitLine(replacedLine, p, index);
-        if (replacedLine != p.Text)
+        var replacedLine = ReplaceLineFixes(index, item, wordsToIgnore);
+        var splitLine = SplitLine(replacedLine, item, index);
+        if (replacedLine != item.Text)
         {
-            splitLine.ReplacementUsed = new ReplacementUsedItem(p.Text, replacedLine, index);
+            splitLine.ReplacementUsed = new ReplacementUsedItem(item.Text, replacedLine, index);
         }
 
         for (var i = 0; i < splitLine.Words.Count; i++)
@@ -124,10 +123,9 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         return subtitle;
     }
 
-    private string ReplaceLineFixes(int index, List<string> wordsToIgnore)
+    private string ReplaceLineFixes(int index, OcrSubtitleItem item, List<string> wordsToIgnore)
     {
-        var line = _subtitles[index];
-        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(line.Text, _subtitle, index, _spellCheckManager, wordsToIgnore);
+        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(item.Text, _subtitle, index, _spellCheckManager, wordsToIgnore);
         return replacedLine;
     }
 

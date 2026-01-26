@@ -16,6 +16,7 @@ public class NOcrChar
     public List<NOcrLine> LinesBackground { get; }
     public int ExpandCount { get; set; }
     public bool LoadedOk { get; }
+    public ImageSplitterItem2? ImageSplitterItem { get; set; }
 
     public double WidthPercent => Height * 100.0 / Width;
 

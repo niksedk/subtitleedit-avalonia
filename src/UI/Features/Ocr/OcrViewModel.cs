@@ -49,6 +49,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static Nikse.SubtitleEdit.Logic.Ocr.BinaryOcrMatcher;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
 
@@ -1373,9 +1374,12 @@ public partial class OcrViewModel : ObservableObject
                 }
 
                 var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
-                    vm => { vm.Initialize(answer == MessageBoxResult.Custom1 
+                    vm =>
+                    {
+                        vm.Initialize(answer == MessageBoxResult.Custom1
                         ? PaddleOcrDownloadType.EngineCpu
-                        : PaddleOcrDownloadType.EngineGpu); });
+                        : PaddleOcrDownloadType.EngineGpu);
+                    });
 
                 _isCtrlDown = false;
 
@@ -1728,7 +1732,7 @@ public partial class OcrViewModel : ObservableObject
                 {
                     if (splitterItem.SpecialCharacter != null)
                     {
-                        matches.Add(new NOcrChar { Text = splitterItem.SpecialCharacter });
+                        matches.Add(new NOcrChar { Text = splitterItem.SpecialCharacter, ImageSplitterItem = splitterItem });
                     }
                 }
                 else
@@ -1742,7 +1746,7 @@ public partial class OcrViewModel : ObservableObject
 
                         if (_skipOnceChars.Any(p => p.LetterIndex == letterIndex && p.LineIndex == i))
                         {
-                            matches.Add(new NOcrChar { Text = "*" });
+                            matches.Add(new NOcrChar { Text = "*", ImageSplitterItem = splitterItem });
                             index++;
                             continue;
                         }
@@ -1751,7 +1755,7 @@ public partial class OcrViewModel : ObservableObject
                             _runOnceChars.FirstOrDefault(p => p.LetterIndex == letterIndex && p.LineIndex == i);
                         if (runOnceChar != null)
                         {
-                            matches.Add(new NOcrChar { Text = runOnceChar.Text });
+                            matches.Add(new NOcrChar { Text = runOnceChar.Text, ImageSplitterItem = splitterItem });
                             _runOnceChars.Clear();
                             index++;
                             continue;
@@ -1815,11 +1819,11 @@ public partial class OcrViewModel : ObservableObject
 
                     if (match == null)
                     {
-                        matches.Add(new NOcrChar { Text = "*" });
+                        matches.Add(new NOcrChar { Text = "*", ImageSplitterItem = splitterItem });
                     }
                     else
                     {
-                        matches.Add(new NOcrChar { Text = _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match), Italic = match.Italic });
+                        matches.Add(new NOcrChar { Text = _nOcrCaseFixer.FixUppercaseLowercaseIssues(splitterItem, match), Italic = match.Italic, ImageSplitterItem = splitterItem });
                     }
                 }
 
@@ -1833,17 +1837,32 @@ public partial class OcrViewModel : ObservableObject
             }
 
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
-            var unknownWords = OcrFixLineAndSetText(i, item);
+            var ocrFixResultTemp = OcrFixLine(i, item);
+            if (ocrFixResultTemp.UnknownWords.Count > 0 && item.Text.Contains("<i>", StringComparison.Ordinal))
+            {
+                var unItalicFactor = 0.33;
+                var text = GetTextWithMoreSpacesInItalic(ocrFixResultTemp.UnknownWords, matches, letters, parentBitmap, unItalicFactor, SelectedNOcrPixelsAreSpace);
+                var unItalicItem = new OcrSubtitleItem(item, text);
+                var unItalicResultTemp = OcrFixLine(i, unItalicItem);
+                if (ocrFixResultTemp.UnknownWords.Count > unItalicResultTemp.UnknownWords.Count)
+                {
+                    item.Text = unItalicItem.Text;
+                    item.FixResult = unItalicItem.FixResult;
+                    ocrFixResultTemp = unItalicResultTemp;
+                }
+            }
+
+            SetText(i, item, ocrFixResultTemp);
 
             _runOnceChars.Clear();
             _skipOnceChars.Clear();
 
-            if (DoPromptForUnknownWords && unknownWords.Count > 0)
+            if (DoPromptForUnknownWords && ocrFixResultTemp.UnknownWords.Count > 0)
             {
                 var tcs = new TaskCompletionSource<bool>();
                 Dispatcher.UIThread.Post(async () =>
                 {
-                    foreach (var unknownWord in unknownWords)
+                    foreach (var unknownWord in ocrFixResultTemp.UnknownWords)
                     {
                         var suggestions = _ocrFixEngine.GetSpellCheckSuggestions(unknownWord.Word.FixedWord);
                         var result = await _windowService.ShowDialogAsync<PromptUnknownWordWindow, PromptUnknownWordViewModel>(Window!,
@@ -1903,6 +1922,105 @@ public partial class OcrViewModel : ObservableObject
 
         _isCtrlDown = false;
         IsOcrRunning = false;
+    }
+
+    private static string GetTextWithMoreSpacesInItalic(
+        List<UnknownWordItem> unknownWords,
+        List<NOcrChar> matches,
+        List<ImageSplitterItem2> letters,
+        NikseBitmap2 parentBitmap,
+        double unItalicFactor,
+        int pixelsIsSpace)
+    {
+        // Clear all CouldBeSpaceBefore flags
+        foreach (var letter in letters)
+        {
+            letter.CouldBeSpaceBefore = false;
+        }
+
+        // Check for potential spaces in italic text
+        for (int i = 0; i < matches.Count - 1; i++)
+        {
+            var match = matches[i];
+            var matchNext = matches[i + 1];
+            if (!match.Italic || matchNext.Text == "," ||
+                string.IsNullOrWhiteSpace(match.Text) || string.IsNullOrWhiteSpace(matchNext.Text) ||
+                match.ImageSplitterItem == null || matchNext.ImageSplitterItem == null)
+            {
+                continue;
+            }
+
+            int blankVerticalLines = IsVerticalAngledLineTransparent(parentBitmap, match.ImageSplitterItem, matchNext.ImageSplitterItem, unItalicFactor);
+            if (match.Text == "f" || match.Text == "," || matchNext.Text.StartsWith('y') || matchNext.Text.StartsWith('j'))
+            {
+                blankVerticalLines++;
+            }
+
+            if (blankVerticalLines >= pixelsIsSpace)
+            {
+                matchNext.ImageSplitterItem.CouldBeSpaceBefore = true;
+            }
+        }
+
+        // Insert spaces where CouldBeSpaceBefore is true and previous match is italic
+        int j = 1;
+        while (j < matches.Count)
+        {
+            var match = matches[j];
+            var prevMatch = matches[j - 1];
+            if (match.ImageSplitterItem?.CouldBeSpaceBefore == true)
+            {
+                match.ImageSplitterItem.CouldBeSpaceBefore = false;
+                if (prevMatch.Italic)
+                {
+                    matches.Insert(j, new NOcrChar(" "));
+                    j++; // Skip the inserted space
+                }
+            }
+
+            j++;
+        }
+
+        return ItalicTextMerger.MergeWithItalicTags(matches).Trim();
+    }
+
+    private static int IsVerticalAngledLineTransparent(NikseBitmap2 parentBitmap, ImageSplitterItem2 match, ImageSplitterItem2 next, double unItalicFactor)
+    {
+        if (match.NikseBitmap == null || next.NikseBitmap == null)
+        {
+            return 0;
+        }
+
+        int blanks = 0;
+        var min = match.X + match.NikseBitmap.Width;
+        var max = next.X + next.NikseBitmap.Width / 2;
+        for (int startX = min; startX < max; startX++)
+        {
+            var lineBlank = true;
+            for (int y = match.Y; y < match.Y + match.NikseBitmap.Height; y++)
+            {
+                var x = startX - (y - match.Y) * unItalicFactor;
+                if (x >= 0 && x < parentBitmap.Width && y < parentBitmap.Height)
+                {
+                    var color = parentBitmap.GetPixel((int)Math.Round(x), y);
+                    if (color.Alpha != 0)
+                    {
+                        lineBlank = false;
+                        if (blanks > 0)
+                        {
+                            return blanks;
+                        }
+                    }
+                }
+            }
+
+            if (lineBlank)
+            {
+                blanks++;
+            }
+        }
+
+        return blanks;
     }
 
     private void RunBinaryImageCompareOcr(List<int> selectedIndices, CancellationToken cancellationToken)
@@ -2144,7 +2262,7 @@ public partial class OcrViewModel : ObservableObject
         IsOcrRunning = false;
     }
 
-    private void ChangeWord(OcrSubtitleItem item, UnknownWordItem unknownWord, string word)
+    private static void ChangeWord(OcrSubtitleItem item, UnknownWordItem unknownWord, string word)
     {
         if (unknownWord.Word.FixedWord == word)
         {
@@ -2155,6 +2273,110 @@ public partial class OcrViewModel : ObservableObject
         if (item.Text.Substring(idx).StartsWith(unknownWord.Word.FixedWord))
         {
             item.Text = item.Text.Remove(idx, unknownWord.Word.FixedWord.Length).Insert(idx, word);
+        }
+    }
+
+
+    public class OcrFixLineResultTemp
+    {
+        public List<UnknownWordItem> UnknownWords { get; set; } = new List<UnknownWordItem>();
+        public List<ReplacementUsedItem> Fixes { get; set; } = new List<ReplacementUsedItem>();
+        public List<GuessUsedItem> Guesses { get; set; } = new List<GuessUsedItem>();
+        public string ResultText { get; set; } = string.Empty;
+        public OcrFixLineResult OcrFixLineResult { get; set; } = new OcrFixLineResult();
+    }
+
+    private OcrFixLineResultTemp OcrFixLine(int i, OcrSubtitleItem item)
+    {
+        var result = new OcrFixLineResultTemp();
+
+        if (DoAutoBreak)
+        {
+            item.Text = Utilities.AutoBreakLine(item.Text);
+        }
+
+        if (SelectedDictionary != null &&
+            SelectedDictionary.Name != GetDictionaryNameNone() &&
+            _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
+        {
+            result.OcrFixLineResult = _ocrFixEngine.FixOcrErrors(i, item, DoTryToGuessUnknownWords);
+            var alignment = GetAlignment(item);
+            if (!string.IsNullOrEmpty(alignment))
+            {
+                result.OcrFixLineResult.Words.Insert(0, new OcrFixLinePartResult { Word = alignment, IsSpellCheckedOk = null });
+            }
+
+            result.ResultText = result.OcrFixLineResult.GetText();
+
+            if (!string.IsNullOrEmpty(result.OcrFixLineResult.ReplacementUsed.From))
+            {
+                result.Fixes.Add(result.OcrFixLineResult.ReplacementUsed);
+            }
+
+            foreach (var word in result.OcrFixLineResult.Words)
+            {
+                if (!string.IsNullOrEmpty(word.ReplacementUsed.From))
+                {
+                    result.Fixes.Add(word.ReplacementUsed);
+                }
+
+                if (word.GuessUsed)
+                {
+                    result.Guesses.Add(new GuessUsedItem(word.Word, word.FixedWord, i));
+                }
+
+                if (word.IsSpellCheckedOk == false)
+                {
+                    var unknownWordItem = new UnknownWordItem(item, result.OcrFixLineResult, word);
+                    result.UnknownWords.Add(unknownWordItem);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void SetText(int i, OcrSubtitleItem item, OcrFixLineResultTemp resultTemp)
+    {
+        if (SelectedDictionary != null &&
+            SelectedDictionary.Name != GetDictionaryNameNone() &&
+            _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                CurrentText = resultTemp.ResultText;
+                item.Text = resultTemp.ResultText;
+                item.FixResult = resultTemp.OcrFixLineResult;
+            });
+        }
+        else
+        {
+            var alignment = GetAlignment(item);
+            Dispatcher.UIThread.Post(() =>
+            {
+                item.Text = alignment + item.Text;
+                CurrentText = item.Text;
+                item.FixResult = new OcrFixLineResult
+                {
+                    LineIndex = i,
+                    Words = new List<OcrFixLinePartResult> { new() { Word = item.Text, IsSpellCheckedOk = null } },
+                };
+            });
+        }
+
+        SelectAndScrollToRow(i);
+
+        foreach (var unknownWord in resultTemp.UnknownWords)
+        {
+            UnknownWords.Add(unknownWord);
+        }
+        foreach (var guess in resultTemp.Guesses)
+        {
+            AllGuesses.Add(guess);
+        }
+        foreach (var fix in resultTemp.Fixes)
+        {
+            AllFixes.Add(fix);
         }
     }
 
@@ -2170,7 +2392,7 @@ public partial class OcrViewModel : ObservableObject
             SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
-            var result = _ocrFixEngine.FixOcrErrors(i, DoTryToGuessUnknownWords);
+            var result = _ocrFixEngine.FixOcrErrors(i, item, DoTryToGuessUnknownWords);
             var alignment = GetAlignment(item);
             if (!string.IsNullOrEmpty(alignment))
             {
@@ -2824,6 +3046,7 @@ public partial class OcrViewModel : ObservableObject
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= OcrSubtitleItems.Count)
         {
             var no = (int)viewModel.LineNumber;
+            SelectAndScrollToRow(Math.Min(OcrSubtitleItems.Count-1, no +1));
             SelectAndScrollToRow(no - 1);
         }
     }
