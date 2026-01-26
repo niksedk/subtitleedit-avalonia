@@ -3297,6 +3297,7 @@
 		<Beginning from="lt'syour" to="It's your" />
 		<Beginning from="It'syour" to="It's your" />
 		<Beginning from="Ls " to="Is " />
+		<Beginning from="ls " to="Is " />
 		<Beginning from="I ve " to="I've " />
 		<Beginning from="I ii " to="I'll " />
 		<Beginning from="I m " to="I'm " />
@@ -3399,8 +3400,9 @@
     	<RegEx find="\b([A-Z]+)l([A-Z]+)\b" spellCheck="$1I$2" replaceWith="$1I$2" /> <!-- SlNG to SING -->
 		<RegEx find="\b([a-zæøåöääöéèàùâêîôûëï]+)II([a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1ll$2" replaceWith="$1ll$2" /> <!-- chaIIenge → challenge -->
 		<RegEx find="\b([a-zæøåöääöéèàùâêîôûëï]+)I([a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1l$2" replaceWith="$1l$2" /> <!-- traiIing → trailing -->		
-		<RegEx find="\bI([a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="l$1" replaceWith="l$1" /> <!-- Iaunch → launch -->		
+		<RegEx find="\bI([a-zæøåöääöéèàùâêîôûëï]{3,})\b" spellCheck="l$1" replaceWith="l$1" /> <!-- Iaunch → launch, but NOT Is -->
         <RegEx find="\bof([A-Z][a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1" replaceWith="of $1" /> <!-- ofDavid → of David -->
         <RegEx find="\bin([A-Z][a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1" replaceWith="in $1" /> <!-- inLondon → in London -->
+		<RegEx find="\bl\b" replaceWith="I" /> <!-- lowercase l (L) to I (i) -->
 	</RegularExpressionsIfSpelledCorrectly>
 </OCRFixReplaceList>

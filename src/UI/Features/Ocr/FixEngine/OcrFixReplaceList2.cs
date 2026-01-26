@@ -262,7 +262,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             return false;
         }
 
-        public string FixOcrErrorViaLineReplaceList(string input, Subtitle subtitle, int index, ISpellCheckManager spellCheckManager, List<string> wordsToIgnore)
+        public string FixOcrErrorViaLineReplaceList(string input, Subtitle subtitle, int index, ISpellCheckManager spellCheckManager, List<string> wordsToIgnore, bool spelledOK)
         {
             // Whole fromLine
             foreach (var from in _wholeLineReplaceList.Keys)
@@ -378,12 +378,15 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 }
             }
 
-            foreach (var spellCheckRegex in _regExSpellCheckList)
+            if (!spelledOK)
             {
-                var x = spellCheckRegex.Apply(newText, wordsToIgnore, (word) => spellCheckManager.IsWordCorrect(word));
-                if (x != newText)
+                foreach (var spellCheckRegex in _regExSpellCheckList)
                 {
-                    newText = x;
+                    var x = spellCheckRegex.Apply(newText, wordsToIgnore, (word) => spellCheckManager.IsWordCorrect(word));
+                    if (x != newText)
+                    {
+                        newText = x;
+                    }
                 }
             }
 

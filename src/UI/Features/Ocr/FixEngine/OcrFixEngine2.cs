@@ -125,7 +125,8 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
 
     private string ReplaceLineFixes(int index, OcrSubtitleItem item, List<string> wordsToIgnore)
     {
-        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(item.Text, _subtitle, index, _spellCheckManager, wordsToIgnore);
+        var spelledOK = IsSpelledCorrect(item.Text);
+        var replacedLine = _ocrFixReplaceList.FixOcrErrorViaLineReplaceList(item.Text, _subtitle, index, _spellCheckManager, wordsToIgnore, spelledOK);
         return replacedLine;
     }
 
@@ -396,7 +397,7 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
             var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (var part in parts)
             {
-                if (!_spellCheckManager.IsWordCorrect(part))
+                if (!_spellCheckManager.IsWordCorrect(part.Trim('¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟')))
                 {
                     return false;
                 }
