@@ -3299,6 +3299,11 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task PickAudioTrack(object parameter)
+    {
+    }
+
+    [RelayCommand]
     private async Task CommandVideoOpen()
     {
         var fileName = await _fileHelper.PickOpenVideoFile(Window!, Se.Language.General.OpenVideoFileTitle);
@@ -5567,7 +5572,7 @@ public partial class MainViewModel :
                 else
                 {
                     selectedText = _colorService.SetColorTag(selectedText, color, isAssa, isWebVtt,
-                                        GetUpdateSubtitle());
+                        GetUpdateSubtitle());
                     tb.SelectedText = selectedText;
                     tb.SelectionStart = selectionStart;
                     tb.SelectionEnd = selectionStart + selectedText.Length;
@@ -10446,7 +10451,11 @@ public partial class MainViewModel :
         IsVideoLoaded = true;
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        Task.Run(() => { GetMediaInformation(videoFileName); });
+        Task.Run(() =>
+        {
+            GetMediaInformation(videoFileName);
+            UpdateAudioTrackMenuItems();
+        });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
@@ -10461,7 +10470,59 @@ public partial class MainViewModel :
         catch
         {
             _mediaInfo = null;
-            ;
+        }
+    }
+
+    private void UpdateAudioTrackMenuItems()
+    {
+        try
+        {
+            var vp = GetVideoPlayerControl();
+            if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
+            {
+                var audioTracks = mpv.GetAudioTracks();
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    AudioTraksMenuItem.Items.Clear();
+                    foreach (var audioTrack in audioTracks)
+                    {
+                        var trackName = string.Format(Se.Language.Main.AudioTrackX,audioTrack.Id);
+                        if (!string.IsNullOrEmpty(audioTrack.Language))    
+                        {
+                            var languageName = Iso639Dash2LanguageCode.List.FirstOrDefault(p=>p.ThreeLetterCode == audioTrack.Language);
+                            if (string.IsNullOrEmpty(languageName?.EnglishName))
+                            {
+                                trackName += $" - {audioTrack.Language}";
+                            }
+                            else
+                            {
+                                trackName += $" - {languageName.EnglishName}";
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(audioTrack.Title))
+                        {
+                            trackName += $" - {audioTrack.Title}";
+                        }   
+                            
+                        var menuItem = new MenuItem();
+                        menuItem.Header = trackName;
+                        menuItem.Command = PickAudioTrackCommand;
+                        menuItem.CommandParameter = audioTrack;
+                        AudioTraksMenuItem.Items.Add(menuItem);
+                    }
+
+                    IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 0;
+                });
+            }
+        }
+        catch (Exception exception)
+        {
+            Se.LogError(exception, "UpdateAudioTrackMenuItems failed");
+            Dispatcher.UIThread.Post(() =>
+            {
+                IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 0;
+            });
         }
     }
 
@@ -12851,6 +12912,7 @@ public partial class MainViewModel :
                             SelectAndScrollToSubtitle(p1);
                         }
                     }
+
                     break;
                 case WaveformSingleClickActionType.SetVideopositionAndPauseAndSelectSubtitleAndCenter:
                     vp.VideoPlayerInstance.Pause();
@@ -12864,6 +12926,7 @@ public partial class MainViewModel :
                             AudioVisualizer.CenterOnPosition(e.Seconds);
                         }
                     }
+
                     break;
                 case WaveformSingleClickActionType.SetVideoPositionAndPause:
                     vp.VideoPlayerInstance.Pause();
@@ -12876,6 +12939,7 @@ public partial class MainViewModel :
                     {
                         AudioVisualizer.CenterOnPosition(e.Seconds);
                     }
+
                     break;
                 case WaveformSingleClickActionType.SetVideoposition:
                     vp.Position = e.Seconds;
@@ -12907,12 +12971,14 @@ public partial class MainViewModel :
                             SelectAndScrollToSubtitle(p);
                         }
                     }
+
                     break;
                 case WaveformDoubleClickActionType.Center:
                     if (e.Paragraph != null)
                     {
                         AudioVisualizerCenterOnPositionIfNeeded(e.Paragraph, e.Seconds);
                     }
+
                     break;
                 case WaveformDoubleClickActionType.Pause:
                     vp.VideoPlayerInstance.Pause();

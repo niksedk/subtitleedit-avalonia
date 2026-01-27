@@ -10,6 +10,7 @@ public class LanguageMain
     public LanguageMainWaveform Waveform { get; set; } = new();
 
     public string AudioTrackIsNowX { get; set; }
+    public string AudioTrackX { get; set; }
     public string AutoBreakHint { get; set; }
     public string CharactersPerSecond { get; set; }
     public string ChooseColumn { get; set; }
@@ -93,6 +94,7 @@ public class LanguageMain
     public LanguageMain()
     {
         AudioTrackIsNowX = "Audio track is now \"{0}\"";
+        AudioTrackX = "Audio track {0}";
         AutoBreakHint = "Auto-break selected lines";
         CharactersPerSecond = "Chars/second: {0}";
         ChooseColumn = "Choose column";

@@ -9,6 +9,38 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
+public class AudioTrackInfo
+{
+    public int Id { get; set; }
+    public string? Language { get; set; }
+    public string? Title { get; set; }
+    public bool IsSelected { get; set; }
+
+    public override string ToString()
+    {
+        var parts = new List<string>();
+        
+        if (!string.IsNullOrWhiteSpace(Title))
+        {
+            parts.Add(Title);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(Language))
+        {
+            parts.Add($"[{Language}]");
+        }
+        
+        parts.Add($"(ID: {Id})");
+        
+        if (IsSelected)
+        {
+            parts.Add("*");
+        }
+        
+        return string.Join(" ", parts);
+    }
+}
+
 public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 {
     /// <summary>
@@ -1060,6 +1092,104 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         catch
         {
             return string.Empty;
+        }
+    }
+
+    public List<AudioTrackInfo> GetAudioTracks()
+    {
+        var audioTracks = new List<AudioTrackInfo>();
+        
+        EnsureNotDisposed();
+        if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null || _mpvGetPropertyString == null || _mpvFree == null)
+        {
+            return audioTracks;
+        }
+
+        try
+        {
+            // Get track list count
+            double trackCount = 0;
+            var trackCountBytes = GetUtf8Bytes("track-list/count");
+            var err = _mpvGetPropertyDouble(_mpv, trackCountBytes, MPV_FORMAT_DOUBLE, ref trackCount);
+
+            if (err < 0 || trackCount <= 0)
+            {
+                return audioTracks;
+            }
+
+            // Iterate through tracks to find audio tracks
+            for (var i = 0; i < (int)trackCount; i++)
+            {
+                // Get track type
+                var typePtr = IntPtr.Zero;
+                var typeBytes = GetUtf8Bytes($"track-list/{i}/type");
+                err = _mpvGetPropertyString(_mpv, typeBytes, MPV_FORMAT_STRING, ref typePtr);
+
+                if (err < 0 || typePtr == IntPtr.Zero)
+                {
+                    continue;
+                }
+
+                var type = Marshal.PtrToStringUTF8(typePtr);
+                _mpvFree(typePtr);
+
+                if (!string.Equals(type, "audio", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                // Get track ID
+                double trackId = -1;
+                var idBytes = GetUtf8Bytes($"track-list/{i}/id");
+                err = _mpvGetPropertyDouble(_mpv, idBytes, MPV_FORMAT_DOUBLE, ref trackId);
+
+                if (err < 0 || trackId < 0)
+                {
+                    continue;
+                }
+
+                var trackInfo = new AudioTrackInfo
+                {
+                    Id = (int)trackId
+                };
+
+                // Get track language (optional)
+                var langPtr = IntPtr.Zero;
+                var langBytes = GetUtf8Bytes($"track-list/{i}/lang");
+                err = _mpvGetPropertyString(_mpv, langBytes, MPV_FORMAT_STRING, ref langPtr);
+
+                if (err >= 0 && langPtr != IntPtr.Zero)
+                {
+                    trackInfo.Language = Marshal.PtrToStringUTF8(langPtr);
+                    _mpvFree(langPtr);
+                }
+
+                // Get track title (optional)
+                var titlePtr = IntPtr.Zero;
+                var titleBytes = GetUtf8Bytes($"track-list/{i}/title");
+                err = _mpvGetPropertyString(_mpv, titleBytes, MPV_FORMAT_STRING, ref titlePtr);
+
+                if (err >= 0 && titlePtr != IntPtr.Zero)
+                {
+                    trackInfo.Title = Marshal.PtrToStringUTF8(titlePtr);
+                    _mpvFree(titlePtr);
+                }
+
+                // Get track selected status
+                double selectedValue = 0;
+                var selectedBytes = GetUtf8Bytes($"track-list/{i}/selected");
+                err = _mpvGetPropertyDouble(_mpv, selectedBytes, MPV_FORMAT_FLAG, ref selectedValue);
+
+                trackInfo.IsSelected = err >= 0 && selectedValue == 1;
+
+                audioTracks.Add(trackInfo);
+            }
+
+            return audioTracks;
+        }
+        catch
+        {
+            return audioTracks;
         }
     }
 
