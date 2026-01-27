@@ -65,6 +65,7 @@ public class LanguageMainMenu
     public string OpenVideo { get; set; }
     public string OpenVideoFromUrl { get; set; }
     public string CloseVideoFile { get; set; }
+    public string AudioTracks { get; set; }
     public string SpeechToText { get; set; }
     public string TextToSpeech { get; set; }
     public string SetVideoOffset { get; set; }
@@ -104,7 +105,7 @@ public class LanguageMainMenu
     public string PointSyncViaOther { get; set; }
     public string SortSubtitles { get; set; }
     public string SetLayer { get; set; }
-
+    
     public LanguageMainMenu()
     {
         File = "_File";
@@ -167,6 +168,7 @@ public class LanguageMainMenu
         OpenVideo = "_Open video...";
         OpenVideoFromUrl = "Open video from _URL...";
         CloseVideoFile = "_Close video file";
+        AudioTracks = "_Audio tracks";
         SpeechToText = "_Speech to text...";
         TextToSpeech = "_Text to speech...";
         UndockVideoControls = "_Undock video controls";

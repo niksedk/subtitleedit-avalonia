@@ -476,6 +476,12 @@ public static class InitMenu
             }
         });
 
+        var menuItemAudioTracks = new MenuItem
+        {
+            Header = l.AudioTracks,
+        };
+        menuItemAudioTracks.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsAudioTracksVisible)));
+        vm.AudioTraksMenuItem = menuItemAudioTracks;
         menu.Items.Add(new MenuItem
         {
             Header = l.Video,
@@ -496,6 +502,7 @@ public static class InitMenu
                     Header = l.CloseVideoFile,
                     Command = vm.CommandVideoCloseCommand,
                 },
+                menuItemAudioTracks,
                 new Separator(),
                 new MenuItem
                 {

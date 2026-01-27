@@ -209,6 +209,7 @@ public partial class MainViewModel :
     [ObservableProperty] private string _videoOffsetText;
     [ObservableProperty] private string _setVideoOffsetText;
     [ObservableProperty] private bool _isVideoOffsetVisible;
+    [ObservableProperty] private bool _isAudioTracksVisible;
     [ObservableProperty] private bool _isWaveformGenerating;
     [ObservableProperty] private string _waveformGeneratingText;
     [ObservableProperty] private bool _isFilePropertiesVisible;
@@ -315,6 +316,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemStyles { get; set; }
     public MenuItem MenuItemActors { get; set; }
     public Button ButtonWaveformPlay { get; set; }
+    public MenuItem AudioTraksMenuItem { get; set; }
 
     public MainViewModel(
         IFileHelper fileHelper,
@@ -392,6 +394,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerMergeWithNext = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
+        AudioTraksMenuItem = new MenuItem();
         Toolbar = new Border();
         ButtonWaveformPlay = new Button();
         _subtitle = new Subtitle();
