@@ -229,7 +229,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 for (int i = 0; i < lines.Count; i++)
                 {
                     var line = lines[i];
-                    var paragraphContent = new XmlDocument();
+                    var paragraphContent = new XmlDocument { PreserveWhitespace = true };
                     paragraphContent.LoadXml($"<root>{line.Replace("&", "&amp;")}</root>");
                     ConvertParagraphNodeToTtmlNode(paragraphContent.DocumentElement, xml, paragraph);
 
@@ -258,7 +258,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             foreach (XmlNode child in node.ChildNodes)
             {
-                if (child is XmlText)
+                if (child is XmlText || child is XmlWhitespace || child is XmlSignificantWhitespace)
                 {
                     XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
                     span.AppendChild(ttmlXml.CreateTextNode(child.Value));
@@ -273,61 +273,25 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (child.Name == "i")
                 {
-                    // Check if nested <b> tag exists for combined italic+bold
-                    bool hasBold = child.InnerXml.Contains("<b>");
-                    if (hasBold)
-                    {
-                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                        attr.InnerText = "s_italic s_bold";
-                        span.Attributes.Append(attr);
-                        
-                        // Get the text content, removing the nested <b> tags
-                        var textContent = child.InnerText;
-                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                        ttmlNode.AppendChild(span);
-                    }
-                    else
-                    {
-                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                        attr.InnerText = "s_italic";
-                        span.Attributes.Append(attr);
-                        
-                        // Get the text content directly without nesting spans
-                        var textContent = child.InnerText;
-                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                        ttmlNode.AppendChild(span);
-                    }
+                    XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                    attr.InnerText = "s_italic";
+                    span.Attributes.Append(attr);
+                    
+                    // Recursively process child nodes to handle nested tags
+                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
+                    ttmlNode.AppendChild(span);
                 }
                 else if (child.Name == "b")
                 {
-                    // Check if nested <i> tag exists for combined bold+italic
-                    bool hasItalic = child.InnerXml.Contains("<i>");
-                    if (hasItalic)
-                    {
-                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                        attr.InnerText = "s_italic s_bold";
-                        span.Attributes.Append(attr);
-                        
-                        // Get the text content, removing the nested <i> tags
-                        var textContent = child.InnerText;
-                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                        ttmlNode.AppendChild(span);
-                    }
-                    else
-                    {
-                        XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
-                        XmlAttribute attr = ttmlXml.CreateAttribute("style");
-                        attr.InnerText = "s_bold";
-                        span.Attributes.Append(attr);
-                        
-                        // Get the text content directly without nesting spans
-                        var textContent = child.InnerText;
-                        span.AppendChild(ttmlXml.CreateTextNode(textContent));
-                        ttmlNode.AppendChild(span);
-                    }
+                    XmlNode span = ttmlXml.CreateElement("span", "http://www.w3.org/ns/ttml");
+                    XmlAttribute attr = ttmlXml.CreateAttribute("style");
+                    attr.InnerText = "s_bold";
+                    span.Attributes.Append(attr);
+                    
+                    // Recursively process child nodes to handle nested tags
+                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
+                    ttmlNode.AppendChild(span);
                 }
                 else if (child.Name == "u")
                 {
@@ -336,9 +300,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     attr.InnerText = "s_underline";
                     span.Attributes.Append(attr);
                     
-                    // Get the text content directly without nesting spans
-                    var textContent = child.InnerText;
-                    span.AppendChild(ttmlXml.CreateTextNode(textContent));
+                    // Recursively process child nodes to handle nested tags
+                    ConvertParagraphNodeToTtmlNode(child, ttmlXml, span);
                     ttmlNode.AppendChild(span);
                 }
                 else
@@ -608,7 +571,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var styles = GetStyles();
             foreach (XmlNode child in node.ChildNodes)
             {
-                if (child.NodeType == XmlNodeType.Text)
+                if (child.NodeType == XmlNodeType.Text || child.NodeType == XmlNodeType.Whitespace || child.NodeType == XmlNodeType.SignificantWhitespace)
                 {
                     pText.Append(child.Value);
                 }
@@ -785,7 +748,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
             }
 
-            return pText.ToString().TrimEnd(' ');
+            return pText.ToString();
         }
     }
 }
