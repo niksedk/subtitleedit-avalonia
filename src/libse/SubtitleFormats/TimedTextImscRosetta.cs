@@ -424,19 +424,30 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 TimedText10.ExtractTimeCodes(divNode, subtitle, out var begin, out var end);
 
-                var pNode = divNode.SelectSingleNode("ttml:p", namespaceManager);
-                if (pNode != null)
+                var pNodes = divNode.SelectNodes("ttml:p", namespaceManager);
+                if (pNodes != null && pNodes.Count > 0)
                 {
                     // Extract region ID from div
                     var regionId = divNode.Attributes?["region"]?.Value ?? "R2"; // default to bottom
                     
-                    // Extract paragraph style
-                    var paragraphStyle = pNode.Attributes?["style"]?.Value ?? string.Empty;
+                    // Extract paragraph style from first p node
+                    var firstPNode = pNodes[0];
+                    var paragraphStyle = firstPNode.Attributes?["style"]?.Value ?? string.Empty;
                     
                     // Get the alignment tag
                     var alignmentTag = GetAlignmentTagFromRegionAndStyle(regionId, paragraphStyle);
                     
-                    var text = ReadParagraph(pNode, xml);
+                    // Read all <p> nodes and combine them with line breaks
+                    var textBuilder = new StringBuilder();
+                    for (int i = 0; i < pNodes.Count; i++)
+                    {
+                        if (i > 0)
+                        {
+                            textBuilder.AppendLine();
+                        }
+                        textBuilder.Append(ReadParagraph(pNodes[i], xml));
+                    }
+                    var text = textBuilder.ToString();
                     
                     // Prepend alignment tag if not default
                     if (!string.IsNullOrEmpty(alignmentTag))
