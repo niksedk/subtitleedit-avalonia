@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -708,7 +709,7 @@ public partial class MainViewModel :
     private void TogglePlayPause2()
     {
         TogglePlayPause();
-    }   
+    }
 
     [RelayCommand]
     private void ToggleLockTimeCodes()
@@ -1121,6 +1122,14 @@ public partial class MainViewModel :
 
         Se.Settings.General.CurrentVideoOffsetInMs = recentFile.VideoOffsetInMs;
         UpdateVideoOffsetStatus();
+
+        _audioTrack = recentFile.AudioTrack;
+        var _ = Task.Run(async () => PickAudioTrack(new AudioTrackInfo()
+        {
+            Id = _audioTrack,
+            Language = string.Empty,
+            Title = string.Empty,
+        }));
     }
 
     [RelayCommand]
@@ -3324,6 +3333,7 @@ public partial class MainViewModel :
             mpv.SetAudioTrack(audioTrack.Id);
             _audioTrack = audioTrack.Id;
             var _ = Task.Run(LoadAudioTrackMenuItems);
+            ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, _audioTrack));
         }
     }
 
@@ -10020,7 +10030,8 @@ public partial class MainViewModel :
             idx,
             SelectedEncoding.DisplayName,
             Se.Settings.General.CurrentVideoOffsetInMs,
-            IsSmpteTimingEnabled);
+            IsSmpteTimingEnabled,
+            _audioTrack);
         Se.SaveSettings();
 
         if (updateMenu)

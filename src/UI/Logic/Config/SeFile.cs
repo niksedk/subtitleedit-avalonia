@@ -37,7 +37,7 @@ public class SeFile
         });
     }
 
-    public void AddToRecentFiles(string subtitleFileName, string subtitleFileNameOriginal, string videoFileName, int selectedLine, string encoding, long VideoOffsetInMs, bool videoIsSmpte)
+    public void AddToRecentFiles(string subtitleFileName, string subtitleFileNameOriginal, string videoFileName, int selectedLine, string encoding, long VideoOffsetInMs, bool videoIsSmpte, int audioTrack)
     {
         RecentFiles.RemoveAll(rf => rf.SubtitleFileName == subtitleFileName && rf.SubtitleFileNameOriginal == subtitleFileNameOriginal);
 
@@ -50,6 +50,7 @@ public class SeFile
             Encoding = encoding,
             VideoOffsetInMs = VideoOffsetInMs,
             VideoIsSmpte = videoIsSmpte,
+            AudioTrack = audioTrack,
         });
 
         if (RecentFiles.Count > RecentFilesMaximum)
