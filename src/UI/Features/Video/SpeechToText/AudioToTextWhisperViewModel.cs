@@ -156,7 +156,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         TextBoxConsoleLog = new TextBox();
         BatchGrid = new DataGrid();
         ReDownloadText = string.Empty;
-        _audioTrackNumber = 0;
+        _audioTrackNumber = -1;
         _error = string.Empty;
 
         LoadSettings();
@@ -1342,7 +1342,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             (engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName) &&
             (videoFileName.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase) ||
              videoFileName.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) &&
-            _audioTrackNumber <= 0)
+            _audioTrackNumber < 0)
         {
             inputFile = videoFileName;
         }
@@ -1689,9 +1689,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         var audioParameter = string.Empty;
-        if (audioTrackNumber > 0)
+        if (audioTrackNumber >= 0)
         {
-            audioParameter = $"-map 0:a:{audioTrackNumber}";
+            audioParameter = $"-map 0:{audioTrackNumber}";
         }
 
         var fFmpegWaveTranscodeSettings = "-i \"{0}\" -vn -ar 16000 -ac 1 -ab 32k -af volume=1.75 -f wav {2} \"{1}\"";
@@ -1830,9 +1830,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         SaveSettings();
     }
 
-    internal void Initialize(string? videoFileName)
+    internal void Initialize(string? videoFileName, int audioTrackNumber)
     {
         _videoFileName = videoFileName;
+        _audioTrackNumber = audioTrackNumber;
         if (string.IsNullOrEmpty(_videoFileName) || !File.Exists(_videoFileName))
         {
             IsBatchModeVisible = false;
@@ -1847,8 +1848,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
-    internal void InitializeBatch(List<AudioClip> audioClips)
+    internal void InitializeBatch(List<AudioClip> audioClips, int audioTrackNumber)
     {
+        _audioTrackNumber = audioTrackNumber;
         IsBatchMode = true;
         _audioClips = audioClips;
         ResultAudioClips = audioClips.Select(ac => new AudioClip(ac)).ToList();

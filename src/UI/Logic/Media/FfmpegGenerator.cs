@@ -760,7 +760,6 @@ public class FfmpegGenerator
         return args;
     }
 
-
     internal static string AlterEmbeddedTracksMatroska(List<EmbeddedTrack> embeddedTracks, List<EmbeddedTrack> originalTracks, string inputFileName, string outputFileName)
     {
         var args = new List<string>();

@@ -3333,7 +3333,14 @@ public partial class MainViewModel :
             _audioTrack = audioTrack;
             var _ = Task.Run(LoadAudioTrackMenuItems);
             ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, _audioTrack));
-            //ReloadAudioVisualizer();
+
+            if (AudioVisualizer != null)
+            {
+                AudioVisualizer.WavePeaks = null;
+                AudioVisualizer.ShotChanges = new List<double>();
+            }
+            _updateAudioVisualizer = true;
+            LoadWaveformAndSpectrogram(_videoFileName);
         }
     }
 
@@ -3589,7 +3596,10 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => { vm.Initialize(_videoFileName); });
+            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm =>
+            {
+                vm.Initialize(_videoFileName, _audioTrack?.FfIndex ?? -1);
+            });
 
         if (result.OkPressed && !result.IsBatchMode)
         {
@@ -3622,7 +3632,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var resultSpeechToText = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => { vm.InitializeBatch(resultGetAudioClips.AudioClips); });
+        var resultSpeechToText = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm =>
+        {
+            vm.InitializeBatch(resultGetAudioClips.AudioClips, _audioTrack?.FfIndex ?? -1);
+        });
 
         if (!resultSpeechToText.OkPressed)
         {
@@ -10439,6 +10452,19 @@ public partial class MainViewModel :
             return;
         }
 
+        LoadWaveformAndSpectrogram(videoFileName);
+
+        IsVideoLoaded = true;
+
+        var __ = Task.Run(() =>
+        {
+            GetMediaInformation(videoFileName);
+            LoadAudioTrackMenuItems();
+        });
+    }
+
+    private void LoadWaveformAndSpectrogram(string videoFileName)
+    {
         var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName, _audioTrack?.FfIndex ?? -1);
         var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, _audioTrack?.FfIndex ?? -1);
         if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !Directory.Exists(spectrogramFolder)))
@@ -10480,16 +10506,10 @@ public partial class MainViewModel :
                 {
                     ExtractShotChanges(videoFileName);
                 }
+
+                _updateAudioVisualizer = true;
             }
         }
-
-        IsVideoLoaded = true;
-
-        var __ = Task.Run(() =>
-        {
-            GetMediaInformation(videoFileName);
-            LoadAudioTrackMenuItems();
-        });
     }
 
     private void GetMediaInformation(string videoFileName)
