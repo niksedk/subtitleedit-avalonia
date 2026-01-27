@@ -9,5 +9,5 @@ public class RecentFile
     public string Encoding { get; set; } = string.Empty;
     public long VideoOffsetInMs { get; set; }
     public bool VideoIsSmpte { get; set; }
-    public int AudioTrack { get; set; }
+    public int AudioTrack { get; set; } = -1;
 }

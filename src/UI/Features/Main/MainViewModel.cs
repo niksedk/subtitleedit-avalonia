@@ -244,7 +244,7 @@ public partial class MainViewModel :
     private Subtitle _subtitleOriginal;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
-    private int _audioTrack;
+    private int _audioTrack = -1;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
     private int _changeSubtitleHashOriginal = -1;
@@ -1122,6 +1122,11 @@ public partial class MainViewModel :
         UpdateVideoOffsetStatus();
 
         _audioTrack = recentFile.AudioTrack;
+        if (_audioTrack == -1)
+        {
+            return;
+        }
+        
         var _ = Task.Run(async () => PickAudioTrack(new AudioTrackInfo()
         {
             Id = _audioTrack,
@@ -4694,7 +4699,7 @@ public partial class MainViewModel :
                         if (FfmpegHelper.IsFfmpegInstalled())
                         {
                             var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                            var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, -1, tempWaveFileName,
+                            var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, _audioTrack, tempWaveFileName,
                                 Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, _videoFileName); });
@@ -10444,7 +10449,7 @@ public partial class MainViewModel :
             if (FfmpegHelper.IsFfmpegInstalled())
             {
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, -1, tempWaveFileName,
+                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, _audioTrack, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
