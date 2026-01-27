@@ -10,7 +10,7 @@ public class EditEmbeddedTrackWindow : Window
     public EditEmbeddedTrackWindow(EditEmbeddedTrackViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.General.GoToLineNumber;
+        Title = Se.Language.General.Settings;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         vm.Window = this;
