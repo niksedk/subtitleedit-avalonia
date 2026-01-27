@@ -1193,6 +1193,21 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
+    public void SetAudioTrack(int trackId)
+    {
+        EnsureNotDisposed();
+        if (_mpv == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var err = DoMpvCommand("set", "aid", trackId.ToString(CultureInfo.InvariantCulture));
+        if (err < 0)
+        {
+            Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer SetAudioTrack");
+        }
+    }
+
     public void InitializeWithSoftwareRendering()
     {
         LoadLibraryInternal();

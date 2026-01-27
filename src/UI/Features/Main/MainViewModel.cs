@@ -3301,6 +3301,21 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task PickAudioTrack(object parameter)
     {
+        if (string.IsNullOrEmpty(_videoFileName) || parameter == null)
+        {
+            return;
+        }
+        
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv && parameter is int audioTrack)
+        {
+            mpv.SetAudioTrack(audioTrack);
+        }
     }
 
     [RelayCommand]
