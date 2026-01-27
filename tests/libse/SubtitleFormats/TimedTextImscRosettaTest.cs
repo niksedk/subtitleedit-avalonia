@@ -20,6 +20,23 @@ namespace Tests.Logic.SubtitleFormats
 
 
         [Fact]
+        public void Italic_Word()
+        {
+            var sut = new TimedTextImscRosetta();
+
+            // make xml
+            var subtitle = new Subtitle();
+            var text = "This line has one <i>italic</i> word.";
+            subtitle.Paragraphs.Add(new Paragraph(text, 0, 2000));
+            var xml = sut.ToText(subtitle, "test");
+
+            // load xml
+            subtitle = new Subtitle();
+            sut.LoadSubtitle(subtitle, xml.SplitToLines(), "test.xml");
+            Assert.Equal(text, subtitle.Paragraphs[0].Text);
+        }
+
+        [Fact]
         public void One_Line_Italic_One_Line_Bold()
         {
             var sut = new TimedTextImscRosetta();
