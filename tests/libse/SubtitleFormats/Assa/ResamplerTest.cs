@@ -1,6 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 
-namespace Tests.Assa
+namespace LibSETests.SubtitleFormats.Assa
 {
     
     public class AssaResamplerTest
