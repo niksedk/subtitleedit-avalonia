@@ -9,38 +9,6 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
-public class AudioTrackInfo
-{
-    public int Id { get; set; }
-    public string? Language { get; set; }
-    public string? Title { get; set; }
-    public bool IsSelected { get; set; }
-
-    public override string ToString()
-    {
-        var parts = new List<string>();
-        
-        if (!string.IsNullOrWhiteSpace(Title))
-        {
-            parts.Add(Title);
-        }
-        
-        if (!string.IsNullOrWhiteSpace(Language))
-        {
-            parts.Add($"[{Language}]");
-        }
-        
-        parts.Add($"(ID: {Id})");
-        
-        if (IsSelected)
-        {
-            parts.Add("*");
-        }
-        
-        return string.Join(" ", parts);
-    }
-}
-
 public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 {
     /// <summary>
@@ -989,12 +957,12 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-    public string ToggleAudioTrack()
+    public int ToggleAudioTrack()
     {
         EnsureNotDisposed();
         if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null || _mpvGetPropertyString == null || _mpvFree == null)
         {
-            return string.Empty;
+            return -1;
         }
 
         try
@@ -1006,7 +974,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             if (err < 0 || trackCount <= 0)
             {
-                return string.Empty;
+                return -1;
             }
 
             var audioTracks = new List<(int listIndex, int id, string? lang, bool selected)>();
@@ -1066,7 +1034,7 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             if (audioTracks.Count == 0)
             {
-                return string.Empty;
+                return -1;
             }
 
             // Find current track and select next one
@@ -1081,24 +1049,23 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                 Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer ToggleAudioTrack set aid");
             }
 
-            // Return language code if available, otherwise return track ID
             if (!string.IsNullOrWhiteSpace(next.lang))
             {
-                return next.lang!;
+                return next.id!;
             }
 
-            return next.id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return next.id;
         }
         catch
         {
-            return string.Empty;
+            return -1;
         }
     }
 
     public List<AudioTrackInfo> GetAudioTracks()
     {
         var audioTracks = new List<AudioTrackInfo>();
-        
+
         EnsureNotDisposed();
         if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null || _mpvGetPropertyString == null || _mpvFree == null)
         {

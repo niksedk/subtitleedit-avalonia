@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 
@@ -105,7 +104,7 @@ public partial class GetAudioClipsViewModel : ObservableObject
 
     private Process GetExtractProcess(string videoFileName, SubtitleLineViewModel line, string outputFileName)
     {
-        var useCenterChannelOnly = false; // Se.Settings.Waveform.cen;
+        var useCenterChannelOnly = false; //TODO: Se.Settings.Waveform.cen;
 
         var arguments = FfmpegGenerator.ExtractAudioClipFromVideoParameters(
             videoFileName,

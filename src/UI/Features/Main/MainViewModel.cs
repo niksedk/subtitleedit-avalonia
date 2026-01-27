@@ -1,6 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using AvaloniaEdit;
@@ -242,6 +245,7 @@ public partial class MainViewModel :
     private Subtitle _subtitleOriginal;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
+    private int _audioTrack;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
     private int _changeSubtitleHashOriginal = -1;
@@ -704,25 +708,7 @@ public partial class MainViewModel :
     private void TogglePlayPause2()
     {
         TogglePlayPause();
-    }
-
-    [RelayCommand]
-    private void ToggleAudioTracks()
-    {
-        var control = GetVideoPlayerControl();
-        if (control == null)
-        {
-            return;
-        }
-
-        var track = control.ToggleAudioTrack();
-        if (string.IsNullOrEmpty(track))
-        {
-            return;
-        }
-
-        ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, track));
-    }
+    }   
 
     [RelayCommand]
     private void ToggleLockTimeCodes()
@@ -3299,22 +3285,45 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void ToggleAudioTracks()
+    {
+        var control = GetVideoPlayerControl();
+        if (control == null)
+        {
+            return;
+        }
+
+        var track = control.ToggleAudioTrack();
+        if (track < 0)
+        {
+            return;
+        }
+
+        _audioTrack = track;
+        var _ = Task.Run(LoadAudioTrackMenuItems);
+
+        ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, track));
+    }
+
+    [RelayCommand]
     private async Task PickAudioTrack(object parameter)
     {
         if (string.IsNullOrEmpty(_videoFileName) || parameter == null)
         {
             return;
         }
-        
+
         var vp = GetVideoPlayerControl();
         if (vp == null)
         {
             return;
         }
 
-        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv && parameter is int audioTrack)
+        if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv && parameter is AudioTrackInfo audioTrack)
         {
-            mpv.SetAudioTrack(audioTrack);
+            mpv.SetAudioTrack(audioTrack.Id);
+            _audioTrack = audioTrack.Id;
+            var _ = Task.Run(LoadAudioTrackMenuItems);
         }
     }
 
@@ -10465,13 +10474,11 @@ public partial class MainViewModel :
 
         IsVideoLoaded = true;
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        Task.Run(() =>
+        var __ = Task.Run(() =>
         {
             GetMediaInformation(videoFileName);
-            UpdateAudioTrackMenuItems();
+            LoadAudioTrackMenuItems();
         });
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     private void GetMediaInformation(string videoFileName)
@@ -10488,7 +10495,7 @@ public partial class MainViewModel :
         }
     }
 
-    private void UpdateAudioTrackMenuItems()
+    private void LoadAudioTrackMenuItems()
     {
         try
         {
@@ -10496,16 +10503,31 @@ public partial class MainViewModel :
             if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
             {
                 var audioTracks = mpv.GetAudioTracks();
+                if (audioTracks.Count == 0)
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        IsAudioTracksVisible = false;
+                        AudioTraksMenuItem.Items.Clear();
+                    });
+                    return;
+                }
+
+                var selectedTrack = audioTracks.FirstOrDefault(p => p.Id == _audioTrack);
+                if (selectedTrack == null)
+                {
+                    _audioTrack = audioTracks[0].Id;
+                }
 
                 Dispatcher.UIThread.Post(() =>
                 {
                     AudioTraksMenuItem.Items.Clear();
                     foreach (var audioTrack in audioTracks)
                     {
-                        var trackName = string.Format(Se.Language.Main.AudioTrackX,audioTrack.Id);
-                        if (!string.IsNullOrEmpty(audioTrack.Language))    
+                        var trackName = string.Format(Se.Language.Main.AudioTrackX, audioTrack.Id);
+                        if (!string.IsNullOrEmpty(audioTrack.Language))
                         {
-                            var languageName = Iso639Dash2LanguageCode.List.FirstOrDefault(p=>p.ThreeLetterCode == audioTrack.Language);
+                            var languageName = Iso639Dash2LanguageCode.List.FirstOrDefault(p => p.ThreeLetterCode == audioTrack.Language);
                             if (string.IsNullOrEmpty(languageName?.EnglishName))
                             {
                                 trackName += $" - {audioTrack.Language}";
@@ -10518,12 +10540,21 @@ public partial class MainViewModel :
                         if (!string.IsNullOrEmpty(audioTrack.Title))
                         {
                             trackName += $" - {audioTrack.Title}";
-                        }   
-                            
+                        }
+
                         var menuItem = new MenuItem();
                         menuItem.Header = trackName;
                         menuItem.Command = PickAudioTrackCommand;
                         menuItem.CommandParameter = audioTrack;
+                        if (audioTrack.Id == _audioTrack)
+                        {
+                            menuItem.Icon = new Projektanker.Icons.Avalonia.Icon
+                            {
+                                Value = IconNames.CheckBold,
+                                VerticalAlignment = VerticalAlignment.Center,
+                            };
+                        }
+
                         AudioTraksMenuItem.Items.Add(menuItem);
                     }
 
