@@ -8,6 +8,7 @@ public class AudioTrackInfo
     public string? Language { get; set; }
     public string? Title { get; set; }
     public bool IsSelected { get; set; }
+    public int? FfIndex { get; set; }
 
     public override string ToString()
     {

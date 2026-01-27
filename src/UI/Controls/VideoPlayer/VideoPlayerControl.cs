@@ -574,7 +574,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _videoPlayerInstance.PlayOrPause();
         }
 
-        internal int ToggleAudioTrack()
+        internal AudioTrackInfo? ToggleAudioTrack()
         {
             return _videoPlayerInstance.ToggleAudioTrack();
         }

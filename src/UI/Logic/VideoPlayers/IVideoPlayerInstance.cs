@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.VideoPlayers;
 
@@ -15,7 +16,7 @@ public interface IVideoPlayerInstance
     void PlayOrPause();
     void Pause();
     void Stop();
-    int ToggleAudioTrack();
+    AudioTrackInfo? ToggleAudioTrack();
 
     bool IsPlaying { get; }
     bool IsPaused { get; }

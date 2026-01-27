@@ -372,14 +372,13 @@ public class WavePeakGenerator2 : IDisposable
 {
     #region Movie Hasher -
 
-    public static string GetPeakWaveFileName(string videoFileName, int trackNumber = 0)
+    public static string GetPeakWaveFileName(string videoFileName, int trackNumber = -1)
     {
-        if (trackNumber < 0)
-        {
-            trackNumber = 0;
-        }
-
         var dir = Se.WaveformsFolder;
+        //if (Directory.GetFiles(dir, "-*.wav").Length == 0)
+        //{
+        //    trackNumber = -1;
+        //}
 
         if (videoFileName != null && (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                                       videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
@@ -395,7 +394,7 @@ public class WavePeakGenerator2 : IDisposable
         var hash = MovieHasher.GenerateHash(videoFileName);
 
         string wavePeakName;
-        if (trackNumber > 0 || Directory.GetFiles(dir, "-*.wav").Length == 0)
+        if (trackNumber >= 0)
         {
             wavePeakName = $"{hash}-{trackNumber}.wav";
         }
@@ -954,13 +953,8 @@ public class WavePeakGenerator2 : IDisposable
         private readonly double[] _magnitude1;
         private readonly double[] _magnitude2;
 
-        public static string GetSpectrogramFolder(string videoFileName, int trackNumber = 0)
+        public static string GetSpectrogramFolder(string videoFileName, int trackNumber = -1)
         {
-            if (trackNumber < 0)
-            {
-                trackNumber = 0;
-            }
-
             var dir = Se.SpectrogramsFolder;
             if (!Directory.Exists(dir))
             {
@@ -974,7 +968,7 @@ public class WavePeakGenerator2 : IDisposable
             }
 
             string spectrogramFolder;
-            if (trackNumber > 0)
+            if (trackNumber >= 0)
             {
                 spectrogramFolder = MovieHasher.GenerateHash(videoFileName) + "-" + trackNumber;
             }

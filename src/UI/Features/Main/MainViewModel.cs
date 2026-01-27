@@ -244,7 +244,7 @@ public partial class MainViewModel :
     private Subtitle _subtitleOriginal;
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
-    private int _audioTrack = -1;
+    private AudioTrackInfo? _audioTrack;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
     private int _changeSubtitleHashOriginal = -1;
@@ -1121,18 +1121,14 @@ public partial class MainViewModel :
         Se.Settings.General.CurrentVideoOffsetInMs = recentFile.VideoOffsetInMs;
         UpdateVideoOffsetStatus();
 
-        _audioTrack = recentFile.AudioTrack;
-        if (_audioTrack == -1)
+        var vp = GetVideoPlayerControl();
+
+        if (vp != null && vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
-            return;
+            var audioTracks = mpv.GetAudioTracks();
+            _audioTrack = audioTracks.FirstOrDefault(p => p.Id == recentFile.AudioTrack);
+            var _ = Task.Run(async () => PickAudioTrack(_audioTrack));
         }
-        
-        var _ = Task.Run(async () => PickAudioTrack(new AudioTrackInfo()
-        {
-            Id = _audioTrack,
-            Language = string.Empty,
-            Title = string.Empty,
-        }));
     }
 
     [RelayCommand]
@@ -3306,7 +3302,7 @@ public partial class MainViewModel :
         }
 
         var track = control.ToggleAudioTrack();
-        if (track < 0)
+        if (track == null)
         {
             return;
         }
@@ -3318,7 +3314,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task PickAudioTrack(object parameter)
+    private async Task PickAudioTrack(object? parameter)
     {
         if (string.IsNullOrEmpty(_videoFileName) || parameter == null)
         {
@@ -3334,9 +3330,10 @@ public partial class MainViewModel :
         if (vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv && parameter is AudioTrackInfo audioTrack)
         {
             mpv.SetAudioTrack(audioTrack.Id);
-            _audioTrack = audioTrack.Id;
+            _audioTrack = audioTrack;
             var _ = Task.Run(LoadAudioTrackMenuItems);
             ShowStatus(string.Format(Se.Language.Main.AudioTrackIsNowX, _audioTrack));
+            //ReloadAudioVisualizer();
         }
     }
 
@@ -3929,8 +3926,8 @@ public partial class MainViewModel :
             return;
         }
 
-        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName);
-        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
+        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
+        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
 
         var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
         if (AudioVisualizer != null)
@@ -4692,14 +4689,14 @@ public partial class MainViewModel :
                 {
                     SettingsViewModel.DeleteWaveformAndSpectrogramFiles();
 
-                    var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName);
-                    var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, 0);
+                    var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
+                    var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
                     if (!File.Exists(peakWaveFileName))
                     {
                         if (FfmpegHelper.IsFfmpegInstalled())
                         {
                             var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                            var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, _audioTrack, tempWaveFileName,
+                            var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, _audioTrack?.FfIndex ?? -1, tempWaveFileName,
                                 Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, _videoFileName); });
@@ -10034,7 +10031,7 @@ public partial class MainViewModel :
             SelectedEncoding.DisplayName,
             Se.Settings.General.CurrentVideoOffsetInMs,
             IsSmpteTimingEnabled,
-            _audioTrack);
+            _audioTrack?.Id ?? -1);
         Se.SaveSettings();
 
         if (updateMenu)
@@ -10442,14 +10439,14 @@ public partial class MainViewModel :
             return;
         }
 
-        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName);
-        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, 0);
+        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName, _audioTrack?.FfIndex ?? -1);
+        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, _audioTrack?.FfIndex ?? -1);
         if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !Directory.Exists(spectrogramFolder)))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
             {
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, _audioTrack, tempWaveFileName,
+                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, _audioTrack?.FfIndex ?? -1, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
@@ -10527,10 +10524,10 @@ public partial class MainViewModel :
                     return;
                 }
 
-                var selectedTrack = audioTracks.FirstOrDefault(p => p.Id == _audioTrack);
+                var selectedTrack = audioTracks.FirstOrDefault(p => p.FfIndex == (_audioTrack?.FfIndex ?? -1));
                 if (selectedTrack == null)
                 {
-                    _audioTrack = audioTracks[0].Id;
+                    _audioTrack = audioTracks[0];
                 }
 
                 Dispatcher.UIThread.Post(() =>
@@ -10560,7 +10557,7 @@ public partial class MainViewModel :
                         menuItem.Header = trackName;
                         menuItem.Command = PickAudioTrackCommand;
                         menuItem.CommandParameter = audioTrack;
-                        if (audioTrack.Id == _audioTrack)
+                        if (audioTrack.FfIndex == (_audioTrack?.FfIndex ?? -1))
                         {
                             menuItem.Icon = new Projektanker.Icons.Avalonia.Icon
                             {
@@ -10623,7 +10620,7 @@ public partial class MainViewModel :
         await vp.WaitForPlayersReadyAsync(10_000);
         if (vp.VideoPlayerInstance.Duration > 0)
         {
-            var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName);
+            var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
             AudioVisualizer.ZoomFactor = 1.0;
             AudioVisualizer.VerticalZoomFactor = 1.0;
             AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)vp.VideoPlayerInstance.Duration);

@@ -29,7 +29,7 @@ public static class WaveFileExtractor
         {
             encoderName = "FFmpeg";
             string audioParameter = string.Empty;
-            if (audioTrackNumber > 0)
+            if (audioTrackNumber >= 0)
             {
                 audioParameter = $"-map 0:a:{audioTrackNumber}";
             }

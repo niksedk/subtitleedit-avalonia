@@ -957,108 +957,41 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-    public int ToggleAudioTrack()
+    public AudioTrackInfo? ToggleAudioTrack()
     {
         EnsureNotDisposed();
-        if (_mpv == IntPtr.Zero || _mpvGetPropertyDouble == null || _mpvGetPropertyString == null || _mpvFree == null)
+        if (_mpv == IntPtr.Zero)
         {
-            return -1;
+            return null;
         }
 
         try
         {
-            // Get track list count
-            double trackCount = 0;
-            var trackCountBytes = GetUtf8Bytes("track-list/count");
-            var err = _mpvGetPropertyDouble(_mpv, trackCountBytes, MPV_FORMAT_DOUBLE, ref trackCount);
-
-            if (err < 0 || trackCount <= 0)
-            {
-                return -1;
-            }
-
-            var audioTracks = new List<(int listIndex, int id, string? lang, bool selected)>();
-
-            // Iterate through tracks to find audio tracks
-            for (var i = 0; i < (int)trackCount; i++)
-            {
-                // Get track type
-                var typePtr = IntPtr.Zero;
-                var typeBytes = GetUtf8Bytes($"track-list/{i}/type");
-                err = _mpvGetPropertyString(_mpv, typeBytes, MPV_FORMAT_STRING, ref typePtr);
-
-                if (err < 0 || typePtr == IntPtr.Zero)
-                {
-                    continue;
-                }
-
-                var type = Marshal.PtrToStringUTF8(typePtr);
-                _mpvFree(typePtr);
-
-                if (!string.Equals(type, "audio", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                // Get track ID
-                double trackId = -1;
-                var idBytes = GetUtf8Bytes($"track-list/{i}/id");
-                err = _mpvGetPropertyDouble(_mpv, idBytes, MPV_FORMAT_DOUBLE, ref trackId);
-
-                if (err < 0 || trackId < 0)
-                {
-                    continue;
-                }
-
-                // Get track language (optional)
-                string? lang = null;
-                var langPtr = IntPtr.Zero;
-                var langBytes = GetUtf8Bytes($"track-list/{i}/lang");
-                err = _mpvGetPropertyString(_mpv, langBytes, MPV_FORMAT_STRING, ref langPtr);
-
-                if (err >= 0 && langPtr != IntPtr.Zero)
-                {
-                    lang = Marshal.PtrToStringUTF8(langPtr);
-                    _mpvFree(langPtr);
-                }
-
-                // Get track selected status
-                double selectedValue = 0;
-                var selectedBytes = GetUtf8Bytes($"track-list/{i}/selected");
-                err = _mpvGetPropertyDouble(_mpv, selectedBytes, MPV_FORMAT_FLAG, ref selectedValue);
-
-                var selected = err >= 0 && selectedValue == 1;
-
-                audioTracks.Add((i, (int)trackId, lang, selected));
-            }
+            var audioTracks = GetAudioTracks();
 
             if (audioTracks.Count == 0)
             {
-                return -1;
+                return null;
             }
 
             // Find current track and select next one
-            var currentIdx = audioTracks.FindIndex(t => t.selected);
+            var currentIdx = audioTracks.FindIndex(t => t.IsSelected);
             var nextIdx = currentIdx >= 0 ? (currentIdx + 1) % audioTracks.Count : 0;
-            var next = audioTracks[nextIdx];
+            var nextTrack = audioTracks[nextIdx];
 
             // Switch to the next audio track by ID
-            err = DoMpvCommand("set", "aid", next.id.ToString());
+            var err = DoMpvCommand("set", "aid", nextTrack.Id.ToString(CultureInfo.InvariantCulture));
             if (err < 0)
             {
                 Se.LogError(new InvalidOperationException(GetErrorString(err)), "LibMpvDynamicPlayer ToggleAudioTrack set aid");
+                return null;
             }
 
-            if (!string.IsNullOrWhiteSpace(next.lang))
-            {
-                return next.id!;
-            }
-
-            return next.id;
+            return nextTrack;
         }
         catch
         {
-            return -1;
+            return null;
         }
     }
 
@@ -1140,6 +1073,16 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayerInstance
                 {
                     trackInfo.Title = Marshal.PtrToStringUTF8(titlePtr);
                     _mpvFree(titlePtr);
+                }
+
+                // Get track ff-index (optional)
+                double ffIndex = -1;
+                var ffIndexBytes = GetUtf8Bytes($"track-list/{i}/ff-index");
+                err = _mpvGetPropertyDouble(_mpv, ffIndexBytes, MPV_FORMAT_DOUBLE, ref ffIndex);
+
+                if (err >= 0 && ffIndex >= 0)
+                {
+                    trackInfo.FfIndex = (int)ffIndex;
                 }
 
                 // Get track selected status

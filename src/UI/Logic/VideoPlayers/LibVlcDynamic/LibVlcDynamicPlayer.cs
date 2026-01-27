@@ -845,14 +845,14 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
         }
     }
 
-    public int ToggleAudioTrack()
+    public AudioTrackInfo? ToggleAudioTrack()
     {
         EnsureNotDisposed();
         if (_mediaPlayer == IntPtr.Zero || _libvlc_audio_get_track_count == null ||
             _libvlc_audio_get_track_description == null || _libvlc_audio_get_track == null ||
             _libvlc_audio_set_track == null || _libvlc_track_description_release == null)
         {
-            return -1;
+            return null;
         }
 
         try
@@ -879,7 +879,7 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
 
             if (audioTracks.Count == 0)
             {
-                return -1;
+                return null;
             }
 
             var currentTrack = _libvlc_audio_get_track(_mediaPlayer);
@@ -888,11 +888,16 @@ public sealed class LibVlcDynamicPlayer : IDisposable, IVideoPlayerInstance
             var next = audioTracks[nextIdx];
 
             _libvlc_audio_set_track(_mediaPlayer, next.id);
-            return next.id;
+            return new AudioTrackInfo()
+            { 
+                FfIndex = next.id,
+                Id = next.id,
+                Title = next.name,
+            };
         }
         catch
         {
-            return -1;
+            return null;
         }
     }
 

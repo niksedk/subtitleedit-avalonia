@@ -73,8 +73,8 @@ public class VideoPlayerInstanceNone : IVideoPlayerInstance
     {
     }
 
-    public int ToggleAudioTrack()
+    public AudioTrackInfo? ToggleAudioTrack()
     {
-        return -1;
+        return null;
     }
 }
