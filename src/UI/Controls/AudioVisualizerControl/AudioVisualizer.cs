@@ -389,23 +389,14 @@ public class AudioVisualizer : Control
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-
-        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-        {
-            _isCtrlDown = false;
-        }
-        else if (e.Key == Key.LeftAlt || e.Key == Key.RightAlt)
-        {
-            _isAltDown = false;
-        }
-        else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
-        {
-            _isShiftDown = false;
-        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        
         if (e.Key == Key.Escape)
         {
             _interactionMode = InteractionMode.None;
@@ -447,6 +438,10 @@ public class AudioVisualizer : Control
 
     private async void OnTapped(object? sender, TappedEventArgs e)
     {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        
         var point = e.GetPosition(this);
         if (!_isCtrlDown && !_isAltDown && !_isShiftDown && e.Pointer.IsPrimary)
         {
@@ -581,6 +576,10 @@ public class AudioVisualizer : Control
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        
         var nsp = NewSelectionParagraph;
         if (nsp is { Duration.TotalMilliseconds: <= 1 })
         {
@@ -624,8 +623,7 @@ public class AudioVisualizer : Control
             MenuFlyout.ShowAt(this, true);
             return;
         }
-
-
+        
         if (nsp is { Duration.TotalMilliseconds: > 1 })
         {
             nsp.UpdateDuration();
@@ -709,6 +707,10 @@ public class AudioVisualizer : Control
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        
         _lastPointerPressed = Environment.TickCount64;
         e.Handled = true;
         var point = e.GetPosition(this);
