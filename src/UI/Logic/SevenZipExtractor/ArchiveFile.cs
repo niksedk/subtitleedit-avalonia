@@ -322,7 +322,7 @@ namespace SevenZipExtractor
                         "lib7z.so",
                     };
 
-                    _libraryFilePath = paths.FirstOrDefault(p => 
+                    _libraryFilePath = paths.FirstOrDefault(p =>
                         Path.IsPathRooted(p) ? File.Exists(p) : !string.IsNullOrEmpty(p));
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -336,7 +336,7 @@ namespace SevenZipExtractor
                         "lib7z.dylib",
                     };
 
-                    _libraryFilePath = paths.FirstOrDefault(p => 
+                    _libraryFilePath = paths.FirstOrDefault(p =>
                         Path.IsPathRooted(p) ? File.Exists(p) : !string.IsNullOrEmpty(p));
                 }
             }

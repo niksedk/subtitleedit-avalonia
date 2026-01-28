@@ -46,7 +46,7 @@ public class Cea708Test
     {
         var command = new DelayCancel(0);
         var bytes = command.GetBytes();
-        Assert.Equal(1, bytes.Length);
+        Assert.Single(bytes);
         Assert.Equal(DelayCancel.Id, bytes[0]);
     }
 
@@ -75,7 +75,7 @@ public class Cea708Test
     {
         var command = new EndOfText(0);
         var bytes = command.GetBytes();
-        Assert.Equal(1, bytes.Length);
+        Assert.Single(bytes);
         Assert.Equal(EndOfText.Id, bytes[0]);
     }
 
@@ -94,7 +94,7 @@ public class Cea708Test
     {
         var command = new Reset(0);
         var bytes = command.GetBytes();
-        Assert.Equal(1, bytes.Length);
+        Assert.Single(bytes);
         Assert.Equal(Reset.Id, bytes[0]);
     }
 
@@ -103,7 +103,7 @@ public class Cea708Test
     {
         var command = new SetCurrentWindow(0, 1);
         var bytes = command.GetBytes();
-        Assert.Equal(1, bytes.Length);
+        Assert.Single(bytes);
         Assert.Equal(SetCurrentWindow.IdStart + 1, bytes[0]);
         Assert.Equal(1, command.WindowIndex);
     }

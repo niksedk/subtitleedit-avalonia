@@ -6,6 +6,7 @@ using SharpCompress.Common;
 using SharpCompress.Readers;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Nikse.SubtitleEdit.Logic.SevenZipExtractor;
@@ -19,13 +20,13 @@ public static class Unpacker
             updateProgressText(Se.Language.General.Unpacking7ZipArchiveDotDotDot);
         });
 
-        if (!OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows() || (OperatingSystem.IsLinux() && RuntimeInformation.ProcessArchitecture == Architecture.X64))
         {
-            Extract7ZipSlow(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+            Unpack7ZipViaNativeLibrary(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
             return;
         }
 
-        Unpack7ZipViaNativeLibrary(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+        Extract7ZipSlow(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
     }
 
     private static void Unpack7ZipViaNativeLibrary(string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)

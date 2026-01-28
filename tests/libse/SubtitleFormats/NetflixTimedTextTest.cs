@@ -20,7 +20,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -40,7 +40,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -60,7 +60,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -80,7 +80,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -100,7 +100,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -119,7 +119,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 
@@ -139,7 +139,7 @@ public class NetflixTimedTextTest
         format.LoadSubtitle(sub, raw.SplitToLines(), null);
 
         // Assert
-        Assert.Equal(1, sub.Paragraphs.Count);
+        Assert.Single(sub.Paragraphs);
         Assert.Equal(input, sub.Paragraphs[0].Text);
     }
 }

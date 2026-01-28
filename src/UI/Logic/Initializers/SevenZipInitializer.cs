@@ -1,7 +1,9 @@
 ﻿using Avalonia.Platform;
+using Nikse.SubtitleEdit.Logic.Compression;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Initializers;
@@ -11,21 +13,28 @@ public interface ISevenZipInitializer
     Task UpdateSevenZipIfNeeded();
 }
 
-public class SevenZipInitializer : ISevenZipInitializer
+public class SevenZipInitializer() : ISevenZipInitializer
 {
     public async Task UpdateSevenZipIfNeeded()
     {
-        // On Windows, we bundle 7zxa.dll; on Linux/macOS, use system libraries
-        if (!OperatingSystem.IsWindows())
+        string outputDir = Se.SevenZipFolder;
+
+        if (OperatingSystem.IsWindows())
         {
-            return; // Linux/macOS will use system-installed p7zip
+            if (await NeedsUpdate(outputDir))
+            {
+                await UnpackWindows(outputDir);
+                WriteNewVersionFile(outputDir);
+            }
         }
 
-        string outputDir = Se.SevenZipFolder;
-        if (await NeedsUpdate(outputDir))
+        if (OperatingSystem.IsLinux() && RuntimeInformation.ProcessArchitecture == Architecture.X64)
         {
-            await Unpack(outputDir);
-            WriteNewVersionFile(outputDir);
+            if (await NeedsUpdate(outputDir))
+            {
+                await UnpackLinux64(outputDir);
+                WriteNewVersionFile(outputDir);
+            }
         }
     }
 
@@ -74,7 +83,7 @@ public class SevenZipInitializer : ISevenZipInitializer
         return false;
     }
 
-    private async Task Unpack(string outputDir)
+    private static async Task UnpackWindows(string outputDir)
     {
         try
         {
@@ -88,6 +97,25 @@ public class SevenZipInitializer : ISevenZipInitializer
             var outputPath = Path.Combine(outputDir, "7zxa.dll");
             await using var fileStream = File.Create(outputPath);
             await stream.CopyToAsync(fileStream);
+        }
+        catch
+        {
+            // Ignore
+        }
+    }
+    private static async Task UnpackLinux64(string outputDir)
+    {
+        try
+        {
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7z-linux64.zip");
+            await using var zipStream = AssetLoader.Open(zipUri);
+            var zipUnpacker = new ZipUnpacker();
+            zipUnpacker.UnpackZipStream(zipStream, outputDir);
         }
         catch
         {
