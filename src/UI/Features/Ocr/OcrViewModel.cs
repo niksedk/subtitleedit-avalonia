@@ -2762,6 +2762,8 @@ public partial class OcrViewModel : ObservableObject
 
     internal void OnKeyDown(KeyEventArgs e)
     {
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        
         if (e.Key == Key.Escape)
         {
             Cancel();
@@ -2770,10 +2772,6 @@ public partial class OcrViewModel : ObservableObject
         {
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
-        }
-        else if (e.Key is Key.LeftCtrl or Key.RightCtrl)
-        {
-            _isCtrlDown = true;
         }
     }
 
@@ -3101,7 +3099,7 @@ public partial class OcrViewModel : ObservableObject
     public void TextBoxPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
-            _isCtrlDown &&
+            e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);
@@ -3121,16 +3119,14 @@ public partial class OcrViewModel : ObservableObject
 
     public void OnWindowKeyUp(KeyEventArgs e)
     {
-        if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
-        {
-            _isCtrlDown = false;
-        }
+        _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
     }
 
     internal void DataGridSubtitleMacPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
-            _isCtrlDown &&
+            e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
+            !e.Pointer.IsPrimary &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);

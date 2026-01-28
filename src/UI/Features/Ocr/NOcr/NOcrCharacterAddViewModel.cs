@@ -604,7 +604,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     internal void TextBoxMacPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
-            _isControlDown &&
+            e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);

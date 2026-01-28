@@ -12866,8 +12866,8 @@ public partial class MainViewModel :
     public void ControlMacPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (OperatingSystem.IsMacOS() &&
-            _shortcutManager.IsControlPressed() &&
-            !_shortcutManager.IsShiftPressed() &&
+            e.KeyModifiers.HasFlag(KeyModifiers.Control) &&
+            !e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
             sender is Control control)
         {
             var args = new ContextRequestedEventArgs(e);
