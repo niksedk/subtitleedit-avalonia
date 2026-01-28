@@ -2763,7 +2763,7 @@ public partial class OcrViewModel : ObservableObject
     internal void OnKeyDown(KeyEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        
+
         if (e.Key == Key.Escape)
         {
             Cancel();
@@ -2798,20 +2798,22 @@ public partial class OcrViewModel : ObservableObject
         return new Bitmap(stream);
     }
 
-    internal void SelectAndScrollToRow(int index)
+    internal async void SelectAndScrollToRow(int index)
     {
         if (index < 0 || index >= OcrSubtitleItems.Count)
         {
             return;
         }
 
-        Dispatcher.UIThread.Post(() =>
+        await Dispatcher.UIThread.InvokeAsync(async () =>
         {
             SelectedOcrSubtitleItem = OcrSubtitleItems[index];
             SubtitleGrid.SelectedIndex = index;
-            SubtitleGrid.ScrollIntoView(SelectedOcrSubtitleItem, null);
-            TrackChanged();
-        });
+            await Task.Delay(1);
+            SubtitleGrid.ScrollIntoView(OcrSubtitleItems[index], null);
+            await Task.Delay(1);
+            SubtitleGrid.ScrollIntoView(OcrSubtitleItems[index], null);
+        }, DispatcherPriority.Background);
     }
 
     public void Initialize(List<BluRaySupParser.PcsData> subtitles, string fileName)
@@ -3044,7 +3046,7 @@ public partial class OcrViewModel : ObservableObject
         if (viewModel is { OkPressed: true, LineNumber: >= 0 } && viewModel.LineNumber <= OcrSubtitleItems.Count)
         {
             var no = (int)viewModel.LineNumber;
-            SelectAndScrollToRow(Math.Min(OcrSubtitleItems.Count-1, no +1));
+            SelectAndScrollToRow(Math.Min(OcrSubtitleItems.Count - 1, no + 1));
             SelectAndScrollToRow(no - 1);
         }
     }
