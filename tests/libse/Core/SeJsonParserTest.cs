@@ -1,118 +1,117 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 
-namespace Tests.Core
+namespace LibSETests.Core;
+
+public class SeJsonParserTest
 {
-    
-    public class SeJsonParserTest
+    [Fact]
+    public void Simple()
     {
-        [Fact]
-        public void Simple()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("{ \"content\" : \"Joe\"}", "content");
-            Assert.Equal("Joe", result.First());
-        }
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("{ \"content\" : \"Joe\"}", "content");
+        Assert.Equal("Joe", result.First());
+    }
 
-        [Fact]
-        public void SimpleQuote()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("{ \"content\" : \"Joe \\\"is\\\" best\"}", "content");
-            Assert.Equal("Joe \\\"is\\\" best", result.First());
-        }
+    [Fact]
+    public void SimpleQuote()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("{ \"content\" : \"Joe \\\"is\\\" best\"}", "content");
+        Assert.Equal("Joe \\\"is\\\" best", result.First());
+    }
 
-        [Fact]
-        public void SimpleArray()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : \"Joe1\"},{ \"content\" : \"Joe2\"}]", "content");
-            Assert.Equal("Joe1", result[0]);
-            Assert.Equal("Joe2", result[1]);
-        }
+    [Fact]
+    public void SimpleArray()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : \"Joe1\"},{ \"content\" : \"Joe2\"}]", "content");
+        Assert.Equal("Joe1", result[0]);
+        Assert.Equal("Joe2", result[1]);
+    }
 
-        [Fact]
-        public void Complex()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("{" + Environment.NewLine +
-                                                          "\"name\":\"John\"," + Environment.NewLine +
-                                                          "\"age\":30," + Environment.NewLine +
-                                                          "\"cars\": [" + Environment.NewLine +
-                                                          "{ \"name\":\"Ford\", \"content\":\"Fiesta\"  }," + Environment.NewLine +
-                                                          "{ \"name\":\"BMW\", \"content\": \"X3\"}," + Environment.NewLine +
-                                                          "{ \"name\":\"Fiat\", \"content\": \"500\" } ]}", "content");
-            Assert.Equal("Fiesta", result[0]);
-            Assert.Equal("X3", result[1]);
-            Assert.Equal("500", result[2]);
-        }
+    [Fact]
+    public void Complex()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("{" + Environment.NewLine +
+                                                      "\"name\":\"John\"," + Environment.NewLine +
+                                                      "\"age\":30," + Environment.NewLine +
+                                                      "\"cars\": [" + Environment.NewLine +
+                                                      "{ \"name\":\"Ford\", \"content\":\"Fiesta\"  }," + Environment.NewLine +
+                                                      "{ \"name\":\"BMW\", \"content\": \"X3\"}," + Environment.NewLine +
+                                                      "{ \"name\":\"Fiat\", \"content\": \"500\" } ]}", "content");
+        Assert.Equal("Fiesta", result[0]);
+        Assert.Equal("X3", result[1]);
+        Assert.Equal("500", result[2]);
+    }
 
-        [Fact]
-        public void SimpleNumber()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : 10 }]", "content");
-            Assert.Equal("10", result[0]);
-        }
+    [Fact]
+    public void SimpleNumber()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : 10 }]", "content");
+        Assert.Equal("10", result[0]);
+    }
 
-        [Fact]
-        public void SimpleBoolTrue()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : true }]", "content");
-            Assert.Equal("true", result[0]);
-        }
+    [Fact]
+    public void SimpleBoolTrue()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : true }]", "content");
+        Assert.Equal("true", result[0]);
+    }
 
-        [Fact]
-        public void SimpleBoolFalse()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : false }]", "content");
-            Assert.Equal("false", result[0]);
-        }
+    [Fact]
+    public void SimpleBoolFalse()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : false }]", "content");
+        Assert.Equal("false", result[0]);
+    }
 
-        [Fact]
-        public void SimpleNull()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : null }]", "content");
-            Assert.Null(result[0]);
-        }
+    [Fact]
+    public void SimpleNull()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetAllTagsByNameAsStrings("[{ \"content\" : null }]", "content");
+        Assert.Null(result[0]);
+    }
 
 
-        [Fact]
-        public void GetArrayElementsByName_Simple()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetArrayElementsByName("{ \"items\": [ { \"name\" : \"Joe1\" },{ \"name\" : \"Joe2\" } ] }", "items");
-            Assert.Equal(2, result.Count);
-            Assert.Equal("{ \"name\" : \"Joe1\" }", result[0].Trim());
-            Assert.Equal("{ \"name\" : \"Joe2\" }", result[1].Trim());
-        }
+    [Fact]
+    public void GetArrayElementsByName_Simple()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetArrayElementsByName("{ \"items\": [ { \"name\" : \"Joe1\" },{ \"name\" : \"Joe2\" } ] }", "items");
+        Assert.Equal(2, result.Count);
+        Assert.Equal("{ \"name\" : \"Joe1\" }", result[0].Trim());
+        Assert.Equal("{ \"name\" : \"Joe2\" }", result[1].Trim());
+    }
 
-        [Fact]
-        public void GetArrayElementsByName_Simple_Compact()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetArrayElementsByName("{\"items\":[{\"name\":\"Joe1\"},{\"name\":\"Joe2\"}]}", "items");
-            Assert.Equal(2, result.Count);
-            Assert.Equal("{\"name\":\"Joe1\"}", result[0].Trim());
-            Assert.Equal("{\"name\":\"Joe2\"}", result[1].Trim());
-        }
+    [Fact]
+    public void GetArrayElementsByName_Simple_Compact()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetArrayElementsByName("{\"items\":[{\"name\":\"Joe1\"},{\"name\":\"Joe2\"}]}", "items");
+        Assert.Equal(2, result.Count);
+        Assert.Equal("{\"name\":\"Joe1\"}", result[0].Trim());
+        Assert.Equal("{\"name\":\"Joe2\"}", result[1].Trim());
+    }
 
-        [Fact]
-        public void GetArrayElementsByName_Empty_Array()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetArrayElementsByName("{ \"start_time\": \"118.64\", \"items\": [] }", "items");
-            Assert.Single(result);
-            Assert.Equal("", result[0].Trim());
-        }
+    [Fact]
+    public void GetArrayElementsByName_Empty_Array()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetArrayElementsByName("{ \"start_time\": \"118.64\", \"items\": [] }", "items");
+        Assert.Single(result);
+        Assert.Equal("", result[0].Trim());
+    }
 
 
-        [Fact]
-        public void GetArrayElementsByName_Get_Two_Lines()
-        {
-            var json = @"{                    
+    [Fact]
+    public void GetArrayElementsByName_Get_Two_Lines()
+    {
+        var json = @"{                    
 	        'TextLines': [                        
 		        'Aussi dur que ce soit pour nous,',
 		        'tout ce qui nous arrive'
@@ -120,18 +119,18 @@ namespace Tests.Core
 	        'ClassName': 'fr',
 	        'ShowTime': 115801,                    
 	        'HideTime': 120040".Replace('\'', '"');
-            var parser = new SeJsonParser();
-            var result = parser.GetArrayElementsByName(json, "TextLines");
-            Assert.Equal(2, result.Count);
-            Assert.Equal("Aussi dur que ce soit pour nous,", result[0].Trim());
-            Assert.Equal("tout ce qui nous arrive", result[1].Trim());
-        }
+        var parser = new SeJsonParser();
+        var result = parser.GetArrayElementsByName(json, "TextLines");
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Aussi dur que ce soit pour nous,", result[0].Trim());
+        Assert.Equal("tout ce qui nous arrive", result[1].Trim());
+    }
 
-        [Fact]
-        public void GetArrayElementsByName_Advanced()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetArrayElementsByName(@"{
+    [Fact]
+    public void GetArrayElementsByName_Advanced()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetArrayElementsByName(@"{
     'results': {
         'transcripts': [
             {
@@ -187,52 +186,51 @@ namespace Tests.Core
     },
     'status': 'COMPLETED'
 }".Replace('\'', '"'), "items");
-            Assert.Equal(4, result.Count);
-        }
+        Assert.Equal(4, result.Count);
+    }
 
-        [Fact]
-        public void GetRootElements_Simple_Value()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetRootElements("{ \"tag\": \"hi there!\" }");
-            Assert.Single(result);
-            Assert.Equal("tag", result[0].Name);
-            Assert.Equal("hi there!", result[0].Json);
-        }
+    [Fact]
+    public void GetRootElements_Simple_Value()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetRootElements("{ \"tag\": \"hi there!\" }");
+        Assert.Single(result);
+        Assert.Equal("tag", result[0].Name);
+        Assert.Equal("hi there!", result[0].Json);
+    }
 
-        [Fact]
-        public void GetRootElements_Simple_Object()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetRootElements("{ \"tag\": { \"name\" : \"Joe\" } }");
-            Assert.Single(result);
-            Assert.Equal("tag", result[0].Name);
-            Assert.Equal("{ \"name\" : \"Joe\" }", result[0].Json);
-        }
+    [Fact]
+    public void GetRootElements_Simple_Object()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetRootElements("{ \"tag\": { \"name\" : \"Joe\" } }");
+        Assert.Single(result);
+        Assert.Equal("tag", result[0].Name);
+        Assert.Equal("{ \"name\" : \"Joe\" }", result[0].Json);
+    }
 
 
-        [Fact]
-        public void GetRootElements_Simple_Value_And_Object()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetRootElements("{ \"tag1\": \"hi there!\", \"tag2\": { \"name\" : \"Joe\" } }");
-            Assert.Equal(2, result.Count);
-            Assert.Equal("tag1", result[0].Name);
-            Assert.Equal("hi there!", result[0].Json);
-            Assert.Equal("tag2", result[1].Name);
-            Assert.Equal("{ \"name\" : \"Joe\" }", result[1].Json);
-        }
+    [Fact]
+    public void GetRootElements_Simple_Value_And_Object()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetRootElements("{ \"tag1\": \"hi there!\", \"tag2\": { \"name\" : \"Joe\" } }");
+        Assert.Equal(2, result.Count);
+        Assert.Equal("tag1", result[0].Name);
+        Assert.Equal("hi there!", result[0].Json);
+        Assert.Equal("tag2", result[1].Name);
+        Assert.Equal("{ \"name\" : \"Joe\" }", result[1].Json);
+    }
 
-        [Fact]
-        public void GetRootElements_Two_Simple_Value()
-        {
-            var parser = new SeJsonParser();
-            var result = parser.GetRootElements("{ \"tag\": \"hi there!\",\"tag2\": \"hi!\", }");
-            Assert.Equal(2, result.Count);
-            Assert.Equal("tag", result[0].Name);
-            Assert.Equal("hi there!", result[0].Json);
-            Assert.Equal("tag2", result[1].Name);
-            Assert.Equal("hi!", result[1].Json);
-        }
+    [Fact]
+    public void GetRootElements_Two_Simple_Value()
+    {
+        var parser = new SeJsonParser();
+        var result = parser.GetRootElements("{ \"tag\": \"hi there!\",\"tag2\": \"hi!\", }");
+        Assert.Equal(2, result.Count);
+        Assert.Equal("tag", result[0].Name);
+        Assert.Equal("hi there!", result[0].Json);
+        Assert.Equal("tag2", result[1].Name);
+        Assert.Equal("hi!", result[1].Json);
     }
 }

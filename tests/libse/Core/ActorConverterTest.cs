@@ -1,215 +1,213 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
-namespace Tests.Core
+namespace LibSETests.Core;
+
+public class ActorConverterTest
 {
-    
-    public class ActorConverterTest
+    [Fact]
+    public void SquareToSquare()
     {
-        [Fact]
-        public void SquareToSquare()
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("[Joe] How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("[Joe] How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToSquareUppercase()
+    [Fact]
+    public void SquareToSquareUppercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
-            Assert.Equal("[JOE] How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
+        Assert.Equal("[JOE] How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToParentheses()
+    [Fact]
+    public void SquareToParentheses()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("(Joe) How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("(Joe) How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToParenthesesWithSecondLineNoActor()
+    [Fact]
+    public void SquareToParenthesesWithSecondLineNoActor()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "Are you okay?" };
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("(Joe) How are you?" + Environment.NewLine + "Are you okay?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "Are you okay?" };
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("(Joe) How are you?" + Environment.NewLine + "Are you okay?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToParenthesesWithSecondLine()
+    [Fact]
+    public void SquareToParenthesesWithSecondLine()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "How are you?" + Environment.NewLine + "[Joe] Are you okay?" };
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("How are you?" + Environment.NewLine + "(Joe) Are you okay?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "How are you?" + Environment.NewLine + "[Joe] Are you okay?" };
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("How are you?" + Environment.NewLine + "(Joe) Are you okay?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToParenthesesUppercase()
+    [Fact]
+    public void SquareToParenthesesUppercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
-            Assert.Equal("(JOE) How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
+        Assert.Equal("(JOE) How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToParenthesesLowercase()
+    [Fact]
+    public void SquareToParenthesesLowercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', ActorConverter.LowerCase, null);
-            Assert.Equal("(joe) How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', ActorConverter.LowerCase, null);
+        Assert.Equal("(joe) How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void ParenthesesToSquareLowercase()
+    [Fact]
+    public void ParenthesesToSquareLowercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "(JOE) How are you?" };
-            var result = c.FixActors(p, '(', ')', ActorConverter.NormalCase, null);
-            Assert.Equal("[Joe] How are you?", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "(JOE) How are you?" };
+        var result = c.FixActors(p, '(', ')', ActorConverter.NormalCase, null);
+        Assert.Equal("[Joe] How are you?", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void ColorToParenthesesLowercase()
+    [Fact]
+    public void ColorToParenthesesLowercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "Joe: How are you?" };
-            var text = c.FixActorsFromBeforeColon(p, ':', ActorConverter.LowerCase, null);
-            Assert.Equal("(joe) How are you?", text);
-        }
+        var p = new Paragraph() { Text = "Joe: How are you?" };
+        var text = c.FixActorsFromBeforeColon(p, ':', ActorConverter.LowerCase, null);
+        Assert.Equal("(joe) How are you?", text);
+    }
 
-        [Fact]
-        public void FromActorToSquare()
+    [Fact]
+    public void FromActorToSquare()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "How are you?", Actor = "Joe" };
-            var text = c.FixActorsFromActor(p, null, null);
-            Assert.Equal("[Joe] How are you?", text);
-        }
+        var p = new Paragraph() { Text = "How are you?", Actor = "Joe" };
+        var text = c.FixActorsFromActor(p, null, null);
+        Assert.Equal("[Joe] How are you?", text);
+    }
 
-        [Fact]
-        public void SquareToActorUppercase()
+    [Fact]
+    public void SquareToActorUppercase()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToActor = true,
-            };
+            ToActor = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" };
-            var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
-            Assert.Equal("How are you?", result.Paragraph.Text);
-            Assert.Equal("JOE", result.Paragraph.Actor);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" };
+        var result = c.FixActors(p, '[', ']', ActorConverter.UpperCase, null);
+        Assert.Equal("How are you?", result.Paragraph.Text);
+        Assert.Equal("JOE", result.Paragraph.Actor);
+    }
 
-        [Fact]
-        public void ColonDialogToSquare1()
+    [Fact]
+    public void ColonDialogToSquare1()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "Joe: How are you?" + Environment.NewLine + "Jane: I'm fine." };
-            var text = c.FixActorsFromBeforeColon(p, ':', null, null);
-            Assert.Equal("[Joe] How are you?" + Environment.NewLine + "[Jane] I'm fine.", text);
-        }
+        var p = new Paragraph() { Text = "Joe: How are you?" + Environment.NewLine + "Jane: I'm fine." };
+        var text = c.FixActorsFromBeforeColon(p, ':', null, null);
+        Assert.Equal("[Joe] How are you?" + Environment.NewLine + "[Jane] I'm fine.", text);
+    }
 
-        [Fact]
-        public void ColonDialogToSquare2()
+    [Fact]
+    public void ColonDialogToSquare2()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToSquare = true,
-            };
+            ToSquare = true,
+        };
 
-            var p = new Paragraph() { Text = "- Joe: How are you?" + Environment.NewLine + "- Jane: I'm fine." };
-            var text = c.FixActorsFromBeforeColon(p, ':', null, null);
-            Assert.Equal("[Joe] How are you?" + Environment.NewLine + "[Jane] I'm fine.", text);
-        }
+        var p = new Paragraph() { Text = "- Joe: How are you?" + Environment.NewLine + "- Jane: I'm fine." };
+        var text = c.FixActorsFromBeforeColon(p, ':', null, null);
+        Assert.Equal("[Joe] How are you?" + Environment.NewLine + "[Jane] I'm fine.", text);
+    }
 
-        [Fact]
-        public void SquareToParenthesesDialog()
+    [Fact]
+    public void SquareToParenthesesDialog()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToParentheses = true,
-            };
+            ToParentheses = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "[Jane] I am fine." };
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("(Joe) How are you?" + Environment.NewLine + "(Jane) I am fine.", result.Paragraph.Text);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "[Jane] I am fine." };
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("(Joe) How are you?" + Environment.NewLine + "(Jane) I am fine.", result.Paragraph.Text);
+    }
 
-        [Fact]
-        public void SquareToActor()
+    [Fact]
+    public void SquareToActor()
+    {
+        var c = new ActorConverter(new SubRip(), "en")
         {
-            var c = new ActorConverter(new SubRip(), "en")
-            {
-                ToActor = true,
-            };
+            ToActor = true,
+        };
 
-            var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "[Jane] I am fine." };
-            p.StartTime.TotalMilliseconds = 1000;
-            p.EndTime.TotalMilliseconds = 2000;
-            p.Style = "style";
-            var result = c.FixActors(p, '[', ']', null, null);
-            Assert.Equal("How are you?", result.Paragraph.Text);
-            Assert.Equal("Joe", result.Paragraph.Actor);
-            Assert.Equal("I am fine.", result.NextParagraph.Text);
-            Assert.Equal("Jane", result.NextParagraph.Actor);
-            Assert.Equal(p.StartTime.TotalMilliseconds, result.NextParagraph.StartTime.TotalMilliseconds);
-            Assert.Equal(p.EndTime.TotalMilliseconds, result.NextParagraph.EndTime.TotalMilliseconds);
-            Assert.Equal(p.Style, result.NextParagraph.Style);
-            Assert.NotEqual(p.Id, result.NextParagraph.Id);
-        }
+        var p = new Paragraph() { Text = "[Joe] How are you?" + Environment.NewLine + "[Jane] I am fine." };
+        p.StartTime.TotalMilliseconds = 1000;
+        p.EndTime.TotalMilliseconds = 2000;
+        p.Style = "style";
+        var result = c.FixActors(p, '[', ']', null, null);
+        Assert.Equal("How are you?", result.Paragraph.Text);
+        Assert.Equal("Joe", result.Paragraph.Actor);
+        Assert.Equal("I am fine.", result.NextParagraph.Text);
+        Assert.Equal("Jane", result.NextParagraph.Actor);
+        Assert.Equal(p.StartTime.TotalMilliseconds, result.NextParagraph.StartTime.TotalMilliseconds);
+        Assert.Equal(p.EndTime.TotalMilliseconds, result.NextParagraph.EndTime.TotalMilliseconds);
+        Assert.Equal(p.Style, result.NextParagraph.Style);
+        Assert.NotEqual(p.Id, result.NextParagraph.Id);
     }
 }
