@@ -70,5 +70,24 @@ namespace Tests.Logic.SubtitleFormats
             sut.LoadSubtitle(subtitle, xml.SplitToLines(), "test.xml");
             Assert.Equal(text, subtitle.Paragraphs[0].Text);
         }
+
+        [Fact]
+        public void TopAlignment_An8()
+        {
+            var sut = new TimedTextImscRosetta();
+
+            // make xml with top alignment
+            var subtitle = new Subtitle();
+            var text = "{\\an8}This text is top-aligned.";
+            subtitle.Paragraphs.Add(new Paragraph(text, 0, 2000));
+            var xml = sut.ToText(subtitle, "test");
+
+            // load xml
+            subtitle = new Subtitle();
+            sut.LoadSubtitle(subtitle, xml.SplitToLines(), "test.xml");
+            
+            // verify that the text still has top alignment tag
+            Assert.Equal(text, subtitle.Paragraphs[0].Text);
+        }
     }
 }
