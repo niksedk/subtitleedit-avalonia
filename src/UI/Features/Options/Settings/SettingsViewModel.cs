@@ -330,6 +330,26 @@ public partial class SettingsViewModel : ObservableObject
         };
         SelectedWaveformSpectrogramStyle = WaveformSpectrogramStyles[0];
 
+        WaveformSingleClickActionTypes =
+        [
+            Se.Language.Waveform.SetVideoPositionAndPauseAndSelectSubtitle,
+            Se.Language.Waveform.SetVideopositionAndPauseAndSelectSubtitleAndCenter,
+            Se.Language.Waveform.SetVideoPositionAndPause,
+            Se.Language.Waveform.SetVideopositionAndPauseAndCenter,
+            Se.Language.Waveform.SetVideoposition,
+        ];
+        SelectedWaveformSingleClickActionType = WaveformSingleClickActionTypes[0];
+
+        WaveformDoubleClickActionTypes =
+        [
+            Se.Language.General.None,
+            Se.Language.General.SelectSubtitle,
+            Se.Language.General.Center,
+            Se.Language.General.Pause,
+            Se.Language.General.Play,
+        ];
+        SelectedWaveformDoubleClickActionType = WaveformDoubleClickActionTypes[0];
+
         var subtitleFormats = SubtitleFormat.AllSubtitleFormats;
         var defaultSubtitleFormats = new List<string>();
         var saveSubtitleFormats = new List<string> { "Auto" };
@@ -649,24 +669,7 @@ public partial class SettingsViewModel : ObservableObject
         WaveformShotChangesAutoGenerate = Se.Settings.Waveform.ShotChangesAutoGenerate;
         WaveformAllowOverlap = Se.Settings.Waveform.AllowOverlap;
 
-        WaveformSingleClickActionTypes =
-        [
-            Se.Language.Waveform.SetVideoPositionAndPauseAndSelectSubtitle,
-            Se.Language.Waveform.SetVideopositionAndPauseAndSelectSubtitleAndCenter,
-            Se.Language.Waveform.SetVideoPositionAndPause,
-            Se.Language.Waveform.SetVideopositionAndPauseAndCenter,
-            Se.Language.Waveform.SetVideoposition,
-        ];
         SelectedWaveformSingleClickActionType = MapWaveformSingleClickToTranslation(Se.Settings.Waveform.SingleClickAction);
-
-        WaveformDoubleClickActionTypes =
-        [
-            Se.Language.General.None,
-            Se.Language.General.SelectSubtitle,
-            Se.Language.General.Center,
-            Se.Language.General.Pause,
-            Se.Language.General.Play,
-        ];
         SelectedWaveformDoubleClickActionType = MapWaveformDoubleClickToTranslation(Se.Settings.Waveform.DoubleClickAction);
 
         WaveformRightClickSelectsSubtitle = Se.Settings.Waveform.RightClickSelectsSubtitle;
@@ -1008,7 +1011,7 @@ public partial class SettingsViewModel : ObservableObject
         return SingleClickTextToActionMap.TryGetValue(text, out var action)
             ? action
             : SubtitleSingleClickActionType.None.ToString();
-    }    
+    }
 
     private static readonly Dictionary<string, string> _actionToTextMap = new Dictionary<string, string>
     {
@@ -1300,7 +1303,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             return nameof(SplitOddLinesActionType.WeightTop);
         }
-        
+
         if (translation == Se.Language.Options.Settings.SplitOddLineActionWeightBottom)
         {
             return nameof(SplitOddLinesActionType.WeightBottom);
