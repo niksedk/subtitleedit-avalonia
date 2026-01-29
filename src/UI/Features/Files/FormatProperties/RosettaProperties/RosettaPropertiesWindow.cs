@@ -47,7 +47,7 @@ public class RosettaPropertiesWindow : Window
         };
 
         var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize).WithMinWidth(labelWidth);
-        var textBoxFontSize = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedFontSize)); 
+        var comboBoxFontSize = UiUtil.MakeComboBox<string>(vm.FontSizes, vm, nameof(vm.SelectedFontSize)).WithMinWidth(100);
         var panelFontSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -55,7 +55,7 @@ public class RosettaPropertiesWindow : Window
             Children =
             {
                 labelFontSize,
-                textBoxFontSize,
+                comboBoxFontSize,
             }
         };
 

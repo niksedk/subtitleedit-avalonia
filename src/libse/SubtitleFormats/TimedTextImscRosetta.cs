@@ -15,7 +15,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override string Name => "Timed Text IMSC Rosetta";
 
         public static string LineHeight = "125%";
-        public static string FontSize = "100%";
+        public static string FontSize = "5.3rh";
         public static string Language = string.Empty;
 
 
@@ -33,14 +33,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
       <style xml:id=""r_default"" style=""_r_default"" tts:backgroundColor=""#00000000"" tts:fontFamily=""proportionalSansSerif"" tts:fontStyle=""normal"" tts:fontWeight=""normal"" tts:overflow=""visible"" tts:showBackground=""whenActive"" tts:wrapOption=""noWrap"" />
       <style xml:id=""_d_default"" style=""d_outline"" />
       <style xml:id=""_r_quantisationregion"" tts:origin=""10% 10%"" tts:extent=""80% 80%"" tts:fontSize=""5.333rh"" tts:lineHeight=""125%""/>
-      <style xml:id=""_r_default"" style=""s_fg_white p_al_center"" tts:fontSize=""5.1rh"" tts:lineHeight=""[LINE_HEIGHT]"" tts:luminanceGain=""1.0"" itts:fillLineGap=""false"" ebutts:linePadding=""0.25c"" />
+      <style xml:id=""_r_default"" style=""s_fg_white p_al_center"" tts:fontSize=""[FONT_SIZE]"" tts:lineHeight=""[LINE_HEIGHT]"" tts:luminanceGain=""1.0"" itts:fillLineGap=""false"" ebutts:linePadding=""0.25c"" />
       <style xml:id=""p_al_center"" tts:textAlign=""center"" ebutts:multiRowAlign=""center"" />
       <style xml:id=""p_al_start"" tts:textAlign=""start"" ebutts:multiRowAlign=""start"" />
       <style xml:id=""p_al_end"" tts:textAlign=""end"" ebutts:multiRowAlign=""end"" />
       <style xml:id=""s_fg_white"" tts:color=""#FFFFFF"" />
       <style xml:id=""s_outlineblack"" tts:textOutline=""#000000 0.05em"" />
       <style xml:id=""d_outline"" style=""s_outlineblack"" />
-      <style xml:id=""p_font1"" tts:fontFamily=""proportionalSansSerif"" tts:fontSize=""[FONT_SIZE]"" tts:lineHeight=""[LINE_HEIGHT]"" />
+      <style xml:id=""p_font1"" tts:fontFamily=""proportionalSansSerif"" tts:fontSize=""100%"" tts:lineHeight=""[LINE_HEIGHT]"" />
       <style xml:id=""s_italic"" tts:fontStyle=""italic"" />
       <style xml:id=""s_bold"" tts:fontWeight=""bold"" />
       <style xml:id=""s_underline"" tts:textDecoration=""underline"" />
