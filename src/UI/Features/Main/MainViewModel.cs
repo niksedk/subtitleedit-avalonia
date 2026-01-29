@@ -1126,8 +1126,14 @@ public partial class MainViewModel :
         if (vp != null && vp.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
         {
             var audioTracks = mpv.GetAudioTracks();
-            _audioTrack = audioTracks.FirstOrDefault(p => p.Id == recentFile.AudioTrack);
-            var _ = Task.Run(async () => PickAudioTrack(_audioTrack));
+            var desiredTrack = audioTracks.FirstOrDefault(p => p.Id == recentFile.AudioTrack);
+            
+            // Only switch track and regenerate waveform if different from current
+            if (desiredTrack != null && (_audioTrack == null || _audioTrack.Id != desiredTrack.Id))
+            {
+                _audioTrack = desiredTrack;
+                var _ = Task.Run(async () => PickAudioTrack(_audioTrack));
+            }
         }
     }
 
@@ -10450,14 +10456,13 @@ public partial class MainViewModel :
             return;
         }
 
-        LoadWaveformAndSpectrogram(videoFileName);
-
         IsVideoLoaded = true;
 
-        var __ = Task.Run(() =>
+        var _ = Task.Run(() =>
         {
-            GetMediaInformation(videoFileName);
             LoadAudioTrackMenuItems();
+            Dispatcher.UIThread.Post(() => LoadWaveformAndSpectrogram(videoFileName));
+            GetMediaInformation(videoFileName);
         });
     }
 

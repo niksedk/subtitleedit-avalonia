@@ -375,7 +375,7 @@ public class WavePeakGenerator2 : IDisposable
     public static string GetPeakWaveFileName(string videoFileName, int trackNumber = -1)
     {
         var dir = Se.WaveformsFolder;
-        if (Directory.Exists(dir))
+        if (!Directory.Exists(dir))
         {
             Directory.CreateDirectory(dir);
         }
