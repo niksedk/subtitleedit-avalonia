@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Markup.Declarative;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 

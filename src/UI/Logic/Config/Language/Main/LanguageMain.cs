@@ -29,6 +29,7 @@ public class LanguageMain
     public string ErrorLoadTorrent { get; set; }
     public string ErrorLoadZip { get; set; }
     public string ExtractingWaveInfo { get; set; }
+    public string ExtractingShotChanges { get; set; }
     public string FailedToExtractWaveInfo { get; set; }
     public string FixedRightToLeftUsingUnicodeControlCharactersX { get; set; }
     public string GeneratingSpectrogramDotDotDot { get; set; }
@@ -113,6 +114,7 @@ public class LanguageMain
         ErrorLoadTorrent = "This file seems to be a BitTorrent file.\n\nSubtitle Edit cannot open torrent files.";
         ErrorLoadZip = "This file seems to be a compressed ZIP file.\n\nSubtitle Edit cannot open compressed files.";
         ExtractingWaveInfo = "Extracting wave info...";
+        ExtractingShotChanges = "Extracting shot changes...";
         FailedToExtractWaveInfo = "Failed to extract wave info.";
         FixedRightToLeftUsingUnicodeControlCharactersX = "Fixed right-to-left using Unicode control characters in {0} lines";
         GeneratingSpectrogramDotDotDot = "Generating spectrogram...";

@@ -11,7 +11,7 @@ namespace Nikse.SubtitleEdit.Logic.Media;
 
 public class ShotChangesHelper
 {
-    private static string GetShotChangesFileName(string videoFileName)
+    private static string GetShotChangesFileName(string videoFileName, int audioTrackNumber)
     {
         var dir = Se.ShotChangesFolder;
         if (!Directory.Exists(dir))
@@ -26,8 +26,10 @@ public class ShotChangesHelper
         {
             videoFileNameWithoutExtension = videoFileNameWithoutExtension.Substring(0, 25);
         }
+        
+        var trackSuffix = audioTrackNumber >= 0 ? $"_{audioTrackNumber}" : string.Empty;
 
-        var newFileName = $"{MovieHasher.GenerateHash(videoFileName)}_{videoFileNameWithoutExtension}.shotchanges";
+        var newFileName = $"{MovieHasher.GenerateHash(videoFileName)}{trackSuffix}_{videoFileNameWithoutExtension}.shotchanges";
         newFileName = Path.Combine(dir, newFileName);
         return newFileName;
     }
@@ -107,23 +109,25 @@ public class ShotChangesHelper
     /// </summary>
     /// <param name="videoFileName">Video file name</param>
     /// <param name="list">List of shot changes in seconds</param>
-    public static void SaveShotChanges(string videoFileName, List<double> list)
+    /// <param name="audioTrackNumber">Audio track number, -1 if no track number</param>
+    public static void SaveShotChanges(string videoFileName, List<double> list, int audioTrackNumber)
     {
         var sb = new StringBuilder();
         foreach (var d in list)
         {
             sb.AppendLine(d.ToString(CultureInfo.InvariantCulture));
         }
-        File.WriteAllText(GetShotChangesFileName(videoFileName), sb.ToString().Trim());
+        
+        File.WriteAllText(GetShotChangesFileName(videoFileName, audioTrackNumber), sb.ToString().Trim());
     }
 
     /// <summary>
     /// Delete shot changes file associated with video file
     /// </summary>
     /// <param name="videoFileName">Video file name</param>
-    public static void DeleteShotChanges(string videoFileName)
+    public static void DeleteShotChanges(string videoFileName, int audioTrackNumber)
     {
-        var shotChangesFileName = GetShotChangesFileName(videoFileName);
+        var shotChangesFileName = GetShotChangesFileName(videoFileName, audioTrackNumber);
         if (File.Exists(shotChangesFileName))
         {
             File.Delete(shotChangesFileName);

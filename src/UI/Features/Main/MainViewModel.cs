@@ -3970,7 +3970,7 @@ public partial class MainViewModel :
             AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(_videoFileName);
             if (AudioVisualizer.ShotChanges.Count == 0)
             {
-                ExtractShotChanges(_videoFileName);
+                ExtractShotChanges(_videoFileName, _audioTrack?.FfIndex ?? -1);
             }
         }
     }
@@ -4055,7 +4055,7 @@ public partial class MainViewModel :
             AudioVisualizer.ShotChanges = result.FfmpegLines.Select(p => p.Seconds).ToList();
             ShowShotChangesListMenuItem = AudioVisualizer.ShotChanges.Count > 0;
             _updateAudioVisualizer = true;
-            ShotChangesHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges);
+            ShotChangesHelper.SaveShotChanges(_videoFileName, AudioVisualizer.ShotChanges, _audioTrack?.FfIndex ?? -1);
             ShowStatus(string.Format(Se.Language.Main.XShotChangedLoaded, AudioVisualizer.ShotChanges.Count));
         }
     }
@@ -4108,7 +4108,7 @@ public partial class MainViewModel :
             RemoveShotChange(idx);
             if (AudioVisualizer.ShotChanges.Count == 0)
             {
-                ShotChangesHelper.DeleteShotChanges(_videoFileName);
+                ShotChangesHelper.DeleteShotChanges(_videoFileName, _audioTrack?.FfIndex ?? -1);
             }
         }
         else
@@ -4118,7 +4118,7 @@ public partial class MainViewModel :
             list.Add(cp);
             list.Sort();
             AudioVisualizer.ShotChanges = list;
-            ShotChangesHelper.SaveShotChanges(_videoFileName, list);
+            ShotChangesHelper.SaveShotChanges(_videoFileName, list, _audioTrack?.FfIndex ?? -1);
         }
 
         ShowShotChangesListMenuItem = AudioVisualizer?.ShotChanges.Count > 0;
@@ -8973,7 +8973,7 @@ public partial class MainViewModel :
 
             if (!string.IsNullOrEmpty(_videoFileName))
             {
-                ShotChangesHelper.SaveShotChanges(_videoFileName, temp);
+                ShotChangesHelper.SaveShotChanges(_videoFileName, temp, _audioTrack?.FfIndex ?? -1);
             }
         }
     }
@@ -10460,9 +10460,9 @@ public partial class MainViewModel :
 
         var _ = Task.Run(() =>
         {
-            LoadAudioTrackMenuItems();
             Dispatcher.UIThread.Post(() => LoadWaveformAndSpectrogram(videoFileName));
             GetMediaInformation(videoFileName);
+            LoadAudioTrackMenuItems();
         });
     }
 
@@ -10508,7 +10508,7 @@ public partial class MainViewModel :
                 AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
                 if (AudioVisualizer.ShotChanges.Count == 0)
                 {
-                    ExtractShotChanges(videoFileName);
+                    ExtractShotChanges(videoFileName, trackNumber);
                 }
 
                 _updateAudioVisualizer = true;
@@ -10593,7 +10593,7 @@ public partial class MainViewModel :
                         AudioTraksMenuItem.Items.Add(menuItem);
                     }
 
-                    IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 0;
+                    IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 1;
                 });
             }
         }
@@ -10602,7 +10602,7 @@ public partial class MainViewModel :
             Se.LogError(exception, "UpdateAudioTrackMenuItems failed");
             Dispatcher.UIThread.Post(() =>
             {
-                IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 0;
+                IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 1;
             });
         }
     }
@@ -10723,7 +10723,7 @@ public partial class MainViewModel :
                 }
             }
 
-            ExtractShotChanges(videoFileName);
+            ExtractShotChanges(videoFileName, _audioTrack?.FfIndex ?? -1);
         }
         finally
         {
@@ -10733,11 +10733,11 @@ public partial class MainViewModel :
         }
     }
 
-    private void ExtractShotChanges(string videoFileName)
+    private void ExtractShotChanges(string videoFileName, int audioTrackNumber)
     {
         if (Se.Settings.Waveform.ShotChangesAutoGenerate)
         {
-            WaveformGeneratingText = "Extracting shot changse...";
+            WaveformGeneratingText = Se.Language.Main.ExtractingShotChanges;
 
             var threshold = Se.Settings.Waveform.ShotChangesSensitivity.ToString(CultureInfo.InvariantCulture);
             var argumentsFormat = Se.Settings.Video.ShowChangesFFmpegArguments;
@@ -10773,7 +10773,7 @@ public partial class MainViewModel :
 
                 if (!_videoOpenTokenSource.IsCancellationRequested && AudioVisualizer != null && AudioVisualizer.ShotChanges != null)
                 {
-                    ShotChangesHelper.SaveShotChanges(videoFileName, AudioVisualizer.ShotChanges);
+                    ShotChangesHelper.SaveShotChanges(videoFileName, AudioVisualizer.ShotChanges, audioTrackNumber);
                 }
             });
         }
