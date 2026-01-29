@@ -1,5 +1,6 @@
 ﻿using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Initializers;
 using SevenZipExtractor;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
@@ -20,9 +21,15 @@ public static class Unpacker
             updateProgressText(Se.Language.General.Unpacking7ZipArchiveDotDotDot);
         });
 
-        if (OperatingSystem.IsWindows() || (OperatingSystem.IsLinux() && RuntimeInformation.ProcessArchitecture == Architecture.X64))
+        if (OperatingSystem.IsWindows())
         {
             Unpack7ZipViaNativeLibrary(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+            return;
+        }
+
+        if (OperatingSystem.IsLinux() && RuntimeInformation.ProcessArchitecture == Architecture.X64)
+        {
+            Unpack7ZipVia77zExecutable(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
             return;
         }
 
@@ -71,6 +78,163 @@ public static class Unpacker
 
                 return fullFileName;
             });
+        }
+    }
+
+    private static void Unpack7ZipVia77zExecutable(string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
+    {
+        new SevenZipInitializer().UpdateSevenZipIfNeeded().Wait();
+        var sevenZipPath = Path.Combine(Se.SevenZipFolder, "7zr"); // 7zr is the standalone version for 7zip archives
+
+        if (!File.Exists(sevenZipPath))
+        {
+            throw new FileNotFoundException($"7zr executable not found at {sevenZipPath}");
+        }
+
+        // Make sure 7zr is executable on Linux
+        if (OperatingSystem.IsLinux())
+        {
+            LinuxHelper.MakeExecutable(sevenZipPath);
+        }
+
+        // Extract to a temporary directory if we need to skip folder levels
+        var extractPath = string.IsNullOrEmpty(skipFolderLevel) ? dir : Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+        try
+        {
+            if (!Directory.Exists(extractPath))
+            {
+                Directory.CreateDirectory(extractPath);
+            }
+
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = sevenZipPath,
+                    Arguments = $"x \"{tempFileName}\" -o\"{extractPath}\" -y",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+
+            while (!process.StandardOutput.EndOfStream)
+            {
+                if (cancellationTokenSource.IsCancellationRequested)
+                {
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        // Ignore if already exited
+                    }
+                    return;
+                }
+
+                var line = process.StandardOutput.ReadLine();
+                if (!string.IsNullOrWhiteSpace(line) && line.Contains("Extracting"))
+                {
+                    var displayLine = line.Length > 50 ? "..." + line.Substring(line.Length - 46) : line;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        updateProgressText(displayLine);
+                    });
+                }
+            }
+
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                var error = process.StandardError.ReadToEnd();
+                throw new Exception($"7zr extraction failed with exit code {process.ExitCode}: {error}");
+            }
+
+            // If we need to skip folder levels, move files from temp to final destination
+            if (!string.IsNullOrEmpty(skipFolderLevel))
+            {
+                MoveFilesSkippingFolderLevel(extractPath, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+            }
+        }
+        finally
+        {
+            // Clean up temporary directory if we used one
+            if (!string.IsNullOrEmpty(skipFolderLevel) && Directory.Exists(extractPath))
+            {
+                try
+                {
+                    Directory.Delete(extractPath, true);
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
+            }
+        }
+    }
+
+    private static void MoveFilesSkippingFolderLevel(string sourceDir, string targetDir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
+    {
+        var skipPath = Path.Combine(sourceDir, skipFolderLevel.Replace('/', Path.DirectorySeparatorChar));
+
+        if (!Directory.Exists(skipPath))
+        {
+            // If the skip path doesn't exist, just move everything
+            skipPath = sourceDir;
+        }
+
+        MoveDirectoryContents(skipPath, targetDir, cancellationTokenSource, updateProgressText);
+    }
+
+    private static void MoveDirectoryContents(string sourceDir, string targetDir, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
+    {
+        if (!Directory.Exists(targetDir))
+        {
+            Directory.CreateDirectory(targetDir);
+        }
+
+        // Move all files
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var fileName = Path.GetFileName(file);
+            var destFile = Path.Combine(targetDir, fileName);
+
+            var displayName = fileName;
+            if (displayName.Length > 30)
+            {
+                displayName = "..." + displayName.Substring(displayName.Length - 26).Trim();
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                updateProgressText(string.Format(Se.Language.General.UnpackingX, displayName));
+            });
+
+            File.Move(file, destFile, true);
+        }
+
+        // Move all subdirectories recursively
+        foreach (var subDir in Directory.GetDirectories(sourceDir))
+        {
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+
+            var dirName = Path.GetFileName(subDir);
+            var destSubDir = Path.Combine(targetDir, dirName);
+            MoveDirectoryContents(subDir, destSubDir, cancellationTokenSource, updateProgressText);
         }
     }
 
