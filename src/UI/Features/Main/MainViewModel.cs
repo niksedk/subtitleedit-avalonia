@@ -10238,8 +10238,6 @@ public partial class MainViewModel :
                 sb.AppendLine(arg);
             }
 
-            Se.LogError("OnLoaded Environment.GetCommandLineArgs: " + sb);
-
             var fileName = arguments[1];
             if (File.Exists(fileName))
             {
@@ -10465,14 +10463,15 @@ public partial class MainViewModel :
 
     private void LoadWaveformAndSpectrogram(string videoFileName)
     {
-        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName, _audioTrack?.FfIndex ?? -1);
-        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, _audioTrack?.FfIndex ?? -1);
+        var trackNumber = _audioTrack?.FfIndex ?? -1;
+        var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName, trackNumber);
+        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, trackNumber);
         if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !Directory.Exists(spectrogramFolder)))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
             {
                 var tempWaveFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
-                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, _audioTrack?.FfIndex ?? -1, tempWaveFileName,
+                var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, trackNumber, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
