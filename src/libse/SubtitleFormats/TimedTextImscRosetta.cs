@@ -391,7 +391,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 if (pNodes != null && pNodes.Count > 0)
                 {
                     // Extract region ID from div
-                    var regionId = divNode.Attributes?["region"]?.Value ?? "R2"; // default to bottom
+                    var regionId = divNode.Attributes?["region"]?.Value ?? "R0"; // default to bottom
                     
                     // Extract paragraph style from first p node
                     var firstPNode = pNodes[0];
@@ -454,9 +454,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             // Determine vertical position from region
             var verticalPosition = regionId switch
             {
-                "R0" => "top",
+                "R0" => "bottom",
                 "R1" => "middle",
-                "R2" => "bottom",
+                "R2" => "top",
+                "R3" => "middle",
                 _ => "bottom" // default
             };
 
@@ -497,16 +498,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             return alignment switch
             {
-                "an1" => "R2",  // bottom-left
-                "an2" => "R2",  // bottom-center
-                "an3" => "R2",  // bottom-right
+                "an1" => "R0",  // bottom-left
+                "an2" => "R0",  // bottom-center
+                "an3" => "R0",  // bottom-right
                 "an4" => "R1",  // middle-left
                 "an5" => "R1",  // middle-center
                 "an6" => "R1",  // middle-right
-                "an7" => "R0",  // top-left
-                "an8" => "R0",  // top-center
-                "an9" => "R0",  // top-right
-                _ => "R2"       // default: bottom
+                "an7" => "R2",  // top-left
+                "an8" => "R2",  // top-center
+                "an9" => "R2",  // top-right
+                _ => "R0"       // default: bottom
             };
         }
 
@@ -542,7 +543,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             // Generate only the needed regions
             if (regionsNeeded.Contains("R0"))
             {
-                sb.AppendLine("      <region xml:id=\"R0\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"before\" style=\"r_default\" />");
+                sb.AppendLine("      <region xml:id=\"R0\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
             }
 
             if (regionsNeeded.Contains("R1"))
@@ -552,13 +553,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             if (regionsNeeded.Contains("R2"))
             {
-                sb.AppendLine("      <region xml:id=\"R2\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
+                sb.AppendLine("      <region xml:id=\"R2\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"before\" style=\"r_default\" />");
             }
 
-            // Ensure we always have at least the default region (R2 - bottom)
+            // Ensure we always have at least the default region (R0 - bottom)
             if (regionsNeeded.Count == 0)
             {
-                sb.AppendLine("      <region xml:id=\"R2\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
+                sb.AppendLine("      <region xml:id=\"R0\" tts:origin=\"10% 10%\" tts:extent=\"80% 80%\" tts:displayAlign=\"after\" style=\"r_default\" />");
             }
 
             return sb.ToString().TrimEnd();
