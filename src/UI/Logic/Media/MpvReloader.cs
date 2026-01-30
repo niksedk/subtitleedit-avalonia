@@ -34,12 +34,7 @@ public class MpvReloader : IMpvReloader
         try
         {
             var uiFormatType = uiFormat.GetType();
-
             subtitle = new Subtitle(subtitle, false);
-            if (Se.Settings.General.CurrentVideoOffsetInMs != 0)
-            {
-                subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-Se.Settings.General.CurrentVideoOffsetInMs));
-            }
 
             if (SmpteMode)
             {
