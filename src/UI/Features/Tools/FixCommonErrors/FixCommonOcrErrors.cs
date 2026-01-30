@@ -1,10 +1,10 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Interfaces;
-using Nikse.SubtitleEdit.Features.Ocr;
 using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.OcrSubtitle;
 using Nikse.SubtitleEdit.Features.SpellCheck;
-using System.Collections.Generic;
+using Nikse.SubtitleEdit.Logic.Config;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
 {
@@ -32,23 +32,34 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
             }
 
             var ocrSubtitle = new OcrSubtitleDummy(subtitle);
-            var spellChecker = new SpellCheckDictionaryDisplay();
-            spellChecker.DictionaryFileName = ""; //TODO: find
+            var ocrSubtitles = ocrSubtitle.MakeOcrSubtitleItems();
 
-            if (string.IsNullOrEmpty(spellChecker.DictionaryFileName))
+            var spellCheckManager = new SpellCheckManager();
+            var spellCheckers = spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
+            var spellChecker = spellCheckers.FirstOrDefault(x => x.GetThreeLetterCode() == threeLetterCode);  
+            if (spellChecker == null)
             {
                 return;
             }
 
-            OcrFixEngine.Initialize(ocrSubtitle.MakeOcrSubtitleItems(), threeLetterCode, spellChecker);
+            OcrFixEngine.Initialize(ocrSubtitles, threeLetterCode, spellChecker);
 
             var fixAction = Language.FixText;
             var fixCount = 0;
-            for (var i = 0; i < subtitle.Paragraphs.Count; i++)
+            for (var i = 0; i < ocrSubtitles.Count; i++)
             {
                 var p = subtitle.Paragraphs[i];
-
-
+                var s = ocrSubtitles[i];
+                s.Text = p.Text;
+                var result = OcrFixEngine.FixOcrErrors(i, s, true);
+                var text = result.GetText();
+                if (text != p.Text)
+                {
+                    var oldText = p.Text;
+                    fixCount++;
+                    callbacks.AddFixToListView(p, fixAction, oldText, text);
+                    p.Text = text;
+                }
             }
 
             callbacks.UpdateFixStatus(fixCount, fixAction);

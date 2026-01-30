@@ -96,6 +96,7 @@ public partial class FixRuleDisplayItem : ObservableObject
             new NormalizeStrings(),
             new RemoveDialogFirstLineInNonDialogs(),
             new RemoveSpaceBetweenNumbers(),
+            new FixCommonOcrErrors(),
         };
 
         return list;
