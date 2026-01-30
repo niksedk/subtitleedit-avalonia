@@ -33,6 +33,16 @@ public static class Unpacker
             return;
         }
 
+        if (OperatingSystem.IsMacOS())
+        {
+            var macSevenZipPath = GetMacSevenZipPath();
+            if (macSevenZipPath != null)
+            {
+                Unpack7ZipViaSystemExecutable(macSevenZipPath, tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+                return;
+            }
+        }
+
         Extract7ZipSlow(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
     }
 
@@ -78,6 +88,109 @@ public static class Unpacker
 
                 return fullFileName;
             });
+        }
+    }
+
+    private static string? GetMacSevenZipPath()
+    {
+        var paths = new[]
+        {
+            "/opt/homebrew/bin/7zz",
+            "/usr/local/bin/7zz"
+        };
+
+        foreach (var path in paths)
+        {
+            if (File.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return null;
+    }
+
+    private static void Unpack7ZipViaSystemExecutable(string sevenZipPath, string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
+    {
+        // Extract to a temporary directory if we need to skip folder levels
+        var extractPath = string.IsNullOrEmpty(skipFolderLevel) ? dir : Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+        try
+        {
+            if (!Directory.Exists(extractPath))
+            {
+                Directory.CreateDirectory(extractPath);
+            }
+
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = sevenZipPath,
+                    Arguments = $"x \"{tempFileName}\" -o\"{extractPath}\" -y",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+
+            while (!process.StandardOutput.EndOfStream)
+            {
+                if (cancellationTokenSource.IsCancellationRequested)
+                {
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch
+                    {
+                        // Ignore if already exited
+                    }
+                    return;
+                }
+
+                var line = process.StandardOutput.ReadLine();
+                if (!string.IsNullOrWhiteSpace(line) && line.Contains("Extracting"))
+                {
+                    var displayLine = line.Length > 50 ? "..." + line.Substring(line.Length - 46) : line;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        updateProgressText(displayLine);
+                    });
+                }
+            }
+
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
+            {
+                var error = process.StandardError.ReadToEnd();
+                throw new Exception($"7zz extraction failed with exit code {process.ExitCode}: {error}");
+            }
+
+            // If we need to skip folder levels, move files from temp to final destination
+            if (!string.IsNullOrEmpty(skipFolderLevel))
+            {
+                MoveFilesSkippingFolderLevel(extractPath, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+            }
+        }
+        finally
+        {
+            // Clean up temporary directory if we used one
+            if (!string.IsNullOrEmpty(skipFolderLevel) && Directory.Exists(extractPath))
+            {
+                try
+                {
+                    Directory.Delete(extractPath, true);
+                }
+                catch
+                {
+                    // Ignore cleanup errors
+                }
+            }
         }
     }
 
