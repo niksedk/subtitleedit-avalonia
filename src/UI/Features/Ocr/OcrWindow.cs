@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
+using System;
 using MenuItem = Avalonia.Controls.MenuItem;
 
 namespace Nikse.SubtitleEdit.Features.Ocr;
@@ -35,8 +36,12 @@ public class OcrWindow : Window
         var editView = MakeEditView(vm);
         var buttonView = MakeBottomView(vm);
 
-        int editViewHeight = 215;
-        var editViewRow = new RowDefinition { Height = new GridLength(editViewHeight, GridUnitType.Pixel), MinHeight = editViewHeight };
+        var editViewHeight = 215;
+        var editViewRow = new RowDefinition
+        {
+            Height = new GridLength(editViewHeight, GridUnitType.Pixel),
+            MinHeight = 150
+        };
 
         var grid = new Grid
         {
@@ -58,51 +63,61 @@ public class OcrWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        // Store and restore editView row height when OCR starts/stops
-        double savedEditViewHeightPixels = 0;
-        
-        // Set initial value
+        // Track the user's preferred height (saved when OCR starts)
+        var savedHeight = (double)editViewHeight;
+
+        // Collapse row when OCR is running, restore when stopped
+        vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(vm.IsOcrRunning))
+            {
+                // Dispatch to UI thread since PropertyChanged may be raised from background thread
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    try
+                    {
+                        if (vm.IsOcrRunning)
+                        {
+                            // Save current height before collapsing (use actual bounds if available)
+                            if (editView.Bounds.Height > 0)
+                            {
+                                savedHeight = editView.Bounds.Height;
+                            }
+                            else if (editViewRow.Height.GridUnitType == GridUnitType.Pixel && editViewRow.Height.Value > 0)
+                            {
+                                savedHeight = editViewRow.Height.Value;
+                            }
+                            // Use Auto to collapse (content is hidden via binding)
+                            editViewRow.Height = new GridLength(1, GridUnitType.Auto);
+                            editViewRow.MinHeight = 0;
+                        }
+                        else
+                        {
+                            // Restore to saved height (ensure it's valid)
+                            var heightToRestore = savedHeight > 0 ? savedHeight : editViewHeight;
+                            editViewRow.MinHeight = 150;
+                            editViewRow.Height = new GridLength(heightToRestore, GridUnitType.Pixel);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore exceptions during height restoration
+                    }
+                });
+            }
+        };
+
+
+
+
+
+
+        // Set initial state if OCR is already running when window opens
         if (vm.IsOcrRunning)
         {
             editViewRow.Height = new GridLength(1, GridUnitType.Auto);
             editViewRow.MinHeight = 0;
         }
-        else
-        {
-            editViewRow.MinHeight = editViewHeight;
-        }
-        
-        // Update when property changes
-        vm.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(vm.IsOcrRunning))
-            {
-                if (vm.IsOcrRunning)
-                {
-                    // Save current actual pixel height before collapsing
-                    if (editView.Bounds.Height > 0)
-                    {
-                        savedEditViewHeightPixels = editView.Bounds.Height;
-                    }
-                    editViewRow.Height = new GridLength(1, GridUnitType.Auto);
-                    editViewRow.MinHeight = 0;
-                }
-                else
-                {
-                    // Restore saved height as pixel value, or use Star if no saved value
-                    if (savedEditViewHeightPixels > 0)
-                    {
-                        editViewRow.Height = new GridLength(savedEditViewHeightPixels, GridUnitType.Pixel);
-                    }
-                    else
-                    {
-                        editViewRow.Height = new GridLength(editViewHeight, GridUnitType.Pixel);
-                    }
-
-                    editViewRow.MinHeight = 150;
-                }
-            }
-        };
 
         var splitter = new GridSplitter
         {
@@ -497,6 +512,7 @@ public class OcrWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            ClipToBounds = true, // Ensure content doesn't affect parent measure
         };
 
         var textBoxText = new TextBox
@@ -619,6 +635,7 @@ public class OcrWindow : Window
         grid.Add(tabControl, 0, 2);
 
         var border = UiUtil.MakeBorderForControl(grid).WithMarginBottom(5);
+        border.ClipToBounds = true; // Prevent content from pushing the parent row larger
         border.Bind(Border.IsVisibleProperty, new Binding(nameof(vm.IsOcrRunning)) { Source = vm, Converter = new InverseBooleanConverter() });
 
         return border;
