@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Config.Language.Tools;
@@ -47,6 +48,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     public Encoding Encoding { get; set; } = Encoding.UTF8;
     public string Language { get; set; } = "en";
     public DataGrid GridSubtitles { get; internal set; }
+    public static object FixOcrErrors { get; private set; }
 
     public Subtitle FixedSubtitle = new();
 
@@ -61,11 +63,13 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     private SubtitleFormat _subtitleFormat;
     private readonly INamesList _namesList;
     private readonly IWindowService _windowService;
+    private readonly IOcrFixEngine2 _ocrFixEngine;
 
-    public FixCommonErrorsViewModel(INamesList namesList, IWindowService windowService)
+    public FixCommonErrorsViewModel(INamesList namesList, IWindowService windowService, IOcrFixEngine2 ocrFixEngine)
     {
         _namesList = namesList;
         _windowService = windowService;
+        _ocrFixEngine = ocrFixEngine;
 
         GridSubtitles = new DataGrid();
         SearchText = string.Empty;
@@ -77,9 +81,10 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
         _language = Se.Language.Tools.FixCommonErrors;
         Step1IsVisible = true;
         _oldSelectedLanguage = new LanguageDisplayItem(new CultureInfo("en"), "English");
-        _subtitleFormat = new SubRip(); 
+        _subtitleFormat = new SubRip();
         Profiles = new ObservableCollection<ProfileDisplayItem>();
         Step2Title = Se.Language.Tools.FixCommonErrors.FixCommonOcrErrorsStep2;
+        FixCommonOcrErrors.OcrFixEngine = _ocrFixEngine;
     }
 
     public void Initialize(Subtitle subtitle, SubtitleFormat subtitleFormat)
@@ -363,7 +368,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     }
 
     public static List<FixRuleDisplayItem> MakeDefaultRules()
-    {
+    {        
         var language = Se.Language.Tools.FixCommonErrors;
         return new List<FixRuleDisplayItem>
         {
@@ -396,7 +401,7 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             new (language.FixDoubleGreaterThan, language.FixDoubleGreaterThanExample, 1, true, nameof(FixDoubleGreaterThan)),
             new ( string.Format(language.FixContinuationStyleX, Se.Language.Options.Settings.GetContinuationStyleName(Enum.Parse<ContinuationStyle>(Se.Settings.General.ContinuationStyle))), string.Empty, 1, true, nameof(FixContinuationStyle)),
             new (language.FixMissingOpenBracket, language.FixMissingOpenBracketExample, 1, true, nameof(FixMissingOpenBracket)),
-            //new (_language.FixCommonOcrErrors, _language.FixOcrErrorExample, 1, true, () => FixOcrErrorsViaReplaceList(threeLetterIsoLanguageName), ce.FixOcrErrorsViaReplaceListTicked),
+            new (language.FixCommonOcrErrors, language.FixOcrErrorExample, 1, true, nameof(FixCommonOcrErrors)),
             new (language.FixUppercaseIInsideLowercaseWords, language.FixUppercaseIInsideLowercaseWordsExample, 1, true, nameof(FixUppercaseIInsideWords)),
             new (language.RemoveSpaceBetweenNumber, language.FixSpaceBetweenNumbersExample, 1, true, nameof(RemoveSpaceBetweenNumbers)),
             new (language.RemoveDialogFirstInNonDialogs, language.RemoveDialogFirstInNonDialogsExample, 1, true, nameof(RemoveDialogFirstLineInNonDialogs)),
