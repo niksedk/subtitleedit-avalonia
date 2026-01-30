@@ -1448,7 +1448,7 @@ public partial class OcrViewModel : ObservableObject
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleVision)
         {
-            //   RunGoogleVisionOcr(startFromIndex);
+            RunGoogleVisionOcr(selectedIndices, _cancellationTokenSource.Token);
         }
         else if (ocrEngine.EngineType == OcrEngineType.GoogleLens)
         {
@@ -2573,6 +2573,37 @@ public partial class OcrViewModel : ObservableObject
                 SelectAndScrollToRow(i);
 
                 var text = await mistralOcr.Ocr(bitmap, SelectedOllamaLanguage ?? "English", cancellationToken);
+                item.Text = text;
+
+                OcrFixLineAndSetText(i, item);
+            }
+
+            PauseOcr();
+        });
+    }
+
+    private void RunGoogleVisionOcr(List<int> selectedIndices, CancellationToken cancellationToken)
+    {
+        var engine = new GoogleVisionOcr();
+
+        _ = Task.Run(async () =>
+        {
+            foreach (var i in selectedIndices)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                ProgressValue = i * 100.0 / OcrSubtitleItems.Count;
+                ProgressText = string.Format(Se.Language.Ocr.RunningOcrDotDotDotXY, i + 1, OcrSubtitleItems.Count);
+
+                var item = OcrSubtitleItems[i];
+                var bitmap = item.GetSkBitmap();
+
+                SelectAndScrollToRow(i);
+
+                var text = await engine.Ocr(bitmap, GoogleVisionApiKey, SelectedGoogleVisionLanguage?.Code ?? "en", cancellationToken);
                 item.Text = text;
 
                 OcrFixLineAndSetText(i, item);
