@@ -103,7 +103,7 @@ public class GetDictionariesWindow : Window
 
         var linkOpenFolder = UiUtil.MakeLink(Se.Language.General.OpenDictionaryFolder, vm.OpenFolderCommand);
 
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonOk = UiUtil.MakeButtonDone(vm.OkCommand);
         buttonOk.WithBindIsVisible(nameof(vm.IsDownloadEnabled));
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         buttonCancel.WithBindIsVisible(nameof(vm.IsProgressVisible));

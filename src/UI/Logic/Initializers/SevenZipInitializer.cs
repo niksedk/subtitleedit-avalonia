@@ -103,6 +103,7 @@ public class SevenZipInitializer() : ISevenZipInitializer
             // Ignore
         }
     }
+
     private static async Task UnpackLinux64(string outputDir)
     {
         try
@@ -112,7 +113,7 @@ public class SevenZipInitializer() : ISevenZipInitializer
                 Directory.CreateDirectory(outputDir);
             }
 
-            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7z-linux64.zip");
+            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7zrLinux64.zip");
             await using var zipStream = AssetLoader.Open(zipUri);
             var zipUnpacker = new ZipUnpacker();
             zipUnpacker.UnpackZipStream(zipStream, outputDir);

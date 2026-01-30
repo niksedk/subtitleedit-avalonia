@@ -490,50 +490,46 @@ public class NOcrDb
 
     public static bool IsMatch(NikseBitmap2 bitmap, NOcrChar oc, int errorsAllowed)
     {
-        var index = 0;
         var errors = 0;
-        while (index < oc.LinesForeground.Count)
+        var width = bitmap.Width;
+        var height = bitmap.Height;
+        var pixelData = bitmap.GetPixelData();
+        var widthX4 = width * 4;
+
+        foreach (var op in oc.LinesForeground)
         {
-            var op = oc.LinesForeground[index];
-            foreach (var point in op.ScaledGetPoints(oc, bitmap.Width, bitmap.Height))
+            foreach (var point in op.ScaledGetPoints(oc, width, height))
             {
-                if (point.X >= 0 && point.Y >= 0 && point.X < bitmap.Width && point.Y < bitmap.Height)
+                if ((uint)point.X < (uint)width && (uint)point.Y < (uint)height)
                 {
-                    var a = bitmap.GetAlpha(point.X, point.Y);
+                    var a = pixelData[point.X * 4 + point.Y * widthX4 + 3];
                     if (a <= 150)
                     {
-                        errors++;
-                        if (errors > errorsAllowed)
+                        if (++errors > errorsAllowed)
                         {
                             return false;
                         }
                     }
                 }
             }
-
-            index++;
         }
 
-        index = 0;
-        while (index < oc.LinesBackground.Count)
+        foreach (var op in oc.LinesBackground)
         {
-            var op = oc.LinesBackground[index];
-            foreach (var point in op.ScaledGetPoints(oc, bitmap.Width, bitmap.Height))
+            foreach (var point in op.ScaledGetPoints(oc, width, height))
             {
-                if (point.X >= 0 && point.Y >= 0 && point.X < bitmap.Width && point.Y < bitmap.Height)
+                if ((uint)point.X < (uint)width && (uint)point.Y < (uint)height)
                 {
-                    var a = bitmap.GetAlpha(point.X, point.Y);
+                    var a = pixelData[point.X * 4 + point.Y * widthX4 + 3];
                     if (a > 150)
                     {
-                        errors++;
-                        if (errors > errorsAllowed)
+                        if (++errors > errorsAllowed)
                         {
                             return false;
                         }
                     }
                 }
             }
-            index++;
         }
 
         return true;

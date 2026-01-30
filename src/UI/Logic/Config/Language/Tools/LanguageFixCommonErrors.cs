@@ -40,6 +40,7 @@ public class LanguageFixCommonErrors
     public string StartWithUppercaseLetterAfterColon { get; set; }
     public string FixLowercaseIToUppercaseI { get; set; }
     public string FixCommonOcrErrors { get; set; }
+    public string FixCommonOcrErrorExample { get; set; }
     public string CommonOcrErrorsFixed { get; set; }
     public string RemoveSpaceBetweenNumber { get; set; }
     public string BreakDialogsOnOneLine { get; set; }
@@ -165,6 +166,8 @@ public class LanguageFixCommonErrors
         RemoveDialogFirstInNonDialogs = "Remove start dash in first line for non-dialogs";
         NormalizeStrings = "Normalize strings";
         FixLowercaseIToUppercaseI = "Fix alone lowercase 'i' to 'I' (English)";
+        FixCommonOcrErrors = "Fix common OCR errors";
+        FixOcrErrorExample = "D0n't -> Don't";
         FixTurkishAnsi = "Fix Turkish ANSI (Icelandic) letters to Unicode";
         FixDanishLetterI = "Fix Danish letter 'i'";
         FixSpanishInvertedQuestionAndExclamationMarks = "Fix Spanish inverted question and exclamation marks";

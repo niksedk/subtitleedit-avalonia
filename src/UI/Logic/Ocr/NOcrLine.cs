@@ -45,17 +45,17 @@ public class NOcrLine
         return PointPixelsToPercent(End, width, height);
     }
 
-    public List<OcrPoint> GetPoints()
+    public IEnumerable<OcrPoint> GetPoints()
     {
         return GetPoints(Start, End);
     }
 
-    public List<OcrPoint> ScaledGetPoints(NOcrChar nOcrChar, int width, int height)
+    public IEnumerable<OcrPoint> ScaledGetPoints(NOcrChar nOcrChar, int width, int height)
     {
         return GetPoints(GetScaledStart(nOcrChar, width, height), GetScaledEnd(nOcrChar, width, height));
     }
 
-    public static List<OcrPoint> GetPoints(OcrPoint start, OcrPoint end)
+    public static IEnumerable<OcrPoint> GetPoints(OcrPoint start, OcrPoint end)
     {
         var dx = end.X - start.X;
         var dy = end.Y - start.Y;
@@ -66,23 +66,19 @@ public class NOcrLine
         {
             var (x1, y1, x2, y2) = dx > 0 ? (start.X, start.Y, end.X, end.Y) : (end.X, end.Y, start.X, start.Y);
             var factor = (double)(y2 - y1) / (x2 - x1);
-            var list = new List<OcrPoint>(absDx + 1);
             for (var i = x1; i <= x2; i++)
             {
-                list.Add(new OcrPoint(i, (int)Math.Round(y1 + factor * (i - x1), MidpointRounding.AwayFromZero)));
+                yield return new OcrPoint(i, (int)Math.Round(y1 + factor * (i - x1), MidpointRounding.AwayFromZero));
             }
-            return list;
         }
         else
         {
             var (x1, y1, x2, y2) = dy > 0 ? (start.X, start.Y, end.X, end.Y) : (end.X, end.Y, start.X, start.Y);
             var factor = (double)(x2 - x1) / (y2 - y1);
-            var list = new List<OcrPoint>(absDy + 1);
             for (var i = y1; i <= y2; i++)
             {
-                list.Add(new OcrPoint((int)Math.Round(x1 + factor * (i - y1), MidpointRounding.AwayFromZero), i));
+                yield return new OcrPoint((int)Math.Round(x1 + factor * (i - y1), MidpointRounding.AwayFromZero), i);
             }
-            return list;
         }
     }
 

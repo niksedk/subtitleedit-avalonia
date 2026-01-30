@@ -15,41 +15,89 @@ namespace Nikse.SubtitleEdit.Features.Translate;
 
 public static partial class MergeAndSplitHelper
 {
+    private const int MinCharsForHalving = 500;
+    private const int MaxGapBetweenContinuousLinesMs = 1000;
+    private const char PeriodPlaceholder = '¤';
+
     public static bool MergeSplitProblems { get; set; }
 
-    public static async Task<int> MergeAndTranslateIfPossible(ObservableCollection<TranslateRow> rows, TranslationPair source, TranslationPair target, int index, IAutoTranslator autoTranslator, bool forceSingleLineMode, CancellationToken cancellationToken)
+    public static async Task<int> MergeAndTranslateIfPossible(
+        ObservableCollection<TranslateRow> rows,
+        TranslationPair source,
+        TranslationPair target,
+        int index,
+        IAutoTranslator autoTranslator,
+        bool forceSingleLineMode,
+        CancellationToken cancellationToken)
     {
         var noSentenceEndingSource = IsNonMergeLanguage(source);
         var noSentenceEndingTarget = IsNonMergeLanguage(target);
 
-        // Try to handle (remove and save info for later restore) italics, bold, alignment, and more where possible
-        var tempSubtitle = rows.Select(p => new TranslateRow() { Number = p.Number, Show = p.Show, Duration = p.Duration, Text = p.Text }).ToArray();
+        var tempSubtitle = CreateTempSubtitle(rows);
         var formattingList = HandleFormatting(tempSubtitle, index, target.Code);
+        var maxChars = CalculateMaxChars(autoTranslator, forceSingleLineMode);
 
+        var mergeResult = TryMergeLines(tempSubtitle, index, maxChars, ref noSentenceEndingSource, noSentenceEndingTarget);
+        if (mergeResult.HasError)
+        {
+            return 0;
+        }
+
+        var mergedTranslation = await autoTranslator.Translate(mergeResult.Text, source.Code, target.Code, cancellationToken);
+
+        if (forceSingleLineMode || mergeResult.ParagraphCount == 1)
+        {
+            return ApplySingleLineTranslation(rows, index, formattingList, mergedTranslation);
+        }
+
+        return TrySplitStrategies(rows, target, index, tempSubtitle, formattingList, mergeResult, mergedTranslation);
+    }
+
+    private static TranslateRow[] CreateTempSubtitle(ObservableCollection<TranslateRow> rows)
+    {
+        return rows.Select(p => new TranslateRow
+        {
+            Number = p.Number,
+            Show = p.Show,
+            Duration = p.Duration,
+            Text = p.Text
+        }).ToArray();
+    }
+
+    private static int CalculateMaxChars(IAutoTranslator autoTranslator, bool forceSingleLineMode)
+    {
         if (Configuration.Settings.Tools.AutoTranslateMaxBytes <= 0)
         {
             Configuration.Settings.Tools.AutoTranslateMaxBytes = new ToolsSettings().AutoTranslateMaxBytes;
         }
+
         var maxChars = Math.Min(autoTranslator.MaxCharacters, Configuration.Settings.Tools.AutoTranslateMaxBytes);
 
         if (forceSingleLineMode)
         {
-            maxChars = 0;
+            return 0;
         }
 
         if (MergeSplitProblems)
         {
             MergeSplitProblems = false;
-            if (maxChars > 500)
+            if (maxChars > MinCharsForHalving)
             {
                 maxChars /= 2;
             }
         }
 
-        // Merge text for better translation and save info enough to split again later
+        return maxChars;
+    }
+
+    private static MergeResult TryMergeLines(
+        TranslateRow[] tempSubtitle,
+        int index,
+        int maxChars,
+        ref bool noSentenceEndingSource,
+        bool noSentenceEndingTarget)
+    {
         var mergeResult = MergeMultipleLines(tempSubtitle, index, maxChars, noSentenceEndingSource, noSentenceEndingTarget);
-        var mergeCount = mergeResult.ParagraphCount;
-        var text = mergeResult.Text;
 
         if (mergeResult.HasError)
         {
@@ -59,168 +107,206 @@ public static partial class MergeAndSplitHelper
             {
                 noSentenceEndingSource = true;
                 mergeResult = MergeMultipleLines(tempSubtitle, index, maxChars, noSentenceEndingSource, noSentenceEndingTarget);
-                mergeCount = mergeResult.ParagraphCount;
-                text = mergeResult.Text;
-            }
-
-            if (mergeResult.HasError)
-            {
-                return 0;
             }
         }
 
-        var linesTranslate = 0;
-        var mergedTranslation = await autoTranslator.Translate(text, source.Code, target.Code, cancellationToken);
+        return mergeResult;
+    }
 
-        if (forceSingleLineMode || mergeCount == 1)
+    private static int ApplySingleLineTranslation(
+        ObservableCollection<TranslateRow> rows,
+        int index,
+        List<Formatting> formattingList,
+        string mergedTranslation)
+    {
+        if (index < rows.Count && formattingList.Count > 0)
         {
-            // Single line mode, so just reformat and return
-            if (index < rows.Count && formattingList.Count > 0)
-            {
-                var reformattedText = formattingList[0].ReAddFormatting(mergedTranslation);
-                rows[index].TranslatedText = reformattedText;
-                linesTranslate++;
-            }
-
-            return linesTranslate;
+            rows[index].TranslatedText = formattingList[0].ReAddFormatting(mergedTranslation);
+            return 1;
         }
+        return 0;
+    }
 
-        // Split by line ending chars where period count matches
+    private static int TrySplitStrategies(
+        ObservableCollection<TranslateRow> rows,
+        TranslationPair target,
+        int index,
+        TranslateRow[] tempSubtitle,
+        List<Formatting> formattingList,
+        MergeResult mergeResult,
+        string mergedTranslation)
+    {
+        var sourceTexts = tempSubtitle.Select(p => p.Text).ToList();
+        var mergeCount = mergeResult.ParagraphCount;
+
+        // Strategy 1: Split by line ending chars where period count matches
         var splitResult = SplitMultipleLines(mergeResult, mergedTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index) &&
-            Utilities.CountTagInText(text, '.') == Utilities.CountTagInText(mergedTranslation, '.'))
+        if (IsSplitValid(splitResult, mergeCount, sourceTexts, index) &&
+            HasMatchingPeriodCount(mergeResult.Text, mergedTranslation))
         {
-            var idx = 0;
-            foreach (var line in splitResult)
-            {
-                if (index >= rows.Count || idx >= formattingList.Count)
-                {
-                    break;
-                }
-
-                var reformattedText = formattingList[idx].ReAddFormatting(line);
-                rows[index].TranslatedText = reformattedText;
-                index++;
-                linesTranslate++;
-                idx++;
-            }
-
-            return linesTranslate;
+            return ApplySplitResult(rows, index, formattingList, splitResult);
         }
 
-
-        // Split per number of lines
-        var translatedLines = mergedTranslation.SplitToLines();
-        if (translatedLines.Count == mergeResult.Text.SplitToLines().Count)
+        // Strategy 2: Split per number of lines
+        var lineCountResult = TrySplitByLineCount(rows, target, index, formattingList, mergeResult, mergedTranslation, splitResult);
+        if (lineCountResult > 0)
         {
-            var translatedLinesIdx = 0;
-            var paragraphIdx = 0;
-            foreach (var mergeItem in mergeResult.MergeResultItems)
-            {
-                var numberOfParagraphs = mergeItem.EndIndex - mergeItem.StartIndex + 1;
-                var numberOfLines = mergeItem.Text.SplitToLines().Count;
-
-                var sb = new StringBuilder();
-                for (var j = 0; j < numberOfLines && translatedLinesIdx < translatedLines.Count; j++)
-                {
-                    sb.AppendLine(translatedLines[translatedLinesIdx]);
-                    translatedLinesIdx++;
-                }
-
-                var translatedText = sb.ToString().Trim();
-
-                var arr = TextSplit.SplitMulti(translatedText, numberOfParagraphs, target.TwoLetterIsoLanguageName);
-                for (var i = 0; i < arr.Count; i++)
-                {
-                    var res = arr[i];
-                    if (res.Contains('\n') ||
-                        res.TrimEnd('.').Contains('.') ||
-                        res.Length >= Configuration.Settings.General.SubtitleLineMaximumLength)
-                    {
-                        res = Utilities.AutoBreakLine(arr[i], Configuration.Settings.General.SubtitleLineMaximumLength * 2, Configuration.Settings.General.MergeLinesShorterThan, target.TwoLetterIsoLanguageName);
-                    }
-
-                    rows[i].TranslatedText = res;
-                    paragraphIdx++;
-                }
-            }
-
-            if (paragraphIdx == mergeCount && HasSameEmptyLines(rows.Select(p => p.TranslatedText).ToList(), rows.Select(p => p.Text).ToList(), index))
-            {
-                var idx = 0;
-                foreach (var line in splitResult)
-                {
-                    if (idx >= formattingList.Count && index < rows.Count)
-                    {
-                        break;
-                    }
-
-                    var reformattedText = formattingList[idx].ReAddFormatting(rows[index].TranslatedText);
-                    rows[index].TranslatedText = reformattedText;
-                    index++;
-                    linesTranslate++;
-                    idx++;
-                }
-
-                return linesTranslate;
-            }
+            return lineCountResult;
         }
 
-        // Split by line ending chars - periods in numbers removed
+        // Strategy 3: Split with periods in numbers normalized
         var noPeriodsInNumbersTranslation = FixPeriodInNumbers(mergedTranslation);
         splitResult = SplitMultipleLines(mergeResult, noPeriodsInNumbersTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index) &&
-            Utilities.CountTagInText(text, '.') == Utilities.CountTagInText(noPeriodsInNumbersTranslation, '.'))
+        if (IsSplitValid(splitResult, mergeCount, sourceTexts, index) &&
+            HasMatchingPeriodCount(mergeResult.Text, noPeriodsInNumbersTranslation))
         {
-            var idx = 0;
-            foreach (var line in splitResult)
-            {
-                if (index >= rows.Count || idx >= formattingList.Count)
-                {
-                    break;
-                }
-                var reformattedText = formattingList[idx].ReAddFormatting(line.Replace('¤', '.'));
-                rows[index].TranslatedText = reformattedText;
-                index++;
-                linesTranslate++;
-                idx++;
-            }
-
-            return linesTranslate;
+            return ApplySplitResult(rows, index, formattingList, splitResult, restorePeriodPlaceholder: true);
         }
 
-
-        // Split by line ending chars
+        // Strategy 4: Split by line ending chars (relaxed - no period count check)
         splitResult = SplitMultipleLines(mergeResult, mergedTranslation, target.Code);
-        if (splitResult.Count == mergeCount && HasSameEmptyLines(splitResult, tempSubtitle.Select(p => p.Text).ToList(), index))
+        if (IsSplitValid(splitResult, mergeCount, sourceTexts, index))
         {
-            var idx = 0;
-            foreach (var line in splitResult)
-            {
-                if (index >= rows.Count || idx >= formattingList.Count)
-                {
-                    break;
-                }
-
-                var reformattedText = formattingList[idx].ReAddFormatting(line);
-                rows[index].TranslatedText = reformattedText;
-                index++;
-                linesTranslate++;
-                idx++;
-            }
-
-            return linesTranslate;
+            return ApplySplitResult(rows, index, formattingList, splitResult);
         }
-
 
         MergeSplitProblems = true;
+        return 0;
+    }
 
-        return linesTranslate;
+    private static bool IsSplitValid(List<string> splitResult, int expectedCount, List<string> sourceTexts, int index)
+    {
+        return splitResult.Count == expectedCount && HasSameEmptyLines(splitResult, sourceTexts, index);
+    }
+
+    private static bool HasMatchingPeriodCount(string source, string translation)
+    {
+        return Utilities.CountTagInText(source, '.') == Utilities.CountTagInText(translation, '.');
+    }
+
+    private static int ApplySplitResult(
+        ObservableCollection<TranslateRow> rows,
+        int index,
+        List<Formatting> formattingList,
+        List<string> splitResult,
+        bool restorePeriodPlaceholder = false)
+    {
+        var linesTranslated = 0;
+        var idx = 0;
+
+        foreach (var line in splitResult)
+        {
+            if (index >= rows.Count || idx >= formattingList.Count)
+            {
+                break;
+            }
+
+            var text = restorePeriodPlaceholder ? line.Replace(PeriodPlaceholder, '.') : line;
+            rows[index].TranslatedText = formattingList[idx].ReAddFormatting(text);
+            index++;
+            linesTranslated++;
+            idx++;
+        }
+
+        return linesTranslated;
+    }
+
+    private static int TrySplitByLineCount(
+        ObservableCollection<TranslateRow> rows,
+        TranslationPair target,
+        int index,
+        List<Formatting> formattingList,
+        MergeResult mergeResult,
+        string mergedTranslation,
+        List<string> splitResult)
+    {
+        var translatedLines = mergedTranslation.SplitToLines();
+        if (translatedLines.Count != mergeResult.Text.SplitToLines().Count)
+        {
+            return 0;
+        }
+
+        var translatedLinesIdx = 0;
+        var currentRowIndex = index;
+
+        foreach (var mergeItem in mergeResult.MergeResultItems)
+        {
+            var numberOfParagraphs = mergeItem.EndIndex - mergeItem.StartIndex + 1;
+            var numberOfLines = mergeItem.Text.SplitToLines().Count;
+
+            var translatedText = BuildTranslatedText(translatedLines, ref translatedLinesIdx, numberOfLines);
+            var splitParts = TextSplit.SplitMulti(translatedText, numberOfParagraphs, target.TwoLetterIsoLanguageName);
+
+            for (var i = 0; i < splitParts.Count && currentRowIndex < rows.Count; i++)
+            {
+                rows[currentRowIndex].TranslatedText = AutoBreakIfNeeded(splitParts[i], target.TwoLetterIsoLanguageName);
+                currentRowIndex++;
+            }
+        }
+
+        var totalProcessed = currentRowIndex - index;
+        if (totalProcessed == mergeResult.ParagraphCount &&
+            HasSameEmptyLines(rows.Skip(index).Take(totalProcessed).Select(p => p.TranslatedText).ToList(), 
+                              rows.Skip(index).Take(totalProcessed).Select(p => p.Text).ToList(), 0))
+        {
+            return ApplyFormattingToExistingTranslations(rows, index, formattingList, mergeResult.ParagraphCount);
+        }
+
+        return 0;
+    }
+
+    private static string BuildTranslatedText(List<string> translatedLines, ref int translatedLinesIdx, int numberOfLines)
+    {
+        var sb = new StringBuilder();
+        for (var j = 0; j < numberOfLines && translatedLinesIdx < translatedLines.Count; j++)
+        {
+            sb.AppendLine(translatedLines[translatedLinesIdx]);
+            translatedLinesIdx++;
+        }
+        return sb.ToString().Trim();
+    }
+
+    private static string AutoBreakIfNeeded(string text, string language)
+    {
+        if (text.Contains('\n') ||
+            text.TrimEnd('.').Contains('.') ||
+            text.Length >= Configuration.Settings.General.SubtitleLineMaximumLength)
+        {
+            return Utilities.AutoBreakLine(
+                text,
+                Configuration.Settings.General.SubtitleLineMaximumLength * 2,
+                Configuration.Settings.General.MergeLinesShorterThan,
+                language);
+        }
+        return text;
+    }
+
+    private static int ApplyFormattingToExistingTranslations(
+        ObservableCollection<TranslateRow> rows,
+        int index,
+        List<Formatting> formattingList,
+        int count)
+    {
+        var linesTranslated = 0;
+
+        for (var i = 0; i < count; i++)
+        {
+            if (i >= formattingList.Count || index >= rows.Count)
+            {
+                break;
+            }
+
+            rows[index].TranslatedText = formattingList[i].ReAddFormatting(rows[index].TranslatedText);
+            index++;
+            linesTranslated++;
+        }
+
+        return linesTranslated;
     }
 
     private static string FixPeriodInNumbers(string mergedTranslation)
     {
-        var findCommaNumber = new Regex(@"\d\.\d");
+        var findCommaNumber = FindPeriodInNumber();
         var s = mergedTranslation;
         while (true)
         {
@@ -228,7 +314,7 @@ public static partial class MergeAndSplitHelper
             if (match.Success)
             {
                 s = s.Remove(match.Index + 1, 1);
-                s = s.Insert(match.Index + 1, "¤");
+                s = s.Insert(match.Index + 1, PeriodPlaceholder.ToString());
             }
             else
             {
@@ -237,13 +323,16 @@ public static partial class MergeAndSplitHelper
         }
     }
 
+    [GeneratedRegex(@"\d\.\d")]
+    private static partial Regex FindPeriodInNumber();
+
     private static bool HasSameEmptyLines(List<string> newTexts, List<string> sourceSubtitle, int index)
     {
         for (var i = 0; i < newTexts.Count && i + index < sourceSubtitle.Count; i++)
         {
             var inputBlank = string.IsNullOrWhiteSpace(sourceSubtitle[i + index]);
             var outputBlank = string.IsNullOrWhiteSpace(newTexts[i]);
-            if (inputBlank || outputBlank && (inputBlank != outputBlank))
+            if (inputBlank != outputBlank)
             {
                 return false;
             }
@@ -277,240 +366,334 @@ public static partial class MergeAndSplitHelper
             NoSentenceEndingTarget = noSentenceEndingTarget,
         };
 
-        var item = new MergeResultItem
-        {
-            StartIndex = index,
-            EndIndex = index,
-            Text = string.Empty,
-            Paragraphs = new List<TranslateRow>(),
+        var context = new MergeContext(sourceSubtitle, index);
 
-        };
+        // Initialize with the first subtitle line
+        InitializeFirstItem(result, context);
 
-        result.Text = sourceSubtitle[index].Text;
-        item.Paragraphs.Add(sourceSubtitle[index]);
-        item.Text = sourceSubtitle[index].Text;
-        if (string.IsNullOrWhiteSpace(result.Text))
-        {
-            item.IsEmpty = true;
-            item.Text = string.Empty;
-            result.MergeResultItems.Add(item);
-            item = null;
-            result.Text = string.Empty;
-        }
-
-        var textBuild = new StringBuilder(result.Text);
-        var prev = sourceSubtitle[index];
-
+        // Process remaining lines
         for (var i = index + 1; i < sourceSubtitle.Length; i++)
         {
-            var p = sourceSubtitle[i];
+            var currentRow = sourceSubtitle[i];
 
-            if (item != null && Utilities.UrlEncodeLength(result.Text + Environment.NewLine + p.Text) > maxTextSize)
+            if (ExceedsMaxSize(result, context, currentRow, maxTextSize))
             {
                 break;
             }
 
-            if (noSentenceEndingSource)
+            var continueProcessing = ProcessRow(result, context, currentRow, i, noSentenceEndingSource);
+            if (!continueProcessing)
             {
-
-                if (item != null)
-                {
-                    item.TextIndexEnd = result.Text.Length;
-                }
-
-                result.Text += Environment.NewLine + "." + Environment.NewLine + p.Text;
-
-                if (item != null)
-                {
-                    item.Text += Environment.NewLine + "." + Environment.NewLine + p.Text;
-                    item.Paragraphs.Add(p);
-
-                    item.TextIndexStart = result.Text.Length;
-                    item.StartIndex = i - 1;
-                    item.EndIndex = i - 1;
-                    result.MergeResultItems.Add(item);
-
-                    textBuild = new StringBuilder();
-                    item = new MergeResultItem { StartIndex = i, Text = string.Empty, Paragraphs = new List<TranslateRow>() };
-                }
+                break;
             }
-            else if (string.IsNullOrWhiteSpace(p.Text))
+        }
+
+        FinalizeResult(result, context);
+        return result;
+    }
+
+    private sealed class MergeContext
+    {
+        public MergeResultItem? CurrentItem { get; set; }
+        public StringBuilder TextBuilder { get; set; }
+        public TranslateRow PreviousRow { get; set; }
+        public int StartIndex { get; }
+
+        public MergeContext(TranslateRow[] sourceSubtitle, int index)
+        {
+            StartIndex = index;
+            PreviousRow = sourceSubtitle[index];
+            TextBuilder = new StringBuilder();
+        }
+    }
+
+    private static void InitializeFirstItem(MergeResult result, MergeContext context)
+    {
+        var firstRow = context.PreviousRow;
+        context.CurrentItem = new MergeResultItem
+        {
+            StartIndex = context.StartIndex,
+            EndIndex = context.StartIndex,
+            Text = string.Empty,
+            Paragraphs = new List<TranslateRow> { firstRow },
+        };
+
+        result.Text = firstRow.Text;
+        context.CurrentItem.Text = firstRow.Text;
+
+        if (string.IsNullOrWhiteSpace(result.Text))
+        {
+            context.CurrentItem.IsEmpty = true;
+            context.CurrentItem.Text = string.Empty;
+            result.MergeResultItems.Add(context.CurrentItem);
+            context.CurrentItem = null;
+            result.Text = string.Empty;
+        }
+        else
+        {
+            context.TextBuilder = new StringBuilder(result.Text);
+        }
+    }
+
+    private static bool ExceedsMaxSize(MergeResult result, MergeContext context, TranslateRow currentRow, int maxTextSize)
+    {
+        return context.CurrentItem != null &&
+               Utilities.UrlEncodeLength(result.Text + Environment.NewLine + currentRow.Text) > maxTextSize;
+    }
+
+    private static bool ProcessRow(MergeResult result, MergeContext context, TranslateRow currentRow, int rowIndex, bool noSentenceEndingSource)
+    {
+        if (noSentenceEndingSource)
+        {
+            ProcessNoSentenceEndingRow(result, context, currentRow, rowIndex);
+        }
+        else if (string.IsNullOrWhiteSpace(currentRow.Text))
+        {
+            ProcessEmptyRow(result, context, rowIndex);
+        }
+        else if (result.Text.HasSentenceEnding() || string.IsNullOrWhiteSpace(result.Text))
+        {
+            ProcessSentenceEndingRow(result, context, currentRow, rowIndex);
+        }
+        else if (IsContinuousWithPrevious(context, currentRow))
+        {
+            ProcessContinuousRow(result, context, currentRow, rowIndex);
+        }
+        else
+        {
+            result.HasError = true;
+            return false; // Cannot process - weird continuation
+        }
+
+        context.PreviousRow = currentRow;
+        return true;
+    }
+
+    private static void ProcessNoSentenceEndingRow(MergeResult result, MergeContext context, TranslateRow currentRow, int rowIndex)
+    {
+        if (context.CurrentItem == null)
+        {
+            return;
+        }
+
+        context.CurrentItem.TextIndexEnd = result.Text.Length;
+        result.Text += Environment.NewLine + "." + Environment.NewLine + currentRow.Text;
+        context.CurrentItem.Text += Environment.NewLine + "." + Environment.NewLine + currentRow.Text;
+        context.CurrentItem.Paragraphs.Add(currentRow);
+        context.CurrentItem.TextIndexStart = result.Text.Length;
+        context.CurrentItem.StartIndex = rowIndex - 1;
+        context.CurrentItem.EndIndex = rowIndex - 1;
+
+        result.MergeResultItems.Add(context.CurrentItem);
+
+        context.TextBuilder = new StringBuilder(currentRow.Text);
+        context.CurrentItem = new MergeResultItem
+        {
+            StartIndex = rowIndex,
+            EndIndex = rowIndex,
+            Text = currentRow.Text,
+            Paragraphs = new List<TranslateRow> { currentRow }
+        };
+    }
+
+    private static void ProcessEmptyRow(MergeResult result, MergeContext context, int rowIndex)
+    {
+        if (context.CurrentItem != null && result.Text.Length > 0)
+        {
+            var endChar = result.Text[^1];
+            context.CurrentItem.TextIndexStart = result.Text.Length;
+            context.CurrentItem.TextIndexEnd = result.Text.Length;
+            context.CurrentItem.EndChar = endChar;
+            context.CurrentItem.EndCharOccurrences = Utilities.CountTagInText(context.TextBuilder.ToString(), endChar);
+            result.MergeResultItems.Add(context.CurrentItem);
+        }
+
+        result.MergeResultItems.Add(new MergeResultItem
+        {
+            StartIndex = context.StartIndex,
+            EndIndex = context.StartIndex,
+            IsEmpty = true,
+            TextIndexStart = result.Text.Length,
+            TextIndexEnd = result.Text.Length,
+            Text = string.Empty,
+            Paragraphs = new List<TranslateRow>(),
+        });
+
+        context.CurrentItem = null;
+        context.TextBuilder = new StringBuilder();
+    }
+
+    private static void ProcessSentenceEndingRow(MergeResult result, MergeContext context, TranslateRow currentRow, int rowIndex)
+    {
+        if (context.CurrentItem != null)
+        {
+            if (string.IsNullOrWhiteSpace(result.Text))
             {
-                var endChar = result.Text[result.Text.Length - 1];
-                if (item != null)
-                {
-                    item.TextIndexStart = result.Text.Length;
-                    item.TextIndexEnd = result.Text.Length;
-                    item.EndChar = endChar;
-                    var endCharOccurrences = Utilities.CountTagInText(textBuild.ToString(), endChar);
-                    item.EndCharOccurrences = endCharOccurrences;
-                    result.MergeResultItems.Add(item);
-                }
-
-                result.MergeResultItems.Add(new MergeResultItem
-                {
-                    StartIndex = index,
-                    EndIndex = index,
-                    IsEmpty = true,
-                    TextIndexStart = result.Text.Length,
-                    TextIndexEnd = result.Text.Length,
-                    Text = string.Empty,
-                    Paragraphs = new List<TranslateRow>(),
-                });
-
-                item = null;
-                textBuild = new StringBuilder();
-
-            }
-            else if (result.Text.HasSentenceEnding() || string.IsNullOrWhiteSpace(result.Text))
-            {
-
-                if (string.IsNullOrWhiteSpace(result.Text))
-                {
-                    if (item != null)
-                    {
-                        item.TextIndexEnd = result.Text.Length;
-                        result.MergeResultItems.Add(item);
-                        textBuild = new StringBuilder();
-                    }
-                }
-                else
-                {
-                    var endChar = result.Text[result.Text.Length - 1];
-
-                    if (item != null)
-                    {
-                        item.EndChar = endChar;
-                        var endCharOccurrences = Utilities.CountTagInText(textBuild.ToString(), endChar);
-                        item.EndCharOccurrences = endCharOccurrences;
-                        item.TextIndexEnd = result.Text.Length;
-                        result.MergeResultItems.Add(item);
-                        textBuild = new StringBuilder();
-                    }
-                }
-
-                textBuild.Append(p.Text);
-
-                result.Text += Environment.NewLine + p.Text;
-
-                item = new MergeResultItem { StartIndex = i, TextIndexStart = result.Text.Length, Text = p.Text, Paragraphs = new List<TranslateRow>(), };
-            }
-            else if (item != null && (item.Continuous || item.StartIndex == item.EndIndex) && p.Show.TotalMilliseconds - prev.Hide.TotalMilliseconds < 1000)
-            {
-                textBuild.Append(" ");
-                textBuild.Append(p.Text);
-                result.Text += " " + p.Text;
-                item.Text += " " + p.Text;
-                item.Continuous = true;
-                item.Paragraphs.Add(p);
+                context.CurrentItem.TextIndexEnd = result.Text.Length;
             }
             else
             {
-                result.HasError = true;
-                break; // weird continuation
+                var endChar = result.Text[^1];
+                context.CurrentItem.EndChar = endChar;
+                context.CurrentItem.EndCharOccurrences = Utilities.CountTagInText(context.TextBuilder.ToString(), endChar);
+                context.CurrentItem.TextIndexEnd = result.Text.Length;
             }
 
-            if (item != null)
-            {
-                item.EndIndex = i;
-                item.TextIndexEnd = result.Text.Length;
-            }
-
-            prev = p;
+            result.MergeResultItems.Add(context.CurrentItem);
         }
 
-        if (item != null)
-        {
-            //TODO: skip last item if it does not has sentence ending (or skip early at sentence ending...)
+        context.TextBuilder = new StringBuilder(currentRow.Text);
+        result.Text += Environment.NewLine + currentRow.Text;
 
-            result.MergeResultItems.Add(item);
+        context.CurrentItem = new MergeResultItem
+        {
+            StartIndex = rowIndex,
+            EndIndex = rowIndex,
+            TextIndexStart = result.Text.Length,
+            Text = currentRow.Text,
+            Paragraphs = new List<TranslateRow> { currentRow },
+        };
+    }
+
+    private static bool IsContinuousWithPrevious(MergeContext context, TranslateRow currentRow)
+    {
+        if (context.CurrentItem == null)
+        {
+            return false;
+        }
+
+        var isFirstOrContinuous = context.CurrentItem.Continuous || context.CurrentItem.StartIndex == context.CurrentItem.EndIndex;
+        var gapMs = currentRow.Show.TotalMilliseconds - context.PreviousRow.Hide.TotalMilliseconds;
+
+        return isFirstOrContinuous && gapMs < MaxGapBetweenContinuousLinesMs;
+    }
+
+    private static void ProcessContinuousRow(MergeResult result, MergeContext context, TranslateRow currentRow, int rowIndex)
+    {
+        if (context.CurrentItem == null)
+        {
+            return;
+        }
+
+        context.TextBuilder.Append(' ');
+        context.TextBuilder.Append(currentRow.Text);
+        result.Text += " " + currentRow.Text;
+        context.CurrentItem.Text += " " + currentRow.Text;
+        context.CurrentItem.Continuous = true;
+        context.CurrentItem.Paragraphs.Add(currentRow);
+        context.CurrentItem.EndIndex = rowIndex;
+        context.CurrentItem.TextIndexEnd = result.Text.Length;
+    }
+
+    private static void FinalizeResult(MergeResult result, MergeContext context)
+    {
+        if (context.CurrentItem != null)
+        {
+            result.MergeResultItems.Add(context.CurrentItem);
 
             if (result.Text.Length > 0 && result.Text.HasSentenceEnding())
             {
-                var endChar = result.Text[result.Text.Length - 1];
-                item.EndChar = endChar;
-                item.EndCharOccurrences = Utilities.CountTagInText(textBuild.ToString(), endChar);
+                var endChar = result.Text[^1];
+                context.CurrentItem.EndChar = endChar;
+                context.CurrentItem.EndCharOccurrences = Utilities.CountTagInText(context.TextBuilder.ToString(), endChar);
             }
         }
 
         result.Text = result.Text.Trim();
         result.ParagraphCount = result.MergeResultItems.Sum(p => p.EndIndex - p.StartIndex + 1);
 
-        foreach (var i in result.MergeResultItems)
+        foreach (var item in result.MergeResultItems)
         {
-            i.Text = i.Text.Trim();
+            item.Text = item.Text.Trim();
         }
-
-        return result;
     }
 
     public static List<string> SplitMultipleLines(MergeResult mergeResult, string translatedText, string language)
     {
-        var lines = new List<string>();
         var text = translatedText;
 
         if (mergeResult.NoSentenceEndingSource)
         {
-            var sb = new StringBuilder();
-            var translatedLines = text.SplitToLines();
-            foreach (var translatedLine in translatedLines)
-            {
-                var s = translatedLine.Trim();
-                if (s == ".")
-                {
-                    lines.Add(sb.ToString().Trim());
-                    sb.Clear();
-                    continue;
-                }
-
-                sb.AppendLine(s);
-            }
-
-            if (sb.Length > 0)
-            {
-                lines.Add(sb.ToString().Trim());
-            }
-
-            return lines;
+            return SplitByPeriodMarkers(text);
         }
 
+        var lines = new List<string>();
         foreach (var item in mergeResult.MergeResultItems)
         {
             if (item.IsEmpty)
             {
                 lines.Add(string.Empty);
+                continue;
             }
-            else if (item.Continuous)
+
+            var part = ExtractPartForItem(ref text, item);
+            if (string.IsNullOrEmpty(part) && !item.IsEmpty)
             {
-                var part = GetPartFromItem(text, item);
-                text = text.Remove(0, part.Length).Trim();
-                var lineRange = SplitContinuous(part, item, language);
-                lines.AddRange(lineRange);
+                return []; // Failed to extract part
+            }
+
+            if (item.Continuous)
+            {
+                lines.AddRange(SplitContinuousText(part, item, language));
             }
             else
             {
-                var part = GetPartFromItem(text, item);
-                text = text.Remove(0, part.Length).Trim();
-                lines.Add(part.Length > Configuration.Settings.General.SubtitleLineMaximumLength ? Utilities.AutoBreakLine(part) : part);
+                lines.Add(AutoBreakIfTooLong(part));
             }
         }
 
-        if (!string.IsNullOrEmpty(text))
+        // If there's remaining text, the split failed
+        return string.IsNullOrEmpty(text) ? lines : [];
+    }
+
+    private static List<string> SplitByPeriodMarkers(string text)
+    {
+        var lines = new List<string>();
+        var sb = new StringBuilder();
+
+        foreach (var translatedLine in text.SplitToLines())
         {
-            return new List<string>();
+            var trimmed = translatedLine.Trim();
+            if (trimmed == ".")
+            {
+                lines.Add(sb.ToString().Trim());
+                sb.Clear();
+            }
+            else
+            {
+                sb.AppendLine(trimmed);
+            }
+        }
+
+        if (sb.Length > 0)
+        {
+            lines.Add(sb.ToString().Trim());
         }
 
         return lines;
     }
 
-    private static string GetPartFromItem(string input, Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem item)
+    private static string ExtractPartForItem(ref string text, MergeResultItem item)
     {
         if (item.EndChar == '\0')
         {
-            return input;
+            var result = text;
+            text = string.Empty;
+            return result;
         }
 
-        var idx = input.IndexOf(item.EndChar);
+        var part = FindPartByEndChar(text, item.EndChar, item.EndCharOccurrences);
+        if (!string.IsNullOrEmpty(part))
+        {
+            text = text[part.Length..].Trim();
+        }
+
+        return part;
+    }
+
+    private static string FindPartByEndChar(string input, char endChar, int targetOccurrence)
+    {
+        var idx = input.IndexOf(endChar);
         if (idx < 0)
         {
             return string.Empty;
@@ -519,125 +702,302 @@ public static partial class MergeAndSplitHelper
         var count = 1;
         while (idx >= 0 && idx < input.Length - 1)
         {
-            if (count == item.EndCharOccurrences)
+            if (count == targetOccurrence)
             {
-                var s = input.Substring(0, idx + 1);
-                return s;
+                return input[..(idx + 1)];
             }
 
-            idx = input.IndexOf(item.EndChar, idx + 1);
+            idx = input.IndexOf(endChar, idx + 1);
             count++;
         }
 
         return input;
     }
 
-    private static List<string> SplitContinuous(string text, Nikse.SubtitleEdit.Features.Translate.MergeAndSplitHelper.MergeResultItem item, string language)
+    private static string AutoBreakIfTooLong(string text)
     {
-        var count = item.EndIndex - item.StartIndex + 1;
-
-        if (count == 2)
-        {
-            var arr = Utilities.AutoBreakLine(text, Configuration.Settings.General.SubtitleLineMaximumLength * 2, 0, language).SplitToLines();
-            if (arr.Count == 2 && item.Paragraphs.Count == 2)
-            {
-                // test using character count for percentage
-                var totalCharLength = item.Paragraphs[0].Text.Length + item.Paragraphs[1].Text.Length;
-                var pctCharLength1 = item.Paragraphs[0].Text.Length * 100.0 / totalCharLength;
-                var pctCharLength2 = item.Paragraphs[1].Text.Length * 100.0 / totalCharLength;
-                var pctCharArr = GetTwoPartsByPct(text, pctCharLength1, pctCharLength2);
-
-                // test using duration for percentage
-                var totalDurationLength = item.Paragraphs[0].DurationTotalMilliseconds + item.Paragraphs[1].DurationTotalMilliseconds + 1;
-                var pctDurationLength1 = item.Paragraphs[0].DurationTotalMilliseconds * 100.0 / totalDurationLength;
-                var pctDurationLength2 = item.Paragraphs[1].DurationTotalMilliseconds * 100.0 / totalDurationLength;
-                var pctDurationArr = GetTwoPartsByPct(text, pctDurationLength1, pctDurationLength2);
-
-
-                // use best match of the three arrays considering line separator, adherence to chars/sec
-
-                // same result for char split + duration split
-                if (pctCharArr[0].Length > 0 && pctCharArr[0] == pctDurationArr[0])
-                {
-                    return pctCharArr.ToList();
-                }
-
-                // check max chars
-                var cps1 = new Paragraph(arr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
-                var cps2 = new Paragraph(arr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
-
-                var cpsChar1 = new Paragraph(pctCharArr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
-                var cpsChar2 = new Paragraph(pctCharArr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
-
-                var cpsDuration1 = new Paragraph(pctDurationArr[0], item.Paragraphs[0].Show.TotalMilliseconds, item.Paragraphs[0].Hide.TotalMilliseconds).GetCharactersPerSecond();
-                var cpsDuration2 = new Paragraph(pctDurationArr[1], item.Paragraphs[1].Show.TotalMilliseconds, item.Paragraphs[1].Hide.TotalMilliseconds).GetCharactersPerSecond();
-
-                if (pctCharArr[0].Length > 0 && pctCharArr[0].EndsWith(',') &&
-                    cpsChar1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&
-                    cpsChar2 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
-                {
-                    return pctCharArr.ToList();
-                }
-
-                if (pctDurationArr[0].Length > 0 && pctDurationArr[0].EndsWith(',') &&
-                    cpsDuration1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&
-                    cpsDuration2 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
-                {
-                    return pctDurationArr.ToList();
-                }
-
-                if (pctCharArr[0].Length > 0 &&
-                    cpsChar1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&
-                    cpsChar2 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
-                {
-                    return pctCharArr.ToList();
-                }
-
-                if (pctDurationArr[0].Length > 0 &&
-                    cpsDuration1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&
-                    cpsDuration2 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
-                {
-                    return pctDurationArr.ToList();
-                }
-
-                if (arr[0].Length > 0 &&
-                    cps1 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds &&
-                    cps2 < Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds)
-                {
-                    return arr.ToList();
-                }
-
-                if (pctDurationArr[0].Length > 0)
-                {
-                    return pctDurationArr.ToList();
-                }
-            }
-
-            return arr;
-        }
-
-        return TextSplit.SplitMulti(text, count, language);
+        return text.Length > Configuration.Settings.General.SubtitleLineMaximumLength
+            ? Utilities.AutoBreakLine(text)
+            : text;
     }
 
-    private static string[] GetTwoPartsByPct(string text, double pctCharLength1, double pctCharLength2)
+    private static List<string> SplitContinuousText(string text, MergeResultItem item, string language)
     {
-        var idx = (int)Math.Round(text.Length * pctCharLength1 / 100.0, MidpointRounding.AwayFromZero);
-        for (var i = 0; i < idx; i++)
+        var paragraphCount = item.EndIndex - item.StartIndex + 1;
+
+        if (paragraphCount == 2 && item.Paragraphs.Count == 2)
         {
-            var j = idx - i;
-            if (j > 1 && text[j] == ' ')
+            return SplitIntoTwoParts(text, item, language);
+        }
+
+        return TextSplit.SplitMulti(text, paragraphCount, language);
+    }
+
+    private static List<string> SplitIntoTwoParts(string text, MergeResultItem item, string language)
+    {
+        var candidates = GenerateSplitCandidates(text, item, language);
+
+        if (candidates.Count == 0)
+        {
+            return Utilities.AutoBreakLine(text, Configuration.Settings.General.SubtitleLineMaximumLength * 2, 0, language)
+                .SplitToLines()
+                .ToList();
+        }
+
+        var bestCandidate = SelectBestCandidate(candidates, item);
+        return [bestCandidate.Part1, bestCandidate.Part2];
+    }
+
+    private static List<SplitCandidate> GenerateSplitCandidates(string text, MergeResultItem item, string language)
+    {
+        var candidates = new List<SplitCandidate>();
+        var maxCps = Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds;
+
+        // Strategy 1: Auto-break by language rules
+        var autoBreak = Utilities.AutoBreakLine(text, Configuration.Settings.General.SubtitleLineMaximumLength * 2, 0, language)
+            .SplitToLines();
+        if (autoBreak.Count == 2)
+        {
+            candidates.Add(CreateCandidate(autoBreak[0], autoBreak[1], item, SplitStrategy.AutoBreak));
+        }
+
+        // Strategy 2: Split by character proportion (original text lengths)
+        var charPctSplit = SplitByProportion(text, item.Paragraphs[0].Text.Length, item.Paragraphs[1].Text.Length);
+        if (!string.IsNullOrEmpty(charPctSplit.Part1))
+        {
+            candidates.Add(CreateCandidate(charPctSplit.Part1, charPctSplit.Part2, item, SplitStrategy.CharacterProportion));
+        }
+
+        // Strategy 3: Split by duration proportion
+        var durationPctSplit = SplitByProportion(text,
+            item.Paragraphs[0].DurationTotalMilliseconds,
+            item.Paragraphs[1].DurationTotalMilliseconds + 1); // +1 to avoid division by zero
+        if (!string.IsNullOrEmpty(durationPctSplit.Part1))
+        {
+            candidates.Add(CreateCandidate(durationPctSplit.Part1, durationPctSplit.Part2, item, SplitStrategy.DurationProportion));
+        }
+
+        // Strategy 4: Split at punctuation boundaries
+        var punctuationSplit = SplitAtBestPunctuation(text, item);
+        if (!string.IsNullOrEmpty(punctuationSplit.Part1))
+        {
+            candidates.Add(CreateCandidate(punctuationSplit.Part1, punctuationSplit.Part2, item, SplitStrategy.Punctuation));
+        }
+
+        return candidates;
+    }
+
+    private static SplitCandidate CreateCandidate(string part1, string part2, MergeResultItem item, SplitStrategy strategy)
+    {
+        var cps1 = CalculateCps(part1, item.Paragraphs[0]);
+        var cps2 = CalculateCps(part2, item.Paragraphs[1]);
+
+        return new SplitCandidate
+        {
+            Part1 = part1,
+            Part2 = part2,
+            Cps1 = cps1,
+            Cps2 = cps2,
+            Strategy = strategy
+        };
+    }
+
+    private static double CalculateCps(string text, TranslateRow paragraph)
+    {
+        return new Paragraph(text, paragraph.Show.TotalMilliseconds, paragraph.Hide.TotalMilliseconds)
+            .GetCharactersPerSecond();
+    }
+
+    private static SplitCandidate SelectBestCandidate(List<SplitCandidate> candidates, MergeResultItem item)
+    {
+        var maxCps = Configuration.Settings.General.SubtitleMaximumCharactersPerSeconds;
+        var maxLineLength = Configuration.Settings.General.SubtitleLineMaximumLength;
+
+        // Score each candidate
+        foreach (var candidate in candidates)
+        {
+            candidate.Score = CalculateCandidateScore(candidate, maxCps, maxLineLength);
+        }
+
+        // Return the candidate with the highest score
+        return candidates.OrderByDescending(c => c.Score).First();
+    }
+
+    private static double CalculateCandidateScore(SplitCandidate candidate, double maxCps, int maxLineLength)
+    {
+        var score = 0.0;
+
+        // Bonus for both parts being within CPS limits (most important)
+        if (candidate.Cps1 < maxCps && candidate.Cps2 < maxCps)
+        {
+            score += 100;
+        }
+        else if (candidate.Cps1 < maxCps || candidate.Cps2 < maxCps)
+        {
+            score += 30; // Partial bonus if at least one is within limits
+        }
+
+        // Penalty for exceeding CPS (proportional to how much it exceeds)
+        if (candidate.Cps1 > maxCps)
+        {
+            score -= (candidate.Cps1 - maxCps) * 2;
+        }
+        if (candidate.Cps2 > maxCps)
+        {
+            score -= (candidate.Cps2 - maxCps) * 2;
+        }
+
+        // Bonus for ending at natural break points
+        if (EndsWithNaturalBreak(candidate.Part1))
+        {
+            score += 20;
+        }
+
+        // Bonus for balanced line lengths
+        var lengthDiff = Math.Abs(candidate.Part1.Length - candidate.Part2.Length);
+        var avgLength = (candidate.Part1.Length + candidate.Part2.Length) / 2.0;
+        var balanceRatio = avgLength > 0 ? lengthDiff / avgLength : 0;
+        score += (1 - balanceRatio) * 10; // Up to 10 points for perfect balance
+
+        // Penalty for exceeding max line length
+        if (candidate.Part1.Length > maxLineLength)
+        {
+            score -= 15;
+        }
+        if (candidate.Part2.Length > maxLineLength)
+        {
+            score -= 15;
+        }
+
+        // Small bonus based on strategy preference
+        score += candidate.Strategy switch
+        {
+            SplitStrategy.Punctuation => 5,
+            SplitStrategy.DurationProportion => 3,
+            SplitStrategy.CharacterProportion => 2,
+            SplitStrategy.AutoBreak => 1,
+            _ => 0
+        };
+
+        return score;
+    }
+
+    private static bool EndsWithNaturalBreak(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        var lastChar = text[^1];
+        return lastChar is ',' or ';' or ':' or '.' or '!' or '?' or '—' or '-' or ')' or '"' or '\'';
+    }
+
+    private static (string Part1, string Part2) SplitByProportion(string text, double length1, double length2)
+    {
+        var totalLength = length1 + length2;
+        if (totalLength <= 0)
+        {
+            return (string.Empty, string.Empty);
+        }
+
+        var targetIdx = (int)Math.Round(text.Length * length1 / totalLength, MidpointRounding.AwayFromZero);
+        return FindNearestSpaceSplit(text, targetIdx);
+    }
+
+    private static (string Part1, string Part2) FindNearestSpaceSplit(string text, int targetIdx)
+    {
+        // Search outward from target index to find nearest space
+        for (var offset = 0; offset < targetIdx && offset < text.Length - targetIdx; offset++)
+        {
+            var leftIdx = targetIdx - offset;
+            if (leftIdx > 1 && text[leftIdx] == ' ')
             {
-                return new[] { text.Substring(0, j).Trim(), text.Substring(j + 1).Trim() };
+                return (text[..leftIdx].Trim(), text[(leftIdx + 1)..].Trim());
             }
 
-            var k = idx + i;
-            if (k < text.Length - 1 && text[k] == ' ')
+            var rightIdx = targetIdx + offset;
+            if (rightIdx < text.Length - 1 && text[rightIdx] == ' ')
             {
-                return new[] { text.Substring(0, k).Trim(), text.Substring(k + 1).Trim() };
+                return (text[..rightIdx].Trim(), text[(rightIdx + 1)..].Trim());
             }
         }
 
-        return new[] { string.Empty, string.Empty };
+        return (string.Empty, string.Empty);
+    }
+
+    private static (string Part1, string Part2) SplitAtBestPunctuation(string text, MergeResultItem item)
+    {
+        // Priority order for punctuation-based splits
+        char[] punctuationPriority = [',', ';', ':', '—', '-', ')'];
+
+        var totalDuration = item.Paragraphs[0].DurationTotalMilliseconds + item.Paragraphs[1].DurationTotalMilliseconds;
+        var targetRatio = totalDuration > 0
+            ? item.Paragraphs[0].DurationTotalMilliseconds / totalDuration
+            : 0.5;
+
+        var targetIdx = (int)(text.Length * targetRatio);
+        var searchRange = text.Length / 3; // Search within 33% of target
+
+        foreach (var punct in punctuationPriority)
+        {
+            var bestIdx = FindBestPunctuationIndex(text, punct, targetIdx, searchRange);
+            if (bestIdx > 0 && bestIdx < text.Length - 1)
+            {
+                // Split after the punctuation
+                var splitIdx = bestIdx + 1;
+                while (splitIdx < text.Length && text[splitIdx] == ' ')
+                {
+                    splitIdx++;
+                }
+
+                return (text[..splitIdx].Trim(), text[splitIdx..].Trim());
+            }
+        }
+
+        return (string.Empty, string.Empty);
+    }
+
+    private static int FindBestPunctuationIndex(string text, char punct, int targetIdx, int searchRange)
+    {
+        var bestIdx = -1;
+        var bestDistance = int.MaxValue;
+
+        var startSearch = Math.Max(0, targetIdx - searchRange);
+        var endSearch = Math.Min(text.Length, targetIdx + searchRange);
+
+        for (var i = startSearch; i < endSearch; i++)
+        {
+            if (text[i] == punct)
+            {
+                var distance = Math.Abs(i - targetIdx);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestIdx = i;
+                }
+            }
+        }
+
+        return bestIdx;
+    }
+
+    private enum SplitStrategy
+    {
+        AutoBreak,
+        CharacterProportion,
+        DurationProportion,
+        Punctuation
+    }
+
+    private sealed class SplitCandidate
+    {
+        public required string Part1 { get; init; }
+        public required string Part2 { get; init; }
+        public double Cps1 { get; init; }
+        public double Cps2 { get; init; }
+        public SplitStrategy Strategy { get; init; }
+        public double Score { get; set; }
     }
 
     private static bool IsNonMergeLanguage(TranslationPair language)
