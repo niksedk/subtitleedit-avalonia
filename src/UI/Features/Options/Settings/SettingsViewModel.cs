@@ -260,6 +260,7 @@ public partial class SettingsViewModel : ObservableObject
         new() { Extension = ".ssa", IconPath = "avares://SubtitleEdit/Assets/FileTypes/ssa.ico" },
         new() { Extension = ".stl", IconPath = "avares://SubtitleEdit/Assets/FileTypes/stl.ico" },
         new() { Extension = ".sub", IconPath = "avares://SubtitleEdit/Assets/FileTypes/sub.ico" },
+        new() { Extension = ".sup", IconPath = "avares://SubtitleEdit/Assets/FileTypes/sup.ico" },
         new() { Extension = ".vtt", IconPath = "avares://SubtitleEdit/Assets/FileTypes/vtt.ico" },
     };
 
