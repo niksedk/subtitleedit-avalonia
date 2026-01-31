@@ -43,9 +43,9 @@ public class MultipleReplaceWindow : Window
             },
             ColumnDefinitions =
             {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // For the splitter
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), MinWidth = 300, },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }, // splitter
+                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star), MinWidth = 300, },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 2,
