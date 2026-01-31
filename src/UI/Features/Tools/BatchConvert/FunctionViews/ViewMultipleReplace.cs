@@ -9,18 +9,13 @@ public static class ViewMultipleReplace
 {
     public static Control Make(BatchConvertViewModel vm)
     {
-        var labelHeader = new Label
-        {
-            Content = Se.Language.General.MultipleReplace,
-            VerticalAlignment = VerticalAlignment.Center,
-            FontWeight = Avalonia.Media.FontWeight.Bold,
-        };
+        var labelHeader = UiUtil.MakeLabel(Se.Language.General.MultipleReplace).WithBold();
+        var buttonSettings = UiUtil.MakeButton(vm.ShowMultipleReplaceCommand, IconNames.Settings);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -35,6 +30,7 @@ public static class ViewMultipleReplace
         };
 
         grid.Add(labelHeader, 0, 0);
+        grid.Add(buttonSettings, 1, 0);
 
         return grid;
     }

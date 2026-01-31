@@ -11,6 +11,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
+using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
@@ -726,6 +727,18 @@ public partial class BatchConvertViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ShowMultipleReplace()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<MultipleReplaceWindow, MultipleReplaceViewModel>(Window!,
+            vm => { vm.Initialize(new Subtitle()); });
+    }
+
+    [RelayCommand]
     private async Task Statistics()
     {
         if (Window == null)
@@ -1299,6 +1312,11 @@ public partial class BatchConvertViewModel : ObservableObject
                 RebalanceLongLines = SplitBreakRebalanceLongLines,
                 MaxNumberOfLines = SplitBreakMaxNumberOfLines,
                 SingleLineMaxLength = SplitBreakSingleLineMaxLength,
+            },
+
+            MultipleReplace = new BatchConvertConfig.MultipleReplaceSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MultipleReplace),
             },
         };
     }
