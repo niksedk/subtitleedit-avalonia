@@ -29,6 +29,25 @@ public class LanguageAssa
     public string Secondary { get; set; }
     public string AssaDraw { get; set; }
 
+    // ASSA Draw
+    public string DrawSelectTool { get; set; }
+    public string DrawLineTool { get; set; }
+    public string DrawBezierTool { get; set; }
+    public string DrawRectangleTool { get; set; }
+    public string DrawCircleTool { get; set; }
+    public string DrawCloseShape { get; set; }
+    public string DrawDeleteShape { get; set; }
+    public string DrawClearAll { get; set; }
+    public string DrawZoomIn { get; set; }
+    public string DrawZoomOut { get; set; }
+    public string DrawResetView { get; set; }
+    public string DrawToggleGrid { get; set; }
+    public string DrawCopyToClipboard { get; set; }
+    public string DrawShapes { get; set; }
+    public string DrawSelectedPoint { get; set; }
+    public string DrawToolX { get; set; }
+    public string DrawHelpText { get; set; }
+
     public LanguageAssa()
     {
         StylesTitle = "Advanced Sub Station Alpha styles";
@@ -57,5 +76,24 @@ public class LanguageAssa
         Primary = "Primary";
         Secondary = "Secondary";
         AssaDraw = "ASSA Draw";
+
+        // ASSA Draw
+        DrawSelectTool = "Select (move points)";
+        DrawLineTool = "Line Tool (F4)";
+        DrawBezierTool = "Bezier Curve (F5)";
+        DrawRectangleTool = "Rectangle (F6)";
+        DrawCircleTool = "Circle (F7)";
+        DrawCloseShape = "Close Shape (F8/Enter)";
+        DrawDeleteShape = "Delete Shape (Del)";
+        DrawClearAll = "Clear All (Ctrl+N)";
+        DrawZoomIn = "Zoom In (Ctrl++)";
+        DrawZoomOut = "Zoom Out (Ctrl+-)";
+        DrawResetView = "Reset View (Ctrl+0)";
+        DrawToggleGrid = "Toggle Grid (Ctrl+G)";
+        DrawCopyToClipboard = "Copy to Clipboard (Ctrl+C)";
+        DrawShapes = "Shapes";
+        DrawSelectedPoint = "Selected point";
+        DrawToolX = "Tool: {0}";
+        DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";
     }
 }
