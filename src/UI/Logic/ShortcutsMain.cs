@@ -301,6 +301,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.SortByEndTimeCommand), Se.Language.Options.Shortcuts.SortByEndTime },
         { nameof(MainViewModel.ShowPickLayerFilterCommand), Se.Language.General.FilterByLayer },
         { nameof(MainViewModel.ShowPickLayerCommand), Se.Language.General.PickLayer },
+        { nameof(MainViewModel.CopyTextToClipboardCommand), Se.Language.Options.Shortcuts.CopyTextToClipboard },
+        { nameof(MainViewModel.CopyTextFromOriginalToClipboardCommand), Se.Language.Options.Shortcuts.CopyTextFromOriginalToClipboard },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -551,6 +553,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.SortByEndTimeCommand, nameof(vm.SortByEndTimeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowPickLayerFilterCommand, nameof(vm.ShowPickLayerFilterCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowPickLayerCommand, nameof(vm.ShowPickLayerCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CopyTextToClipboardCommand, nameof(vm.CopyTextToClipboardCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CopyTextFromOriginalToClipboardCommand, nameof(vm.CopyTextFromOriginalToClipboardCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

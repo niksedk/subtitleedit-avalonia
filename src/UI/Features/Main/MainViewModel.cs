@@ -3014,6 +3014,58 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void CopyTextFromOriginalToClipboard()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0 || !ShowColumnOriginalText)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var subtitle in selectedItems)
+        {
+            sb.AppendLine(subtitle.OriginalText);
+        }
+
+        ClipboardHelper.SetTextAsync(Window, sb.ToString()).GetAwaiter().GetResult();
+
+        ShowStatus(string.Format("{0} lines copied to clipboard", selectedItems.Count));
+    }
+
+    [RelayCommand]
+    private void CopyTextToClipboard()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var subtitle in selectedItems)
+        {
+            sb.AppendLine(subtitle.Text);
+        }
+
+        ClipboardHelper.SetTextAsync(Window, sb.ToString()).GetAwaiter().GetResult();
+
+        ShowStatus(string.Format("{0} lines copied to clipboard", selectedItems.Count));
+    }
+
+    [RelayCommand]
     private async Task ShowToolsSplit()
     {
         if (Window == null)

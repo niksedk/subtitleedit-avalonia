@@ -244,6 +244,8 @@ public class LanguageSettingsShortcuts
     public string SortByStartTime { get; set; }
     public string SortByEndTime { get; set; }
     public string DuplicatesFound { get; set; }
+    public string CopyTextToClipboard { get; set; }
+    public string CopyTextFromOriginalToClipboard { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -491,5 +493,7 @@ public class LanguageSettingsShortcuts
         SortByStartTime = "Sort by \"Show\" time";
         SortByEndTime = "Sort by \"Hide\" time";
         DuplicatesFound = "The following duplicate shortcuts were found:";
+        CopyTextToClipboard = "Copy text to clipboard (selected lines)";
+        CopyTextFromOriginalToClipboard = "Copy text from original to clipboard (selected lines)";
     }
 }
