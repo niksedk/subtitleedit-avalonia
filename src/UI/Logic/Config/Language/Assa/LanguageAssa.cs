@@ -27,6 +27,7 @@ public class LanguageAssa
     public string OpenStyleImportFile { get; set; }
     public string Primary { get; set; }
     public string Secondary { get; set; }
+    public string AssaDraw { get; set; }
 
     public LanguageAssa()
     {
@@ -55,5 +56,6 @@ public class LanguageAssa
         OpenStyleImportFile = "Open subtitle file to import styles from";
         Primary = "Primary";
         Secondary = "Secondary";
+        AssaDraw = "ASSA Draw";
     }
 }

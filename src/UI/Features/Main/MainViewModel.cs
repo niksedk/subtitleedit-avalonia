@@ -21,6 +21,7 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
@@ -810,6 +811,21 @@ public partial class MainViewModel :
             _subtitle.Footer = result.Footer;
         }
     }
+
+
+    [RelayCommand]
+    private async Task ShowAssaDraw()
+    {
+        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+
 
     [RelayCommand]
     private async Task SaveLanguageFile()

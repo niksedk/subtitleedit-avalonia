@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
@@ -194,6 +195,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<ApplyMinGapViewModel>();
         collection.AddTransient<AlignmentPickerViewModel>();
         collection.AddTransient<AssaAttachmentsViewModel>();
+        collection.AddTransient<AssaDrawViewModel>();
         collection.AddTransient<AssaPropertiesViewModel>();
         collection.AddTransient<AssaSingleStyleViewModel>();
         collection.AddTransient<AssaStylePickerViewModel>();

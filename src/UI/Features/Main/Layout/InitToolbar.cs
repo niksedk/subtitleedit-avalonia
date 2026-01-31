@@ -279,7 +279,6 @@ public static class InitToolbar
             },
         });
 
-
         stackPanelLeft.Children.Add(new Button
         {
             Content = new Image
@@ -297,6 +296,22 @@ public static class InitToolbar
             },
         });
 
+        stackPanelLeft.Children.Add(new Button
+        {
+            Content = new Image
+            {
+                Source = new Bitmap(System.IO.Path.Combine(path, "AssaDraw.png")),
+                Width = 32,
+                Height = 32,
+            },
+            Command = vm.ShowAssaDrawCommand,
+            Background = Brushes.Transparent,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaDrawHint, shortcuts, nameof(vm.ShowAssaDrawCommand)),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            {
+                Source = vm,
+            },
+        });
 
         var stackPanelRight = new StackPanel
         {
