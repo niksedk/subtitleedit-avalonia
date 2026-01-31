@@ -46,8 +46,8 @@ public class RosettaPropertiesWindow : Window
             }
         };
 
-        var labelFontSize = UiUtil.MakeLabel(Se.Language.General.FontSize).WithMinWidth(labelWidth);
-        var comboBoxFontSize = UiUtil.MakeComboBox<string>(vm.FontSizes, vm, nameof(vm.SelectedFontSize)).WithMinWidth(100);
+        var labelFontSize = UiUtil.MakeLabel(Se.Language.File.RosettaFontSize).WithMinWidth(labelWidth);
+        var numericUpDownFontSize = UiUtil.MakeNumericUpDownOneDecimal(1, 100, 120, vm, nameof(vm.SelectedFontSize));
         var panelFontSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -55,7 +55,7 @@ public class RosettaPropertiesWindow : Window
             Children =
             {
                 labelFontSize,
-                comboBoxFontSize,
+                numericUpDownFontSize,
             }
         };
 

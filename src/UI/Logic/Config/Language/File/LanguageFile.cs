@@ -27,6 +27,7 @@ public class LanguageFile
     public string SaveCompareHtmlTitle { get; set; }
     public string PickMatroskaTrackX { get; set; }
     public string RosettaProperties { get; set; }
+    public string RosettaFontSize { get; set; }
     public string TmpegEncXmlProperties { get; set; }
 
     public LanguageFile()
@@ -50,6 +51,7 @@ public class LanguageFile
         SaveCompareHtmlTitle = "Save compare HTML file";
         PickMatroskaTrackX = "Pick Matroska track - {0}";
         RosettaProperties = "Timed Text Rosetta IMSC properties";
+        RosettaFontSize = "Font size (row height)";
         TmpegEncXmlProperties = "TMPGEnc VME properties";
     }
 }

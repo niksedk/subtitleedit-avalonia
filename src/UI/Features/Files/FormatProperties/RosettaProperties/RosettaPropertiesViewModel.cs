@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
@@ -12,10 +13,9 @@ namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 public partial class RosettaPropertiesViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<string> _languages;
-    [ObservableProperty] private ObservableCollection<string> _fontSizes;
     [ObservableProperty] private string _selectedLanguage;
     [ObservableProperty] private string _selectedFontName;
-    [ObservableProperty] private string _selectedFontSize;
+    [ObservableProperty] private decimal _selectedFontSize;
     [ObservableProperty] private string _selectedLineHeight;
 
     public Window? Window { get; set; }
@@ -535,23 +535,9 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         ];
         SelectedLanguage = Languages[0];
 
-        FontSizes =
-        [
-            "4.0rh",
-            "4.5rh",
-            "5.0rh",
-            "5.3rh",
-            "5.5rh",
-            "6.0rh",
-            "6.5rh",
-            "7.0rh",
-            "7.5rh",
-            "8.0rh",
-        ];
-
         SelectedLanguage = string.Empty;
         SelectedFontName = string.Empty;
-        SelectedFontSize = string.Empty;
+        SelectedFontSize = 5.3m;
         SelectedLineHeight = string.Empty;
         LoadSettings();
     }
@@ -560,14 +546,14 @@ public partial class RosettaPropertiesViewModel : ObservableObject
     {
         SelectedLineHeight = Se.Settings.Formats.RosettaLineHeight;
         
-        var fontSize = Se.Settings.Formats.RosettaFontSize;
-        if (FontSizes.Contains(fontSize))
+        var fontSize = Se.Settings.Formats.RosettaFontSize.Replace("rh", string.Empty);
+        if (decimal.TryParse(fontSize, CultureInfo.InvariantCulture, out var d))
         {
-            SelectedFontSize = fontSize;
+            SelectedFontSize = d;
         }
         else
         {
-            SelectedFontSize = "5.3rh";
+            SelectedFontSize = 5.3m;
         }
         
         if (Se.Settings.Formats.RosettaLanguageAutoDetect)
@@ -584,7 +570,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
     private void SaveSettings()
     {
         Se.Settings.Formats.RosettaLineHeight = SelectedLineHeight;
-        Se.Settings.Formats.RosettaFontSize = SelectedFontSize;
+        Se.Settings.Formats.RosettaFontSize = SelectedFontSize.ToString(CultureInfo.InvariantCulture) + "rh";
 
         if (SelectedLanguage == Languages[0])
         {
