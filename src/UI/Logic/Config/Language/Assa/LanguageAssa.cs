@@ -47,6 +47,38 @@ public class LanguageAssa
     public string DrawSelectedPoint { get; set; }
     public string DrawToolX { get; set; }
     public string DrawHelpText { get; set; }
+    public string ProgressBarTitle { get; set; }
+
+    // Progress Bar Generator
+    public string ProgressBarSettings { get; set; }
+    public string ProgressBarPosition { get; set; }
+    public string ProgressBarBottom { get; set; }
+    public string ProgressBarTop { get; set; }
+    public string ProgressBarForeColor { get; set; }
+    public string ProgressBarBackColor { get; set; }
+    public string ProgressBarStyle { get; set; }
+    public string ProgressBarSquareCorners { get; set; }
+    public string ProgressBarRoundedCorners { get; set; }
+    public string ProgressBarChapters { get; set; }
+    public string ProgressBarSplitterWidth { get; set; }
+    public string ProgressBarSplitterHeight { get; set; }
+    public string ProgressBarXAdjustment { get; set; }
+    public string ProgressBarYAdjustment { get; set; }
+    public string ProgressBarTextAlignment { get; set; }
+    public string ProgressBarTakePosFromVideo { get; set; }
+    public string ProgressBarPreview { get; set; }
+
+    // Resolution Resampler
+    public string ResolutionResamplerTitle { get; set; }
+    public string ResolutionResamplerSourceRes { get; set; }
+    public string ResolutionResamplerTargetRes { get; set; }
+    public string ResolutionResamplerChangeMargins { get; set; }
+    public string ResolutionResamplerChangeFontSize { get; set; }
+    public string ResolutionResamplerChangePositions { get; set; }
+    public string ResolutionResamplerChangeDrawing { get; set; }
+    public string ResolutionResamplerFromVideo { get; set; }
+    public string ResolutionResamplerSourceAndTargetEqual { get; set; }
+    public string ResolutionResamplerNothingSelected { get; set; }
 
     public LanguageAssa()
     {
@@ -76,6 +108,7 @@ public class LanguageAssa
         Primary = "Primary";
         Secondary = "Secondary";
         AssaDraw = "ASSA Draw";
+        ProgressBarTitle = "ASSA progress bar";
 
         // ASSA Draw
         DrawSelectTool = "Select (move points)";
@@ -95,5 +128,36 @@ public class LanguageAssa
         DrawSelectedPoint = "Selected point";
         DrawToolX = "Tool: {0}";
         DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";
+
+        // Progress Bar Generator
+        ProgressBarSettings = "Progress bar";
+        ProgressBarPosition = "Position";
+        ProgressBarBottom = "Bottom";
+        ProgressBarTop = "Top";
+        ProgressBarForeColor = "Foreground color";
+        ProgressBarBackColor = "Background color";
+        ProgressBarStyle = "Style";
+        ProgressBarSquareCorners = "Square corners";
+        ProgressBarRoundedCorners = "Rounded corners";
+        ProgressBarChapters = "Chapters";
+        ProgressBarSplitterWidth = "Splitter width";
+        ProgressBarSplitterHeight = "Splitter height";
+        ProgressBarXAdjustment = "X adjustment";
+        ProgressBarYAdjustment = "Y adjustment";
+        ProgressBarTextAlignment = "Text alignment";
+        ProgressBarTakePosFromVideo = "Take position from video";
+        ProgressBarPreview = "Preview";
+
+        // Resolution Resampler
+        ResolutionResamplerTitle = "Change resolution";
+        ResolutionResamplerSourceRes = "Source resolution";
+        ResolutionResamplerTargetRes = "Target resolution";
+        ResolutionResamplerChangeMargins = "Change margins";
+        ResolutionResamplerChangeFontSize = "Change font size";
+        ResolutionResamplerChangePositions = "Change positions";
+        ResolutionResamplerChangeDrawing = "Change drawing";
+        ResolutionResamplerFromVideo = "From video...";
+        ResolutionResamplerSourceAndTargetEqual = "Source and target resolution are the same - nothing to do.";
+        ResolutionResamplerNothingSelected = "Please select at least one option to change.";
     }
 }
