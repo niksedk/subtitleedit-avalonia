@@ -80,6 +80,16 @@ public class LanguageAssa
     public string ResolutionResamplerSourceAndTargetEqual { get; set; }
     public string ResolutionResamplerNothingSelected { get; set; }
 
+    // Background Box Generator
+    public string BackgroundBoxGenerator { get; set; }
+    public string BackgroundBoxPadding { get; set; }
+    public string BackgroundBoxFillWidth { get; set; }
+    public string BackgroundBoxBoxColor { get; set; }
+    public string BackgroundBoxRadius { get; set; }
+    public string BackgroundBoxCircle { get; set; }
+    public string BackgroundBoxSpikes { get; set; }
+    public string BackgroundBoxBubbles { get; set; }
+
     public LanguageAssa()
     {
         StylesTitle = "Advanced Sub Station Alpha styles";
@@ -109,6 +119,7 @@ public class LanguageAssa
         Secondary = "Secondary";
         AssaDraw = "ASSA Draw";
         ProgressBarTitle = "ASSA progress bar";
+        BackgroundBoxGenerator = "ASSA background box generator";
 
         // ASSA Draw
         DrawSelectTool = "Select (move points)";
@@ -128,6 +139,7 @@ public class LanguageAssa
         DrawSelectedPoint = "Selected point";
         DrawToolX = "Tool: {0}";
         DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";
+        
 
         // Progress Bar Generator
         ProgressBarSettings = "Progress bar";
@@ -159,5 +171,15 @@ public class LanguageAssa
         ResolutionResamplerFromVideo = "From video...";
         ResolutionResamplerSourceAndTargetEqual = "Source and target resolution are the same - nothing to do.";
         ResolutionResamplerNothingSelected = "Please select at least one option to change.";
+
+        // Background Box Generator
+        BackgroundBoxGenerator = "Generate background box";
+        BackgroundBoxPadding = "Padding";
+        BackgroundBoxFillWidth = "Fill width";
+        BackgroundBoxBoxColor = "Box color";
+        BackgroundBoxRadius = "Radius";
+        BackgroundBoxCircle = "Circle";
+        BackgroundBoxSpikes = "Spikes";
+        BackgroundBoxBubbles = "Bubbles";
     }
 }
