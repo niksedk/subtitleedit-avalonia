@@ -2159,10 +2159,6 @@ public static class UiUtil
     {
         window.Icon = GetSeIcon();
         window.Name = name;
-        if (Se.Settings.Appearance.RightToLeft)
-        {
-            window.FlowDirection = FlowDirection.RightToLeft;
-        }
     }
 
     public static void SaveWindowPosition(Window? window)

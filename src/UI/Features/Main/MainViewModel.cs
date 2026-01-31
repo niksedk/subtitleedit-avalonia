@@ -4824,6 +4824,12 @@ public partial class MainViewModel :
             _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
 
+        if (Se.Settings.Appearance.RightToLeft)
+        {
+            Se.Settings.Appearance.RightToLeft = !Se.Settings.Appearance.RightToLeft;
+            RightToLeftToggle();
+        }
+
         UpdateVideoOffsetStatus();
         SetLibSeSettings();
     }
