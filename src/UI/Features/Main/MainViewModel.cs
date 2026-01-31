@@ -1127,7 +1127,7 @@ public partial class MainViewModel :
         {
             var audioTracks = mpv.GetAudioTracks();
             var desiredTrack = audioTracks.FirstOrDefault(p => p.Id == recentFile.AudioTrack);
-            
+
             // Only switch track and regenerate waveform if different from current
             if (desiredTrack != null && (_audioTrack == null || _audioTrack.Id != desiredTrack.Id))
             {
@@ -3397,6 +3397,7 @@ public partial class MainViewModel :
                 AudioVisualizer.WavePeaks = null;
                 AudioVisualizer.ShotChanges = new List<double>();
             }
+
             _updateAudioVisualizer = true;
             LoadWaveformAndSpectrogram(_videoFileName);
         }
@@ -3654,10 +3655,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm =>
-            {
-                vm.Initialize(_videoFileName, _audioTrack?.FfIndex ?? -1);
-            });
+            await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm => { vm.Initialize(_videoFileName, _audioTrack?.FfIndex ?? -1); });
 
         if (result.OkPressed && !result.IsBatchMode)
         {
@@ -4711,10 +4709,7 @@ public partial class MainViewModel :
     {
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
         UiTheme.SetCurrentTheme();
-
         InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
-        UiUtil.ReplaceControl(_oldSubtitleGrid, SubtitleGrid);
-        UiUtil.ReplaceControl(_oldEditTextBox.ContentControl, EditTextBox.ContentControl);
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -4791,13 +4786,11 @@ public partial class MainViewModel :
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
         _errorBrush = new SolidColorBrush(_errorColor);
-
         if (!AreVideoControlsUndocked)
         {
             Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
-            InitLayout.MakeLayout(MainView!, this, Se.Settings.General.LayoutNumber);
-            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
             SetLayout(Se.Settings.General.LayoutNumber);
+            InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
         }
 
         _autoBackupService.StopAutobackup();
@@ -8206,9 +8199,9 @@ public partial class MainViewModel :
         if (WaveformCenter)
         {
             var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
-            av.StartPositionSeconds =  newPosition - waveformHalfSeconds;
+            av.StartPositionSeconds = newPosition - waveformHalfSeconds;
         }
-        else 
+        else
         {
             if (newPosition <= av.StartPositionSeconds)
             {
@@ -8220,7 +8213,7 @@ public partial class MainViewModel :
                 av.StartPositionSeconds = Math.Min(newPosition - waveformWindowSeconds + 0.1, vp.Duration);
             }
         }
-        
+
         _updateAudioVisualizer = true;
     }
 
@@ -10658,6 +10651,7 @@ public partial class MainViewModel :
                                 trackName += $" - {languageName.EnglishName}";
                             }
                         }
+
                         if (!string.IsNullOrEmpty(audioTrack.Title))
                         {
                             trackName += $" - {audioTrack.Title}";
@@ -10686,10 +10680,7 @@ public partial class MainViewModel :
         catch (Exception exception)
         {
             Se.LogError(exception, "UpdateAudioTrackMenuItems failed");
-            Dispatcher.UIThread.Post(() =>
-            {
-                IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 1;
-            });
+            Dispatcher.UIThread.Post(() => { IsAudioTracksVisible = AudioTraksMenuItem.Items.Count > 1; });
         }
     }
 
@@ -12388,7 +12379,6 @@ public partial class MainViewModel :
             }
         }
     }
-
 
     private CancellationTokenSource? _singleTapCancellationTokenSource;
 
