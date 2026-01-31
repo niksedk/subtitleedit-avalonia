@@ -1447,6 +1447,22 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 ContentAlignments[0];
             IsBold = profile.IsBold;
             SelectedFontFamily = profile.FontName;
+
+            if (string.IsNullOrEmpty(SelectedFontFamily))
+            {
+                var preferredFonts = new[]
+                {
+                    "Sarabun",
+                    "DejaVu Sans",
+                    "Tahoma",
+                    "Segoe UI",
+                    "Helvetica Neue",
+                    "Arial Unicode MS",
+                };
+
+                SelectedFontFamily = preferredFonts.FirstOrDefault(font => FontFamilies.Contains(font));
+            }
+
             FontColor = profile.FontColor.FromHex().ToAvaloniaColor();
             OutlineColor = profile.OutlineColor.FromHex().ToAvaloniaColor();
             ShadowColor = profile.ShadowColor.FromHex().ToAvaloniaColor();
