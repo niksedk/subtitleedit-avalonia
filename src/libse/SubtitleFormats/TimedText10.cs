@@ -540,7 +540,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 {
                     paragraphContent.LoadXml($"<root>{text.Replace("&", "&amp;")}</root>");
                 }
-                catch 
+                catch
                 {
                     var guid = Guid.NewGuid().ToString();
                     var tempText = text.Replace("&amp;", guid);
@@ -1663,10 +1663,19 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 extentArr.Length == 2 && extentArr[0].EndsWith("%", StringComparison.Ordinal) && extentArr[1].EndsWith("%", StringComparison.Ordinal) &&
                 !string.IsNullOrEmpty(displayAlign))
             {
-                var yPos = Convert.ToDouble(originArr[1].TrimEnd('%'), CultureInfo.InvariantCulture);
-                if (yPos > 40 && displayAlign == "after")
+                if (double.TryParse(originArr[1].TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture, out var yPos) &&
+                    double.TryParse(extentArr[1].TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture, out var yExtent))
                 {
-                    return true;
+                    var bottomEdge = yPos + yExtent;
+                    if (bottomEdge >= 80)
+                    {
+                        return true;
+                    }
+
+                    if (displayAlign == "after" && yPos > 50)
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
