@@ -6368,7 +6368,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(() =>
         {
-            if (Se.Settings.General.IsLanguageRightToLeft())
+            if (!Se.Settings.General.IsLanguageRightToLeft())
             {
                 Se.Settings.Appearance.RightToLeft = !Se.Settings.Appearance.RightToLeft;
                 IsRightToLeftEnabled = Se.Settings.Appearance.RightToLeft;
