@@ -6352,7 +6352,7 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(() =>
         {
-            if (Se.Settings.Appearance.RightToLeftOnlyGridAndText)
+            if (Se.Settings.General.IsLanguageRightToLeft())
             {
                 Se.Settings.Appearance.RightToLeft = !Se.Settings.Appearance.RightToLeft;
                 IsRightToLeftEnabled = Se.Settings.Appearance.RightToLeft;
@@ -10512,6 +10512,12 @@ public partial class MainViewModel :
 
         Task.Run(async () =>
         {
+            if (Se.Settings.Appearance.RightToLeft)
+            {
+                Se.Settings.Appearance.RightToLeft = !Se.Settings.Appearance.RightToLeft;
+                RightToLeftToggle();
+            }
+
             await Task.Delay(1000); // delay 1 second (off UI thread)          
 
             _undoRedoManager.StartChangeDetection();

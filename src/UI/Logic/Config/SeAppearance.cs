@@ -41,7 +41,6 @@ public class SeAppearance
     public bool ToolbarShowHelp { get; set; }
     public bool ToolbarShowEncoding { get; set; }
     public bool RightToLeft { get; set; }
-    public bool RightToLeftOnlyGridAndText { get; set; }
     public bool ShowLayer { get; set; }
     public bool ShowUpDownStartTime { get; set; }
     public bool ShowUpDownEndTime { get; set; }
@@ -80,7 +79,6 @@ public class SeAppearance
         ShowUpDownEndTime = false;
         ShowUpDownDuration = true;
         ShowUpDownLabels = true;
-        RightToLeftOnlyGridAndText = true;
 
         ToolbarShowFileNew = true;
         ToolbarShowFileOpen = true;

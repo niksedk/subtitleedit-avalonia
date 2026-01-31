@@ -163,7 +163,7 @@ namespace Nikse.SubtitleEdit.Logic
         /// </summary>
         private static void ApplyRightToLeftSettings(Window window)
         {
-            if (Se.Settings.Appearance.RightToLeftOnlyGridAndText && Se.Settings.Appearance.RightToLeft)
+            if (Se.Settings.Appearance.RightToLeft)
             {
                 RightToLeftHelper.SetRightToLeftForDataGridAndText(window);
             }

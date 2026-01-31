@@ -576,4 +576,15 @@ public class SeGeneral
             ContinuationStyle = Core.Enums.ContinuationStyle.None
         });
     }
+
+    internal bool IsLanguageRightToLeft() => Language is
+        "Arabic" or
+        "Dari" or
+        "Hebrew" or
+        "Kurdish" or
+        "Pashto" or
+        "Persian" or
+        "Sindhi" or
+        "Urdu" or
+        "Yiddish";
 }
