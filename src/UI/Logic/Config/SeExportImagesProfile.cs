@@ -57,7 +57,7 @@ public class SeExportImagesProfile
         Error = string.Empty;
         FramesPerSecond = 25;
         OverridePosition = string.Empty;
-        LineSpacingPercent = 17;
+        LineSpacingPercent = 0;
     }
 
     public override string ToString()

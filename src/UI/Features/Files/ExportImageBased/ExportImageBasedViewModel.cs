@@ -18,12 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using HarfBuzzSharp;
 using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
+using SkiaSharp.HarfBuzz;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -714,60 +713,38 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var lines = SplitIntoSegments(segments);
         var fontMetrics = regularFont.Metrics;
 
-        // Measure actual text bounds
+        // Measure text width
         float maxWidth = 0;
-        var minY = float.MaxValue;
-        var maxY = float.MinValue;
 
         // Calculate line spacing once
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
         var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
+
 
         float currentY = 0;
 
         foreach (var line in lines)
         {
             float lineWidth = 0;
-            var lineMinY = float.MaxValue;
-            var lineMaxY = float.MinValue;
 
             foreach (var segment in line)
             {
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
-                // Measure width
-                float segmentWidth;
-                if (ip.IsRightToLeft)
-                {
-                    segmentWidth = MeasureTextWithShaping(segment.Text, currentFont);
-                }
-                else
-                {
-                    segmentWidth = currentFont.MeasureText(segment.Text);
-                }
+                // Measure width using SKShaper for proper complex script support
+                var segmentWidth = MeasureTextWithShaping(segment.Text, currentFont);
 
                 lineWidth += segmentWidth;
-
-                // Get actual text bounds for this segment
-                var textBounds = new SKRect();
-                currentFont.MeasureText(segment.Text, out textBounds);
-
-                var segmentMinY = currentY + textBounds.Top;
-                var segmentMaxY = currentY + textBounds.Bottom;
-
-                lineMinY = Math.Min(lineMinY, segmentMinY);
-                lineMaxY = Math.Max(lineMaxY, segmentMaxY);
             }
 
             maxWidth = Math.Max(maxWidth, lineWidth);
-            minY = Math.Min(minY, lineMinY);
-            maxY = Math.Max(maxY, lineMaxY);
 
             currentY += baseLineHeight + lineSpacing;
         }
 
-        // Calculate actual text height from measured bounds
-        var actualTextHeight = lines.Count > 0 ? maxY - minY : 0;
+        // Calculate text height using font metrics (more reliable for complex scripts)
+        var totalLineHeight = lines.Count * baseLineHeight + (lines.Count - 1) * lineSpacing;
+        var actualTextHeight = lines.Count > 0 ? Math.Max(totalLineHeight, 0) : 0;
 
         // Calculate precise content area and effects padding
         var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
@@ -809,7 +786,8 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
         // Calculate precise text positioning
         var textStartX = effectsPadding + paddingLeftRight;
-        var textStartY = effectsPadding + paddingTopBottom - minY;
+        // Position text using font ascent (ascent is negative, so we subtract to move down)
+        var textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
 
         currentY = 0;
 
@@ -823,14 +801,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             foreach (var seg in segmentsToRender)
             {
                 var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
-                if (ip.IsRightToLeft)
-                {
-                    lineWidth += MeasureTextWithShaping(seg.Text, font);
-                }
-                else
-                {
-                    lineWidth += font.MeasureText(seg.Text);
-                }
+                lineWidth += MeasureTextWithShaping(seg.Text, font);
             }
 
             float currentX;
@@ -892,14 +863,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                             StrokeCap = SKStrokeCap.Round,
                         };
 
-                        if (ip.IsRightToLeft)
-                        {
-                            DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
-                        }
-                        else
-                        {
-                            canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
-                        }
+                        DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowOutlinePaint);
                     }
 
                     using var shadowTextPaint = new SKPaint
@@ -909,14 +873,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         Style = SKPaintStyle.Fill,
                     };
 
-                    if (ip.IsRightToLeft)
-                    {
-                        DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
-                    }
-                    else
-                    {
-                        canvas.DrawText(segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
-                    }
+                    DrawShapedText(canvas, segment.Text, shadowOffsetX, shadowOffsetY, currentFont, shadowTextPaint);
                 }
 
                 // Draw outline second (if outline width > 0)
@@ -932,14 +889,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                         StrokeCap = SKStrokeCap.Round,
                     };
 
-                    if (ip.IsRightToLeft)
-                    {
-                        DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
-                    }
-                    else
-                    {
-                        canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
-                    }
+                    DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, outlinePaint);
                 }
 
                 // Draw the main text on top
@@ -950,24 +900,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
                     Style = SKPaintStyle.Fill,
                 };
 
-                if (ip.IsRightToLeft)
-                {
-                    DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
-                }
-                else
-                {
-                    canvas.DrawText(segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
-                }
+                DrawShapedText(canvas, segment.Text, currentX, textStartY + currentY, currentFont, textPaint);
 
                 // Update X position for next segment
-                if (ip.IsRightToLeft)
-                {
-                    currentX += MeasureTextWithShaping(segment.Text, currentFont);
-                }
-                else
-                {
-                    currentX += currentFont.MeasureText(segment.Text);
-                }
+                currentX += MeasureTextWithShaping(segment.Text, currentFont);
 
                 // Add small spacing after styled segments to prevent crowding
                 if ((segment.IsItalic || segment.IsBold) && i < segmentsToRender.Count - 1)
@@ -983,115 +919,19 @@ public partial class ExportImageBasedViewModel : ObservableObject
         return bitmap;
     }
 
-    // Helper method to measure text with HarfBuzz shaping
+    // Helper method to measure text with HarfBuzz shaping via SKShaper
     private static float MeasureTextWithShaping(string text, SKFont font)
     {
-        // Get font data
-        using var skStream = font.Typeface.OpenStream(out var ttcIndex);
-        var fontData = new byte[skStream.Length];
-        skStream.Read(fontData, fontData.Length);
-
-        // Pin the data and create HarfBuzz objects
-        var handle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
-        try
-        {
-            var blob = new Blob(handle.AddrOfPinnedObject(), fontData.Length, MemoryMode.ReadOnly, () => handle.Free());
-            using var face = new Face(blob, (uint)ttcIndex);
-            using var hbFont = new HarfBuzzSharp.Font(face);
-
-            hbFont.SetFunctionsOpenType();
-
-            using var buffer = new HarfBuzzSharp.Buffer();
-            buffer.AddUtf16(text);
-            buffer.Direction = Direction.RightToLeft;
-            buffer.GuessSegmentProperties();
-
-            hbFont.Shape(buffer);
-
-            var glyphPositions = buffer.GlyphPositions;
-
-            var totalAdvance = 0;
-            for (var i = 0; i < glyphPositions.Length; i++)
-            {
-                totalAdvance += glyphPositions[i].XAdvance;
-            }
-
-            // Convert from font units to pixels
-            return totalAdvance * font.Size / face.UnitsPerEm;
-        }
-        catch
-        {
-            handle.Free();
-            throw;
-        }
+        using var shaper = new SKShaper(font.Typeface);
+        var result = shaper.Shape(text, font);
+        return result.Width;
     }
 
-    // Helper method to draw shaped text
+    // Helper method to draw shaped text using SKShaper
     private static void DrawShapedText(SKCanvas canvas, string text, float x, float y, SKFont font, SKPaint paint)
     {
-        // Get font data
-        using var skStream = font.Typeface.OpenStream(out var ttcIndex);
-        var fontData = new byte[skStream.Length];
-        skStream.Read(fontData, fontData.Length);
-
-        // Pin the data and create HarfBuzz objects
-        var handle = GCHandle.Alloc(fontData, GCHandleType.Pinned);
-        try
-        {
-            var blob = new Blob(handle.AddrOfPinnedObject(), fontData.Length, MemoryMode.ReadOnly, () => handle.Free());
-            using var face = new Face(blob, (uint)ttcIndex);
-            using var hbFont = new HarfBuzzSharp.Font(face);
-
-            hbFont.SetFunctionsOpenType();
-
-            using var buffer = new HarfBuzzSharp.Buffer();
-            buffer.AddUtf16(text);
-            buffer.Direction = Direction.RightToLeft;
-            buffer.GuessSegmentProperties();
-
-            hbFont.Shape(buffer);
-
-            var glyphInfos = buffer.GlyphInfos;
-            var glyphPositions = buffer.GlyphPositions;
-
-            // Create arrays for SKTextBlob
-            var glyphIds = new ushort[glyphInfos.Length];
-            var positions = new SKPoint[glyphInfos.Length];
-
-            var currentAdvance = 0;
-            for (var i = 0; i < glyphInfos.Length; i++)
-            {
-                glyphIds[i] = (ushort)glyphInfos[i].Codepoint;
-
-                // Convert from font units to pixels
-                var xPos = (currentAdvance + glyphPositions[i].XOffset) * font.Size / face.UnitsPerEm;
-                var yPos = glyphPositions[i].YOffset * font.Size / face.UnitsPerEm;
-
-                positions[i] = new SKPoint(xPos, yPos);
-                currentAdvance += glyphPositions[i].XAdvance;
-            }
-
-            // Create SKTextBlob using builder
-            using var builder = new SKTextBlobBuilder();
-            var run = builder.AllocatePositionedRun(font, glyphIds.Length);
-
-            // Copy glyphs and positions
-            var glyphSpan = run.Glyphs;
-            var posSpan = run.Positions;
-            for (var i = 0; i < glyphIds.Length; i++)
-            {
-                glyphSpan[i] = glyphIds[i];
-                posSpan[i] = positions[i];
-            }
-
-            using var textBlob = builder.Build();
-            canvas.DrawText(textBlob, x, y, paint);
-        }
-        catch
-        {
-            handle.Free();
-            throw;
-        }
+        using var shaper = new SKShaper(font.Typeface);
+        canvas.DrawShapedText(shaper, text, x, y, SKTextAlign.Left, font, paint);
     }
 
     private static SKFont GetFont(TextSegment segment, SKFont regular, SKFont bold, SKFont italic, SKFont boldItalic)

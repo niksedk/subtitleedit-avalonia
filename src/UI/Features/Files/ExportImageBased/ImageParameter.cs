@@ -43,7 +43,7 @@ public class ImageParameter
         Bitmap = new SKBitmap(1, 1, true);
         Text = string.Empty;
         FontName = string.Empty;
-        Buffer = new byte[0];
+        Buffer = [];
         Error = string.Empty;
     }
 
