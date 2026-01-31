@@ -237,6 +237,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.MergeSelectedLinesCommand), Se.Language.General.MergeSelectedLines },
         { nameof(MainViewModel.MergeSelectedLinesDialogCommand), Se.Language.General.MergeSelectedLinesDialog },
         { nameof(MainViewModel.ShowColorPickerCommand), Se.Language.General.ChooseColorDotDotDot },
+        { nameof(MainViewModel.FetchFirstWordFromNextSubtitleCommand), Se.Language.Options.Shortcuts.FetchFirstWordFromNextSubtitle },
         { nameof(MainViewModel.WaveformSetEndAndStartOfNextAfterGapCommand), Se.Language.Options.Shortcuts.WaveformSetEndAndStartOfNextAfterGap },
         { nameof(MainViewModel.WaveformSetEndAndStartOfNextAfterGapAndGoToNextCommand), Se.Language.Options.Shortcuts.WaveformSetEndAndStartOfNextAfterGapAndGoToNext },
         { nameof(MainViewModel.WaveformSetStartAndSetEndOfPreviousMinusGapCommand), Se.Language.Options.Shortcuts.WaveformSetStartAndSetEndOfPreviousMinusGap },

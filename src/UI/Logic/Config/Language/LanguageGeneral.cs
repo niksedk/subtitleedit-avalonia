@@ -75,6 +75,7 @@ public class LanguageGeneral
     public string Characters { get; set; }
     public string CharsPerSec { get; set; }
     public string ChooseColorDotDotDot { get; set; }
+    public string FetchFirstWordFromNextSubtitle { get; set; }
     public string ChooseImageFiles { get; set; }
     public string Class { get; set; }
     public string Classic { get; set; }
@@ -679,6 +680,7 @@ public class LanguageGeneral
         Characters = "Characters";
         CharsPerSec = "Chars/sec";
         ChooseColorDotDotDot = "Choose color...";
+        FetchFirstWordFromNextSubtitle = "Fetch first word from next subtitle";
         ChooseImageFiles = "Choose image files";
         Class = "Class";
         Classic = "Classic";
