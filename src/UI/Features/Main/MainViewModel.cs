@@ -8136,6 +8136,32 @@ public partial class MainViewModel :
         }
 
         vp.Position = newPosition;
+
+        if (vp.IsPlaying)
+        {
+            return;
+        }
+
+        var av = AudioVisualizer;
+        if (WaveformCenter)
+        {
+            var waveformHalfSeconds = (av.EndPositionSeconds - av.StartPositionSeconds) / 2.0;
+            av.StartPositionSeconds =  newPosition - waveformHalfSeconds;
+        }
+        else 
+        {
+            if (newPosition <= av.StartPositionSeconds)
+            {
+                av.StartPositionSeconds = Math.Max(0, newPosition - 0.1);
+            }
+            else if (newPosition >= av.EndPositionSeconds)
+            {
+                var waveformWindowSeconds = av.EndPositionSeconds - av.StartPositionSeconds;
+                av.StartPositionSeconds = Math.Min(newPosition - waveformWindowSeconds + 0.1, vp.Duration);
+            }
+        }
+        
+        _updateAudioVisualizer = true;
     }
 
     private async Task<bool> RequireFfmpegOk()
