@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using Nikse.SubtitleEdit.Features.Main.MainHelpers;
+using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Logic
 {
@@ -74,6 +76,8 @@ namespace Nikse.SubtitleEdit.Logic
             window.Show();
             window.Focus();
 
+            ApplyRightToLeftSettings(window);
+
             return window;
         }
 
@@ -98,6 +102,8 @@ namespace Nikse.SubtitleEdit.Logic
             window.Show(owner);
             window.Focus();
 
+            ApplyRightToLeftSettings(window);
+
             return viewModel;
         }
 
@@ -107,6 +113,9 @@ namespace Nikse.SubtitleEdit.Logic
             var window = CreateWindow<T>();
 
             configure?.Invoke(window);
+
+            ApplyRightToLeftSettings(window);
+
             await window.ShowDialog(owner);
 
             return window;
@@ -133,6 +142,8 @@ namespace Nikse.SubtitleEdit.Logic
             window.WindowStartupLocation = WindowStartupLocation.CenterOwner; //TODO: does this work on mac?
             configureWindow?.Invoke(window);
 
+            ApplyRightToLeftSettings(window);
+
             await window.ShowDialog(owner);
 
             return viewModel;
@@ -145,6 +156,17 @@ namespace Nikse.SubtitleEdit.Logic
         {
             var window = _serviceProvider.GetRequiredService<T>();
             return window;
+        }
+
+        /// <summary>
+        /// Applies RTL settings to the window if the setting is enabled.
+        /// </summary>
+        private static void ApplyRightToLeftSettings(Window window)
+        {
+            if (Se.Settings.Appearance.RightToLeftOnlyGridAndText && Se.Settings.Appearance.RightToLeft)
+            {
+                RightToLeftHelper.SetRightToLeftForDataGridAndText(window);
+            }
         }
     }
 }

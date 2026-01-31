@@ -6359,6 +6359,14 @@ public partial class MainViewModel :
 
         Dispatcher.UIThread.Post(() =>
         {
+            if (Se.Settings.Appearance.RightToLeftOnlyGridAndText)
+            {
+                Se.Settings.Appearance.RightToLeft = !Se.Settings.Appearance.RightToLeft;
+                IsRightToLeftEnabled = Se.Settings.Appearance.RightToLeft;
+                RightToLeftHelper.SetRightToLeftForDataGridAndText(Window);
+                return;
+            }
+
             if (Window.FlowDirection == FlowDirection.RightToLeft)
             {
                 IsRightToLeftEnabled = false;
