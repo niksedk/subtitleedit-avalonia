@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Features.Main;
+using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
 
@@ -138,6 +139,8 @@ public class LanguageSettingsShortcuts
     public string ToggleFocusTextBoxAndWaveform { get; set; }
     public string ToggleFocusTextBoxAndGrid { get; set; }
     public string GoToPreviousLineAndSetVideoPosition { get; set; }
+    public string GoToPreviousLineFromVideoPosition { get; set; }
+    public string GoToNextLineFromVideoPosition { get; set; }
     public string GoToNextLineAndSetVideoPosition { get; set; }
     public string TextBoxDeleteSelectionNoClipboard { get; set; }
     public string TextBoxCut { get; set; }
@@ -388,6 +391,8 @@ public class LanguageSettingsShortcuts
         ToggleFocusTextBoxAndGrid = "Toggle focus between text box and subtitle grid";
         GoToPreviousLineAndSetVideoPosition = "Go to previous subtitle and set video position";
         GoToNextLineAndSetVideoPosition = "Go to next subtitle and set video position";
+        GoToPreviousLineFromVideoPosition = "Go to previous subtitle (from current video position)";
+        GoToNextLineFromVideoPosition = "Go to next subtitle (from current video position)";
         TextBoxDeleteSelectionNoClipboard = "Text box: Delete selection (no clipboard)";
         TextBoxCut = "Text box: Cut";
         TextBoxCut2 = "Text box: Cut (alternative)";

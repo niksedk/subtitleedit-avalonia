@@ -6631,6 +6631,77 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void GoToNextLineFromVideoPosition()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        // find first line after current video position with duration less than 10 seconds (to avoid jumping to very long lines like ASSA background effects)
+        var firstLineAfterPosition = Subtitles.FirstOrDefault(s => s.StartTime.TotalSeconds > vp.Position && s.Duration.TotalSeconds < 10);
+
+        if (firstLineAfterPosition == null)
+        {
+            // find first line after current video position regardless of duration
+            firstLineAfterPosition = Subtitles.FirstOrDefault(s => s.StartTime.TotalSeconds > vp.Position);
+        }
+
+        if (firstLineAfterPosition == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(firstLineAfterPosition);
+        var next = Subtitles.GetOrNull(idx);
+        if (next == null)
+        {
+            return;
+        }
+
+        vp.Position = next.StartTime.TotalSeconds;  
+        SelectAndScrollToRow(idx);
+        AudioVisualizerCenterOnPositionIfNeeded(next, next.StartTime.TotalSeconds);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void GoToPreviousLineFromVideoPosition()
+    {
+        var vp = GetVideoPlayerControl();
+        if (vp == null)
+        {
+            return;
+        }
+
+        // find first line before current video position with duration less than 10 seconds (to avoid jumping to very long lines like ASSA background effects)
+        var firstLineBeforePosition = Subtitles.LastOrDefault(s => s.StartTime.TotalSeconds < vp.Position - 0.001 && s.Duration.TotalSeconds < 10);
+        if (firstLineBeforePosition == null)
+        {
+            // find first line before current video position regardless of duration
+            firstLineBeforePosition = Subtitles.LastOrDefault(s => s.StartTime.TotalSeconds < vp.Position - 0.001);
+        }
+
+        if (firstLineBeforePosition == null)
+        {
+            return;
+        }
+
+        var idx = Subtitles.IndexOf(firstLineBeforePosition);
+        var previous = Subtitles.GetOrNull(idx);
+        if (previous == null)
+        {
+            return;
+        }
+
+        vp.Position = previous.StartTime.TotalSeconds;
+        SelectAndScrollToRow(idx);
+        AudioVisualizerCenterOnPositionIfNeeded(previous, previous.StartTime.TotalSeconds);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void FocusSelectedLine()
     {
         var idx = SelectedSubtitleIndex ?? -1;
