@@ -867,6 +867,7 @@ public partial class MainViewModel :
             return;
         }
 
+        AddToRecentFiles(true);
         ResetSubtitle();
         VideoCloseFile();
         AddToRecentFiles(false);
@@ -881,6 +882,7 @@ public partial class MainViewModel :
             return;
         }
 
+        AddToRecentFiles(true);
         ResetSubtitle();
         AddToRecentFiles(false);
     }
@@ -1098,6 +1100,14 @@ public partial class MainViewModel :
     [RelayCommand]
     private void CommandFileReopen(RecentFile recentFile)
     {
+        var idx = SelectedSubtitleIndex;
+        if (idx.HasValue &&
+            recentFile.VideoFileName == _videoFileName &&
+            recentFile.SubtitleFileName == _subtitleFileName)
+        {
+            recentFile.SelectedLine = idx.Value;
+        }
+
         Dispatcher.UIThread.Post(async void () =>
         {
             var doContinue = await HasChangesContinue();
