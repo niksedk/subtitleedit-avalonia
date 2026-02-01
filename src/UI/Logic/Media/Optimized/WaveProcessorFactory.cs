@@ -1,6 +1,4 @@
 using Nikse.SubtitleEdit.Core.Common;
-using Nikse.SubtitleEdit.Logic.Config;
-using System;
 using System.IO;
 using System.Threading;
 
