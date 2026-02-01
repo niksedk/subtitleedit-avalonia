@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace Nikse.SubtitleEdit.Logic.Media.Optimized;
 
 /// <summary>
-/// Shared helper for reading WAV sample data efficiently.
+/// Shared helper functions for reading WAV sample data efficiently.
 /// Eliminates code duplication across peak and spectrogram generators.
 /// </summary>
 public static class WaveDataReader
@@ -79,7 +79,7 @@ public static class WaveDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ReadValue16Bit(byte[] data, ref int index)
     {
-        int result = (short)((data[index]) | (data[index + 1] << 8));
+        int result = (short)(data[index] | (data[index + 1] << 8));
         index += 2;
         return result;
     }
@@ -95,7 +95,7 @@ public static class WaveDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ReadValue32Bit(byte[] data, ref int index)
     {
-        int result = (data[index]) | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
+        int result = data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
         index += 4;
         return result;
     }
@@ -111,7 +111,7 @@ public static class WaveDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ReadValue16BitSpan(ReadOnlySpan<byte> data, ref int index)
     {
-        int result = (short)((data[index]) | (data[index + 1] << 8));
+        int result = (short)(data[index] | (data[index + 1] << 8));
         index += 2;
         return result;
     }
@@ -127,7 +127,7 @@ public static class WaveDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ReadValue32BitSpan(ReadOnlySpan<byte> data, ref int index)
     {
-        int result = (data[index]) | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
+        int result = data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
         index += 4;
         return result;
     }
