@@ -496,7 +496,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.GoToNextShotChangeCommand, nameof(vm.GoToNextShotChangeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedLinesToNextShotChangeOrNextSubtitleCommand, nameof(vm.ExtendSelectedLinesToNextShotChangeOrNextSubtitleCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SnapSelectedLinesToNearestShotChangeCommand, nameof(vm.SnapSelectedLinesToNearestShotChangeCommand), ShortcutCategory.General);   
-        AddShortcut(shortcuts, vm.MoveAllShotChangeOneFrameBackCommand, nameof(vm.MoveAllShotChangeOneFrameBackCommand), ShortcutCategory.General);   
+        AddShortcut(shortcuts, vm.MoveAllShotChangeOneFrameBackCommand, nameof(vm.MoveAllShotChangeOneFrameBackCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.MoveAllShotChangeOneFrameForwardCommand, nameof(vm.MoveAllShotChangeOneFrameForwardCommand), ShortcutCategory.General);   
 
         AddShortcut(shortcuts, vm.ResetWaveformZoomAndSpeedCommand, nameof(vm.ResetWaveformZoomAndSpeedCommand), ShortcutCategory.General);

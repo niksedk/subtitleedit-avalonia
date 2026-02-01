@@ -396,7 +396,7 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        
+
         if (e.Key == Key.Escape)
         {
             _interactionMode = InteractionMode.None;
@@ -441,7 +441,7 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        
+
         var point = e.GetPosition(this);
         if (!_isCtrlDown && !_isAltDown && !_isShiftDown && e.Pointer.IsPrimary)
         {
@@ -579,7 +579,7 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        
+
         var nsp = NewSelectionParagraph;
         if (nsp is { Duration.TotalMilliseconds: <= 1 })
         {
@@ -591,7 +591,19 @@ public class AudioVisualizer : Control
         if (nsp == null && e.InitialPressMouseButton == MouseButton.Right && Se.Settings.Waveform.RightClickSelectsSubtitle)
         {
             var p = HitTestParagraph(pos);
-            OnSelectRequested?.Invoke(this, new ParagraphEventArgs(RelativeXPositionToSeconds(pos.X), p));
+
+            if (_isCtrlDown)
+            {
+                OnToggleSelection?.Invoke(this, new ParagraphEventArgs(RelativeXPositionToSeconds(pos.X), p));
+            }
+            else
+            {
+                OnSelectRequested?.Invoke(this, new ParagraphEventArgs(RelativeXPositionToSeconds(pos.X), p));
+            }
+
+            _interactionMode = InteractionMode.None;
+            _activeParagraph = null;
+            return;
         }
 
         var showContextMenu = false;
@@ -623,7 +635,7 @@ public class AudioVisualizer : Control
             MenuFlyout.ShowAt(this, true);
             return;
         }
-        
+
         if (nsp is { Duration.TotalMilliseconds: > 1 })
         {
             nsp.UpdateDuration();
@@ -710,7 +722,7 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        
+
         _lastPointerPressed = Environment.TickCount64;
         e.Handled = true;
         var point = e.GetPosition(this);
