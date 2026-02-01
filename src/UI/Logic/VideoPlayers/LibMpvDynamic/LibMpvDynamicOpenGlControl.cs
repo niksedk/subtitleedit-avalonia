@@ -134,13 +134,15 @@ public class LibMpvDynamicOpenGlControl : OpenGlControlBase
 
     protected override void OnOpenGlDeinit(GlInterface gl)
     {
-        //if (_mpvPlayer != null)
-        //{
-        //    _mpvPlayer.RequestRender -= OnMpvRequestRender;
-        //    _mpvPlayer.Dispose();
-        //    _mpvPlayer = null;
-        //}
+        // Unsubscribe from render events to prevent memory leaks and zombie handlers
+        if (_mpvPlayer != null)
+        {
+            _mpvPlayer.RequestRender -= OnMpvRequestRender;
+            // Note: Don't dispose _mpvPlayer here - it may be owned by a parent ViewModel
+            // and could be reused. The owner is responsible for disposal.
+        }
 
+        _isInitialized = false;
         base.OnOpenGlDeinit(gl);
     }
 

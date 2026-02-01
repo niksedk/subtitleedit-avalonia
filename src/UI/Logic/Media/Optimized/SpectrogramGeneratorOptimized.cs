@@ -15,6 +15,7 @@ public class SpectrogramGeneratorOptimized
 {
     private const int FftSize = 256;
     private const int ImageWidth = 1024;
+    private const int StreamingBufferSize = 32 * 1024 * 1024; // 32MB buffer for streaming reads
     
     private readonly WaveHeader2 _header;
     private readonly Stream _stream;
@@ -27,86 +28,143 @@ public class SpectrogramGeneratorOptimized
     
     public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, CancellationToken token)
     {
+        double sampleDuration = (double)FftSize / _header.SampleRate;
+
+        // Check if spectrogram already exists and is valid
+        if (Configuration.Settings.VideoControls.UseBinarySpectrogramFormat && BinarySpectrogramFormat.Exists(spectrogramDirectory))
+        {
+            // If exists, try to load it instead of regenerating
+            try 
+            {
+                var loader = BinarySpectrogramFormat.CreateMemoryMappedLoader(spectrogramDirectory);
+                if (loader != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[PERF] Spectrogram already exists (memory mapped), skipping generation");
+                    return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, new BinarySpectrogramFormat.SpectrogramImageList(loader));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[WARN] Failed to load existing spectrogram: {ex.Message}. Regenerating.");
+            }
+        }
+
         var totalSw = System.Diagnostics.Stopwatch.StartNew();
         
         int delaySampleCount = (int)(_header.SampleRate * (delayInMilliseconds / TimeCode.BaseUnit));
         delaySampleCount = Math.Max(delaySampleCount, 0);
         
-        int chunkSampleCount = FftSize * ImageWidth;
+        int chunkSampleCount = FftSize * ImageWidth; // Samples per spectrogram image
         long fileSampleCount = _header.LengthInSamples;
         int chunkCount = (int)Math.Ceiling((double)(fileSampleCount + delaySampleCount) / chunkSampleCount);
         
         Directory.CreateDirectory(spectrogramDirectory);
         
-        // Phase 1: Read all samples into memory (sequential I/O is faster)
-        var readSw = System.Diagnostics.Stopwatch.StartNew();
-        var allSamples = ReadAllSamples(delaySampleCount, chunkSampleCount, chunkCount);
-        readSw.Stop();
-        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized: Read {chunkCount} chunks ({allSamples.Length} samples) in {readSw.ElapsedMilliseconds}ms");
-        
-        if (token.IsCancellationRequested) return CreateEmptyResult();
-        
-        // Phase 2: Generate spectrograms in parallel
+        // Use streaming approach: read audio in batches, process in parallel, save immediately
         var processSw = System.Diagnostics.Stopwatch.StartNew();
-        var images = new SKBitmap[chunkCount];
-        var parallelOptions = new ParallelOptions 
-        { 
-            MaxDegreeOfParallelism = Environment.ProcessorCount,
-            CancellationToken = token 
-        };
         
+        // Calculate how many chunks we can process per batch based on buffer size
+        int bytesPerChunk = chunkSampleCount * _header.BlockAlign;
+        int chunksPerBatch = Math.Max(1, StreamingBufferSize / bytesPerChunk);
+        chunksPerBatch = Math.Min(chunksPerBatch, Environment.ProcessorCount * 4); // Limit batch size
+        
+        var images = new SKBitmap[chunkCount];
+        double sampleAndChannelScale = WaveDataReader.GetSampleAndChannelScale(_header.BytesPerSample, _header.NumberOfChannels);
+        
+        _stream.Seek(_header.DataStartPosition, SeekOrigin.Begin);
+        
+        int processedChunks = 0;
+        long fileSampleOffset = -delaySampleCount;
+        
+        // Rent a buffer for streaming reads
+        var buffer = WaveDataReader.RentBuffer(StreamingBufferSize);
         try
         {
-            Parallel.For(0, chunkCount, parallelOptions, chunkIndex =>
+            while (processedChunks < chunkCount && !token.IsCancellationRequested)
             {
-                var drawer = new SpectrogramDrawerOptimized(FftSize);
-                var chunkSamples = ExtractChunkSamples(allSamples, chunkIndex, chunkSampleCount);
-                images[chunkIndex] = drawer.Draw(chunkSamples);
-            });
+                int batchSize = Math.Min(chunksPerBatch, chunkCount - processedChunks);
+                
+                // Read audio data for this batch
+                var batchSamples = ReadBatchSamples(
+                    buffer, batchSize, chunkSampleCount, 
+                    ref fileSampleOffset, fileSampleCount, sampleAndChannelScale);
+                
+                if (token.IsCancellationRequested) break;
+                
+                // Process batch in parallel
+                var parallelOptions = new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Environment.ProcessorCount,
+                    CancellationToken = token
+                };
+                
+                int batchStartIndex = processedChunks;
+                try
+                {
+                    Parallel.For(0, batchSize, parallelOptions, i =>
+                    {
+                        var drawer = new SpectrogramDrawerOptimized(FftSize);
+                        images[batchStartIndex + i] = drawer.Draw(batchSamples[i]);
+                    });
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                
+                processedChunks += batchSize;
+                
+                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram: Processed {processedChunks}/{chunkCount} chunks");
+            }
         }
-        catch (OperationCanceledException)
+        finally
         {
-            return CreateEmptyResult();
+            WaveDataReader.ReturnBuffer(buffer);
         }
+        
         processSw.Stop();
         System.Diagnostics.Debug.WriteLine($"[PERF] Optimized: Generated {chunkCount} spectrograms in {processSw.ElapsedMilliseconds}ms ({Environment.ProcessorCount} threads)");
         
-        if (token.IsCancellationRequested) return CreateEmptyResult();
+        if (token.IsCancellationRequested) 
+            return CreateEmptyResult(sampleDuration);
         
-        // Phase 3: Save images
+        // Filter out null images if cancelled mid-way
+        var validImages = new SKBitmap[processedChunks];
+        Array.Copy(images, validImages, processedChunks);
+        
+        // Save images
         var saveSw = System.Diagnostics.Stopwatch.StartNew();
         
         if (Configuration.Settings.VideoControls.UseBinarySpectrogramFormat)
         {
-            // Binary format: single file, no encoding overhead
-            BinarySpectrogramFormat.Save(images, spectrogramDirectory);
+            BinarySpectrogramFormat.Save(validImages, spectrogramDirectory);
         }
         else
         {
-            // Legacy JPEG format: multiple files
-            var saveOptions = new ParallelOptions 
-            { 
+            // Legacy JPEG format
+            var saveOptions = new ParallelOptions
+            {
                 MaxDegreeOfParallelism = 4,
-                CancellationToken = token 
+                CancellationToken = token
             };
             
             try
             {
-                Parallel.For(0, chunkCount, saveOptions, chunkIndex =>
+                Parallel.For(0, validImages.Length, saveOptions, chunkIndex =>
                 {
                     string imagePath = Path.Combine(spectrogramDirectory, chunkIndex + ".jpg");
                     using var stream = File.OpenWrite(imagePath);
-                    using var imageData = images[chunkIndex].Encode(SKEncodedImageFormat.Jpeg, 50);
+                    using var imageData = validImages[chunkIndex].Encode(SKEncodedImageFormat.Jpeg, 50);
                     imageData.SaveTo(stream);
                 });
             }
             catch (OperationCanceledException)
             {
-                return CreateEmptyResult();
+                return CreateEmptyResult(sampleDuration);
             }
         }
         saveSw.Stop();
-        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized: Saved {chunkCount} images in {saveSw.ElapsedMilliseconds}ms");
+        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized: Saved {validImages.Length} images in {saveSw.ElapsedMilliseconds}ms");
         
         // Save metadata
         SaveMetadata(spectrogramDirectory, chunkSampleCount, token);
@@ -114,79 +172,68 @@ public class SpectrogramGeneratorOptimized
         totalSw.Stop();
         System.Diagnostics.Debug.WriteLine($"[PERF] Optimized TOTAL: {chunkCount} chunks in {totalSw.ElapsedMilliseconds}ms (avg: {totalSw.ElapsedMilliseconds / (double)chunkCount:F2}ms/chunk, {_header.LengthInSeconds:F1}s audio)");
         
-        double sampleDuration = (double)FftSize / _header.SampleRate;
-        return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, images);
+        return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, validImages);
     }
     
-    private double[] ReadAllSamples(int delaySampleCount, int chunkSampleCount, int chunkCount)
+    /// <summary>
+    /// Reads a batch of sample arrays for parallel processing.
+    /// </summary>
+    private double[][] ReadBatchSamples(
+        byte[] buffer, int batchSize, int chunkSampleCount,
+        ref long fileSampleOffset, long fileSampleCount, double sampleAndChannelScale)
     {
-        long fileSampleCount = _header.LengthInSamples;
-        long fileSampleOffset = -delaySampleCount;
-        int totalSamples = chunkSampleCount * chunkCount;
-        var allSamples = new double[totalSamples];
+        var batchSamples = new double[batchSize][];
+        int blockAlign = _header.BlockAlign;
+        int bytesPerSample = _header.BytesPerSample;
+        int numberOfChannels = _header.NumberOfChannels;
         
-        var readSampleDataValue = GetSampleDataReader();
-        double sampleAndChannelScale = GetSampleAndChannelScale();
-        byte[] data = new byte[chunkSampleCount * _header.BlockAlign];
-        
-        _stream.Seek(_header.DataStartPosition, SeekOrigin.Begin);
-        
-        if (fileSampleOffset > 0)
+        for (int chunkIdx = 0; chunkIdx < batchSize; chunkIdx++)
         {
-            _stream.Seek(fileSampleOffset * _header.BlockAlign, SeekOrigin.Current);
-        }
-        
-        int globalSampleOffset = 0;
-        
-        for (var iChunk = 0; iChunk < chunkCount; iChunk++)
-        {
-            int startPaddingSampleCount = 0;
+            var chunkSamples = new double[chunkSampleCount];
+            batchSamples[chunkIdx] = chunkSamples;
+            
+            int sampleIndex = 0;
+            
+            // Handle delay (padding at start)
             if (fileSampleOffset < 0)
             {
-                startPaddingSampleCount = (int)Math.Min(-fileSampleOffset, chunkSampleCount);
-                fileSampleOffset += startPaddingSampleCount;
+                int paddingSamples = (int)Math.Min(-fileSampleOffset, chunkSampleCount);
+                // Samples are already zero-initialized
+                sampleIndex = paddingSamples;
+                fileSampleOffset += paddingSamples;
             }
             
-            long fileSamplesRemaining = fileSampleCount - Math.Max(fileSampleOffset, 0);
-            int fileReadSampleCount = (int)Math.Min(fileSamplesRemaining, chunkSampleCount - startPaddingSampleCount);
-            int endPaddingSampleCount = chunkSampleCount - startPaddingSampleCount - fileReadSampleCount;
+            // Read from file
+            int samplesToRead = chunkSampleCount - sampleIndex;
+            long availableSamples = fileSampleCount - Math.Max(0, fileSampleOffset);
+            samplesToRead = (int)Math.Min(samplesToRead, availableSamples);
             
-            // Start padding (zeros)
-            globalSampleOffset += startPaddingSampleCount;
-            
-            // Read samples
-            if (fileReadSampleCount > 0)
+            if (samplesToRead > 0)
             {
-                int fileReadByteCount = fileReadSampleCount * _header.BlockAlign;
-                _ = _stream.Read(data, 0, fileReadByteCount);
-                fileSampleOffset += fileReadSampleCount;
+                int bytesToRead = samplesToRead * blockAlign;
+                int bytesRead = _stream.Read(buffer, 0, bytesToRead);
                 
-                int dataByteOffset = 0;
-                while (dataByteOffset < fileReadByteCount)
+                int bufferOffset = 0;
+                while (bufferOffset < bytesRead && sampleIndex < chunkSampleCount)
                 {
-                    double value = 0D;
-                    for (int iChannel = 0; iChannel < _header.NumberOfChannels; iChannel++)
+                    double value = 0.0;
+                    for (int iChannel = 0; iChannel < numberOfChannels; iChannel++)
                     {
-                        value += readSampleDataValue(data, ref dataByteOffset);
+                        if (bufferOffset + bytesPerSample <= bytesRead)
+                        {
+                            value += WaveDataReader.ReadSampleValue(buffer, ref bufferOffset, bytesPerSample);
+                        }
                     }
-                    allSamples[globalSampleOffset] = value * sampleAndChannelScale;
-                    globalSampleOffset++;
+                    chunkSamples[sampleIndex++] = value * sampleAndChannelScale;
                 }
+                
+                fileSampleOffset += samplesToRead;
             }
             
-            // End padding (zeros already default)
-            globalSampleOffset += endPaddingSampleCount;
+            // Remaining samples stay zero (end padding)
         }
         
-        return allSamples;
-    }
-    
-    private static double[] ExtractChunkSamples(double[] allSamples, int chunkIndex, int chunkSampleCount)
-    {
-        var chunkSamples = new double[chunkSampleCount];
-        int startIndex = chunkIndex * chunkSampleCount;
-        Array.Copy(allSamples, startIndex, chunkSamples, 0, chunkSampleCount);
-        return chunkSamples;
+        return batchSamples;
     }
     
     private void SaveMetadata(string spectrogramDirectory, int chunkSampleCount, CancellationToken token)
@@ -209,56 +256,8 @@ public class SpectrogramGeneratorOptimized
         doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
     }
     
-    private SpectrogramData2 CreateEmptyResult()
+    private SpectrogramData2 CreateEmptyResult(double sampleDuration)
     {
-        double sampleDuration = (double)FftSize / _header.SampleRate;
         return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, Array.Empty<SKBitmap>());
-    }
-    
-    private delegate int ReadSampleDataValue(byte[] data, ref int index);
-    
-    private ReadSampleDataValue GetSampleDataReader()
-    {
-        return _header.BytesPerSample switch
-        {
-            1 => ReadValue8Bit,
-            2 => ReadValue16Bit,
-            3 => ReadValue24Bit,
-            4 => ReadValue32Bit,
-            _ => throw new InvalidDataException("Cannot read bits per sample of " + _header.BitsPerSample)
-        };
-    }
-    
-    private double GetSampleAndChannelScale()
-    {
-        return (1.0 / Math.Pow(2.0, _header.BytesPerSample * 8 - 1)) / _header.NumberOfChannels;
-    }
-    
-    private static int ReadValue8Bit(byte[] data, ref int index)
-    {
-        int result = sbyte.MinValue + data[index];
-        index += 1;
-        return result;
-    }
-    
-    private static int ReadValue16Bit(byte[] data, ref int index)
-    {
-        int result = (short)((data[index]) | (data[index + 1] << 8));
-        index += 2;
-        return result;
-    }
-    
-    private static int ReadValue24Bit(byte[] data, ref int index)
-    {
-        int result = ((data[index] << 8) | (data[index + 1] << 16) | (data[index + 2] << 24)) >> 8;
-        index += 3;
-        return result;
-    }
-    
-    private static int ReadValue32Bit(byte[] data, ref int index)
-    {
-        int result = (data[index]) | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
-        index += 4;
-        return result;
     }
 }

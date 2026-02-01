@@ -326,11 +326,22 @@ public class SpectrogramData2 : IDisposable
             if (BinarySpectrogramFormat.Exists(directory))
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
+                
+                // Try lazy loading first (memory optimized)
+                var lazyLoader = BinarySpectrogramFormat.CreateLazyLoader(directory);
+                if (lazyLoader != null)
+                {
+                    Images = new BinarySpectrogramFormat.SpectrogramImageList(lazyLoader);
+                    sw.Stop();
+                    System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load (binary lazy): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                    return;
+                }
+
                 var memBefore = GC.GetTotalMemory(false);
                 Images = BinarySpectrogramFormat.Load(directory);
                 sw.Stop();
                 var memAfter = GC.GetTotalMemory(false);
-                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load (binary): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram sync load (binary full): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
                 System.Diagnostics.Debug.WriteLine($"[MEM] Spectrogram load: {(memAfter - memBefore) / (1024.0 * 1024.0):F1}MB allocated");
                 return;
             }
@@ -397,11 +408,22 @@ public class SpectrogramData2 : IDisposable
             if (BinarySpectrogramFormat.Exists(directory))
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
+                
+                // Try lazy loading first (memory optimized)
+                var lazyLoader = await Task.Run(() => BinarySpectrogramFormat.CreateLazyLoader(directory), cancellationToken);
+                if (lazyLoader != null)
+                {
+                    Images = new BinarySpectrogramFormat.SpectrogramImageList(lazyLoader);
+                    sw.Stop();
+                    System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram async load (binary lazy): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                    return;
+                }
+
                 var memBefore = GC.GetTotalMemory(false);
                 Images = await Task.Run(() => BinarySpectrogramFormat.Load(directory), cancellationToken);
                 sw.Stop();
                 var memAfter = GC.GetTotalMemory(false);
-                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram async load (binary): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
+                System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram async load (binary full): {Images.Count} chunks in {sw.ElapsedMilliseconds}ms");
                 System.Diagnostics.Debug.WriteLine($"[MEM] Spectrogram load: {(memAfter - memBefore) / (1024.0 * 1024.0):F1}MB allocated");
                 return;
             }
@@ -446,15 +468,22 @@ public class SpectrogramData2 : IDisposable
 
     public void Dispose()
     {
-        foreach (var image in Images)
+        if (Images is IDisposable disposableList)
         {
-            try
+            disposableList.Dispose();
+        }
+        else
+        {
+            foreach (var image in Images)
             {
-                image.Dispose();
-            }
-            catch
-            {
-                // ignore
+                try
+                {
+                    image.Dispose();
+                }
+                catch
+                {
+                    // ignore
+                }
             }
         }
         Images = Array.Empty<SKBitmap>();

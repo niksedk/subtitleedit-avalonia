@@ -9,6 +9,8 @@ namespace Nikse.SubtitleEdit.Logic.Media.Optimized;
 
 public class PeakGeneratorOptimized
 {
+    private const int StreamingBufferSize = 32 * 1024 * 1024; // 32MB buffer for streaming reads
+    
     private readonly WaveHeader2 _header;
     private readonly Stream _stream;
     
@@ -32,161 +34,256 @@ public class PeakGeneratorOptimized
         int delaySampleCount = (int)(_header.SampleRate * (delayInMilliseconds / TimeCode.BaseUnit));
         delaySampleCount = Math.Max(delaySampleCount, 0);
         
-        float sampleAndChannelScale = (float)GetSampleAndChannelScale();
+        float sampleAndChannelScale = (float)WaveDataReader.GetSampleAndChannelScale(_header.BytesPerSample, _header.NumberOfChannels);
         long fileSampleCount = _header.LengthInSamples;
-        long fileSampleOffset = -delaySampleCount;
-        int chunkSampleCount = _header.SampleRate / peaksPerSecond;
+        int samplesPerPeak = _header.SampleRate / peaksPerSecond;
+        int totalPeaks = (int)Math.Ceiling((double)(fileSampleCount + delaySampleCount) / samplesPerPeak);
         
-        // Read all data at once for better I/O performance
+        var peaks = new List<WavePeak2>(totalPeaks);
+        
+        // Add delay peaks (silence at the beginning)
+        int delayPeakCount = delaySampleCount / samplesPerPeak;
+        for (int i = 0; i < delayPeakCount; i++)
+        {
+            peaks.Add(new WavePeak2(0, 0));
+        }
+        
+        // Calculate remaining delay samples after full peaks
+        int remainingDelaySamples = delaySampleCount % samplesPerPeak;
+        
+        // Streaming read with pooled buffer
         var readSw = System.Diagnostics.Stopwatch.StartNew();
         _stream.Seek(_header.DataStartPosition, SeekOrigin.Begin);
         
-        if (fileSampleOffset > 0)
+        var buffer = WaveDataReader.RentBuffer(StreamingBufferSize);
+        try
         {
-            _stream.Seek(fileSampleOffset * _header.BlockAlign, SeekOrigin.Current);
-        }
-        
-        int totalChunks = (int)Math.Ceiling((double)(fileSampleCount + delaySampleCount) / chunkSampleCount);
-        var allData = new byte[_header.DataChunkSize];
-        int bytesRead = _stream.Read(allData, 0, allData.Length);
-        readSw.Stop();
-        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks: Read {bytesRead / 1024}KB in {readSw.ElapsedMilliseconds}ms");
-        
-        // Process peaks in parallel
-        var processSw = System.Diagnostics.Stopwatch.StartNew();
-        var peaks = new WavePeak2[totalChunks];
-        int blockAlign = _header.BlockAlign;
-        int bytesPerSample = _header.BytesPerSample;
-        int numberOfChannels = _header.NumberOfChannels;
-        int bytesPerChunk = chunkSampleCount * blockAlign;
-        
-        int threadCount = Math.Min(Environment.ProcessorCount, 16);
-        Parallel.For(0, totalChunks, new ParallelOptions { MaxDegreeOfParallelism = threadCount }, chunkIndex =>
-        {
-            long chunkFileSampleOffset = (long)chunkIndex * chunkSampleCount - delaySampleCount;
+            int blockAlign = _header.BlockAlign;
+            int bytesPerSample = _header.BytesPerSample;
+            int numberOfChannels = _header.NumberOfChannels;
+            int bytesPerPeak = samplesPerPeak * blockAlign;
             
-            int startSkipSampleCount = 0;
-            if (chunkFileSampleOffset < 0)
+            long totalBytesToRead = _header.DataChunkSize;
+            long bytesRead = 0;
+            
+            // Accumulator for samples across buffer boundaries
+            var sampleAccumulator = new List<float>(samplesPerPeak * 2);
+            int samplesNeededForNextPeak = samplesPerPeak - remainingDelaySamples;
+            
+            // Skip samples for partial delay peak (will be filled with zeros)
+            if (remainingDelaySamples > 0)
             {
-                startSkipSampleCount = (int)Math.Min(-chunkFileSampleOffset, chunkSampleCount);
-                chunkFileSampleOffset += startSkipSampleCount;
-            }
-            
-            long fileSamplesRemaining = fileSampleCount - Math.Max(chunkFileSampleOffset, 0);
-            int fileReadSampleCount = (int)Math.Min(fileSamplesRemaining, chunkSampleCount - startSkipSampleCount);
-            
-            if (fileReadSampleCount > 0)
-            {
-                int dataOffset = (int)(chunkFileSampleOffset * blockAlign);
-                if (dataOffset < 0) dataOffset = 0;
-                
-                var chunkSamples = new float[fileReadSampleCount * 2];
-                int chunkSampleOffset = 0;
-                int fileReadByteCount = fileReadSampleCount * blockAlign;
-                int endOffset = Math.Min(dataOffset + fileReadByteCount, bytesRead);
-                
-                while (dataOffset < endOffset)
+                // Add zeros for the remaining delay portion of the first peak
+                for (int i = 0; i < remainingDelaySamples; i++)
                 {
-                    float valuePositive = 0F;
-                    float valueNegative = 0F;
-                    for (int iChannel = 0; iChannel < numberOfChannels; iChannel++)
-                    {
-                        var v = ReadSampleValue(allData, ref dataOffset, bytesPerSample);
-                        if (v < 0)
-                            valueNegative += v;
-                        else
-                            valuePositive += v;
-                    }
-                    
-                    chunkSamples[chunkSampleOffset++] = valueNegative * sampleAndChannelScale;
-                    chunkSamples[chunkSampleOffset++] = valuePositive * sampleAndChannelScale;
+                    sampleAccumulator.Add(0f);
+                    sampleAccumulator.Add(0f);
                 }
-                
-                peaks[chunkIndex] = CalculatePeak(chunkSamples, fileReadSampleCount * 2);
             }
-            else
+            
+            while (bytesRead < totalBytesToRead)
             {
-                peaks[chunkIndex] = new WavePeak2(0, 0);
+                int bytesToRead = (int)Math.Min(StreamingBufferSize, totalBytesToRead - bytesRead);
+                int actualBytesRead = _stream.Read(buffer, 0, bytesToRead);
+                
+                if (actualBytesRead == 0)
+                    break;
+                
+                bytesRead += actualBytesRead;
+                
+                // Process buffer in parallel chunks for better CPU utilization
+                ProcessBufferIntoPeaks(
+                    buffer, actualBytesRead, 
+                    blockAlign, bytesPerSample, numberOfChannels, 
+                    sampleAndChannelScale, samplesPerPeak,
+                    sampleAccumulator, peaks);
             }
-        });
-        processSw.Stop();
-        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks: Processed {peaks.Length} peaks in {processSw.ElapsedMilliseconds}ms ({threadCount} threads)");
-        
-        var peakList = new List<WavePeak2>(peaks);
+            
+            // Handle any remaining samples in accumulator
+            if (sampleAccumulator.Count > 0)
+            {
+                peaks.Add(CalculatePeak(sampleAccumulator));
+            }
+            
+            readSw.Stop();
+            System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks: Streamed {bytesRead / (1024 * 1024)}MB in {readSw.ElapsedMilliseconds}ms");
+        }
+        finally
+        {
+            WaveDataReader.ReturnBuffer(buffer);
+        }
         
         // Save results
         if (!string.IsNullOrWhiteSpace(peakFileName))
         {
             var saveSw = System.Diagnostics.Stopwatch.StartNew();
             using var stream = File.Create(peakFileName);
-            WavePeakGenerator2.WriteWaveformData(stream, peaksPerSecond, peakList);
+            WavePeakGenerator2.WriteWaveformData(stream, peaksPerSecond, peaks);
             saveSw.Stop();
             System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks: Saved in {saveSw.ElapsedMilliseconds}ms");
         }
         
         totalSw.Stop();
-        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks TOTAL: {peakList.Count} peaks in {totalSw.ElapsedMilliseconds}ms ({_header.LengthInSeconds:F1}s audio)");
+        System.Diagnostics.Debug.WriteLine($"[PERF] Optimized Peaks TOTAL: {peaks.Count} peaks in {totalSw.ElapsedMilliseconds}ms ({_header.LengthInSeconds:F1}s audio)");
         
-        return new WavePeakData2(peaksPerSecond, peakList);
+        return new WavePeakData2(peaksPerSecond, peaks);
     }
     
-    private static int ReadSampleValue(byte[] data, ref int index, int bytesPerSample)
+    private void ProcessBufferIntoPeaks(
+        byte[] buffer, int bufferLength,
+        int blockAlign, int bytesPerSample, int numberOfChannels,
+        float sampleAndChannelScale, int samplesPerPeak,
+        List<float> sampleAccumulator, List<WavePeak2> peaks)
     {
-        return bytesPerSample switch
+        int offset = 0;
+        
+        // 1. Handle Start Residual (Serial)
+        if (sampleAccumulator.Count > 0)
         {
-            1 => ReadValue8Bit(data, ref index),
-            2 => ReadValue16Bit(data, ref index),
-            3 => ReadValue24Bit(data, ref index),
-            4 => ReadValue32Bit(data, ref index),
-            _ => throw new InvalidDataException("Cannot read bytes per sample of " + bytesPerSample)
-        };
+            // We need 2 accumulated values per sample (pos/neg)
+            // Total samples needed for one peak is samplesPerPeak
+            // Total accumulated values needed is samplesPerPeak * 2
+            int valuesNeeded = samplesPerPeak * 2 - sampleAccumulator.Count;
+            int samplesNeeded = valuesNeeded / 2;
+            int bytesNeeded = samplesNeeded * blockAlign;
+            
+            if (bytesNeeded > bufferLength)
+            {
+                // Buffer is too small to even finish the current peak
+                AppendSamplesToAccumulator(buffer, 0, bufferLength, blockAlign, bytesPerSample, numberOfChannels, sampleAndChannelScale, sampleAccumulator);
+                return;
+            }
+            
+            AppendSamplesToAccumulator(buffer, 0, bytesNeeded, blockAlign, bytesPerSample, numberOfChannels, sampleAndChannelScale, sampleAccumulator);
+            peaks.Add(CalculatePeak(sampleAccumulator));
+            sampleAccumulator.Clear();
+            offset += bytesNeeded;
+        }
+        
+        // 2. Parallel Processing of Full Peaks
+        int remainingBytes = bufferLength - offset;
+        int remainingFrames = remainingBytes / blockAlign;
+        int fullPeaksCount = remainingFrames / samplesPerPeak;
+        
+        if (fullPeaksCount > 0)
+        {
+            var parallelPeaks = new WavePeak2[fullPeaksCount];
+            int parallelOptions = Environment.ProcessorCount;
+            
+            Parallel.For(0, fullPeaksCount, new ParallelOptions { MaxDegreeOfParallelism = parallelOptions }, i =>
+            {
+                int peakStartOffset = offset + (i * samplesPerPeak * blockAlign);
+                parallelPeaks[i] = CalculatePeakFromBuffer(
+                    buffer, peakStartOffset, 
+                    samplesPerPeak, 
+                    blockAlign, bytesPerSample, numberOfChannels, 
+                    sampleAndChannelScale);
+            });
+            
+            peaks.AddRange(parallelPeaks);
+            
+            offset += fullPeaksCount * samplesPerPeak * blockAlign;
+        }
+        
+        // 3. Handle End Residual (Serial)
+        if (offset < bufferLength)
+        {
+            AppendSamplesToAccumulator(buffer, offset, bufferLength - offset, blockAlign, bytesPerSample, numberOfChannels, sampleAndChannelScale, sampleAccumulator);
+        }
     }
     
-    private static WavePeak2 CalculatePeak(float[] chunk, int count)
+    private static void AppendSamplesToAccumulator(
+        byte[] buffer, int offset, int length,
+        int blockAlign, int bytesPerSample, int numberOfChannels,
+        float scale, List<float> sampleAccumulator)
     {
-        if (count == 0) return new WavePeak2();
+        int endOffset = offset + length;
+        int currentOffset = offset;
         
-        var max = chunk[0];
-        var min = chunk[0];
-        for (var i = 1; i < count; i++)
+        while (currentOffset < endOffset)
         {
-            var value = chunk[i];
+            float valuePositive = 0f;
+            float valueNegative = 0f;
+            
+            for (int iChannel = 0; iChannel < numberOfChannels; iChannel++)
+            {
+                if (currentOffset + bytesPerSample > endOffset)
+                    break;
+                    
+                var v = WaveDataReader.ReadSampleValue(buffer, ref currentOffset, bytesPerSample);
+                if (v < 0)
+                    valueNegative += v;
+                else
+                    valuePositive += v;
+            }
+            
+            sampleAccumulator.Add(valueNegative * scale);
+            sampleAccumulator.Add(valuePositive * scale);
+        }
+    }
+
+    private static WavePeak2 CalculatePeakFromBuffer(
+        byte[] buffer, int startOffset, int samplesToRead,
+        int blockAlign, int bytesPerSample, int numberOfChannels,
+        float scale)
+    {
+        float max = 0f;
+        float min = 0f;
+        bool initialized = false;
+        
+        int offset = startOffset;
+        int endOffset = startOffset + (samplesToRead * blockAlign);
+        
+        while (offset < endOffset)
+        {
+            float valPos = 0f;
+            float valNeg = 0f;
+            
+            for (int c = 0; c < numberOfChannels; c++)
+            {
+                 var v = WaveDataReader.ReadSampleValue(buffer, ref offset, bytesPerSample);
+                 if (v < 0) valNeg += v;
+                 else valPos += v;
+            }
+            
+            float p = valPos * scale;
+            float n = valNeg * scale;
+            
+            if (!initialized) { 
+                max = p; 
+                min = n; 
+                initialized = true; 
+            }
+            else 
+            {
+                if (p > max) max = p;
+                else if (p < min) min = p;
+                
+                if (n > max) max = n;
+                else if (n < min) min = n;
+            }
+        }
+        
+        if (!initialized) return new WavePeak2(0, 0);
+        
+        return new WavePeak2((short)(short.MaxValue * max), (short)(short.MaxValue * min));
+    }
+
+    private static WavePeak2 CalculatePeak(List<float> samples)
+    {
+        if (samples.Count == 0) 
+            return new WavePeak2();
+        
+        var max = samples[0];
+        var min = samples[0];
+        
+        for (var i = 1; i < samples.Count; i++)
+        {
+            var value = samples[i];
             if (value > max) max = value;
             else if (value < min) min = value;
         }
+        
         return new WavePeak2((short)(short.MaxValue * max), (short)(short.MaxValue * min));
-    }
-    
-    private double GetSampleAndChannelScale()
-    {
-        return (1.0 / Math.Pow(2.0, _header.BytesPerSample * 8 - 1)) / _header.NumberOfChannels;
-    }
-    
-    private static int ReadValue8Bit(byte[] data, ref int index)
-    {
-        int result = sbyte.MinValue + data[index];
-        index += 1;
-        return result;
-    }
-    
-    private static int ReadValue16Bit(byte[] data, ref int index)
-    {
-        int result = (short)((data[index]) | (data[index + 1] << 8));
-        index += 2;
-        return result;
-    }
-    
-    private static int ReadValue24Bit(byte[] data, ref int index)
-    {
-        int result = ((data[index] << 8) | (data[index + 1] << 16) | (data[index + 2] << 24)) >> 8;
-        index += 3;
-        return result;
-    }
-    
-    private static int ReadValue32Bit(byte[] data, ref int index)
-    {
-        int result = (data[index]) | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
-        index += 4;
-        return result;
     }
 }

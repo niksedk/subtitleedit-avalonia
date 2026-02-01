@@ -448,7 +448,7 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting("Use Binary Spectrogram Format (faster save/load)", nameof(_vm.UseBinarySpectrogramFormat)),
             new SettingsItem("", () => new TextBlock
             {
-                Text = "⚠️ Uses ~2x more memory but 2x faster. Requires experimental renderer. Delete spectrogram folder to regenerate.",
+                Text = "⚠️ Instant loading + low memory usage (Memory Mapped). Requires experimental renderer. Delete spectrogram folder to regenerate.",
                 FontSize = 11,
                 Foreground = new SolidColorBrush(Color.FromRgb(255, 165, 0)),
                 Margin = new Thickness(20, 0, 0, 5),
