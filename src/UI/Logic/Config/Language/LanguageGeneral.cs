@@ -67,6 +67,7 @@ public class LanguageGeneral
     public string Change { get; set; }
     public string ChangeAll { get; set; }
     public string ChangeCasing { get; set; }
+    public string ChangeFormatting { get; set; }
     public string ChangeFrameRate { get; set; }
     public string ChangeLanguageFilter { get; set; }
     public string ChangeOnce { get; set; }
@@ -678,6 +679,7 @@ public class LanguageGeneral
         Change = "Change";
         ChangeAll = "Change all";
         ChangeCasing = "Change casing";
+        ChangeFormatting = "Change formatting";
         ChangeFrameRate = "Change frame rate";
         ChangeLanguageFilter = "Change language filter...";
         ChangeOnce = "Change once";

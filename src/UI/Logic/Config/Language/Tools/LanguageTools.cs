@@ -10,6 +10,7 @@ public class LanguageTools
     public LanguageSortBy SortBy { get; set; } = new();
     public LanguageBatchConvert BatchConvert { get; set; } = new();
     public LanguageChangeCasing ChangeCasing { get; set; } = new();
+    public LanguageChangeFormatting ChangeFormatting { get; set; } = new();
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();
     public LanguageSplitBreakLongLines SplitBreakLongLines { get; set; } = new();

@@ -120,6 +120,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowBridgeGapsCommand), Se.Language.Options.Shortcuts.BridgeGaps },
         { nameof(MainViewModel.ShowApplyMinGapCommand), Se.Language.Options.Shortcuts.ApplyMinGap },
         { nameof(MainViewModel.ShowToolsChangeCasingCommand), Se.Language.General.ChangeCasing },
+        { nameof(MainViewModel.ShowToolsChangeFormattingCommand), Se.Language.General.ChangeFormatting },
         { nameof(MainViewModel.ShowToolsFixCommonErrorsCommand), Se.Language.Options.Shortcuts.FixCommonErrors },
         { nameof(MainViewModel.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand), Se.Language.Options.Shortcuts.MakeEmptyTranslationFromCurrentSubtitle },
         { nameof(MainViewModel.ShowToolsMergeLinesWithSameTextCommand), Se.Language.Options.Shortcuts.MergeLinesWithSameText },
@@ -426,6 +427,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowToolsBatchConvertCommand, nameof(vm.ShowToolsBatchConvertCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowApplyMinGapCommand, nameof(vm.ShowApplyMinGapCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowToolsChangeCasingCommand, nameof(vm.ShowToolsChangeCasingCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowToolsChangeFormattingCommand, nameof(vm.ShowToolsChangeFormattingCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowToolsFixCommonErrorsCommand, nameof(vm.ShowToolsFixCommonErrorsCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand, nameof(vm.ToolsMakeEmptyTranslationFromCurrentSubtitleCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowToolsMergeLinesWithSameTextCommand, nameof(vm.ShowToolsMergeLinesWithSameTextCommand), ShortcutCategory.General);

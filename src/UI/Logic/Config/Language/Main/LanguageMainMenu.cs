@@ -42,6 +42,7 @@ public class LanguageMainMenu
     public string BridgeGaps { get; set; }
     public string ApplyMinGap { get; set; }
     public string ChangeCasing { get; set; }
+    public string ChangeFormatting { get; set; }
     public string FixCommonErrors { get; set; }
     public string CheckAndFixNetflixErrors { get; set; }
     public string MakeEmptyTranslationFromCurrentSubtitle { get; set; }
@@ -152,6 +153,7 @@ public class LanguageMainMenu
         MergeShortLines = "Merge short lines...";
         RemoveTextForHearingImpaired = "_Remove text for hearing impaired...";
         ChangeCasing = "_Change casing...";
+        ChangeFormatting = "Change formatting...";
         BridgeGaps = "Bridge _gaps...";
         ApplyMinGap = "Apply min. gap between subtitles...";
         BatchConvert = "_Batch convert...";

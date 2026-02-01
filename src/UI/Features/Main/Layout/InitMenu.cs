@@ -388,6 +388,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.ChangeFormatting,
+                Command = vm.ShowToolsChangeFormattingCommand,
+            },
+            new MenuItem
+            {
                 Header = l.FixCommonErrors,
                 Command = vm.ShowToolsFixCommonErrorsCommand,
             },
