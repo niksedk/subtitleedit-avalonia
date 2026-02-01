@@ -173,7 +173,7 @@ public class LanguageMainMenu
         AssaChangeResolution = "Change _resolution...";
         AssaGenerateBackground = "Generate background _boxes...";
         AssaProgressBar = "Generate _progress bar...";
-        AssaApplyCustomOverrideTags = "Apply custom _override tags...";
+        AssaApplyCustomOverrideTags = "Apply _override tags...";
         AssaSetPosition = "_Set position...";
         AssaImageColorPicker = "_Image color picker...";
 

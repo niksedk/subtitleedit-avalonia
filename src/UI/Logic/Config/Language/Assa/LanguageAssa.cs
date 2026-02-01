@@ -27,9 +27,10 @@ public class LanguageAssa
     public string OpenStyleImportFile { get; set; }
     public string Primary { get; set; }
     public string Secondary { get; set; }
-    public string AssaDraw { get; set; }
+    public string ApplyOverrideTags { get; set; }
 
     // ASSA Draw
+    public string AssaDraw { get; set; }
     public string DrawSelectTool { get; set; }
     public string DrawLineTool { get; set; }
     public string DrawBezierTool { get; set; }
@@ -47,9 +48,9 @@ public class LanguageAssa
     public string DrawSelectedPoint { get; set; }
     public string DrawToolX { get; set; }
     public string DrawHelpText { get; set; }
-    public string ProgressBarTitle { get; set; }
 
     // Progress Bar Generator
+    public string ProgressBarTitle { get; set; }
     public string ProgressBarSettings { get; set; }
     public string ProgressBarPosition { get; set; }
     public string ProgressBarBottom { get; set; }
@@ -117,11 +118,10 @@ public class LanguageAssa
         OpenStyleImportFile = "Open subtitle file to import styles from";
         Primary = "Primary";
         Secondary = "Secondary";
-        AssaDraw = "ASSA Draw";
-        ProgressBarTitle = "ASSA progress bar";
-        BackgroundBoxGenerator = "ASSA background box generator";
+        ApplyOverrideTags = "Apply override tags";
 
         // ASSA Draw
+        AssaDraw = "ASSA Draw";
         DrawSelectTool = "Select (move points)";
         DrawLineTool = "Line Tool (F4)";
         DrawBezierTool = "Bezier Curve (F5)";
@@ -139,9 +139,10 @@ public class LanguageAssa
         DrawSelectedPoint = "Selected point";
         DrawToolX = "Tool: {0}";
         DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";
-        
+
 
         // Progress Bar Generator
+        ProgressBarTitle = "ASSA progress bar";
         ProgressBarSettings = "Progress bar";
         ProgressBarPosition = "Position";
         ProgressBarBottom = "Bottom";
@@ -173,6 +174,7 @@ public class LanguageAssa
         ResolutionResamplerNothingSelected = "Please select at least one option to change.";
 
         // Background Box Generator
+        BackgroundBoxGenerator = "ASSA background box generator";
         BackgroundBoxGenerator = "Generate background box";
         BackgroundBoxPadding = "Padding";
         BackgroundBoxFillWidth = "Fill width";
