@@ -606,6 +606,10 @@ public class LanguageGeneral
     public string SelectSubtitle { get; set; }
     public string Center { get; set; }
     public string PickLayer { get; set; }
+    public string GoToPreviousShotChange { get; set; }
+    public string GoToNextShotChange { get; set; }
+    public string ExtendSelectedLinesToNextShotChangeOrNextSubtitle { get;  set; }
+    public string SnapSelectedLinesToNearestShotChange { get;  set; }
 
     public LanguageGeneral()
     {
@@ -1211,5 +1215,9 @@ public class LanguageGeneral
         SelectSubtitle = "Select subtitle";
         Center = "Center";
         PickLayer = "Set layer";
+        GoToPreviousShotChange = "Go to previous shot change";
+        GoToNextShotChange = "Go to next shot change";
+        ExtendSelectedLinesToNextShotChangeOrNextSubtitle = "Extend selected lines to next shot change (or next subtitle)";
+        SnapSelectedLinesToNearestShotChange = "Snap selected lines start/end to nearest shot change";
     }
 }

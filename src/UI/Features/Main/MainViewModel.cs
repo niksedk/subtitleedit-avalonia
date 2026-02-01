@@ -4202,6 +4202,198 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void GoToPreviousShotChange()
+    {
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) || vp == null || AudioVisualizer == null || AudioVisualizer.ShotChanges.Count == 0)
+        {
+            return;
+        }
+
+        var shotChange = AudioVisualizer.ShotChanges.LastOrDefault(s => s < vp.Position - 0.001);
+        if (shotChange <= 0)
+        {
+            return;
+        }
+
+        vp.Position = shotChange;
+        AudioVisualizerCenterOnPositionIfNeeded(shotChange);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void GoToNextShotChange()
+    {
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) || vp == null || AudioVisualizer == null || AudioVisualizer.ShotChanges.Count == 0)
+        {
+            return;
+        }
+
+        var shotChange = AudioVisualizer.ShotChanges.FirstOrDefault(s => s > vp.Position + 0.001);
+        if (shotChange <= 0)
+        {
+            return;
+        }
+
+        vp.Position = shotChange;
+        AudioVisualizerCenterOnPositionIfNeeded(shotChange);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void ExtendSelectedLinesToNextShotChangeOrNextSubtitle()
+    {
+        var selectedLines = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) ||
+            vp == null ||
+            AudioVisualizer == null ||
+            AudioVisualizer.ShotChanges.Count == 0 ||
+            selectedLines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var line in selectedLines)
+        {
+            var idx = Subtitles.IndexOf(line);
+            var next = Subtitles.GetOrNull(idx + 1);
+            var shotChange = AudioVisualizer.ShotChanges.FirstOrDefault(s => s > line.EndTime.TotalSeconds - 0.01);
+            if (next == null && shotChange == 0)
+            {
+                continue;
+            }
+
+            if (shotChange == 0)
+            {
+                var newDuration = next!.StartTime - line.StartTime;
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                {
+                    line.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
+                }
+
+                continue;
+            }
+
+            if (next == null)
+            {
+                var newDuration = TimeSpan.FromSeconds(shotChange) - line.StartTime;
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                {
+                    line.EndTime = TimeSpan.FromSeconds(shotChange);
+                }
+
+                continue;
+            }
+
+            if (TimeSpan.FromSeconds(shotChange) < next.StartTime)
+            {
+                var newDuration = TimeSpan.FromSeconds(shotChange) - line.StartTime;
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                {
+                    line.EndTime = TimeSpan.FromSeconds(shotChange);
+                }
+            }
+            else
+            {
+                var newDuration = next.StartTime - line.StartTime;
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                {
+                    line.EndTime = TimeSpan.FromMilliseconds(next.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
+                }
+            }
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void SnapSelectedLinesToNearestShotChange()
+    {
+        var selectedLines = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().OrderBy(p => p.StartTime).ToList();
+        var vp = GetVideoPlayerControl();
+        if (string.IsNullOrEmpty(_videoFileName) ||
+            vp == null ||
+            AudioVisualizer == null ||
+            AudioVisualizer.ShotChanges.Count == 0 ||
+            selectedLines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var line in selectedLines)
+        {
+            var idx = Subtitles.IndexOf(line);
+            var prev = Subtitles.GetOrNull(idx - 1);
+            var next = Subtitles.GetOrNull(idx + 1);
+
+            var nearestStartShotChange = AudioVisualizer.ShotChanges
+                .OrderBy(s => Math.Abs(s - line.StartTime.TotalSeconds))
+                .FirstOrDefault(s => Math.Abs(s - line.StartTime.TotalSeconds) < 1.0); //TODO: customizable
+
+            var nearestEndShotChange = AudioVisualizer.ShotChanges
+                .OrderBy(s => Math.Abs(s - line.EndTime.TotalSeconds))
+                .FirstOrDefault(s => Math.Abs(s - line.EndTime.TotalSeconds) < 1.5); //TODO: customizable
+
+            if (nearestStartShotChange == 0 && nearestEndShotChange == 0)
+            {
+                continue;
+            }
+
+            if (nearestStartShotChange == 0)
+            {
+                var newDuration = TimeSpan.FromSeconds(nearestEndShotChange) - line.StartTime;
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds &&
+                    newDuration.TotalMilliseconds >= Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
+                {
+                    line.EndTime = TimeSpan.FromSeconds(nearestEndShotChange);
+                }
+
+                continue;
+            }
+
+            if (nearestEndShotChange == 0)
+            {
+                var newDuration = line.EndTime - TimeSpan.FromSeconds(nearestStartShotChange);
+                if (newDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds &&
+                    newDuration.TotalMilliseconds >= Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
+                {
+                    line.StartTime = TimeSpan.FromSeconds(nearestStartShotChange);
+                }
+
+                continue;
+            }
+
+            if (nearestStartShotChange == nearestEndShotChange)
+            {
+                nearestEndShotChange = AudioVisualizer.ShotChanges
+                .OrderBy(s => Math.Abs(s - line.EndTime.TotalSeconds))
+                .FirstOrDefault(s => Math.Abs(s - line.EndTime.TotalSeconds) < 0.5); //TODO: customizable
+
+                if (nearestEndShotChange > 0 && nearestEndShotChange > line.StartTime.TotalSeconds)
+                {
+                    line.EndTime = TimeSpan.FromSeconds(nearestEndShotChange);
+                }
+
+                continue;
+            }
+
+            var newStartTime = TimeSpan.FromSeconds(nearestStartShotChange);
+            var newEndTime = TimeSpan.FromSeconds(nearestEndShotChange);
+            var newCombinedDuration = newEndTime - newStartTime;
+            if (newCombinedDuration.TotalMilliseconds <= Se.Settings.General.SubtitleMaximumDisplayMilliseconds &&
+                newCombinedDuration.TotalMilliseconds >= Se.Settings.General.SubtitleMinimumDisplayMilliseconds)
+            {
+                line.StartTime = newStartTime;
+                line.EndTime = newEndTime;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void ShowSyncAdjustAllTimes()
     {
         if (Window == null)
@@ -6692,7 +6884,7 @@ public partial class MainViewModel :
             return;
         }
 
-        vp.Position = next.StartTime.TotalSeconds;  
+        vp.Position = next.StartTime.TotalSeconds;
         SelectAndScrollToRow(idx);
         AudioVisualizerCenterOnPositionIfNeeded(next, next.StartTime.TotalSeconds);
         _updateAudioVisualizer = true;
@@ -8275,7 +8467,7 @@ public partial class MainViewModel :
     private void MoveVideoPositionMs(int ms)
     {
         var vp = GetVideoPlayerControl();
-        if (vp == null || string.IsNullOrEmpty(_videoFileName))
+        if (vp == null || string.IsNullOrEmpty(_videoFileName) || AudioVisualizer == null)
         {
             return;
         }
@@ -12484,6 +12676,19 @@ public partial class MainViewModel :
                 seconds + 0.2 >= AudioVisualizer.EndPositionSeconds)
             {
                 AudioVisualizer.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+            }
+        }
+    }
+
+    private void AudioVisualizerCenterOnPositionIfNeeded(double seconds)
+    {
+        if (AudioVisualizer != null)
+        {
+            if (seconds <= AudioVisualizer.StartPositionSeconds ||
+                seconds + 0.2 >= AudioVisualizer.EndPositionSeconds)
+            {
+                AudioVisualizer.CenterOnPosition(seconds);
                 _updateAudioVisualizer = true;
             }
         }
