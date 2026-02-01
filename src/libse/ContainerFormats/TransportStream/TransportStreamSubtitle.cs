@@ -1,7 +1,6 @@
 ﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Interfaces;
 using SkiaSharp;
-using System.Drawing;
 
 namespace Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream
 {

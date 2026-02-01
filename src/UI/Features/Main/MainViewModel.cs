@@ -3227,7 +3227,7 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<ChangeFormattingWindow, ChangeFormattingViewModel>(vm => { vm.Initialize(Subtitles.ToList()); });
+            await ShowDialogAsync<ChangeFormattingWindow, ChangeFormattingViewModel>(vm => { vm.Initialize(Subtitles.ToList(), SelectedSubtitleFormat); });
 
         if (!result.OkPressed)
         {

@@ -1,6 +1,9 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -30,8 +33,9 @@ public class ChangeFormattingWindow : Window
         comboBoxTo.SelectionChanged += vm.SelectionChanged;
 
         var labelColor = UiUtil.MakeLabel(Se.Language.General.Color);
-        var numericUpDownPercentForLeft = UiUtil.MakeNumericUpDownInt(0, 100, Se.Settings.Tools.BridgeGaps.PercentForLeft, 130, vm, nameof(vm.PercentForLeft));
-        numericUpDownPercentForLeft.ValueChanged += vm.ValueChanged;
+        var colorPicker = UiUtil.MakeColorPicker(vm, nameof(vm.SelectedColor));
+        colorPicker.Bind(ColorPicker.IsVisibleProperty, new Binding(nameof(vm.IsColorVisible)));
+        colorPicker.ColorChanged += vm.ColorChanged;
 
         var panelControls = UiUtil.MakeHorizontalPanel(
             labelFrom,
@@ -39,7 +43,7 @@ public class ChangeFormattingWindow : Window
             labelTo,
             comboBoxTo,
             labelColor,
-            numericUpDownPercentForLeft);
+            colorPicker);
 
         var subtitleView = MakeSubtitleView(vm);
 
@@ -79,10 +83,11 @@ public class ChangeFormattingWindow : Window
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
-    private Border MakeSubtitleView(ChangeFormattingViewModel vm)
+    private static Border MakeSubtitleView(ChangeFormattingViewModel vm)
     {
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
+        var colorConverter = new TextWithSubtitleSyntaxHighlightingConverter();
         var dataGridSubtitle = new DataGrid
         {
             AutoGenerateColumns = false,
@@ -118,21 +123,63 @@ public class ChangeFormattingWindow : Window
                     Binding = new Binding(nameof(ChangeFormattingDisplayItem.Duration)) { Converter = shortTimeConverter },
                     IsReadOnly = true,
                 },
-                new DataGridTextColumn
+                new DataGridTemplateColumn
                 {
                     Header = Se.Language.General.Before,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ChangeFormattingDisplayItem.Text)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTemplate = new FuncDataTemplate<ChangeFormattingDisplayItem>((value, nameScope) =>
+                    {
+                        var border = new Border
+                        {
+                            Padding = new Thickness(4, 2),
+                        };
+
+                        var textBlock = new TextBlock
+                        {
+                            VerticalAlignment = VerticalAlignment.Center,
+                            TextWrapping = TextWrapping.NoWrap,
+                            [!TextBlock.InlinesProperty] = new Binding(nameof(ChangeFormattingDisplayItem.Text)) { Converter = colorConverter, Mode = BindingMode.OneWay },
+                        };
+
+                        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                        {
+                            textBlock.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                        }
+
+                        border.Child = textBlock;
+                        return border;
+                    })
                 },
-                new DataGridTextColumn
+                new DataGridTemplateColumn
                 {
                     Header = Se.Language.General.After,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(ChangeFormattingDisplayItem.NewText)),
                     IsReadOnly = true,
-                    Width = new DataGridLength(120),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    CellTemplate = new FuncDataTemplate<ChangeFormattingDisplayItem>((value, nameScope) =>
+                    {
+                        var border = new Border
+                        {
+                            Padding = new Thickness(4, 2),
+                        };
+
+                        var textBlock = new TextBlock
+                        {
+                            VerticalAlignment = VerticalAlignment.Center,
+                            TextWrapping = TextWrapping.NoWrap,
+                            [!TextBlock.InlinesProperty] = new Binding(nameof(ChangeFormattingDisplayItem.NewText)) { Converter = colorConverter, Mode = BindingMode.OneWay },
+                        };
+
+                        if (!string.IsNullOrEmpty(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName))
+                        {
+                            textBlock.FontFamily = new FontFamily(Se.Settings.Appearance.SubtitleTextBoxAndGridFontName);
+                        }
+
+                        border.Child = textBlock;
+                        return border;
+                    })
                 },
             },
         };

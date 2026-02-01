@@ -613,6 +613,7 @@ public class LanguageGeneral
     public string SnapSelectedLinesToNearestShotChange { get;  set; }
     public string MoveAllShotChangeOneFrameBack { get;  set; }
     public string MoveAllShotChangeOneFrameForward { get;  set; }
+    public string LinesChangedX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1225,5 +1226,6 @@ public class LanguageGeneral
         SnapSelectedLinesToNearestShotChange = "Snap selected lines start/end to nearest shot change";
         MoveAllShotChangeOneFrameBack = "Move all shot changes one frame back";
         MoveAllShotChangeOneFrameForward = "Move all shot changes one frame forward";
+        LinesChangedX = "Lines changed: {0}";
     }
 }

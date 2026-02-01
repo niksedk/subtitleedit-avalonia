@@ -4,7 +4,6 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
@@ -23,10 +22,9 @@ public partial class ChangeFormattingViewModel : ObservableObject
     [ObservableProperty] private ChangeFormattingTypeDisplay? _selectedFromType;
     [ObservableProperty] private ObservableCollection<ChangeFormattingTypeDisplay> _toTypes;
     [ObservableProperty] private ChangeFormattingTypeDisplay? _selectedToType;
-    [ObservableProperty] private int _bridgeGapsSmallerThanMs;
-    [ObservableProperty] private int _minGapMs;
-    [ObservableProperty] private int _percentForLeft;
     [ObservableProperty] private string _statusText;
+    [ObservableProperty] private Color _selectedColor;
+    [ObservableProperty] private bool _isColorVisible;
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _allSubtitles;
 
     public Window? Window { get; set; }
@@ -37,8 +35,7 @@ public partial class ChangeFormattingViewModel : ObservableObject
 
     private readonly System.Timers.Timer _timerUpdatePreview;
     private bool _dirty;
-    private Dictionary<string, string> _dic;
-
+    private SubtitleFormat _format = new SubRip();
 
     public ChangeFormattingViewModel()
     {
@@ -47,10 +44,7 @@ public partial class ChangeFormattingViewModel : ObservableObject
         ToTypes = new ObservableCollection<ChangeFormattingTypeDisplay>(ChangeFormattingTypeDisplay.GetToTypes());
         AllSubtitles = new ObservableCollection<SubtitleLineViewModel>();
         FixedSubtitle = new List<SubtitleLineViewModel>();
-        BridgeGapsSmallerThanMs = 500;
-        MinGapMs = 10;
         StatusText = string.Empty;
-        _dic = new Dictionary<string, string>();
 
         LoadSettings();
 
@@ -82,39 +76,41 @@ public partial class ChangeFormattingViewModel : ObservableObject
             foreach (var v in allSubtitles)
             {
                 var vm = new ChangeFormattingDisplayItem(v);
-                vm.NewText = FormattingReplacer.Replace(v.Text, SelectedFromType.Type, SelectedToType.Type, Colors.Yellow, new SubRip());
+                vm.NewText = FormattingReplacer.Replace(v.Text, SelectedFromType.Type, SelectedToType.Type, SelectedColor, _format);
                 if (vm.Text != vm.NewText)
                 {
+                    vm.SubtitleLineViewModel.Text = vm.NewText;
                     fixedCount++;
                 }
                 Subtitles.Add(vm);
             }
 
-            StatusText = string.Format(Se.Language.Tools.BridgeGaps.NumberOfSmallGapsBridgedX, fixedCount);
+            StatusText = string.Format(Se.Language.General.LinesChangedX, fixedCount);
         });
     }
 
-    public void Initialize(List<SubtitleLineViewModel> subtitles)
+    public void Initialize(List<SubtitleLineViewModel> subtitles, SubtitleFormat format)
     {
         AllSubtitles.Clear();
         AllSubtitles.AddRange(subtitles.Select(p => new SubtitleLineViewModel(p)));
         _dirty = true;
+        _format = format;
         _timerUpdatePreview.Start();
     }
 
     private void LoadSettings()
     {
-        //BridgeGapsSmallerThanMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
-        //MinGapMs = Se.Settings.Tools.BridgeGaps.MinGapMs;
-        //PercentForLeft = Se.Settings.Tools.BridgeGaps.PercentForLeft;
+        SelectedFromType = FromTypes.FirstOrDefault(p => p.Type.ToString() == Se.Settings.Tools.ChangeFormatting.LastFromType) ?? FromTypes.First();
+        SelectedToType = ToTypes.FirstOrDefault(p => p.Type.ToString() == Se.Settings.Tools.ChangeFormatting.LastToType) ?? ToTypes.First();
+        SelectedColor = Se.Settings.Tools.ChangeFormatting.Color.FromHexToColor();
+        IsColorVisible = SelectedToType?.Type == ChangeFormattingType.Color;
     }
 
     private void SaveSettings()
     {
-        //Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs = BridgeGapsSmallerThanMs;
-        //Se.Settings.Tools.BridgeGaps.MinGapMs = MinGapMs;
-        //Se.Settings.Tools.BridgeGaps.PercentForLeft = PercentForLeft;
-
+        Se.Settings.Tools.ChangeFormatting.LastFromType = SelectedFromType?.Type.ToString() ?? string.Empty;
+        Se.Settings.Tools.ChangeFormatting.LastToType = SelectedToType?.Type.ToString() ?? string.Empty;
+        Se.Settings.Tools.ChangeFormatting.Color = SelectedColor.FromColorToHex();
         Se.SaveSettings();
     }
 
@@ -142,12 +138,13 @@ public partial class ChangeFormattingViewModel : ObservableObject
         }
     }
 
-    internal void ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+    internal void SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         _dirty = true;
+        IsColorVisible = SelectedToType?.Type == ChangeFormattingType.Color;
     }
 
-    internal void SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    internal void ColorChanged(object? sender, ColorChangedEventArgs e)
     {
         _dirty = true;
     }
