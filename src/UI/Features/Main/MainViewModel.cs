@@ -22,6 +22,9 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
+using Nikse.SubtitleEdit.Features.Assa.AssaProgressBar;
+using Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
+using Nikse.SubtitleEdit.Features.Assa.ResolutionResampler;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
@@ -820,6 +823,80 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
         {
             //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShowAssaGenerateProgressBar()
+    {
+        var result = await ShowDialogAsync<AssaProgressBarWindow, AssaProgressBarViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+    [RelayCommand]
+    private async Task ShowAssaChangeResolution()
+    {
+        var result = await ShowDialogAsync<AssaResolutionResamplerWindow, AssaResolutionResamplerViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+    [RelayCommand]
+    private async Task ShowAssaGenerateBackground()
+    {
+        var result = await ShowDialogAsync<AssSetBackgroundWindow, AssSetBackgroundViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+    [RelayCommand]
+    private async Task ShowAssaImageColorPicker()
+    {
+        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+    [RelayCommand]
+    private async Task ShowAssaSetPosition()
+    {
+        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        {
+            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+        });
+
+        if (result.OkPressed)
+        {
+        }
+    }
+    [RelayCommand]
+    private async Task ShowAssaApplyCustomOverrideTags()
+    {
+        var result = await ShowDialogAsync<AssaApplyCustomOverrideTagsWindow, AssaApplyCustomOverrideTagsViewModel>(vm =>
+        {
+            var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
+            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
         });
 
         if (result.OkPressed)

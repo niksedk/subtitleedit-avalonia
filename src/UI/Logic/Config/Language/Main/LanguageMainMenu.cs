@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language;
+﻿using Avalonia.Controls;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language;
 
 public class LanguageMainMenu
 {
@@ -54,6 +56,13 @@ public class LanguageMainMenu
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }
 
+    public string AssaTools { get; set; }
+    public string AssaProgressBar { get; set; }
+    public string AssaChangeResolution { get; set; }
+    public string AssaGenerateBackground { get; set; }
+    public string AssaApplyCustomOverrideTags { get; set; }
+    public string AssaSetPosition { get; set; }
+    public string AssaImageColorPicker { get; set; }
 
     public string SpellCheckTitle { get; set; }
     public string SpellCheck { get; set; }
@@ -159,6 +168,14 @@ public class LanguageMainMenu
         BatchConvert = "_Batch convert...";
         JoinSubtitles = "_Join subtitles...";
         SplitSubtitle = "_Split subtitle...";
+
+        AssaTools = "_ASSA tools";
+        AssaChangeResolution = "Change _resolution...";
+        AssaGenerateBackground = "Generate background _boxes...";
+        AssaProgressBar = "Generate _progress bar...";
+        AssaApplyCustomOverrideTags = "Apply custom _override tags...";
+        AssaSetPosition = "_Set position...";
+        AssaImageColorPicker = "_Image color picker...";
 
         SpellCheckTitle = "_Spell check";
         FindDoubleWords = "_Find double words...";

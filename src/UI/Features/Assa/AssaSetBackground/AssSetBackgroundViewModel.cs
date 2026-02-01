@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -11,8 +7,11 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 
-namespace Nikse.SubtitleEdit.Features.Assa.AssSetBackground;
+namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 
 public partial class AssSetBackgroundViewModel : ObservableObject
 {
@@ -157,7 +156,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
             var centerY = (top + bottom) / 2;
             var radiusX = width / 2;
             var radiusY = height / 2;
-            
+
             // Simplified circle approximation using bezier curves
             var kappa = 0.5522847498;
             var ox = (int)(radiusX * kappa);
@@ -174,7 +173,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     {
         var baseName = "SE-box-bg";
         var styleNames = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
-        
+
         if (!styleNames.Contains(baseName))
         {
             return baseName;

@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Assa.AssaProgressBar;
-using Nikse.SubtitleEdit.Features.Assa.AssSetBackground;
+using Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 using Nikse.SubtitleEdit.Features.Assa.ResolutionResampler;
 using Nikse.SubtitleEdit.Features.Edit.AlignmentPicker;
 using Nikse.SubtitleEdit.Features.Edit.Find;
@@ -201,6 +201,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AssaAttachmentsViewModel>();
         collection.AddTransient<AssaDrawViewModel>();
         collection.AddTransient<AssaProgressBarViewModel>();
+        collection.AddTransient<AssaApplyCustomOverrideTagsViewModel>();
         collection.AddTransient<AssaPropertiesViewModel>();
         collection.AddTransient<AssaResolutionResamplerViewModel>();
         collection.AddTransient<AssSetBackgroundViewModel>();

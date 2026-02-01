@@ -58,9 +58,9 @@ public class PointSyncViaOtherWindow : Window
 
         Content = grid;
 
-        Activated += delegate
+        Loaded += delegate
         {
-            buttonOk.Focus(); // hack to make OnKeyDown work
+            buttonCancel.Focus(); // hack to make OnKeyDown work
         };
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }

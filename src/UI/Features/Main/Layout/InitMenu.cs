@@ -11,7 +11,6 @@ using Nikse.SubtitleEdit.Logic.ValueConverters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Avalonia.Markup.Declarative;
 
 namespace Nikse.SubtitleEdit.Features.Main.Layout;
 
@@ -451,6 +450,45 @@ public static class InitMenu
         {
             Header = l.SplitSubtitle,
             Command = vm.ShowToolsSplitCommand,
+        });
+
+        menu.Items.Add(new MenuItem
+        {
+            Header = l.AssaTools,
+            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
+            Items =
+            {
+                new MenuItem
+                {
+                    Header = l.AssaProgressBar,
+                    Command = vm.ShowAssaGenerateProgressBarCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.AssaChangeResolution,
+                    Command = vm.ShowAssaChangeResolutionCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.AssaGenerateBackground,
+                    Command = vm.ShowAssaGenerateBackgroundCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.AssaImageColorPicker,
+                    Command = vm.ShowAssaImageColorPickerCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.AssaSetPosition,
+                    Command = vm.ShowAssaSetPositionCommand,
+                },
+                new MenuItem
+                {
+                    Header = l.AssaApplyCustomOverrideTags,
+                    Command = vm.ShowAssaApplyCustomOverrideTagsCommand,
+                },
+            }
         });
 
         menu.Items.Add(new MenuItem

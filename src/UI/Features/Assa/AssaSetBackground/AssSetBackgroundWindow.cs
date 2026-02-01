@@ -7,7 +7,7 @@ using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Assa.AssSetBackground;
+namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 
 public class AssSetBackgroundWindow : Window
 {
