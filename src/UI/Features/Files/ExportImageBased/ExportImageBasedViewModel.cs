@@ -727,14 +727,21 @@ public partial class ExportImageBasedViewModel : ObservableObject
         {
             float lineWidth = 0;
 
-            foreach (var segment in line)
+            for (var i = 0; i < line.Count; i++)
             {
+                var segment = line[i];
                 var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
 
                 // Measure width using SKShaper for proper complex script support
                 var segmentWidth = MeasureTextWithShaping(segment.Text, currentFont);
 
                 lineWidth += segmentWidth;
+
+                // Add spacing after styled segments to match rendering (except for last segment)
+                if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
+                {
+                    lineWidth += fontSize * 0.17f;
+                }
             }
 
             maxWidth = Math.Max(maxWidth, lineWidth);
@@ -796,12 +803,19 @@ public partial class ExportImageBasedViewModel : ObservableObject
             // Reverse segments for RTL languages
             var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
 
-            // Calculate line width for alignment
+            // Calculate line width for alignment (must match measurement phase)
             float lineWidth = 0;
-            foreach (var seg in segmentsToRender)
+            for (var j = 0; j < line.Count; j++)
             {
+                var seg = line[j];
                 var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
                 lineWidth += MeasureTextWithShaping(seg.Text, font);
+                
+                // Add spacing after styled segments to match measurement phase
+                if ((seg.IsItalic || seg.IsBold) && j < line.Count - 1)
+                {
+                    lineWidth += fontSize * 0.17f;
+                }
             }
 
             float currentX;
@@ -924,7 +938,13 @@ public partial class ExportImageBasedViewModel : ObservableObject
     {
         using var shaper = new SKShaper(font.Typeface);
         var result = shaper.Shape(text, font);
-        return result.Width;
+        
+        // Measure visual bounds to account for glyph overhang (important for italic text)
+        var bounds = new SKRect();
+        font.MeasureText(text, out bounds);
+        
+        // Use the maximum of advance width and visual right edge
+        return Math.Max(result.Width, bounds.Right);
     }
 
     // Helper method to draw shaped text using SKShaper
