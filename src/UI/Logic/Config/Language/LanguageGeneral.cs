@@ -610,6 +610,8 @@ public class LanguageGeneral
     public string GoToNextShotChange { get; set; }
     public string ExtendSelectedLinesToNextShotChangeOrNextSubtitle { get;  set; }
     public string SnapSelectedLinesToNearestShotChange { get;  set; }
+    public string MoveAllShotChangeOneFrameBack { get;  set; }
+    public string MoveAllShotChangeOneFrameForward { get;  set; }
 
     public LanguageGeneral()
     {
@@ -1219,5 +1221,7 @@ public class LanguageGeneral
         GoToNextShotChange = "Go to next shot change";
         ExtendSelectedLinesToNextShotChangeOrNextSubtitle = "Extend selected lines to next shot change (or next subtitle)";
         SnapSelectedLinesToNearestShotChange = "Snap selected lines start/end to nearest shot change";
+        MoveAllShotChangeOneFrameBack = "Move all shot changes one frame back";
+        MoveAllShotChangeOneFrameForward = "Move all shot changes one frame forward";
     }
 }

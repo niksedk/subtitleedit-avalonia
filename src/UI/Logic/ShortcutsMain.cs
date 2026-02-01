@@ -224,6 +224,8 @@ public static class ShortcutsMain
         { nameof(MainViewModel.GoToNextShotChangeCommand),  Se.Language.General.GoToNextShotChange },
         { nameof(MainViewModel.ExtendSelectedLinesToNextShotChangeOrNextSubtitleCommand),  Se.Language.General.ExtendSelectedLinesToNextShotChangeOrNextSubtitle },
         { nameof(MainViewModel.SnapSelectedLinesToNearestShotChangeCommand),  Se.Language.General.SnapSelectedLinesToNearestShotChange },
+        { nameof(MainViewModel.MoveAllShotChangeOneFrameBackCommand),  Se.Language.General.MoveAllShotChangeOneFrameBack },
+        { nameof(MainViewModel.MoveAllShotChangeOneFrameForwardCommand),  Se.Language.General.MoveAllShotChangeOneFrameForward },
         { nameof(MainViewModel.ShowWaveformSeekSilenceCommand),  Se.Language.Options.Shortcuts.SeekSilence },
         { nameof(MainViewModel.ShowShotChangesListCommand),  Se.Language.General.ShowShotChangesList },
         { nameof(MainViewModel.VideoUndockControlsCommand),  Se.Language.Options.Shortcuts.UndockVideoControls },
@@ -494,6 +496,8 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.GoToNextShotChangeCommand, nameof(vm.GoToNextShotChangeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedLinesToNextShotChangeOrNextSubtitleCommand, nameof(vm.ExtendSelectedLinesToNextShotChangeOrNextSubtitleCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.SnapSelectedLinesToNearestShotChangeCommand, nameof(vm.SnapSelectedLinesToNearestShotChangeCommand), ShortcutCategory.General);   
+        AddShortcut(shortcuts, vm.MoveAllShotChangeOneFrameBackCommand, nameof(vm.MoveAllShotChangeOneFrameBackCommand), ShortcutCategory.General);   
+        AddShortcut(shortcuts, vm.MoveAllShotChangeOneFrameForwardCommand, nameof(vm.MoveAllShotChangeOneFrameForwardCommand), ShortcutCategory.General);   
 
         AddShortcut(shortcuts, vm.ResetWaveformZoomAndSpeedCommand, nameof(vm.ResetWaveformZoomAndSpeedCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ExtendSelectedToPreviousCommand, nameof(vm.ExtendSelectedToPreviousCommand), ShortcutCategory.General);

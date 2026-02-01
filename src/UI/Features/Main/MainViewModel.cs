@@ -4394,6 +4394,59 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private void MoveAllShotChangeOneFrameBack()
+    {
+        if (AudioVisualizer == null || AudioVisualizer.ShotChanges.Count == 0)
+        {
+            return;
+        }
+
+        var frameRate = _mediaInfo != null ? (double)_mediaInfo.FramesRateNonNormalized : Se.Settings.General.CurrentFrameRate;
+        var milliseconds = 1000.0 / frameRate;
+        var seconds = milliseconds / 1000.0;
+
+        var newShotChanges = new List<double>();
+        foreach (var shotChange in AudioVisualizer.ShotChanges)
+        {
+            var newTime = shotChange - seconds;
+            if (newTime < 0)
+            {
+                continue;
+            }
+
+            newShotChanges.Add(newTime);
+        }
+
+        AudioVisualizer.ShotChanges = newShotChanges;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void MoveAllShotChangeOneFrameForward()
+    {
+        if (AudioVisualizer == null || AudioVisualizer.ShotChanges.Count == 0)
+        {
+            return;
+        }
+
+        var frameRate = _mediaInfo != null ? (double)_mediaInfo.FramesRateNonNormalized : Se.Settings.General.CurrentFrameRate;
+        var milliseconds = 1000.0 / frameRate;
+        var seconds = milliseconds / 1000.0;
+
+        var newShotChanges = new List<double>();
+        foreach (var shotChange in AudioVisualizer.ShotChanges)
+        {
+            var newTime = shotChange + seconds;
+            newShotChanges.Add(newTime);
+        }
+
+        AudioVisualizer.ShotChanges = newShotChanges;
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void ShowSyncAdjustAllTimes()
     {
         if (Window == null)
