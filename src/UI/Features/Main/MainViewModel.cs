@@ -136,7 +136,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 using AssaApplyCustomOverrideTagsViewModel = Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags.AssaApplyCustomOverrideTagsViewModel;
+using TmpegEncXmlPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1308,7 +1310,10 @@ public partial class MainViewModel :
         var format = SelectedSubtitleFormat;
         if (format is TimedTextImscRosetta)
         {
-            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm => { });
+            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
+            {
+                vm.Subtitle = GetUpdateSubtitle();
+            });
             SetLibSeSettings();
         }
 

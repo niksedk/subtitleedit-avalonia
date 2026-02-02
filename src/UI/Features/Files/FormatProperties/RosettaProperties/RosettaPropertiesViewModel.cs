@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 
@@ -19,6 +20,8 @@ public partial class RosettaPropertiesViewModel : ObservableObject
     [ObservableProperty] private string _selectedLineHeight;
 
     public Window? Window { get; set; }
+    
+    public Subtitle Subtitle { get; set; }
 
     public bool OkPressed { get; private set; }
 
@@ -541,7 +544,7 @@ public partial class RosettaPropertiesViewModel : ObservableObject
         SelectedLineHeight = string.Empty;
         LoadSettings();
     }
-
+    
     private void LoadSettings()
     {
         SelectedLineHeight = Se.Settings.Formats.RosettaLineHeight;

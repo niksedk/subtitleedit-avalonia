@@ -135,6 +135,7 @@ using MediaInfoViewViewModel = Nikse.SubtitleEdit.Features.Shared.MediaInfoView.
 using ReviewSpeechViewModel = Nikse.SubtitleEdit.Features.Video.TextToSpeech.ReviewSpeech.ReviewSpeechViewModel;
 using RosettaPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties.RosettaPropertiesViewModel;
 using SetVideoOffsetViewModel = Nikse.SubtitleEdit.Features.Shared.SetVideoOffset.SetVideoOffsetViewModel;
+using TmpegEncXmlPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel;
 using VideoPlayerUndockedViewModel = Nikse.SubtitleEdit.Features.Shared.Undocked.VideoPlayerUndockedViewModel;
 using WhisperAdvancedViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperAdvancedViewModel;
 using WhisperPostProcessingViewModel = Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperPostProcessingViewModel;

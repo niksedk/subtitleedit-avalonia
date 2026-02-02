@@ -3,11 +3,11 @@ using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
+namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 
 public class TmpegEncXmlPropertiesWindow : Window
 {
-    public TmpegEncXmlPropertiesWindow(TmpegEncXmlPropertiesViewModel vm)
+    public TmpegEncXmlPropertiesWindow(TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.File.TmpegEncXmlProperties;

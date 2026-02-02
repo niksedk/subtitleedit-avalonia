@@ -1,13 +1,13 @@
+using System.Collections.ObjectModel;
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System.Collections.ObjectModel;
-using System.Linq;
 
-namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
+namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 
 public partial class TmpegEncXmlPropertiesViewModel : ObservableObject
 {
@@ -25,8 +25,8 @@ public partial class TmpegEncXmlPropertiesViewModel : ObservableObject
     public TmpegEncXmlPropertiesViewModel()
     {
         FontNames = new ObservableCollection<string>(FontHelper.GetSystemFonts());
-        var fn = FontNames.FirstOrDefault(p => p == Se.Settings.Formats.TmpegEncXmlFontName);
-        SelectedFontName = fn ?? FontNames.FirstOrDefault();
+        var fn = Enumerable.FirstOrDefault<string>(FontNames, p => p == Se.Settings.Formats.TmpegEncXmlFontName);
+        SelectedFontName = fn ?? Enumerable.FirstOrDefault<string>(FontNames);
 
         FontHeight = Se.Settings.Formats.TmpegEncXmlFontHeight;
         OffsetX = Se.Settings.Formats.TmpegEncXmlOffsetX;
