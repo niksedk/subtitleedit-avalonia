@@ -37,20 +37,7 @@ public class PasteFromClipboardHelper : IPasteFromClipboardHelper
 
         format.LoadSubtitle(tmp, list, null);
 
-        if (videoPositionInMilliseconds >= 0 && tmp.Paragraphs.Count > 0)
-        {
-            if (tmp.Paragraphs[0].StartTime.TotalMilliseconds > videoPositionInMilliseconds)
-            {
-                var c = tmp.Paragraphs[0].StartTime.TotalMilliseconds - videoPositionInMilliseconds;
-                tmp.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-c));
-            }
-            else
-            {
-                var c = videoPositionInMilliseconds - tmp.Paragraphs[0].StartTime.TotalMilliseconds;
-                tmp.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(c));
-            }
-        }
-        else
+        if (tmp.Paragraphs.Count == 0 && videoPositionInMilliseconds >= 0)
         {
             var start = videoPositionInMilliseconds;
             foreach (var line in list)
