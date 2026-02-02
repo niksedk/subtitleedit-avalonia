@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using AvaloniaEdit.Editing;
+using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Main.MainHelpers;
@@ -17,6 +18,26 @@ internal static class RightToLeftHelper
 
     private static void SetFlowDirectionRecursive(Visual visual, FlowDirection flowDirection)
     {
+        if (visual is ComboBox)
+        {
+            return;
+        }
+
+        if (visual is NumericUpDown)
+        {
+            return;
+        }
+
+        if (visual is TimeCodeUpDown)
+        {
+            return;
+        }
+
+        if (visual is SecondsUpDown)
+        {
+            return;
+        }
+
         if (visual is DataGrid dataGrid)
         {
             dataGrid.FlowDirection = flowDirection;
