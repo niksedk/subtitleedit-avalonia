@@ -26,9 +26,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     [ObservableProperty] private int _selectedParagraphLeftIndex = -1;
     [ObservableProperty] private int _selectedParagraphRightIndex = -1;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
-    [ObservableProperty] private string _title;
-    [ObservableProperty] private string _videoInfo;
-    [ObservableProperty] private string _adjustInfo;
+    [ObservableProperty] private string _currentTagText;
     [ObservableProperty] private string _currentTag;
 
     public Window? Window { get; set; }
@@ -49,9 +47,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         _windowService = windowService;
 
         OverrideTags = new ObservableCollection<OverrideTagDisplay>(OverrideTagDisplay.List());
-        Title = string.Empty;
-        VideoInfo = string.Empty;
-        AdjustInfo = string.Empty;
+        CurrentTagText = string.Empty;
         _videoFileName = string.Empty;
         VideoPlayerControlLeft = new VideoPlayerControl(new VideoPlayerInstanceNone());
         ComboBoxLeft = new ComboBox();
@@ -69,7 +65,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         string? subtitleFileName,
         AudioVisualizer? audioVisualizer)
     {
-        SetVideoInFo(videoFileName);
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>(paragraphs.Select(p => new SubtitleDisplayItem(p)));
         _videoFileName = videoFileName;
         _subtitleLines = paragraphs;
@@ -83,32 +78,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
             StartTitleTimer();
         });
-    }
-
-    private void SetVideoInFo(string? videoFileName)
-    {
-        if (string.IsNullOrEmpty(videoFileName))
-        {
-            VideoInfo = Se.Language.General.NoVideoLoaded;
-            return;
-        }
-
-        _ = Task.Run(() =>
-        {
-            var mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
-            if (mediaInfo?.Dimension is { Width: > 0, Height: > 0 } && mediaInfo.Duration != null)
-            {
-                VideoInfo = string.Format(Se.Language.General.FileNameX, videoFileName) + Environment.NewLine +
-                            string.Format(Se.Language.Sync.ResolutionXDurationYFrameRateZ,
-                                $"{mediaInfo.Dimension.Width}x{mediaInfo.Dimension.Height}",
-                                mediaInfo.Duration.ToShortDisplayString(),
-                                mediaInfo.FramesRateNonNormalized);
-                return;
-            }
-
-            VideoInfo = Se.Language.General.NoVideoLoaded;
-        });
-
     }
 
     private void StartTitleTimer()
@@ -148,7 +117,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     {
         Window?.Close();
     }
-
     
     private async Task PlayAndBack(VideoPlayerControl videoPlayer, int milliseconds)
     {
@@ -164,8 +132,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         _positionTimer.Stop();
         VideoPlayerControlLeft.VideoPlayerInstance.CloseFile();
     }
-
-    
 
     internal async void OnLoaded()
     {
@@ -196,5 +162,17 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void OnOverrideTagSelectionChanged()
+    {
+        if (SelectedOverrideTag != null)
+        {
+            CurrentTagText = SelectedOverrideTag.Tag;
+        }
+        else
+        {
+            CurrentTagText = string.Empty;
+        }   
     }
 }

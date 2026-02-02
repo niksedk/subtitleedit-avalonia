@@ -23,9 +23,12 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        var labelOverrideTag = UiUtil.MakeLabel("Choose override tag to apply");
+        var labelOverrideTag = UiUtil.MakeLabel("Choose override tag to add");
         var comboBoxOverrideTags = UiUtil.MakeComboBox(vm.OverrideTags, vm, nameof(vm.SelectedOverrideTag));
-        var buttonApplyOverrideTag = UiUtil.MakeButton("Add", vm.AddCommand);
+        comboBoxOverrideTags.SelectionChanged += (_, _) => vm.OnOverrideTagSelectionChanged();
+        var buttonApplyOverrideTag = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
+        var labelTagText = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.CurrentTagText));
+        labelTagText.WithBorderColorAsColor();
         var panelOverrideTags = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -34,13 +37,13 @@ public class AssaApplyCustomOverrideTagsWindow : Window
                 labelOverrideTag,
                 comboBoxOverrideTags,
                 buttonApplyOverrideTag,
+                labelTagText,
             }
         };
 
         var textBoxCurrent = new TextBox
         {
             AcceptsReturn = true,
-            IsReadOnly = true,
             Height = 60,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -56,10 +59,9 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
         vm.ComboBoxLeft = comboBoxLeft;
 
-        var labelInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.AdjustInfo));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(labelInfo, buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
         var gridLeft = new Grid
         {
@@ -114,5 +116,10 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
         Loaded += (_, _) => vm.OnLoaded();
         Closing += (_, e) => vm.OnClosing();
+    }
+
+    private void ComboBoxOverrideTags_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        throw new System.NotImplementedException();
     }
 }

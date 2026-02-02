@@ -22,7 +22,7 @@ public class OverrideTagDisplay
         return new List<OverrideTagDisplay>
         {
             new OverrideTagDisplay("Font size change", "{\\t(\\fs60)}"),
-            new OverrideTagDisplay("Move text from left to right", "{\\move(350,350,1500,350)}Move test"),
+            new OverrideTagDisplay("Move text from left to right", "{\\move(350,350,1500,350)}"),
             new OverrideTagDisplay("Color from white to red", "{\\1c&HFFFFFF&\\t(\\1c&H0000FF&)}"),
             new OverrideTagDisplay("Rotate X (slow)", "{\\t(\\frx25)}"),
             new OverrideTagDisplay("Rotate X", "{\\t(\\frx360)}"),
