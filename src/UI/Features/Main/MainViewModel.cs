@@ -3680,6 +3680,20 @@ public partial class MainViewModel :
             VideoPlayerControl?.Close();
             VideoPlayerControl = null;
 
+            if (_videoPlayerUndockedViewModel != null)
+            {
+                _videoPlayerUndockedViewModel.AllowClose = true;
+                _videoPlayerUndockedViewModel.Window?.Close();
+                _videoPlayerUndockedViewModel = null;
+            }
+
+            if (_audioVisualizerUndockedViewModel != null)
+            {
+                _audioVisualizerUndockedViewModel.AllowClose = true;
+                _audioVisualizerUndockedViewModel.Window?.Close();
+                _audioVisualizerUndockedViewModel = null;
+            }
+
             _windowService.ShowWindow<VideoPlayerUndockedWindow, VideoPlayerUndockedViewModel>(Window, (window, vm) =>
             {
                 _videoPlayerUndockedViewModel = vm;
@@ -5154,7 +5168,6 @@ public partial class MainViewModel :
     {
         UiUtil.SetFontName(Se.Settings.Appearance.FontName);
         UiTheme.SetCurrentTheme();
-        InitListViewAndEditBox.MakeLayoutListViewAndEditBox(MainView!, this);
 
         if (Toolbar is Border toolbarBorder)
         {
@@ -5231,7 +5244,11 @@ public partial class MainViewModel :
 
         _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
         _errorBrush = new SolidColorBrush(_errorColor);
-        if (!AreVideoControlsUndocked)
+        if (AreVideoControlsUndocked)
+        {
+            VideoUndockControls();
+        }
+        else 
         {
             Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
             SetLayout(Se.Settings.General.LayoutNumber);

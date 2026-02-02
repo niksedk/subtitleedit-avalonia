@@ -45,6 +45,10 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
                 Window.WindowState = WindowState.Minimized;
             }
         }
+        else
+        {
+            UiUtil.SaveWindowPosition(Window);
+        }
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
