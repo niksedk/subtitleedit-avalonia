@@ -8485,7 +8485,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SubtitleGridCopyPasteHelper.Cut(Window, Subtitles, selectedItems, SelectedSubtitleFormat);
+        await SubtitleGridCopyPasteHelper.Cut(Window, Subtitles, selectedItems, SelectedSubtitleFormat, _subtitle);
         Renumber();
         _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
@@ -8500,7 +8500,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SubtitleGridCopyPasteHelper.Copy(Window, selectedItems, SelectedSubtitleFormat);
+        await SubtitleGridCopyPasteHelper.Copy(Window, selectedItems, SelectedSubtitleFormat, _subtitle);
         _shortcutManager.ClearKeys();
     }
 
