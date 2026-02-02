@@ -1,11 +1,13 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Features.Main.Layout;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
-namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
+namespace Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 
 public class AssaApplyCustomOverrideTagsWindow : Window
 {
@@ -23,7 +25,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
 
         var labelOverrideTag = UiUtil.MakeLabel("Choose override tag to apply");
         var comboBoxOverrideTags = UiUtil.MakeComboBox(vm.OverrideTags, vm, nameof(vm.SelectedOverrideTag));
-        var buttonApplyOverrideTag = UiUtil.MakeButton("Apply", vm.OkCommand);
+        var buttonApplyOverrideTag = UiUtil.MakeButton("Add", vm.AddCommand);
         var panelOverrideTags = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -43,6 +45,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
+        textBoxCurrent.Bind(TextBox.TextProperty, new Binding(nameof(vm.CurrentTag)));
 
         vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
@@ -54,10 +57,9 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         vm.ComboBoxLeft = comboBoxLeft;
 
         var labelInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.AdjustInfo));
-        var buttonSync = UiUtil.MakeButton(Se.Language.Sync.Sync, vm.SyncCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(labelInfo, buttonSync, buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(labelInfo, buttonOk, buttonCancel);
 
         var gridLeft = new Grid
         {

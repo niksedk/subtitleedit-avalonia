@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -5,18 +10,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
-using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Sync.VisualSync;
+namespace Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 
 public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 {
@@ -29,6 +29,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     [ObservableProperty] private string _title;
     [ObservableProperty] private string _videoInfo;
     [ObservableProperty] private string _adjustInfo;
+    [ObservableProperty] private string _currentTag;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
@@ -56,6 +57,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         ComboBoxLeft = new ComboBox();
         ComboBoxRight = new ComboBox();
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>();
+        CurrentTag = string.Empty;
 
         // Toggle play/pause on surface click
         VideoPlayerControlLeft.SurfacePointerPressed += (_, __) => VideoPlayerControlLeft.TogglePlayPause();
@@ -80,7 +82,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
             }
 
             StartTitleTimer();
-            _updateAudioVisualizer = true;
         });
     }
 
@@ -122,9 +123,17 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
 
     [RelayCommand]
-    private async Task Sync()
+    private void Add()
     {
-       
+        var tag = SelectedOverrideTag;
+        if (tag == null)
+        {
+            return;
+        }
+
+        var newTag = CurrentTag + tag.Tag;
+        newTag = newTag.Replace("}{", string.Empty);
+        CurrentTag = newTag;
     }
 
     [RelayCommand]
