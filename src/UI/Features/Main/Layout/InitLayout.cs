@@ -10,6 +10,7 @@ namespace Nikse.SubtitleEdit.Features.Main.Layout;
 public static partial class InitLayout
 {
     public const int WaveFormHeight = 150;
+    public static int LayoutWithoutVideo = 12;
 
     public class LayoutPositions
     {
@@ -960,7 +961,7 @@ public static partial class InitLayout
 
     internal static bool LayoutHasNoVideo(int layoutNumber)
     {
-        return layoutNumber == 12;
+        return layoutNumber == LayoutWithoutVideo;
     }
 
     private static void CleanupOldContent(Grid contentGrid)
