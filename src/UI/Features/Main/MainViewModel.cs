@@ -1312,7 +1312,7 @@ public partial class MainViewModel :
         {
             var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
             {
-                vm.Subtitle = GetUpdateSubtitle();
+                vm.Initialize(GetUpdateSubtitle());
             });
             SetLibSeSettings();
         }
