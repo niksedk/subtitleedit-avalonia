@@ -101,6 +101,9 @@ public static partial class InitListViewAndEditBox
             Child = vm.SubtitleGrid
         };
 
+        vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
+        vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
+
         var sourceViewTextEditor = new TextEditor
         {
             ShowLineNumbers = true,
