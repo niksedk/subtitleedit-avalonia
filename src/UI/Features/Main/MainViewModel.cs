@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -5914,7 +5915,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToggleCasing()
     {
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             var selectedItems = _selectedSubtitles?.ToList() ?? [];
             if (selectedItems.Count == 0)
@@ -8359,7 +8360,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             AudioVisualizer.Focus();
         }
@@ -8409,7 +8410,7 @@ public partial class MainViewModel :
             AudioVisualizer.SkipNextPointerEntered = true;
         }
 
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             FocusEditTextBox();
         }
@@ -12169,6 +12170,36 @@ public partial class MainViewModel :
                typeName.Contains("TextInput");
     }
 
+    private bool IsSubtitleGridFocused()
+    {
+        var focusedElement = Window?.FocusManager?.GetFocusedElement();
+        if (focusedElement == null)
+        {
+            return false;
+        }
+
+        if (focusedElement == SubtitleGrid)
+        {
+            return true;
+        }
+
+        // Check if the focused element is a child of SubtitleGrid (e.g., DataGridRow, DataGridCell)
+        if (focusedElement is Avalonia.Visual visual)
+        {
+            var parent = visual.GetVisualParent();
+            while (parent != null)
+            {
+                if (parent == SubtitleGrid)
+                {
+                    return true;
+                }
+                parent = parent.GetVisualParent();
+            }
+        }
+
+        return false;
+    }
+
     private readonly Lock _onKeyDownHandlerLock = new();
 
     internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
@@ -12261,7 +12292,7 @@ public partial class MainViewModel :
                 }
             }
 
-            if (SubtitleGrid.IsFocused)
+            if (IsSubtitleGridFocused())
             {
                 if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
                 {
