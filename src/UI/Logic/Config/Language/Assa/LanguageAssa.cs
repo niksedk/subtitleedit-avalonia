@@ -28,6 +28,16 @@ public class LanguageAssa
     public string Primary { get; set; }
     public string Secondary { get; set; }
     public string ApplyOverrideTags { get; set; }
+    public string ChooseOverrideTagToAdd { get; set; }
+    public string FontSizeChange { get; set; }
+    public string MoveTextFromLeftToRight { get; set; }
+    public string ColorFromWhiteToRed { get; set; }
+    public string RotateXSlow { get; set; }
+    public string RotateX { get; set; }
+    public string RotateY { get; set; }
+    public string RotateTilt { get; set; }
+    public string SpaceIncrease { get; set; }
+
 
     // ASSA Draw
     public string AssaDraw { get; set; }
@@ -119,6 +129,15 @@ public class LanguageAssa
         Primary = "Primary";
         Secondary = "Secondary";
         ApplyOverrideTags = "Apply override tags";
+        ChooseOverrideTagToAdd = "Choose override tag to add";
+        FontSizeChange = "Font size change";
+        MoveTextFromLeftToRight = "Move text from left to right";
+        ColorFromWhiteToRed = "Color from white to red";
+        RotateXSlow = "Rotate X (slow)";
+        RotateX = "Rotate X";
+        RotateY = "Rotate Y";
+        RotateTilt = "Rotate tilt";
+        SpaceIncrease = "Space increase";
 
         // ASSA Draw
         AssaDraw = "ASSA Draw";

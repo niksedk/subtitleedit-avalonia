@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
@@ -14,7 +9,11 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 
@@ -26,7 +25,6 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     [ObservableProperty] private int _selectedParagraphLeftIndex = -1;
     [ObservableProperty] private int _selectedParagraphRightIndex = -1;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
-    [ObservableProperty] private string _currentTagText;
     [ObservableProperty] private string _currentTag;
 
     public Window? Window { get; set; }
@@ -40,14 +38,12 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     private string? _videoFileName;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private List<SubtitleLineViewModel> _subtitleLines = new List<SubtitleLineViewModel>();
-    private bool _updateAudioVisualizer;
 
     public AssaApplyCustomOverrideTagsViewModel(IWindowService windowService)
     {
         _windowService = windowService;
 
         OverrideTags = new ObservableCollection<OverrideTagDisplay>(OverrideTagDisplay.List());
-        CurrentTagText = string.Empty;
         _videoFileName = string.Empty;
         VideoPlayerControlLeft = new VideoPlayerControl(new VideoPlayerInstanceNone());
         ComboBoxLeft = new ComboBox();
@@ -57,6 +53,8 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
         // Toggle play/pause on surface click
         VideoPlayerControlLeft.SurfacePointerPressed += (_, __) => VideoPlayerControlLeft.TogglePlayPause();
+
+        SelectedOverrideTag = OverrideTags.FirstOrDefault(p=> p.Tag == Se.Settings.Assa.LastOverrideTag) ?? OverrideTags[0];
     }
 
     public void Initialize(
@@ -131,6 +129,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     {
         _positionTimer.Stop();
         VideoPlayerControlLeft.VideoPlayerInstance.CloseFile();
+        Se.Settings.Assa.LastOverrideTag = SelectedOverrideTag?.Tag ?? string.Empty;
     }
 
     internal async void OnLoaded()
@@ -162,17 +161,5 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
-    }
-
-    internal void OnOverrideTagSelectionChanged()
-    {
-        if (SelectedOverrideTag != null)
-        {
-            CurrentTagText = SelectedOverrideTag.Tag;
-        }
-        else
-        {
-            CurrentTagText = string.Empty;
-        }   
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Nikse.SubtitleEdit.Logic.Config;
+using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 
@@ -14,22 +15,22 @@ public class OverrideTagDisplay
 
     public override string ToString()
     {
-        return Name;
+        return Name + " - " +Tag;
     }
 
     public static List<OverrideTagDisplay> List()
     {
         return new List<OverrideTagDisplay>
         {
-            new OverrideTagDisplay("Font size change", "{\\t(\\fs60)}"),
-            new OverrideTagDisplay("Move text from left to right", "{\\move(350,350,1500,350)}"),
-            new OverrideTagDisplay("Color from white to red", "{\\1c&HFFFFFF&\\t(\\1c&H0000FF&)}"),
-            new OverrideTagDisplay("Rotate X (slow)", "{\\t(\\frx25)}"),
-            new OverrideTagDisplay("Rotate X", "{\\t(\\frx360)}"),
-            new OverrideTagDisplay("Rotate Y", "{\\t(\\fry360)}"),
-            new OverrideTagDisplay("Rotate (tilt)", "{\\t(\\fr5\\fr0)}"),
-            new OverrideTagDisplay("Fade", "{\\fad(300,300}"),
-            new OverrideTagDisplay("Space increase (slow)", "{\\t(\\fsp4)}"),
+            new OverrideTagDisplay(Se.Language.Assa.FontSizeChange, "{\\t(\\fs60)}"),
+            new OverrideTagDisplay(Se.Language.Assa.MoveTextFromLeftToRight, "{\\move(350,350,1500,350)}"),
+            new OverrideTagDisplay(Se.Language.Assa.ColorFromWhiteToRed, "{\\1c&HFFFFFF&\\t(\\1c&H0000FF&)}"),
+            new OverrideTagDisplay(Se.Language.Assa.RotateXSlow, "{\\t(\\frx25)}"),
+            new OverrideTagDisplay(Se.Language.Assa.RotateX, "{\\t(\\frx360)}"),
+            new OverrideTagDisplay(Se.Language.Assa.RotateY, "{\\t(\\fry360)}"),
+            new OverrideTagDisplay(Se.Language.Assa.RotateTilt, "{\\t(\\fr5\\fr0)}"),
+            new OverrideTagDisplay(Se.Language.General.Fade, "{\\fad(300,300}"),
+            new OverrideTagDisplay(Se.Language.Assa.SpaceIncrease, "{\\t(\\fsp4)}"),
         };
     }   
 }
