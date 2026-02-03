@@ -46,8 +46,8 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         };
         textBoxCurrent.Bind(TextBox.TextProperty, new Binding(nameof(vm.CurrentTag)));
 
-        vm.VideoPlayerControlLeft = InitVideoPlayer.MakeVideoPlayer();
-        vm.VideoPlayerControlLeft.FullScreenIsVisible = false;
+        vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControl.FullScreenIsVisible = false;
 
         var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
         comboBoxLeft.Width = double.NaN;
@@ -76,7 +76,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        gridLeft.Add(vm.VideoPlayerControlLeft, 0);
+        gridLeft.Add(vm.VideoPlayerControl, 0);
         gridLeft.Add(comboBoxLeft, 1);
 
         var grid = new Grid

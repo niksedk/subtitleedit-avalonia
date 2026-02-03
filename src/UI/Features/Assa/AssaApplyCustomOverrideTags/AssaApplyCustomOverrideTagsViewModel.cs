@@ -5,13 +5,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Sync.VisualSync;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,12 +33,16 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
-    public VideoPlayerControl VideoPlayerControlLeft { get; set; }
+    public VideoPlayerControl VideoPlayerControl { get; set; }
     public ComboBox ComboBoxLeft { get; set; }
     public ComboBox ComboBoxRight { get; set; }
 
     private readonly IWindowService _windowService;
-
+    private readonly string _tempSubtitleFileName;
+    private readonly SubtitleFormat _assaFormat;
+    private LibMpvDynamicPlayer? _mpvPlayer;
+    private bool _isSubtitleLoaded;
+    private string _oldSubtitleText;
     private string? _videoFileName;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private List<SubtitleLineViewModel> _subtitleLines = new List<SubtitleLineViewModel>();
@@ -45,16 +53,20 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
         OverrideTags = new ObservableCollection<OverrideTagDisplay>(OverrideTagDisplay.List());
         _videoFileName = string.Empty;
-        VideoPlayerControlLeft = new VideoPlayerControl(new VideoPlayerInstanceNone());
+        VideoPlayerControl = new VideoPlayerControl(new VideoPlayerInstanceNone());
         ComboBoxLeft = new ComboBox();
         ComboBoxRight = new ComboBox();
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>();
         CurrentTag = string.Empty;
+        _assaFormat = new AdvancedSubStationAlpha();
+        _oldSubtitleText = string.Empty;
 
         // Toggle play/pause on surface click
-        VideoPlayerControlLeft.SurfacePointerPressed += (_, __) => VideoPlayerControlLeft.TogglePlayPause();
+        VideoPlayerControl.SurfacePointerPressed += (_, __) => VideoPlayerControl.TogglePlayPause();
 
-        SelectedOverrideTag = OverrideTags.FirstOrDefault(p=> p.Tag == Se.Settings.Assa.LastOverrideTag) ?? OverrideTags[0];
+        SelectedOverrideTag = OverrideTags.FirstOrDefault(p => p.Tag == Se.Settings.Assa.LastOverrideTag) ?? OverrideTags[0];
+
+        _tempSubtitleFileName = System.IO.Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".ass");
     }
 
     public void Initialize(
@@ -71,7 +83,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         {
             if (!string.IsNullOrEmpty(videoFileName))
             {
-                _ = VideoPlayerControlLeft.Open(videoFileName);
+                _ = VideoPlayerControl.Open(videoFileName);
             }
 
             StartTitleTimer();
@@ -80,14 +92,43 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
     private void StartTitleTimer()
     {
-        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         _positionTimer.Tick += (s, e) =>
         {
-            
+            if (_mpvPlayer == null)
+            {
+                return;
+            }
+
+            var subtitle = new Subtitle();
+            foreach (var item in Paragraphs)
+            {
+                var p = new SubtitleLineViewModel(item.Subtitle);
+                p.Text = CurrentTag + item.Text;
+                subtitle.Paragraphs.Add(p.ToParagraph());
+            }
+
+            var text = _assaFormat.ToText(subtitle, string.Empty);
+            if (_oldSubtitleText == text)
+            {
+                return;
+            }
+
+            File.WriteAllText(_tempSubtitleFileName, text);
+            if (!_isSubtitleLoaded)
+            {
+                _isSubtitleLoaded = true;
+                _mpvPlayer.SubAdd(_tempSubtitleFileName);
+            }
+            else 
+            {
+                _mpvPlayer.SubReload();
+            }
+
+            _oldSubtitleText = text;
         };
         _positionTimer.Start();
     }
-
 
     [RelayCommand]
     private void Add()
@@ -115,7 +156,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     {
         Window?.Close();
     }
-    
+
     private async Task PlayAndBack(VideoPlayerControl videoPlayer, int milliseconds)
     {
         var originalPosition = videoPlayer.Position;
@@ -128,7 +169,18 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     internal void OnClosing()
     {
         _positionTimer.Stop();
-        VideoPlayerControlLeft.VideoPlayerInstance.CloseFile();
+        VideoPlayerControl.VideoPlayerInstance.CloseFile();
+        try
+        {
+            if (File.Exists(_tempSubtitleFileName))
+            {
+                File.Delete(_tempSubtitleFileName);
+            }
+        }
+        catch
+        {
+            // ignore
+        }
         Se.Settings.Assa.LastOverrideTag = SelectedOverrideTag?.Tag ?? string.Empty;
     }
 
@@ -140,10 +192,12 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         }
 
         // Wait a bit for video players to finish opening the file (or until they report a duration)
-        await VideoPlayerControlLeft.WaitForPlayersReadyAsync();
+        await VideoPlayerControl.WaitForPlayersReadyAsync();
 
         Dispatcher.UIThread.Post(() =>
         {
+            _mpvPlayer = VideoPlayerControl.VideoPlayerInstance as LibMpvDynamicPlayer;
+
             if (Paragraphs.Count == 0)
             {
                 return;
@@ -151,6 +205,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
             SelectedParagraphLeftIndex = 0;
             SelectedParagraphRightIndex = Paragraphs.Count - 1;
+
         });
     }
 
