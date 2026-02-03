@@ -104,7 +104,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
             foreach (var item in Paragraphs)
             {
                 var p = new SubtitleLineViewModel(item.Subtitle);
-                p.Text = CurrentTag + item.Text;
+                p.Text = CurrentTag + p.Text;
                 subtitle.Paragraphs.Add(p.ToParagraph());
             }
 
@@ -120,7 +120,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
                 _isSubtitleLoaded = true;
                 _mpvPlayer.SubAdd(_tempSubtitleFileName);
             }
-            else 
+            else
             {
                 _mpvPlayer.SubReload();
             }
