@@ -179,7 +179,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = 1,
             Maximum = 200,
-            Width = 100,
+            Width = 120,
             HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.BarHeight)) { Mode = BindingMode.TwoWay },
         };
@@ -410,7 +410,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = 0,
             Maximum = 50,
-            Width = 70,
+            Width = 120,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SplitterWidth)) { Mode = BindingMode.TwoWay },
         };
         
@@ -419,7 +419,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = 0,
             Maximum = 200,
-            Width = 70,
+            Width = 120,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SplitterHeight)) { Mode = BindingMode.TwoWay },
         };
 
@@ -457,7 +457,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = 6,
             Maximum = 200,
-            Width = 80,
+            Width = 120,
             HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.FontSize)) { Mode = BindingMode.TwoWay },
         };
@@ -484,7 +484,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = -500,
             Maximum = 500,
-            Width = 70,
+            Width = 120,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.XAdjustment)) { Mode = BindingMode.TwoWay },
         };
         
@@ -493,7 +493,7 @@ public class AssaProgressBarWindow : Window
         {
             Minimum = -500,
             Maximum = 500,
-            Width = 70,
+            Width = 120,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.YAdjustment)) { Mode = BindingMode.TwoWay },
         };
 

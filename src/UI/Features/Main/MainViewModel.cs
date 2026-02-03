@@ -844,6 +844,15 @@ public partial class MainViewModel :
 
         if (result.OkPressed)
         {
+            _subtitle = result.ResultSubtitle;
+            for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
+            {
+                var p = result.ResultSubtitle.Paragraphs[index];
+                Subtitles.Insert(index, new SubtitleLineViewModel(p, SelectedSubtitleFormat));
+            }
+
+            Renumber();
+            _updateAudioVisualizer = true;
         }
     }
     [RelayCommand]

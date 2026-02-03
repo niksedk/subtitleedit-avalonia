@@ -122,7 +122,7 @@ public class AssaResolutionResamplerWindow : Window
         {
             Minimum = 1,
             Maximum = 8192,
-            Width = 100,
+            Width = 120,
             Increment = 1,
             FormatString = "0",
             [!NumericUpDown.ValueProperty] = new Binding(widthBinding) { Mode = BindingMode.TwoWay },
@@ -145,7 +145,7 @@ public class AssaResolutionResamplerWindow : Window
         {
             Minimum = 1,
             Maximum = 8192,
-            Width = 100,
+            Width = 120,
             Increment = 1,
             FormatString = "0",
             [!NumericUpDown.ValueProperty] = new Binding(heightBinding) { Mode = BindingMode.TwoWay },
