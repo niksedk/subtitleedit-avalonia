@@ -111,9 +111,9 @@ public static class FormattingReplacer
             var pattern4 = $@"\\{fromTag}0";
             
             result = Regex.Replace(result, pattern1, Regex.Escape(colorTag), RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, pattern2, string.Empty, RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, pattern2, @"{\\r}", RegexOptions.IgnoreCase);
             result = Regex.Replace(result, pattern3, Regex.Escape(colorTag.TrimStart('{').TrimEnd('}')), RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, pattern4, string.Empty, RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, pattern4, @"\\r", RegexOptions.IgnoreCase);
         }
         else
         {
