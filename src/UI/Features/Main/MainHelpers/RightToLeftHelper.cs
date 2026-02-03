@@ -46,14 +46,6 @@ internal static class RightToLeftHelper
         {
             textBox.FlowDirection = flowDirection;
         }
-        else if (visual is TextBlock textBlock)
-        {
-            textBlock.FlowDirection = flowDirection;
-        }
-        else if (visual is SelectableTextBlock selectableTextBlock)
-        {
-            selectableTextBlock.FlowDirection = flowDirection;
-        }
         else if (visual is TextArea textArea)
         {
             textArea.FlowDirection = flowDirection;
