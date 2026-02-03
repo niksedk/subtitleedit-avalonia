@@ -30,9 +30,13 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     [ObservableProperty] private int _selectedParagraphRightIndex = -1;
     [ObservableProperty] private bool _isAudioVisualizerVisible;
     [ObservableProperty] private string _currentTag;
+    [ObservableProperty] private bool _adjustAll;
+    [ObservableProperty] private bool _adjustSelectedLines;
+    [ObservableProperty] private bool _adjustSelectedLinesAndForward;
 
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
+    public Subtitle UpdatedSubtitle { get; set; }
     public VideoPlayerControl VideoPlayerControl { get; set; }
     public ComboBox ComboBoxLeft { get; set; }
     public ComboBox ComboBoxRight { get; set; }
@@ -60,6 +64,8 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         CurrentTag = string.Empty;
         _assaFormat = new AdvancedSubStationAlpha();
         _oldSubtitleText = string.Empty;
+        AdjustAll = true;
+        UpdatedSubtitle = new  Subtitle();
 
         // Toggle play/pause on surface click
         VideoPlayerControl.SurfacePointerPressed += (_, __) => VideoPlayerControl.TogglePlayPause();
@@ -71,13 +77,17 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
 
     public void Initialize(
         List<SubtitleLineViewModel> paragraphs,
-        string? videoFileName,
-        string? subtitleFileName,
-        AudioVisualizer? audioVisualizer)
+        List<SubtitleLineViewModel> selectedParagraphs,
+        string? videoFileName)
     {
         Paragraphs = new ObservableCollection<SubtitleDisplayItem>(paragraphs.Select(p => new SubtitleDisplayItem(p)));
         _videoFileName = videoFileName;
         _subtitleLines = paragraphs;
+
+        if (selectedParagraphs.Count > 1)
+        {
+            AdjustSelectedLines = true;
+        }
 
         Dispatcher.UIThread.Post(() =>
         {
@@ -126,7 +136,9 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
             }
 
             _oldSubtitleText = text;
+            UpdatedSubtitle = subtitle;
         };
+        
         _positionTimer.Start();
     }
 

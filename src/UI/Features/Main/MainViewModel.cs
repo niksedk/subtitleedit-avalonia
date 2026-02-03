@@ -900,11 +900,18 @@ public partial class MainViewModel :
         var result = await ShowDialogAsync<AssaApplyCustomOverrideTagsWindow, AssaApplyCustomOverrideTagsViewModel>(vm =>
         {
             var paragraphs = Subtitles.Select(p => new SubtitleLineViewModel(p)).ToList();
-            vm.Initialize(paragraphs, _videoFileName, _subtitleFileName, AudioVisualizer);
+            var selectedParagraphs = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+            vm.Initialize(paragraphs, selectedParagraphs, _videoFileName);
         });
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.UpdatedSubtitle.Paragraphs.Count == Subtitles.Count)
         {
+            for (int i = 0; i < Subtitles.Count; i++)
+            {
+                Subtitles[i].Text = result.UpdatedSubtitle.Paragraphs[i].Text;
+            }
+            
+            _updateAudioVisualizer = true;  
         }
     }
 

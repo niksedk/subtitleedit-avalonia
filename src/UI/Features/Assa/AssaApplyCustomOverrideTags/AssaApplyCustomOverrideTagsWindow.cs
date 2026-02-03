@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Interactivity;
@@ -31,7 +32,6 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             Orientation = Orientation.Horizontal,
             Children =
             {
-                labelOverrideTag,
                 comboBoxOverrideTags,
                 buttonApplyOverrideTag,
             }
@@ -45,7 +45,31 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         textBoxCurrent.Bind(TextBox.TextProperty, new Binding(nameof(vm.CurrentTag)));
-
+        
+        var panelRadioButtons = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(10, 10, 0, 0),
+            Children =
+            {
+                new RadioButton
+                {
+                    Content = Se.Language.Sync.AdjustAll,
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustAll))
+                },
+                new RadioButton
+                {
+                    Content = Se.Language.Sync.AdjustSelectedLines,
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLines))
+                },
+                new RadioButton
+                {
+                    Content = Se.Language.Sync.AdjustSelectedLinesAndForward,
+                    [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
+                }
+            },
+        };
+        
         vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControl.FullScreenIsVisible = false;
 
@@ -59,7 +83,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
 
-        var gridLeft = new Grid
+        var gridVideo = new Grid
         {
             RowDefinitions =
             {
@@ -76,13 +100,14 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        gridLeft.Add(vm.VideoPlayerControl, 0);
-        gridLeft.Add(comboBoxLeft, 1);
+        gridVideo.Add(vm.VideoPlayerControl, 0);
+        gridVideo.Add(comboBoxLeft, 1);
 
         var grid = new Grid
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // override tags
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // override tags
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // text box with current chosen tags
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player 
@@ -91,7 +116,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -100,10 +125,12 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelOverrideTags, 0, 0, 1, 2);
-        grid.Add(textBoxCurrent, 1, 0, 1, 2);
-        grid.Add(UiUtil.MakeBorderForControl(gridLeft), 2, 0, 1, 2);
-        grid.Add(buttonPanel, 3, 0, 1, 2);
+        grid.Add(labelOverrideTag, 0);
+        grid.Add(panelOverrideTags, 1, 0, 1, 1);
+        grid.Add(textBoxCurrent, 2, 0, 1, 1);
+        grid.Add(panelRadioButtons, 0, 1, 3, 1);
+        grid.Add(UiUtil.MakeBorderForControl(gridVideo), 3, 0, 1, 2);
+        grid.Add(buttonPanel, 4, 0, 1, 2);
 
         Content = grid;
 
