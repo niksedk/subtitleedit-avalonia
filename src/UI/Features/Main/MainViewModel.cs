@@ -3520,7 +3520,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private async Task PickAudioTrack(object? parameter)
+    private void PickAudioTrack(object? parameter)
     {
         if (string.IsNullOrEmpty(_videoFileName) || parameter == null)
         {

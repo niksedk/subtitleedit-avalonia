@@ -48,7 +48,6 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
     public Encoding Encoding { get; set; } = Encoding.UTF8;
     public string Language { get; set; } = "en";
     public DataGrid GridSubtitles { get; internal set; }
-    public static object FixOcrErrors { get; private set; }
 
     public Subtitle FixedSubtitle = new();
 

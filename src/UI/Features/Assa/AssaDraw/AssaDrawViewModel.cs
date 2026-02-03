@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -382,7 +383,7 @@ public partial class AssaDrawViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async void CopyToClipboard()
+    private async Task CopyToClipboard()
     {
         var code = GenerateAssaCode();
         if (!string.IsNullOrEmpty(code) && Window?.Clipboard != null)

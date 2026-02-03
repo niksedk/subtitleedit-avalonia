@@ -40,7 +40,6 @@ public class LanguageFixCommonErrors
     public string StartWithUppercaseLetterAfterColon { get; set; }
     public string FixLowercaseIToUppercaseI { get; set; }
     public string FixCommonOcrErrors { get; set; }
-    public string FixCommonOcrErrorExample { get; set; }
     public string CommonOcrErrorsFixed { get; set; }
     public string RemoveSpaceBetweenNumber { get; set; }
     public string BreakDialogsOnOneLine { get; set; }

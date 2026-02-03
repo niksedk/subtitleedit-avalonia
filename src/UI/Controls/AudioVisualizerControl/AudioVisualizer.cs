@@ -1498,7 +1498,6 @@ public class AudioVisualizer : Control
     }
 
     public MenuFlyout MenuFlyout { get; set; }
-    public Action<object, PositionEventArgs> PositionChanged { get; internal set; }
 
     private void DrawAllGridLines(DrawingContext context, ref RenderContext renderCtx)
     {
