@@ -286,14 +286,15 @@ public partial class BatchConvertViewModel : ObservableObject
         AutoTranslateModel = string.Empty;
         AutoTranslateUrl = string.Empty;
         AutoTranslateApiKey = string.Empty;
-        AutoTranslators = new ObservableCollection<IAutoTranslator>()
-        {
+        AutoTranslators =
+        [
             new OllamaTranslate(),
             new LibreTranslate(),
             new LmStudioTranslate(),
             new NoLanguageLeftBehindServe(),
             new NoLanguageLeftBehindApi(),
-        };
+            new DeepLTranslate()
+        ];
         SelectedAutoTranslator = AutoTranslators[0];
         OnAutoTranslatorChanged();
 
@@ -1362,6 +1363,14 @@ public partial class BatchConvertViewModel : ObservableObject
             Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
             Se.Settings.AutoTranslate.NnlbApiUrl = AutoTranslateUrl.Trim();
         }
+
+        if (engineType == typeof(DeepLTranslate))
+        {
+            Configuration.Settings.Tools.AutoTranslateDeepLUrl = AutoTranslateUrl.Trim();
+            Configuration.Settings.Tools.AutoTranslateDeepLApiKey = AutoTranslateApiKey.Trim();
+            Se.Settings.AutoTranslate.DeepLUrl = AutoTranslateUrl.Trim();
+            Se.Settings.AutoTranslate.DeepLApiKey = AutoTranslateApiKey.Trim();
+        }
     }
 
     internal void SelectedFunctionChanged()
@@ -1508,6 +1517,16 @@ public partial class BatchConvertViewModel : ObservableObject
             AutoTranslateUrlIsVisible = true;
             AutoTranslateApiKey = string.Empty;
             AutoTranslateApiKeyIsVisible = false;
+        }
+        else if (engine is DeepLTranslate)
+        {
+            AutoTranslateModel = string.Empty;
+            AutoTranslateModelBrowseIsVisible = false;
+            AutoTranslateModelIsVisible = false;
+            AutoTranslateUrl = Se.Settings.AutoTranslate.DeepLUrl;
+            AutoTranslateUrlIsVisible = true;
+            AutoTranslateApiKey = Se.Settings.AutoTranslate.DeepLApiKey;
+            AutoTranslateApiKeyIsVisible = true;
         }
         else
         {
