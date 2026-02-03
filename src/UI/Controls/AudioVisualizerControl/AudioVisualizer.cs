@@ -441,6 +441,11 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        var isWinDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);    
+        if (OperatingSystem.IsMacOS())
+        {
+            _isCtrlDown = isWinDown;
+        }
 
         var point = e.GetPosition(this);
         if (!_isCtrlDown && !_isAltDown && !_isShiftDown && e.Pointer.IsPrimary)
