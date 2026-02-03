@@ -66,6 +66,22 @@ public partial class VisualSyncViewModel : ObservableObject
         // Toggle play/pause on surface click
         VideoPlayerControlLeft.SurfacePointerPressed += (_, __) => VideoPlayerControlLeft.TogglePlayPause();
         VideoPlayerControlRight.SurfacePointerPressed += (_, __) => VideoPlayerControlRight.TogglePlayPause();
+
+        AudioVisualizerLeft.OnPrimarySingleClicked += AudioVisualizerLeft_OnPrimarySingleClicked;
+        AudioVisualizerLeft.PositionChanged += AudioVisualizerLeftPositionChanged;
+
+        AudioVisualizerRight.OnPrimarySingleClicked += AudioVisualizerRight_OnPrimarySingleClicked;
+        AudioVisualizerRight.PositionChanged += AudioVisualizerRightPositionChanged;
+    }
+
+    private void AudioVisualizerLeft_OnPrimarySingleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        VideoPlayerControlLeft.Position = e.Seconds;
+    }
+
+    private void AudioVisualizerRight_OnPrimarySingleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        VideoPlayerControlRight.Position = e.Seconds;
     }
 
     public void Initialize(
