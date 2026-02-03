@@ -452,44 +452,52 @@ public static class InitMenu
             Command = vm.ShowToolsSplitCommand,
         });
 
-        menu.Items.Add(new MenuItem
+        var assaTools = new List<MenuItem>
+        {
+            new MenuItem
+            {
+                Header = l.AssaProgressBar,
+                Command = vm.ShowAssaGenerateProgressBarCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaChangeResolution,
+                Command = vm.ShowAssaChangeResolutionCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaGenerateBackground,
+                Command = vm.ShowAssaGenerateBackgroundCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaImageColorPicker,
+                Command = vm.ShowAssaImageColorPickerCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaSetPosition,
+                Command = vm.ShowAssaSetPositionCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaApplyCustomOverrideTags,
+                Command = vm.ShowAssaApplyCustomOverrideTagsCommand,
+            },
+        };
+
+        var menuItemAssaTools = new MenuItem
         {
             Header = l.AssaTools,
             [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
-            Items =
-            {
-                new MenuItem
-                {
-                    Header = l.AssaProgressBar,
-                    Command = vm.ShowAssaGenerateProgressBarCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.AssaChangeResolution,
-                    Command = vm.ShowAssaChangeResolutionCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.AssaGenerateBackground,
-                    Command = vm.ShowAssaGenerateBackgroundCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.AssaImageColorPicker,
-                    Command = vm.ShowAssaImageColorPickerCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.AssaSetPosition,
-                    Command = vm.ShowAssaSetPositionCommand,
-                },
-                new MenuItem
-                {
-                    Header = l.AssaApplyCustomOverrideTags,
-                    Command = vm.ShowAssaApplyCustomOverrideTagsCommand,
-                },
-            }
-        });
+        };
+        
+        foreach (var item in assaTools.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
+        {
+            menuItemAssaTools.Items.Add(item);
+        }
+        
+        menu.Items.Add(menuItemAssaTools);
 
         menu.Items.Add(new MenuItem
         {
