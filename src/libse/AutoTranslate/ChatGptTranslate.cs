@@ -220,6 +220,7 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
                MakePair("Spanish (Latin America)","es-419"),
                MakePair("Swedish","sv"),
                MakePair("Tatar","tt"),
+               MakePair("Tetum","tet"),
                MakePair("Thai","th"),
                MakePair("Turkish","tr"),
                MakePair("Ukrainian","uk"),
