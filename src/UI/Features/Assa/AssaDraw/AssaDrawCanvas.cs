@@ -172,13 +172,45 @@ public class AssaDrawCanvas : Control
             DrawShape(context, ActiveShape, true);
             DrawShapePoints(context, ActiveShape);
 
-            // Draw preview line to current mouse position
+            // Draw preview to current mouse position
             if (CurrentX > float.MinValue && CurrentY > float.MinValue && ActiveShape.Points.Count > 0)
             {
                 var lastPoint = ActiveShape.Points[^1];
                 var pen = new Pen(new SolidColorBrush(DrawSettings.ActiveShapeLineColor), 2, lineCap: PenLineCap.Round);
-                context.DrawLine(pen, ToZoomFactorPoint(lastPoint),
-                    new Point(ToZoomFactorX(CurrentX), ToZoomFactorY(CurrentY)));
+
+                if (CurrentTool == DrawingTool.Circle && ActiveShape.Points.Count == 1)
+                {
+                    // Draw circle preview
+                    var radius = Math.Max(Math.Abs(CurrentX - lastPoint.X), Math.Abs(CurrentY - lastPoint.Y));
+                    var centerX = ToZoomFactorX(lastPoint.X);
+                    var centerY = ToZoomFactorY(lastPoint.Y);
+                    var rect = new Rect(
+                        centerX - radius * _zoomFactor,
+                        centerY - radius * _zoomFactor,
+                        radius * 2 * _zoomFactor,
+                        radius * 2 * _zoomFactor);
+                    context.DrawEllipse(null, pen, rect);
+                }
+                else if (CurrentTool == DrawingTool.Rectangle && ActiveShape.Points.Count == 1)
+                {
+                    // Draw rectangle preview
+                    var x1 = ToZoomFactorX(lastPoint.X);
+                    var y1 = ToZoomFactorY(lastPoint.Y);
+                    var x2 = ToZoomFactorX(CurrentX);
+                    var y2 = ToZoomFactorY(CurrentY);
+                    var rect = new Rect(
+                        Math.Min(x1, x2),
+                        Math.Min(y1, y2),
+                        Math.Abs(x2 - x1),
+                        Math.Abs(y2 - y1));
+                    context.DrawRectangle(null, pen, rect);
+                }
+                else
+                {
+                    // Draw preview line for Line and Bezier tools
+                    context.DrawLine(pen, ToZoomFactorPoint(lastPoint),
+                        new Point(ToZoomFactorX(CurrentX), ToZoomFactorY(CurrentY)));
+                }
             }
         }
 

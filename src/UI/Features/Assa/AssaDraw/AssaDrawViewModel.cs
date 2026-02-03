@@ -138,6 +138,52 @@ public partial class AssaDrawViewModel : ObservableObject
                     lastPoint.X + oneThirdX * 2, lastPoint.Y + oneThirdY * 2, DrawSettings.PointHelperColor);
                 ActiveShape.AddPoint(DrawCoordinateType.BezierCurve, x, y, DrawSettings.PointColor);
                 break;
+
+            case DrawingTool.Circle:
+                // Complete the circle with second click
+                if (ActiveShape.Points.Count == 1)
+                {
+                    var start = ActiveShape.Points[0];
+                    var radius = Math.Max(Math.Abs(x - start.X), Math.Abs(y - start.Y));
+                    if (radius > 1)
+                    {
+                        ActiveShape = CircleBezier.MakeCircle(start.X, start.Y, radius, ActiveShape.Layer, ActiveShape.ForeColor);
+                        Shapes.Add(ActiveShape);
+                        RefreshTreeView();
+                        ActiveShape = null;
+                        _currentX = float.MinValue;
+                        _currentY = float.MinValue;
+                        if (Canvas != null)
+                        {
+                            Canvas.Shapes = Shapes;
+                            Canvas.ActiveShape = null;
+                            Canvas.CurrentX = float.MinValue;
+                            Canvas.CurrentY = float.MinValue;
+                        }
+                    }
+                }
+                break;
+
+            case DrawingTool.Rectangle:
+                // Complete the rectangle with second click
+                if (ActiveShape.Points.Count == 1)
+                {
+                    var start = ActiveShape.Points[0];
+                    ActiveShape = MakeRectangle(start.X, start.Y, x - start.X, y - start.Y, ActiveShape.Layer, ActiveShape.ForeColor);
+                    Shapes.Add(ActiveShape);
+                    RefreshTreeView();
+                    ActiveShape = null;
+                    _currentX = float.MinValue;
+                    _currentY = float.MinValue;
+                    if (Canvas != null)
+                    {
+                        Canvas.Shapes = Shapes;
+                        Canvas.ActiveShape = null;
+                        Canvas.CurrentX = float.MinValue;
+                        Canvas.CurrentY = float.MinValue;
+                    }
+                }
+                break;
         }
     }
 
