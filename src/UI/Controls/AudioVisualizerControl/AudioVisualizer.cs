@@ -436,7 +436,7 @@ public class AudioVisualizer : Control
         }
     }
 
-    private async void OnTapped(object? sender, TappedEventArgs e)
+    private void OnTapped(object? sender, TappedEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);

@@ -1247,7 +1247,7 @@ public partial class MainViewModel :
             if (desiredTrack != null && (_audioTrack == null || _audioTrack.Id != desiredTrack.Id))
             {
                 _audioTrack = desiredTrack;
-                var _ = Task.Run(async () => PickAudioTrack(_audioTrack));
+                var _ = Task.Run(() => PickAudioTrack(_audioTrack));
             }
         }
     }
