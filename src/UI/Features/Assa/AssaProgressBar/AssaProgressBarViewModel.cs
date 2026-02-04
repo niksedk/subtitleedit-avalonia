@@ -92,9 +92,8 @@ public partial class AssaProgressBarViewModel : ObservableObject
         _videoHeight = videoHeight > 0 ? videoHeight : 1080;
         _videoDurationMs = videoDurationMs > 0 ? videoDurationMs : 3600000;
 
-        // Load existing progress bar settings from subtitle
         LoadExistingSettings();
-
+        _subtitle.Paragraphs.Clear();
         GeneratePreview();
     }
 
@@ -413,7 +412,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     private static string ToAssaColor(Color color)
     {
-        return $"&H{color.A:X2}{color.B:X2}{color.G:X2}{color.R:X2}";
+        var alpha = 255 - color.A;
+        return $"&H{alpha:X2}{color.B:X2}{color.G:X2}{color.R:X2}";
     }
 
     [RelayCommand]
@@ -468,7 +468,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     {
         PositionBottom = true;
         PositionTop = false;
-        BarHeight = 10;
+        BarHeight = 20;
         ForegroundColor = Colors.LimeGreen;
         BackgroundColor = Color.FromRgb(64, 64, 64);
         TextColor = Colors.White;

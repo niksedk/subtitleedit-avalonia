@@ -21,9 +21,12 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
+using Nikse.SubtitleEdit.Features.Assa.AssaImageColorPicker;
 using Nikse.SubtitleEdit.Features.Assa.AssaProgressBar;
 using Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
+using Nikse.SubtitleEdit.Features.Assa.AssaSetPosition;
 using Nikse.SubtitleEdit.Features.Assa.ResolutionResampler;
 using Nikse.SubtitleEdit.Features.Edit.Find;
 using Nikse.SubtitleEdit.Features.Edit.ModifySelection;
@@ -39,6 +42,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
@@ -135,8 +139,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
-using Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 using AssaApplyCustomOverrideTagsViewModel = Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags.AssaApplyCustomOverrideTagsViewModel;
 using TmpegEncXmlPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel;
 
@@ -839,21 +841,26 @@ public partial class MainViewModel :
     {
         var result = await ShowDialogAsync<AssaProgressBarWindow, AssaProgressBarViewModel>(vm =>
         {
-            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            var width = _mediaInfo?.Dimension.Width ?? 1920;
+            var height = _mediaInfo?.Dimension.Height ?? 1080;
+            var duration = (double)(_mediaInfo?.Duration?.TotalMilliseconds ?? 60_000);
+            vm.Initialize(_subtitle, width, height, duration);
         });
 
-        if (result.OkPressed)
+        if (!result.OkPressed)
         {
-            _subtitle = result.ResultSubtitle;
-            for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
-            {
-                var p = result.ResultSubtitle.Paragraphs[index];
-                Subtitles.Insert(index, new SubtitleLineViewModel(p, SelectedSubtitleFormat));
-            }
-
-            Renumber();
-            _updateAudioVisualizer = true;
+            return;
         }
+
+        _subtitle = result.ResultSubtitle;
+        for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
+        {
+            var p = result.ResultSubtitle.Paragraphs[index];
+            Subtitles.Insert(index, new SubtitleLineViewModel(p, SelectedSubtitleFormat));
+        }
+
+        Renumber();
+        _updateAudioVisualizer = true;
     }
     [RelayCommand]
     private async Task ShowAssaChangeResolution()
@@ -882,7 +889,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaImageColorPicker()
     {
-        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        var result = await ShowDialogAsync<AssaImageColorPickerWindow, AssaImageColorPickerViewModel>(vm =>
         {
             //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
@@ -894,7 +901,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaSetPosition()
     {
-        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        var result = await ShowDialogAsync<AssaSetPositionWindow, AssaSetPositionViewModel>(vm =>
         {
             //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });

@@ -174,9 +174,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\libse\LibSE.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Features\Assa\AssaImageColorPicker\" />
-	  <Folder Include="Features\Assa\AssaSetPosition\" />
-	</ItemGroup>
 </Project>
