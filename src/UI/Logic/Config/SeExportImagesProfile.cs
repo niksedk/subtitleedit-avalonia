@@ -58,6 +58,8 @@ public class SeExportImagesProfile
         FramesPerSecond = 25;
         OverridePosition = string.Empty;
         LineSpacingPercent = 0;
+        PaddingLeftRight = 2;
+        PaddingTopBottom = 2;
     }
 
     public override string ToString()
