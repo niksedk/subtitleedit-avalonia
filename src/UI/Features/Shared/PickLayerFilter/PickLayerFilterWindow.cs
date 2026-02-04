@@ -15,7 +15,7 @@ public class PickLayerFilterWindow : Window
     public PickLayerFilterWindow(PickLayerFilterViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Tools.PickLayersTitle;
+        Title = Se.Language.Tools.FilterLayersTitle;
         CanResize = true;
         Width = 800;
         Height = 700;

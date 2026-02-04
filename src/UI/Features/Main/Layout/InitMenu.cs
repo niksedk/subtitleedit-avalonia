@@ -497,6 +497,13 @@ public static class InitMenu
             menuItemAssaTools.Items.Add(item);
         }
         
+        menuItemAssaTools.Items.Add(new Separator());
+        menuItemAssaTools.Items.Add(new MenuItem
+        {
+            Header = l.FilterLayersForDisplayDotDotDot,
+            Command = vm.ShowPickLayerFilterCommand,
+        });
+        
         menu.Items.Add(menuItemAssaTools);
 
         menu.Items.Add(new MenuItem

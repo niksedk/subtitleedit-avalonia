@@ -115,7 +115,8 @@ public class LanguageMainMenu
     public string PointSyncViaOther { get; set; }
     public string SortSubtitles { get; set; }
     public string SetLayer { get; set; }
-    
+    public string FilterLayersForDisplayDotDotDot { get; set; }
+
     public LanguageMainMenu()
     {
         File = "_File";
@@ -227,5 +228,6 @@ public class LanguageMainMenu
         ReverseRightToLeftStartEnd = "Reverse RTL start/end (selected lines)";
         SortSubtitles = "_Sort subtitles...";
         SetLayer = "Set layer...";
+        FilterLayersForDisplayDotDotDot = "Filter layers for display...";
     }
 }

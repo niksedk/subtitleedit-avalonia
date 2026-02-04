@@ -22,7 +22,7 @@ public class LanguageTools
     public string PickAlignmentTitle { get; set; }
     public string PickFontNameTitle { get; set; }
     public string ColorPickerTitle { get; set; }
-    public string PickLayersTitle { get; set; }
+    public string FilterLayersTitle { get; set; }
     public string PickSubtitleFormat { get; set; }
     public string PickLayerTitle { get; set; }
 
@@ -31,7 +31,7 @@ public class LanguageTools
         PickAlignmentTitle = "Choose alignment";
         PickFontNameTitle = "Choose font name";
         ColorPickerTitle = "Choose color";
-        PickLayersTitle = "Choose layers to display in audio waveform/spectrogram";
+        FilterLayersTitle = "Filter layers for display";
         PickSubtitleFormat = "Choose subtitle format";
         PickLayerTitle = "Set layer";
     }
