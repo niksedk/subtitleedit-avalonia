@@ -8,7 +8,7 @@ using Nikse.SubtitleEdit.Core.AudioToText;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEngineOpenAi : IWhisperEngine
+public class WhisperEngineOpenAi : ISpeechToTextEngine
 {
     public static string StaticName => "Whisper Open AI";
     public string Name => StaticName;

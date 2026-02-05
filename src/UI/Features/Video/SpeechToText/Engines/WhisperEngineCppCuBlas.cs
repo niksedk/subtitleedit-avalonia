@@ -10,7 +10,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEngineCppCuBlas : IWhisperEngine
+public class WhisperEngineCppCuBlas : ISpeechToTextEngine
 {
     public static string StaticName => "Whisper CPP cuBLAS";
     public string Name => StaticName;

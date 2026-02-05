@@ -10,7 +10,7 @@ public static class WhisperEngineFactory
     /// <param name="staticName">StaticName property.</param>
     /// <returns>Whisper engine.</returns>
     /// <exception cref="NotImplementedException">If StaticName is not known.</exception>
-    public static IWhisperEngine MakeEngineFromStaticName(string staticName)
+    public static ISpeechToTextEngine MakeEngineFromStaticName(string staticName)
     {
         if (staticName == WhisperEngineCpp.StaticName)
         {

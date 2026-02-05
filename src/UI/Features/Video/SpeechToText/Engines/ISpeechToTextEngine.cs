@@ -4,7 +4,7 @@ using Nikse.SubtitleEdit.Core.AudioToText;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public interface IWhisperEngine
+public interface ISpeechToTextEngine
 {
     string Name { get; }
     string Choice { get; }

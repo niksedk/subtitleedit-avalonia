@@ -32,8 +32,8 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public partial class AudioToTextWhisperViewModel : ObservableObject
 {
-    [ObservableProperty] private ObservableCollection<IWhisperEngine> _engines;
-    [ObservableProperty] private IWhisperEngine _selectedEngine;
+    [ObservableProperty] private ObservableCollection<ISpeechToTextEngine> _engines;
+    [ObservableProperty] private ISpeechToTextEngine _selectedEngine;
 
     [ObservableProperty] private ObservableCollection<WhisperLanguage> _languages;
     [ObservableProperty] private WhisperLanguage? _selectedLanguage;
@@ -139,7 +139,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            Engines.Add(new AudioToTextEngineChatLlm());
+            Engines.Add(new ChatLlmCppEngine());
         }
 
         SelectedEngine = Engines[0];
@@ -154,7 +154,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         ResultAudioClips = new List<AudioClip>();
 
         IsTranscribeEnabled = true;
-        IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+        IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
         Parameters = string.Empty;
         ConsoleLog = string.Empty;
         ProgressText = string.Empty;
@@ -183,7 +183,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         DoPostProcessing = Se.Settings.Tools.AudioToText.PostProcessing;
         Parameters = Se.Settings.Tools.AudioToText.WhisperCustomCommandLineArguments;
 
-        var selectedEngine = Enumerable.FirstOrDefault<IWhisperEngine>(Engines, p => p.Choice == Se.Settings.Tools.AudioToText.WhisperChoice);
+        var selectedEngine = Enumerable.FirstOrDefault<ISpeechToTextEngine>((IEnumerable<ISpeechToTextEngine>)Engines, p => p.Choice == Se.Settings.Tools.AudioToText.WhisperChoice);
         if (selectedEngine != null)
         {
             SelectedEngine = selectedEngine;
@@ -298,7 +298,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             var settings = Se.Settings.Tools.AudioToText;
             _whisperProcess.Dispose();
 
-            if (SelectedEngine is AudioToTextEngineChatLlm chatLlm)
+            if (SelectedEngine is ChatLlmCppEngine chatLlm)
             {
                 var sbLog = new StringBuilder();
                 foreach (var s in _outputText)
@@ -564,7 +564,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 MessageBoxIcon.Information);
 
             IsTranscribeEnabled = true;
-            IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+            IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
 
             if (failed == 0)
             {
@@ -730,7 +730,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     {
         Task.Delay(500);
 
-        if (SelectedEngine is not IWhisperEngine engine)
+        if (SelectedEngine is not ISpeechToTextEngine engine)
         {
             resultTexts = new List<ResultText>();
             return false;
@@ -891,7 +891,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             var settings = Se.Settings.Tools.AudioToText;
             IsTranscribeEnabled = true;
-            IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+            IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
             HideProgressBar();
 
             if (_loadedFromStdOut)
@@ -936,7 +936,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
                 ProgressOpacity = 0;
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 return;
             }
 
@@ -960,7 +960,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                                      "ffmpeg exit code: " + _waveExtractProcess.ExitCode + Environment.NewLine +
                                      "ffmpeg log: " + _ffmpegLog);
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 _waveExtractProcess = null;
                 return;
             }
@@ -969,7 +969,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (string.IsNullOrEmpty(_videoFileName))
             {
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     await MessageBox.Show(Window!, "No video file", "No video file found!");
@@ -982,7 +982,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (!startOk)
             {
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
+                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     if (string.IsNullOrEmpty(_error))
@@ -1148,8 +1148,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             viewModal =>
             {
                 viewModal.Parameters = Parameters;
-                viewModal.Engines = Enumerable.ToList<IWhisperEngine>(Engines);
-                viewModal.EngineClickedCommand.Execute(SelectedEngine);
+                viewModal.Engines = Enumerable.ToList<ISpeechToTextEngine>((IEnumerable<ISpeechToTextEngine>)Engines);
+                viewModal.EngineClickedCommand.Execute((ISpeechToTextEngine)SelectedEngine);
             });
 
         if (vm.OkPressed)
@@ -1294,7 +1294,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
-        if (engine is AudioToTextEngineChatLlm chatLlm)
+        if (engine is ChatLlmCppEngine chatLlm)
         {
             var modelAligner = Models.First(p => p.Model.Name.Contains("aligner"));
             if (!engine.IsModelInstalled(model.Model))
@@ -1354,7 +1354,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     MessageBoxIcon.Error);
 
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(engine is AudioToTextEngineChatLlm);
+                IsTranslateEnabled = !(engine is ChatLlmCppEngine);
                 return;
             }
 
@@ -1526,14 +1526,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     }
 
     private Process GetWhisperProcess(
-        IWhisperEngine engine,
+        ISpeechToTextEngine engine,
         string waveFileName,
         string model,
         string language,
         bool translate,
         DataReceivedEventHandler? dataReceivedHandler = null)
     {
-        if (engine is AudioToTextEngineChatLlm chatLlm)
+        if (engine is ChatLlmCppEngine chatLlm)
         {
             var exe = chatLlm.GetExecutable();
             var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine(model)}\" -p \"{waveFileName}\"";
@@ -1706,7 +1706,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         return process;
     }
 
-    public static string GetWhisperTranslateParameter(IWhisperEngine engine)
+    public static string GetWhisperTranslateParameter(ISpeechToTextEngine engine)
     {
         if (engine.Choice == new WhisperEnginePurfviewFasterWhisperXxl().Choice || engine.Choice == new WhisperEngineOpenAi().Choice)
         {
@@ -1955,7 +1955,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
     private void RefreshDownloadStatus(WhisperModel? result)
     {
-        if (SelectedEngine is not IWhisperEngine engine)
+        if (SelectedEngine is not ISpeechToTextEngine engine)
         {
             return;
         }
@@ -2044,7 +2044,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Parameters = "--standard";
         }
 
-        IsTranslateEnabled = !(engine is AudioToTextEngineChatLlm);
+        IsTranslateEnabled = !(engine is ChatLlmCppEngine);
 
         SaveSettings();
     }

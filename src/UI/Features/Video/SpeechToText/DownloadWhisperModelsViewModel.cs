@@ -40,7 +40,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
     public bool OkPressed { get; internal set; }
 
     private IWhisperDownloadService _whisperDownloadService;
-    private IWhisperEngine? _whisperEngine;
+    private ISpeechToTextEngine? _whisperEngine;
     private readonly IFolderHelper _folderHelper;
 
     private Task? _downloadTask;
@@ -73,7 +73,7 @@ public partial class DownloadWhisperModelsViewModel : ObservableObject
         _timer.Start();
     }
 
-    public void SetModels(ObservableCollection<WhisperModelDisplay> models, IWhisperEngine whisperEngine, WhisperModelDisplay? whisperModel)
+    public void SetModels(ObservableCollection<WhisperModelDisplay> models, ISpeechToTextEngine whisperEngine, WhisperModelDisplay? whisperModel)
     {
         _whisperEngine = whisperEngine;
 

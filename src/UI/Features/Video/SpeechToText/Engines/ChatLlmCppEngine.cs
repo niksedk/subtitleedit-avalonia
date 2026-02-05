@@ -10,7 +10,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class AudioToTextEngineChatLlm : IWhisperEngine
+public class ChatLlmCppEngine : ISpeechToTextEngine
 {
     public static string StaticName => "Chat LLM";
     public string Name => StaticName;
@@ -48,28 +48,28 @@ public class AudioToTextEngineChatLlm : IWhisperEngine
                 {
                     Name = "qwen3-asr-1.7b.bin",
                     Size = "2.5 GB",
-                    Urls = new[]
-                    {
+                    Urls =
+                    [
                         "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-1.7b.bin"
-                    }
+                    ]
                 },
                 new WhisperModel
                 {
                     Name = "qwen3-asr-0.6b.bin",
                     Size = "1 GB",
-                    Urls = new[]
-                    {
+                    Urls =
+                    [
                         "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-0.6b.bin"
-                    }
+                    ]
                 },
                 new WhisperModel
                 {
                     Name = "qwen3-focedaligner-0.6b.bin",
                     Size = "1 GB",
-                    Urls = new[]
-                    {
+                    Urls =
+                    [
                         "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-focedaligner-0.6b.bin"
-                    }
+                    ]
                 },
             }.ToList();
         }

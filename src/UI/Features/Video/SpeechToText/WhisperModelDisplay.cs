@@ -7,7 +7,7 @@ public class WhisperModelDisplay
 {
     public WhisperModel Model { get; set; } = new WhisperModel();
     public string? Display { get; set; }
-    public IWhisperEngine Engine { get; set; } = new WhisperEngineCpp();
+    public ISpeechToTextEngine Engine { get; set; } = new WhisperEngineCpp();
 
     public override string ToString()
     {

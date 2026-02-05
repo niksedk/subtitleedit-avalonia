@@ -9,7 +9,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEngineConstMe : IWhisperEngine
+public class WhisperEngineConstMe : ISpeechToTextEngine
 {
     public static string StaticName => "Whisper Const-me";
     public string Name => StaticName;

@@ -32,7 +32,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
-    public IWhisperEngine? Engine { get; internal set; }
+    public ISpeechToTextEngine? Engine { get; internal set; }
 
     private readonly IWhisperDownloadService _whisperDownloadService;
     private readonly IChatLlmDownloadService _chatLlmDownloadService;
@@ -253,7 +253,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
             _downloadTask = _whisperDownloadService.DownloadWhisperPurfviewFasterWhisperXxl(tempFileName, downloadProgress, _cancellationTokenSource.Token);
         }
-        else if (Engine is AudioToTextEngineChatLlm)
+        else if (Engine is ChatLlmCppEngine)
         {
             var dir = Engine.GetAndCreateWhisperFolder();
             _downloadTask = _chatLlmDownloadService.DownloadEngine(_downloadStream, downloadProgress, _cancellationTokenSource.Token);

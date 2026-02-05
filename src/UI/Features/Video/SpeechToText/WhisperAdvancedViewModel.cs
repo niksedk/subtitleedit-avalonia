@@ -21,7 +21,7 @@ public partial class WhisperAdvancedViewModel : ObservableObject
     [ObservableProperty] private bool _isWhisperXxlVisible;
 
     public Window? Window { get; set; }
-    public List<IWhisperEngine> Engines { get; set; }
+    public List<ISpeechToTextEngine> Engines { get; set; }
 
     public bool OkPressed { get; private set; }
 
@@ -29,17 +29,17 @@ public partial class WhisperAdvancedViewModel : ObservableObject
     {
         Parameters = string.Empty;
         HelpText = string.Empty;
-        Engines = new List<IWhisperEngine>();
+        Engines = new List<ISpeechToTextEngine>();
     }
 
-    private void RefreshVadCpp(IWhisperEngine engine)
+    private void RefreshVadCpp(ISpeechToTextEngine engine)
     {
         IsVadCppVisible = engine.Name == WhisperEngineCpp.StaticName;
         IsWhisperXxlVisible = engine.Name == WhisperEnginePurfviewFasterWhisperXxl.StaticName;
     }
 
     [RelayCommand]
-    private async Task EngineClicked(IWhisperEngine engine)
+    private async Task EngineClicked(ISpeechToTextEngine engine)
     {
         var helpText = await engine.GetHelpText();
         HelpText = engine.Name + Environment.NewLine + Environment.NewLine + helpText;

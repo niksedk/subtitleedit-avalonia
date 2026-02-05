@@ -10,7 +10,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEnginePurfviewFasterWhisperXxl : IWhisperEngine
+public class WhisperEnginePurfviewFasterWhisperXxl : ISpeechToTextEngine
 {
     public static string StaticName => "Purfview Faster Whisper XXL";
     public string Name => StaticName;
