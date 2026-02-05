@@ -113,8 +113,15 @@ public partial class MergeShortLinesViewModel : ObservableObject
                     var language = string.IsNullOrWhiteSpace(baseVm.Language) ? "en" : baseVm.Language;
                     var combinedRaw = (current.Text ?? string.Empty).TrimEnd() + " " + (next.Text ?? string.Empty).TrimStart();
                     var wrapped = Utilities.AutoBreakLine(combinedRaw, SingleLineMaxLength, Se.Settings.General.UnbreakLinesShorterThan, language);
-                    var lineCount = wrapped.SplitToLines().Count;
-                    if (lineCount > MaxNumberOfLines)
+                    var lines = wrapped.SplitToLines();
+                    if (lines.Count > MaxNumberOfLines)
+                    {
+                        break;
+                    }
+
+                    // Check that each line doesn't exceed SingleLineMaxLength
+                    var anyLineTooLong = lines.Any(line => HtmlUtil.RemoveHtmlTags(line, true).Length > SingleLineMaxLength);
+                    if (anyLineTooLong)
                     {
                         break;
                     }
