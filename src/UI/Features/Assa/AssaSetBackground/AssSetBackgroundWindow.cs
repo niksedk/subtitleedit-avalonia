@@ -1,8 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -14,14 +16,21 @@ public class AssSetBackgroundWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Assa.BackgroundBoxGenerator;
-        CanResize = false;
-        SizeToContent = SizeToContent.WidthAndHeight;
-        MinWidth = 500;
+        CanResize = true;
+        Width = 1100;
+        Height = 700;
+        MinWidth = 900;
+        MinHeight = 650;
 
         vm.Window = this;
         DataContext = vm;
 
-        var mainGrid = new Grid
+        vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControl.FullScreenIsVisible = false;
+
+        var videoPanel = UiUtil.MakeBorderForControl(vm.VideoPlayerControl);
+
+        var leftPanel = new Grid
         {
             RowDefinitions =
             {
@@ -29,34 +38,50 @@ public class AssSetBackgroundWindow : Window
                 new RowDefinition { Height = GridLength.Auto },
                 new RowDefinition { Height = GridLength.Auto },
                 new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = GridLength.Auto },
             },
-            Margin = UiUtil.MakeWindowMargin(),
             RowSpacing = 12,
         };
 
         // Padding settings
-        mainGrid.Add(CreatePaddingPanel(vm), 0);
+        leftPanel.Add(CreatePaddingPanel(vm), 0);
 
         // Fill width settings
-        mainGrid.Add(CreateFillWidthPanel(vm), 1);
+        leftPanel.Add(CreateFillWidthPanel(vm), 1);
 
         // Style settings
-        mainGrid.Add(CreateStylePanel(vm), 2);
+        leftPanel.Add(CreateStylePanel(vm), 2);
 
         // Colors
-        mainGrid.Add(CreateColorsPanel(vm), 3);
+        leftPanel.Add(CreateColorsPanel(vm), 3);
 
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        mainGrid.Add(panelButtons, 4);
+        leftPanel.Add(panelButtons, 5);
+
+        var mainGrid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+            },
+            Margin = UiUtil.MakeWindowMargin(),
+            ColumnSpacing = 12,
+        };
+
+        mainGrid.Add(leftPanel, 0, 0);
+        mainGrid.Add(videoPanel, 0, 1);
 
         Content = mainGrid;
 
         Activated += delegate { buttonOk.Focus(); };
-        KeyDown += vm.KeyDown;
+        AddHandler(KeyDownEvent, vm.KeyDown, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
+        Loaded += (_, _) => vm.OnLoaded();
+        Closing += (_, _) => vm.OnClosing();
     }
 
     private static Border CreatePaddingPanel(AssSetBackgroundViewModel vm)
