@@ -3,12 +3,10 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 
@@ -69,95 +67,31 @@ public partial class MergeShortLinesViewModel : ObservableObject
             AllSubtitlesFixed.Clear();
             Fixes.Clear();
 
-            var mergeCount = 0;
-            var maxCharactersPerSubtitle = MaxNumberOfLines * SingleLineMaxLength;
+            var gapThresholdMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
+            var unbreakLinesShorterThan = Se.Settings.General.UnbreakLinesShorterThan;
 
-            var result = new List<SubtitleLineViewModel>(_allSubtitles.Count);
-            var gapThresholdMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs; // reuse existing setting for "close in time"
+            var mergeResult = MergeShortLinesHelper.Merge(
+                _allSubtitles,
+                _shotChanges,
+                SingleLineMaxLength,
+                MaxNumberOfLines,
+                gapThresholdMs,
+                unbreakLinesShorterThan);
 
-            for (var index = 0; index < _allSubtitles.Count; index++)
+            AllSubtitlesFixed.AddRange(mergeResult.MergedSubtitles);
+
+            foreach (var fix in mergeResult.Fixes)
             {
-                var baseVm = _allSubtitles[index];
-                var current = new SubtitleLineViewModel(baseVm);
-
-                var mergedWithCount = 0;
-                var j = index + 1;
-                while (j < _allSubtitles.Count)
-                {
-                    var next = _allSubtitles[j];
-
-                    // stop if there is a shot change between current and next
-                    var hasShotChangeBetween = _shotChanges != null && _shotChanges.Any(s =>
-                        s > current.EndTime.TotalSeconds && s < next.StartTime.TotalSeconds);
-                    if (hasShotChangeBetween)
-                    {
-                        break;
-                    }
-
-                    // Check temporal proximity
-                    var gapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
-                    if (gapMs > gapThresholdMs)
-                    {
-                        break;
-                    }
-
-                    // Check combined plain length limit
-                    var combinedPlain = HtmlUtil.RemoveHtmlTags((current.Text ?? string.Empty) + " " + (next.Text ?? string.Empty), true)
-                        .Replace("\r\n", " ").Replace('\n', ' ').Trim();
-                    if (combinedPlain.Length > maxCharactersPerSubtitle)
-                    {
-                        break;
-                    }
-
-                    // Try to wrap combined text within SingleLineMaxLength and MaxNumberOfLines
-                    var language = string.IsNullOrWhiteSpace(baseVm.Language) ? "en" : baseVm.Language;
-                    var combinedRaw = (current.Text ?? string.Empty).TrimEnd() + " " + (next.Text ?? string.Empty).TrimStart();
-                    var wrapped = Utilities.AutoBreakLine(combinedRaw, SingleLineMaxLength, Se.Settings.General.UnbreakLinesShorterThan, language);
-                    var lines = wrapped.SplitToLines();
-                    if (lines.Count > MaxNumberOfLines)
-                    {
-                        break;
-                    }
-
-                    // Check that each line doesn't exceed SingleLineMaxLength
-                    var anyLineTooLong = lines.Any(line => HtmlUtil.RemoveHtmlTags(line, true).Length > SingleLineMaxLength);
-                    if (anyLineTooLong)
-                    {
-                        break;
-                    }
-
-                    // Merge
-                    current.Text = wrapped;
-                    current.EndTime = next.EndTime;
-                    current.UpdateDuration();
-                    mergedWithCount++;
-                    mergeCount++;
-
-                    // fix item for this merge step
-                    var fix = new MergeShortLinesItem(
-                        "Merge short lines",
-                        index + 1,
-                        $"Merged line {j + 1} into {index + 1}",
-                        new SubtitleLineViewModel(current));
-                    Fixes.Add(fix);
-
-                    j++;
-                }
-
-                result.Add(current);
-                // Skip the lines we merged into current
-                index = j - 1;
+                Fixes.Add(fix);
             }
 
-            AllSubtitlesFixed.AddRange(result);
-
-            if (mergeCount == 0)
+            if (mergeResult.MergeCount == 0)
             {
                 FixesInfo = Se.Language.Tools.ApplyDurationLimits.NoChangesNeeded;
             }
             else
             {
-                FixesInfo = $"Lines merged: {mergeCount}";
+                FixesInfo = $"Lines merged: {mergeResult.MergeCount}";
             }
         });
     }
