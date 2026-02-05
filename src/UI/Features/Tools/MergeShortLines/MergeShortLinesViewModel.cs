@@ -205,4 +205,9 @@ public partial class MergeShortLinesViewModel : ObservableObject
     {
         _isDirty = true;
     }
+
+    internal void Loaded()
+    {
+        _isDirty = true;
+    }
 }

@@ -58,6 +58,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private bool _isWhisperCppActive;
     [ObservableProperty] private bool _isWhisperPurfviewXxlActive;
     [ObservableProperty] private bool _isTranscribeEnabled;
+    [ObservableProperty] private bool _isTranslateEnabled;
     [ObservableProperty] private double _progressOpacity;
 
     [ObservableProperty] private double _progressValue;
@@ -111,6 +112,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private int _batchIndex = -1;
     private string _error;
     private List<AudioClip>? _audioClips;
+    private string _chatLlmText = string.Empty;
 
     private readonly IWindowService _windowService;
     private readonly IFileHelper _fileHelper;
@@ -152,6 +154,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         ResultAudioClips = new List<AudioClip>();
 
         IsTranscribeEnabled = true;
+        IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
         Parameters = string.Empty;
         ConsoleLog = string.Empty;
         ProgressText = string.Empty;
@@ -292,13 +295,124 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             _timerWhisper.Stop();
 
+            var settings = Se.Settings.Tools.AudioToText;
+            _whisperProcess.Dispose();
+
+            if (SelectedEngine is AudioToTextEngineChatLlm chatLlm)
+            {
+                var sbLog = new StringBuilder();
+                foreach (var s in _outputText)
+                {
+                    sbLog.AppendLine(s.TrimEnd());
+                }
+
+                var text = sbLog.ToString();
+
+                if (!string.IsNullOrEmpty(text) && !string.IsNullOrEmpty(_chatLlmText))
+                {
+                    _chatLlmText = string.Empty;
+                    var lines = text.SplitToLines();
+                    var subtitle = new Subtitle();
+                    new SubRip().LoadSubtitle(subtitle, lines, string.Empty);
+                    if (subtitle.Paragraphs.Count > 0)
+                    {
+                        var last = subtitle.Paragraphs.Last();
+                        var indexOfTimings = last.Text.IndexOf("\ntimings:");
+                        if (indexOfTimings > 0)
+                        {
+                            last.Text = last.Text.Substring(0, indexOfTimings).Trim();
+                        }
+
+                        var postProcessedSubtitle = PostProcess(subtitle);
+
+                        if (_audioClips != null && ResultAudioClips.Count > 0)
+                        {
+                            var outputAudioClip = ResultAudioClips.FirstOrDefault(p => p.AudioFileName == _videoFileName);
+                            if (outputAudioClip != null)
+                            {
+                                outputAudioClip.Transcription = new Subtitle(postProcessedSubtitle);
+                            }
+                        }
+
+                        Dispatcher.UIThread.Invoke<Task>(async () =>
+                        {
+                            LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+                            ProgressValue = 100;
+                            await MakeResult(postProcessedSubtitle);
+                        });
+                    }
+                    return;
+                }
+
+
+                var tag = "<asr_text>";
+                var start = text.IndexOf(tag);
+                if (start < 0)
+                {
+                    LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+                    LogToConsole($"Speech to text: Could not find '{tag}' in text{Environment.NewLine}");
+                    return;
+                }
+
+                text = text.Remove(0, start + tag.Length);
+                LogToConsole($"Speech to text step 1/2 ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+                LogToConsole($"Speech to text step 2/2 ({settings.WhisperChoice}) qwen3-focedaligner-0.6b.bin starting");
+
+                _chatLlmText = text;
+
+                sbLog.Clear();
+                _outputText.Clear();
+
+                var exe = chatLlm.GetExecutable();
+                var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine("qwen3-focedaligner-0.6b.bin")}\" --multimedia-file-tags {{{{ }}}} -p \"{{{{audio:{_waveFileName}}}}}{_chatLlmText}\"";
+
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo(exe, chatLlmParams)
+                    {
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WorkingDirectory = Path.GetDirectoryName(exe),
+                    }
+                };
+
+                _whisperProcess = p;
+
+                var dataReceivedHandler = (DataReceivedEventHandler)OutputHandler;
+                if (dataReceivedHandler != null)
+                {
+                    p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.OutputDataReceived += dataReceivedHandler;
+                    p.ErrorDataReceived += dataReceivedHandler;
+                }
+
+
+
+#pragma warning disable CA1416
+                p.Start();
+#pragma warning restore CA1416
+
+
+                if (dataReceivedHandler != null)
+                {
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
+                }
+
+
+                _timerWhisper.Start();
+
+                return;
+            }
+
             Dispatcher.UIThread.Invoke<Task>(async () =>
             {
+                LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
                 ProgressValue = 100;
-                var settings = Se.Settings.Tools.AudioToText;
-                LogToConsole($"Whisper ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
-
-                _whisperProcess.Dispose();
 
                 var hasError = false;
                 if (_incompleteModel)
@@ -450,6 +564,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 MessageBoxIcon.Information);
 
             IsTranscribeEnabled = true;
+            IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
 
             if (failed == 0)
             {
@@ -776,6 +891,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             var settings = Se.Settings.Tools.AudioToText;
             IsTranscribeEnabled = true;
+            IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
             HideProgressBar();
 
             if (_loadedFromStdOut)
@@ -820,6 +936,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
                 ProgressOpacity = 0;
                 IsTranscribeEnabled = true;
+                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
                 return;
             }
 
@@ -843,6 +960,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                                      "ffmpeg exit code: " + _waveExtractProcess.ExitCode + Environment.NewLine +
                                      "ffmpeg log: " + _ffmpegLog);
                 IsTranscribeEnabled = true;
+                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
                 _waveExtractProcess = null;
                 return;
             }
@@ -851,6 +969,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (string.IsNullOrEmpty(_videoFileName))
             {
                 IsTranscribeEnabled = true;
+                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     await MessageBox.Show(Window!, "No video file", "No video file found!");
@@ -863,6 +982,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (!startOk)
             {
                 IsTranscribeEnabled = true;
+                IsTranslateEnabled = !(SelectedEngine is AudioToTextEngineChatLlm);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     if (string.IsNullOrEmpty(_error))
@@ -1174,6 +1294,34 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             return;
         }
 
+        if (engine is AudioToTextEngineChatLlm chatLlm)
+        {
+            var modelAligner = Models.First(p => p.Model.Name.Contains("aligner"));
+            if (!engine.IsModelInstalled(model.Model))
+            {
+                var answer = await MessageBox.Show(
+                                Window!,
+                                $"Download {modelAligner}?",
+                                $"'Chat LLM' a forced aligner to create timestamps.\nDownload and use {modelAligner.Model.Name}?",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(
+                    Window!, viewModel =>
+                    {
+                        viewModel.SetModels(Models, SelectedEngine, modelAligner);
+                        viewModel.StartDownload();
+                    });
+
+                return;
+            }
+        }
+
         if (language.Code != "en" && IsModelEnglishOnly(model.Model))
         {
             var answer = await MessageBox.Show(
@@ -1190,6 +1338,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         IsTranscribeEnabled = false;
+        IsTranslateEnabled = false;
         ConsoleLog = string.Empty;
 
         if (!IsBatchMode)
@@ -1205,6 +1354,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     MessageBoxIcon.Error);
 
                 IsTranscribeEnabled = true;
+                IsTranslateEnabled = !(engine is AudioToTextEngineChatLlm);
                 return;
             }
 
@@ -1299,6 +1449,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         _showProgressPct = -1;
         IsTranscribeEnabled = false;
+        IsTranslateEnabled = false;
         ProgressOpacity = 1;
         ProgressText = GetProgressText();
 
@@ -1384,8 +1535,27 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     {
         if (engine is AudioToTextEngineChatLlm chatLlm)
         {
-            var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine(model)}\" -p \"{waveFileName}\"";
             var exe = chatLlm.GetExecutable();
+            var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine(model)}\" -p \"{waveFileName}\"";
+
+            if (OperatingSystem.IsWindows())
+            {
+                var ffmpegPath = Se.Settings.General.FfmpegPath;
+                var targetFfmpegPath = Path.Combine(Path.GetDirectoryName(exe) ?? string.Empty, "ffmpeg.exe");
+                if (!string.IsNullOrEmpty(ffmpegPath) && File.Exists(ffmpegPath) &&
+                    !File.Exists(targetFfmpegPath))
+                {
+                    try
+                    {
+                        File.Copy(ffmpegPath, targetFfmpegPath, false);
+                    }
+                    catch (Exception ex)
+                    {
+                        SeLogger.Error(ex, "Error copying ffmpeg to chat-llm folder");
+                    }
+                }
+            }
+
             var p = new Process
             {
                 StartInfo = new ProcessStartInfo(exe, chatLlmParams)
@@ -1710,9 +1880,13 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
-    private void LogToConsole(string s)
+    private void LogToConsole(string s, bool skipOutputText = false)
     {
-        _outputText.Enqueue(s);
+        if (!skipOutputText)
+        {
+            _outputText.Enqueue(s);
+        }
+
         ConsoleLog += s.Trim() + "\n";
 
         Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
@@ -1869,6 +2043,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             Parameters = "--standard";
         }
+
+        IsTranslateEnabled = !(engine is AudioToTextEngineChatLlm);
 
         SaveSettings();
     }

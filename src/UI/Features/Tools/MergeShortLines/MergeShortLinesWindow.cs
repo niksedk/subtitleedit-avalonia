@@ -51,6 +51,7 @@ public class MergeShortLinesWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
+        Loaded += delegate { vm.Loaded(); };
     }
 
     private static Grid MakeControlsView(MergeShortLinesViewModel vm)
