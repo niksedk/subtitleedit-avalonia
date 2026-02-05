@@ -36,27 +36,22 @@ public class AssSetBackgroundWindow : Window
         };
 
         // Padding settings
-        mainGrid.Children.Add(CreatePaddingPanel(vm));
-        Grid.SetRow(mainGrid.Children[^1], 0);
+        mainGrid.Add(CreatePaddingPanel(vm), 0);
 
         // Fill width settings
-        mainGrid.Children.Add(CreateFillWidthPanel(vm));
-        Grid.SetRow(mainGrid.Children[^1], 1);
+        mainGrid.Add(CreateFillWidthPanel(vm), 1);
 
         // Style settings
-        mainGrid.Children.Add(CreateStylePanel(vm));
-        Grid.SetRow(mainGrid.Children[^1], 2);
+        mainGrid.Add(CreateStylePanel(vm), 2);
 
         // Colors
-        mainGrid.Children.Add(CreateColorsPanel(vm));
-        Grid.SetRow(mainGrid.Children[^1], 3);
+        mainGrid.Add(CreateColorsPanel(vm), 3);
 
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        Grid.SetRow(panelButtons, 4);
-        mainGrid.Children.Add(panelButtons);
+        mainGrid.Add(panelButtons, 4);
 
         Content = mainGrid;
 
@@ -91,53 +86,35 @@ public class AssSetBackgroundWindow : Window
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5),
         };
-        Grid.SetRow(titleLabel, 0);
-        Grid.SetColumnSpan(titleLabel, 4);
-        grid.Children.Add(titleLabel);
+        grid.Add(titleLabel, 0, 0, 1, 4);
 
         // Left
         var leftLabel = new TextBlock { Text = Se.Language.General.Left, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(leftLabel, 1);
-        Grid.SetColumn(leftLabel, 0);
-        grid.Children.Add(leftLabel);
+        grid.Add(leftLabel, 1, 0);
 
         var leftBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingLeft));
-        Grid.SetRow(leftBox, 1);
-        Grid.SetColumn(leftBox, 1);
-        grid.Children.Add(leftBox);
+        grid.Add(leftBox, 1, 1);
 
         // Right
         var rightLabel = new TextBlock { Text = Se.Language.General.Right, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(rightLabel, 1);
-        Grid.SetColumn(rightLabel, 2);
-        grid.Children.Add(rightLabel);
+        grid.Add(rightLabel, 1, 2);
 
         var rightBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingRight));
-        Grid.SetRow(rightBox, 1);
-        Grid.SetColumn(rightBox, 3);
-        grid.Children.Add(rightBox);
+        grid.Add(rightBox, 1, 3);
 
         // Top
         var topLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarTop, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(topLabel, 2);
-        Grid.SetColumn(topLabel, 0);
-        grid.Children.Add(topLabel);
+        grid.Add(topLabel, 2, 0);
 
         var topBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingTop));
-        Grid.SetRow(topBox, 2);
-        Grid.SetColumn(topBox, 1);
-        grid.Children.Add(topBox);
+        grid.Add(topBox, 2, 1);
 
         // Bottom
         var bottomLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarBottom, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(bottomLabel, 2);
-        Grid.SetColumn(bottomLabel, 2);
-        grid.Children.Add(bottomLabel);
+        grid.Add(bottomLabel, 2, 2);
 
         var bottomBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingBottom));
-        Grid.SetRow(bottomBox, 2);
-        Grid.SetColumn(bottomBox, 3);
-        grid.Children.Add(bottomBox);
+        grid.Add(bottomBox, 2, 3);
 
         return new Border
         {
@@ -175,33 +152,23 @@ public class AssSetBackgroundWindow : Window
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.FillWidth)) { Mode = BindingMode.TwoWay },
             FontWeight = FontWeight.Bold,
         };
-        Grid.SetRow(checkBox, 0);
-        Grid.SetColumnSpan(checkBox, 4);
-        grid.Children.Add(checkBox);
+        grid.Add(checkBox, 0, 0, 1, 4);
 
         // Margin Left
         var leftLabel = new TextBlock { Text = Se.Language.General.Left, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(leftLabel, 1);
-        Grid.SetColumn(leftLabel, 0);
-        grid.Children.Add(leftLabel);
+        grid.Add(leftLabel, 1, 0);
 
         var leftBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.FillWidthMarginLeft));
         leftBox.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.FillWidth)));
-        Grid.SetRow(leftBox, 1);
-        Grid.SetColumn(leftBox, 1);
-        grid.Children.Add(leftBox);
+        grid.Add(leftBox, 1, 1);
 
         // Margin Right
         var rightLabel = new TextBlock { Text = Se.Language.General.Right, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(rightLabel, 1);
-        Grid.SetColumn(rightLabel, 2);
-        grid.Children.Add(rightLabel);
+        grid.Add(rightLabel, 1, 2);
 
         var rightBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.FillWidthMarginRight));
         rightBox.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.FillWidth)));
-        Grid.SetRow(rightBox, 1);
-        Grid.SetColumn(rightBox, 3);
-        grid.Children.Add(rightBox);
+        grid.Add(rightBox, 1, 3);
 
         return new Border
         {
@@ -239,14 +206,11 @@ public class AssSetBackgroundWindow : Window
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5),
         };
-        Grid.SetRow(titleLabel, 0);
-        Grid.SetColumnSpan(titleLabel, 2);
-        grid.Children.Add(titleLabel);
+        grid.Add(titleLabel, 0, 0, 1, 2);
 
         // Box style
         var styleLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarStyle, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(styleLabel, 1);
-        grid.Children.Add(styleLabel);
+        grid.Add(styleLabel, 1, 0);
 
         var styleCombo = new ComboBox
         {
@@ -254,29 +218,21 @@ public class AssSetBackgroundWindow : Window
             [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.BoxStyles)),
             [!ComboBox.SelectedIndexProperty] = new Binding(nameof(vm.BoxStyleIndex)) { Mode = BindingMode.TwoWay },
         };
-        Grid.SetRow(styleCombo, 1);
-        Grid.SetColumn(styleCombo, 1);
-        grid.Children.Add(styleCombo);
+        grid.Add(styleCombo, 1, 1);
 
         // Radius (for rounded corners)
         var radiusLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxRadius, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(radiusLabel, 2);
-        grid.Children.Add(radiusLabel);
+        grid.Add(radiusLabel, 2, 0);
 
         var radiusBox = UiUtil.MakeNumericUpDownInt(0, 200, 0, 120, vm, nameof(vm.Radius));
-        Grid.SetRow(radiusBox, 2);
-        Grid.SetColumn(radiusBox, 1);
-        grid.Children.Add(radiusBox);
+        grid.Add(radiusBox, 2, 1);
 
         // Outline width
         var outlineLabel = new TextBlock { Text = Se.Language.General.Outline, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(outlineLabel, 3);
-        grid.Children.Add(outlineLabel);
+        grid.Add(outlineLabel, 3, 0);
 
         var outlineBox = UiUtil.MakeNumericUpDownInt(0, 20, 0, 120, vm, nameof(vm.OutlineWidth));
-        Grid.SetRow(outlineBox, 3);
-        Grid.SetColumn(outlineBox, 1);
-        grid.Children.Add(outlineBox);
+        grid.Add(outlineBox, 3, 1);
 
         return new Border
         {
@@ -314,42 +270,31 @@ public class AssSetBackgroundWindow : Window
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5),
         };
-        Grid.SetRow(titleLabel, 0);
-        Grid.SetColumnSpan(titleLabel, 2);
-        grid.Children.Add(titleLabel);
+        grid.Add(titleLabel, 0, 0, 1, 2);
 
         // Box color
         var boxLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxBoxColor, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(boxLabel, 1);
-        grid.Children.Add(boxLabel);
+        grid.Add(boxLabel, 1, 0);
 
         var boxPicker = UiUtil.MakeColorPicker(vm, nameof(vm.BoxColor));
         boxPicker.HorizontalAlignment = HorizontalAlignment.Left;
-        Grid.SetRow(boxPicker, 1);
-        Grid.SetColumn(boxPicker, 1);
-        grid.Children.Add(boxPicker);
+        grid.Add(boxPicker, 1, 1);
 
         // Outline color
         var outlineLabel = new TextBlock { Text = Se.Language.General.Outline, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(outlineLabel, 2);
-        grid.Children.Add(outlineLabel);
+        grid.Add(outlineLabel, 2, 0);
 
         var outlinePicker = UiUtil.MakeColorPicker(vm, nameof(vm.OutlineColor));
         outlinePicker.HorizontalAlignment = HorizontalAlignment.Left;
-        Grid.SetRow(outlinePicker, 2);
-        Grid.SetColumn(outlinePicker, 1);
-        grid.Children.Add(outlinePicker);
+        grid.Add(outlinePicker, 2, 1);
 
         // Shadow color
         var shadowLabel = new TextBlock { Text = Se.Language.General.Shadow, VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(shadowLabel, 3);
-        grid.Children.Add(shadowLabel);
+        grid.Add(shadowLabel, 3, 0);
 
         var shadowPicker = UiUtil.MakeColorPicker(vm, nameof(vm.ShadowColor));
         shadowPicker.HorizontalAlignment = HorizontalAlignment.Left;
-        Grid.SetRow(shadowPicker, 3);
-        Grid.SetColumn(shadowPicker, 1);
-        grid.Children.Add(shadowPicker);
+        grid.Add(shadowPicker, 3, 1);
 
         return new Border
         {

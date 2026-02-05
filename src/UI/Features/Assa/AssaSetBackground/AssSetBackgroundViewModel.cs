@@ -44,6 +44,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     private int _videoWidth = 1920;
     private int _videoHeight = 1080;
     private readonly Random _random = new();
+    private string? _videoFileName;
 
     public Subtitle ResultSubtitle => _subtitle;
 
@@ -54,12 +55,18 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         BoxStyles.Add(Se.Language.Assa.BackgroundBoxCircle);
     }
 
-    public void Initialize(Subtitle subtitle, int[]? selectedIndices, int videoWidth, int videoHeight)
+    public void Initialize(
+        Subtitle subtitle, 
+        int[]? selectedIndices, 
+        int videoWidth, 
+        int videoHeight,
+        string? videoFileName)
     {
         _subtitle = new Subtitle(subtitle, false);
         _selectedIndices = selectedIndices;
         _videoWidth = videoWidth > 0 ? videoWidth : 1920;
         _videoHeight = videoHeight > 0 ? videoHeight : 1080;
+        _videoFileName = videoFileName;
 
         if (string.IsNullOrWhiteSpace(_subtitle.Header))
         {
