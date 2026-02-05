@@ -549,7 +549,7 @@ public partial class AssaDrawViewModel : ObservableObject
         }
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    internal async void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {
@@ -603,7 +603,7 @@ public partial class AssaDrawViewModel : ObservableObject
                     e.Handled = true;
                     break;
                 case Key.C:
-                    CopyToClipboard();
+                    await CopyToClipboard();
                     e.Handled = true;
                     break;
                 case Key.N:

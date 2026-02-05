@@ -1,5 +1,4 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
@@ -78,9 +77,9 @@ public class AssSetBackgroundWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
                 new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
             },
             RowSpacing = 8,
             ColumnSpacing = 10,
@@ -97,65 +96,45 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(titleLabel);
 
         // Left
-        var leftLabel = new TextBlock { Text = Se.Language.General.Left + ":", VerticalAlignment = VerticalAlignment.Center };
+        var leftLabel = new TextBlock { Text = Se.Language.General.Left, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(leftLabel, 1);
         Grid.SetColumn(leftLabel, 0);
         grid.Children.Add(leftLabel);
 
-        var leftBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PaddingLeft)) { Mode = BindingMode.TwoWay },
-        };
+        var leftBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingLeft));
         Grid.SetRow(leftBox, 1);
         Grid.SetColumn(leftBox, 1);
         grid.Children.Add(leftBox);
 
         // Right
-        var rightLabel = new TextBlock { Text = Se.Language.General.Right + ":", VerticalAlignment = VerticalAlignment.Center };
+        var rightLabel = new TextBlock { Text = Se.Language.General.Right, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(rightLabel, 1);
         Grid.SetColumn(rightLabel, 2);
         grid.Children.Add(rightLabel);
 
-        var rightBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PaddingRight)) { Mode = BindingMode.TwoWay },
-        };
+        var rightBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingRight));
         Grid.SetRow(rightBox, 1);
         Grid.SetColumn(rightBox, 3);
         grid.Children.Add(rightBox);
 
         // Top
-        var topLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarTop + ":", VerticalAlignment = VerticalAlignment.Center };
+        var topLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarTop, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(topLabel, 2);
         Grid.SetColumn(topLabel, 0);
         grid.Children.Add(topLabel);
 
-        var topBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PaddingTop)) { Mode = BindingMode.TwoWay },
-        };
+        var topBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingTop));
         Grid.SetRow(topBox, 2);
         Grid.SetColumn(topBox, 1);
         grid.Children.Add(topBox);
 
         // Bottom
-        var bottomLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarBottom + ":", VerticalAlignment = VerticalAlignment.Center };
+        var bottomLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarBottom, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(bottomLabel, 2);
         Grid.SetColumn(bottomLabel, 2);
         grid.Children.Add(bottomLabel);
 
-        var bottomBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PaddingBottom)) { Mode = BindingMode.TwoWay },
-        };
+        var bottomBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.PaddingBottom));
         Grid.SetRow(bottomBox, 2);
         Grid.SetColumn(bottomBox, 3);
         grid.Children.Add(bottomBox);
@@ -182,9 +161,9 @@ public class AssSetBackgroundWindow : Window
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
                 new ColumnDefinition { Width = GridLength.Auto },
-                new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
             },
             RowSpacing = 8,
             ColumnSpacing = 10,
@@ -201,35 +180,25 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(checkBox);
 
         // Margin Left
-        var leftLabel = new TextBlock { Text = Se.Language.General.Left + ":", VerticalAlignment = VerticalAlignment.Center };
+        var leftLabel = new TextBlock { Text = Se.Language.General.Left, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(leftLabel, 1);
         Grid.SetColumn(leftLabel, 0);
         grid.Children.Add(leftLabel);
 
-        var leftBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.FillWidthMarginLeft)) { Mode = BindingMode.TwoWay },
-            [!NumericUpDown.IsEnabledProperty] = new Binding(nameof(vm.FillWidth)),
-        };
+        var leftBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.FillWidthMarginLeft));
+        leftBox.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.FillWidth)));
         Grid.SetRow(leftBox, 1);
         Grid.SetColumn(leftBox, 1);
         grid.Children.Add(leftBox);
 
         // Margin Right
-        var rightLabel = new TextBlock { Text = Se.Language.General.Right + ":", VerticalAlignment = VerticalAlignment.Center };
+        var rightLabel = new TextBlock { Text = Se.Language.General.Right, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(rightLabel, 1);
         Grid.SetColumn(rightLabel, 2);
         grid.Children.Add(rightLabel);
 
-        var rightBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 500,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.FillWidthMarginRight)) { Mode = BindingMode.TwoWay },
-            [!NumericUpDown.IsEnabledProperty] = new Binding(nameof(vm.FillWidth)),
-        };
+        var rightBox = UiUtil.MakeNumericUpDownInt(0, 500, 0, 120, vm, nameof(vm.FillWidthMarginRight));
+        rightBox.Bind(NumericUpDown.IsEnabledProperty, new Binding(nameof(vm.FillWidth)));
         Grid.SetRow(rightBox, 1);
         Grid.SetColumn(rightBox, 3);
         grid.Children.Add(rightBox);
@@ -275,7 +244,7 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(titleLabel);
 
         // Box style
-        var styleLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarStyle + ":", VerticalAlignment = VerticalAlignment.Center };
+        var styleLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarStyle, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(styleLabel, 1);
         grid.Children.Add(styleLabel);
 
@@ -290,35 +259,21 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(styleCombo);
 
         // Radius (for rounded corners)
-        var radiusLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxRadius + ":", VerticalAlignment = VerticalAlignment.Center };
+        var radiusLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxRadius, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(radiusLabel, 2);
         grid.Children.Add(radiusLabel);
 
-        var radiusBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 200,
-            Width = 100,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.Radius)) { Mode = BindingMode.TwoWay },
-        };
+        var radiusBox = UiUtil.MakeNumericUpDownInt(0, 200, 0, 120, vm, nameof(vm.Radius));
         Grid.SetRow(radiusBox, 2);
         Grid.SetColumn(radiusBox, 1);
         grid.Children.Add(radiusBox);
 
         // Outline width
-        var outlineLabel = new TextBlock { Text = Se.Language.General.Outline + ":", VerticalAlignment = VerticalAlignment.Center };
+        var outlineLabel = new TextBlock { Text = Se.Language.General.Outline, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(outlineLabel, 3);
         grid.Children.Add(outlineLabel);
 
-        var outlineBox = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 20,
-            Width = 100,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.OutlineWidth)) { Mode = BindingMode.TwoWay },
-        };
+        var outlineBox = UiUtil.MakeNumericUpDownInt(0, 20, 0, 120, vm, nameof(vm.OutlineWidth));
         Grid.SetRow(outlineBox, 3);
         Grid.SetColumn(outlineBox, 1);
         grid.Children.Add(outlineBox);
@@ -364,7 +319,7 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(titleLabel);
 
         // Box color
-        var boxLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxBoxColor + ":", VerticalAlignment = VerticalAlignment.Center };
+        var boxLabel = new TextBlock { Text = Se.Language.Assa.BackgroundBoxBoxColor, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(boxLabel, 1);
         grid.Children.Add(boxLabel);
 
@@ -375,7 +330,7 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(boxPicker);
 
         // Outline color
-        var outlineLabel = new TextBlock { Text = Se.Language.General.Outline + ":", VerticalAlignment = VerticalAlignment.Center };
+        var outlineLabel = new TextBlock { Text = Se.Language.General.Outline, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(outlineLabel, 2);
         grid.Children.Add(outlineLabel);
 
@@ -386,7 +341,7 @@ public class AssSetBackgroundWindow : Window
         grid.Children.Add(outlinePicker);
 
         // Shadow color
-        var shadowLabel = new TextBlock { Text = Se.Language.General.Shadow + ":", VerticalAlignment = VerticalAlignment.Center };
+        var shadowLabel = new TextBlock { Text = Se.Language.General.Shadow, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetRow(shadowLabel, 3);
         grid.Children.Add(shadowLabel);
 
