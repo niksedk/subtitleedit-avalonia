@@ -62,6 +62,7 @@ public class MergeShortLinesWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -81,11 +82,16 @@ public class MergeShortLinesWindow : Window
         var numericUpDownMaxNumberOfLines = UiUtil.MakeNumericUpDownInt(2, 10, 2, 130, vm, nameof(vm.MaxNumberOfLines));
         numericUpDownMaxNumberOfLines.ValueChanged += (s, e) => vm.SetChanged();
 
+        var checkBoxHighlightParts = UiUtil.MakeCheckBox(Se.Language.Tools.MergeShortLines.HighlightParts, vm, nameof(vm.HighLight));
+        checkBoxHighlightParts.IsCheckedChanged += (s, e) => vm.SetChanged();
+
         grid.Add(labelSingleLineMaxLength, 0, 0);
         grid.Add(numericUpDownSingleLineMaxLength, 0, 1);
 
         grid.Add(labelMaxNumberOfLines, 1, 0);
         grid.Add(numericUpDownMaxNumberOfLines, 1, 1);
+
+        grid.Add(checkBoxHighlightParts, 2, 1);
 
         return grid;
     }

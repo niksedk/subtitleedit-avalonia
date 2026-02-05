@@ -20,6 +20,7 @@ public partial class MergeShortLinesViewModel : ObservableObject
 
     [ObservableProperty] private int _singleLineMaxLength;
     [ObservableProperty] private int _maxNumberOfLines;
+    [ObservableProperty] private bool _highLight;
 
     [ObservableProperty] private string _fixesInfo;
 
@@ -70,13 +71,28 @@ public partial class MergeShortLinesViewModel : ObservableObject
             var gapThresholdMs = Se.Settings.Tools.BridgeGaps.BridgeGapsSmallerThanMs;
             var unbreakLinesShorterThan = Se.Settings.General.UnbreakLinesShorterThan;
 
-            var mergeResult = MergeShortLinesHelper.Merge(
-                _allSubtitles,
-                _shotChanges,
-                SingleLineMaxLength,
-                MaxNumberOfLines,
-                gapThresholdMs,
-                unbreakLinesShorterThan);
+            var mergeResult = new MergeShortLinesResult(new List<SubtitleLineViewModel>(), new List<MergeShortLinesItem>(), 0);
+            if (HighLight)
+            {
+                mergeResult = MergeShortLinesHelper.MergeWithHighlights(
+                    _allSubtitles,
+                    _shotChanges,
+                    SingleLineMaxLength,
+                    MaxNumberOfLines,
+                    gapThresholdMs,
+                    unbreakLinesShorterThan);
+            }
+            else
+            {
+                mergeResult = MergeShortLinesHelper.Merge(
+                    _allSubtitles,
+                    _shotChanges,
+                    SingleLineMaxLength,
+                    MaxNumberOfLines,
+                    gapThresholdMs,
+                    unbreakLinesShorterThan);
+            }
+            
 
             AllSubtitlesFixed.AddRange(mergeResult.MergedSubtitles);
 
