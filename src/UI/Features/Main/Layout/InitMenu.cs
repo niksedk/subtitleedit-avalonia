@@ -491,19 +491,19 @@ public static class InitMenu
             Header = l.AssaTools,
             [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
         };
-        
+
         foreach (var item in assaTools.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
         {
             menuItemAssaTools.Items.Add(item);
         }
-        
+
         menuItemAssaTools.Items.Add(new Separator());
         menuItemAssaTools.Items.Add(new MenuItem
         {
             Header = l.FilterLayersForDisplayDotDotDot,
             Command = vm.ShowPickLayerFilterCommand,
         });
-        
+
         menu.Items.Add(menuItemAssaTools);
 
         menu.Items.Add(new MenuItem
@@ -541,6 +541,61 @@ public static class InitMenu
         };
         menuItemAudioTracks.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsAudioTracksVisible)));
         vm.AudioTraksMenuItem = menuItemAudioTracks;
+
+
+
+        var videoMore = new List<MenuItem>
+        {
+            new MenuItem
+            {
+                Header = Se.Language.Video.GenerateBlankVideoDotDotDot,
+                Command = vm.VideoGenerateBlankCommand,
+            },
+            new MenuItem
+            {
+                Header = Se.Language.Video.ReEncodeVideoForBetterSubtitlingDotDotDot,
+                Command = vm.VideoReEncodeCommand,
+            },
+            new MenuItem
+            {
+                Header = Se.Language.Video.CutVideoDotDotDot,
+                Command = vm.VideoCutCommand,
+            },
+            new MenuItem
+            {
+                Header = Se.Language.Video.EmbedSubtitlesDotDotDot,
+                Command = vm.VideoEmbedCommand,
+            },
+            new MenuItem
+            {
+                Header = Se.Language.Main.Menu.SetVideoOffset,
+                [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SetVideoOffsetText)),
+                Command = vm.ShowVideoSetOffsetCommand,
+            },
+            new MenuItem
+            {
+                Header = l.SmpteTiming,
+                Command = vm.ToggleSmpteTimingCommand,
+                Icon = new Projektanker.Icons.Avalonia.Icon
+                {
+                    Value = IconNames.CheckBold,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsSmpteTimingEnabled)),
+                }
+            },
+        };
+
+        var menuItemVideoMore = new MenuItem
+        {
+            Header = Se.Language.General.More,
+            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
+        };
+
+        foreach (var item in videoMore.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
+        {
+            menuItemVideoMore.Items.Add(item);
+        }
+
         menu.Items.Add(new MenuItem
         {
             Header = l.Video,
@@ -610,49 +665,7 @@ public static class InitMenu
                     [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.AreVideoControlsUndocked)),
                 },
 
-                new MenuItem
-                {
-                    Header = Se.Language.General.More,
-                    Items =
-                    {
-                        new MenuItem
-                        {
-                            Header = Se.Language.Video.GenerateBlankVideoDotDotDot,
-                            Command = vm.VideoGenerateBlankCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.Video.ReEncodeVideoForBetterSubtitlingDotDotDot,
-                            Command = vm.VideoReEncodeCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.Video.CutVideoDotDotDot,
-                            Command = vm.VideoCutCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = Se.Language.Video.EmbedSubtitlesDotDotDot,
-                            Command = vm.VideoEmbedCommand,
-                        },
-                        new MenuItem
-                        {
-                            [!MenuItem.HeaderProperty] = new Binding(nameof(vm.SetVideoOffsetText)),
-                            Command = vm.ShowVideoSetOffsetCommand,
-                        },
-                        new MenuItem
-                        {
-                            Header = l.SmpteTiming,
-                            Command = vm.ToggleSmpteTimingCommand,
-                            Icon = new Projektanker.Icons.Avalonia.Icon
-                            {
-                                Value = IconNames.CheckBold,
-                                VerticalAlignment = VerticalAlignment.Center,
-                                [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsSmpteTimingEnabled)),
-                            }
-                        },
-                    }
-                },
+                menuItemVideoMore,
             },
         });
 
