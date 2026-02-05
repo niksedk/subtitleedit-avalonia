@@ -135,6 +135,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         Engines.Add(new WhisperEngineOpenAi());
 
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Engines.Add(new AudioToTextEngineChatLlm());
+        }
+
         SelectedEngine = Engines[0];
 
         Languages = new ObservableCollection<WhisperLanguage>(SelectedEngine.Languages);
@@ -1377,6 +1382,44 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         bool translate,
         DataReceivedEventHandler? dataReceivedHandler = null)
     {
+        if (engine is AudioToTextEngineChatLlm chatLlm)
+        {
+            var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine(model)}\" -p \"{waveFileName}\"";
+            var exe = chatLlm.GetExecutable();
+            var p = new Process
+            {
+                StartInfo = new ProcessStartInfo(exe, chatLlmParams)
+                {
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WorkingDirectory = Path.GetDirectoryName(exe),
+                }
+            };
+
+            if (dataReceivedHandler != null)
+            {
+                p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                p.OutputDataReceived += dataReceivedHandler;
+                p.ErrorDataReceived += dataReceivedHandler;
+            }
+
+#pragma warning disable CA1416
+            p.Start();
+#pragma warning restore CA1416
+
+            if (dataReceivedHandler != null)
+            {
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+            }
+
+            return p;
+        }
+
         var settings = Se.Settings.Tools.AudioToText;
         settings.WhisperCustomCommandLineArguments = settings.WhisperCustomCommandLineArguments.Trim();
         if (settings.WhisperCustomCommandLineArguments == "--standard" &&

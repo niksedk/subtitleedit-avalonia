@@ -13,7 +13,7 @@ public class WhisperModelDisplay
     {
         if (Display == null)
         {
-            RefreshDownloadStatus(); ;
+            RefreshDownloadStatus();
         }
 
         return Display!;

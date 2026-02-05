@@ -35,6 +35,7 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
     public IWhisperEngine? Engine { get; internal set; }
 
     private readonly IWhisperDownloadService _whisperDownloadService;
+    private readonly IChatLlmDownloadService _chatLlmDownloadService;
     private Task? _downloadTask;
     private readonly Timer _timer;
     private readonly CancellationTokenSource _cancellationTokenSource;
@@ -44,10 +45,14 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
 
     private IndeterminateProgressHelper? _indeterminateProgressHelper;
 
-    public DownloadWhisperEngineViewModel(IWhisperDownloadService whisperDownloadService, IZipUnpacker zipUnpacker)
+    public DownloadWhisperEngineViewModel(
+        IWhisperDownloadService whisperDownloadService, 
+        IZipUnpacker zipUnpacker, 
+        IChatLlmDownloadService chatLlmDownloadService)
     {
         _whisperDownloadService = whisperDownloadService;
         _zipUnpacker = zipUnpacker;
+        _chatLlmDownloadService = chatLlmDownloadService;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -247,6 +252,11 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             var dir = Engine.GetAndCreateWhisperFolder();
             var tempFileName = Path.Combine(dir, Engine.Name + ".7z");
             _downloadTask = _whisperDownloadService.DownloadWhisperPurfviewFasterWhisperXxl(tempFileName, downloadProgress, _cancellationTokenSource.Token);
+        }
+        else if (Engine is AudioToTextEngineChatLlm)
+        {
+            var dir = Engine.GetAndCreateWhisperFolder();
+            _downloadTask = _chatLlmDownloadService.DownloadEngine(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
         }
     }
 
