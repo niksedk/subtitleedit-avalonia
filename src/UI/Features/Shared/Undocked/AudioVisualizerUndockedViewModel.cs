@@ -55,6 +55,12 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
     {
         var videoPlayer = MainViewModel?.GetVideoPlayerControl();
 
+        MainViewModel?.OnKeyDownHandler(sender, e);
+        if (e.Handled)
+        {
+            return;
+        }
+
         if (videoPlayer != null)
         {
             if (e.Key == Key.Space)

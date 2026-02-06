@@ -91,6 +91,12 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             return;
         }
 
+        MainViewModel?.OnKeyDownHandler(sender, e);
+        if (e.Handled)
+        {
+            return;
+        }
+
         if (VideoPlayerControl != null)
         {
             if (e.Key == Key.Escape && Window is { } && Window.WindowState == WindowState.FullScreen)
@@ -144,7 +150,7 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
             VideoPlayerControl.NotifyUserActivity();
         }
 
-        MainViewModel?.OnKeyDownHandler(sender, e);
+        
     }
 
     internal void Onloaded(object? sender, RoutedEventArgs e)
