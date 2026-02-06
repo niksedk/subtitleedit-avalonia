@@ -924,11 +924,7 @@ public class WavePeakGenerator2 : IDisposable
     }
 
     //////////////////////////////////////// SPECTRUM ///////////////////////////////////////////////////////////
-
-    // TODO: Phase 1.2 - Implement parallel FFT processing
-    // When experimental renderer is enabled, process chunks in parallel using Parallel.For
-    // This requires refactoring to avoid sequential file reading dependency
-    // Estimated performance gain: 4-8x on multi-core CPUs
+    
     public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, System.Threading.CancellationToken token)
     {
         var totalSw = System.Diagnostics.Stopwatch.StartNew();
@@ -1120,8 +1116,7 @@ public class WavePeakGenerator2 : IDisposable
             _mapper = new MagnitudeToIndexMapper(100.0, MagnitudeIndexRange - 1);
             _fft = new RealFFT(nfft);
             
-            // Phase 2: Always use legacy RealFFT - SIMD FFT has overhead for small 256-point FFTs
-            // and was measured to be 2.7x SLOWER than the optimized RealFFT implementation
+            //Always use legacy RealFFT - SIMD FFT has overhead for small 256-point FFTs and was measured to be 30-200% SLOWER than the optimized RealFFT implementation
             System.Diagnostics.Debug.WriteLine($"[PERF] SpectrogramDrawer initialized with RealFFT (size: {nfft})");
             
             _palette = GeneratePalette();
@@ -1191,7 +1186,7 @@ public class WavePeakGenerator2 : IDisposable
                 _segment[i] = samples[offset + i] * _window[i];
             }
 
-            // transform to the frequency domain using optimized RealFFT
+            // transform to the frequency domain
             var fftSw = System.Diagnostics.Stopwatch.StartNew();
             _fft.ComputeForward(_segment);
             fftSw.Stop();
