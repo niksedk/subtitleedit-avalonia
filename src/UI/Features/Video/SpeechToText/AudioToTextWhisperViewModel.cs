@@ -424,7 +424,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         text = text.Remove(0, start + tag.Length);
         LogToConsole($"Speech to text step 1/2 ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
-        LogToConsole($"Speech to text step 2/2 ({settings.WhisperChoice}) qwen3-focedaligner-0.6b.bin starting");
+        LogToConsole($"Speech to text step 2/2 ({settings.WhisperChoice}) qwen3-focedaligner-0.6b.bin starting...");
 
         _chatLlmText = text;
 
@@ -529,7 +529,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             for (var i = wordIndex; i < searchEnd; i++)
             {
                 var originalWord = words[i];
-                var cleanWord = originalWord.TrimEnd('.', '!', '?').ToLowerInvariant();
+                var cleanWord = originalWord.TrimEnd('.', '!', '?', ',').ToLowerInvariant();
 
                 if (string.Equals(text, cleanWord, StringComparison.OrdinalIgnoreCase))
                 {
