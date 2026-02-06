@@ -158,33 +158,74 @@ jobs:
       - name: Free disk space before builds
         run: |
           echo "Before cleanup:"; df -h /
-      
+    
           # Clear NuGet caches
-          #dotnet nuget locals all --clear
-      
+          dotnet nuget locals all --clear
+    
           # Remove Homebrew caches 
           brew cleanup --prune=all -s
           rm -rf ~/Library/Caches/Homebrew/* 2>/dev/null || true
-      
+    
           # Remove Xcode/iOS dev files (not needed for .NET)
           rm -rf ~/Library/Developer/Xcode/DerivedData/* 2>/dev/null || true
           rm -rf ~/Library/Developer/CoreSimulator/* 2>/dev/null || true
           rm -rf ~/Library/Developer/Xcode/Archives/* 2>/dev/null || true
-      
+    
           # Remove Android SDK files if present (not needed for .NET)
           rm -rf ~/Library/Android/sdk/build-tools/* 2>/dev/null || true
           rm -rf ~/Library/Android/sdk/platforms/* 2>/dev/null || true
-      
+    
           # Remove CocoaPods cache (iOS dev tool, not needed)
           rm -rf ~/Library/Caches/CocoaPods/* 2>/dev/null || true
-      
+    
           # Remove Carthage cache (Mac dev tool, not needed)
           rm -rf ~/Library/Caches/org.carthage.CarthageKit/* 2>/dev/null || true
-      
+    
           # Remove pip/Python caches (not needed for .NET)
           rm -rf ~/Library/Caches/pip/* 2>/dev/null || true
           rm -rf ~/Library/Caches/pypoetry/* 2>/dev/null || true
-      
+    
+          # Additional aggressive cleanup for GitHub Actions runners
+    
+          # Remove large tool caches (often 5-10 GB total)
+          sudo rm -rf /usr/local/lib/android 2>/dev/null || true
+          sudo rm -rf /usr/share/dotnet 2>/dev/null || true  # Old .NET versions if present
+          sudo rm -rf /usr/share/swift 2>/dev/null || true
+    
+          # Remove Docker images and containers (can be several GB)
+          docker system prune -a -f 2>/dev/null || true
+    
+          # Remove Gradle caches (Java build tool)
+          rm -rf ~/.gradle/caches/* 2>/dev/null || true
+          rm -rf ~/.gradle/wrapper/* 2>/dev/null || true
+    
+          # Remove Maven caches (Java build tool)
+          rm -rf ~/.m2/repository/* 2>/dev/null || true
+    
+          # Remove npm/yarn caches (JavaScript package managers)
+          npm cache clean --force 2>/dev/null || true
+          rm -rf ~/.npm/* 2>/dev/null || true
+          rm -rf ~/.yarn/cache/* 2>/dev/null || true
+    
+          # Remove Go caches
+          rm -rf ~/go/pkg/* 2>/dev/null || true
+          go clean -cache -modcache -testcache 2>/dev/null || true
+    
+          # Remove Ruby gems cache
+          rm -rf ~/.gem/* 2>/dev/null || true
+    
+          # Remove Rust/Cargo caches
+          rm -rf ~/.cargo/registry/* 2>/dev/null || true
+          rm -rf ~/.cargo/git/* 2>/dev/null || true
+    
+          # Remove browser caches
+          rm -rf ~/Library/Caches/Google/Chrome/* 2>/dev/null || true
+          rm -rf ~/Library/Caches/com.apple.Safari/* 2>/dev/null || true
+    
+          # Remove temporary files
+          sudo rm -rf /tmp/* 2>/dev/null || true
+          sudo rm -rf /var/tmp/* 2>/dev/null || true
+    
           echo "After cleanup:"; df -h /
 
       # Setup signing environment if certificates are available
