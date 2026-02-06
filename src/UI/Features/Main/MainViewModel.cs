@@ -10829,40 +10829,12 @@ public partial class MainViewModel :
             }, DispatcherPriority.Background);
         }
 
-        var subtitleFileLoaded = false;
-        var arguments = Environment.GetCommandLineArgs();
-        if (arguments.Length > 1)
-        {
-            var sb = new StringBuilder();
-            foreach (var arg in arguments)
-            {
-                sb.AppendLine(arg);
-            }
-
-            var fileName = arguments[1];
-            if (File.Exists(fileName))
-            {
-                subtitleFileLoaded = true;
-                Dispatcher.UIThread.Post(async void () =>
-                {
-                    try
-                    {
-                        await SubtitleOpen(fileName);
-                    }
-                    catch (Exception e)
-                    {
-                        Se.LogError(e);
-                    }
-                });
-            }
-        }
-
         if (AudioVisualizer != null)
         {
             AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
 
-        if (!subtitleFileLoaded && !Program.FileOpenedViaActivation && Se.Settings.File.ShowRecentFiles)
+        if (!Program.FileOpenedViaActivation && Se.Settings.File.ShowRecentFiles)
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
