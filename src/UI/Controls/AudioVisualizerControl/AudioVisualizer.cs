@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -294,6 +294,35 @@ public class AudioVisualizer : Control
     private long _lastPointerPressed = -1;
     private WaveformDisplayMode _displayMode = WaveformDisplayMode.OnlyWaveform;
     private SpectrogramData2? _spectrogram;
+
+    // Phase 2: Bitmap caching with overscan buffer (render 3x visible width)
+    private const double CacheOverscanMultiplier = 3.0;
+    
+    private record struct WaveformCacheKey(
+        double ZoomFactor,
+        double VerticalZoomFactor,
+        int Height,
+        int PeaksCount,
+        WaveformDrawStyle DrawStyle);
+
+    private SKBitmap? _cachedWaveformBitmap;
+    private WaveformCacheKey _cachedWaveformKey;
+    private Avalonia.Media.Imaging.Bitmap? _cachedWaveformAvaloniaBitmap;
+    private double _cachedWaveformStartSeconds;
+    private double _cachedWaveformEndSeconds;
+    private int _cachedWaveformWidth;
+
+    // Phase 2: Bitmap caching for spectrogram rendering
+    private record struct SpectrogramCacheKey(
+        double ZoomFactor,
+        int SpectrogramImageCount);
+
+    private SKBitmap? _cachedSpectrogramBitmap;
+    private SpectrogramCacheKey _cachedSpectrogramKey;
+    private Avalonia.Media.Imaging.Bitmap? _cachedSpectrogramAvaloniaBitmap;
+    private double _cachedSpectrogramStartSeconds;
+    private double _cachedSpectrogramEndSeconds;
+    private int _cachedSpectrogramWidth;
 
     private enum InteractionMode
     {
@@ -1371,17 +1400,96 @@ public class AudioVisualizer : Control
         }
 
         var endPositionSeconds = RelativeXPositionToSecondsOptimized(renderCtx.Width, renderCtx.SampleRate, renderCtx.StartPositionSeconds, renderCtx.ZoomFactor);
-        var width = (int)Math.Round((endPositionSeconds - renderCtx.StartPositionSeconds) / _spectrogram.SampleDuration);
-        if (width <= 0 || width > 4000)
+        var spectrogramWidth = (int)Math.Round((endPositionSeconds - renderCtx.StartPositionSeconds) / _spectrogram.SampleDuration);
+        if (spectrogramWidth <= 0 || spectrogramWidth > 4000)
         {
             return;
         }
 
-        // Create a combined bitmap using SkiaSharp
-        using var skBitmapCombined = new SKBitmap(width, _spectrogram.FftSize / 2);
+        // Phase 2: Use cached spectrogram bitmap if experimental renderer enabled
+        if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
+        {
+            DrawSpectrogramCached(context, height, spectrogramWidth, ref renderCtx);
+            return;
+        }
+
+        // Legacy: Create new bitmap every frame
+        using var skBitmapCombined = new SKBitmap(spectrogramWidth, _spectrogram.FftSize / 2);
         using var skCanvas = new SKCanvas(skBitmapCombined);
 
-        var left = (int)Math.Round(StartPositionSeconds / _spectrogram.SampleDuration);
+        RenderSpectrogramToCanvas(skCanvas, spectrogramWidth, renderCtx.StartPositionSeconds);
+
+        var displayHeight = height;
+        var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
+
+        var destRectangle = new Rect(0, renderCtx.Height - displayHeight, renderCtx.Width, displayHeight);
+        context.DrawImage(avaloniaBitmap, destRectangle);
+    }
+
+    private void DrawSpectrogramCached(DrawingContext context, double height, int spectrogramWidth, ref RenderContext renderCtx)
+    {
+        if (_spectrogram == null || spectrogramWidth <= 0)
+        {
+            return;
+        }
+
+        var visibleStartSeconds = renderCtx.StartPositionSeconds;
+        var visibleEndSeconds = RelativeXPositionToSecondsOptimized(spectrogramWidth, renderCtx.SampleRate, visibleStartSeconds, renderCtx.ZoomFactor);
+
+        var currentKey = new SpectrogramCacheKey(
+            renderCtx.ZoomFactor,
+            _spectrogram.Images.Count);
+
+        // Check if we need to refresh: key changed OR visible area outside cached buffer
+        var keyChanged = _cachedSpectrogramBitmap == null || !_cachedSpectrogramKey.Equals(currentKey);
+        var outsideBuffer = visibleStartSeconds < _cachedSpectrogramStartSeconds || 
+                           visibleEndSeconds > _cachedSpectrogramEndSeconds;
+
+        if (keyChanged || outsideBuffer)
+        {
+            _cachedSpectrogramAvaloniaBitmap?.Dispose();
+            _cachedSpectrogramBitmap?.Dispose();
+
+            // Render overscan buffer (3x visible width, centered on current view)
+            var visibleDuration = visibleEndSeconds - visibleStartSeconds;
+            var bufferStartSeconds = Math.Max(0, visibleStartSeconds - visibleDuration);
+            var bufferEndSeconds = bufferStartSeconds + visibleDuration * CacheOverscanMultiplier;
+            var bufferWidth = (int)(spectrogramWidth * CacheOverscanMultiplier);
+
+            _cachedSpectrogramBitmap = new SKBitmap(bufferWidth, _spectrogram.FftSize / 2);
+            using var canvas = new SKCanvas(_cachedSpectrogramBitmap);
+
+            RenderSpectrogramToCanvas(canvas, bufferWidth, bufferStartSeconds);
+
+            _cachedSpectrogramAvaloniaBitmap = _cachedSpectrogramBitmap.ToAvaloniaBitmap();
+            _cachedSpectrogramKey = currentKey;
+            _cachedSpectrogramStartSeconds = bufferStartSeconds;
+            _cachedSpectrogramEndSeconds = bufferEndSeconds;
+            _cachedSpectrogramWidth = bufferWidth;
+
+            System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram cache MISS - rendered {bufferWidth}x{_spectrogram.FftSize / 2} buffer ({bufferStartSeconds:F2}s - {bufferEndSeconds:F2}s)");
+        }
+
+        // Blit only the visible portion from the cached buffer
+        if (_cachedSpectrogramAvaloniaBitmap != null)
+        {
+            var bufferDuration = _cachedSpectrogramEndSeconds - _cachedSpectrogramStartSeconds;
+            var offsetRatio = (visibleStartSeconds - _cachedSpectrogramStartSeconds) / bufferDuration;
+            var srcX = offsetRatio * _cachedSpectrogramWidth;
+            var srcRect = new Rect(srcX, 0, spectrogramWidth, _spectrogram.FftSize / 2);
+            var destRectangle = new Rect(0, renderCtx.Height - height, renderCtx.Width, height);
+            context.DrawImage(_cachedSpectrogramAvaloniaBitmap, srcRect, destRectangle);
+        }
+    }
+
+    private void RenderSpectrogramToCanvas(SKCanvas canvas, int width, double startSeconds)
+    {
+        if (_spectrogram == null)
+        {
+            return;
+        }
+
+        var left = (int)Math.Round(startSeconds / _spectrogram.SampleDuration);
         var offset = 0;
         var imageIndex = left / _spectrogram.ImageWidth;
 
@@ -1390,21 +1498,13 @@ public class AudioVisualizer : Control
             var x = (left + offset) % _spectrogram.ImageWidth;
             var w = Math.Min(_spectrogram.ImageWidth - x, width - offset);
 
-            // Draw part of the spectrogram image
-            var sourceRect = new SKRect(x, 0, x + w, skBitmapCombined.Height);
-            var destRect = new SKRect(offset, 0, offset + w, skBitmapCombined.Height);
-            skCanvas.DrawBitmap(_spectrogram.Images[imageIndex], sourceRect, destRect);
+            var sourceRect = new SKRect(x, 0, x + w, _spectrogram.FftSize / 2);
+            var destRect = new SKRect(offset, 0, offset + w, _spectrogram.FftSize / 2);
+            canvas.DrawBitmap(_spectrogram.Images[imageIndex], sourceRect, destRect);
 
             offset += w;
             imageIndex++;
         }
-
-        // Convert SKBitmap to Avalonia Bitmap and draw it
-        var displayHeight = height;
-        var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
-
-        var destRectangle = new Rect(0, renderCtx.Height - displayHeight, renderCtx.Width, displayHeight);
-        context.DrawImage(avaloniaBitmap, destRectangle);
     }
 
     private void DrawTimeLine(DrawingContext context, ref RenderContext renderCtx)
@@ -1557,6 +1657,13 @@ public class AudioVisualizer : Control
             waveformHeight = renderCtx.WaveformHeight;
         }
 
+        // Phase 2: Use cached waveform bitmap if experimental renderer enabled
+        if (Configuration.Settings.VideoControls.UseExperimentalRenderer)
+        {
+            DrawWaveFormCached(context, waveformHeight, ref renderCtx);
+            return;
+        }
+
         if (WaveformDrawStyle == WaveformDrawStyle.Classic)
         {
             DrawWaveFormClassic(context, waveformHeight, ref renderCtx);
@@ -1564,6 +1671,149 @@ public class AudioVisualizer : Control
         else
         {
             DrawWaveFormFancy(context, waveformHeight, ref renderCtx);
+        }
+    }
+
+    private void DrawWaveFormCached(DrawingContext context, double waveformHeight, ref RenderContext renderCtx)
+    {
+        var visibleWidth = (int)renderCtx.Width;
+        var height = (int)waveformHeight;
+        if (visibleWidth <= 0 || height <= 0)
+        {
+            return;
+        }
+
+        var visibleStartSeconds = renderCtx.StartPositionSeconds;
+        var visibleEndSeconds = RelativeXPositionToSecondsOptimized(visibleWidth, renderCtx.SampleRate, visibleStartSeconds, renderCtx.ZoomFactor);
+
+        var currentKey = new WaveformCacheKey(
+            renderCtx.ZoomFactor,
+            renderCtx.VerticalZoomFactor,
+            height,
+            WavePeaks?.Peaks.Count ?? 0,
+            WaveformDrawStyle);
+
+        // Check if we need to refresh: key changed OR visible area outside cached buffer
+        var keyChanged = _cachedWaveformBitmap == null || !_cachedWaveformKey.Equals(currentKey);
+        var outsideBuffer = visibleStartSeconds < _cachedWaveformStartSeconds || 
+                           visibleEndSeconds > _cachedWaveformEndSeconds;
+
+        if (keyChanged || outsideBuffer)
+        {
+            _cachedWaveformAvaloniaBitmap?.Dispose();
+            _cachedWaveformBitmap?.Dispose();
+
+            // Render overscan buffer (3x visible width, centered on current view)
+            var visibleDuration = visibleEndSeconds - visibleStartSeconds;
+            var bufferDuration = visibleDuration * CacheOverscanMultiplier;
+            var bufferStartSeconds = Math.Max(0, visibleStartSeconds - visibleDuration);
+            var bufferEndSeconds = bufferStartSeconds + bufferDuration;
+            var bufferWidth = (int)(visibleWidth * CacheOverscanMultiplier);
+
+            _cachedWaveformBitmap = new SKBitmap(bufferWidth, height, SKColorType.Rgba8888, SKAlphaType.Premul);
+            using var canvas = new SKCanvas(_cachedWaveformBitmap);
+            canvas.Clear(SKColors.Transparent);
+
+            // Create a modified render context for the buffer
+            var bufferCtx = renderCtx;
+            bufferCtx.StartPositionSeconds = bufferStartSeconds;
+            bufferCtx.Width = bufferWidth;
+
+            RenderWaveformToSkCanvas(canvas, waveformHeight, ref bufferCtx);
+
+            _cachedWaveformAvaloniaBitmap = _cachedWaveformBitmap.ToAvaloniaBitmap();
+            _cachedWaveformKey = currentKey;
+            _cachedWaveformStartSeconds = bufferStartSeconds;
+            _cachedWaveformEndSeconds = bufferEndSeconds;
+            _cachedWaveformWidth = bufferWidth;
+
+            System.Diagnostics.Debug.WriteLine($"[PERF] Waveform cache MISS - rendered {bufferWidth}x{height} buffer ({bufferStartSeconds:F2}s - {bufferEndSeconds:F2}s)");
+        }
+
+        // Blit only the visible portion from the cached buffer
+        if (_cachedWaveformAvaloniaBitmap != null)
+        {
+            var bufferDuration = _cachedWaveformEndSeconds - _cachedWaveformStartSeconds;
+            var offsetRatio = (visibleStartSeconds - _cachedWaveformStartSeconds) / bufferDuration;
+            var srcX = offsetRatio * _cachedWaveformWidth;
+            var srcRect = new Rect(srcX, 0, visibleWidth, height);
+            var dstRect = new Rect(0, 0, visibleWidth, height);
+            context.DrawImage(_cachedWaveformAvaloniaBitmap, srcRect, dstRect);
+        }
+    }
+
+    private void RenderWaveformToSkCanvas(SKCanvas canvas, double waveformHeight, ref RenderContext renderCtx)
+    {
+        if (WavePeaks == null)
+        {
+            return;
+        }
+
+        var halfWaveformHeight = (float)(waveformHeight / 2);
+        var div = renderCtx.SampleRate * renderCtx.ZoomFactor;
+
+        if (div <= 0)
+        {
+            return;
+        }
+
+        var peaks = WavePeaks.Peaks;
+        var peaksCount = peaks.Count;
+
+        var waveformColor = new SKColor(WaveformColor.R, WaveformColor.G, WaveformColor.B, WaveformColor.A);
+        var selectedColor = new SKColor(WaveformSelectedColor.R, WaveformSelectedColor.G, WaveformSelectedColor.B, WaveformSelectedColor.A);
+
+        using var paintNormal = new SKPaint
+        {
+            Color = waveformColor,
+            StrokeWidth = 1,
+            IsAntialias = false,
+            Style = SKPaintStyle.Stroke
+        };
+
+        using var paintSelected = new SKPaint
+        {
+            Color = selectedColor,
+            StrokeWidth = 1,
+            IsAntialias = false,
+            Style = SKPaintStyle.Stroke
+        };
+
+        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, renderCtx.SampleRate);
+
+        for (var x = 0; x < renderCtx.Width; x++)
+        {
+            var pos = (renderCtx.StartPositionSeconds + x / div) * renderCtx.SampleRate;
+            var pos0 = (int)pos;
+            var pos1 = pos0 + 1;
+
+            if (pos1 >= peaksCount || pos0 > peaksCount)
+            {
+                break;
+            }
+
+            var pos1Weight = pos - pos0;
+            var pos0Weight = 1.0 - pos1Weight;
+            var peak0 = peaks[pos0];
+            var peak1 = peaks[pos1];
+            var max = peak0.Max * pos0Weight + peak1.Max * pos1Weight;
+            var min = peak0.Min * pos0Weight + peak1.Min * pos1Weight;
+
+            var yMax = (float)CalculateYOptimized(max, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, waveformHeight);
+            var yMin = (float)CalculateYOptimized(min, halfWaveformHeight, renderCtx.HighestPeak, renderCtx.VerticalZoomFactor, waveformHeight);
+
+            if (yMin < yMax)
+            {
+                (yMin, yMax) = (yMax, yMin);
+            }
+
+            if (Math.Abs(yMax - yMin) < 1)
+            {
+                yMin = yMax + 1;
+            }
+
+            var paint = isSelectedHelper.IsSelected(pos0) ? paintSelected : paintNormal;
+            canvas.DrawLine(x, yMax, x, yMin, paint);
         }
     }
 
@@ -2241,6 +2491,20 @@ public class AudioVisualizer : Control
         }
 
         _spectrogram = spectrogram;
+        InvalidateRenderCaches();
+    }
+
+    private void InvalidateRenderCaches()
+    {
+        _cachedWaveformAvaloniaBitmap?.Dispose();
+        _cachedWaveformAvaloniaBitmap = null;
+        _cachedWaveformBitmap?.Dispose();
+        _cachedWaveformBitmap = null;
+
+        _cachedSpectrogramAvaloniaBitmap?.Dispose();
+        _cachedSpectrogramAvaloniaBitmap = null;
+        _cachedSpectrogramBitmap?.Dispose();
+        _cachedSpectrogramBitmap = null;
     }
 
     public double FindDataBelowThreshold(double thresholdPercent, double durationInSeconds)
