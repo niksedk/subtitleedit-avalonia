@@ -349,12 +349,6 @@ public static class InitToolbar
         stackPanelRight.Children.Add(comboBoxSubtitleFormat);
         isLastSeparator = false;
 
-
-        if (!isLastSeparator && appearance.ToolbarShowEncoding)
-        {
-            stackPanelRight.Children.Add(MakeSeparator());
-        }
-
         if (appearance.ToolbarShowEncoding)
         {
             stackPanelRight.Children.Add(new TextBlock
@@ -372,6 +366,26 @@ public static class InitToolbar
                 DataContext = vm,
             };
             stackPanelRight.Children.Add(comboBoxEncoding);
+        }
+
+        if (appearance.ToolbarShowFrameRate)
+        {
+            stackPanelRight.Children.Add(new TextBlock
+            {
+                Text = Se.Language.General.FrameRate,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(5, 0, 0, 0),
+            });
+            var comboBoxFrameRate = new ComboBox
+            {
+                Width = 110,
+                Height = 30,
+                [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.FrameRates)),
+                [!ComboBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedFrameRate)),
+                DataContext = vm,
+            };
+            stackPanelRight.Children.Add(comboBoxFrameRate);
+            comboBoxFrameRate.SelectionChanged += vm.ComboBoxFrameRateSelectionChanged;
         }
 
         var grid = new Grid

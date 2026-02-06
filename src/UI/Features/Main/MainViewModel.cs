@@ -177,6 +177,9 @@ public partial class MainViewModel :
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _selectedEncoding;
 
+    [ObservableProperty] private ObservableCollection<string> _frameRates;
+    [ObservableProperty] private string? _selectedFrameRate;
+
     [ObservableProperty] private string _statusTextLeft;
     [ObservableProperty] private string _statusTextRight;
 
@@ -425,9 +428,24 @@ public partial class MainViewModel :
         SubtitleFormats.Remove(defaultFormat);
         SubtitleFormats.Insert(0, defaultFormat);
         SelectedSubtitleFormat = SubtitleFormats[0];
+
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
-        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
-                           Encodings[0];
+        SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
+
+        FrameRates = new ObservableCollection<string>
+        {
+            "23.976",
+            "24",
+            "25",
+            "29.97",
+            "30",
+            "50",
+            "59.94",
+            "60",
+            "120"
+        };
+        SelectedFrameRate = FrameRates[0];
+
         StatusTextLeft = string.Empty;
         StatusTextRight = string.Empty;
         ShowColumnEndTime = Se.Settings.General.ShowColumnEndTime;
@@ -926,8 +944,8 @@ public partial class MainViewModel :
             {
                 Subtitles[i].Text = result.UpdatedSubtitle.Paragraphs[i].Text;
             }
-            
-            _updateAudioVisualizer = true;  
+
+            _updateAudioVisualizer = true;
         }
     }
 
@@ -5212,7 +5230,7 @@ public partial class MainViewModel :
         {
             VideoUndockControls();
         }
-        else 
+        else
         {
             Se.Settings.Appearance.CurrentLayoutPositions = InitLayout.SaveLayoutPositions(ContentGrid.Children.FirstOrDefault() as Grid);
             SetLayout(Se.Settings.General.LayoutNumber);
@@ -11094,12 +11112,22 @@ public partial class MainViewModel :
         try
         {
             _mediaInfo = FfmpegMediaInfo2.Parse(videoFileName);
-            Se.Settings.General.CurrentFrameRate = (double)_mediaInfo.FramesRate;
-            Configuration.Settings.General.CurrentFrameRate = (double)_mediaInfo.FramesRate;
+            SelectedFrameRate = _mediaInfo?.FramesRate.ToString(CultureInfo.InvariantCulture) ?? FrameRates[0];
+            Se.Settings.General.CurrentFrameRate = (double)(_mediaInfo?.FramesRate ?? 23.976m);
+            Configuration.Settings.General.CurrentFrameRate = (double)(_mediaInfo?.FramesRate ?? 23.976m);
         }
         catch
         {
             _mediaInfo = null;
+        }
+    }
+
+    internal void ComboBoxFrameRateSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (double.TryParse(SelectedFrameRate, NumberStyles.Any, CultureInfo.InvariantCulture, out var frameRate))
+        {
+            Se.Settings.General.CurrentFrameRate = frameRate;
+            Configuration.Settings.General.CurrentFrameRate = frameRate;
         }
     }
 

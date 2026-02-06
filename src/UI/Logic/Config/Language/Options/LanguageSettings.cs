@@ -150,6 +150,7 @@ public class LanguageSettings
     public string ShowToolbarLayout { get; set; }
     public string ShowToolbarHelp { get; set; }
     public string ShowToolbarEncoding { get; set; }
+    public string ShowToolbarFrameRate { get; set; }
 
     // Network
     public string ProxyAddress { get; set; }
@@ -403,6 +404,7 @@ public class LanguageSettings
         ShowToolbarLayout = "Show layout icon";
         ShowToolbarHelp = "Show help icon";
         ShowToolbarEncoding = "Show encoding";
+        ShowToolbarFrameRate = "Show frame rate";
 
         // Network
         ProxyAddress = "Proxy address";

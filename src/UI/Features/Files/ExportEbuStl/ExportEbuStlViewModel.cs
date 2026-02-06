@@ -101,6 +101,10 @@ public partial class ExportEbuStlViewModel : ObservableObject
             "25",
             "29.97",
             "30",
+            "50",
+            "59.94",
+            "60",
+            "120"
         };
 
         DisplayStandardCodes = new ObservableCollection<string>
