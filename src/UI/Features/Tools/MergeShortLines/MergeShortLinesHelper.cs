@@ -1,5 +1,7 @@
-using Nikse.SubtitleEdit.Core.Common;
+﻿using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -93,9 +95,9 @@ public static class MergeShortLinesHelper
 
                 // fix item for this merge step
                 var fix = new MergeShortLinesItem(
-                    "Merge short lines",
+                    Se.Language.Tools.MergeShortLines.Title,
                     index + 1,
-                    $"Merged line {j + 1} into {index + 1}",
+                    $"Merged line {j + 1} into {index + 1} - {current.Text.Replace(Environment.NewLine, " ⏎ ")}",
                     new SubtitleLineViewModel(current));
                 fixes.Add(fix);
 
@@ -224,9 +226,9 @@ public static class MergeShortLinesHelper
                     result.Add(highlightedVm);
 
                     fixes.Add(new MergeShortLinesItem(
-                        "Merge short lines",
+                        Se.Language.Tools.MergeShortLines.Title,
                         index + k + 1,
-                        $"Line {index + k + 1}",
+                        $"Line {index + k + 1} - {highlightedVm.Text.Replace(Environment.NewLine, " ⏎ ")}",
                         highlightedVm));
                 }
             }

@@ -82,7 +82,10 @@ namespace Nikse.SubtitleEdit.Core.AudioToText
                     var next = input.GetParagraphOrDefault(index + 1);
                     if (next != null && Math.Abs(paragraph.EndTime.TotalMilliseconds - next.StartTime.TotalMilliseconds) < 0.01)
                     {
-                        next.StartTime.TotalMilliseconds++;
+                        if (next.EndTime.TotalMilliseconds - next.StartTime.TotalMilliseconds > 1)
+                        {
+                            next.StartTime.TotalMilliseconds++;
+                        }
                     }
                 }
 

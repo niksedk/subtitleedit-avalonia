@@ -441,7 +441,7 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        var isWinDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);    
+        var isWinDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
         if (OperatingSystem.IsMacOS())
         {
             _isCtrlDown = isWinDown;
@@ -2090,13 +2090,13 @@ public class AudioVisualizer : Control
             var maxTime = TimeCode.MaxTimeTotalMilliseconds;
 
             // 1. Use Binary Search to find the first potential subtitle in the time range O(log N)
-            int startIndex = FindFirstIndexAfterTime(subtitle, startThreshold);
+            var startIndex = FindFirstIndexAfterTime(subtitle, startThreshold);
 
             var lastStartTime = -1d;
-            int count = 0;
+            var count = 0;
 
             // 2. Linear scan only the relevant window
-            for (int i = startIndex; i < subtitle.Count; i++)
+            for (var i = startIndex; i < subtitle.Count; i++)
             {
                 var p = subtitle[i];
                 var pStart = p.StartTime.TotalMilliseconds;
@@ -2114,8 +2114,7 @@ public class AudioVisualizer : Control
                 }
 
                 // 3. Apply filtering logic immediately to avoid second loop
-                // Note: I've removed the .OrderBy() because the input is already sorted.
-                bool isTooShortOrDense = count > 30 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
+                var isTooShortOrDense = count > 75 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
 
                 if (!isTooShortOrDense)
                 {

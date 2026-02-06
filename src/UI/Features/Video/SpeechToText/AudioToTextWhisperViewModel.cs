@@ -58,7 +58,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     [ObservableProperty] private bool _isWhisperCppActive;
     [ObservableProperty] private bool _isWhisperPurfviewXxlActive;
     [ObservableProperty] private bool _isTranscribeEnabled;
-    [ObservableProperty] private bool _isTranslateEnabled;
+    [ObservableProperty] private bool _isTranslateVisible;
     [ObservableProperty] private double _progressOpacity;
 
     [ObservableProperty] private double _progressValue;
@@ -154,7 +154,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         ResultAudioClips = new List<AudioClip>();
 
         IsTranscribeEnabled = true;
-        IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
+        IsTranslateVisible = SelectedEngine is not ChatLlmCppEngine;
         Parameters = string.Empty;
         ConsoleLog = string.Empty;
         ProgressText = string.Empty;
@@ -300,112 +300,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
             if (SelectedEngine is ChatLlmCppEngine chatLlm)
             {
-                var sbLog = new StringBuilder();
-                foreach (var s in _outputText)
-                {
-                    sbLog.AppendLine(s.TrimEnd());
-                }
-
-                var text = sbLog.ToString();
-
-                if (!string.IsNullOrEmpty(text) && !string.IsNullOrEmpty(_chatLlmText))
-                {
-                    _chatLlmText = string.Empty;
-                    var lines = text.SplitToLines();
-                    var subtitle = new Subtitle();
-                    new SubRip().LoadSubtitle(subtitle, lines, string.Empty);
-                    if (subtitle.Paragraphs.Count > 0)
-                    {
-                        var last = subtitle.Paragraphs.Last();
-                        var indexOfTimings = last.Text.IndexOf("\ntimings:");
-                        if (indexOfTimings > 0)
-                        {
-                            last.Text = last.Text.Substring(0, indexOfTimings).Trim();
-                        }
-
-                        var postProcessedSubtitle = PostProcess(subtitle);
-
-                        if (_audioClips != null && ResultAudioClips.Count > 0)
-                        {
-                            var outputAudioClip = ResultAudioClips.FirstOrDefault(p => p.AudioFileName == _videoFileName);
-                            if (outputAudioClip != null)
-                            {
-                                outputAudioClip.Transcription = new Subtitle(postProcessedSubtitle);
-                            }
-                        }
-
-                        Dispatcher.UIThread.Invoke<Task>(async () =>
-                        {
-                            LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
-                            ProgressValue = 100;
-                            await MakeResult(postProcessedSubtitle);
-                        });
-                    }
-                    return;
-                }
-
-
-                var tag = "<asr_text>";
-                var start = text.IndexOf(tag);
-                if (start < 0)
-                {
-                    LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
-                    LogToConsole($"Speech to text: Could not find '{tag}' in text{Environment.NewLine}");
-                    return;
-                }
-
-                text = text.Remove(0, start + tag.Length);
-                LogToConsole($"Speech to text step 1/2 ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
-                LogToConsole($"Speech to text step 2/2 ({settings.WhisperChoice}) qwen3-focedaligner-0.6b.bin starting");
-
-                _chatLlmText = text;
-
-                sbLog.Clear();
-                _outputText.Clear();
-
-                var exe = chatLlm.GetExecutable();
-                var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine("qwen3-focedaligner-0.6b.bin")}\" --multimedia-file-tags {{{{ }}}} -p \"{{{{audio:{_waveFileName}}}}}{_chatLlmText}\"";
-
-                var p = new Process
-                {
-                    StartInfo = new ProcessStartInfo(exe, chatLlmParams)
-                    {
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        WorkingDirectory = Path.GetDirectoryName(exe),
-                    }
-                };
-
-                _whisperProcess = p;
-
-                var dataReceivedHandler = (DataReceivedEventHandler)OutputHandler;
-                if (dataReceivedHandler != null)
-                {
-                    p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-                    p.StartInfo.UseShellExecute = false;
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.StartInfo.RedirectStandardError = true;
-                    p.OutputDataReceived += dataReceivedHandler;
-                    p.ErrorDataReceived += dataReceivedHandler;
-                }
-
-
-
-#pragma warning disable CA1416
-                p.Start();
-#pragma warning restore CA1416
-
-
-                if (dataReceivedHandler != null)
-                {
-                    p.BeginOutputReadLine();
-                    p.BeginErrorReadLine();
-                }
-
-
-                _timerWhisper.Start();
-
+                ProcessChatLlmTranscription(settings, chatLlm);
                 return;
             }
 
@@ -464,6 +359,199 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 _loadedFromStdOut = transcribedSubtitleFromStdOut.Paragraphs.Count > 0;
                 await MakeResult(transcribedSubtitleFromStdOut);
             });
+        }
+    }
+
+    private void ProcessChatLlmTranscription(SeAudioToText settings, ChatLlmCppEngine chatLlm)
+    {
+        var sbLog = new StringBuilder();
+        foreach (var s in _outputText)
+        {
+            sbLog.AppendLine(s.TrimEnd());
+        }
+
+        var text = sbLog.ToString();
+
+        if (!string.IsNullOrEmpty(text) && !string.IsNullOrEmpty(_chatLlmText))
+        {
+            var originalText = _chatLlmText;
+            _chatLlmText = string.Empty;
+            var lines = text.SplitToLines();
+            var subtitle = new Subtitle();
+            new SubRip().LoadSubtitle(subtitle, lines, string.Empty);
+            if (subtitle.Paragraphs.Count > 0)
+            {
+                var last = subtitle.Paragraphs.Last();
+                var indexOfTimings = last.Text.IndexOf("\ntimings:");
+                if (indexOfTimings > 0)
+                {
+                    last.Text = last.Text.Substring(0, indexOfTimings).Trim();
+                }
+
+                ReInsertPeriodsEtc(originalText, subtitle);
+                FixNegativeDuration(subtitle);
+
+                var postProcessedSubtitle = PostProcess(subtitle);
+
+                if (_audioClips != null && ResultAudioClips.Count > 0)
+                {
+                    var outputAudioClip = ResultAudioClips.FirstOrDefault(p => p.AudioFileName == _videoFileName);
+                    if (outputAudioClip != null)
+                    {
+                        outputAudioClip.Transcription = new Subtitle(postProcessedSubtitle);
+                    }
+                }
+
+                Dispatcher.UIThread.Invoke<Task>(async () =>
+                {
+                    LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+                    ProgressValue = 100;
+                    await MakeResult(postProcessedSubtitle);
+                });
+            }
+
+            return;
+        }
+
+
+        var tag = "<asr_text>";
+        var start = text.IndexOf(tag);
+        if (start < 0)
+        {
+            LogToConsole($"Speech to text ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+            LogToConsole($"Speech to text: Could not find '{tag}' in text{Environment.NewLine}");
+        }
+
+        text = text.Remove(0, start + tag.Length);
+        LogToConsole($"Speech to text step 1/2 ({settings.WhisperChoice}) done in {_sw.Elapsed}{Environment.NewLine}");
+        LogToConsole($"Speech to text step 2/2 ({settings.WhisperChoice}) qwen3-focedaligner-0.6b.bin starting");
+
+        _chatLlmText = text;
+
+        sbLog.Clear();
+        _outputText.Clear();
+
+        var exe = chatLlm.GetExecutable();
+        var chatLlmParams = $" -m \"{chatLlm.GetModelForCmdLine("qwen3-focedaligner-0.6b.bin")}\" --multimedia-file-tags {{{{ }}}} -p \"{{{{audio:{_waveFileName}}}}}{_chatLlmText}\"";
+
+        var p = new Process
+        {
+            StartInfo = new ProcessStartInfo(exe, chatLlmParams)
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetDirectoryName(exe),
+            }
+        };
+
+        _whisperProcess = p;
+
+        var dataReceivedHandler = (DataReceivedEventHandler)OutputHandler;
+        if (dataReceivedHandler != null)
+        {
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.UseShellExecute = false;
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.OutputDataReceived += dataReceivedHandler;
+            p.ErrorDataReceived += dataReceivedHandler;
+        }
+
+#pragma warning disable CA1416
+        p.Start();
+#pragma warning restore CA1416
+
+
+        if (dataReceivedHandler != null)
+        {
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+        }
+
+        _timerWhisper.Start();
+    }
+
+    /// <summary>
+    /// Fixes small/small-negative durations in the subtitle by taking time from prevoius subtitle line.
+    /// </summary>
+    private static void FixNegativeDuration(Subtitle subtitle)
+    {
+        for (int i = 0; i < subtitle.Paragraphs.Count; i++)
+        {
+            var paragraph = subtitle.Paragraphs[i];
+            if (i > 0 &&
+                paragraph.DurationTotalMilliseconds < 5 && paragraph.DurationTotalMilliseconds > -20 && paragraph.StartTime.TotalMilliseconds > 20)
+            {
+                var prev = subtitle.Paragraphs[i - 1];
+                if (prev.DurationTotalMilliseconds < 50)
+                {
+                    continue;
+                }
+
+                paragraph.StartTime.TotalMilliseconds = paragraph.EndTime.TotalMilliseconds - 10;
+                if (prev.EndTime.TotalMilliseconds > paragraph.StartTime.TotalMilliseconds)
+                {
+                    prev.EndTime.TotalMilliseconds = paragraph.StartTime.TotalMilliseconds;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Re-inserts periods, exclamation marks, and question marks into the subtitle text based on the original text.
+    /// </summary>
+    private static void ReInsertPeriodsEtc(string originalText, Subtitle subtitle)
+    {
+        var words = originalText.Split([' ', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        var wordIndex = 0;
+        var consecutiveNoMatch = 0;
+        const int maxConsecutiveNoMatch = 10;
+
+        foreach (var p in subtitle.Paragraphs)
+        {
+            // each paragraph.Text contains one word
+            var text = p.Text.Trim();
+            if (string.IsNullOrEmpty(text))
+            {
+                continue;
+            }
+
+            if (wordIndex >= words.Length)
+            {
+                break;
+            }
+
+            // Try to find matching word in original text (look ahead a few words in case of slight misalignment)
+            var found = false;
+            var searchEnd = Math.Min(wordIndex + 5, words.Length);
+
+            for (var i = wordIndex; i < searchEnd; i++)
+            {
+                var originalWord = words[i];
+                var cleanWord = originalWord.TrimEnd('.', '!', '?').ToLowerInvariant();
+
+                if (string.Equals(text, cleanWord, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Found match - restore punctuation/casing from original word
+                    p.Text = originalWord;
+
+                    wordIndex = i + 1;
+                    found = true;
+                    consecutiveNoMatch = 0;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                consecutiveNoMatch++;
+                if (consecutiveNoMatch >= maxConsecutiveNoMatch)
+                {
+                    // Exit if no words match for a while
+                    return;
+                }
+            }
         }
     }
 
@@ -564,7 +652,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 MessageBoxIcon.Information);
 
             IsTranscribeEnabled = true;
-            IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
 
             if (failed == 0)
             {
@@ -891,7 +978,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             var settings = Se.Settings.Tools.AudioToText;
             IsTranscribeEnabled = true;
-            IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
             HideProgressBar();
 
             if (_loadedFromStdOut)
@@ -936,7 +1022,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
                 ProgressOpacity = 0;
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 return;
             }
 
@@ -960,7 +1045,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                                      "ffmpeg exit code: " + _waveExtractProcess.ExitCode + Environment.NewLine +
                                      "ffmpeg log: " + _ffmpegLog);
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 _waveExtractProcess = null;
                 return;
             }
@@ -969,7 +1053,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (string.IsNullOrEmpty(_videoFileName))
             {
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     await MessageBox.Show(Window!, "No video file", "No video file found!");
@@ -982,7 +1065,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             if (!startOk)
             {
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(SelectedEngine is ChatLlmCppEngine);
                 Dispatcher.UIThread.Invoke(async () =>
                 {
                     if (string.IsNullOrEmpty(_error))
@@ -1296,13 +1378,19 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (engine is ChatLlmCppEngine chatLlm)
         {
-            var modelAligner = Models.First(p => p.Model.Name.Contains("aligner"));
+            var modelAligner = chatLlm.ForcedAlignerModel;
+            var displayModelAligner = new WhisperModelDisplay
+            {
+                Model = modelAligner,
+                Display = modelAligner.Name + " (forced aligner for timestamps)",
+                Engine = engine,
+            };
             if (!engine.IsModelInstalled(model.Model))
             {
                 var answer = await MessageBox.Show(
                                 Window!,
                                 $"Download {modelAligner}?",
-                                $"'Chat LLM' a forced aligner to create timestamps.\nDownload and use {modelAligner.Model.Name}?",
+                                $"'Chat LLM' requires a forced aligner to create timestamps.\nDownload and use {modelAligner.Name}?",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question);
 
@@ -1311,10 +1399,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     return;
                 }
 
+                var models = new ObservableCollection<WhisperModelDisplay>
+                {
+                    displayModelAligner
+                };
                 var vm = await _windowService.ShowDialogAsync<DownloadWhisperModelsWindow, DownloadWhisperModelsViewModel>(
                     Window!, viewModel =>
                     {
-                        viewModel.SetModels(Models, SelectedEngine, modelAligner);
+                        viewModel.SetModels(models, SelectedEngine, displayModelAligner);
                         viewModel.StartDownload();
                     });
 
@@ -1338,7 +1430,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         IsTranscribeEnabled = false;
-        IsTranslateEnabled = false;
         ConsoleLog = string.Empty;
 
         if (!IsBatchMode)
@@ -1354,7 +1445,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     MessageBoxIcon.Error);
 
                 IsTranscribeEnabled = true;
-                IsTranslateEnabled = !(engine is ChatLlmCppEngine);
                 return;
             }
 
@@ -1449,7 +1539,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         _showProgressPct = -1;
         IsTranscribeEnabled = false;
-        IsTranslateEnabled = false;
         ProgressOpacity = 1;
         ProgressText = GetProgressText();
 
@@ -2044,7 +2133,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Parameters = "--standard";
         }
 
-        IsTranslateEnabled = !(engine is ChatLlmCppEngine);
+        IsTranslateVisible = !(engine is ChatLlmCppEngine);
 
         SaveSettings();
     }

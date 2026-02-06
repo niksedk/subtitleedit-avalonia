@@ -62,18 +62,16 @@ public class ChatLlmCppEngine : ISpeechToTextEngine
                         "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-0.6b.bin"
                     ]
                 },
-                new WhisperModel
-                {
-                    Name = "qwen3-focedaligner-0.6b.bin",
-                    Size = "1 GB",
-                    Urls =
-                    [
-                        "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-focedaligner-0.6b.bin"
-                    ]
-                },
             }.ToList();
         }
     }
+
+    public WhisperModel ForcedAlignerModel => new WhisperModel
+    {
+        Name = "qwen3-focedaligner-0.6b.bin",
+        Size = "1 GB",
+        Urls = [ "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-focedaligner-0.6b.bin" ],
+    };
 
     public string Extension => string.Empty;
     public string UnpackSkipFolder => string.Empty;
