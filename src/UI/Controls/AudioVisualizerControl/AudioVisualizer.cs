@@ -2123,7 +2123,7 @@ public class AudioVisualizer : Control
                     count++;
                 }
 
-                if (count >= 200)
+                if (count >= 250)
                 {
                     break;
                 }
