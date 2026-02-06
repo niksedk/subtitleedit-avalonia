@@ -94,8 +94,6 @@ public partial class AudioVisualizerUndockedViewModel : ObservableObject
                 return;
             }
         }
-
-        MainViewModel?.OnKeyDownHandler(sender, e);
     }
 
     internal void OnKeyUp(object? sender, KeyEventArgs e)

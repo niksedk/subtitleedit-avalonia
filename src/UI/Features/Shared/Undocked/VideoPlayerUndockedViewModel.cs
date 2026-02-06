@@ -149,8 +149,6 @@ public partial class VideoPlayerUndockedViewModel : ObservableObject
 
             VideoPlayerControl.NotifyUserActivity();
         }
-
-        
     }
 
     internal void Onloaded(object? sender, RoutedEventArgs e)
