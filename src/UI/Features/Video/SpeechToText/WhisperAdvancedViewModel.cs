@@ -59,6 +59,12 @@ public partial class WhisperAdvancedViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void EnableWordLevelCpp()
+    {
+        Parameters = "-owts true -ojf true";
+    }
+
+    [RelayCommand]
     private void WhisperXxlSettingStandard()
     {
         Parameters = "--standard";
