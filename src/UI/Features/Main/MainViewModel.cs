@@ -3576,8 +3576,11 @@ public partial class MainViewModel :
 
             if (AudioVisualizer != null)
             {
-                AudioVisualizer.WavePeaks = null;
-                AudioVisualizer.ShotChanges = new List<double>();
+                Dispatcher.UIThread.Post(() =>
+                {
+                    AudioVisualizer.WavePeaks = null;
+                    AudioVisualizer.ShotChanges = new List<double>();
+                });
             }
 
             _updateAudioVisualizer = true;
