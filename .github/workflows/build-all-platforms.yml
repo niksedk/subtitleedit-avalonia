@@ -252,14 +252,21 @@ jobs:
           dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
             -p:PublishSingleFile=true \
             -o ./publish/macos-x64
-      - name: Remove PDB files from x64 build
-        run: find "./publish/macos-x64/" -name "*.pdb" -type f -delete
+          
+          # Remove PDB files immediately
+          find "./publish/macos-x64/" -name "*.pdb" -type f -delete
+          
+          echo "Disk space after x64 publish:"; df -h /
+      
       - name: Update Info.plist with version from Se.cs
         run: |
           chmod +x ./installer/macBundle/update-plist-version.sh
           ./installer/macBundle/update-plist-version.sh
+      
       - name: Create, sign, and package x64 DMG
         run: |
+          echo "Disk space before x64 DMG creation:"; df -h /
+          
           # Copy template for x64
           cp -R "./installer/macBundle/SubtitleEdit.app" "./SubtitleEdit-x64.app"
       
@@ -267,6 +274,9 @@ jobs:
           cp "./publish/macos-x64/SubtitleEdit" "./SubtitleEdit-x64.app/Contents/MacOS/"
           cp "./publish/macos-x64/"*.dylib "./SubtitleEdit-x64.app/Contents/MacOS/" 2>/dev/null || true
           chmod +x "./SubtitleEdit-x64.app/Contents/MacOS/SubtitleEdit"
+          
+          # Delete publish directory immediately after copying
+          rm -rf "./publish/macos-x64"
       
           # Fix library linking for x64
           executable="./SubtitleEdit-x64.app/Contents/MacOS/SubtitleEdit"
@@ -284,21 +294,35 @@ jobs:
           # Create DMG for x64
           mkdir -p "./dmg-temp-x64"
           cp -R "./SubtitleEdit-x64.app" "./dmg-temp-x64/Subtitle Edit.app"
+          
+          # Delete app bundle immediately after copying
+          rm -rf "./SubtitleEdit-x64.app"
+          
           ln -s /Applications "./dmg-temp-x64/Applications"
           hdiutil create -volname "SubtitleEdit x64" -srcfolder "./dmg-temp-x64" -ov -format UDZO "./SubtitleEdit-macOS-x64.dmg"
       
-          # Immediate cleanup of x64 artifacts
-          rm -rf "./dmg-temp-x64" "./SubtitleEdit-x64.app" "./publish/macos-x64"
+          # Immediate cleanup of x64 temp directory
+          rm -rf "./dmg-temp-x64"
+          
+          echo "Disk space after x64 DMG creation:"; df -h /
 
       - name: Publish macOS ARM64 app
         run: |
+          echo "Disk space before ARM64 publish:"; df -h /
+          
           dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-arm64 --self-contained true \
             -p:PublishSingleFile=true \
             -o ./publish/macos-arm64
-      - name: Remove PDB files from ARM64 build
-        run: find "./publish/macos-arm64/" -name "*.pdb" -type f -delete
+          
+          # Remove PDB files immediately
+          find "./publish/macos-arm64/" -name "*.pdb" -type f -delete
+          
+          echo "Disk space after ARM64 publish:"; df -h /
+      
       - name: Create, sign, and package ARM64 DMG
         run: |
+          echo "Disk space before ARM64 DMG creation:"; df -h /
+          
           # Copy template for ARM64
           cp -R "./installer/macBundle/SubtitleEdit.app" "./SubtitleEdit-ARM64.app"
       
@@ -306,16 +330,25 @@ jobs:
           cp "./publish/macos-arm64/SubtitleEdit" "./SubtitleEdit-ARM64.app/Contents/MacOS/"
           cp "./publish/macos-arm64/"*.dylib "./SubtitleEdit-ARM64.app/Contents/MacOS/" 2>/dev/null || true
           chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/SubtitleEdit"
+          
+          # Delete publish directory immediately after copying
+          rm -rf "./publish/macos-arm64"
       
           # Copy ffmpeg to ARM64 bundle
           cp "./ffmpeg-temp/ffmpeg" "./SubtitleEdit-ARM64.app/Contents/MacOS/" 2>/dev/null || true
           chmod +x "./SubtitleEdit-ARM64.app/Contents/MacOS/ffmpeg" 2>/dev/null || true
+          
+          # Delete ffmpeg temp immediately after copying
+          rm -rf "./ffmpeg-temp"
       
           # Create Frameworks directory and copy libmpv for ARM64
           mkdir -p "./SubtitleEdit-ARM64.app/Contents/Frameworks"
           cp "./libmpv-temp/"*.dylib "./SubtitleEdit-ARM64.app/Contents/Frameworks/" 2>/dev/null || true
           cp "./libmpv-temp/"*.framework "./SubtitleEdit-ARM64.app/Contents/Frameworks/" 2>/dev/null || true
           chmod -R 755 "./SubtitleEdit-ARM64.app/Contents/Frameworks/"
+          
+          # Delete libmpv temp immediately after copying
+          rm -rf "./libmpv-temp"
       
           # Fix library linking for ARM64
           executable="./SubtitleEdit-ARM64.app/Contents/MacOS/SubtitleEdit"
@@ -356,17 +389,20 @@ jobs:
             codesign --verify --verbose "./SubtitleEdit-ARM64.app"
           fi
       
-          # Clean up temp directories before creating DMG
-          rm -rf "./publish/macos-arm64" "./ffmpeg-temp" "./libmpv-temp"
-      
           # Create DMG for ARM64
           mkdir -p "./dmg-temp-arm64"
           cp -R "./SubtitleEdit-ARM64.app" "./dmg-temp-arm64/Subtitle Edit.app"
+          
+          # Delete app bundle immediately after copying
+          rm -rf "./SubtitleEdit-ARM64.app"
+          
           ln -s /Applications "./dmg-temp-arm64/Applications"
           hdiutil create -volname "SubtitleEdit ARM64" -srcfolder "./dmg-temp-arm64" -ov -format UDZO "./SubtitleEdit-macOS-ARM64.dmg"
       
           # Final cleanup
-          rm -rf "./dmg-temp-arm64" "./SubtitleEdit-ARM64.app"
+          rm -rf "./dmg-temp-arm64"
+          
+          echo "Disk space after ARM64 DMG creation:"; df -h /
 
       - name: Cleanup signing keychain
         if: env.SIGNING_AVAILABLE == 'true'
