@@ -828,6 +828,30 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             waveFileName = videoFileName;
         }
 
+        var jsonFileName = waveFileName + ".json";
+        if (File.Exists(jsonFileName))
+        {
+            var json = File.ReadAllText(jsonFileName);  
+            var jsonTranscription = WhisperCppJson.GetTranscription(json);
+            if (jsonTranscription.Count > 0)
+            {
+                resultTexts = jsonTranscription.SelectMany(s => s.ToUnderlineActiveWords().Select(p => new ResultText
+                {
+                    Start = (decimal)p.StartTime.TotalSeconds,
+                    End = (decimal)p.EndTime.TotalSeconds,
+                    Text = p.Text
+                })).ToList();
+
+                //resultTexts = jsonTranscription.Select(s => s.ToSubtitleLineViewModel()).Select(p=>  new ResultText
+                //{
+                //    Start = (decimal)p.StartTime.TotalSeconds,
+                //    End = (decimal)p.EndTime.TotalSeconds,
+                //    Text = p.Text
+                //}).ToList();
+                return true;
+            }
+        }
+
         var srtFileName = waveFileName + ".srt";
         if (!File.Exists(srtFileName) && waveFileName.EndsWith(".wav"))
         {

@@ -2114,7 +2114,7 @@ public class AudioVisualizer : Control
                 }
 
                 // 3. Apply filtering logic immediately to avoid second loop
-                var isTooShortOrDense = count > 75 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
+                var isTooShortOrDense = count > 200 && (p.Duration.TotalMilliseconds < 0.01 || pStart - lastStartTime < 90);
 
                 if (!isTooShortOrDense)
                 {
@@ -2123,7 +2123,7 @@ public class AudioVisualizer : Control
                     count++;
                 }
 
-                if (count >= 100)
+                if (count >= 200)
                 {
                     break;
                 }

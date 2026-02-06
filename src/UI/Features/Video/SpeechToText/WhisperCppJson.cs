@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.WhisperCppToHighlight;
+namespace Nikse.SubtitleEdit.Features.Video.SpeechToText;
 
 public static class WhisperCppJson
 {
@@ -90,7 +90,7 @@ public class TranscriptionSegment
     public List<SubtitleLineViewModel> ToUnderlineActiveWords()
     {
         var result = new List<SubtitleLineViewModel>();
-        
+
         if (Tokens == null || Tokens.Count == 0)
         {
             return result;
@@ -108,18 +108,18 @@ public class TranscriptionSegment
                 if (t == token)
                 {
                     textBuilder.Append("<u>");
-                    textBuilder.Append(t.Text);
+                    textBuilder.Append(CleanText(t.Text));
                     textBuilder.Append("</u>");
                 }
                 else
                 {
-                    textBuilder.Append(t.Text);
+                    textBuilder.Append(CleanText(t.Text));
                 }
             }
 
             var viewModel = new SubtitleLineViewModel
             {
-                Text = textBuilder.ToString(),
+                Text = textBuilder.ToString().Replace("<u></u>", string.Empty),
                 StartTime = TimeSpan.FromMilliseconds(startMs),
                 EndTime = TimeSpan.FromMilliseconds(endMs)
             };
@@ -128,6 +128,44 @@ public class TranscriptionSegment
         }
 
         return result;
+    }
+
+    private static string CleanText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return text;
+        }
+
+        var begin = text.IndexOf('[');
+        if (begin < 0)
+        {
+            return text;
+        }
+
+        var end = text.IndexOf(']', begin);
+        if (end < 0)
+        {
+            return text;
+        }
+
+        text = text.Remove(begin, end - begin + 1);
+
+        begin = text.IndexOf('[');
+        if (begin < 0)
+        {
+            return text;
+        }
+
+        end = text.IndexOf(']', begin);
+        if (end < 0)
+        {
+            return text;
+        }
+
+        text = text.Remove(begin, end - begin + 1);
+
+        return text;
     }
 }
 
