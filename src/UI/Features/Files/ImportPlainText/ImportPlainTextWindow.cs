@@ -171,6 +171,7 @@ public class ImportPlainTextWindow : Window
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
+            MinWidth = 320,
         };
 
         var labelSplit = UiUtil.MakeLabel(Se.Language.File.Import.SplitTextAt);

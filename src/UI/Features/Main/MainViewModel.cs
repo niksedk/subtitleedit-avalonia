@@ -3859,6 +3859,14 @@ public partial class MainViewModel :
         if (result.OkPressed && !result.IsBatchMode)
         {
             _subtitle = result.TranscribedSubtitle;
+            if (SelectedSubtitleFormat is AdvancedSubStationAlpha)
+            {
+                foreach (var p in _subtitle.Paragraphs)
+                {
+                    p.Text = AdvancedSubStationAlpha.FormatText(p.Text);
+                }
+            }
+
             SetSubtitles(_subtitle);
             SelectAndScrollToRow(0);
             ShowStatus($"Transcription completed with {result.TranscribedSubtitle.Paragraphs.Count} lines");
