@@ -122,7 +122,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         SelectedLineSpacing = 0;
         SubtitleGrid = new DataGrid();
         Title = string.Empty;
-        BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+        BitmapPreview = new SKBitmap(1, 1, false).ToAvaloniaBitmap();
         OutlineColor = Colors.Black;
         ProgressText = string.Empty;
         ProgressValue = 0;
@@ -537,7 +537,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
     [RelayCommand]
     private async Task SavePreview()
     {
-        if (SelectedSubtitle == null)
+        if (SelectedSubtitle == null || Window == null)
         {
             return;
         }
@@ -552,6 +552,24 @@ public partial class ExportImageBasedViewModel : ObservableObject
         }
 
         BitmapPreview.Save(fileName, 100);
+
+        Dispatcher.UIThread.Post(async void () =>
+        {
+            try
+            {
+                _ = await _windowService.ShowDialogAsync<PromptFileSavedWindow, PromptFileSavedViewModel>(Window,
+                    vm =>
+                    {
+                        vm.Initialize(Se.Language.General.ImageSaved,
+                            string.Format(Se.Language.General.FileSavedToX, fileName), fileName, true, true);
+                    });
+            }
+            catch (Exception e)
+            {
+                Se.LogError(e);
+            }
+        });
+
     }
 
     [RelayCommand]
@@ -624,7 +642,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var text = selected.Text;
         if (string.IsNullOrEmpty(text))
         {
-            BitmapPreview = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
+            BitmapPreview = new SKBitmap(1, 1, false).ToAvaloniaBitmap();
             return;
         }
 
@@ -709,101 +727,145 @@ public partial class ExportImageBasedViewModel : ObservableObject
         using var italicFont = new SKFont(ip.IsBold ? boldItalicTypeface : italicTypeface, fontSize);
         using var boldItalicFont = new SKFont(boldItalicTypeface, fontSize);
 
-        // Split segments into lines and measure dimensions
+        // Split segments into lines
         var lines = SplitIntoSegments(segments);
         var fontMetrics = regularFont.Metrics;
 
-        // Measure text width
-        float maxWidth = 0;
-
-        // Calculate line spacing once
+        // Calculate line spacing
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
         var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
 
-
-        float currentY = 0;
-
-        foreach (var line in lines)
-        {
-            float lineWidth = 0;
-
-            for (var i = 0; i < line.Count; i++)
-            {
-                var segment = line[i];
-                var currentFont = GetFont(segment, regularFont, boldFont, italicFont, boldItalicFont);
-
-                // Measure width using SKShaper for proper complex script support
-                var segmentWidth = MeasureTextWithShaping(segment.Text, currentFont);
-
-                lineWidth += segmentWidth;
-
-                // Add spacing after styled segments to match rendering (except for last segment)
-                if ((segment.IsItalic || segment.IsBold) && i < line.Count - 1)
-                {
-                    lineWidth += fontSize * 0.17f;
-                }
-            }
-
-            maxWidth = Math.Max(maxWidth, lineWidth);
-
-            currentY += baseLineHeight + lineSpacing;
-        }
-
-        // Calculate text height using font metrics (more reliable for complex scripts)
-        var totalLineHeight = lines.Count * baseLineHeight + (lines.Count - 1) * lineSpacing;
-        var actualTextHeight = lines.Count > 0 ? Math.Max(totalLineHeight, 0) : 0;
-
-        // Calculate precise content area and effects padding
+        // Calculate effects padding
         var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
         var paddingLeftRight = (float)ip.PaddingLeftRight;
         var paddingTopBottom = (float)ip.PaddingTopBottom;
 
-        // Content area (text + specified padding)
-        var contentWidth = maxWidth + (paddingLeftRight * 2);
-        var contentHeight = actualTextHeight + (paddingTopBottom * 2);
+        // Create oversized temporary bitmap for rendering
+        var tempWidth = Math.Max(4000, ip.ScreenWidth);
+        var tempHeight = Math.Max(2000, ip.ScreenHeight);
+        using var tempBitmap = new SKBitmap(tempWidth, tempHeight, false);
+        using var tempCanvas = new SKCanvas(tempBitmap);
+        tempCanvas.Clear(SKColors.Transparent);
 
-        // Total bitmap size (content + effects padding)
-        var width = (int)Math.Ceiling(contentWidth + (effectsPadding * 2));
-        var height = (int)Math.Ceiling(contentHeight + (effectsPadding * 2));
+        // Render text to temporary bitmap to measure actual bounds
+        var textStartX = effectsPadding + paddingLeftRight;
+        var textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
+        
+        RenderTextToCanvas(tempCanvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
+            textStartX, textStartY, baseLineHeight, lineSpacing, effectsPadding, paddingLeftRight, 
+            fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, tempWidth, isForMeasurement: true);
+
+        // Measure actual bounds by scanning for non-transparent pixels
+        var bounds = MeasureActualBounds(tempBitmap);
+
+        // Calculate final bitmap size
+        var finalWidth = (int)Math.Ceiling(bounds.Width + effectsPadding * 2 + paddingLeftRight * 2);
+        var finalHeight = (int)Math.Ceiling(bounds.Height + effectsPadding * 2 + paddingTopBottom * 2);
 
         // Ensure minimum size
-        width = Math.Max(width, 1);
-        height = Math.Max(height, 1);
+        finalWidth = Math.Max(finalWidth, 1);
+        finalHeight = Math.Max(finalHeight, 1);
 
-        // Create bitmap and canvas
-        var bitmap = new SKBitmap(width, height, true);
+        // Create final bitmap
+        var bitmap = new SKBitmap(finalWidth, finalHeight, false);
         using var canvas = new SKCanvas(bitmap);
+        canvas.Clear(SKColors.Transparent);
 
-        // Set up paint for background
-        using var paint = new SKPaint
+        // Draw background only if it has some alpha (not fully transparent)
+        if (ip.BackgroundColor.Alpha > 0)
         {
-            Color = ip.BackgroundColor,
-            IsAntialias = true,
-        };
+            using var paint = new SKPaint
+            {
+                Color = ip.BackgroundColor,
+                IsAntialias = true,
+            };
 
-        // Draw the rounded rectangle background
-        var boxRect = new SKRect(
-            effectsPadding,
-            effectsPadding,
-            width - effectsPadding,
-            height - effectsPadding
-        );
-        var cornerRadius = (float)ip.BackgroundCornerRadius;
-        canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
+            var boxRect = new SKRect(
+                effectsPadding,
+                effectsPadding,
+                finalWidth - effectsPadding,
+                finalHeight - effectsPadding
+            );
+            var cornerRadius = (float)ip.BackgroundCornerRadius;
+            canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
+        }
 
-        // Calculate precise text positioning
-        var textStartX = effectsPadding + paddingLeftRight;
-        // Position text using font ascent (ascent is negative, so we subtract to move down)
-        var textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
+        // Render text to final bitmap
+        textStartX = effectsPadding + paddingLeftRight;
+        textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
 
-        currentY = 0;
+        RenderTextToCanvas(canvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
+            textStartX, textStartY, baseLineHeight, lineSpacing, effectsPadding, paddingLeftRight,
+            fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, finalWidth, isForMeasurement: false);
+
+        return bitmap;
+    }
+
+    private static SKRect MeasureActualBounds(SKBitmap bitmap)
+    {
+        var left = bitmap.Width;
+        var top = bitmap.Height;
+        var right = 0;
+        var bottom = 0;
+
+        var pixels = bitmap.Pixels;
+        var width = bitmap.Width;
+        var height = bitmap.Height;
+
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var pixel = pixels[y * width + x];
+                if (pixel.Alpha > 0)
+                {
+                    left = Math.Min(left, x);
+                    top = Math.Min(top, y);
+                    right = Math.Max(right, x);
+                    bottom = Math.Max(bottom, y);
+                }
+            }
+        }
+
+        // If no pixels found, return minimal bounds
+        if (left > right)
+        {
+            return new SKRect(0, 0, 1, 1);
+        }
+
+        return new SKRect(left, top, right + 1, bottom + 1);
+    }
+
+    private static void RenderTextToCanvas(
+        SKCanvas canvas,
+        List<List<TextSegment>> lines,
+        ImageParameter ip,
+        SKFont regularFont,
+        SKFont boldFont,
+        SKFont italicFont,
+        SKFont boldItalicFont,
+        float textStartX,
+        float textStartY,
+        float baseLineHeight,
+        float lineSpacing,
+        float effectsPadding,
+        float paddingLeftRight,
+        SKColor fontColor,
+        SKColor outlineColor,
+        SKColor shadowColor,
+        double outlineWidth,
+        double shadowWidth,
+        float canvasWidth,
+        bool isForMeasurement)
+    {
+        var currentY = 0f;
 
         foreach (var line in lines)
         {
             // Reverse segments for RTL languages
             var segmentsToRender = ip.IsRightToLeft ? line.AsEnumerable().Reverse().ToList() : line;
 
-            // Calculate line width for alignment (must match measurement phase)
+            // Calculate line width for alignment
             float lineWidth = 0;
             for (var j = 0; j < line.Count; j++)
             {
@@ -811,19 +873,23 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
                 lineWidth += MeasureTextWithShaping(seg.Text, font);
                 
-                // Add spacing after styled segments to match measurement phase
                 if ((seg.IsItalic || seg.IsBold) && j < line.Count - 1)
                 {
-                    lineWidth += fontSize * 0.17f;
+                    lineWidth += regularFont.Size * 0.17f;
                 }
             }
 
             float currentX;
 
             // Calculate X position based on alignment
-            if (ip.IsRightToLeft)
+            if (isForMeasurement)
             {
-                var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                // For measurement, use simple left alignment
+                currentX = textStartX;
+            }
+            else if (ip.IsRightToLeft)
+            {
+                var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
 
                 if (ip.ContentAlignment == ExportContentAlignment.Center)
                 {
@@ -833,7 +899,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 {
                     currentX = textStartX;
                 }
-                else // Right or default for RTL
+                else
                 {
                     currentX = textStartX + contentAreaWidth - lineWidth;
                 }
@@ -844,12 +910,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                 if (ip.ContentAlignment == ExportContentAlignment.Center)
                 {
-                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                    var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
                     currentX += (contentAreaWidth - lineWidth) / 2;
                 }
                 else if (ip.ContentAlignment == ExportContentAlignment.Right)
                 {
-                    var contentAreaWidth = contentWidth - (paddingLeftRight * 2);
+                    var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
                     currentX += contentAreaWidth - lineWidth;
                 }
             }
@@ -922,15 +988,13 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 // Add small spacing after styled segments to prevent crowding
                 if ((segment.IsItalic || segment.IsBold) && i < segmentsToRender.Count - 1)
                 {
-                    currentX += fontSize * 0.17f;
+                    currentX += regularFont.Size * 0.17f;
                 }
             }
 
             // Move to next line
             currentY += baseLineHeight + lineSpacing;
         }
-
-        return bitmap;
     }
 
     // Helper method to measure text with HarfBuzz shaping via SKShaper

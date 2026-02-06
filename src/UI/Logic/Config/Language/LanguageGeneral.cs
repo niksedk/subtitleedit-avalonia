@@ -615,6 +615,8 @@ public class LanguageGeneral
     public string MoveAllShotChangeOneFrameForward { get;  set; }
     public string LinesChangedX { get; set; }
     public string Fade { get; set; }
+    public string FileSavedToX { get; set; }
+    public string ImageSaved { get; set; }
 
     public LanguageGeneral()
     {
@@ -1229,5 +1231,7 @@ public class LanguageGeneral
         MoveAllShotChangeOneFrameForward = "Move all shot changes one frame forward";
         LinesChangedX = "Lines changed: {0}";
         Fade = "Fade";
+        FileSavedToX = "File saved to {0}";
+        ImageSaved = "Image saved";
     }
 }
