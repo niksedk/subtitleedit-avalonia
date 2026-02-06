@@ -198,6 +198,15 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     MacHelper.MakeExecutable(path);
                 }
             }
+            
+            if (Engine is ChatLlmCppEngine chatLlmCppEngine)
+            {
+                path = Path.Combine(folder, chatLlmCppEngine.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    MacHelper.MakeExecutable(path);
+                }
+            }
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -210,6 +219,15 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             if (Engine is WhisperEnginePurfviewFasterWhisperXxl purfviewEngine)
             {
                 path = Path.Combine(folder, purfviewEngine.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    LinuxHelper.MakeExecutable(path);
+                }
+            }
+            
+            if (Engine is ChatLlmCppEngine chatLlmCppEngine)
+            {
+                path = Path.Combine(folder, chatLlmCppEngine.GetExecutableFileName());
                 if (File.Exists(path))
                 {
                     LinuxHelper.MakeExecutable(path);
