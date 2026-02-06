@@ -105,6 +105,23 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     try
                     {
                         File.Delete(tempFileName);
+
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        {
+                            var path = Engine.GetExecutable();
+                            if (File.Exists(path))
+                            {
+                                MacHelper.MakeExecutable(path);
+                            }
+                        }
+                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        {
+                            var path = Engine.GetExecutable();
+                            if (File.Exists(path))
+                            {
+                                LinuxHelper.MakeExecutable(path);
+                            }
+                        }
                     }
                     catch
                     {
