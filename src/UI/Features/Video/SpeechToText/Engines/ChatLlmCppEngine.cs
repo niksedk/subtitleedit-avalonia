@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
 public class ChatLlmCppEngine : ISpeechToTextEngine
 {
-    public static string StaticName => "Chat LLM";
+    public static string StaticName => "Chat LLM.cpp";
     public string Name => StaticName;
     public string Choice => WhisperChoice.ChatLlm;
     public string Url => "https://github.com/foldl/chatllm.cpp";
@@ -46,20 +46,20 @@ public class ChatLlmCppEngine : ISpeechToTextEngine
             {
                 new WhisperModel
                 {
-                    Name = "qwen3-asr-1.7b.bin",
-                    Size = "2.5 GB",
-                    Urls =
-                    [
-                        "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-1.7b.bin"
-                    ]
-                },
-                new WhisperModel
-                {
                     Name = "qwen3-asr-0.6b.bin",
                     Size = "1 GB",
                     Urls =
                     [
                         "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-0.6b.bin"
+                    ]
+                },
+                new WhisperModel
+                {
+                    Name = "qwen3-asr-1.7b.bin",
+                    Size = "2.5 GB",
+                    Urls =
+                    [
+                        "https://modelscope.cn/models/judd2024/chatllm_quantized_qwen3/resolve/master/qwen3-asr-1.7b.bin"
                     ]
                 },
             }.ToList();
@@ -84,13 +84,13 @@ public class ChatLlmCppEngine : ISpeechToTextEngine
 
     public string GetAndCreateWhisperFolder()
     {
-        var baseFolder = Se.WhisperFolder;
+        var baseFolder = Se.DataFolder;
         if (!Directory.Exists(baseFolder))
         {
             Directory.CreateDirectory(baseFolder);
         }
 
-        var folder = Path.Combine(baseFolder, "ChatLLM");
+        var folder = Path.Combine(baseFolder, "ChatLLM.cpp");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);

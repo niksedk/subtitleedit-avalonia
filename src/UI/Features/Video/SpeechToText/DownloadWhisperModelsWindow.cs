@@ -16,7 +16,7 @@ public class DownloadWhisperModelsWindow : Window
     {
         vm.Window = this;
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.Video.AudioToText.DownloadingWhisperModel;
+        Title = Se.Language.Video.AudioToText.DownloadingSpeechToTextModel;
         SizeToContent = SizeToContent.WidthAndHeight;
         MinWidth = 500;
         CanResize = false;

@@ -16,10 +16,10 @@ public class LanguageAudioToText
     public string WhisperXxlSentence { get; set; }
     public string WhisperXxlSingleWords { get; set; }
     public string WhisperXxlHighlightWord { get; set; }
-    public string DownloadingWhisperModel { get; set; }
     public string SelectModel { get; set; }
     public string ViewWhisperLogFile { get; set; }
     public string ReDownloadX { get; set; }
+    public string? DownloadingSpeechToTextModel { get; set; }
 
     public LanguageAudioToText()
     {
@@ -37,9 +37,9 @@ public class LanguageAudioToText
         WhisperXxlSentence = "Sentence-level";
         WhisperXxlSingleWords = "Single words";
         WhisperXxlHighlightWord = "Highlight word";
-        DownloadingWhisperModel = "Downloading Whisper model";
         SelectModel = "Select model";
         ViewWhisperLogFile = "View Whisper log file";
         ReDownloadX = "Re-download {0}";
+        DownloadingSpeechToTextModel = "Downloading speech-to-text model";  
     }
 }

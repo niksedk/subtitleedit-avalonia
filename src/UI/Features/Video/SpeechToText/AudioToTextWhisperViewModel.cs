@@ -1372,8 +1372,6 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 });
 
             RefreshDownloadStatus(vm.SelectedModel?.Model as WhisperModel);
-
-            return;
         }
 
         if (engine is ChatLlmCppEngine chatLlm)
@@ -1385,7 +1383,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 Display = modelAligner.Name + " (forced aligner for timestamps)",
                 Engine = engine,
             };
-            if (!engine.IsModelInstalled(model.Model))
+            if (!engine.IsModelInstalled(modelAligner))
             {
                 var answer = await MessageBox.Show(
                                 Window!,
@@ -1410,7 +1408,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                         viewModel.StartDownload();
                     });
 
-                return;
+                if (!vm.OkPressed)
+                {
+                    return;
+                }
             }
         }
 
