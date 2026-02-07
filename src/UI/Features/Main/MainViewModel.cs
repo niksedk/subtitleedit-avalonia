@@ -1971,16 +1971,18 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>();
-
-        if (!result.OkPressed || result.Subtitles.Count == 0)
+        var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>(vm => vm.SetCurrentSubtitle(_subtitle));
+        if (result.OkPressed && result.Subtitles.Count > 0)
         {
-            return;
+            _subtitleFileName = string.Empty;
+            ResetSubtitle();
+            foreach (var item in result.Subtitles)
+            {
+                Subtitles.Add(item);
+            }
+            Renumber();
+            _updateAudioVisualizer = true;
         }
-
-        _subtitleFileName = string.Empty;
-        ResetSubtitle();
-        Subtitles.AddRange(result.Subtitles);
     }
 
     [RelayCommand]

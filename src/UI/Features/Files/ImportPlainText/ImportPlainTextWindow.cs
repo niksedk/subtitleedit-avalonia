@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -8,6 +9,8 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
+using Avalonia.Controls.Primitives;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 
@@ -18,291 +21,193 @@ public class ImportPlainTextWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.File.Import.TitleImportPlainText;
         CanResize = true;
-        Width = 1200;
+        Width = 1100;
         Height = 850;
-        MinWidth = 1100;
+        MinWidth = 800;
         MinHeight = 600;
 
         vm.Window = this;
         DataContext = vm;
 
-        var grid = new Grid
+        var mainGrid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1.2, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = GridLength.Auto },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            ColumnSpacing = 5,
-            RowSpacing = 5,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
+            RowSpacing = 8,
         };
 
-        var buttonImportFiles = UiUtil.MakeButton(Se.Language.File.Import.ImportFilesDotDotDot, vm.FilesImportCommand).WithMinWidth(110);
-        buttonImportFiles.Bind(Button.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm });
-        var buttonImportFile = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand).WithMinWidth(110);
-        buttonImportFile.Bind(Button.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
-        var checkBoxImportFiles = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.IsImportFilesVisible));
-        checkBoxImportFiles.IsCheckedChanged += (s, e) => vm.CheckBoxImportFilesChanged();
-        var panelImport = new StackPanel
+        var topGrid = new Grid
         {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Children =
+            ColumnDefinitions =
             {
-                buttonImportFiles,
-                buttonImportFile,
-                checkBoxImportFiles,
+                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
-            Spacing = 10,
+            ColumnSpacing = 12,
         };
 
+        topGrid.Children.Add(MakeImportPlainTextGroup(vm));
+        Grid.SetColumn(topGrid.Children.Last(), 0);
+        topGrid.Children.Add(MakeOptionsGroup(vm));
+        Grid.SetColumn(topGrid.Children.Last(), 1);
 
+        mainGrid.Children.Add(topGrid);
+        Grid.SetRow(topGrid, 0);
+
+        mainGrid.Children.Add(MakePreviewGroup(vm));
+        Grid.SetRow(mainGrid.Children.Last(), 1);
+
+        var buttonRefresh = UiUtil.MakeButton(Se.Language.General.Refresh, vm.RefreshCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var panelButtons = UiUtil.MakeButtonBar(buttonRefresh, buttonOk, buttonCancel);
+        mainGrid.Add(panelButtons, 2, 0, 1, 2);
 
-        grid.Add(panelImport, 0);
-        grid.Add(MakeTextBoxAndControlsView(vm), 1);
-        grid.Add(MakeSubtitleGridView(vm), 2);
-        grid.Add(panelButtons, 3, 0);
-
-        Content = grid;
-
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Content = mainGrid;
+        Activated += delegate { buttonOk.Focus(); };
         KeyDown += vm.KeyDown;
     }
 
-    private static Grid MakeTextBoxAndControlsView(ImportPlainTextViewModel vm)
+    private static Control MakeImportPlainTextGroup(ImportPlainTextViewModel vm)
     {
         var grid = new Grid
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = GridLength.Star },
             },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            ColumnSpacing = 5,
             RowSpacing = 5,
         };
 
-        var textBox = new TextBox
+        var checkBoxMultiple = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.MultipleFilesOneFileIsOneSubtitle));
+        var buttonOpen = UiUtil.MakeButton("Open text file", vm.FileImportCommand);
+        var buttonOpenMultiple = UiUtil.MakeButton("...", vm.FilesImportCommand);
+
+        var panelTop = new Grid
         {
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            Height = 350,
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            DataContext = vm,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Star },
+                new ColumnDefinition { Width = GridLength.Auto },
+                new ColumnDefinition { Width = GridLength.Auto },
+            }
         };
+        panelTop.Add(checkBoxMultiple, 0, 0);
+        panelTop.Add(buttonOpen, 0, 2);
+        panelTop.Add(buttonOpenMultiple, 0, 3);
+
+        var labelEncoding = UiUtil.MakeLabel(Se.Language.General.Encoding);
+        var comboEncoding = UiUtil.MakeComboBox(vm.Encodings, vm, nameof(vm.SelectedEncoding)).WithWidth(240);
+        var panelEncoding = UiUtil.MakeHorizontalPanel(labelEncoding, comboEncoding);
+
+        var textBox = new TextBox { AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
-        textBox.Bind(TextBox.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
-        textBox.TextChanged += (s, e) => vm.PlainTextChanged();
-        var sizeConverter = new FileSizeConverter();
+        textBox.Bind(Visual.IsVisibleProperty, new Binding("!MultipleFilesOneFileIsOneSubtitle"));
 
-        var dataGrid = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
-            CanUserResizeColumns = true,
-            CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = 348,
-            DataContext = vm,
-            ItemsSource = vm.Files,
-            Columns =
-            {
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.FileName,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(DisplayFile.FileName)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Size,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(DisplayFile.Size)) { Converter = sizeConverter, Mode = BindingMode.OneWay },
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-            },
-        };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFile)) { Source = vm });
-        dataGrid.Bind(DataGrid.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm });
+        var listBoxFiles = new ListBox();
+        listBoxFiles.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Files)));
+        listBoxFiles.Bind(ListBox.SelectedItemProperty, new Binding(nameof(vm.SelectedFile)));
+        listBoxFiles.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle)));
 
-        grid.Add(textBox, 0);
-        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 0);
-        grid.Add(MakeControlsView(vm), 0, 1);
+        grid.Add(panelTop, 0, 0);
+        grid.Add(panelEncoding, 1, 0);
+        grid.Add(textBox, 2, 0);
+        grid.Add(listBoxFiles, 2, 0);
 
+        return MakeGroupBox(Se.Language.File.Import.TitleImportPlainText, grid);
+    }
+
+    private static Control MakeOptionsGroup(ImportPlainTextViewModel vm)
+    {
+        var stack = new StackPanel { Spacing = 10 };
+
+        var splittingStack = new StackPanel { Spacing = 5 };
+        splittingStack.Children.Add(UiUtil.MakeRadioButton("Auto split text", vm, nameof(vm.IsAutoSplitText), "SplitGroup"));
+        splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.BlankLines, vm, nameof(vm.IsSplitAtBlankLines), "SplitGroup"));
+        splittingStack.Children.Add(UiUtil.MakeRadioButton("Line mode", vm, nameof(vm.IsSplitAtLineMode), "SplitGroup"));
+
+        var comboLineMode = UiUtil.MakeComboBox(vm.SplitAtOptions, vm, nameof(vm.SelectedSplitAtOption)).WithHorizontalAlignmentStretch();
+        comboLineMode.Bind(InputElement.IsEnabledProperty, new Binding(nameof(vm.IsSplitAtLineMode)));
+        splittingStack.Children.Add(comboLineMode);
+
+        var lineBreakGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
+        lineBreakGrid.Add(UiUtil.MakeLabel("Line break"), 0, 0);
+        var comboLineBreak = UiUtil.MakeComboBox(vm.LineBreaks, vm, nameof(vm.SelectedLineBreak)).WithHorizontalAlignmentStretch();
+        comboLineBreak.IsEditable = true;
+        comboLineBreak.Bind(ComboBox.TextProperty, new Binding(nameof(vm.SelectedLineBreak)) { Mode = BindingMode.TwoWay });
+        lineBreakGrid.Add(comboLineBreak, 0, 1);
+        splittingStack.Children.Add(lineBreakGrid);
+
+        stack.Children.Add(MakeGroupBox(Se.Language.File.Import.SplitTextAt, splittingStack));
+
+        var settingsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = GridLength.Auto } }, RowDefinitions = { new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition() }, RowSpacing = 5 };
+        settingsGrid.Add(UiUtil.MakeLabel("Max. line length"), 0, 0);
+        settingsGrid.Add(UiUtil.MakeNumericUpDownInt(1, 500, 42, 110, vm, nameof(vm.SingleLineMaxLength)), 0, 1);
+        settingsGrid.Add(UiUtil.MakeCheckBox("Merge short lines", vm, nameof(vm.MergeShortLines)), 1, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.General.AutoBreak, vm, nameof(vm.AutoBreak)), 2, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox("Remove lines without letters", vm, nameof(vm.RemoveLinesWithoutLetters)), 3, 0, 1, 2);
+
+        var endCharsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
+        endCharsGrid.Add(UiUtil.MakeCheckBox("Split at end chars", vm, nameof(vm.SplitAtEndCharsSetting)), 0, 0);
+        endCharsGrid.Add(UiUtil.MakeTextBox(110, vm, nameof(vm.EndChars)), 0, 1);
+        settingsGrid.Add(endCharsGrid, 4, 0, 1, 2);
+
+        var settingsGroupBox = MakeGroupBox(Se.Language.General.Settings, settingsGrid);
+        settingsGroupBox.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsAutoSplitText)));
+        stack.Children.Add(settingsGroupBox);
+
+        var timeStack = new StackPanel { Spacing = 2 };
+        timeStack.Children.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.ImportTimeCodes.Replace("...", string.Empty), vm, nameof(vm.IsTimeCodeGenerate)));
+        var checkTakeTime = UiUtil.MakeCheckBox("Take time from current file", vm, nameof(vm.IsTimeCodeTakeFromCurrent));
+        checkTakeTime.Bind(InputElement.IsEnabledProperty, new Binding(nameof(vm.IsTimeCodeGenerate)));
+        timeStack.Children.Add(checkTakeTime);
+
+        var gapGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = GridLength.Auto } }, ColumnSpacing = 5 };
+        gapGrid.Add(UiUtil.MakeLabel($"{Se.Language.General.Gap} (ms)"), 0, 0);
+        gapGrid.Add(UiUtil.MakeNumericUpDownInt(0, 5000, 90, 110, vm, nameof(vm.GapBetweenSubtitles)), 0, 1);
+        timeStack.Children.Add(gapGrid);
+
+        stack.Children.Add(MakeGroupBox(Se.Language.File.Import.TimeCodesDotDotDot.Replace("...", string.Empty), timeStack));
+
+        var durStack = new StackPanel { Spacing = 2 };
+        durStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.General.Auto, vm, nameof(vm.IsAutoDuration), "DurGroup"));
+        durStack.Children.Add(UiUtil.MakeHorizontalPanel(UiUtil.MakeRadioButton("Fixed", vm, nameof(vm.IsFixedDuration), "DurGroup"),
+            UiUtil.MakeNumericUpDownInt(100, 50000, 2000, 110, vm, nameof(vm.FixedDuration)).WithBindEnabled(nameof(vm.IsFixedDuration))));
+
+        stack.Children.Add(MakeGroupBox(Se.Language.General.Duration, durStack));
+
+        return MakeGroupBox("Import options", new ScrollViewer { Content = stack });
+    }
+
+    private static Control MakePreviewGroup(ImportPlainTextViewModel vm)
+    {
+        var dataGrid = new DataGrid { AutoGenerateColumns = false, SelectionMode = DataGridSelectionMode.Single, CanUserResizeColumns = true };
+        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Subtitles)));
+        dataGrid.Columns.Add(new DataGridTextColumn { Header = "#", Binding = new Binding(nameof(SubtitleLineViewModel.Number)), Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
+        dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Show, Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = new TimeSpanToDisplayFullConverter() }, Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
+        dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Hide, Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = new TimeSpanToDisplayFullConverter() }, Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
+        dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Text, Binding = new Binding(nameof(SubtitleLineViewModel.Text)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });
+
+        var border = UiUtil.MakeBorderForControlNoPadding(dataGrid);
+        var groupBox = MakeGroupBox(Se.Language.General.Preview, border);
+        var label = (groupBox as Grid)!.Children[0] as Label;
+        label!.Bind(Label.ContentProperty, new Binding(nameof(vm.PreviewSubtitlesModifiedText)));
+        return groupBox;
+    }
+
+    private static Grid MakeGroupBox(string title, Control content)
+    {
+        var grid = new Grid { RowDefinitions = { new RowDefinition { Height = GridLength.Auto }, new RowDefinition { Height = GridLength.Star } } };
+        grid.Children.Add(UiUtil.MakeLabel(title).WithBold().WithMarginBottom(2));
+        grid.Add(content, 1, 0);
         return grid;
-    }
-
-    private static void TextBox_TextChanged(object? sender, TextChangedEventArgs e)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    private static Border MakeControlsView(ImportPlainTextViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            MinWidth = 320,
-        };
-
-        var labelSplit = UiUtil.MakeLabel(Se.Language.File.Import.SplitTextAt);
-        var comboBoxSplit = new ComboBox
-        {
-            DataContext = vm,
-        };
-        comboBoxSplit.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.SplitAtOptions)) { Source = vm });
-        comboBoxSplit.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedSplitAtOption)) { Source = vm, Mode = BindingMode.TwoWay });
-        comboBoxSplit.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
-        comboBoxSplit.SelectionChanged += (s, e) => vm.SplitAtOptionChanged();
-
-        var panelSplit = UiUtil.MakeHorizontalPanel(labelSplit, comboBoxSplit);
-
-        grid.Add(panelSplit, 0);
-
-        return UiUtil.MakeBorderForControl(grid);
-    }
-
-    private static Border MakeSubtitleGridView(ImportPlainTextViewModel vm)
-    {
-        var grid = new Grid
-        {
-            RowDefinitions =
-            {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-            },
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-            },
-            Width = double.NaN,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
-
-        var fullTimeConverter = new TimeSpanToDisplayFullConverter();
-        var shortTimeConverter = new TimeSpanToDisplayShortConverter();
-        var fileSizeConverter = new FileSizeConverter();
-        var dataGrid = new DataGrid
-        {
-            AutoGenerateColumns = false,
-            SelectionMode = DataGridSelectionMode.Single,
-            CanUserResizeColumns = true,
-            CanUserSortColumns = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Width = double.NaN,
-            Height = double.NaN,
-            DataContext = vm,
-            ItemsSource = vm.Subtitles,
-            Columns =
-            {
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.NumberSymbol,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Show,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = fullTimeConverter, Mode = BindingMode.OneWay },
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Hide,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = fullTimeConverter, Mode = BindingMode.OneWay },
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Duration,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Duration)) { Converter = shortTimeConverter, Mode = BindingMode.OneWay },
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
-                },
-                new DataGridTextColumn
-                {
-                    Header = Se.Language.General.Text,
-                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Text)),
-                    IsReadOnly = true,
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                },
-            },
-        };
-        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Source = vm });
-
-        // hack to make drag and drop work on the DataGrid - also on empty rows
-        var dropHost = new Border
-        {
-            Background = Brushes.Transparent,
-            Child = dataGrid,
-        };
-        DragDrop.SetAllowDrop(dropHost, true);
-        dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
-        dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
-
-        dropHost.Tapped += (s, e) =>
-        {
-       //     vm.FileGridTapped();
-        };
-
-        var flyout = new MenuFlyout();
-        dropHost.ContextFlyout = flyout;
-        var menuItemImport = new MenuItem
-        {
-            Header = Se.Language.General.ImportDotDotDot,
-            DataContext = vm,
-            Command = vm.FileImportCommand,
-        };
-        flyout.Items.Add(menuItemImport);
-
-        grid.Add(dropHost, 0);
-
-        return UiUtil.MakeBorderForControlNoPadding(grid);
     }
 }
