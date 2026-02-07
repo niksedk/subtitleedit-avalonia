@@ -2964,7 +2964,7 @@ public partial class MainViewModel :
             vm.Initialize(Subtitles.ToList(), shotChanges);
         });
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.AllSubtitlesFixed.Count > 0)
         {
             var idx = SelectedSubtitleIndex;
             Subtitles.Clear();
@@ -3476,7 +3476,7 @@ public partial class MainViewModel :
             .ShowDialogAsync<SplitBreakLongLinesWindow, SplitBreakLongLinesViewModel>(
                 Window!, vm => { vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>()); });
 
-        if (result.OkPressed)
+        if (result.OkPressed && result.AllSubtitlesFixed.Count > 0)
         {
             Subtitles.Clear();
             Subtitles.AddRange(result.AllSubtitlesFixed);
