@@ -735,12 +735,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
         var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
 
-        // Calculate effects padding
-        var effectsPadding = (float)Math.Max(outlineWidth, shadowWidth);
         var paddingLeftRight = (float)ip.PaddingLeftRight;
         var paddingTopBottom = (float)ip.PaddingTopBottom;
 
-        // Create oversized temporary bitmap for rendering
+        // Create oversized temporary bitmap for rendering (with fixed margin for effects)
+        const float tempMargin = 50f;
         var tempWidth = Math.Max(4000, ip.ScreenWidth);
         var tempHeight = Math.Max(2000, ip.ScreenHeight);
         using var tempBitmap = new SKBitmap(tempWidth, tempHeight, false);
@@ -748,11 +747,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
         tempCanvas.Clear(SKColors.Transparent);
 
         // Render text to temporary bitmap to measure actual bounds
-        var textStartX = effectsPadding + paddingLeftRight;
-        var textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
+        var textStartX = tempMargin;
+        var textStartY = tempMargin + Math.Abs(fontMetrics.Ascent);
         
         RenderTextToCanvas(tempCanvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
-            textStartX, textStartY, baseLineHeight, lineSpacing, effectsPadding, paddingLeftRight, 
+            textStartX, textStartY, baseLineHeight, lineSpacing, paddingLeftRight, 
             fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, tempWidth, isForMeasurement: true);
 
         // Measure actual bounds by scanning for non-transparent pixels
@@ -790,14 +789,14 @@ public partial class ExportImageBasedViewModel : ObservableObject
             canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
         }
 
-        // Render text to final bitmap - offset accounts for where effects start
-        var offsetX = bounds.Left - (effectsPadding + paddingLeftRight);
-        var offsetY = bounds.Top - (effectsPadding + paddingTopBottom);
+        // Render text to final bitmap - offset accounts for where content actually rendered
+        var offsetX = bounds.Left - tempMargin;
+        var offsetY = bounds.Top - tempMargin;
         textStartX = paddingLeftRight - offsetX;
         textStartY = paddingTopBottom + Math.Abs(fontMetrics.Ascent) - offsetY;
 
         RenderTextToCanvas(canvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
-            textStartX, textStartY, baseLineHeight, lineSpacing, effectsPadding, paddingLeftRight,
+            textStartX, textStartY, baseLineHeight, lineSpacing, paddingLeftRight,
             fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, finalWidth, isForMeasurement: false);
 
         return bitmap;
@@ -850,7 +849,6 @@ public partial class ExportImageBasedViewModel : ObservableObject
         float textStartY,
         float baseLineHeight,
         float lineSpacing,
-        float effectsPadding,
         float paddingLeftRight,
         SKColor fontColor,
         SKColor outlineColor,
@@ -891,7 +889,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
             }
             else if (ip.IsRightToLeft)
             {
-                var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
+                var contentAreaWidth = canvasWidth - paddingLeftRight * 2;
 
                 if (ip.ContentAlignment == ExportContentAlignment.Center)
                 {
@@ -912,12 +910,12 @@ public partial class ExportImageBasedViewModel : ObservableObject
 
                 if (ip.ContentAlignment == ExportContentAlignment.Center)
                 {
-                    var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
+                    var contentAreaWidth = canvasWidth - paddingLeftRight * 2;
                     currentX += (contentAreaWidth - lineWidth) / 2;
                 }
                 else if (ip.ContentAlignment == ExportContentAlignment.Right)
                 {
-                    var contentAreaWidth = canvasWidth - effectsPadding * 2 - paddingLeftRight * 2;
+                    var contentAreaWidth = canvasWidth - paddingLeftRight * 2;
                     currentX += contentAreaWidth - lineWidth;
                 }
             }
