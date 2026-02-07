@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
@@ -205,6 +206,9 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
     [ObservableProperty] private bool _hasFormatStyle;
+    [ObservableProperty] private bool _isSourceViewActive;
+    [ObservableProperty] private string _sourceViewText;
+    [ObservableProperty] private int _sourceViewLineNumber;
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
     [ObservableProperty] private bool _waveformCenter;
@@ -754,6 +758,66 @@ public partial class MainViewModel :
     private async Task ShowHelp()
     {
         await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
+    private void ToggleSourceView()
+    {
+        if (IsSourceViewActive)
+        {
+            var text = SourceViewText ?? string.Empty;
+            var lines = text.SplitToLines();
+            var subtitle = new Subtitle();
+            SelectedSubtitleFormat.LoadSubtitle(subtitle, lines, string.Empty);
+            if (subtitle.Paragraphs.Count == 0)
+            {
+                subtitle = Subtitle.Parse(lines, ".srt");
+            }
+
+            if (subtitle.Paragraphs.Count > 0)
+            {
+                var oldSelectedIndex = SelectedSubtitleIndex ?? 0;
+                SetSubtitles(subtitle);
+                var idx = Math.Min(oldSelectedIndex, Subtitles.Count - 1);
+                SelectAndScrollToRow(idx);
+                _updateAudioVisualizer = true;
+            }
+        }
+        else
+        {
+            var subtitle = GetUpdateSubtitle();
+            var format = SelectedSubtitleFormat;
+            var fullText = subtitle.ToText(format);
+            SourceViewText = fullText;
+            
+            // Calculate line number for current selection
+            var selectedIndex = SelectedSubtitleIndex ?? 0;
+            if (selectedIndex >= 0 && selectedIndex < Subtitles.Count)
+            {
+                var subBefore = new Subtitle();
+                for (int i = 0; i < selectedIndex; i++)
+                {
+                    subBefore.Paragraphs.Add(new Paragraph(Subtitles[i].Paragraph));
+                }
+                var textBefore = subBefore.ToText(format);
+                var lineCount = textBefore.SplitToLines().Count;
+                
+                // If we have text before, we need to account for the gap (usually one blank line)
+                if (lineCount > 0)
+                {
+                    lineCount++;
+                }
+
+                SourceViewLineNumber = lineCount + 1;
+            }
+            else
+            {
+                SourceViewLineNumber = 1;
+            }
+        }
+
+        IsSourceViewActive = !IsSourceViewActive;
         _shortcutManager.ClearKeys();
     }
 
@@ -5835,7 +5899,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private void ToggleCasing()
     {
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             var selectedItems = _selectedSubtitles?.ToList() ?? [];
             if (selectedItems.Count == 0)
@@ -8280,7 +8344,7 @@ public partial class MainViewModel :
             return;
         }
 
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             AudioVisualizer.Focus();
         }
@@ -8330,7 +8394,7 @@ public partial class MainViewModel :
             AudioVisualizer.SkipNextPointerEntered = true;
         }
 
-        if (SubtitleGrid.IsFocused)
+        if (IsSubtitleGridFocused())
         {
             FocusEditTextBox();
         }
@@ -8504,7 +8568,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SubtitleGridCopyPasteHelper.Cut(Window, Subtitles, selectedItems, SelectedSubtitleFormat);
+        await SubtitleGridCopyPasteHelper.Cut(Window, Subtitles, selectedItems, SelectedSubtitleFormat, _subtitle);
         Renumber();
         _updateAudioVisualizer = true;
         _shortcutManager.ClearKeys();
@@ -8519,7 +8583,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await SubtitleGridCopyPasteHelper.Copy(Window, selectedItems, SelectedSubtitleFormat);
+        await SubtitleGridCopyPasteHelper.Copy(Window, selectedItems, SelectedSubtitleFormat, _subtitle);
         _shortcutManager.ClearKeys();
     }
 
@@ -12090,6 +12154,36 @@ public partial class MainViewModel :
                typeName.Contains("TextInput");
     }
 
+    private bool IsSubtitleGridFocused()
+    {
+        var focusedElement = Window?.FocusManager?.GetFocusedElement();
+        if (focusedElement == null)
+        {
+            return false;
+        }
+
+        if (focusedElement == SubtitleGrid)
+        {
+            return true;
+        }
+
+        // Check if the focused element is a child of SubtitleGrid (e.g., DataGridRow, DataGridCell)
+        if (focusedElement is Avalonia.Visual visual)
+        {
+            var parent = visual.GetVisualParent();
+            while (parent != null)
+            {
+                if (parent == SubtitleGrid)
+                {
+                    return true;
+                }
+                parent = parent.GetVisualParent();
+            }
+        }
+
+        return false;
+    }
+
     private readonly Lock _onKeyDownHandlerLock = new();
 
     internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
@@ -12182,7 +12276,7 @@ public partial class MainViewModel :
                 }
             }
 
-            if (SubtitleGrid.IsFocused)
+            if (IsSubtitleGridFocused())
             {
                 if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Subtitles.Count > 0)
                 {

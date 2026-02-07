@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
 using AvaloniaEdit;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
@@ -99,12 +100,72 @@ public static partial class InitListViewAndEditBox
             Background = Brushes.Transparent,
             Child = vm.SubtitleGrid
         };
-        DragDrop.SetAllowDrop(dropHost, true);
-        dropHost.AddHandler(DragDrop.DragOverEvent, vm.SubtitleGridOnDragOver, RoutingStrategies.Bubble);
-        dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
         vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
+
+        var sourceViewTextEditor = new TextEditor
+        {
+            ShowLineNumbers = true,
+            WordWrap = false,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+
+        var inverseBooleanConverter = new InverseBooleanConverter();
+        sourceViewTextEditor.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSourceViewActive)));
+        sourceViewTextEditor.Bind(TextEditorExtensions.ScrollToLineProperty, new Binding(nameof(vm.SourceViewLineNumber)));
+
+        // Setup manual two-way binding for TextEditor since it doesn't support direct binding to Text property
+        var isUpdatingFromViewModel = false;
+        var isUpdatingFromUI = false;
+
+        sourceViewTextEditor.TextChanged += (sender, e) =>
+        {
+            if (isUpdatingFromViewModel)
+            {
+                return;
+            }
+
+            isUpdatingFromUI = true;
+            vm.SourceViewText = sourceViewTextEditor.Text;
+            isUpdatingFromUI = false;
+        };
+
+        vm.PropertyChanged += (sender, e) =>
+        {
+            if (e.PropertyName == nameof(vm.SourceViewText))
+            {
+                if (isUpdatingFromUI)
+                {
+                    return;
+                }
+
+                isUpdatingFromViewModel = true;
+                sourceViewTextEditor.Text = vm.SourceViewText ?? string.Empty;
+                isUpdatingFromViewModel = false;
+            }
+            else if (e.PropertyName == nameof(vm.IsSourceViewActive) && vm.IsSourceViewActive)
+            {
+                sourceViewTextEditor.Focus();
+            }
+        };
+
+        var contentPanel = new Grid
+        {
+            Children = { dropHost, sourceViewTextEditor }
+        };
+
+        dropHost.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSourceViewActive)) { Converter = inverseBooleanConverter });
+
+        var containerBorder = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = contentPanel
+        };
+        DragDrop.SetAllowDrop(containerBorder, true);
+        containerBorder.AddHandler(DragDrop.DragOverEvent, vm.SubtitleGridOnDragOver, RoutingStrategies.Bubble);
+        containerBorder.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
@@ -113,7 +174,6 @@ public static partial class InitListViewAndEditBox
         var notNullConverter = new NotNullConverter();
         var syntaxHighlightingConverter = new TextWithSubtitleSyntaxHighlightingConverter();
         var gapConverter = new DoubleToNoDecimalHideMaxConverter();
-        var inverseBooleanConverter = new InverseBooleanConverter();
         var textOneLineShortConverter = new TextOneLineShortConverter();
         var booleanToGridLengthConverter = new BooleanToGridLengthConverter();
         var booleanAndConverter = BooleanAndConverter.Instance;
@@ -425,9 +485,6 @@ public static partial class InitListViewAndEditBox
             Mode = BindingMode.TwoWay,
             Source = vm,
         };
-
-        Grid.SetRow(dropHost, 0);
-        mainGrid.Children.Add(dropHost);
 
         // Create a Flyout for the DataGrid
         var flyout = new MenuFlyout();
@@ -1357,6 +1414,8 @@ public static partial class InitListViewAndEditBox
 
         Grid.SetRow(editGrid, 1);
         mainGrid.Children.Add(editGrid);
+        Grid.SetRow(containerBorder, 0);
+        mainGrid.Children.Add(containerBorder);
 
 
         textEditGrid.ColumnDefinitions[1].Bind(ColumnDefinition.WidthProperty, new Binding(nameof(vm.ShowColumnOriginalText))
@@ -1454,7 +1513,7 @@ public static partial class InitListViewAndEditBox
             FontWeight = Se.Settings.Appearance.SubtitleTextBoxFontBold ? FontWeight.Bold : FontWeight.Normal,
             WordWrap = true,
             ShowLineNumbers = false,
-            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
             Focusable = true,
             Padding = new Thickness(6, 4, 4, 4),
