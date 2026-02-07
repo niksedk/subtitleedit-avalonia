@@ -16,7 +16,7 @@ public class ColorPickerWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Tools.ColorPickerTitle;
         CanResize = false;
-        SizeToContent = SizeToContent.WidthAndHeight;   
+        SizeToContent = SizeToContent.WidthAndHeight;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         vm.Window = this;
         DataContext = vm;
@@ -130,95 +130,95 @@ public class ColorPickerWindow : Window
         // Red slider
         var redSlider = new ColorChannelSlider
         {
-            Label = "R:",
+            Label = "R",
         };
         redSlider.Bind(ColorChannelSlider.ValueProperty, new Binding
         {
             Source = vm,
-            Path = "Red",
+            Path = nameof(vm.Red),
             Mode = BindingMode.TwoWay
         });
         redSlider.Bind(ColorChannelSlider.StartColorProperty, new Binding
         {
             Source = vm,
-            Path = "RedGradientStart",
+            Path = nameof(vm.RedGradientStart),
         });
         redSlider.Bind(ColorChannelSlider.EndColorProperty, new Binding
         {
             Source = vm,
-            Path = "RedGradientEnd",
+            Path = nameof(vm.RedGradientEnd),
         });
 
         // Green slider
         var greenSlider = new ColorChannelSlider
         {
-            Label = "G:",
+            Label = "G",
         };
         greenSlider.Bind(ColorChannelSlider.ValueProperty, new Binding
         {
             Source = vm,
-            Path = "Green",
+            Path = nameof(vm.Green),
             Mode = BindingMode.TwoWay
         });
         greenSlider.Bind(ColorChannelSlider.StartColorProperty, new Binding
         {
             Source = vm,
-            Path = "GreenGradientStart",
+            Path = nameof(vm.GreenGradientStart),
         });
         greenSlider.Bind(ColorChannelSlider.EndColorProperty, new Binding
         {
             Source = vm,
-            Path = "GreenGradientEnd",
+            Path = nameof(vm.GreenGradientEnd),
         });
 
         // Blue slider
         var blueSlider = new ColorChannelSlider
         {
-            Label = "B:",
+            Label = "B",
         };
         blueSlider.Bind(ColorChannelSlider.ValueProperty, new Binding
         {
             Source = vm,
-            Path = "Blue",
+            Path = nameof(vm.Blue),
             Mode = BindingMode.TwoWay
         });
         blueSlider.Bind(ColorChannelSlider.StartColorProperty, new Binding
         {
             Source = vm,
-            Path = "BlueGradientStart",
+            Path = nameof(vm.BlueGradientStart),
         });
         blueSlider.Bind(ColorChannelSlider.EndColorProperty, new Binding
         {
             Source = vm,
-            Path = "BlueGradientEnd",
+            Path = nameof(vm.BlueGradientEnd),
         });
 
         // Alpha slider
         var alphaSlider = new ColorChannelSlider
         {
-            Label = "A:",
+            Label = "A",
         };
         alphaSlider.Bind(ColorChannelSlider.ValueProperty, new Binding
         {
             Source = vm,
-            Path = "Alpha",
+            Path = nameof(vm.Alpha),
             Mode = BindingMode.TwoWay
         });
         alphaSlider.Bind(ColorChannelSlider.StartColorProperty, new Binding
         {
             Source = vm,
-            Path = "AlphaGradientStart",
+            Path = nameof(vm.AlphaGradientStart),
         });
         alphaSlider.Bind(ColorChannelSlider.EndColorProperty, new Binding
         {
             Source = vm,
-            Path = "AlphaGradientEnd",
+            Path = nameof(vm.AlphaGradientEnd),
         });
 
         // Hex input
         var hexLabel = new TextBlock
         {
-            Text = "Hex:",
+            Text = Se.Language.General.Hex,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 10, 10, 0),
         };
@@ -231,7 +231,7 @@ public class ColorPickerWindow : Window
         hexTextBox.Bind(TextBox.TextProperty, new Binding
         {
             Source = vm,
-            Path = "HexColor",
+            Path = nameof(vm.HexColor),
             Mode = BindingMode.TwoWay
         });
 

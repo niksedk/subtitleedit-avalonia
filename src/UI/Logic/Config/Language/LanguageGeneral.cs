@@ -617,6 +617,7 @@ public class LanguageGeneral
     public string Fade { get; set; }
     public string FileSavedToX { get; set; }
     public string ImageSaved { get; set; }
+    public string Hex { get; set; }
 
     public LanguageGeneral()
     {
@@ -1233,5 +1234,6 @@ public class LanguageGeneral
         Fade = "Fade";
         FileSavedToX = "File saved to {0}";
         ImageSaved = "Image saved";
+        Hex = "Hex";
     }
 }
