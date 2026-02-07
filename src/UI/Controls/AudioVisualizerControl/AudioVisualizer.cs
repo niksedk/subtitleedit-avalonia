@@ -600,6 +600,7 @@ public class AudioVisualizer : Control
             if (_isCtrlDown)
             {
                 OnToggleSelection?.Invoke(this, new ParagraphEventArgs(RelativeXPositionToSeconds(pos.X), p));
+                return;
             }
             else
             {
@@ -608,7 +609,6 @@ public class AudioVisualizer : Control
 
             _interactionMode = InteractionMode.None;
             _activeParagraph = null;
-            return;
         }
 
         var showContextMenu = false;
