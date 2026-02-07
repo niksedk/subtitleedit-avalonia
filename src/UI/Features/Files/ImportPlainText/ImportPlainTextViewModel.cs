@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
@@ -28,6 +29,26 @@ public partial class ImportPlainTextViewModel : ObservableObject
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isDeleteAllVisible;
     [ObservableProperty] private string _plainText;
+    [ObservableProperty] private bool _isAutoSplitText = true;
+    [ObservableProperty] private bool _isSplitAtBlankLines;
+    [ObservableProperty] private ObservableCollection<string> _lineBreaks;
+    [ObservableProperty] private string? _selectedLineBreak;
+    [ObservableProperty] private int _maxNumberOfLines = 2;
+    [ObservableProperty] private int _singleLineMaxLength = 42;
+    [ObservableProperty] private bool _splitAtBlankLinesSetting = true;
+    [ObservableProperty] private bool _removeLinesWithoutLetters;
+    [ObservableProperty] private bool _splitAtEndCharsSetting = true;
+    [ObservableProperty] private string _endChars = ".!?";
+    [ObservableProperty] private bool _generateTimeCodes = true;
+    [ObservableProperty] private bool _takeTimeFromCurrentFile;
+    [ObservableProperty] private int _gapBetweenSubtitles = 90;
+    [ObservableProperty] private bool _isAutoDuration = true;
+    [ObservableProperty] private bool _isFixedDuration;
+    [ObservableProperty] private int _fixedDuration = 2500;
+    [ObservableProperty] private ObservableCollection<string> _encodings;
+    [ObservableProperty] private string? _selectedEncoding;
+    [ObservableProperty] private bool _multipleFilesOneFileIsOneSubtitle;
+    [ObservableProperty] private string _previewSubtitlesModifiedText = "Preview - subtitles modified: 0";
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -53,6 +74,83 @@ public partial class ImportPlainTextViewModel : ObservableObject
         };
         SelectedSplitAtOption = SplitAtOptions[0];
         PlainText = string.Empty;
+
+        LineBreaks = new ObservableCollection<string> { "<br />", "|", "||" };
+        SelectedLineBreak = LineBreaks[0];
+
+        Encodings = new ObservableCollection<string> { "UTF-8", "UTF-8 with BOM", "UTF-16", "ANSI" };
+        SelectedEncoding = Encodings[1];
+    }
+
+    partial void OnSelectedSplitAtOptionChanged(string? value) => GeneratePreview();
+    partial void OnPlainTextChanged(string value) => GeneratePreview();
+    partial void OnIsAutoSplitTextChanged(bool value) => GeneratePreview();
+    partial void OnIsSplitAtBlankLinesChanged(bool value) => GeneratePreview();
+    partial void OnSelectedLineBreakChanged(string? value) => GeneratePreview();
+    partial void OnMaxNumberOfLinesChanged(int value) => GeneratePreview();
+    partial void OnSingleLineMaxLengthChanged(int value) => GeneratePreview();
+    partial void OnSplitAtBlankLinesSettingChanged(bool value) => GeneratePreview();
+    partial void OnRemoveLinesWithoutLettersChanged(bool value) => GeneratePreview();
+    partial void OnSplitAtEndCharsSettingChanged(bool value) => GeneratePreview();
+    partial void OnEndCharsChanged(string value) => GeneratePreview();
+    partial void OnGenerateTimeCodesChanged(bool value) => GeneratePreview();
+    partial void OnGapBetweenSubtitlesChanged(int value) => GeneratePreview();
+    partial void OnIsAutoDurationChanged(bool value) => GeneratePreview();
+    partial void OnIsFixedDurationChanged(bool value) => GeneratePreview();
+    partial void OnFixedDurationChanged(int value) => GeneratePreview();
+
+    [RelayCommand]
+    private void Refresh() => GeneratePreview();
+
+    private void GeneratePreview()
+    {
+        if (string.IsNullOrEmpty(PlainText))
+        {
+            Subtitles.Clear();
+            PreviewSubtitlesModifiedText = "Preview - subtitles modified: 0";
+            return;
+        }
+
+        var splitAtBlankLines = IsSplitAtBlankLines || (IsAutoSplitText && SplitAtBlankLinesSetting);
+        var numberOfLines = -1;
+        if (SelectedSplitAtOption == Se.Language.File.Import.OneLineIsOneSubtitle)
+        {
+            numberOfLines = 1;
+        }
+        else if (SelectedSplitAtOption == Se.Language.File.Import.TwoLinesAreOneSubtitle)
+        {
+            numberOfLines = 2;
+        }
+
+        var text = PlainText;
+        if (!string.IsNullOrEmpty(SelectedLineBreak))
+        {
+            var delimiters = SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var d in delimiters)
+            {
+                text = text.Replace(d, Environment.NewLine);
+            }
+        }
+
+        var endChars = SplitAtEndCharsSetting ? EndChars : string.Empty;
+        var importer = new PlainTextImporter(splitAtBlankLines, RemoveLinesWithoutLetters, numberOfLines, endChars, SingleLineMaxLength, Se.Settings.General.Language);
+        var lines = importer.ImportAutoSplit(text.SplitToLines());
+
+        var list = new List<SubtitleLineViewModel>();
+        double startTime = 0;
+        var format = new SubRip();
+        foreach (var line in lines)
+        {
+            var duration = IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(line) : FixedDuration;
+            var p = new Paragraph(line, startTime, startTime + duration);
+            list.Add(new SubtitleLineViewModel(p, format));
+            if (GenerateTimeCodes)
+            {
+                startTime += duration + GapBetweenSubtitles;
+            }
+        }
+        Subtitles = new ObservableCollection<SubtitleLineViewModel>(list);
+        PreviewSubtitlesModifiedText = $"Preview - subtitles modified: {list.Count}";
     }
 
     [RelayCommand]
@@ -77,9 +175,22 @@ public partial class ImportPlainTextViewModel : ObservableObject
         }
 
         var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.ChooseImageFiles, Se.Language.General.TextFiles, ".txt", Se.Language.General.TextFiles);
-        if (!string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
             return;
+        }
+
+        try
+        {
+            PlainText = await File.ReadAllTextAsync(fileName);
+            // Default split behavior or preserve from UI? 
+            // The setter of PlainText will trigger GeneratePreview via OnPlainTextChanged
+        }
+        catch (Exception ex)
+        {
+            // Handle error (log or show message? MainViewModel is where we have Window usually)
+            // For now just ignore or print to debug
+            System.Diagnostics.Debug.WriteLine(ex.Message);
         }
     }
 

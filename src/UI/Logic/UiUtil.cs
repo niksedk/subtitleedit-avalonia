@@ -928,13 +928,7 @@ public static class UiUtil
         return control;
     }
 
-    public static Button WithHorizontalAlignmentStretch(this Button control)
-    {
-        control.HorizontalAlignment = HorizontalAlignment.Stretch;
-        return control;
-    }
-
-    public static TextBox WithHorizontalAlignmentStretch(this TextBox control)
+    public static T WithHorizontalAlignmentStretch<T>(this T control) where T : Control
     {
         control.HorizontalAlignment = HorizontalAlignment.Stretch;
         return control;

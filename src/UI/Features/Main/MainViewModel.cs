@@ -1909,6 +1909,15 @@ public partial class MainViewModel :
         }
 
         var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>();
+        if (result.OkPressed)
+        {
+            foreach (var item in result.Subtitles)
+            {
+                Subtitles.Add(item);
+            }
+            Renumber();
+            _updateAudioVisualizer = true;
+        }
     }
 
     [RelayCommand]
