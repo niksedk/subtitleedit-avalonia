@@ -21,8 +21,8 @@ public partial class ImportPlainTextViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
-    [ObservableProperty] private ObservableCollection<string> _files;
-    [ObservableProperty] private string? _selectedFile;
+    [ObservableProperty] private ObservableCollection<DisplayFile> _files;
+    [ObservableProperty] private DisplayFile? _selectedFile;
     [ObservableProperty] private ObservableCollection<string> _splitAtOptions;
     [ObservableProperty] private string _selectedSplitAtOption;
     [ObservableProperty] private bool _isImportFilesVisible;
@@ -47,7 +47,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         _fileHelper = fileHelper;
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
-        Files = new ObservableCollection<string>();
+        Files = new ObservableCollection<DisplayFile>();
         SplitAtOptions = new ObservableCollection<string>
         {
             Se.Language.General.Auto,
@@ -71,20 +71,23 @@ public partial class ImportPlainTextViewModel : ObservableObject
             var subtitles = new List<SubtitleLineViewModel>();
             if (IsImportFilesVisible)
             {
-                subtitles = UpdatePreviewFiles(SelectedSplitAtOption, Files.ToList());
+                subtitles = UpdatePreviewFiles(Files.ToList());
             }
             else
             {
                 subtitles = UpdatePreviewText(SelectedSplitAtOption, PlainText);
             }
 
-            subtitles = TimeCodeCalculator.CalculateTimeCodes(
-                subtitles, 
-                Se.Settings.General.SubtitleOptimalCharactersPerSeconds, 
-                Se.Settings.General.SubtitleMaximumCharactersPerSeconds,
-                Se.Settings.General.MinimumMillisecondsBetweenLines, 
-                Se.Settings.General.SubtitleMinimumDisplayMilliseconds,
-                Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
+            if (!HasTimeCodes(subtitles))
+            {
+                subtitles = TimeCodeCalculator.CalculateTimeCodes(
+                    subtitles,
+                    Se.Settings.General.SubtitleOptimalCharactersPerSeconds,
+                    Se.Settings.General.SubtitleMaximumCharactersPerSeconds,
+                    Se.Settings.General.MinimumMillisecondsBetweenLines,
+                    Se.Settings.General.SubtitleMinimumDisplayMilliseconds,
+                    Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
+            }
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -101,9 +104,38 @@ public partial class ImportPlainTextViewModel : ObservableObject
         }
     }
 
-    private List<SubtitleLineViewModel> UpdatePreviewFiles(string splitAtOption, List<string> list)
+    private bool HasTimeCodes(List<SubtitleLineViewModel> subtitles)
     {
-        return new List<SubtitleLineViewModel>();
+        return subtitles.Any(s => s.StartTime != TimeSpan.Zero || s.EndTime != TimeSpan.Zero);
+    }
+
+    private static List<SubtitleLineViewModel> UpdatePreviewFiles(List<DisplayFile> list)
+    {
+        var subtitles = new List<SubtitleLineViewModel>();
+
+        foreach (var file in list)
+        {
+            try
+            {
+                var text = File.ReadAllText(file.FullPath);
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    var (start, end) = file.GetTimeCodes();
+                    subtitles.Add(new SubtitleLineViewModel
+                    {
+                        Text = text.Trim(),
+                        StartTime = start,
+                        EndTime = end,
+                    });
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        return subtitles;
     }
 
     private static List<SubtitleLineViewModel> UpdatePreviewText(string splitAtOption, string plainText)
@@ -185,6 +217,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
         var text = await File.ReadAllTextAsync(fileName);
         PlainText = text;
+        _dirty = true;
     }
 
     [RelayCommand]
@@ -203,8 +236,12 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
         foreach (var fileName in fileNames)
         {
-
+            var fileInfo = new FileInfo(fileName);
+            var displayFile = new DisplayFile(fileName, fileInfo.Length);
+            Files.Add(displayFile);
         }
+
+        _dirty = true;
     }
 
     private void Close()
@@ -260,10 +297,12 @@ public partial class ImportPlainTextViewModel : ObservableObject
                             continue;
                         }
 
-                        //var importImageItem = new ImportImageItem(path);
-                        //Images.Add(importImageItem);
+                        var fileInfo = new FileInfo(path);
+                        var displayFile = new DisplayFile(path, fileInfo.Length);
+                        Files.Add(displayFile);
                     }
                 }
+                _dirty = true;
             });
         }
     }
@@ -274,6 +313,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
     }
 
     internal void SplitAtOptionChanged()
+    {
+        _dirty = true;
+    }
+
+    internal void CheckBoxImportFilesChanged()
     {
         _dirty = true;
     }

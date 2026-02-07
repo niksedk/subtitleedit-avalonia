@@ -51,6 +51,7 @@ public class ImportPlainTextWindow : Window
         var buttonImportFile = UiUtil.MakeButton(Se.Language.General.ImportDotDotDot, vm.FileImportCommand).WithMinWidth(110);
         buttonImportFile.Bind(Button.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
         var checkBoxImportFiles = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.IsImportFilesVisible));
+        checkBoxImportFiles.IsCheckedChanged += (s, e) => vm.CheckBoxImportFilesChanged();
         var panelImport = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -111,6 +112,7 @@ public class ImportPlainTextWindow : Window
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
         textBox.Bind(TextBox.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
         textBox.TextChanged += (s, e) => vm.PlainTextChanged();
+        var sizeConverter = new FileSizeConverter();
 
         var dataGrid = new DataGrid
         {
@@ -130,7 +132,7 @@ public class ImportPlainTextWindow : Window
                 {
                     Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.Number)),
+                    Binding = new Binding(nameof(DisplayFile.FileName)),
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
@@ -138,7 +140,7 @@ public class ImportPlainTextWindow : Window
                 {
                     Header = Se.Language.General.Size,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)),
+                    Binding = new Binding(nameof(DisplayFile.Size)) { Converter = sizeConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto),
                 },
