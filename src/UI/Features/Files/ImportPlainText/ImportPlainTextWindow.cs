@@ -110,6 +110,7 @@ public class ImportPlainTextWindow : Window
         };
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
         textBox.Bind(TextBox.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
+        textBox.TextChanged += (s, e) => vm.PlainTextChanged();
 
         var dataGrid = new DataGrid
         {
@@ -120,7 +121,7 @@ public class ImportPlainTextWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Width = double.NaN,
-            Height = double.NaN,
+            Height = 348,
             DataContext = vm,
             ItemsSource = vm.Files,
             Columns =
@@ -147,10 +148,15 @@ public class ImportPlainTextWindow : Window
         dataGrid.Bind(DataGrid.IsVisibleProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm });
 
         grid.Add(textBox, 0);
-        grid.Add(dataGrid, 0);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(dataGrid), 0);
         grid.Add(MakeControlsView(vm), 0, 1);
 
         return grid;
+    }
+
+    private static void TextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    {
+        throw new System.NotImplementedException();
     }
 
     private static Border MakeControlsView(ImportPlainTextViewModel vm)
@@ -182,6 +188,7 @@ public class ImportPlainTextWindow : Window
         comboBoxSplit.Bind(ComboBox.ItemsSourceProperty, new Binding(nameof(vm.SplitAtOptions)) { Source = vm });
         comboBoxSplit.Bind(ComboBox.SelectedItemProperty, new Binding(nameof(vm.SelectedSplitAtOption)) { Source = vm, Mode = BindingMode.TwoWay });
         comboBoxSplit.Bind(ComboBox.IsEnabledProperty, new Binding(nameof(vm.IsImportFilesVisible)) { Source = vm, Converter = new InverseBooleanConverter() });
+        comboBoxSplit.SelectionChanged += (s, e) => vm.SplitAtOptionChanged();
 
         var panelSplit = UiUtil.MakeHorizontalPanel(labelSplit, comboBoxSplit);
 
@@ -266,7 +273,6 @@ public class ImportPlainTextWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSubtitle)) { Source = vm });
-        dataGrid.KeyDown += vm.AttachmentsDataGridKeyDown;
 
         // hack to make drag and drop work on the DataGrid - also on empty rows
         var dropHost = new Border
@@ -284,27 +290,7 @@ public class ImportPlainTextWindow : Window
         };
 
         var flyout = new MenuFlyout();
-       // flyout.Opening += vm.ImagesContextMenuOpening;
         dropHost.ContextFlyout = flyout;
-
-        var menuItemDelete = new MenuItem
-        {
-            Header = Se.Language.General.Remove,
-            DataContext = vm,
-            Command = vm.ImageRemoveCommand,
-        };
-        menuItemDelete.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteVisible)) { Source = vm });
-        flyout.Items.Add(menuItemDelete);
-
-        var menuItemClear = new MenuItem
-        {
-            Header = Se.Language.General.Clear,
-            DataContext = vm,
-            //Command = vm.AttachemntsRemoveAllCommand,
-        };
-        menuItemClear.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsDeleteAllVisible)) { Source = vm });
-        flyout.Items.Add(menuItemClear);
-
         var menuItemImport = new MenuItem
         {
             Header = Se.Language.General.ImportDotDotDot,

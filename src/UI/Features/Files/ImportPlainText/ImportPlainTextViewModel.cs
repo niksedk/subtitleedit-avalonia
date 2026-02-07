@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
 
@@ -23,7 +24,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _files;
     [ObservableProperty] private string? _selectedFile;
     [ObservableProperty] private ObservableCollection<string> _splitAtOptions;
-    [ObservableProperty] private string? _selectedSplitAtOption;
+    [ObservableProperty] private string _selectedSplitAtOption;
     [ObservableProperty] private bool _isImportFilesVisible;
     [ObservableProperty] private bool _isDeleteVisible;
     [ObservableProperty] private bool _isDeleteAllVisible;
@@ -38,6 +39,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
         "*.txt",
         "*.rtf" ,
     };
+    private bool _dirty;
+    private readonly System.Timers.Timer _timerUpdatePreview;
+
 
     public ImportPlainTextViewModel(IFileHelper fileHelper)
     {
@@ -53,6 +57,101 @@ public partial class ImportPlainTextViewModel : ObservableObject
         };
         SelectedSplitAtOption = SplitAtOptions[0];
         PlainText = string.Empty;
+
+        _timerUpdatePreview = new Timer();
+        _timerUpdatePreview.Interval = 250;
+        _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
+        _timerUpdatePreview.Start();
+    }
+
+    private void TimerUpdatePreviewElapsed(object? sender, ElapsedEventArgs e)
+    {
+        if (_dirty)
+        {
+            var subtitles = new List<SubtitleLineViewModel>();  
+            if (IsImportFilesVisible)
+            {
+                subtitles = UpdatePreviewFiles(SelectedSplitAtOption, Files.ToList());
+            }
+            else
+            {
+                subtitles = UpdatePreviewText(SelectedSplitAtOption, PlainText);
+            }
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                Subtitles.Clear();
+                for (int i = 0; i < subtitles.Count; i++)
+                {
+                    var subtitle = subtitles[i];
+                    subtitle.Number = i + 1;    
+                    Subtitles.Add(subtitle);
+                }
+            }); 
+
+            _dirty = false;
+        }
+    }
+
+    private List<SubtitleLineViewModel> UpdatePreviewFiles(string splitAtOption, List<string> list)
+    {
+        return new List<SubtitleLineViewModel>();
+    }
+
+    private List<SubtitleLineViewModel> UpdatePreviewText(string splitAtOption, string plainText)
+    {
+        var subtitles = new List<SubtitleLineViewModel>();
+
+        if (splitAtOption == Se.Language.General.Auto)
+        {
+            return AutomaticSplit(plainText, Se.Settings.General.MaxNumberOfLines, Se.Settings.General.SubtitleLineMaximumLength);
+        }
+        else if (splitAtOption == Se.Language.File.Import.BlankLines)
+        {
+            var blocks = plainText.SplitToLines();
+            foreach (var block in blocks)
+            {
+                if (!string.IsNullOrWhiteSpace(block))
+                {
+                    subtitles.Add(new SubtitleLineViewModel { Text = block.Trim() });
+                }
+            }
+        }
+        else if (splitAtOption == Se.Language.File.Import.OneLineIsOneSubtitle)
+        {
+            var lines = plainText.SplitToLines();
+            foreach (var line in lines)
+            {
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    subtitles.Add(new SubtitleLineViewModel { Text = line.Trim() });
+                }
+            }
+        }
+        else if (splitAtOption == Se.Language.File.Import.TwoLinesAreOneSubtitle)
+        {
+            var lines = plainText.SplitToLines();
+            for (int i = 0; i < lines.Count; i += 2)
+            {
+                var text = lines[i].Trim();
+                if (i + 1 < lines.Count)
+                {
+                    text += Environment.NewLine + lines[i + 1].Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    subtitles.Add(new SubtitleLineViewModel { Text = text });
+                }
+            }
+        }
+
+        return subtitles;
+    }
+
+    private List<SubtitleLineViewModel> AutomaticSplit(string plainText, int maxNumberOfLines, int singleLineMaximumLength)
+    {
+        // split into subtitle text lines. Make split at blank lines, but if there are no blank lines, split at max number of lines or max length per line
+        // prefer to split at punctuation (period, question mark, exclamation mark, etc) if possible. Also prefer to split at comma if near the max length. 
     }
 
     [RelayCommand]
@@ -77,10 +176,13 @@ public partial class ImportPlainTextViewModel : ObservableObject
         }
 
         var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.ChooseImageFiles, Se.Language.General.TextFiles, ".txt", Se.Language.General.TextFiles);
-        if (!string.IsNullOrEmpty(fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
+
+        var text = await File.ReadAllTextAsync(fileName);
+        PlainText = text;
     }
 
     [RelayCommand]
@@ -103,46 +205,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void ImageRemove()
-    {
-        //var selectedStyle = SelectedImage;
-        //if (selectedStyle == null)
-        //{
-        //    return;
-        //}
-
-        //Dispatcher.UIThread.Post(async void () =>
-        //{
-        //    var answer = await MessageBox.Show(
-        //    Window!,
-        //    "Remove image?",
-        //    $"Do you want to remove {selectedStyle.FileName}?",
-        //    MessageBoxButtons.YesNoCancel,
-        //    MessageBoxIcon.Question);
-
-        //    if (answer != MessageBoxResult.Yes)
-        //    {
-        //        return;
-        //    }
-
-        //    if (selectedStyle != null)
-        //    {
-        //        var idx = Images.IndexOf(selectedStyle);
-        //        Images.Remove(selectedStyle);
-        //        SelectedImage = null;
-        //        if (Images.Count > 0)
-        //        {
-        //            if (idx >= Images.Count)
-        //            {
-        //                idx = Images.Count - 1;
-        //            }
-        //            SelectedImage = Images[idx];
-        //        }
-        //    }
-        //});
-    }
-
     private void Close()
     {
         Dispatcher.UIThread.Post(() =>
@@ -156,15 +218,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         if (e.Key == Key.Escape)
         {
             Close();
-        }
-    }
-
-    internal void AttachmentsDataGridKeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete && SelectedFile != null)
-        {
-            ImageRemove();
-            e.Handled = true;
         }
     }
 
@@ -211,5 +264,15 @@ public partial class ImportPlainTextViewModel : ObservableObject
                 }
             });
         }
+    }
+
+    internal void PlainTextChanged()
+    {
+        _dirty = true;
+    }
+
+    internal void SplitAtOptionChanged()
+    {
+        _dirty = true;
     }
 }
