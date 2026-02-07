@@ -758,9 +758,9 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Measure actual bounds by scanning for non-transparent pixels
         var bounds = MeasureActualBounds(tempBitmap);
 
-        // Calculate final bitmap size
-        var finalWidth = (int)Math.Ceiling(bounds.Width + effectsPadding * 2 + paddingLeftRight * 2);
-        var finalHeight = (int)Math.Ceiling(bounds.Height + effectsPadding * 2 + paddingTopBottom * 2);
+        // Calculate final bitmap size (bounds already includes effects, just add user padding)
+        var finalWidth = (int)Math.Ceiling(bounds.Width + paddingLeftRight * 2);
+        var finalHeight = (int)Math.Ceiling(bounds.Height + paddingTopBottom * 2);
 
         // Ensure minimum size
         finalWidth = Math.Max(finalWidth, 1);
@@ -781,18 +781,20 @@ public partial class ExportImageBasedViewModel : ObservableObject
             };
 
             var boxRect = new SKRect(
-                effectsPadding,
-                effectsPadding,
-                finalWidth - effectsPadding,
-                finalHeight - effectsPadding
+                0,
+                0,
+                finalWidth,
+                finalHeight
             );
             var cornerRadius = (float)ip.BackgroundCornerRadius;
             canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
         }
 
-        // Render text to final bitmap
-        textStartX = effectsPadding + paddingLeftRight;
-        textStartY = effectsPadding + paddingTopBottom + Math.Abs(fontMetrics.Ascent);
+        // Render text to final bitmap - offset accounts for where effects start
+        var offsetX = bounds.Left - (effectsPadding + paddingLeftRight);
+        var offsetY = bounds.Top - (effectsPadding + paddingTopBottom);
+        textStartX = paddingLeftRight - offsetX;
+        textStartY = paddingTopBottom + Math.Abs(fontMetrics.Ascent) - offsetY;
 
         RenderTextToCanvas(canvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
             textStartX, textStartY, baseLineHeight, lineSpacing, effectsPadding, paddingLeftRight,
