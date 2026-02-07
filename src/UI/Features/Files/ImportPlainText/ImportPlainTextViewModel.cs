@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
+namespace Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 
 public partial class ImportPlainTextViewModel : ObservableObject
 {
@@ -68,7 +68,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         if (_dirty)
         {
-            var subtitles = new List<SubtitleLineViewModel>();  
+            var subtitles = new List<SubtitleLineViewModel>();
             if (IsImportFilesVisible)
             {
                 subtitles = UpdatePreviewFiles(SelectedSplitAtOption, Files.ToList());
@@ -78,16 +78,24 @@ public partial class ImportPlainTextViewModel : ObservableObject
                 subtitles = UpdatePreviewText(SelectedSplitAtOption, PlainText);
             }
 
+            subtitles = TimeCodeCalculator.CalculateTimeCodes(
+                subtitles, 
+                Se.Settings.General.SubtitleOptimalCharactersPerSeconds, 
+                Se.Settings.General.SubtitleMaximumCharactersPerSeconds,
+                Se.Settings.General.MinimumMillisecondsBetweenLines, 
+                Se.Settings.General.SubtitleMinimumDisplayMilliseconds,
+                Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
+
             Dispatcher.UIThread.Post(() =>
             {
                 Subtitles.Clear();
                 for (int i = 0; i < subtitles.Count; i++)
                 {
                     var subtitle = subtitles[i];
-                    subtitle.Number = i + 1;    
+                    subtitle.Number = i + 1;
                     Subtitles.Add(subtitle);
                 }
-            }); 
+            });
 
             _dirty = false;
         }
@@ -98,13 +106,13 @@ public partial class ImportPlainTextViewModel : ObservableObject
         return new List<SubtitleLineViewModel>();
     }
 
-    private List<SubtitleLineViewModel> UpdatePreviewText(string splitAtOption, string plainText)
+    private static List<SubtitleLineViewModel> UpdatePreviewText(string splitAtOption, string plainText)
     {
         var subtitles = new List<SubtitleLineViewModel>();
 
         if (splitAtOption == Se.Language.General.Auto)
         {
-            return AutomaticSplit(plainText, Se.Settings.General.MaxNumberOfLines, Se.Settings.General.SubtitleLineMaximumLength);
+            return PlainTextSplitter.AutomaticSplit(plainText, Se.Settings.General.MaxNumberOfLines, Se.Settings.General.SubtitleLineMaximumLength);
         }
         else if (splitAtOption == Se.Language.File.Import.BlankLines)
         {
@@ -146,12 +154,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         }
 
         return subtitles;
-    }
-
-    private List<SubtitleLineViewModel> AutomaticSplit(string plainText, int maxNumberOfLines, int singleLineMaximumLength)
-    {
-        // split into subtitle text lines. Make split at blank lines, but if there are no blank lines, split at max number of lines or max length per line
-        // prefer to split at punctuation (period, question mark, exclamation mark, etc) if possible. Also prefer to split at comma if near the max length. 
     }
 
     [RelayCommand]

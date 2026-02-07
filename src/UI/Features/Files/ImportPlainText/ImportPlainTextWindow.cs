@@ -9,7 +9,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 
-namespace Nikse.SubtitleEdit.Features.Files.ImportImages;
+namespace Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 
 public class ImportPlainTextWindow : Window
 {

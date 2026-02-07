@@ -44,6 +44,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
+using Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
@@ -1891,6 +1892,15 @@ public partial class MainViewModel :
         }
 
         var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>();
+
+        if (!result.OkPressed || result.Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        _subtitleFileName = string.Empty;
+        ResetSubtitle();
+        Subtitles.AddRange(result.Subtitles);
     }
 
     [RelayCommand]
@@ -1912,7 +1922,6 @@ public partial class MainViewModel :
         {
             _subtitleFileName = string.Empty;
             ResetSubtitle();
-            Subtitles.Clear();
             Subtitles.AddRange(ocrResult.OcredSubtitle);
         }
     }
@@ -11091,29 +11100,32 @@ public partial class MainViewModel :
             var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
             if (AudioVisualizer != null)
             {
-                AudioVisualizer.WavePeaks = wavePeaks;
-
-                if (IsSmpteTimingEnabled)
+                Dispatcher.UIThread.Post(() => 
                 {
-                    AudioVisualizer.UseSmpteDropFrameTime();
-                }
+                    AudioVisualizer.WavePeaks = wavePeaks;
 
-                var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
-                if (spectrogram != null)
-                {
-                    spectrogram.Load();
-                    AudioVisualizer.SetSpectrogram(spectrogram);
-                }
+                    if (IsSmpteTimingEnabled)
+                    {
+                        AudioVisualizer.UseSmpteDropFrameTime();
+                    }
 
-                InitializeWaveformDisplayMode();
+                    var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+                    if (spectrogram != null)
+                    {
+                        spectrogram.Load();
+                        AudioVisualizer.SetSpectrogram(spectrogram);
+                    }
 
-                AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
-                if (AudioVisualizer.ShotChanges.Count == 0)
-                {
-                    ExtractShotChanges(videoFileName, trackNumber);
-                }
+                    InitializeWaveformDisplayMode();
 
-                _updateAudioVisualizer = true;
+                    AudioVisualizer.ShotChanges = ShotChangesHelper.FromDisk(videoFileName);
+                    if (AudioVisualizer.ShotChanges.Count == 0)
+                    {
+                        ExtractShotChanges(videoFileName, trackNumber);
+                    }
+
+                    _updateAudioVisualizer = true;
+                });
             }
         }
     }
