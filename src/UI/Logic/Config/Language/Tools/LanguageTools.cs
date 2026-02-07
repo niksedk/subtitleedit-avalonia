@@ -25,6 +25,7 @@ public class LanguageTools
     public string FilterLayersTitle { get; set; }
     public string PickSubtitleFormat { get; set; }
     public string PickLayerTitle { get; set; }
+    public string RecentColors { get; set; }
 
     public LanguageTools()
     {
@@ -34,5 +35,6 @@ public class LanguageTools
         FilterLayersTitle = "Filter layers for display";
         PickSubtitleFormat = "Choose subtitle format";
         PickLayerTitle = "Set layer";
+        RecentColors = "Recent colors";
     }
 }

@@ -8,7 +8,7 @@ using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Features.Shared.PickColor;
+using Nikse.SubtitleEdit.Features.Shared.ColorPicker;
 using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -422,7 +422,7 @@ public partial class ShortcutsViewModel : ObservableObject
 
         if (node.ShortCut.Action == MainViewModel.SetColor1Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color1);
             });
@@ -433,7 +433,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor2Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color2);
             });
@@ -444,7 +444,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor3Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color3);
             });
@@ -455,7 +455,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor4Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color4);
             });
@@ -466,7 +466,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor5Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color5);
             });
@@ -477,7 +477,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor6Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color6);
             });
@@ -488,7 +488,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor7Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color7);
             });
@@ -499,7 +499,7 @@ public partial class ShortcutsViewModel : ObservableObject
         }
         else if (node.ShortCut.Action == MainViewModel.SetColor8Command)
         {
-            var result = await _windowService.ShowDialogAsync<PickColorWindow, PickColorViewModel>(Window, vm =>
+            var result = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(Window, vm =>
             {
                 vm.Initialize(_color8);
             });

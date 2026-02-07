@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -52,6 +53,15 @@ public class SeTools
     public decimal BinEditOutlineWidth { get; set; }
     public decimal BinEditShadowWidth { get; set; }
 
+    public string LastColorPickerColor { get; set; }
+    public string LastColorPickerColor1 { get; set; }
+    public string LastColorPickerColor2 { get; set; }
+    public string LastColorPickerColor3 { get; set; }
+    public string LastColorPickerColor4 { get; set; }
+    public string LastColorPickerColor5 { get; set; }
+    public string LastColorPickerColor6 { get; set; }
+    public string LastColorPickerColor7 { get; set; }
+
     public SeTools()
     {
         OllamaPrompt = string.Empty;
@@ -84,5 +94,14 @@ public class SeTools
         BinEditBackgroundColor = Colors.Transparent.FromColorToHex();
         BinEditOutlineWidth = 2;
         BinEditShadowWidth = 1;
+
+        LastColorPickerColor = Colors.Yellow.FromColorToHex();
+        LastColorPickerColor1 = Colors.Red.FromColorToHex();
+        LastColorPickerColor2 = Colors.Green.FromColorToHex();
+        LastColorPickerColor3 = Colors.Blue.FromColorToHex();
+        LastColorPickerColor4 = Colors.White.FromColorToHex();
+        LastColorPickerColor5 = Colors.Black.FromColorToHex();
+        LastColorPickerColor6 = Colors.Cyan.FromColorToHex();
+        LastColorPickerColor7 = Colors.Orange.FromColorToHex(); 
     }
 }

@@ -60,13 +60,13 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.AddToNamesList;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit;
 using Nikse.SubtitleEdit.Features.Shared.Bookmarks;
+using Nikse.SubtitleEdit.Features.Shared.ColorPicker;
 using Nikse.SubtitleEdit.Features.Shared.ColumnPaste;
 using Nikse.SubtitleEdit.Features.Shared.ErrorList;
 using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 using Nikse.SubtitleEdit.Features.Shared.GoToLineNumber;
 using Nikse.SubtitleEdit.Features.Shared.MediaInfoView;
 using Nikse.SubtitleEdit.Features.Shared.PickAlignment;
-using Nikse.SubtitleEdit.Features.Shared.PickColor;
 using Nikse.SubtitleEdit.Features.Shared.PickFontName;
 using Nikse.SubtitleEdit.Features.Shared.PickLayer;
 using Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
@@ -6060,7 +6060,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>();
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>();
         if (!result.OkPressed)
         {
             return;
@@ -7484,7 +7484,7 @@ public partial class MainViewModel :
         var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
         var selectionLength = selectionEnd - selectionStart;
 
-        var result = await ShowDialogAsync<PickColorWindow, PickColorViewModel>();
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>();
         if (!result.OkPressed)
         {
             return;
