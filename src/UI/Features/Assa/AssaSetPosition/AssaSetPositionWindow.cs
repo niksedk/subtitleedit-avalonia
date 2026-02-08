@@ -44,6 +44,13 @@ public class AssaSetPositionWindow : Window
         // label
         var label = UiUtil.MakeLabel("Set position of subtitle");
 
+        // Create a grid to hold the video/screenshot and overlay
+        var videoGrid = new Grid
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+
         // bitmap
         var bitmapImage = new Image
         {
@@ -53,6 +60,80 @@ public class AssaSetPositionWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
 
+        // Add background image to video grid
+        videoGrid.Children.Add(bitmapImage);
+
+        // subtitle bitmap overlay
+        var bitmapTextImage = new Image
+        {
+            [!Image.SourceProperty] = new Binding(nameof(vm.ScreenshotOverlayText)),
+            Stretch = Stretch.None,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
+        };
+
+        // Add overlay to video grid
+        videoGrid.Children.Add(bitmapTextImage);
+
+        // Store references
+        vm.ScreenshotImage = bitmapImage;
+        vm.ScreenshotOverlayImage = bitmapTextImage;
+        vm.VideoGrid = videoGrid;
+
+        // Update position when screenshot image size changes
+        bitmapImage.SizeChanged += (_, _) => vm.UpdateOverlayPosition();
+
+        // Implement mouse dragging for overlay image
+        Point? dragStartPoint = null;
+        int originalX = 0;
+        int originalY = 0;
+
+        bitmapTextImage.PointerPressed += (_, e) =>
+        {
+            if (e.GetCurrentPoint(bitmapTextImage).Properties.IsLeftButtonPressed)
+            {
+                dragStartPoint = e.GetPosition(videoGrid);
+                originalX = vm.ScreenshotX;
+                originalY = vm.ScreenshotY;
+                e.Handled = true;
+            }
+        };
+
+        bitmapTextImage.PointerMoved += (_, e) =>
+        {
+            if (dragStartPoint.HasValue && vm.ScreenshotOverlayText != null)
+            {
+                var currentPoint = e.GetPosition(videoGrid);
+                var delta = currentPoint - dragStartPoint.Value;
+
+                // Convert screen delta to subtitle coordinate delta (inverse of scale)
+                var screenshotImageWidth = bitmapImage.Bounds.Width;
+                if (screenshotImageWidth > 0 && vm.TargetWidth > 0)
+                {
+                    var scale = screenshotImageWidth / vm.TargetWidth;
+                    var deltaX = (int)(delta.X / scale);
+                    var deltaY = (int)(delta.Y / scale);
+
+                    vm.ScreenshotX = originalX + deltaX;
+                    vm.ScreenshotY = originalY + deltaY;
+
+                    vm.UpdateOverlayPosition();
+                }
+
+                e.Handled = true;
+            }
+        };
+
+        bitmapTextImage.PointerReleased += (_, e) =>
+        {
+            if (dragStartPoint.HasValue)
+            {
+                dragStartPoint = null;
+                e.Handled = true;
+            }
+        };
+
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -60,7 +141,7 @@ public class AssaSetPositionWindow : Window
 
 
         grid.Add(label, 0);
-        grid.Add(bitmapImage, 1);
+        grid.Add(videoGrid, 1);
         grid.Add(panelButtons, 3);
 
         Content = grid;
