@@ -93,6 +93,7 @@ public class ColorChannelSlider : Grid
             IsSnapToTickEnabled = true,
             Background = Brushes.Transparent,
             Margin = new Thickness(0, -2, 0, 0),
+            Foreground = new SolidColorBrush(Color.FromRgb(240, 240, 240)), // Light gray thumb
         };
         _slider.ValueChanged += (s, e) =>
         {
