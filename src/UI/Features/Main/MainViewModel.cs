@@ -920,9 +920,15 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaSetPosition()
     {
+        var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
+        if (selectedItem == null)
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaSetPositionWindow, AssaSetPositionViewModel>(vm =>
         {
-            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(_subtitle, selectedItem, _videoFileName, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
         });
 
         if (result.OkPressed)
@@ -11100,7 +11106,7 @@ public partial class MainViewModel :
             var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
             if (AudioVisualizer != null)
             {
-                Dispatcher.UIThread.Post(() => 
+                Dispatcher.UIThread.Post(() =>
                 {
                     AudioVisualizer.WavePeaks = wavePeaks;
 

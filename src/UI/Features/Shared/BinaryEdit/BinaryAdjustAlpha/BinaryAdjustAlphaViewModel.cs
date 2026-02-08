@@ -181,7 +181,7 @@ public partial class BinaryAdjustAlphaViewModel : ObservableObject
         return adjustedBitmap;
     }
 
-    private static Bitmap CreateCheckeredBackground(int width, int height)
+    public static Bitmap CreateCheckeredBackground(int width, int height)
     {
         const int checkSize = 10;
         var bitmap = new SKBitmap(width, height);

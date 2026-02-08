@@ -274,6 +274,7 @@ public class FfmpegGenerator
 
     public static string GetScreenShot(string inputFileName, string timeCode, string colorMatrix = "")
     {
+        timeCode = timeCode.Replace(',', '.');
         var outputFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.png");
         var vfMatrix = string.Empty;
         if (!string.IsNullOrEmpty(colorMatrix))
@@ -286,7 +287,7 @@ public class FfmpegGenerator
             StartInfo =
             {
                 FileName = GetFfmpegLocation(),
-                Arguments = $"-ss {timeCode} -i \"{inputFileName}\" {vfMatrix} -frames:v 1 -q:v 2 \"{outputFileName}\"",
+                Arguments = $"-ss {timeCode} -i \"{inputFileName}\" {vfMatrix} -frames:v 1 -c:v png \"{outputFileName}\"",
                 UseShellExecute = false,
                 CreateNoWindow = true
             }

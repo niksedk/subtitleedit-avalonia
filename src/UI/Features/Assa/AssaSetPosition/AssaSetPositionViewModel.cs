@@ -3,15 +3,20 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAlpha;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetPosition;
 
@@ -24,10 +29,10 @@ public partial class AssaSetPositionViewModel : ObservableObject
     [ObservableProperty] private int _sourceHeight = 1080;
     [ObservableProperty] private int _targetWidth = 1920;
     [ObservableProperty] private int _targetHeight = 1080;
-    [ObservableProperty] private bool _changeMargins = true;
-    [ObservableProperty] private bool _changeFontSize = true;
-    [ObservableProperty] private bool _changePositions = true;
-    [ObservableProperty] private bool _changeDrawing = true;
+    [ObservableProperty] private int _screenshotX;
+    [ObservableProperty] private int _screenshotY;
+    [ObservableProperty] private Bitmap _screenshot;
+    [ObservableProperty] private string _screenshotText;
 
     private Subtitle _subtitle = new();
     private string? _videoFileName;
@@ -36,12 +41,15 @@ public partial class AssaSetPositionViewModel : ObservableObject
 
     public AssaSetPositionViewModel()
     {
+        Screenshot = new SKBitmap(1, 1).ToAvaloniaBitmap();
+        ScreenshotText = string.Empty;
     }
 
-    public void Initialize(Subtitle subtitle, string? videoFileName, int? videoWidth, int? videoHeight)
+    public void Initialize(Subtitle subtitle, SubtitleLineViewModel line, string? videoFileName, int? videoWidth, int? videoHeight)
     {
         _subtitle = new Subtitle(subtitle, false);
         _videoFileName = videoFileName;
+        ScreenshotText = line.Text;
 
         if (string.IsNullOrEmpty(_subtitle.Header))
         {
@@ -79,6 +87,36 @@ public partial class AssaSetPositionViewModel : ObservableObject
         {
             TargetHeight = SourceHeight;
         }
+
+        if (TargetWidth <= 0 || TargetHeight <= 0)   
+        {
+            TargetWidth = 1820;
+            TargetHeight = 1080;
+        }
+
+        if (string.IsNullOrEmpty(videoFileName))
+        {
+            Screenshot = BinaryAdjustAlphaViewModel.CreateCheckeredBackground(TargetHeight, TargetHeight);
+            return;
+        }
+
+        var fileName = FfmpegGenerator.GetScreenShot(videoFileName, new TimeCode(line.StartTime.TotalMilliseconds).ToDisplayString());
+        if (System.IO.File.Exists(fileName))
+        {
+            try
+            {
+                Screenshot = new Bitmap(fileName);
+            }
+            catch
+            {
+                Screenshot = BinaryAdjustAlphaViewModel.CreateCheckeredBackground(TargetHeight, TargetHeight);
+            }
+        }
+        else
+        {
+            Screenshot = BinaryAdjustAlphaViewModel.CreateCheckeredBackground(TargetHeight, TargetHeight);
+        }
+
     }
 
     [RelayCommand]
@@ -146,98 +184,8 @@ public partial class AssaSetPositionViewModel : ObservableObject
     [RelayCommand]
     private async Task Ok()
     {
-        if (!ChangeMargins && !ChangeFontSize && !ChangePositions && !ChangeDrawing)
-        {
-            if (Window != null)
-            {
-                await MessageBox.Show(Window, Se.Language.Assa.ResolutionResamplerTitle, Se.Language.Assa.ResolutionResamplerNothingSelected);
-            }
-            return;
-        }
-
-        if (SourceWidth == TargetWidth && SourceHeight == TargetHeight)
-        {
-            if (Window != null)
-            {
-                await MessageBox.Show(Window, Se.Language.Assa.ResolutionResamplerTitle, Se.Language.Assa.ResolutionResamplerSourceAndTargetEqual);
-            }
-            return;
-        }
-
-        if (SourceWidth == 0 || SourceHeight == 0 || TargetWidth == 0 || TargetHeight == 0)
-        {
-            if (Window != null)
-            {
-                await MessageBox.Show(Window, Se.Language.Assa.ResolutionResamplerTitle, "Video width/height cannot be zero.");
-            }
-            return;
-        }
-
-        ApplyResampling();
         OkPressed = true;
         Close();
-    }
-
-    private void ApplyResampling()
-    {
-        if (string.IsNullOrEmpty(_subtitle.Header))
-        {
-            _subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
-        }
-
-        decimal sourceWidth = SourceWidth;
-        decimal sourceHeight = SourceHeight;
-        decimal targetWidth = TargetWidth;
-        decimal targetHeight = TargetHeight;
-
-        // Resample styles
-        var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
-        foreach (var style in styles)
-        {
-            if (ChangeMargins)
-            {
-                style.MarginLeft = AssaResampler.Resample(sourceWidth, targetWidth, style.MarginLeft);
-                style.MarginRight = AssaResampler.Resample(sourceWidth, targetWidth, style.MarginRight);
-                style.MarginVertical = AssaResampler.Resample(sourceHeight, targetHeight, style.MarginVertical);
-            }
-
-            if (ChangeFontSize)
-            {
-                style.FontSize = AssaResampler.Resample(sourceHeight, targetHeight, style.FontSize);
-            }
-
-            if (ChangeFontSize || ChangeDrawing)
-            {
-                style.OutlineWidth = AssaResampler.Resample(sourceHeight, targetHeight, style.OutlineWidth);
-                style.ShadowWidth = AssaResampler.Resample(sourceHeight, targetHeight, style.ShadowWidth);
-                style.Spacing = AssaResampler.Resample(sourceWidth, targetWidth, style.Spacing);
-            }
-        }
-
-        _subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(_subtitle.Header, styles);
-
-        // Update PlayRes in header
-        _subtitle.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX", "PlayResX: " + TargetWidth.ToString(CultureInfo.InvariantCulture), "[Script Info]", _subtitle.Header);
-        _subtitle.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY", "PlayResY: " + TargetHeight.ToString(CultureInfo.InvariantCulture), "[Script Info]", _subtitle.Header);
-
-        // Resample paragraphs
-        foreach (var p in _subtitle.Paragraphs)
-        {
-            if (ChangeFontSize)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsFont(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text);
-            }
-
-            if (ChangePositions)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsPosition(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text);
-            }
-
-            if (ChangeDrawing)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsDrawing(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text, null);
-            }
-        }
     }
 
     [RelayCommand]
