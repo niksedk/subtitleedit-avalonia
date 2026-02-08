@@ -905,18 +905,22 @@ public partial class MainViewModel :
         {
         }
     }
+
     [RelayCommand]
     private async Task ShowAssaImageColorPicker()
     {
+        var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
+        if (selectedItem == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaImageColorPickerWindow, AssaImageColorPickerViewModel>(vm =>
         {
-            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(_subtitle, selectedItem, _videoFileName, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
         });
-
-        if (result.OkPressed)
-        {
-        }
     }
+
     [RelayCommand]
     private async Task ShowAssaSetPosition()
     {

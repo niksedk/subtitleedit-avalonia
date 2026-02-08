@@ -39,6 +39,8 @@ public class LanguageAssa
     public string SpaceIncrease { get; set; }
     public string PlayCurrent { get; set; }
     public string SetPosition { get; set; }
+    public string PickColorFromImage { get; set; }
+
 
 
     // ASSA Draw
@@ -142,6 +144,7 @@ public class LanguageAssa
         SpaceIncrease = "Space increase";
         PlayCurrent = "Play current";
         SetPosition = "Set position";
+        PickColorFromImage = "Pick color from image";
 
         // ASSA Draw
         AssaDraw = "ASSA Draw";
