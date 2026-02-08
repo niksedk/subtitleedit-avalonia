@@ -67,7 +67,8 @@ public class AssaSetPositionWindow : Window
         var bitmapTextImage = new Image
         {
             [!Image.SourceProperty] = new Binding(nameof(vm.ScreenshotOverlayText)),
-            Stretch = Stretch.None,
+            Width = double.NaN,
+            Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
             Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),

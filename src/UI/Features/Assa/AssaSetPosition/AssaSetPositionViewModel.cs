@@ -67,6 +67,8 @@ public partial class AssaSetPositionViewModel : ObservableObject
         ScreenshotText = line.Text;
 
         ScreenshotOverlayText = CreateTextImage(subtitle, line);
+        //var byes = ScreenshotOverlayText.ToSkBitmap().ToPngArray();
+        //System.IO.File.WriteAllBytes(@"C:\temp\overlay.png", byes);
 
         if (string.IsNullOrEmpty(_subtitle.Header))
         {
@@ -181,7 +183,7 @@ public partial class AssaSetPositionViewModel : ObservableObject
         }
 
         using var typeface = SKTypeface.FromFamilyName(style.FontName, fontStyle);
-        using var font = new SKFont(typeface, (float)style.FontSize);
+        using var font = new SKFont(typeface, (float)(style.FontSize * 3.3m));
         
         // Measure text
         var textBounds = new SKRect();
