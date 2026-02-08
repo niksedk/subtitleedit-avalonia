@@ -58,6 +58,7 @@ public class PickFontNameWindow : Window
 
         var labelFontBold = UiUtil.MakeLabel(Se.Language.General.Bold);
         var checkBoxFontBold = UiUtil.MakeCheckBox(string.Empty, vm, nameof(vm.IsFontBold));
+        checkBoxFontBold.IsCheckedChanged += (s, e) => vm.FontBoldChanged();    
         var panelFontBold = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -111,7 +112,7 @@ public class PickFontNameWindow : Window
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
-    private Border MakeFontsView(PickFontNameViewModel vm)
+    private static Border MakeFontsView(PickFontNameViewModel vm)
     {
         var dataGrid = new DataGrid
         {

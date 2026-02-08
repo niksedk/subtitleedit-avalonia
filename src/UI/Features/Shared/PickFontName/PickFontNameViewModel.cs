@@ -106,10 +106,9 @@ public partial class PickFontNameViewModel : ObservableObject
             return;
         }
 
-        var previewWidth = 650; 
+        var previewWidth = 750; 
         var previewHeight = 200; 
 
-        //using var skTypeface = SKTypeface.FromData(SKData.CreateCopy(fontBytes));
         var skTypeface = SKTypeface.FromFamilyName(SelectedFontName);
         if (skTypeface == null)
         {
@@ -124,13 +123,19 @@ public partial class PickFontNameViewModel : ObservableObject
         var canvas = surface.Canvas;
         canvas.Clear(SKColors.Transparent);
         using var font = new SKFont(skTypeface, 32);
+
+        if (IsFontBold)
+        { 
+            font.Embolden = true;
+        }
+
         using var paint = new SKPaint
         {
             Color = SKColors.Orange,
             IsAntialias = true
         };
 
-        var text = $"{SelectedFontName}\nThe quick brown fox jumps over the lazy dog.\n0123456789";
+        var text = $"{SelectedFontName}\nI know the quick brown fox jumps over the lazy dog.\n0123456789";
         var lines = text.SplitToLines() ?? [];
         float y = 25;
         foreach (var line in lines)
@@ -178,5 +183,10 @@ public partial class PickFontNameViewModel : ObservableObject
     internal void SearchTextChanged()
     {
         _dirtySearch = true;
+    }
+
+    internal void FontBoldChanged()
+    {
+        _dirtyPreview = true;
     }
 }
