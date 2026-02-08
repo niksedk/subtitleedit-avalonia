@@ -267,6 +267,35 @@ public class AssaDrawWindow : Window
             item => item.Children
         );
 
+        // Wire up selection changed event
+        treeView.SelectionChanged += (sender, e) =>
+        {
+            if (treeView.SelectedItem is ShapeTreeItem selectedItem)
+            {
+                vm.SelectedTreeItem = selectedItem;
+                
+                // Update point editor if a point is selected
+                if (selectedItem.Point != null)
+                {
+                    vm.ActivePoint = selectedItem.Point;
+                    vm.PointX = selectedItem.Point.X;
+                    vm.PointY = selectedItem.Point.Y;
+                    vm.IsPointSelected = true;
+                }
+                else
+                {
+                    vm.ActivePoint = null;
+                    vm.IsPointSelected = false;
+                }
+                
+                // Update active shape for canvas rendering
+                if (selectedItem.Shape != null)
+                {
+                    vm.ActiveShape = selectedItem.Shape;
+                }
+            }
+        };
+
         Grid.SetRow(treeView, 1);
         panelGrid.Children.Add(treeView);
 

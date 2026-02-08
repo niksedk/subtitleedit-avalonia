@@ -25,6 +25,9 @@ public class AssaDrawCanvas : Control
     public static readonly StyledProperty<DrawShape?> ActiveShapeProperty =
         AvaloniaProperty.Register<AssaDrawCanvas, DrawShape?>(nameof(ActiveShape));
 
+    public static readonly StyledProperty<DrawShape?> SelectedShapeProperty =
+        AvaloniaProperty.Register<AssaDrawCanvas, DrawShape?>(nameof(SelectedShape));
+
     public static readonly StyledProperty<DrawCoordinate?> ActivePointProperty =
         AvaloniaProperty.Register<AssaDrawCanvas, DrawCoordinate?>(nameof(ActivePoint));
 
@@ -53,6 +56,12 @@ public class AssaDrawCanvas : Control
     {
         get => GetValue(ActiveShapeProperty);
         set => SetValue(ActiveShapeProperty, value);
+    }
+
+    public DrawShape? SelectedShape
+    {
+        get => GetValue(SelectedShapeProperty);
+        set => SetValue(SelectedShapeProperty, value);
     }
 
     public DrawCoordinate? ActivePoint
@@ -161,7 +170,7 @@ public class AssaDrawCanvas : Control
         // Draw all shapes
         foreach (var shape in Shapes.Where(s => !s.Hidden))
         {
-            var isActive = shape == ActiveShape;
+            var isActive = shape == ActiveShape || shape == SelectedShape;
             DrawShape(context, shape, isActive);
             DrawShapePoints(context, shape);
         }

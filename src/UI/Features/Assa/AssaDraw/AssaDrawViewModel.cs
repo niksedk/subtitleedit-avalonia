@@ -43,6 +43,7 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private bool _isPointSelected;
     [ObservableProperty] private bool _showGrid = true;
     [ObservableProperty] private ObservableCollection<ShapeTreeItem> _shapeTreeItems = [];
+    [ObservableProperty] private ShapeTreeItem? _selectedTreeItem;
 
     private float _currentX = float.MinValue;
     private float _currentY = float.MinValue;
@@ -611,32 +612,73 @@ public partial class AssaDrawViewModel : ObservableObject
             DeleteShape();
             e.Handled = true;
         }
-        else if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        else if (e.KeyModifiers.HasFlag(KeyModifiers.Alt) || 
+                 (e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)))
         {
+            var offset = e.KeyModifiers.HasFlag(KeyModifiers.Alt) ? 1 : 10;
+            
             switch (e.Key)
             {
+                case Key.Up:
+                    AdjustPosition(0, -offset);
+                    e.Handled = true;
+                    break;
+                case Key.Down:
+                    AdjustPosition(0, offset);
+                    e.Handled = true;
+                    break;
+                case Key.Left:
+                    AdjustPosition(-offset, 0);
+                    e.Handled = true;
+                    break;
+                case Key.Right:
+                    AdjustPosition(offset, 0);
+                    e.Handled = true;
+                    break;
                 case Key.D0:
                 case Key.NumPad0:
-                    ResetView();
-                    e.Handled = true;
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        ResetView();
+                        e.Handled = true;
+                    }
                     break;
                 case Key.OemPlus:
                 case Key.Add:
-                    ZoomIn();
-                    e.Handled = true;
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        ZoomIn();
+                        e.Handled = true;
+                    }
                     break;
                 case Key.OemMinus:
                 case Key.Subtract:
-                    ZoomOut();
-                    e.Handled = true;
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        ZoomOut();
+                        e.Handled = true;
+                    }
                     break;
                 case Key.C:
-                    await CopyToClipboard();
-                    e.Handled = true;
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        await CopyToClipboard();
+                        e.Handled = true;
+                    }
                     break;
                 case Key.N:
-                    ClearAll();
-                    e.Handled = true;
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        ClearAll();
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.G:
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        ToggleGrid();
+                        e.Handled = true;
+                    }
                     break;
             }
         }
@@ -665,10 +707,33 @@ public partial class AssaDrawViewModel : ObservableObject
             CloseShape();
             e.Handled = true;
         }
-        else if (e.Key == Key.G && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+    }
+
+    private void AdjustPosition(float xAdjust, float yAdjust)
+    {
+        // Check if a shape is selected in the tree view
+        if (SelectedTreeItem?.Shape != null)
         {
-            ToggleGrid();
-            e.Handled = true;
+            foreach (var point in SelectedTreeItem.Shape.Points)
+            {
+                point.X += xAdjust;
+                point.Y += yAdjust;
+            }
+            RefreshTreeView();
+            Canvas?.InvalidateVisual();
+            return;
+        }
+
+        // Fall back to active shape (currently being drawn)
+        if (ActiveShape != null)
+        {
+            foreach (var point in ActiveShape.Points)
+            {
+                point.X += xAdjust;
+                point.Y += yAdjust;
+            }
+            RefreshTreeView();
+            Canvas?.InvalidateVisual();
         }
     }
 
@@ -689,6 +754,15 @@ public partial class AssaDrawViewModel : ObservableObject
             ActivePoint.Y = value;
             RefreshTreeView();
             Canvas?.InvalidateVisual();
+        }
+    }
+
+    partial void OnSelectedTreeItemChanged(ShapeTreeItem? value)
+    {
+        if (Canvas != null)
+        {
+            Canvas.SelectedShape = value?.Shape;
+            Canvas.InvalidateVisual();
         }
     }
 }
