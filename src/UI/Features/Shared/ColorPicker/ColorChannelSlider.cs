@@ -68,7 +68,6 @@ public class ColorChannelSlider : Grid
 
         _gradientBorder = new Border
         {
-            BorderBrush = new SolidColorBrush(Colors.Gray),
             ClipToBounds = true,
             Height = 24,
             Child = new Border
