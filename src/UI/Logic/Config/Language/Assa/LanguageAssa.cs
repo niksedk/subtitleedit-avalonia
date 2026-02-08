@@ -37,6 +37,7 @@ public class LanguageAssa
     public string RotateY { get; set; }
     public string RotateTilt { get; set; }
     public string SpaceIncrease { get; set; }
+    public string PlayCurrent { get; set; }
 
 
     // ASSA Draw
@@ -138,6 +139,7 @@ public class LanguageAssa
         RotateY = "Rotate Y";
         RotateTilt = "Rotate tilt";
         SpaceIncrease = "Space increase";
+        PlayCurrent = "Play current";
 
         // ASSA Draw
         AssaDraw = "ASSA Draw";

@@ -618,6 +618,7 @@ public class LanguageGeneral
     public string FileSavedToX { get; set; }
     public string ImageSaved { get; set; }
     public string Hex { get; set; }
+    public string SelectedlinesX { get; set; }
 
     public LanguageGeneral()
     {
@@ -1235,5 +1236,6 @@ public class LanguageGeneral
         FileSavedToX = "File saved to {0}";
         ImageSaved = "Image saved";
         Hex = "Hex";
+        SelectedlinesX = "Selected lines: {0}";
     }
 }

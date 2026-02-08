@@ -66,18 +66,22 @@ public class AssaApplyCustomOverrideTagsWindow : Window
                 {
                     Content = Se.Language.Sync.AdjustSelectedLinesAndForward,
                     [!RadioButton.IsCheckedProperty] = new Binding(nameof(vm.AdjustSelectedLinesAndForward))
-                }
+                },
+                UiUtil.MakeLabel().WithBindText(vm, nameof(vm.SelectionInfo)).WithOpacity(0.6),
             },
         };
         
         vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControl.FullScreenIsVisible = false;
 
-        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphLeftIndex));
+        var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphIndex));
         comboBoxLeft.Width = double.NaN;
         comboBoxLeft.MinHeight = 50;
         comboBoxLeft.HorizontalAlignment = HorizontalAlignment.Stretch;
         vm.ComboBoxLeft = comboBoxLeft;
+        comboBoxLeft.SelectionChanged += vm.ComboBoxParagraphsChanged;
+
+        var buttonPlay = UiUtil.MakeButton(Se.Language.Assa.PlayCurrent, vm.PlayAndBackCommand).WithLeftAlignment();
 
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -89,6 +93,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // video player
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // combo box
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // buttons
             },
             ColumnDefinitions =
             {
@@ -102,6 +107,7 @@ public class AssaApplyCustomOverrideTagsWindow : Window
 
         gridVideo.Add(vm.VideoPlayerControl, 0);
         gridVideo.Add(comboBoxLeft, 1);
+        gridVideo.Add(buttonPlay, 2);
 
         var grid = new Grid
         {
@@ -139,10 +145,5 @@ public class AssaApplyCustomOverrideTagsWindow : Window
         AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
         Loaded += (_, _) => vm.OnLoaded();
         Closing += (_, e) => vm.OnClosing();
-    }
-
-    private void ComboBoxOverrideTags_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-    {
-        throw new System.NotImplementedException();
     }
 }
