@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using SkiaSharp;
 using System.IO;
 using System.Linq;
 
@@ -53,7 +54,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "New.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "New.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -70,7 +71,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Open.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Open.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -87,7 +88,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Save.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Save.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -104,7 +105,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "SaveAs.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "SaveAs.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -127,7 +128,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Find.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Find.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -144,7 +145,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Replace.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Replace.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -168,7 +169,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "SpellCheck.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "SpellCheck.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -185,7 +186,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Settings.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Settings.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -202,7 +203,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Layout.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Layout.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -225,7 +226,7 @@ public static class InitToolbar
             {
                 Content = new Image
                 {
-                    Source = new Bitmap(System.IO.Path.Combine(path, "Help.png")),
+                    Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "Help.png"))),
                     Width = 32,
                     Height = 32,
                 },
@@ -249,7 +250,7 @@ public static class InitToolbar
         {
             Content = new Image
             {
-                Source = new Bitmap(System.IO.Path.Combine(path, "AssaStyle.png")),
+                Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "AssaStyle.png"))),
                 Width = 32,
                 Height = 32,
             },
@@ -266,7 +267,7 @@ public static class InitToolbar
         {
             Content = new Image
             {
-                Source = new Bitmap(System.IO.Path.Combine(path, "AssaProperties.png")),
+                Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "AssaProperties.png"))),
                 Width = 32,
                 Height = 32,
             },
@@ -283,7 +284,7 @@ public static class InitToolbar
         {
             Content = new Image
             {
-                Source = new Bitmap(System.IO.Path.Combine(path, "AssaAttachments.png")),
+                Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "AssaAttachments.png"))),
                 Width = 32,
                 Height = 32,
             },
@@ -300,7 +301,7 @@ public static class InitToolbar
         {
             Content = new Image
             {
-                Source = new Bitmap(System.IO.Path.Combine(path, "AssaDraw.png")),
+                Source = MakeOneColor(new Bitmap(System.IO.Path.Combine(path, "AssaDraw.png"))),
                 Width = 32,
                 Height = 32,
             },
@@ -408,6 +409,41 @@ public static class InitToolbar
         grid.Add(stackPanelRight, 0, 1);
 
         return grid;
+    }
+
+    private static Bitmap MakeOneColor(Bitmap bitmap)
+    {
+        if (Se.Settings.Appearance.Theme == UiTheme.ThemeNameDark)
+        {
+            var foregroundColor = UiTheme.GetDarkThemeForegroundColor();
+            
+            using var skBitmap = bitmap.ToSkBitmap();
+            var width = skBitmap.Width;
+            var height = skBitmap.Height;
+            
+            var result = new SKBitmap(width, height);
+            
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    var pixel = skBitmap.GetPixel(x, y);
+                    
+                    var intensity = (pixel.Red * 0.299 + pixel.Green * 0.587 + pixel.Blue * 0.114) / 255.0;
+                    
+                    var newRed = (byte)(foregroundColor.R * intensity);
+                    var newGreen = (byte)(foregroundColor.G * intensity);
+                    var newBlue = (byte)(foregroundColor.B * intensity);
+                    
+                    var newColor = new SKColor(newRed, newGreen, newBlue, pixel.Alpha);
+                    result.SetPixel(x, y, newColor);
+                }
+            }
+            
+            return result.ToAvaloniaBitmap();
+        }
+
+        return bitmap;
     }
 
     private static Border MakeSeparator()

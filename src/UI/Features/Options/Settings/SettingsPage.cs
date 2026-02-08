@@ -543,6 +543,15 @@ public class SettingsPage : UserControl
         sections.Add(new SettingsSection(Se.Language.General.Appearance,
         [
             new SettingsItem(Se.Language.Options.Settings.Theme, () => UiUtil.MakeComboBox(_vm.Themes, _vm, nameof(_vm.SelectedTheme))),
+            new SettingsItem(Se.Language.Options.Settings.DarkThemeForegroundColor, () => new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Children =
+                {
+                    UiUtil.MakeColorPicker(_vm, nameof(_vm.DarkModeForegroundColor)),
+                    UiUtil.MakeLabel(Se.Language.General.RequiresRestart).WithMarginLeft(5).WithOpacity(0.6),
+                }
+            }),
             new SettingsItem(Se.Language.Options.Settings.DarkThemeBackgroundColor, () => new StackPanel
             {
                 Orientation = Orientation.Horizontal,

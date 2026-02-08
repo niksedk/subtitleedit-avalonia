@@ -223,6 +223,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _showHorizontalLineAboveToolbar;
     [ObservableProperty] private ObservableCollection<GridLinesVisibilityDisplay> _gridLinesVisibilities;
     [ObservableProperty] private GridLinesVisibilityDisplay _selectedGridLinesVisibility;
+    [ObservableProperty] private Color _darkModeForegroundColor;
     [ObservableProperty] private Color _darkModeBackgroundColor;
     [ObservableProperty] private bool _useFocusedButtonBackgroundColor;
     [ObservableProperty] private Color _focusedButtonBackgroundColor;
@@ -592,6 +593,7 @@ public partial class SettingsViewModel : ObservableObject
         ShowHorizontalLineAboveToolbar = appearance.ShowHorizontalLineAboveToolbar;
         SelectedGridLinesVisibility = GridLinesVisibilities.FirstOrDefault(p => p.Type.ToString() == appearance.GridLinesAppearance) ?? GridLinesVisibilities[0];
         DarkModeBackgroundColor = appearance.DarkModeBackgroundColor.FromHexToColor();
+        DarkModeForegroundColor = appearance.DarkModeForegroundColor.FromHexToColor();
         UseFocusedButtonBackgroundColor = appearance.UseFocusedButtonBackgroundColor;
         FocusedButtonBackgroundColor = appearance.FocusedButtonBackgroundColor.FromHexToColor();
         BookmarkColor = appearance.BookmarkColor.FromHexToColor();
@@ -1128,6 +1130,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.TextBoxShowButtonRemoveFormatting = TextBoxButtonShowRemoveFormatting;
         appearance.ShowHints = ShowButtonHints;
         appearance.DarkModeBackgroundColor = DarkModeBackgroundColor.FromColorToHex();
+        appearance.DarkModeForegroundColor = DarkModeForegroundColor.FromColorToHex();
         appearance.UseFocusedButtonBackgroundColor = UseFocusedButtonBackgroundColor;
         appearance.FocusedButtonBackgroundColor = FocusedButtonBackgroundColor.FromColorToHex();
         appearance.BookmarkColor = BookmarkColor.FromColorToHex();

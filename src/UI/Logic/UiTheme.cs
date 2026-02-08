@@ -5,7 +5,9 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using AvaloniaEdit;
+using AvaloniaEdit.Editing;
 using Nikse.SubtitleEdit.Logic.Config;
+using Projektanker.Icons.Avalonia;
 using System;
 
 namespace Nikse.SubtitleEdit.Logic;
@@ -123,6 +125,7 @@ public static class UiTheme
 
         UpdateRegionColor();
 
+        var foreColor = GetDarkThemeForegroundColor();
         var bgColor = GetDarkThemeBackgroundColor();
         var bgColorLighter = UiUtil.LightenColor(bgColor, 5);
         var bgColorHeader = UiUtil.LightenColor(bgColor, 15);
@@ -134,7 +137,8 @@ public static class UiTheme
             {
                 Setters =
                 {
-                    new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor))
+                    new Setter(TextBox.BackgroundProperty, new SolidColorBrush(bgColor)),
+                    new Setter(TextBox.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
             new Style(x => x.OfType<TextBox>().Class(":focus").Template().OfType<Border>().Name("PART_BorderElement"))
@@ -153,12 +157,94 @@ public static class UiTheme
                 }
             },
 
+            // Button
+            new Style(x => x.OfType<Button>())
+            {
+                Setters =
+                {
+                    new Setter(Button.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
             // NumericUpDown
             new Style(x => x.OfType<NumericUpDown>())
             {
                 Setters =
                 {
-                    new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor))
+                    new Setter(NumericUpDown.BackgroundProperty, new SolidColorBrush(bgColor)),
+                    new Setter(NumericUpDown.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // ComboBox
+            new Style(x => x.OfType<ComboBox>())
+            {
+                Setters =
+                {
+                    new Setter(ComboBox.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // ListBox
+            new Style(x => x.OfType<ListBox>())
+            {
+                Setters =
+                {
+                    new Setter(ListBox.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // DataGrid
+            new Style(x => x.OfType<DataGrid>())
+            {
+                Setters =
+                {
+                    new Setter(DataGrid.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // Label
+            new Style(x => x.OfType<Label>())
+            {
+                Setters =
+                {
+                    new Setter(Label.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // TextBlock
+            new Style(x => x.OfType<TextBlock>())
+            {
+                Setters =
+                {
+                    new Setter(TextBlock.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+             // TextArea
+            new Style(x => x.OfType<TextArea>())
+            {
+                Setters =
+                {
+                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // MenuItem
+            new Style(x => x.OfType<Avalonia.Controls.MenuItem>())
+            {
+                Setters =
+                {
+                    new Setter(Avalonia.Controls.MenuItem.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // Icon
+            new Style(x => x.OfType<Projektanker.Icons.Avalonia.Icon>())
+            {
+                Setters =
+                {
+                    new Setter(Projektanker.Icons.Avalonia.Icon.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
 
@@ -167,7 +253,8 @@ public static class UiTheme
             {
                 Setters =
                 {
-                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
+                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor)),
+                    new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
 
@@ -176,7 +263,8 @@ public static class UiTheme
             {
                 Setters =
                 {
-                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor))
+                    new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(bgColor)),
+                    new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
 
@@ -185,7 +273,8 @@ public static class UiTheme
             {
                 Setters =
                 {
-                    new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader))
+                    new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(bgColorHeader)),
+                    new Setter(DataGridColumnHeader.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
 
@@ -194,7 +283,8 @@ public static class UiTheme
             {
                 Setters =
                 {
-                    new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor))
+                    new Setter(ButtonSpinner.BackgroundProperty, new SolidColorBrush(bgColor)),
+                    new Setter(ButtonSpinner.ForegroundProperty, new SolidColorBrush(foreColor))
                 }
             },
         };
@@ -445,5 +535,10 @@ public static class UiTheme
     private static Color GetDarkThemeBackgroundColor()
     {
         return Se.Settings.Appearance.DarkModeBackgroundColor.FromHexToColor();
+    }
+
+    public static Color GetDarkThemeForegroundColor()
+    {
+        return Se.Settings.Appearance.DarkModeForegroundColor.FromHexToColor();
     }
 }
