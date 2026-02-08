@@ -154,6 +154,9 @@ jobs:
           curl -L -o libmpv-mac-arm.zip "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2025-01-25/libmpv-mac-arm.zip"
           unzip libmpv-mac-arm.zip -d libmpv-temp
           rm libmpv-mac-arm.zip  # Clean up immediately after extraction
+          
+          # Remove __MACOSX folders (not needed, saves space)
+          rm -rf libmpv-temp/__MACOSX 2>/dev/null || true
 
       - name: Free disk space before builds
         run: |
@@ -397,7 +400,7 @@ jobs:
           rm -rf "./SubtitleEdit-ARM64.app"
           
           ln -s /Applications "./dmg-temp-arm64/Applications"
-          hdiutil create -volname "SubtitleEdit ARM64" -srcfolder "./dmg-temp-arm64" -ov -format UDZO "./SubtitleEdit-macOS-ARM64.dmg"
+          hdiutil create -volname "SubtitleEdit ARM64" -srcfolder "./dmg-temp-arm64" -ov -format UDBZ "./SubtitleEdit-macOS-ARM64.dmg"
       
           # Final cleanup
           rm -rf "./dmg-temp-arm64"
