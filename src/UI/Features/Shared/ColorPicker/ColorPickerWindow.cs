@@ -263,7 +263,7 @@ public class ColorPickerWindow : Window
             ColumnDefinitions = new ColumnDefinitions("*,*,*,*,*,*,*,*"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             Height = 30,
-            Margin = new Thickness(0, 10, 0, 0),
+            Margin = new Thickness(0, 0, 0, 0),
         };
 
         // Create 8 color boxes
@@ -287,7 +287,7 @@ public class ColorPickerWindow : Window
         var panel = new StackPanel
         {
             Orientation = Orientation.Vertical,
-            Margin = new Thickness(10, 0, 10, 0),
+            Margin = new Thickness(10, 10, 10, 0),
             Children = { label, colorsGrid }
         };
 
