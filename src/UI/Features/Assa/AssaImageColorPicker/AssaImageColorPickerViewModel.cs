@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -34,6 +35,10 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     [ObservableProperty] private int _screenshotY;
     [ObservableProperty] private Bitmap _screenshot;
     [ObservableProperty] private string _screenshotOverlayPosiion;
+    [ObservableProperty] private SolidColorBrush _currentMouseColor = new SolidColorBrush(Colors.Transparent);
+    [ObservableProperty] private SolidColorBrush _clickedColor = new SolidColorBrush(Colors.Transparent);
+    [ObservableProperty] private string _currentMouseColorHex = "#00000000";
+    [ObservableProperty] private string _clickedColorHex = "#00000000";
 
     private Subtitle _subtitle = new();
 
@@ -136,68 +141,6 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task SourceFromVideo()
-    {
-        if (Window == null)
-        {
-            return;
-        }
-
-        var files = await Window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = Se.Language.General.OpenVideoFile,
-            AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
-            {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
-            }
-        });
-
-        if (files.Count > 0)
-        {
-            var fileName = files[0].Path.LocalPath;
-            var info = FfmpegMediaInfo2.Parse(fileName);
-            if (info?.Dimension is { Width: > 0, Height: > 0 })
-            {
-                SourceWidth = info.Dimension.Width;
-                SourceHeight = info.Dimension.Height;
-            }
-        }
-    }
-
-    [RelayCommand]
-    private async Task TargetFromVideo()
-    {
-        if (Window == null)
-        {
-            return;
-        }
-
-        var files = await Window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = Se.Language.General.OpenVideoFile,
-            AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
-            {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
-            }
-        });
-
-        if (files.Count > 0)
-        {
-            var fileName = files[0].Path.LocalPath;
-            var info = FfmpegMediaInfo2.Parse(fileName);
-            if (info?.Dimension is { Width: > 0, Height: > 0 })
-            {
-                TargetWidth = info.Dimension.Width;
-                TargetHeight = info.Dimension.Height;
-            }
-        }
-    }
-
-    [RelayCommand]
     private async Task Ok()
     {
         OkPressed = true;
@@ -208,6 +151,15 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     private void Cancel()
     {
         Close();
+    }
+
+    [RelayCommand]
+    private async Task CopyColorToClipboard()
+    {
+        if (Window?.Clipboard != null)
+        {
+            await Window.Clipboard.SetTextAsync(ClickedColorHex);
+        }
     }
 
     private void Close()
@@ -242,5 +194,88 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
         }
 
         ScreenshotOverlayPosiion = $"X: {ScreenshotX}, Y: {ScreenshotY}";
+    }
+
+    public void OnImagePointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (ScreenshotImage == null || Screenshot == null)
+        {
+            return;
+        }
+
+        var position = e.GetPosition(ScreenshotImage);
+        var imageWidth = ScreenshotImage.Bounds.Width;
+        var imageHeight = ScreenshotImage.Bounds.Height;
+
+        if (imageWidth <= 0 || imageHeight <= 0)
+        {
+            return;
+        }
+
+        var scaleX = Screenshot.PixelSize.Width / imageWidth;
+        var scaleY = Screenshot.PixelSize.Height / imageHeight;
+
+        var pixelX = (int)(position.X * scaleX);
+        var pixelY = (int)(position.Y * scaleY);
+
+        ScreenshotX = pixelX;
+        ScreenshotY = pixelY;
+
+        if (pixelX >= 0 && pixelX < Screenshot.PixelSize.Width && pixelY >= 0 && pixelY < Screenshot.PixelSize.Height)
+        {
+            var color = GetPixelColor(Screenshot, pixelX, pixelY);
+            CurrentMouseColor = new SolidColorBrush(color);
+            CurrentMouseColorHex = ColorToHex(color);
+            ScreenshotOverlayPosiion = $"X: {pixelX}, Y: {pixelY} - {CurrentMouseColorHex}";
+        }
+    }
+
+    public void OnImagePointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (ScreenshotImage == null || Screenshot == null)
+        {
+            return;
+        }
+
+        var position = e.GetPosition(ScreenshotImage);
+        var imageWidth = ScreenshotImage.Bounds.Width;
+        var imageHeight = ScreenshotImage.Bounds.Height;
+
+        if (imageWidth <= 0 || imageHeight <= 0)
+        {
+            return;
+        }
+
+        var scaleX = Screenshot.PixelSize.Width / imageWidth;
+        var scaleY = Screenshot.PixelSize.Height / imageHeight;
+
+        var pixelX = (int)(position.X * scaleX);
+        var pixelY = (int)(position.Y * scaleY);
+
+        if (pixelX >= 0 && pixelX < Screenshot.PixelSize.Width && pixelY >= 0 && pixelY < Screenshot.PixelSize.Height)
+        {
+            var color = GetPixelColor(Screenshot, pixelX, pixelY);
+            ClickedColor = new SolidColorBrush(color);
+            ClickedColorHex = ColorToHex(color);
+        }
+    }
+
+    private static Color GetPixelColor(Bitmap bitmap, int x, int y)
+    {
+        try
+        {
+            using var skBitmap = bitmap.ToSkBitmap();
+            var skColor = skBitmap.GetPixel(x, y);
+            return Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
+        }
+        catch
+        {
+            return Colors.Transparent;
+        }
+    }
+
+    private static string ColorToHex(Color color)
+    {
+        return $"#{color.A:X2}{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 }

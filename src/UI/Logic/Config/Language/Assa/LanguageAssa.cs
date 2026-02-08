@@ -2,46 +2,6 @@
 
 public class LanguageAssa
 {
-    public string StylesTitle { get; set; }
-    public string StylesInFile { get; set; }
-    public string StylesSaved { get; set; }
-    public string StylesTitleX { get; set; }
-    public string PropertiesTitleX { get; set; }
-    public string AttachmentsTitleX { get; set; }
-    public string SmartWrappingTopWide { get; set; }
-    public string EndOfLineWrapping { get; set; }
-    public string NoWrapping { get; set; }
-    public string SmartWrappingBottomWide { get; set; }
-    public string FontsAndGraphics { get; set; }
-    public string WrapStyle { get; set; }
-    public string BorderAndShadowScaling { get; set; }
-    public string OriginalScript { get; set; }
-    public string Graphics { get; set; }
-    public string CopyToStorageStyles { get; set; }
-    public string CopyToFileStyles { get; set; }
-    public string SetStyleAsDefault { get; set; }
-    public string TakeUsagesFromDotDotDot { get; set; }
-    public string NoAttachmentsFound { get; set; }
-    public string DeleteStyleQuestion { get; set; }
-    public string DeleteStylesQuestion { get; set; }
-    public string OpenStyleImportFile { get; set; }
-    public string Primary { get; set; }
-    public string Secondary { get; set; }
-    public string ApplyOverrideTags { get; set; }
-    public string ChooseOverrideTagToAdd { get; set; }
-    public string FontSizeChange { get; set; }
-    public string MoveTextFromLeftToRight { get; set; }
-    public string ColorFromWhiteToRed { get; set; }
-    public string RotateXSlow { get; set; }
-    public string RotateX { get; set; }
-    public string RotateY { get; set; }
-    public string RotateTilt { get; set; }
-    public string SpaceIncrease { get; set; }
-    public string PlayCurrent { get; set; }
-    public string SetPosition { get; set; }
-    public string PickColorFromImage { get; set; }
-
-
 
     // ASSA Draw
     public string AssaDraw { get; set; }
@@ -105,47 +65,48 @@ public class LanguageAssa
     public string BackgroundBoxSpikes { get; set; }
     public string BackgroundBoxBubbles { get; set; }
 
+    public string StylesTitle { get; set; }
+    public string StylesInFile { get; set; }
+    public string StylesSaved { get; set; }
+    public string StylesTitleX { get; set; }
+    public string PropertiesTitleX { get; set; }
+    public string AttachmentsTitleX { get; set; }
+    public string SmartWrappingTopWide { get; set; }
+    public string EndOfLineWrapping { get; set; }
+    public string NoWrapping { get; set; }
+    public string SmartWrappingBottomWide { get; set; }
+    public string FontsAndGraphics { get; set; }
+    public string WrapStyle { get; set; }
+    public string BorderAndShadowScaling { get; set; }
+    public string OriginalScript { get; set; }
+    public string Graphics { get; set; }
+    public string CopyToStorageStyles { get; set; }
+    public string CopyToFileStyles { get; set; }
+    public string SetStyleAsDefault { get; set; }
+    public string TakeUsagesFromDotDotDot { get; set; }
+    public string NoAttachmentsFound { get; set; }
+    public string DeleteStyleQuestion { get; set; }
+    public string DeleteStylesQuestion { get; set; }
+    public string OpenStyleImportFile { get; set; }
+    public string Primary { get; set; }
+    public string Secondary { get; set; }
+    public string ApplyOverrideTags { get; set; }
+    public string ChooseOverrideTagToAdd { get; set; }
+    public string FontSizeChange { get; set; }
+    public string MoveTextFromLeftToRight { get; set; }
+    public string ColorFromWhiteToRed { get; set; }
+    public string RotateXSlow { get; set; }
+    public string RotateX { get; set; }
+    public string RotateY { get; set; }
+    public string RotateTilt { get; set; }
+    public string SpaceIncrease { get; set; }
+    public string PlayCurrent { get; set; }
+    public string SetPosition { get; set; }
+    public string ImageColorPicker { get; set; }
+    public string CopyColorAsHextoClipboard { get; set; }
+
     public LanguageAssa()
     {
-        StylesTitle = "Advanced Sub Station Alpha styles";
-        StylesInFile = "Styles in file";
-        StylesSaved = "Styles saved";
-        StylesTitleX = "Styles - {0}";
-        PropertiesTitleX = "Properties - {0}";
-        AttachmentsTitleX = "Attachments - {0}";
-        SmartWrappingTopWide = "0: Smart wrapping (top wide)";
-        EndOfLineWrapping = "1: End-of-line word wrapping, only \\N breaks";
-        NoWrapping = "2: No wrapping, both \\N an \\n breaks";
-        SmartWrappingBottomWide = "3: Smart wrapping (bottom wide)";
-        FontsAndGraphics = "Fonts and graphics";
-        WrapStyle = "Wrap style";
-        BorderAndShadowScaling = "Border and shadow scaling";
-        OriginalScript = "Original script";
-        Graphics = "Graphics";
-        CopyToStorageStyles = "Copy to storage styles";
-        CopyToFileStyles = "Copy to file styles";
-        SetStyleAsDefault = "Set style as default";
-        TakeUsagesFromDotDotDot = "Take usages from...";
-        NoAttachmentsFound = "No attachments found in selected ASSA file.";
-        DeleteStyleQuestion = "Delete style?";
-        DeleteStylesQuestion = "Delete styles?";
-        OpenStyleImportFile = "Open subtitle file to import styles from";
-        Primary = "Primary";
-        Secondary = "Secondary";
-        ApplyOverrideTags = "Apply override tags";
-        ChooseOverrideTagToAdd = "Choose override tag to add";
-        FontSizeChange = "Font size change";
-        MoveTextFromLeftToRight = "Move text from left to right";
-        ColorFromWhiteToRed = "Color from white to red";
-        RotateXSlow = "Rotate X (slow)";
-        RotateX = "Rotate X";
-        RotateY = "Rotate Y";
-        RotateTilt = "Rotate tilt";
-        SpaceIncrease = "Space increase";
-        PlayCurrent = "Play current";
-        SetPosition = "Set position";
-        PickColorFromImage = "Pick color from image";
-
         // ASSA Draw
         AssaDraw = "ASSA Draw";
         DrawSelectTool = "Select (move points)";
@@ -209,5 +170,45 @@ public class LanguageAssa
         BackgroundBoxCircle = "Circle";
         BackgroundBoxSpikes = "Spikes";
         BackgroundBoxBubbles = "Bubbles";
+
+        StylesTitle = "Advanced Sub Station Alpha styles";
+        StylesInFile = "Styles in file";
+        StylesSaved = "Styles saved";
+        StylesTitleX = "Styles - {0}";
+        PropertiesTitleX = "Properties - {0}";
+        AttachmentsTitleX = "Attachments - {0}";
+        SmartWrappingTopWide = "0: Smart wrapping (top wide)";
+        EndOfLineWrapping = "1: End-of-line word wrapping, only \\N breaks";
+        NoWrapping = "2: No wrapping, both \\N an \\n breaks";
+        SmartWrappingBottomWide = "3: Smart wrapping (bottom wide)";
+        FontsAndGraphics = "Fonts and graphics";
+        WrapStyle = "Wrap style";
+        BorderAndShadowScaling = "Border and shadow scaling";
+        OriginalScript = "Original script";
+        Graphics = "Graphics";
+        CopyToStorageStyles = "Copy to storage styles";
+        CopyToFileStyles = "Copy to file styles";
+        SetStyleAsDefault = "Set style as default";
+        TakeUsagesFromDotDotDot = "Take usages from...";
+        NoAttachmentsFound = "No attachments found in selected ASSA file.";
+        DeleteStyleQuestion = "Delete style?";
+        DeleteStylesQuestion = "Delete styles?";
+        OpenStyleImportFile = "Open subtitle file to import styles from";
+        Primary = "Primary";
+        Secondary = "Secondary";
+        ApplyOverrideTags = "Apply override tags";
+        ChooseOverrideTagToAdd = "Choose override tag to add";
+        FontSizeChange = "Font size change";
+        MoveTextFromLeftToRight = "Move text from left to right";
+        ColorFromWhiteToRed = "Color from white to red";
+        RotateXSlow = "Rotate X (slow)";
+        RotateX = "Rotate X";
+        RotateY = "Rotate Y";
+        RotateTilt = "Rotate tilt";
+        SpaceIncrease = "Space increase";
+        PlayCurrent = "Play current";
+        SetPosition = "Set position";
+        ImageColorPicker = "Image color picker";
+        CopyColorAsHextoClipboard = "Copy color as hex to clipboard";
     }
 }

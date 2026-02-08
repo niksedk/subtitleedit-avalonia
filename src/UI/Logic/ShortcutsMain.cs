@@ -314,6 +314,10 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowPickLayerCommand), Se.Language.General.PickLayer },
         { nameof(MainViewModel.CopyTextToClipboardCommand), Se.Language.Options.Shortcuts.CopyTextToClipboard },
         { nameof(MainViewModel.CopyTextFromOriginalToClipboardCommand), Se.Language.Options.Shortcuts.CopyTextFromOriginalToClipboard },
+        { nameof(MainViewModel.ShowAssaImageColorPickerCommand), Se.Language.Assa.ImageColorPicker },
+        { nameof(MainViewModel.ShowAssaSetPositionCommand), Se.Language.Assa.SetPosition },
+        { nameof(MainViewModel.ShowAssaApplyCustomOverrideTagsCommand), Se.Language.Assa.ApplyOverrideTags },
+
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -575,6 +579,9 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowPickLayerCommand, nameof(vm.ShowPickLayerCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CopyTextToClipboardCommand, nameof(vm.CopyTextToClipboardCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.CopyTextFromOriginalToClipboardCommand, nameof(vm.CopyTextFromOriginalToClipboardCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaImageColorPickerCommand, nameof(vm.ShowAssaImageColorPickerCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaSetPositionCommand, nameof(vm.ShowAssaSetPositionCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaApplyCustomOverrideTagsCommand, nameof(vm.ShowAssaApplyCustomOverrideTagsCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

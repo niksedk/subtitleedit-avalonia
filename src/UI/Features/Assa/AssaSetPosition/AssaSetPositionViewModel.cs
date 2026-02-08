@@ -269,68 +269,6 @@ public partial class AssaSetPositionViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task SourceFromVideo()
-    {
-        if (Window == null)
-        {
-            return;
-        }
-
-        var files = await Window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = Se.Language.General.OpenVideoFile,
-            AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
-            {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
-            }
-        });
-
-        if (files.Count > 0)
-        {
-            var fileName = files[0].Path.LocalPath;
-            var info = FfmpegMediaInfo2.Parse(fileName);
-            if (info?.Dimension is { Width: > 0, Height: > 0 })
-            {
-                SourceWidth = info.Dimension.Width;
-                SourceHeight = info.Dimension.Height;
-            }
-        }
-    }
-
-    [RelayCommand]
-    private async Task TargetFromVideo()
-    {
-        if (Window == null)
-        {
-            return;
-        }
-
-        var files = await Window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = Se.Language.General.OpenVideoFile,
-            AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
-            {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
-            }
-        });
-
-        if (files.Count > 0)
-        {
-            var fileName = files[0].Path.LocalPath;
-            var info = FfmpegMediaInfo2.Parse(fileName);
-            if (info?.Dimension is { Width: > 0, Height: > 0 })
-            {
-                TargetWidth = info.Dimension.Width;
-                TargetHeight = info.Dimension.Height;
-            }
-        }
-    }
-
-    [RelayCommand]
     private async Task Ok()
     {
         OkPressed = true;
