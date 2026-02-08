@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -259,6 +260,12 @@ public class AssaDrawWindow : Window
             [!TreeView.ItemsSourceProperty] = new Binding(nameof(vm.ShapeTreeItems)),
             Margin = new Thickness(5),
         };
+
+        // Configure the tree view to display hierarchical data
+        treeView.ItemTemplate = new FuncTreeDataTemplate<ShapeTreeItem>(
+            (item, _) => new TextBlock { Text = item.Name },
+            item => item.Children
+        );
 
         Grid.SetRow(treeView, 1);
         panelGrid.Children.Add(treeView);

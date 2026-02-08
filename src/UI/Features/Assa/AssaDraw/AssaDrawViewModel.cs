@@ -262,7 +262,18 @@ public partial class AssaDrawViewModel : ObservableObject
     [RelayCommand]
     private void CloseShape()
     {
-        if (ActiveShape == null || ActiveShape.Points.Count < 3)
+        if (ActiveShape == null)
+        {
+            return;
+        }
+
+        // For circle/rectangle tools, allow closing with 1 point if cursor is active
+        var isCircleOrRect = CurrentTool == DrawingTool.Circle || CurrentTool == DrawingTool.Rectangle;
+        var hasValidCursor = _currentX > float.MinValue && _currentY > float.MinValue;
+        
+        if (ActiveShape.Points.Count < 1 || 
+            (ActiveShape.Points.Count < 2 && !isCircleOrRect) ||
+            (ActiveShape.Points.Count < 3 && !isCircleOrRect && !hasValidCursor))
         {
             return;
         }
@@ -282,6 +293,23 @@ public partial class AssaDrawViewModel : ObservableObject
             var start = ActiveShape.Points[0];
             ActiveShape = MakeRectangle(start.X, start.Y, _currentX - start.X, _currentY - start.Y,
                 ActiveShape.Layer, ActiveShape.ForeColor);
+        }
+        else if (CurrentTool == DrawingTool.Bezier && ActiveShape.Points.Count >= 1)
+        {
+            // Close with a bezier curve from last point back to first point
+            var lastPoint = ActiveShape.Points[^1];
+            var firstPoint = ActiveShape.Points[0];
+            
+            // Calculate control points for a smooth closing bezier curve
+            var oneThirdX = (firstPoint.X - lastPoint.X) / 3f;
+            var oneThirdY = (firstPoint.Y - lastPoint.Y) / 3f;
+
+            ActiveShape.AddPoint(DrawCoordinateType.BezierCurveSupport1,
+                lastPoint.X + oneThirdX, lastPoint.Y + oneThirdY, DrawSettings.PointHelperColor);
+            ActiveShape.AddPoint(DrawCoordinateType.BezierCurveSupport2,
+                lastPoint.X + oneThirdX * 2, lastPoint.Y + oneThirdY * 2, DrawSettings.PointHelperColor);
+            ActiveShape.AddPoint(DrawCoordinateType.BezierCurve, 
+                firstPoint.X, firstPoint.Y, DrawSettings.PointColor);
         }
 
         if (!Shapes.Contains(ActiveShape))
