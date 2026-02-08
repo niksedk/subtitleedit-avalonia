@@ -18,7 +18,7 @@ public class AssaSetPositionWindow : Window
         MinWidth = 450;
         MinHeight = 300;
         Width = 1000;
-        Height = 900;
+        Height = 700;
 
         vm.Window = this;
         DataContext = vm;
@@ -42,7 +42,7 @@ public class AssaSetPositionWindow : Window
         };
 
         // label
-        var label = UiUtil.MakeLabel("Set position of subtitle");
+        var label = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ScreenshotOverlayPosiion));
 
         // Create a grid to hold the video/screenshot and overlay
         var videoGrid = new Grid
@@ -84,6 +84,14 @@ public class AssaSetPositionWindow : Window
 
         // Update position when screenshot image size changes
         bitmapImage.SizeChanged += (_, _) => vm.UpdateOverlayPosition();
+
+        // Call UpdateOverlayPosition after UI setup to apply initial position
+        bitmapImage.LayoutUpdated += (_, _) =>
+        {
+            vm.UpdateOverlayPosition();
+            // Unsubscribe after first call to avoid repeated updates
+            bitmapImage.LayoutUpdated -= (_, _) => { };
+        };
 
         // Implement mouse dragging for overlay image
         Point? dragStartPoint = null;

@@ -931,10 +931,16 @@ public partial class MainViewModel :
             vm.Initialize(_subtitle, selectedItem, _videoFileName, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
         });
 
-        if (result.OkPressed)
+        if (!result.OkPressed)
         {
+            return;
         }
+
+        var x = result.ScreenshotX;
+        var y = result.ScreenshotY;
+        selectedItem.Text = $"{{\\pos({x},{y})}}" + selectedItem.Text;
     }
+
     [RelayCommand]
     private async Task ShowAssaApplyCustomOverrideTags()
     {

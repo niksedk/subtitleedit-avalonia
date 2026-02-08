@@ -14,7 +14,6 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,10 +35,9 @@ public partial class AssaSetPositionViewModel : ObservableObject
     [ObservableProperty] private int _screenshotY;
     [ObservableProperty] private Bitmap _screenshotOverlayText;
     [ObservableProperty] private Bitmap _screenshot;
-    [ObservableProperty] private string _screenshotText;
+    [ObservableProperty] private string _screenshotOverlayPosiion;
 
     private Subtitle _subtitle = new();
-    private string? _videoFileName;
 
     public Subtitle ResultSubtitle => _subtitle;
 
@@ -47,24 +45,30 @@ public partial class AssaSetPositionViewModel : ObservableObject
     {
         Screenshot = new SKBitmap(1, 1).ToAvaloniaBitmap();
         ScreenshotOverlayText = new SKBitmap(1, 1).ToAvaloniaBitmap();
-        ScreenshotText = string.Empty;
+        ScreenshotOverlayPosiion = string.Empty;
     }
 
     partial void OnScreenshotXChanged(int value)
     {
-        UpdateOverlayPosition();
+        // Only update if UI elements are initialized
+        if (VideoGrid != null && ScreenshotOverlayImage != null && ScreenshotImage != null)
+        {
+            UpdateOverlayPosition();
+        }
     }
 
     partial void OnScreenshotYChanged(int value)
     {
-        UpdateOverlayPosition();
+        // Only update if UI elements are initialized
+        if (VideoGrid != null && ScreenshotOverlayImage != null && ScreenshotImage != null)
+        {
+            UpdateOverlayPosition();
+        }
     }
 
     public void Initialize(Subtitle subtitle, SubtitleLineViewModel line, string? videoFileName, int? videoWidth, int? videoHeight)
     {
         _subtitle = new Subtitle(subtitle, false);
-        _videoFileName = videoFileName;
-        ScreenshotText = line.Text;
 
         ScreenshotOverlayText = CreateTextImage(subtitle, line);
         //var byes = ScreenshotOverlayText.ToSkBitmap().ToPngArray();
@@ -183,7 +187,7 @@ public partial class AssaSetPositionViewModel : ObservableObject
         }
 
         using var typeface = SKTypeface.FromFamilyName(style.FontName, fontStyle);
-        using var font = new SKFont(typeface, (float)(style.FontSize * 3.3m));
+        using var font = new SKFont(typeface, (float)(style.FontSize * 1.3m));
         
         // Measure text
         var textBounds = new SKRect();
@@ -399,5 +403,7 @@ public partial class AssaSetPositionViewModel : ObservableObject
             offsetY + overlayY,
             0,
             0);
+
+        ScreenshotOverlayPosiion = $"X: {ScreenshotX}, Y: {ScreenshotY}";
     }
 }
