@@ -12132,7 +12132,7 @@ public partial class MainViewModel :
             if (IsTextInputFocused())
             {
                 var currentKeys = _shortcutManager.GetActiveKeys();
-                if (currentKeys.Count == 1 && keyEventArgs.KeyModifiers == KeyModifiers.None)
+                if (currentKeys.Count == 1 && (keyEventArgs.KeyModifiers == KeyModifiers.None || keyEventArgs.KeyModifiers == KeyModifiers.Shift))
                 {
                     var key = currentKeys.First();
                     var allowedSingleKeyShortcuts = new HashSet<Key>
