@@ -185,6 +185,24 @@ public static class UiTheme
                 }
             },
 
+            // RadioButton
+            new Style(x => x.OfType<RadioButton>())
+            {
+                Setters =
+                {
+                    new Setter(RadioButton.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
+            // CheckBox
+            new Style(x => x.OfType<CheckBox>())
+            {
+                Setters =
+                {
+                    new Setter(CheckBox.ForegroundProperty, new SolidColorBrush(foreColor))
+                }
+            },
+
             // ListBox
             new Style(x => x.OfType<ListBox>())
             {
