@@ -842,14 +842,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                     Start = (decimal)p.StartTime.TotalSeconds,
                     End = (decimal)p.EndTime.TotalSeconds,
                     Text = p.Text
+                        .Replace("<u> ", " <u>")
+                        .Replace(" </u>", "</u> "),
                 })).ToList();
 
-                //resultTexts = jsonTranscription.Select(s => s.ToSubtitleLineViewModel()).Select(p=>  new ResultText
-                //{
-                //    Start = (decimal)p.StartTime.TotalSeconds,
-                //    End = (decimal)p.EndTime.TotalSeconds,
-                //    Text = p.Text
-                //}).ToList();
                 return true;
             }
         }
