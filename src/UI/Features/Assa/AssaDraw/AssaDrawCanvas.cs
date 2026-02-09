@@ -28,6 +28,9 @@ public class AssaDrawCanvas : Control
     public static readonly StyledProperty<DrawShape?> SelectedShapeProperty =
         AvaloniaProperty.Register<AssaDrawCanvas, DrawShape?>(nameof(SelectedShape));
 
+    public static readonly StyledProperty<List<DrawShape>> SelectedShapesProperty =
+        AvaloniaProperty.Register<AssaDrawCanvas, List<DrawShape>>(nameof(SelectedShapes), []);
+
     public static readonly StyledProperty<DrawCoordinate?> ActivePointProperty =
         AvaloniaProperty.Register<AssaDrawCanvas, DrawCoordinate?>(nameof(ActivePoint));
 
@@ -62,6 +65,12 @@ public class AssaDrawCanvas : Control
     {
         get => GetValue(SelectedShapeProperty);
         set => SetValue(SelectedShapeProperty, value);
+    }
+
+    public List<DrawShape> SelectedShapes
+    {
+        get => GetValue(SelectedShapesProperty);
+        set => SetValue(SelectedShapesProperty, value);
     }
 
     public DrawCoordinate? ActivePoint
@@ -170,15 +179,16 @@ public class AssaDrawCanvas : Control
         // Draw all shapes
         foreach (var shape in Shapes.Where(s => !s.Hidden))
         {
-            var isActive = shape == ActiveShape || shape == SelectedShape;
-            DrawShape(context, shape, isActive);
+            var isSelected = SelectedShapes.Contains(shape);
+            var isActive = shape == ActiveShape || shape == SelectedShape || isSelected;
+            DrawShape(context, shape, isActive, isSelected);
             DrawShapePoints(context, shape);
         }
 
         // Draw active shape being created (not yet in Shapes list)
         if (ActiveShape != null && !Shapes.Contains(ActiveShape))
         {
-            DrawShape(context, ActiveShape, true);
+            DrawShape(context, ActiveShape, true, false);
             DrawShapePoints(context, ActiveShape);
 
             // Draw preview to current mouse position
@@ -282,14 +292,14 @@ public class AssaDrawCanvas : Control
         context.DrawRectangle(null, pen, rect);
     }
 
-    private void DrawShape(DrawingContext context, DrawShape shape, bool isActive)
+    private void DrawShape(DrawingContext context, DrawShape shape, bool isActive, bool isSelected)
     {
         if (shape.Points.Count == 0)
         {
             return;
         }
 
-        var color = isActive ? DrawSettings.ActiveShapeLineColor : DrawSettings.ShapeLineColor;
+        var color = isSelected ? Colors.Yellow : (isActive ? DrawSettings.ActiveShapeLineColor : DrawSettings.ShapeLineColor);
         var pen = new Pen(new SolidColorBrush(color), 2, lineCap: PenLineCap.Round);
 
         var i = 0;

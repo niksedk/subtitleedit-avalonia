@@ -46,6 +46,7 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private bool _showGrid = true;
     [ObservableProperty] private ObservableCollection<ShapeTreeItem> _shapeTreeItems = [];
     [ObservableProperty] private ShapeTreeItem? _selectedTreeItem;
+    [ObservableProperty] private List<DrawShape> _selectedShapes = [];
 
     private float _currentX = float.MinValue;
     private float _currentY = float.MinValue;
@@ -682,6 +683,13 @@ public partial class AssaDrawViewModel : ObservableObject
                         e.Handled = true;
                     }
                     break;
+                case Key.A:
+                    if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                    {
+                        SelectAllShapes();
+                        e.Handled = true;
+                    }
+                    break;
             }
         }
         else if (e.Key == Key.F4)
@@ -713,6 +721,22 @@ public partial class AssaDrawViewModel : ObservableObject
 
     private void AdjustPosition(float xAdjust, float yAdjust)
     {
+        // Check if multiple shapes are selected (Ctrl+A scenario)
+        if (SelectedShapes.Count > 0)
+        {
+            foreach (var shape in SelectedShapes)
+            {
+                foreach (var point in shape.Points)
+                {
+                    point.X += xAdjust;
+                    point.Y += yAdjust;
+                }
+            }
+            RefreshTreeView();
+            Canvas?.InvalidateVisual();
+            return;
+        }
+
         // Check if a shape is selected in the tree view
         if (SelectedTreeItem?.Shape != null)
         {
@@ -791,6 +815,17 @@ public partial class AssaDrawViewModel : ObservableObject
             }
             Canvas?.InvalidateVisual();
         }
+    }
+
+    [RelayCommand]
+    private void SelectAllShapes()
+    {
+        SelectedShapes = Shapes.ToList();
+        if (Canvas != null)
+        {
+            Canvas.SelectedShapes = SelectedShapes;
+        }
+        Canvas?.InvalidateVisual();
     }
 }
 
