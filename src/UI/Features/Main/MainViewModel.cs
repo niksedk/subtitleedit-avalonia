@@ -832,7 +832,7 @@ public partial class MainViewModel :
     {
         var result = await ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(vm =>
         {
-            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
         });
 
         if (result.OkPressed)
@@ -846,14 +846,30 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaDraw()
     {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null)
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
         {
-            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(GetUpdateSubtitle(), selectedItems, _videoFileName ?? string.Empty);
         });
 
-        if (result.OkPressed)
+        if (!result.OkPressed)
         {
+            return;
         }
+
+        var assa = new SubStationAlpha();
+        for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
+        {
+            var p = result.ResultSubtitle.Paragraphs[index];
+            Subtitles.Insert(index, new SubtitleLineViewModel(p, assa));
+        }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]

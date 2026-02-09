@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -13,8 +5,20 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 
@@ -48,23 +52,44 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private ShapeTreeItem? _selectedTreeItem;
     [ObservableProperty] private List<DrawShape> _selectedShapes = [];
 
+    public Subtitle ResultSubtitle { get; set; } = new Subtitle();
+
     private float _currentX = float.MinValue;
     private float _currentY = float.MinValue;
     private readonly Regex _regexStart = new(@"\{[^{]*\\p1[^}]*\}");
     private readonly Regex _regexEnd = new(@"\{[^{]*\\p0[^}]*\}");
+    private readonly IFileHelper _fileHelper;
+    private string _fileName = string.Empty;
 
-    public AssaDrawViewModel()
+    public AssaDrawViewModel(IFileHelper fileHelper)
     {
+        _fileHelper = fileHelper;
     }
 
-    public void Initialize(string? existingDrawCode = null)
+    public void Initialize()
     {
-        if (!string.IsNullOrEmpty(existingDrawCode))
-        {
-            ImportAssaDrawingFromText(existingDrawCode, 0, Colors.White, false);
-        }
-
         RefreshTreeView();
+        Canvas?.InvalidateVisual();
+    }
+
+    public void Initialize(Subtitle subtitle, List<SubtitleLineViewModel> selectedLines, string videoFileName)
+    {
+        var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(subtitle.Header);
+        foreach (var line in selectedLines)
+        {
+            if (line.Text.Contains("{\\p1}") && line.Text.Contains("{\\p0}"))
+            {
+                var style = styles.FirstOrDefault(s => s.Name.Equals(line.Style, StringComparison.OrdinalIgnoreCase));
+                if (style == null)
+                {
+                    style = new SsaStyle();
+                }
+
+                ImportAssaDrawingFromText(line.Text, line.Layer, style.Background.ToAvaloniaColor(), false);
+            }
+        }
+        RefreshTreeView();
+        Canvas?.InvalidateVisual();
     }
 
     public void SetCanvas(AssaDrawCanvas canvas)
@@ -274,8 +299,8 @@ public partial class AssaDrawViewModel : ObservableObject
         // For circle/rectangle tools, allow closing with 1 point if cursor is active
         var isCircleOrRect = CurrentTool == DrawingTool.Circle || CurrentTool == DrawingTool.Rectangle;
         var hasValidCursor = _currentX > float.MinValue && _currentY > float.MinValue;
-        
-        if (ActiveShape.Points.Count < 1 || 
+
+        if (ActiveShape.Points.Count < 1 ||
             (ActiveShape.Points.Count < 2 && !isCircleOrRect) ||
             (ActiveShape.Points.Count < 3 && !isCircleOrRect && !hasValidCursor))
         {
@@ -303,7 +328,7 @@ public partial class AssaDrawViewModel : ObservableObject
             // Close with a bezier curve from last point back to first point
             var lastPoint = ActiveShape.Points[^1];
             var firstPoint = ActiveShape.Points[0];
-            
+
             // Calculate control points for a smooth closing bezier curve
             var oneThirdX = (firstPoint.X - lastPoint.X) / 3f;
             var oneThirdY = (firstPoint.Y - lastPoint.Y) / 3f;
@@ -312,7 +337,7 @@ public partial class AssaDrawViewModel : ObservableObject
                 lastPoint.X + oneThirdX, lastPoint.Y + oneThirdY, DrawSettings.PointHelperColor);
             ActiveShape.AddPoint(DrawCoordinateType.BezierCurveSupport2,
                 lastPoint.X + oneThirdX * 2, lastPoint.Y + oneThirdY * 2, DrawSettings.PointHelperColor);
-            ActiveShape.AddPoint(DrawCoordinateType.BezierCurve, 
+            ActiveShape.AddPoint(DrawCoordinateType.BezierCurve,
                 firstPoint.X, firstPoint.Y, DrawSettings.PointColor);
         }
 
@@ -415,6 +440,78 @@ public partial class AssaDrawViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task Save()
+    {
+        if (Shapes.Count == 0)
+        {
+            return;
+        }
+
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(
+            Window,
+            ".assadraw",
+            string.IsNullOrEmpty(_fileName) ? "untitled.assadraw" : Path.GetFileName(_fileName),
+            "Save ASSA drawing");
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        _fileName = fileName;
+
+        try
+        {
+            var subtitle = GenerateSubtitle();
+            var format = new AdvancedSubStationAlpha();
+            var text = format.ToText(subtitle, string.Empty);
+            await File.WriteAllTextAsync(fileName, text);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task Load()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenFile(
+            Window,
+            "Open ASSA drawing",
+            "ASSA drawing files",
+            "*.assadraw",
+            "ASS files",
+            "*.ass");
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        try
+        {
+            var text = await File.ReadAllTextAsync(fileName);
+            _fileName = fileName;
+            LoadFromText(text);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    [RelayCommand]
     private async Task CopyToClipboard()
     {
         var code = GenerateAssaCode();
@@ -422,6 +519,40 @@ public partial class AssaDrawViewModel : ObservableObject
         {
             await Window.Clipboard.SetTextAsync(code);
         }
+    }
+
+    private Subtitle GenerateSubtitle()
+    {
+        var subtitle = new Subtitle();
+        subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+
+        // Update resolution in header
+        subtitle.Header = subtitle.Header.Replace("PlayResX: 384", $"PlayResX: {CanvasWidth}");
+        subtitle.Header = subtitle.Header.Replace("PlayResY: 288", $"PlayResY: {CanvasHeight}");
+
+        var layers = Shapes.Where(s => !s.Hidden).GroupBy(s => s.Layer).OrderBy(g => g.Key);
+        foreach (var layer in layers)
+        {
+            var sb = new StringBuilder();
+            foreach (var shape in layer.Where(p => !p.IsEraser))
+            {
+                sb.Append(shape.ToAssa());
+                sb.Append("  ");
+            }
+
+            var drawText = sb.ToString().Trim();
+            if (!string.IsNullOrEmpty(drawText))
+            {
+                drawText = $"{{\\p1}}{drawText}{{\\p0}}";
+                var p = new Paragraph(drawText, 0, 10000)
+                {
+                    Layer = layer.Key,
+                };
+                subtitle.Paragraphs.Add(p);
+            }
+        }
+
+        return subtitle;
     }
 
     private string GenerateAssaCode()
@@ -451,6 +582,7 @@ public partial class AssaDrawViewModel : ObservableObject
     private void Ok()
     {
         AssaDrawingCode = GenerateAssaCode();
+        ResultSubtitle = GenerateSubtitle();
         OkPressed = true;
         Window?.Close();
     }
@@ -581,6 +713,37 @@ public partial class AssaDrawViewModel : ObservableObject
         }
     }
 
+    private void LoadFromText(string text)
+    {
+        ClearAll();
+
+        var subtitle = new Subtitle();
+        var format = new AdvancedSubStationAlpha();
+        format.LoadSubtitle(subtitle, text.SplitToLines(), _fileName);
+
+        // Read resolution from header
+        var playResX = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", subtitle.Header);
+        if (int.TryParse(playResX, out var width) && width >= 125 && width <= 4096)
+        {
+            CanvasWidth = width;
+        }
+
+        var playResY = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", subtitle.Header);
+        if (int.TryParse(playResY, out var height) && height >= 125 && height <= 4096)
+        {
+            CanvasHeight = height;
+        }
+
+        // Import drawing codes from paragraphs
+        foreach (var paragraph in subtitle.Paragraphs)
+        {
+            ImportAssaDrawingFromText(paragraph.Text, paragraph.Layer, Colors.White, false);
+        }
+
+        RefreshTreeView();
+        Canvas?.InvalidateVisual();
+    }
+
     internal async void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
@@ -615,11 +778,11 @@ public partial class AssaDrawViewModel : ObservableObject
             DeleteShape();
             e.Handled = true;
         }
-        else if (e.KeyModifiers.HasFlag(KeyModifiers.Alt) || 
+        else if (e.KeyModifiers.HasFlag(KeyModifiers.Alt) ||
                  (e.KeyModifiers.HasFlag(KeyModifiers.Control) && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)))
         {
             var offset = e.KeyModifiers.HasFlag(KeyModifiers.Alt) ? 1 : 10;
-            
+
             switch (e.Key)
             {
                 case Key.Up:
