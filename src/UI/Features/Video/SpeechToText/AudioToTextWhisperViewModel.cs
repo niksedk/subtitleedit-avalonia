@@ -662,7 +662,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         });
     }
 
-    private string GetSubtitleFileName(string videoFileName)
+    private static string GetSubtitleFileName(string videoFileName)
     {
         var path = Path.GetDirectoryName(videoFileName);
         var fileName = Path.GetFileNameWithoutExtension(videoFileName);
@@ -850,89 +850,108 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
         }
 
-        var srtFileName = waveFileName + ".srt";
-        if (!File.Exists(srtFileName) && waveFileName.EndsWith(".wav"))
-        {
-            srtFileName = waveFileName.Remove(waveFileName.Length - 4) + ".srt";
-        }
-
         var whisperFolder = engine.GetAndCreateWhisperFolder();
-        if (!string.IsNullOrEmpty(whisperFolder) && !File.Exists(srtFileName) && !string.IsNullOrEmpty(videoFileName))
+        var srtCandidates = GetResultFileCandidates(".srt", waveFileName, videoFileName, whisperFolder);
+        var vttCandidates = GetResultFileCandidates(".vtt", waveFileName, videoFileName, whisperFolder);
+
+        var srtFileName = srtCandidates.FirstOrDefault(File.Exists);
+        var vttFileName = vttCandidates.FirstOrDefault(File.Exists);
+
+        if (string.IsNullOrEmpty(srtFileName) && string.IsNullOrEmpty(vttFileName))
         {
-            srtFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(videoFileName)) + ".srt";
+            srtFileName = TryFindFilePathInOutput(outputText);
         }
 
-        if (!File.Exists(srtFileName))
-        {
-            srtFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName)) + ".srt";
-        }
-
-        var vttFileName = Path.Combine(whisperFolder, Path.GetFileName(waveFileName) + ".vtt");
-        if (!File.Exists(vttFileName))
-        {
-            vttFileName = Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName)) + ".vtt";
-        }
-
-        if (!File.Exists(srtFileName) && !File.Exists(vttFileName))
-        {
-            //   [39] = "output_srt: saving output to 'C:\\Users\\nikse\\AppData\\Local\\Temp\\se_audioclip_01e9ec97-a99d-465c-8468-a1d34dd441e4.wav.srt'\r\n"
-            foreach (var line in outputText)
-            {
-                var findText = "output_srt: saving output to";
-                if (line.Contains(findText, StringComparison.OrdinalIgnoreCase))
-                {
-                    srtFileName = line.Substring(line.IndexOf(findText) + findText.Length + 1).Trim('"', ' ', '\'', '\r', '\n');
-                    break;
-                }
-            }
-        }
-
-        if (!File.Exists(srtFileName) && !File.Exists(vttFileName))
+        if (string.IsNullOrEmpty(srtFileName) && string.IsNullOrEmpty(vttFileName))
         {
             resultTexts = new List<ResultText>();
             return false;
         }
 
         var sub = new Subtitle();
+        var foundFileName = string.Empty;
+
         if (File.Exists(srtFileName))
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new SubRip().LoadSubtitle(sub, rawText, srtFileName);
+            foundFileName = srtFileName;
             outputText?.Enqueue($"Loading result from {srtFileName}");
         }
-        else
+        else if (File.Exists(vttFileName))
         {
-            var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
-            new WebVTT().LoadSubtitle(sub, rawText, srtFileName);
+            var rawText = FileUtil.ReadAllLinesShared(vttFileName, Encoding.UTF8);
+            new WebVTT().LoadSubtitle(sub, rawText, vttFileName);
+            foundFileName = vttFileName;
             outputText?.Enqueue($"Loading result from {vttFileName}");
         }
 
         sub.RemoveEmptyLines();
 
-        var results = new List<ResultText>();
-        foreach (var p in sub.Paragraphs)
+        resultTexts = sub.Paragraphs.Select(p => new ResultText
         {
-            results.Add(new ResultText
-            {
-                Start = (decimal)p.StartTime.TotalSeconds,
-                End = (decimal)p.EndTime.TotalSeconds,
-                Text = p.Text
-            });
-        }
+            Start = (decimal)p.StartTime.TotalSeconds,
+            End = (decimal)p.EndTime.TotalSeconds,
+            Text = p.Text
+        }).ToList();
 
-        resultTexts = results;
-
-        if (File.Exists(srtFileName))
+        if (!string.IsNullOrEmpty(foundFileName))
         {
-            filesToDelete?.Add(srtFileName);
-        }
-
-        if (File.Exists(vttFileName))
-        {
-            filesToDelete?.Add(vttFileName);
+            filesToDelete?.Add(foundFileName);
         }
 
         return true;
+    }
+
+    private static List<string> GetResultFileCandidates(string ext, string waveFileName, string videoFileName, string whisperFolder)
+    {
+        var candidates = new List<string>
+        {
+            waveFileName + ext,
+            Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileNameWithoutExtension(videoFileName) + ext),
+            Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileNameWithoutExtension(waveFileName) + ext),
+            Path.Combine(AppContext.BaseDirectory, Path.GetFileNameWithoutExtension(videoFileName) + ext),
+            Path.Combine(AppContext.BaseDirectory, Path.GetFileNameWithoutExtension(waveFileName) + ext),
+            Path.Combine(Se.DataFolder, Path.GetFileNameWithoutExtension(videoFileName) + ext),
+            Path.Combine(Se.DataFolder, Path.GetFileNameWithoutExtension(waveFileName) + ext),
+        };
+
+        if (waveFileName.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+        {
+            candidates.Add(waveFileName.Remove(waveFileName.Length - 4) + ext);
+        }
+
+        if (!string.IsNullOrEmpty(whisperFolder))
+        {
+            if (!string.IsNullOrEmpty(videoFileName))
+            {
+                candidates.Add(Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(videoFileName) + ext));
+            }
+
+            candidates.Add(Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName) + ext));
+        }
+
+        return candidates;
+    }
+
+    private static string? TryFindFilePathInOutput(ConcurrentQueue<string> outputText)
+    {
+        const string findText = "output_srt: saving output to";
+        foreach (var line in outputText)
+        {
+            if (line.Contains(findText, StringComparison.OrdinalIgnoreCase))
+            {
+                var filePath = line.Substring(line.IndexOf(findText, StringComparison.OrdinalIgnoreCase) + findText.Length + 1)
+                    .Trim('"', ' ', '\'', '\r', '\n');
+                
+                if (File.Exists(filePath))
+                {
+                    return filePath;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void ShowProgressBar()
