@@ -110,7 +110,12 @@ public class ImportPlainTextWindow : Window
 
         var textBox = new TextBox { AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
-        textBox.Bind(Visual.IsVisibleProperty, new Binding("!MultipleFilesOneFileIsOneSubtitle"));
+        textBox.Bind(
+            Visual.IsVisibleProperty,
+            new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle))
+            {
+                Converter = new InverseBooleanConverter(),
+            });
 
         var listBoxFiles = new ListBox();
         listBoxFiles.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Files)));
