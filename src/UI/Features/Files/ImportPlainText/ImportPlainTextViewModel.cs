@@ -87,7 +87,15 @@ public partial class ImportPlainTextViewModel : ObservableObject
         PlainText = string.Empty;
 
         LineBreaks = new ObservableCollection<string> { string.Empty, "|", ";", "||" };
-        SelectedLineBreak = LineBreaks[0];
+        var existingLineBreak = SelectedLineBreak;
+        if (!string.IsNullOrEmpty(existingLineBreak) && LineBreaks.Contains(existingLineBreak))
+        {
+            SelectedLineBreak = existingLineBreak;
+        }
+        else
+        {
+            SelectedLineBreak = LineBreaks[0];
+        }
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault();
