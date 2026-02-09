@@ -126,7 +126,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         {
             PlainText = LoadTextFromFile(_currentFileName);
         }
-        GeneratePreview();
     }
 
     partial void OnSelectedSplitAtOptionChanged(string? value) => GeneratePreview();
