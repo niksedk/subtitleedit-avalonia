@@ -87,7 +87,7 @@ public class ImportPlainTextWindow : Window
         };
 
         var checkBoxMultiple = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.MultipleFilesOneFileIsOneSubtitle));
-        var buttonOpen = UiUtil.MakeButton("Open text file", vm.FileImportCommand);
+        var buttonOpen = UiUtil.MakeButton(Se.Language.File.Import.OpenTextFile, vm.FileImportCommand);
         var buttonOpenMultiple = UiUtil.MakeButton("...", vm.FilesImportCommand);
 
         var panelTop = new Grid
@@ -135,16 +135,16 @@ public class ImportPlainTextWindow : Window
         var stack = new StackPanel { Spacing = 10 };
 
         var splittingStack = new StackPanel { Spacing = 5 };
-        splittingStack.Children.Add(UiUtil.MakeRadioButton("Auto split text", vm, nameof(vm.IsAutoSplitText), "SplitGroup"));
+        splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.AutoSplitText, vm, nameof(vm.IsAutoSplitText), "SplitGroup"));
         splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.BlankLines, vm, nameof(vm.IsSplitAtBlankLines), "SplitGroup"));
-        splittingStack.Children.Add(UiUtil.MakeRadioButton("Line mode", vm, nameof(vm.IsSplitAtLineMode), "SplitGroup"));
+        splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.LineMode, vm, nameof(vm.IsSplitAtLineMode), "SplitGroup"));
 
         var comboLineMode = UiUtil.MakeComboBox(vm.SplitAtOptions, vm, nameof(vm.SelectedSplitAtOption)).WithHorizontalAlignmentStretch();
         comboLineMode.Bind(InputElement.IsEnabledProperty, new Binding(nameof(vm.IsSplitAtLineMode)));
         splittingStack.Children.Add(comboLineMode);
 
         var lineBreakGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
-        lineBreakGrid.Add(UiUtil.MakeLabel("Line break"), 0, 0);
+        lineBreakGrid.Add(UiUtil.MakeLabel(Se.Language.File.Import.LineBreak), 0, 0);
         var comboLineBreak = UiUtil.MakeComboBox(vm.LineBreaks, vm, null).WithHorizontalAlignmentStretch();
         comboLineBreak.IsEditable = true;
         comboLineBreak.Bind(ComboBox.TextProperty, new Binding(nameof(vm.SelectedLineBreak)) { Mode = BindingMode.TwoWay });
@@ -154,14 +154,14 @@ public class ImportPlainTextWindow : Window
         stack.Children.Add(MakeGroupBox(Se.Language.File.Import.SplitTextAt, splittingStack));
 
         var settingsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = GridLength.Auto } }, RowDefinitions = { new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition() }, RowSpacing = 5 };
-        settingsGrid.Add(UiUtil.MakeLabel("Max. line length"), 0, 0);
+        settingsGrid.Add(UiUtil.MakeLabel(Se.Language.File.Import.MaxLineLength), 0, 0);
         settingsGrid.Add(UiUtil.MakeNumericUpDownInt(1, 500, 42, 110, vm, nameof(vm.SingleLineMaxLength)), 0, 1);
-        settingsGrid.Add(UiUtil.MakeCheckBox("Merge short lines", vm, nameof(vm.MergeShortLines)), 1, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.MergeShortLines, vm, nameof(vm.MergeShortLines)), 1, 0, 1, 2);
         settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.General.AutoBreak, vm, nameof(vm.AutoBreak)), 2, 0, 1, 2);
-        settingsGrid.Add(UiUtil.MakeCheckBox("Remove lines without letters", vm, nameof(vm.RemoveLinesWithoutLetters)), 3, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.RemoveLinesWithoutLetters, vm, nameof(vm.RemoveLinesWithoutLetters)), 3, 0, 1, 2);
 
         var endCharsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
-        endCharsGrid.Add(UiUtil.MakeCheckBox("Split at end chars", vm, nameof(vm.SplitAtEndCharsSetting)), 0, 0);
+        endCharsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.SplitAtEndCharsSetting, vm, nameof(vm.SplitAtEndCharsSetting)), 0, 0);
         endCharsGrid.Add(UiUtil.MakeTextBox(110, vm, nameof(vm.EndChars)), 0, 1);
         settingsGrid.Add(endCharsGrid, 4, 0, 1, 2);
 
@@ -171,7 +171,7 @@ public class ImportPlainTextWindow : Window
 
         var timeStack = new StackPanel { Spacing = 2 };
         timeStack.Children.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.ImportTimeCodes.Replace("...", string.Empty), vm, nameof(vm.IsTimeCodeGenerate)));
-        var checkTakeTime = UiUtil.MakeCheckBox("Take time from current file", vm, nameof(vm.IsTimeCodeTakeFromCurrent));
+        var checkTakeTime = UiUtil.MakeCheckBox(Se.Language.File.Import.TakeTimeFromCurrentFile, vm, nameof(vm.IsTimeCodeTakeFromCurrent));
         checkTakeTime.Bind(InputElement.IsEnabledProperty, new Binding(nameof(vm.IsTimeCodeGenerate)));
         timeStack.Children.Add(checkTakeTime);
 
@@ -184,12 +184,13 @@ public class ImportPlainTextWindow : Window
 
         var durStack = new StackPanel { Spacing = 2 };
         durStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.General.Auto, vm, nameof(vm.IsAutoDuration), "DurGroup"));
-        durStack.Children.Add(UiUtil.MakeHorizontalPanel(UiUtil.MakeRadioButton("Fixed", vm, nameof(vm.IsFixedDuration), "DurGroup"),
-            UiUtil.MakeNumericUpDownInt(100, 50000, 2000, 110, vm, nameof(vm.FixedDuration)).WithBindEnabled(nameof(vm.IsFixedDuration))));
+        durStack.Children.Add(UiUtil.MakeHorizontalPanel(UiUtil.MakeRadioButton(Se.Language.File.Import.Fixed, vm, nameof(vm.IsFixedDuration), "DurGroup"),
+            UiUtil.MakeNumericUpDownInt(100, 50000, 2000, 110, vm, nameof(vm.FixedDuration))
+            .WithBindEnabled(nameof(vm.IsFixedDuration))));
 
         stack.Children.Add(MakeGroupBox(Se.Language.General.Duration, durStack));
 
-        return MakeGroupBox("Import options", new ScrollViewer { Content = stack });
+        return MakeGroupBox(Se.Language.File.Import.ImportOptions, new ScrollViewer { Content = stack });
     }
 
     private static Control MakePreviewGroup(ImportPlainTextViewModel vm)

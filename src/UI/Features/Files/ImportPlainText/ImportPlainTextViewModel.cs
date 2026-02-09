@@ -181,9 +181,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
             foreach (var format in SubtitleFormat.AllSubtitleFormats)
             {
                 var typeName = format.GetType().Name;
-                if (typeName == "PlainText" || typeName == "SubRip" || format.Name.Contains("CSV", StringComparison.OrdinalIgnoreCase))
+                if ((typeName == "PlainText" || typeName == "SubRip" || format.Name.Contains("CSV", StringComparison.OrdinalIgnoreCase)) && typeName != "SubRip")
                 {
-                    if (typeName != "SubRip") continue;
+                    continue;
                 }
 
                 if (format.IsMine(lines, string.Empty))
@@ -255,7 +255,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         foreach (var fileName in Files)
         {
-            var text = LoadTextFromFile(fileName).Replace("|", Environment.NewLine);
+            var text = LoadTextFromFile(fileName);
             if (!string.IsNullOrEmpty(SelectedLineBreak))
             {
                 foreach (var splitter in SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries))
@@ -270,8 +270,8 @@ public partial class ImportPlainTextViewModel : ObservableObject
     private void ImportLineMode(string[] lines)
     {
         int mode = SelectedSplitAtOption == Se.Language.File.Import.TwoLinesAreOneSubtitle ? 2 : 1;
-        var currentLines = new List<string>();
-        foreach (var line in lines)
+
+        var processedLines = lines.Select(line =>
         {
             var processed = line;
             if (!string.IsNullOrEmpty(SelectedLineBreak))
@@ -281,20 +281,20 @@ public partial class ImportPlainTextViewModel : ObservableObject
                     processed = processed.Replace(splitter.Trim(), Environment.NewLine);
                 }
             }
+            return processed;
+        })
+        .Where(p => !string.IsNullOrWhiteSpace(p) || !RemoveLinesWithoutLetters)
+        .Select(p => string.IsNullOrWhiteSpace(p) ? string.Empty : (AutoBreak ? Utilities.AutoBreakLine(p.Trim()) : p.Trim()))
+        .ToList();
 
-            if (string.IsNullOrWhiteSpace(processed) && !RemoveLinesWithoutLetters)
-                currentLines.Add(string.Empty);
-            else if (!string.IsNullOrWhiteSpace(processed))
-                currentLines.Add(AutoBreak ? Utilities.AutoBreakLine(processed.Trim()) : processed.Trim());
-
-            if (currentLines.Count >= mode)
+        for (var i = 0; i < processedLines.Count; i += mode)
+        {
+            var group = processedLines.Skip(i).Take(mode).ToList();
+            if (group.Count > 0)
             {
-                FixedSubtitle.Paragraphs.Add(new Paragraph(string.Join(Environment.NewLine, currentLines), 0, 0));
-                currentLines.Clear();
+                FixedSubtitle.Paragraphs.Add(new Paragraph(string.Join(Environment.NewLine, group), 0, 0));
             }
         }
-        if (currentLines.Count > 0)
-            FixedSubtitle.Paragraphs.Add(new Paragraph(string.Join(Environment.NewLine, currentLines), 0, 0));
     }
 
     private void ImportAutoSplit(string[] lines)
@@ -541,7 +541,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     private async Task FilesImport()
     {
         if (Window == null) return;
-        var fileNames = await _fileHelper.PickOpenFiles(Window, "Open text files", Se.Language.General.TextFiles, _textExtensions, string.Empty, new List<string>());
+        var fileNames = await _fileHelper.PickOpenFiles(Window, Se.Language.File.Import.OpenTextFiles, Se.Language.General.TextFiles, _textExtensions, string.Empty, new List<string>());
         if (fileNames.Length == 0) return;
         foreach (var f in fileNames) Files.Add(f);
         MultipleFilesOneFileIsOneSubtitle = true;

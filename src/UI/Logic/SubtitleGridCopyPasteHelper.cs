@@ -12,7 +12,7 @@ namespace Nikse.SubtitleEdit.Logic;
 
 internal static class SubtitleGridCopyPasteHelper
 {
-    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
+    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle? sourceSubtitle)
     {
         var subtitle = new Subtitle();
         if (sourceSubtitle != null)
@@ -29,7 +29,7 @@ internal static class SubtitleGridCopyPasteHelper
         await ClipboardHelper.SetTextAsync(window, text);
     }
 
-    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
+    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle? sourceSubtitle)
     {
         var subtitle = new Subtitle();
         if (sourceSubtitle != null)

@@ -20,6 +20,20 @@ public class LanguageImport
     public string TwoLinesAreOneSubtitle { get; set; }
     public string ImportFilesDotDotDot { get; set; }
     public string MultipleFiles { get; set; }
+    public string ImportOptions { get; set; }
+    public string AutoSplitText { get; set; }
+    public string LineMode { get; set; }
+    public string MaxLineLength { get; set; }
+    public string MaxLinesPerSubtitle { get; set; }
+    public string MinGapBetweenSubtitles { get; set; }
+    public string MergeShortLines { get; set; }
+    public string RemoveLinesWithoutLetters { get; set; }
+    public string SplitAtEndCharsSetting { get; set; }
+    public string TakeTimeFromCurrentFile { get; set; }
+    public string Fixed { get; set; }
+    public string LineBreak { get; internal set; }
+    public string OpenTextFile { get; internal set; }
+    public string OpenTextFiles { get; internal set; }
 
     public LanguageImport()
     {
@@ -51,5 +65,19 @@ Rules:
         TwoLinesAreOneSubtitle = "Two lines are one subtitle";
         ImportFilesDotDotDot = "Import files...";
         MultipleFiles = "Import from multiple text files (one file is one subtitle)";
+        ImportOptions = "Import options";
+        AutoSplitText = "Auto split text";
+        LineMode = "Line mode";
+        MaxLineLength = "Max line length";
+        MaxLinesPerSubtitle = "Max lines per subtitle";
+        MinGapBetweenSubtitles = "Min gap between subtitles";
+        MergeShortLines = "Merge short lines";
+        RemoveLinesWithoutLetters = "Remove lines without letters";
+        SplitAtEndCharsSetting = "Split at end chars";
+        TakeTimeFromCurrentFile = "Take time from current file";
+        Fixed = "Fixed";
+        LineBreak = "Line break";
+        OpenTextFile = "Open text file";
+        OpenTextFiles = "Open text files";
     }
 }
