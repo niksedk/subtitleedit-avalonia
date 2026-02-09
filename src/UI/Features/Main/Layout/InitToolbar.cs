@@ -214,20 +214,6 @@ public static class InitToolbar
             isLastSeparator = false;
         }
 
-        stackPanelLeft.Children.Add(new Button
-        {
-            Content = new Image
-            {
-                Source = new Bitmap(System.IO.Path.Combine(path, "SourceView.png")),
-                Width = 32,
-                Height = 32,
-            },
-            Command = vm.ToggleSourceViewCommand,
-            Background = Brushes.Transparent,
-            [ToolTip.TipProperty] = "Toggle Source View",
-        });
-        isLastSeparator = false;
-
         if (appearance.ToolbarShowHelp)
         {
             if (!isLastSeparator)
