@@ -109,7 +109,7 @@ public class ImportPlainTextWindow : Window
         var panelEncoding = UiUtil.MakeHorizontalPanel(labelEncoding, comboEncoding);
 
         var textBox = new TextBox { AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
-        textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
+        textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
         textBox.Bind(
             Visual.IsVisibleProperty,
             new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle))
@@ -138,6 +138,7 @@ public class ImportPlainTextWindow : Window
         splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.AutoSplitText, vm, nameof(vm.IsAutoSplitText), "SplitGroup"));
         splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.BlankLines, vm, nameof(vm.IsSplitAtBlankLines), "SplitGroup"));
         splittingStack.Children.Add(UiUtil.MakeRadioButton(Se.Language.File.Import.LineMode, vm, nameof(vm.IsSplitAtLineMode), "SplitGroup"));
+        splittingStack.Children.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.TryToFindTimeCodes, vm, nameof(vm.TryToFindTimeCodes)));
 
         var comboLineMode = UiUtil.MakeComboBox(vm.SplitAtOptions, vm, nameof(vm.SelectedSplitAtOption)).WithHorizontalAlignmentStretch();
         comboLineMode.Bind(InputElement.IsEnabledProperty, new Binding(nameof(vm.IsSplitAtLineMode)));
@@ -147,7 +148,7 @@ public class ImportPlainTextWindow : Window
         lineBreakGrid.Add(UiUtil.MakeLabel(Se.Language.File.Import.LineBreak), 0, 0);
         var comboLineBreak = UiUtil.MakeComboBox(vm.LineBreaks, vm, null).WithHorizontalAlignmentStretch();
         comboLineBreak.IsEditable = true;
-        comboLineBreak.Bind(ComboBox.TextProperty, new Binding(nameof(vm.SelectedLineBreak)) { Mode = BindingMode.TwoWay });
+        comboLineBreak.Bind(ComboBox.TextProperty, new Binding(nameof(vm.SelectedLineBreak)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
         lineBreakGrid.Add(comboLineBreak, 0, 1);
         splittingStack.Children.Add(lineBreakGrid);
 
@@ -155,15 +156,21 @@ public class ImportPlainTextWindow : Window
 
         var settingsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = GridLength.Auto } }, RowDefinitions = { new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition(), new RowDefinition() }, RowSpacing = 5 };
         settingsGrid.Add(UiUtil.MakeLabel(Se.Language.File.Import.MaxLineLength), 0, 0);
-        settingsGrid.Add(UiUtil.MakeNumericUpDownInt(1, 500, 42, 110, vm, nameof(vm.SingleLineMaxLength)), 0, 1);
-        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.MergeShortLines, vm, nameof(vm.MergeShortLines)), 1, 0, 1, 2);
-        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.General.AutoBreak, vm, nameof(vm.AutoBreak)), 2, 0, 1, 2);
-        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.RemoveLinesWithoutLetters, vm, nameof(vm.RemoveLinesWithoutLetters)), 3, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeNumericUpDownInt(1, 1000, 42, 110, vm, nameof(vm.SingleLineMaxLength)), 0, 1);
+        settingsGrid.Add(UiUtil.MakeLabel(Se.Language.File.Import.MaxLinesPerSubtitle), 1, 0);
+        settingsGrid.Add(UiUtil.MakeNumericUpDownInt(1, 10, 2, 110, vm, nameof(vm.MaxNumberOfLines)), 1, 1);
+
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.MergeShortLines, vm, nameof(vm.MergeShortLines)), 2, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.General.AutoBreak, vm, nameof(vm.AutoBreak)), 3, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.RemoveLinesWithoutLetters, vm, nameof(vm.RemoveLinesWithoutLetters)), 4, 0, 1, 2);
+        settingsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.BlankLines, vm, nameof(vm.SplitAtBlankLinesSetting)), 5, 0, 1, 2);
 
         var endCharsGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
-        endCharsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.SplitAtEndCharsSetting, vm, nameof(vm.SplitAtEndCharsSetting)), 0, 0);
-        endCharsGrid.Add(UiUtil.MakeTextBox(110, vm, nameof(vm.EndChars)), 0, 1);
-        settingsGrid.Add(endCharsGrid, 4, 0, 1, 2);
+        endCharsGrid.Add(UiUtil.MakeCheckBox(Se.Language.File.Import.SplitAtEndCharsSetting, vm, nameof(vm.SplitAtEndCharsSetting)), 6, 0);
+        var textBoxEndChars = UiUtil.MakeTextBox(110, vm, nameof(vm.EndChars));
+        textBoxEndChars.Bind(TextBox.TextProperty, new Binding(nameof(vm.EndChars)) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+        endCharsGrid.Add(textBoxEndChars, 6, 1);
+        settingsGrid.Add(endCharsGrid, 6, 0, 1, 2);
 
         var settingsGroupBox = MakeGroupBox(Se.Language.General.Settings, settingsGrid);
         settingsGroupBox.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsAutoSplitText)));

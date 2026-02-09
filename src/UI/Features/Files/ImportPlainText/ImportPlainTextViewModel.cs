@@ -55,6 +55,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     [ObservableProperty] private bool _mergeShortLines;
     [ObservableProperty] private bool _autoBreak;
     [ObservableProperty] private int _startFromNumber = 1;
+    [ObservableProperty] private bool _tryToFindTimeCodes;
 
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
@@ -64,10 +65,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
     private Subtitle? _currentlyLoadedSubtitle;
     private string _currentFileName = string.Empty;
 
-    public void SetCurrentSubtitle(Subtitle subtitle)
-    {
-        _currentlyLoadedSubtitle = subtitle;
-    }
+    public void SetCurrentSubtitle(Subtitle subtitle) => _currentlyLoadedSubtitle = subtitle;
 
     private readonly List<string> _textExtensions = new List<string> { "*.txt", "*.rtf", "*.tx3g", "*.astx", "*.html" };
 
@@ -87,15 +85,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
         PlainText = string.Empty;
 
         LineBreaks = new ObservableCollection<string> { string.Empty, "|", ";", "||" };
-        var existingLineBreak = SelectedLineBreak;
-        if (!string.IsNullOrEmpty(existingLineBreak) && LineBreaks.Contains(existingLineBreak))
-        {
-            SelectedLineBreak = existingLineBreak;
-        }
-        else
-        {
-            SelectedLineBreak = LineBreaks[0];
-        }
+        SelectedLineBreak = LineBreaks.Contains(Se.Settings.Tools.ImportTextLineBreak) ? Se.Settings.Tools.ImportTextLineBreak : LineBreaks[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault();
@@ -107,27 +97,18 @@ public partial class ImportPlainTextViewModel : ObservableObject
         MergeShortLines = Se.Settings.Tools.ImportTextMergeShortLines;
         AutoBreak = Se.Settings.Tools.ImportTextAutoBreak;
         IsTimeCodeGenerate = Se.Settings.Tools.ImportTextGenerateTimeCodes;
-        IsTimeCodeTakeFromCurrent = false; // Default to false
-
         GapBetweenSubtitles = Se.Settings.Tools.ImportTextGap;
         IsAutoDuration = Se.Settings.Tools.ImportTextDurationAuto;
         IsFixedDuration = !Se.Settings.Tools.ImportTextDurationAuto;
         FixedDuration = Se.Settings.Tools.ImportTextFixedDuration;
+        TryToFindTimeCodes = Se.Settings.Tools.ImportTextTryToFindTimeCodes;
 
         if (Se.Settings.Tools.ImportTextSplittingLineMode == "TwoLinesAreOneSubtitle" && SplitAtOptions.Count > 1)
-        {
             SelectedSplitAtOption = SplitAtOptions[1];
-        }
     }
 
-    partial void OnSelectedEncodingChanged(TextEncoding? value)
-    {
-        if (!string.IsNullOrEmpty(_currentFileName))
-        {
-            PlainText = LoadTextFromFile(_currentFileName);
-        }
-    }
-
+    // Property Change Handlers
+    partial void OnSelectedEncodingChanged(TextEncoding? value) { if (!string.IsNullOrEmpty(_currentFileName)) PlainText = LoadTextFromFile(_currentFileName); }
     partial void OnSelectedSplitAtOptionChanged(string? value) => GeneratePreview();
     partial void OnPlainTextChanged(string value) => GeneratePreview();
     partial void OnIsAutoSplitTextChanged(bool value) => GeneratePreview();
@@ -149,6 +130,8 @@ public partial class ImportPlainTextViewModel : ObservableObject
     partial void OnMergeShortLinesChanged(bool value) => GeneratePreview();
     partial void OnAutoBreakChanged(bool value) => GeneratePreview();
     partial void OnMultipleFilesOneFileIsOneSubtitleChanged(bool value) => GeneratePreview();
+    partial void OnStartFromNumberChanged(int value) => GeneratePreview();
+    partial void OnTryToFindTimeCodesChanged(bool value) => GeneratePreview();
 
     [RelayCommand]
     private void Refresh() => GeneratePreview();
@@ -162,89 +145,73 @@ public partial class ImportPlainTextViewModel : ObservableObject
             return;
         }
 
+        // HTML Import check
         if (!string.IsNullOrEmpty(_currentFileName) && IsHtmlIndexExportFromSubtitleEdit(_currentFileName))
         {
             var html = FileUtil.ReadAllTextShared(_currentFileName, Encoding.UTF8);
             FixedSubtitle = GetSubtitleFromHtmlIndex(html);
-            var listX = FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, new SubRip())).ToList();
-            Subtitles = new ObservableCollection<SubtitleLineViewModel>(listX);
-            PreviewSubtitlesModifiedText = $"Preview - subtitles modified: {listX.Count}";
-            return;
-        }
-
-        FixedSubtitle = new Subtitle();
-        var lines = (PlainText ?? string.Empty).SplitToLines();
-
-        var timeCodesOk = false;
-        if (!MultipleFilesOneFileIsOneSubtitle)
-        {
-            foreach (var format in SubtitleFormat.AllSubtitleFormats)
-            {
-                var typeName = format.GetType().Name;
-                if ((typeName == "PlainText" || typeName == "SubRip" || format.Name.Contains("CSV", StringComparison.OrdinalIgnoreCase)) && typeName != "SubRip")
-                {
-                    continue;
-                }
-
-                if (format.IsMine(lines, string.Empty))
-                {
-                    format.LoadSubtitle(FixedSubtitle, lines, string.Empty);
-                    if (FixedSubtitle.Paragraphs.Count > 0)
-                    {
-                        timeCodesOk = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (MultipleFilesOneFileIsOneSubtitle)
-        {
-            ImportMultipleFiles();
-        }
-        else if (timeCodesOk)
-        {
-            // Already loaded via SubRip check above
-        }
-        else if (IsSplitAtLineMode)
-        {
-            ImportLineMode(lines.ToArray());
-        }
-        else if (IsAutoSplitText)
-        {
-            ImportAutoSplit(lines.ToArray());
         }
         else
         {
-            ImportSplitAtBlankLine(lines.ToList());
-        }
+            FixedSubtitle = new Subtitle();
+            var lines = (PlainText ?? string.Empty).SplitToLines();
+            bool timeCodesFound = false;
 
-        if (MergeShortLines)
-        {
-            MergeLinesWithContinuation();
-        }
-
-        FixedSubtitle.Renumber(StartFromNumber);
-
-        if (IsTimeCodeGenerate && IsTimeCodeTakeFromCurrent && _currentlyLoadedSubtitle != null)
-        {
-            for (var i = 0; i < FixedSubtitle.Paragraphs.Count; i++)
+            // 1. Check for existing timecodes if requested
+            if (TryToFindTimeCodes && !MultipleFilesOneFileIsOneSubtitle)
             {
-                var p = FixedSubtitle.Paragraphs[i];
-                var o = _currentlyLoadedSubtitle.GetParagraphOrDefault(i);
-                if (o != null)
+                foreach (var format in SubtitleFormat.AllSubtitleFormats)
                 {
-                    p.StartTime.TotalMilliseconds = o.StartTime.TotalMilliseconds;
-                    p.EndTime.TotalMilliseconds = o.EndTime.TotalMilliseconds;
+                    if (format.FriendlyName == "Plain Text" || format.FriendlyName == SubRip.NameOfFormat) continue;
+                    if (format.IsMine(lines, string.Empty))
+                    {
+                        format.LoadSubtitle(FixedSubtitle, lines, string.Empty);
+                        if (FixedSubtitle.Paragraphs.Count > 0)
+                        {
+                            timeCodesFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 2. Perform Text Splitting (only if we didn't find specific subtitle formatting)
+            if (!timeCodesFound)
+            {
+                if (MultipleFilesOneFileIsOneSubtitle) ImportMultipleFiles();
+                else if (IsSplitAtLineMode) ImportLineMode(lines.ToArray());
+                else if (IsAutoSplitText) ImportAutoSplit(lines.ToArray());
+                else ImportSplitAtBlankLine(lines.ToList());
+
+                if (MergeShortLines) MergeLinesWithContinuation();
+            }
+
+            FixedSubtitle.Renumber(StartFromNumber);
+
+            // 3. Apply Timing (This part ensures Gap/Duration updates)
+            if (IsTimeCodeGenerate)
+            {
+                if (IsTimeCodeTakeFromCurrent && _currentlyLoadedSubtitle != null)
+                {
+                    for (var i = 0; i < FixedSubtitle.Paragraphs.Count; i++)
+                    {
+                        var p = FixedSubtitle.Paragraphs[i];
+                        var o = _currentlyLoadedSubtitle.GetParagraphOrDefault(i);
+                        if (o != null)
+                        {
+                            p.StartTime.TotalMilliseconds = o.StartTime.TotalMilliseconds;
+                            p.EndTime.TotalMilliseconds = o.EndTime.TotalMilliseconds;
+                        }
+                    }
+                }
+                else
+                {
+                    // If we are generating timecodes, we override detected ones to respect the UI settings
+                    FixDurations();
+                    MakePseudoStartTime();
                 }
             }
         }
-        else if (IsTimeCodeGenerate && !timeCodesOk)
-        {
-            FixDurations();
-            MakePseudoStartTime();
-        }
-        // If IsTimeCodeNone is true (removed but logic remains), no time codes are set.
 
         var list = FixedSubtitle.Paragraphs.Select(p => new SubtitleLineViewModel(p, new SubRip())).ToList();
         Subtitles = new ObservableCollection<SubtitleLineViewModel>(list);
@@ -259,9 +226,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
             if (!string.IsNullOrEmpty(SelectedLineBreak))
             {
                 foreach (var splitter in SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
                     text = text.Replace(splitter.Trim(), Environment.NewLine);
-                }
             }
             FixedSubtitle.Paragraphs.Add(new Paragraph(text.Trim(), 0, 0));
         }
@@ -269,61 +234,59 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
     private void ImportLineMode(string[] lines)
     {
-        int mode = SelectedSplitAtOption == Se.Language.File.Import.TwoLinesAreOneSubtitle ? 2 : 1;
+        int splitMode = SelectedSplitAtOption == Se.Language.File.Import.TwoLinesAreOneSubtitle ? 2 : 1;
+        var sb = new StringBuilder();
+        int count = 0;
 
-        var processedLines = lines.Select(line =>
+        foreach (var line in lines)
         {
-            var processed = line;
+            string s = line.Trim();
             if (!string.IsNullOrEmpty(SelectedLineBreak))
             {
                 foreach (var splitter in SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    processed = processed.Replace(splitter.Trim(), Environment.NewLine);
-                }
+                    s = s.Replace(splitter.Trim(), Environment.NewLine);
             }
-            return processed;
-        })
-        .Where(p => !string.IsNullOrWhiteSpace(p) || !RemoveLinesWithoutLetters)
-        .Select(p => string.IsNullOrWhiteSpace(p) ? string.Empty : (AutoBreak ? Utilities.AutoBreakLine(p.Trim()) : p.Trim()))
-        .ToList();
 
-        for (var i = 0; i < processedLines.Count; i += mode)
-        {
-            var group = processedLines.Skip(i).Take(mode).ToList();
-            if (group.Count > 0)
+            if (RemoveLinesWithoutLetters && !PlainTextImporter.ContainsLetters(s)) continue;
+            if (string.IsNullOrEmpty(s)) continue;
+
+            if (sb.Length > 0) sb.AppendLine();
+            sb.Append(s);
+            count++;
+
+            if (count >= splitMode)
             {
-                FixedSubtitle.Paragraphs.Add(new Paragraph(string.Join(Environment.NewLine, group), 0, 0));
+                var text = sb.ToString();
+                FixedSubtitle.Paragraphs.Add(new Paragraph(AutoBreak ? Utilities.AutoBreakLine(text) : text, 0, 0));
+                sb.Clear();
+                count = 0;
             }
+        }
+        if (sb.Length > 0)
+        {
+            var text = sb.ToString();
+            FixedSubtitle.Paragraphs.Add(new Paragraph(AutoBreak ? Utilities.AutoBreakLine(text) : text, 0, 0));
         }
     }
 
     private void ImportAutoSplit(string[] lines)
     {
         var sub = new Subtitle();
-        foreach (var line in lines)
-        {
-            sub.Paragraphs.Add(new Paragraph(line, 0, 0));
-        }
+        foreach (var line in lines) sub.Paragraphs.Add(new Paragraph(line, 0, 0));
         var language = LanguageAutoDetect.AutoDetectGoogleLanguage(sub);
 
         var importer = new PlainTextImporter(SplitAtBlankLinesSetting, RemoveLinesWithoutLetters, MaxNumberOfLines,
             SplitAtEndCharsSetting ? EndChars : string.Empty, SingleLineMaxLength, language);
 
         var autoLines = importer.ImportAutoSplit(lines);
-
-        // Pass to ImportLineMode for final grouping if needed (though auto-split usually does the heavy lifting)
-        // Original code does: ImportLineMode(plainTextImporter.ImportAutoSplit(textLines));
-        // In original code ImportLineMode uses comboBoxLineMode which is 1 or 2 lines.
-        // If we are in AutoSplit, the original UI seems to use the numericUpDownAutoSplitMaxLines instead?
-        // Wait, let's check original code again.
-        ImportLineMode(autoLines.ToArray());
+        foreach (var text in autoLines)
+            FixedSubtitle.Paragraphs.Add(new Paragraph(AutoBreak ? Utilities.AutoBreakLine(text) : text, 0, 0));
     }
 
     private void ImportSplitAtBlankLine(List<string> lines)
     {
         var sb = new StringBuilder();
-        var tempLines = new List<string>(lines) { string.Empty };
-        foreach (var line in tempLines)
+        foreach (var line in lines.Concat(new[] { string.Empty }))
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -334,10 +297,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
                     sb.Clear();
                 }
             }
-            else
-            {
-                sb.AppendLine(line.Trim());
-            }
+            else sb.AppendLine(line.Trim());
         }
     }
 
@@ -347,45 +307,24 @@ public partial class ImportPlainTextViewModel : ObservableObject
         var skipNext = false;
         for (var i = 0; i < FixedSubtitle.Paragraphs.Count; i++)
         {
+            if (skipNext) { skipNext = false; continue; }
             var p = FixedSubtitle.Paragraphs[i];
+            var next = FixedSubtitle.GetParagraphOrDefault(i + 1);
 
-            if (!skipNext)
+            bool merge = next != null && !p.Text.Contains(Environment.NewLine) && MaxNumberOfLines > 1;
+            if (merge && (p.Text.TrimEnd().EndsWith('!') || p.Text.TrimEnd().EndsWith('.')))
             {
-                var next = FixedSubtitle.GetParagraphOrDefault(i + 1);
-
-                // Check 1: Basic merge conditions
-                bool merge = next != null && !p.Text.Contains(Environment.NewLine) && MaxNumberOfLines > 1;
-
-                // Check 2: Punctuation (don't merge if ends with . or ! and next starts with uppercase)
-                if (merge && (p.Text.TrimEnd().EndsWith('!') || p.Text.TrimEnd().EndsWith('.')))
-                {
-                    var st = new StrippableText(next!.Text);
-                    if (st.StrippedText.Length > 0 && char.IsUpper(st.StrippedText[0]))
-                    {
-                        merge = false;
-                    }
-                }
-
-                // Check 3: Length limits (don't merge if resulting line is too long)
-                if (merge && (p.Text.Length >= SingleLineMaxLength - 5 || next!.Text.Length >= SingleLineMaxLength - 5))
-                {
-                    merge = false;
-                }
-
-                if (merge)
-                {
-                    temp.Paragraphs.Add(new Paragraph(p) { Text = p.Text + Environment.NewLine + next!.Text });
-                    skipNext = true;
-                }
-                else
-                {
-                    temp.Paragraphs.Add(new Paragraph(p));
-                }
+                var st = new StrippableText(next!.Text);
+                if (st.StrippedText.Length > 0 && char.IsUpper(st.StrippedText[0])) merge = false;
             }
-            else
+            if (merge && (p.Text.Length >= SingleLineMaxLength - 5 || next!.Text.Length >= SingleLineMaxLength - 5)) merge = false;
+
+            if (merge)
             {
-                skipNext = false;
+                temp.Paragraphs.Add(new Paragraph(p) { Text = p.Text + Environment.NewLine + next!.Text });
+                skipNext = true;
             }
+            else temp.Paragraphs.Add(new Paragraph(p));
         }
         FixedSubtitle = temp;
     }
@@ -394,20 +333,18 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         foreach (var p in FixedSubtitle.Paragraphs)
         {
-            var duration = p.Text.Length == 0
-                ? 2000
-                : (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
-
-            p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
+            double duration = p.Text.Length == 0 ? 2000 : (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
+            p.StartTime.TotalMilliseconds = 0;
+            p.EndTime.TotalMilliseconds = duration;
         }
     }
 
     private void MakePseudoStartTime()
     {
-        double currentMs = GapBetweenSubtitles;
+        double currentMs = 0;
         foreach (var p in FixedSubtitle.Paragraphs)
         {
-            var dur = p.DurationTotalMilliseconds;
+            var dur = p.EndTime.TotalMilliseconds;
             p.StartTime.TotalMilliseconds = currentMs;
             p.EndTime.TotalMilliseconds = currentMs + dur;
             currentMs += dur + GapBetweenSubtitles;
@@ -418,67 +355,40 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         var encoding = SelectedEncoding?.Encoding ?? Encoding.UTF8;
         if (fileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
-        {
-            var rtf = File.ReadAllText(fileName, encoding);
-            return Regex.Replace(rtf, @"\{\*?\\[^{}]+\}|\\\n|\n|\r|\\|[{}]+", "");
-        }
+            return Regex.Replace(File.ReadAllText(fileName, encoding), @"\{\*?\\[^{}]+\}|\\\n|\n|\r|\\|[{}]+", "");
         if (fileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
-        {
-            var html = File.ReadAllText(fileName, encoding);
-            return WebUtility.HtmlDecode(Regex.Replace(html, "<.*?>", string.Empty));
-        }
+            return WebUtility.HtmlDecode(Regex.Replace(File.ReadAllText(fileName, encoding), "<.*?>", string.Empty));
         return File.ReadAllText(fileName, encoding);
     }
 
     private static bool IsHtmlIndexExportFromSubtitleEdit(string fileName)
     {
         if (string.IsNullOrEmpty(fileName)) return false;
-        var html = FileUtil.ReadAllTextShared(fileName, Encoding.UTF8);
-        var s = GetSubtitleFromHtmlIndex(html);
-        return s.Paragraphs.Count > 0;
+        return GetSubtitleFromHtmlIndex(FileUtil.ReadAllTextShared(fileName, Encoding.UTF8)).Paragraphs.Count > 0;
     }
 
     private static Subtitle GetSubtitleFromHtmlIndex(string html)
     {
-        var lines = html
-            .Replace($"<br />{Environment.NewLine}", "<br />")
-            .Replace("<br />\\n", "<br />")
-            .SplitToLines();
-
         var subtitle = new Subtitle();
+        var lines = html.Replace($"<br />{Environment.NewLine}", "<br />").Replace("<br />\\n", "<br />").SplitToLines();
         foreach (var line in lines)
         {
-            var indexOfText = line.IndexOf("background-color:", StringComparison.OrdinalIgnoreCase);
-            if (indexOfText >= 0)
-            {
-                indexOfText = line.IndexOf('>', indexOfText);
-            }
+            var idxText = line.IndexOf("background-color:", StringComparison.OrdinalIgnoreCase);
+            if (idxText >= 0) idxText = line.IndexOf('>', idxText);
+            var idxColon = line.IndexOf(':');
+            var idxSplit = line.IndexOf("->", StringComparison.Ordinal);
+            var idxDiv = line.IndexOf("<div", StringComparison.OrdinalIgnoreCase);
 
-            var indexOfFirstColon = line.IndexOf(':');
-            var indexOfTimeSplit = line.IndexOf("->", StringComparison.Ordinal);
-            var indexOfFirstDiv = line.IndexOf("<div", StringComparison.OrdinalIgnoreCase);
-            if (indexOfText > 0 && indexOfFirstColon > 0 && indexOfTimeSplit > 0 && indexOfFirstDiv > 0)
+            if (idxText > 0 && idxColon > 0 && idxSplit > 0 && idxDiv > 0)
             {
                 try
                 {
-                    var start = line.Substring(indexOfFirstColon + 1, indexOfTimeSplit - indexOfFirstColon - 1);
-                    var end = line.Substring(indexOfTimeSplit + 2, indexOfFirstDiv - indexOfTimeSplit - 2);
-                    var text = line.Substring(indexOfText + 1)
-                        .Replace("</div>", string.Empty)
-                        .Replace("<hr />", string.Empty)
-                        .Replace("<hr/>", string.Empty)
-                        .Replace("<hr>", string.Empty)
-                        .Replace("<br />", Environment.NewLine)
-                        .Replace("<br>", Environment.NewLine)
-                        .Trim();
-                    text = WebUtility.HtmlDecode(text);
-                    var p = new Paragraph(text, DecodeTimeCode(start), DecodeTimeCode(end));
-                    subtitle.Paragraphs.Add(p);
+                    var start = line.Substring(idxColon + 1, idxSplit - idxColon - 1);
+                    var end = line.Substring(idxSplit + 2, idxDiv - idxSplit - 2);
+                    var text = WebUtility.HtmlDecode(line.Substring(idxText + 1).Replace("</div>", "").Replace("<br />", Environment.NewLine).Replace("<br>", Environment.NewLine).Trim());
+                    subtitle.Paragraphs.Add(new Paragraph(text, DecodeTimeCode(start), DecodeTimeCode(end)));
                 }
-                catch
-                {
-                    // Ignore parse errors for specific lines
-                }
+                catch { }
             }
         }
         subtitle.Renumber();
@@ -487,17 +397,14 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
     private static double DecodeTimeCode(string tc)
     {
-        var parts = tc.Split(',', '.', ':');
+        var parts = tc.Split(new[] { ',', '.', ':' }, StringSplitOptions.RemoveEmptyEntries);
         try
         {
-            if (parts.Length == 2)
-                return new TimeCode(0, 0, int.Parse(parts[0]), int.Parse(parts[1])).TotalMilliseconds;
-            if (parts.Length == 3)
-                return new TimeCode(0, int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])).TotalMilliseconds;
-            if (parts.Length == 4)
-                return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3])).TotalMilliseconds;
+            if (parts.Length == 2) return new TimeCode(0, 0, int.Parse(parts[0]), int.Parse(parts[1])).TotalMilliseconds;
+            if (parts.Length == 3) return new TimeCode(0, int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])).TotalMilliseconds;
+            if (parts.Length == 4) return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3])).TotalMilliseconds;
         }
-        catch { return 0; }
+        catch { }
         return 0;
     }
 
@@ -518,15 +425,13 @@ public partial class ImportPlainTextViewModel : ObservableObject
         Se.Settings.Tools.ImportTextAutoBreakAtEndMarkerText = EndChars;
         Se.Settings.Tools.ImportTextDurationAuto = IsAutoDuration;
         Se.Settings.Tools.ImportTextFixedDuration = FixedDuration;
+        Se.Settings.Tools.ImportTextTryToFindTimeCodes = TryToFindTimeCodes;
         Se.SaveSettings();
-
         OkPressed = true;
         Close();
     }
 
-    [RelayCommand]
-    private void Cancel() => Close();
-
+    [RelayCommand] private void Cancel() => Close();
     [RelayCommand]
     private async Task FileImport()
     {
@@ -536,7 +441,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         _currentFileName = fileName;
         PlainText = LoadTextFromFile(fileName);
     }
-
     [RelayCommand]
     private async Task FilesImport()
     {
@@ -546,11 +450,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         foreach (var f in fileNames) Files.Add(f);
         MultipleFilesOneFileIsOneSubtitle = true;
     }
-
     private void Close() => Dispatcher.UIThread.Post(() => Window?.Close());
-
-    internal void KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape) Close();
-    }
+    internal void KeyDown(object? sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
 }

@@ -76,6 +76,7 @@ public class SeTools
     public string LastColorPickerColor5 { get; set; }
     public string LastColorPickerColor6 { get; set; }
     public string LastColorPickerColor7 { get; set; }
+    public bool ImportTextTryToFindTimeCodes { get; set; }
 
     public SeTools()
     {
@@ -124,6 +125,7 @@ public class SeTools
         ImportTextAutoBreakAtEndMarkerText = ".!?";
         ImportTextDurationAuto = true;
         ImportTextFixedDuration = 3000;
+        ImportTextTryToFindTimeCodes = false;
 
         LastColorPickerColor = Colors.Yellow.FromColorToHex();
         LastColorPickerColor1 = Colors.Red.FromColorToHex();

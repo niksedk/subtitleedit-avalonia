@@ -34,6 +34,7 @@ public class LanguageImport
     public string LineBreak { get; internal set; }
     public string OpenTextFile { get; internal set; }
     public string OpenTextFiles { get; internal set; }
+    public string TryToFindTimeCodes { get; internal set; }
 
     public LanguageImport()
     {
@@ -79,5 +80,6 @@ Rules:
         LineBreak = "Line break";
         OpenTextFile = "Open text file";
         OpenTextFiles = "Open text files";
+        TryToFindTimeCodes = "Try to parse time codes";
     }
 }
