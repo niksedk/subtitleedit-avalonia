@@ -87,6 +87,17 @@ public class AssaDrawWindow : Window
             Spacing = 5,
         };
 
+        // File actions
+        var saveButton = CreateToolButton("fa-solid fa-floppy-disk", "Save", vm.SaveCommand);
+        var loadButton = CreateToolButton("fa-solid fa-folder-open", "Load", vm.LoadCommand);
+        var copyButton = CreateToolButton("fa-solid fa-copy", Se.Language.Assa.DrawCopyToClipboard, vm.CopyToClipboardCommand);
+
+        toolbarPanel.Children.Add(saveButton);
+        toolbarPanel.Children.Add(loadButton);
+        toolbarPanel.Children.Add(copyButton);
+
+        toolbarPanel.Children.Add(new Separator { Width = 2, Margin = new Thickness(5, 2) });
+
         // Drawing tools
         var selectButton = CreateToolButton("fa-solid fa-arrow-pointer", Se.Language.Assa.DrawSelectTool, vm.SelectToolCommand);
         var lineButton = CreateToolButton("fa-solid fa-pen", Se.Language.Assa.DrawLineTool, vm.LineToolCommand);
@@ -125,13 +136,6 @@ public class AssaDrawWindow : Window
         toolbarPanel.Children.Add(toggleGridButton);
 
         toolbarPanel.Children.Add(new Separator { Width = 2, Margin = new Thickness(5, 2) });
-
-        // Copy to clipboard
-        var copyButton = CreateToolButton("fa-solid fa-copy", Se.Language.Assa.DrawCopyToClipboard, vm.CopyToClipboardCommand);
-        toolbarPanel.Children.Add(copyButton);
-
-        // Resolution settings
-        toolbarPanel.Children.Add(new Separator { Width = 2, Margin = new Thickness(10, 2) });
 
         var widthLabel = new TextBlock
         {
