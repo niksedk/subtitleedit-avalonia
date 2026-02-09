@@ -217,6 +217,7 @@ public partial class MergeSameTextViewModel : ObservableObject
             {
                 var merged = new SubtitleLineViewModel(s);
                 merged.EndTime = match.LinesToMerge.Max(p => p.EndTime);
+                merged.Text = match.MergedText;
                 result.Add(merged);
 
                 skipCount += match.LinesToMerge.Count - 1;
