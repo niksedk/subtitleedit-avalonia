@@ -30,7 +30,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
     [ObservableProperty] private string? _selectedFile;
     [ObservableProperty] private ObservableCollection<string> _splitAtOptions;
     [ObservableProperty] private string? _selectedSplitAtOption;
-    [ObservableProperty] private bool _isImportFilesVisible;
     [ObservableProperty] private string _plainText;
     [ObservableProperty] private bool _isAutoSplitText = true;
     [ObservableProperty] private bool _isSplitAtBlankLines;
