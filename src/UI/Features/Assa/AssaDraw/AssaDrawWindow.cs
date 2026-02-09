@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
@@ -241,6 +242,7 @@ public class AssaDrawWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
         };
 
@@ -304,6 +306,11 @@ public class AssaDrawWindow : Window
         Grid.SetRow(pointEditorPanel, 2);
         panelGrid.Children.Add(pointEditorPanel);
 
+        // Shape color editor panel
+        var shapeEditorPanel = CreateShapeEditorPanel(vm);
+        Grid.SetRow(shapeEditorPanel, 3);
+        panelGrid.Children.Add(shapeEditorPanel);
+
         return new Border
         {
             Child = panelGrid,
@@ -355,6 +362,46 @@ public class AssaDrawWindow : Window
         };
         yPanel.Children.Add(yBox);
         panel.Children.Add(yPanel);
+
+        return panel;
+    }
+
+    private static StackPanel CreateShapeEditorPanel(AssaDrawViewModel vm)
+    {
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(5),
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.IsLayerSelected)),
+        };
+
+        var headerLabel = new TextBlock
+        {
+            Text = Se.Language.Assa.DrawSelectedLayer,
+            FontWeight = FontWeight.Bold,
+            Margin = new Thickness(0, 0, 0, 5),
+        };
+        panel.Children.Add(headerLabel);
+
+        var colorPicker = new ColorPicker
+        {
+            Width = 200,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(nameof(vm.LayerColor))
+            {
+                Source = vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
+        panel.Children.Add(colorPicker);
 
         return panel;
     }

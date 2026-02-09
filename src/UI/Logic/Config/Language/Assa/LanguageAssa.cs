@@ -20,6 +20,7 @@ public class LanguageAssa
     public string DrawCopyToClipboard { get; set; }
     public string DrawShapes { get; set; }
     public string DrawSelectedPoint { get; set; }
+    public string DrawSelectedLayer { get; set; }
     public string DrawToolX { get; set; }
     public string DrawHelpText { get; set; }
 
@@ -124,6 +125,7 @@ public class LanguageAssa
         DrawCopyToClipboard = "Copy to Clipboard (Ctrl+C)";
         DrawShapes = "Shapes";
         DrawSelectedPoint = "Selected point";
+        DrawSelectedLayer = "Selected layer";
         DrawToolX = "Tool: {0}";
         DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";
 

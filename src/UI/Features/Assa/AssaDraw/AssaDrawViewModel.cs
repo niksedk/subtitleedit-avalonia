@@ -41,6 +41,8 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private float _pointX;
     [ObservableProperty] private float _pointY;
     [ObservableProperty] private bool _isPointSelected;
+    [ObservableProperty] private bool _isLayerSelected;
+    [ObservableProperty] private Color _layerColor = Colors.White;
     [ObservableProperty] private bool _showGrid = true;
     [ObservableProperty] private ObservableCollection<ShapeTreeItem> _shapeTreeItems = [];
     [ObservableProperty] private ShapeTreeItem? _selectedTreeItem;
@@ -93,7 +95,7 @@ public partial class AssaDrawViewModel : ObservableObject
         var x = e.X;
         var y = e.Y;
 
-        if (DrawSettings.SnapToGrid)
+        if (ShowGrid)
         {
             x = MathF.Round(x / DrawSettings.GridSize) * DrawSettings.GridSize;
             y = MathF.Round(y / DrawSettings.GridSize) * DrawSettings.GridSize;
@@ -739,7 +741,7 @@ public partial class AssaDrawViewModel : ObservableObject
 
     partial void OnPointXChanged(float value)
     {
-        if (ActivePoint != null)
+        if (ActivePoint != null && Math.Abs(ActivePoint.X - value) > 0.001f)
         {
             ActivePoint.X = value;
             RefreshTreeView();
@@ -749,7 +751,7 @@ public partial class AssaDrawViewModel : ObservableObject
 
     partial void OnPointYChanged(float value)
     {
-        if (ActivePoint != null)
+        if (ActivePoint != null && Math.Abs(ActivePoint.Y - value) > 0.001f)
         {
             ActivePoint.Y = value;
             RefreshTreeView();
@@ -759,10 +761,35 @@ public partial class AssaDrawViewModel : ObservableObject
 
     partial void OnSelectedTreeItemChanged(ShapeTreeItem? value)
     {
+        // Update layer selection state
+        IsLayerSelected = value?.IsLayer == true;
+        if (value?.IsLayer == true)
+        {
+            // Get color from first shape in this layer
+            var firstShape = Shapes.FirstOrDefault(s => s.Layer == value.Layer);
+            if (firstShape != null)
+            {
+                LayerColor = firstShape.ForeColor;
+            }
+        }
+
         if (Canvas != null)
         {
             Canvas.SelectedShape = value?.Shape;
             Canvas.InvalidateVisual();
+        }
+    }
+
+    partial void OnLayerColorChanged(Color value)
+    {
+        if (SelectedTreeItem?.IsLayer == true)
+        {
+            // Update all shapes in the selected layer
+            foreach (var shape in Shapes.Where(s => s.Layer == SelectedTreeItem.Layer))
+            {
+                shape.ForeColor = value;
+            }
+            Canvas?.InvalidateVisual();
         }
     }
 }
