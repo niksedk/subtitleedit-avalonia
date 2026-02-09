@@ -12,14 +12,11 @@ namespace Nikse.SubtitleEdit.Logic;
 
 internal static class SubtitleGridCopyPasteHelper
 {
-    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle? sourceSubtitle)
+    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
     {
         var subtitle = new Subtitle();
-        if (sourceSubtitle != null)
-        {
-            subtitle.Header = sourceSubtitle.Header;
-            subtitle.Footer = sourceSubtitle.Footer;
-        }
+        subtitle.Header = sourceSubtitle.Header;
+        subtitle.Footer = sourceSubtitle.Footer;
         foreach (var item in selectedItems)
         {
             subtitle.Paragraphs.Add(item.ToParagraph(subtitleFormat));
@@ -29,14 +26,11 @@ internal static class SubtitleGridCopyPasteHelper
         await ClipboardHelper.SetTextAsync(window, text);
     }
 
-    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle? sourceSubtitle)
+    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
     {
         var subtitle = new Subtitle();
-        if (sourceSubtitle != null)
-        {
-            subtitle.Header = sourceSubtitle.Header;
-            subtitle.Footer = sourceSubtitle.Footer;
-        }
+        subtitle.Header = sourceSubtitle.Header;
+        subtitle.Footer = sourceSubtitle.Footer;
         foreach (var item in selectedItems)
         {
             subtitle.Paragraphs.Add(item.ToParagraph(subtitleFormat));
