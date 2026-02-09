@@ -43,6 +43,11 @@ public static class UiTheme
             return themeSetting;
         }
     }
+    
+    public static bool IsDarkThemeEnabled()
+    {
+        return ThemeName == ThemeNameDark;
+    }
 
     public static void SetCurrentTheme()
     {

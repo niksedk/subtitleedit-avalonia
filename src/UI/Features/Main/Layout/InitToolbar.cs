@@ -413,37 +413,37 @@ public static class InitToolbar
 
     private static Bitmap MakeOneColor(Bitmap bitmap)
     {
-        if (Se.Settings.Appearance.Theme == UiTheme.ThemeNameDark)
+        if (!UiTheme.IsDarkThemeEnabled())
         {
-            var foregroundColor = UiTheme.GetDarkThemeForegroundColor();
-            
-            using var skBitmap = bitmap.ToSkBitmap();
-            var width = skBitmap.Width;
-            var height = skBitmap.Height;
-            
-            var result = new SKBitmap(width, height);
-            
-            for (var y = 0; y < height; y++)
-            {
-                for (var x = 0; x < width; x++)
-                {
-                    var pixel = skBitmap.GetPixel(x, y);
-                    
-                    var intensity = (pixel.Red * 0.299 + pixel.Green * 0.587 + pixel.Blue * 0.114) / 255.0;
-                    
-                    var newRed = (byte)(foregroundColor.R * intensity);
-                    var newGreen = (byte)(foregroundColor.G * intensity);
-                    var newBlue = (byte)(foregroundColor.B * intensity);
-                    
-                    var newColor = new SKColor(newRed, newGreen, newBlue, pixel.Alpha);
-                    result.SetPixel(x, y, newColor);
-                }
-            }
-            
-            return result.ToAvaloniaBitmap();
+            return bitmap;
         }
 
-        return bitmap;
+        var foregroundColor = UiTheme.GetDarkThemeForegroundColor();
+            
+        using var skBitmap = bitmap.ToSkBitmap();
+        var width = skBitmap.Width;
+        var height = skBitmap.Height;
+            
+        var result = new SKBitmap(width, height);
+            
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var pixel = skBitmap.GetPixel(x, y);
+                    
+                var intensity = (pixel.Red * 0.299 + pixel.Green * 0.587 + pixel.Blue * 0.114) / 255.0;
+                    
+                var newRed = (byte)(foregroundColor.R * intensity);
+                var newGreen = (byte)(foregroundColor.G * intensity);
+                var newBlue = (byte)(foregroundColor.B * intensity);
+                    
+                var newColor = new SKColor(newRed, newGreen, newBlue, pixel.Alpha);
+                result.SetPixel(x, y, newColor);
+            }
+        }
+            
+        return result.ToAvaloniaBitmap();
     }
 
     private static Border MakeSeparator()
