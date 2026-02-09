@@ -6,7 +6,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Threading;
 using AvaloniaEdit;
 using Nikse.SubtitleEdit.Controls;
 using Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
@@ -112,10 +111,6 @@ public static partial class InitListViewAndEditBox
             VerticalAlignment = VerticalAlignment.Stretch,
         };
 
-        var inverseBooleanConverter = new InverseBooleanConverter();
-        sourceViewTextEditor.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSourceViewActive)));
-        sourceViewTextEditor.Bind(TextEditorExtensions.ScrollToLineProperty, new Binding(nameof(vm.SourceViewLineNumber)));
-
         // Setup manual two-way binding for TextEditor since it doesn't support direct binding to Text property
         var isUpdatingFromViewModel = false;
         var isUpdatingFromUI = false;
@@ -145,9 +140,39 @@ public static partial class InitListViewAndEditBox
                 sourceViewTextEditor.Text = vm.SourceViewText ?? string.Empty;
                 isUpdatingFromViewModel = false;
             }
-            else if (e.PropertyName == nameof(vm.IsSourceViewActive) && vm.IsSourceViewActive)
+            else if (e.PropertyName == nameof(vm.SourceViewLineNumber) || e.PropertyName == nameof(vm.IsSourceViewActive))
             {
-                sourceViewTextEditor.Focus();
+                if (e.PropertyName == nameof(vm.IsSourceViewActive))
+                {
+                    sourceViewTextEditor.IsVisible = vm.IsSourceViewActive;
+                    dropHost.IsVisible = !vm.IsSourceViewActive;
+                    if (vm.IsSourceViewActive)
+                    {
+                        sourceViewTextEditor.Focus();
+                    }
+                }
+
+                if (vm.IsSourceViewActive && vm.SourceViewLineNumber > 0)
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        if (vm.SourceViewLineNumber > 0 && vm.SourceViewLineNumber <= sourceViewTextEditor.Document.LineCount)
+                        {
+                            var line = sourceViewTextEditor.Document.GetLineByNumber(vm.SourceViewLineNumber);
+                            sourceViewTextEditor.CaretOffset = line.Offset;
+                            sourceViewTextEditor.ScrollToLine(vm.SourceViewLineNumber);
+                            
+                            // A secondary scroll check to ensure it's in view after all layout passes
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                if (vm.IsSourceViewActive)
+                                {
+                                    sourceViewTextEditor.ScrollToLine(vm.SourceViewLineNumber);
+                                }
+                            }, DispatcherPriority.Background);
+                        }
+                    }, DispatcherPriority.Loaded);
+                }
             }
         };
 
@@ -155,8 +180,6 @@ public static partial class InitListViewAndEditBox
         {
             Children = { dropHost, sourceViewTextEditor }
         };
-
-        dropHost.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSourceViewActive)) { Converter = inverseBooleanConverter });
 
         var containerBorder = new Border
         {
@@ -174,6 +197,7 @@ public static partial class InitListViewAndEditBox
         var notNullConverter = new NotNullConverter();
         var syntaxHighlightingConverter = new TextWithSubtitleSyntaxHighlightingConverter();
         var gapConverter = new DoubleToNoDecimalHideMaxConverter();
+        var inverseBooleanConverter = new InverseBooleanConverter();
         var textOneLineShortConverter = new TextOneLineShortConverter();
         var booleanToGridLengthConverter = new BooleanToGridLengthConverter();
         var booleanAndConverter = BooleanAndConverter.Instance;
