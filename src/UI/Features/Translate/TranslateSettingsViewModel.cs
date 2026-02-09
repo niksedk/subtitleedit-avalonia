@@ -35,13 +35,34 @@ public partial class TranslateSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void Cancel()
+    {
+        Window?.Close();
+    }
+
+    [RelayCommand]
     private async Task Ok()
     {
-        if (!PromptText.Contains("{0}") || !PromptText.Contains("{1}"))
+        if (AutoTranslator == null)
         {
-            await MessageBox.Show(Window!, "Error",
-                "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
+        }
+
+        var engineType = AutoTranslator.GetType();
+        if (engineType == typeof(ChatGptTranslate) ||
+            engineType == typeof(OllamaTranslate) ||
+            engineType == typeof(LmStudioTranslate) ||
+            engineType == typeof(AnthropicTranslate) ||  
+            engineType == typeof(GroqTranslate) ||
+            engineType == typeof(OpenRouterTranslate) ||
+            engineType == typeof(LlamaCppTranslate))
+        {
+            if (!PromptText.Contains("{0}") || !PromptText.Contains("{1}"))
+            {
+                await MessageBox.Show(Window!, "Error",
+                    "Prompt must contain {0} (source language) and {1} (target language)", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
 
         if (PromptText.Replace("{0}", string.Empty).Replace("{1}", string.Empty).Contains('{'))
@@ -58,12 +79,6 @@ public partial class TranslateSettingsViewModel : ObservableObject
 
         OkPressed = true;
         SaveValues();
-        Window?.Close();
-    }
-
-    [RelayCommand]
-    private void Cancel()
-    {
         Window?.Close();
     }
 
