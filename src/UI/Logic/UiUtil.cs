@@ -1638,6 +1638,7 @@ public static class UiUtil
             Maximum = max,
             Increment = 1,
             FormatString = "F0",
+            Foreground = GetTextColor(),
         };
 
         if (propertyValuePath != null)
@@ -1675,7 +1676,8 @@ public static class UiUtil
             Minimum = min,
             Maximum = max,
             Increment = 0.01m,
-            FormatString = "F2" // Force two decimals
+            FormatString = "F2", // Force two decimals
+            Foreground = GetTextColor(),
         };
 
         if (propertyValuePath != null)

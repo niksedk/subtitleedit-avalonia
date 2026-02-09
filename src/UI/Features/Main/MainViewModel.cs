@@ -41,6 +41,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
+using Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
 using Nikse.SubtitleEdit.Features.Files.RestoreAutoBackup;
 using Nikse.SubtitleEdit.Features.Files.Statistics;
@@ -1908,7 +1909,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>();
+        var result = await ShowDialogAsync<ImportPlainTextWindow, ImportPlainTextViewModel>(vm => vm.SetCurrentSubtitle(_subtitle));
         if (result.OkPressed)
         {
             foreach (var item in result.Subtitles)

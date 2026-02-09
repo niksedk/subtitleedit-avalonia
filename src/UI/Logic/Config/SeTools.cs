@@ -51,6 +51,21 @@ public class SeTools
     public string BinEditBackgroundColor { get; set; }
     public decimal BinEditOutlineWidth { get; set; }
     public decimal BinEditShadowWidth { get; set; }
+    
+    public string ImportTextSplitting { get; set; }
+    public string ImportTextSplittingLineMode { get; set; }
+    public string ImportTextLineBreak { get; set; }
+    public bool ImportTextMergeShortLines { get; set; }
+    public bool ImportTextAutoSplitAtBlank { get; set; }
+    public bool ImportTextRemoveLinesNoLetters { get; set; }
+    public bool ImportTextGenerateTimeCodes { get; set; }
+    public bool ImportTextAutoBreak { get; set; }
+    public bool ImportTextAutoBreakAtEnd { get; set; }
+    public int ImportTextGap { get; set; }
+    public int ImportTextAutoSplitNumberOfLines { get; set; }
+    public string ImportTextAutoBreakAtEndMarkerText { get; set; }
+    public bool ImportTextDurationAuto { get; set; }
+    public int ImportTextFixedDuration { get; set; }
 
     public SeTools()
     {
@@ -84,5 +99,20 @@ public class SeTools
         BinEditBackgroundColor = Colors.Transparent.FromColorToHex();
         BinEditOutlineWidth = 2;
         BinEditShadowWidth = 1;
+
+        ImportTextSplitting = "auto";
+        ImportTextSplittingLineMode = "OneLineIsOneSubtitle";
+        ImportTextLineBreak = "|";
+        ImportTextMergeShortLines = false;
+        ImportTextAutoSplitAtBlank = true;
+        ImportTextRemoveLinesNoLetters = false;
+        ImportTextGenerateTimeCodes = true;
+        ImportTextAutoBreak = true;
+        ImportTextAutoBreakAtEnd = true;
+        ImportTextGap = 90;
+        ImportTextAutoSplitNumberOfLines = 2;
+        ImportTextAutoBreakAtEndMarkerText = ".!?";
+        ImportTextDurationAuto = true;
+        ImportTextFixedDuration = 3000;
     }
 }
