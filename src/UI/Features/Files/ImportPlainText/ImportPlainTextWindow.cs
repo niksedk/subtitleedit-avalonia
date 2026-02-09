@@ -110,7 +110,12 @@ public class ImportPlainTextWindow : Window
 
         var textBox = new TextBox { AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
         textBox.Bind(TextBox.TextProperty, new Binding(nameof(vm.PlainText)) { Mode = BindingMode.TwoWay });
-        textBox.Bind(Visual.IsVisibleProperty, new Binding("!MultipleFilesOneFileIsOneSubtitle"));
+        textBox.Bind(
+            Visual.IsVisibleProperty,
+            new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle))
+            {
+                Converter = new InverseBooleanConverter(),
+            });
 
         var listBoxFiles = new ListBox();
         listBoxFiles.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(vm.Files)));
@@ -140,7 +145,7 @@ public class ImportPlainTextWindow : Window
 
         var lineBreakGrid = new Grid { ColumnDefinitions = { new ColumnDefinition { Width = GridLength.Auto }, new ColumnDefinition { Width = GridLength.Star } }, ColumnSpacing = 5 };
         lineBreakGrid.Add(UiUtil.MakeLabel("Line break"), 0, 0);
-        var comboLineBreak = UiUtil.MakeComboBox(vm.LineBreaks, vm, nameof(vm.SelectedLineBreak)).WithHorizontalAlignmentStretch();
+        var comboLineBreak = UiUtil.MakeComboBox(vm.LineBreaks, vm, null).WithHorizontalAlignmentStretch();
         comboLineBreak.IsEditable = true;
         comboLineBreak.Bind(ComboBox.TextProperty, new Binding(nameof(vm.SelectedLineBreak)) { Mode = BindingMode.TwoWay });
         lineBreakGrid.Add(comboLineBreak, 0, 1);

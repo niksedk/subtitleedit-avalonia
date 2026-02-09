@@ -30,7 +30,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
     [ObservableProperty] private string? _selectedFile;
     [ObservableProperty] private ObservableCollection<string> _splitAtOptions;
     [ObservableProperty] private string? _selectedSplitAtOption;
-    [ObservableProperty] private bool _isImportFilesVisible;
     [ObservableProperty] private string _plainText;
     [ObservableProperty] private bool _isAutoSplitText = true;
     [ObservableProperty] private bool _isSplitAtBlankLines;
@@ -88,7 +87,15 @@ public partial class ImportPlainTextViewModel : ObservableObject
         PlainText = string.Empty;
 
         LineBreaks = new ObservableCollection<string> { string.Empty, "|", ";", "||" };
-        SelectedLineBreak = LineBreaks[0];
+        var existingLineBreak = SelectedLineBreak;
+        if (!string.IsNullOrEmpty(existingLineBreak) && LineBreaks.Contains(existingLineBreak))
+        {
+            SelectedLineBreak = existingLineBreak;
+        }
+        else
+        {
+            SelectedLineBreak = LineBreaks[0];
+        }
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault();
@@ -119,7 +126,6 @@ public partial class ImportPlainTextViewModel : ObservableObject
         {
             PlainText = LoadTextFromFile(_currentFileName);
         }
-        GeneratePreview();
     }
 
     partial void OnSelectedSplitAtOptionChanged(string? value) => GeneratePreview();
@@ -388,15 +394,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         foreach (var p in FixedSubtitle.Paragraphs)
         {
-            if (p.Text.Length == 0)
-            {
-                // Fallback for empty lines
-                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + 2000;
-            }
-            else
-            {
-                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
-            }
+            var duration = p.Text.Length == 0
+                ? 2000
+                : (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
+
+            p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
         }
     }
 
