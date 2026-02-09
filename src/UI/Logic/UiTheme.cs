@@ -43,7 +43,7 @@ public static class UiTheme
             return themeSetting;
         }
     }
-    
+
     public static bool IsDarkThemeEnabled()
     {
         return ThemeName == ThemeNameDark;
@@ -244,12 +244,40 @@ public static class UiTheme
                 }
             },
 
-             // TextArea
+            // TextArea
             new Style(x => x.OfType<TextArea>())
             {
                 Setters =
                 {
-                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor))
+                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor)),
+                    new Setter(TextArea.CaretBrushProperty, new SolidColorBrush(foreColor)),
+                }
+            },
+            
+            // TextArea when focused
+            new Style(x => x.OfType<TextArea>().Class(":focus"))
+            {
+                Setters =
+                {
+                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor)),
+                }
+            },
+            
+            // TextArea when pointer is over
+            new Style(x => x.OfType<TextArea>().Class(":pointerover"))
+            {
+                Setters =
+                {
+                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor)),
+                }
+            },
+            
+            // TextArea when both focused and pointer over (combined state)
+            new Style(x => x.OfType<TextArea>().Class(":focus").Class(":pointerover"))
+            {
+                Setters =
+                {
+                    new Setter(TextArea.ForegroundProperty, new SolidColorBrush(foreColor)),
                 }
             },
 
