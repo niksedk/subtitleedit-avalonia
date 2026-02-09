@@ -394,15 +394,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         foreach (var p in FixedSubtitle.Paragraphs)
         {
-            if (p.Text.Length == 0)
-            {
-                // Fallback for empty lines
-                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + 2000;
-            }
-            else
-            {
-                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
-            }
+            var duration = p.Text.Length == 0
+                ? 2000
+                : (IsAutoDuration ? Utilities.GetOptimalDisplayMilliseconds(p.Text) : FixedDuration);
+
+            p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
         }
     }
 
