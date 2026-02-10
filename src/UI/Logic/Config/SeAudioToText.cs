@@ -46,4 +46,5 @@ public class SeAudioToText
     public bool WhisperPostProcessingFixCasing { get; set; } = false;
 
     public bool WhisperPostProcessingFixShortDuration { get; set; } = true;
+    public string WhisperCppVulcanGpuDevice { get; set; } = string.Empty;
 }
