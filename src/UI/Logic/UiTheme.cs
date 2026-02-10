@@ -15,6 +15,7 @@ namespace Nikse.SubtitleEdit.Logic;
 public static class UiTheme
 {
     private static IStyle? _lighterDarkStyle;
+    private static ResourceDictionary? _resourceOverrides;
     private static object? _themeChangeSubscription;
 
     public const string ThemeNameSystem = "System";
@@ -134,6 +135,17 @@ public static class UiTheme
         var bgColor = GetDarkThemeBackgroundColor();
         var bgColorLighter = UiUtil.LightenColor(bgColor, 5);
         var bgColorHeader = UiUtil.LightenColor(bgColor, 15);
+        var foregroundBrush = new SolidColorBrush(foreColor);
+
+        // Override Fluent theme resources for text controls to prevent white foreground on focus/hover
+        _resourceOverrides = new ResourceDictionary
+        {
+            ["TextControlForeground"] = foregroundBrush,
+            ["TextControlForegroundPointerOver"] = foregroundBrush,
+            ["TextControlForegroundFocused"] = foregroundBrush,
+            ["TextControlForegroundDisabled"] = foregroundBrush,
+        };
+        Application.Current.Resources.MergedDictionaries.Add(_resourceOverrides);
 
         _lighterDarkStyle = new Styles
         {
@@ -345,6 +357,12 @@ public static class UiTheme
 
     private static void RemoveLighterDark()
     {
+        if (_resourceOverrides != null)
+        {
+            Application.Current!.Resources.MergedDictionaries.Remove(_resourceOverrides);
+            _resourceOverrides = null;
+        }
+
         if (_lighterDarkStyle != null)
         {
             Application.Current!.Styles.Remove(_lighterDarkStyle);
