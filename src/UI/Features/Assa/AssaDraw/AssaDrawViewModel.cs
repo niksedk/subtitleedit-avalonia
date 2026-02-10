@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PickLayer;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -46,6 +47,7 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private float _pointY;
     [ObservableProperty] private bool _isPointSelected;
     [ObservableProperty] private bool _isLayerSelected;
+    [ObservableProperty] private bool _isShapeSelected;
     [ObservableProperty] private Color _layerColor = Colors.White;
     [ObservableProperty] private bool _showGrid = true;
     [ObservableProperty] private ObservableCollection<ShapeTreeItem> _shapeTreeItems = [];
@@ -381,6 +383,70 @@ public partial class AssaDrawViewModel : ObservableObject
             RefreshTreeView();
             Canvas?.InvalidateVisual();
         }
+    }
+
+    [RelayCommand]
+    private async Task ChangeLayer()
+    {
+        if (Window == null || SelectedTreeItem == null)
+        {
+            return;
+        }
+
+        // Determine the current layer based on selection
+        int currentLayer;
+        if (SelectedTreeItem.IsLayer)
+        {
+            currentLayer = SelectedTreeItem.Layer;
+        }
+        else if (SelectedTreeItem.Shape != null)
+        {
+            currentLayer = SelectedTreeItem.Shape.Layer;
+        }
+        else
+        {
+            return;
+        }
+
+        var vm = new PickLayerViewModel { Layer = currentLayer };
+        var pickLayerWindow = new PickLayerWindow(vm);
+        await pickLayerWindow.ShowDialog(Window);
+
+        if (!vm.OkPressed || vm.Layer == currentLayer)
+        {
+            return;
+        }
+
+        var newLayer = vm.Layer;
+
+        // Get color from existing shapes in the new layer (if any)
+        var existingShapeInNewLayer = Shapes.FirstOrDefault(s => s.Layer == newLayer);
+        var newColor = existingShapeInNewLayer?.ForeColor;
+
+        if (SelectedTreeItem.IsLayer)
+        {
+            // Change layer for all shapes in the selected layer
+            foreach (var shape in Shapes.Where(s => s.Layer == currentLayer).ToList())
+            {
+                shape.Layer = newLayer;
+                if (newColor.HasValue)
+                {
+                    shape.ForeColor = newColor.Value;
+                }
+            }
+        }
+        else if (SelectedTreeItem.Shape != null)
+        {
+            // Change layer for just the selected shape
+            SelectedTreeItem.Shape.Layer = newLayer;
+            if (newColor.HasValue)
+            {
+                SelectedTreeItem.Shape.ForeColor = newColor.Value;
+            }
+        }
+
+        RefreshTreeView();
+        Canvas?.InvalidateVisual();
     }
 
     [RelayCommand]
@@ -931,7 +997,7 @@ public partial class AssaDrawViewModel : ObservableObject
         if (ActivePoint != null && Math.Abs(ActivePoint.X - value) > 0.001f)
         {
             ActivePoint.X = value;
-            RefreshTreeView();
+            UpdateSelectedPointName();
             Canvas?.InvalidateVisual();
         }
     }
@@ -941,8 +1007,32 @@ public partial class AssaDrawViewModel : ObservableObject
         if (ActivePoint != null && Math.Abs(ActivePoint.Y - value) > 0.001f)
         {
             ActivePoint.Y = value;
-            RefreshTreeView();
+            UpdateSelectedPointName();
             Canvas?.InvalidateVisual();
+        }
+    }
+
+    private void UpdateSelectedPointName()
+    {
+        if (ActivePoint == null)
+        {
+            return;
+        }
+
+        // Find and update the tree item that contains this point
+        foreach (var layerItem in ShapeTreeItems)
+        {
+            foreach (var shapeItem in layerItem.Children)
+            {
+                foreach (var pointItem in shapeItem.Children)
+                {
+                    if (pointItem.Point == ActivePoint)
+                    {
+                        pointItem.Name = ActivePoint.GetText(ActivePoint.X, ActivePoint.Y);
+                        return;
+                    }
+                }
+            }
         }
     }
 
@@ -950,6 +1040,8 @@ public partial class AssaDrawViewModel : ObservableObject
     {
         // Update layer selection state
         IsLayerSelected = value?.IsLayer == true;
+        IsShapeSelected = value?.Shape != null;
+        
         if (value?.IsLayer == true)
         {
             // Get color from first shape in this layer

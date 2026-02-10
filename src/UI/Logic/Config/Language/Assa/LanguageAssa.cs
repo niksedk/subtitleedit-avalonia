@@ -12,6 +12,7 @@ public class LanguageAssa
     public string DrawCircleTool { get; set; }
     public string DrawCloseShape { get; set; }
     public string DrawDeleteShape { get; set; }
+    public string DrawChangeLayer { get; set; }
     public string DrawClearAll { get; set; }
     public string DrawZoomIn { get; set; }
     public string DrawZoomOut { get; set; }
@@ -20,6 +21,7 @@ public class LanguageAssa
     public string DrawCopyToClipboard { get; set; }
     public string DrawShapes { get; set; }
     public string DrawSelectedPoint { get; set; }
+    public string DrawSelectedShape { get; set; }
     public string DrawSelectedLayer { get; set; }
     public string DrawToolX { get; set; }
     public string DrawHelpText { get; set; }
@@ -117,6 +119,7 @@ public class LanguageAssa
         DrawCircleTool = "Circle (F7)";
         DrawCloseShape = "Close Shape (F8/Enter)";
         DrawDeleteShape = "Delete Shape (Del)";
+        DrawChangeLayer = "Change Layer";
         DrawClearAll = "Clear All (Ctrl+N)";
         DrawZoomIn = "Zoom In (Ctrl++)";
         DrawZoomOut = "Zoom Out (Ctrl+-)";
@@ -125,6 +128,7 @@ public class LanguageAssa
         DrawCopyToClipboard = "Copy to Clipboard (Ctrl+C)";
         DrawShapes = "Shapes";
         DrawSelectedPoint = "Selected point";
+        DrawSelectedShape = "Selected shape";
         DrawSelectedLayer = "Selected layer";
         DrawToolX = "Tool: {0}";
         DrawHelpText = "Click to add points • Enter/F8 to close shape • Shift+Drag to pan • Ctrl+Scroll to zoom";

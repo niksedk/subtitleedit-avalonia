@@ -247,6 +247,7 @@ public class AssaDrawWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
         };
 
@@ -269,7 +270,7 @@ public class AssaDrawWindow : Window
 
         // Configure the tree view to display hierarchical data
         treeView.ItemTemplate = new FuncTreeDataTemplate<ShapeTreeItem>(
-            (item, _) => new TextBlock { Text = item.Name },
+            (item, _) => new TextBlock { [!TextBlock.TextProperty] = new Binding(nameof(ShapeTreeItem.Name)) },
             item => item.Children
         );
 
@@ -310,10 +311,15 @@ public class AssaDrawWindow : Window
         Grid.SetRow(pointEditorPanel, 2);
         panelGrid.Children.Add(pointEditorPanel);
 
-        // Shape color editor panel
-        var shapeEditorPanel = CreateShapeEditorPanel(vm);
-        Grid.SetRow(shapeEditorPanel, 3);
-        panelGrid.Children.Add(shapeEditorPanel);
+        // Shape editor panel (for shape-specific actions)
+        var shapeActionsPanel = CreateShapeActionsPanel(vm);
+        Grid.SetRow(shapeActionsPanel, 3);
+        panelGrid.Children.Add(shapeActionsPanel);
+
+        // Layer color editor panel
+        var layerEditorPanel = CreateLayerEditorPanel(vm);
+        Grid.SetRow(layerEditorPanel, 4);
+        panelGrid.Children.Add(layerEditorPanel);
 
         return new Border
         {
@@ -370,7 +376,35 @@ public class AssaDrawWindow : Window
         return panel;
     }
 
-    private static StackPanel CreateShapeEditorPanel(AssaDrawViewModel vm)
+    private static StackPanel CreateShapeActionsPanel(AssaDrawViewModel vm)
+    {
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Thickness(5),
+            [!StackPanel.IsVisibleProperty] = new Binding(nameof(vm.IsShapeSelected)),
+        };
+
+        var headerLabel = new TextBlock
+        {
+            Text = Se.Language.Assa.DrawSelectedShape,
+            FontWeight = FontWeight.Bold,
+            Margin = new Thickness(0, 0, 0, 5),
+        };
+        panel.Children.Add(headerLabel);
+
+        var changeLayerButton = new Button
+        {
+            Content = Se.Language.Assa.DrawChangeLayer,
+            Command = vm.ChangeLayerCommand,
+            HorizontalAlignment = HorizontalAlignment.Left,
+        };
+        panel.Children.Add(changeLayerButton);
+
+        return panel;
+    }
+
+    private static StackPanel CreateLayerEditorPanel(AssaDrawViewModel vm)
     {
         var panel = new StackPanel
         {
@@ -386,6 +420,15 @@ public class AssaDrawWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
         };
         panel.Children.Add(headerLabel);
+
+        var changeLayerButton = new Button
+        {
+            Content = Se.Language.Assa.DrawChangeLayer,
+            Command = vm.ChangeLayerCommand,
+            Margin = new Thickness(0, 0, 0, 10),
+            HorizontalAlignment = HorizontalAlignment.Left,
+        };
+        panel.Children.Add(changeLayerButton);
 
         var colorPicker = new ColorPicker
         {
