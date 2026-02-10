@@ -2,14 +2,11 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
-using Avalonia.Controls.Primitives;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportPlainText;
@@ -73,7 +70,7 @@ public class ImportPlainTextWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private static Control MakeImportPlainTextGroup(ImportPlainTextViewModel vm)
+    private static Grid MakeImportPlainTextGroup(ImportPlainTextViewModel vm)
     {
         var grid = new Grid
         {
@@ -88,7 +85,7 @@ public class ImportPlainTextWindow : Window
 
         var checkBoxMultiple = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.MultipleFilesOneFileIsOneSubtitle));
         var buttonOpen = UiUtil.MakeButton(Se.Language.File.Import.OpenTextFile, vm.FileImportCommand);
-        var buttonOpenMultiple = UiUtil.MakeButton("...", vm.FilesImportCommand);
+        var buttonOpenMultiple = UiUtil.MakeButtonBrowse(vm.FilesImportCommand);
 
         var panelTop = new Grid
         {
@@ -125,12 +122,12 @@ public class ImportPlainTextWindow : Window
         grid.Add(panelTop, 0, 0);
         grid.Add(panelEncoding, 1, 0);
         grid.Add(textBox, 2, 0);
-        grid.Add(listBoxFiles, 2, 0);
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(listBoxFiles), 2, 0);
 
         return MakeGroupBox(Se.Language.File.Import.TitleImportPlainText, grid);
     }
 
-    private static Control MakeOptionsGroup(ImportPlainTextViewModel vm)
+    private static Grid MakeOptionsGroup(ImportPlainTextViewModel vm)
     {
         var stack = new StackPanel { Spacing = 10 };
 
@@ -200,11 +197,11 @@ public class ImportPlainTextWindow : Window
         return MakeGroupBox(Se.Language.File.Import.ImportOptions, new ScrollViewer { Content = stack });
     }
 
-    private static Control MakePreviewGroup(ImportPlainTextViewModel vm)
+    private static Grid MakePreviewGroup(ImportPlainTextViewModel vm)
     {
         var dataGrid = new DataGrid { AutoGenerateColumns = false, SelectionMode = DataGridSelectionMode.Single, CanUserResizeColumns = true };
         dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Subtitles)));
-        dataGrid.Columns.Add(new DataGridTextColumn { Header = "#", Binding = new Binding(nameof(SubtitleLineViewModel.Number)), Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
+        dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.NumberSymbol, Binding = new Binding(nameof(SubtitleLineViewModel.Number)), Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
         dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Show, Binding = new Binding(nameof(SubtitleLineViewModel.StartTime)) { Converter = new TimeSpanToDisplayFullConverter() }, Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
         dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Hide, Binding = new Binding(nameof(SubtitleLineViewModel.EndTime)) { Converter = new TimeSpanToDisplayFullConverter() }, Width = new DataGridLength(1, DataGridLengthUnitType.Auto) });
         dataGrid.Columns.Add(new DataGridTextColumn { Header = Se.Language.General.Text, Binding = new Binding(nameof(SubtitleLineViewModel.Text)), Width = new DataGridLength(1, DataGridLengthUnitType.Star) });

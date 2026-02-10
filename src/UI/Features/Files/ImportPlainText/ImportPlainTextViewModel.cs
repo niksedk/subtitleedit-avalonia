@@ -4,6 +4,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -17,8 +18,6 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
-using Nikse.SubtitleEdit.Core;
 
 namespace Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 
@@ -104,7 +103,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
         TryToFindTimeCodes = Se.Settings.Tools.ImportTextTryToFindTimeCodes;
 
         if (Se.Settings.Tools.ImportTextSplittingLineMode == "TwoLinesAreOneSubtitle" && SplitAtOptions.Count > 1)
+        {
             SelectedSplitAtOption = SplitAtOptions[1];
+        }
     }
 
     // Property Change Handlers
@@ -162,7 +163,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
             {
                 foreach (var format in SubtitleFormat.AllSubtitleFormats)
                 {
-                    if (format.FriendlyName == "Plain Text" || format.FriendlyName == SubRip.NameOfFormat) continue;
+                    if (format.FriendlyName == "Plain Text" || format.FriendlyName == SubRip.NameOfFormat)
+                    {
+                        continue;
+                    }
+
                     if (format.IsMine(lines, string.Empty))
                     {
                         format.LoadSubtitle(FixedSubtitle, lines, string.Empty);
@@ -178,12 +183,27 @@ public partial class ImportPlainTextViewModel : ObservableObject
             // 2. Perform Text Splitting (only if we didn't find specific subtitle formatting)
             if (!timeCodesFound)
             {
-                if (MultipleFilesOneFileIsOneSubtitle) ImportMultipleFiles();
-                else if (IsSplitAtLineMode) ImportLineMode(lines.ToArray());
-                else if (IsAutoSplitText) ImportAutoSplit(lines.ToArray());
-                else ImportSplitAtBlankLine(lines.ToList());
+                if (MultipleFilesOneFileIsOneSubtitle)
+                {
+                    ImportMultipleFiles();
+                }
+                else if (IsSplitAtLineMode)
+                {
+                    ImportLineMode(lines.ToArray());
+                }
+                else if (IsAutoSplitText)
+                {
+                    ImportAutoSplit(lines.ToArray());
+                }
+                else
+                {
+                    ImportSplitAtBlankLine(lines.ToList());
+                }
 
-                if (MergeShortLines) MergeLinesWithContinuation();
+                if (MergeShortLines)
+                {
+                    MergeLinesWithContinuation();
+                }
             }
 
             FixedSubtitle.Renumber(StartFromNumber);
@@ -226,7 +246,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
             if (!string.IsNullOrEmpty(SelectedLineBreak))
             {
                 foreach (var splitter in SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                {
                     text = text.Replace(splitter.Trim(), Environment.NewLine);
+                }
             }
             FixedSubtitle.Paragraphs.Add(new Paragraph(text.Trim(), 0, 0));
         }
@@ -244,13 +266,26 @@ public partial class ImportPlainTextViewModel : ObservableObject
             if (!string.IsNullOrEmpty(SelectedLineBreak))
             {
                 foreach (var splitter in SelectedLineBreak.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                {
                     s = s.Replace(splitter.Trim(), Environment.NewLine);
+                }
             }
 
-            if (RemoveLinesWithoutLetters && !PlainTextImporter.ContainsLetters(s)) continue;
-            if (string.IsNullOrEmpty(s)) continue;
+            if (RemoveLinesWithoutLetters && !PlainTextImporter.ContainsLetters(s))
+            {
+                continue;
+            }
 
-            if (sb.Length > 0) sb.AppendLine();
+            if (string.IsNullOrEmpty(s))
+            {
+                continue;
+            }
+
+            if (sb.Length > 0)
+            {
+                sb.AppendLine();
+            }
+
             sb.Append(s);
             count++;
 
@@ -262,6 +297,7 @@ public partial class ImportPlainTextViewModel : ObservableObject
                 count = 0;
             }
         }
+
         if (sb.Length > 0)
         {
             var text = sb.ToString();
@@ -272,7 +308,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
     private void ImportAutoSplit(string[] lines)
     {
         var sub = new Subtitle();
-        foreach (var line in lines) sub.Paragraphs.Add(new Paragraph(line, 0, 0));
+        foreach (var line in lines)
+        {
+            sub.Paragraphs.Add(new Paragraph(line, 0, 0));
+        }
+
         var language = LanguageAutoDetect.AutoDetectGoogleLanguage(sub);
 
         var importer = new PlainTextImporter(SplitAtBlankLinesSetting, RemoveLinesWithoutLetters, MaxNumberOfLines,
@@ -280,7 +320,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
         var autoLines = importer.ImportAutoSplit(lines);
         foreach (var text in autoLines)
+        {
             FixedSubtitle.Paragraphs.Add(new Paragraph(AutoBreak ? Utilities.AutoBreakLine(text) : text, 0, 0));
+        }
     }
 
     private void ImportSplitAtBlankLine(List<string> lines)
@@ -297,7 +339,10 @@ public partial class ImportPlainTextViewModel : ObservableObject
                     sb.Clear();
                 }
             }
-            else sb.AppendLine(line.Trim());
+            else
+            {
+                sb.AppendLine(line.Trim());
+            }
         }
     }
 
@@ -315,16 +360,25 @@ public partial class ImportPlainTextViewModel : ObservableObject
             if (merge && (p.Text.TrimEnd().EndsWith('!') || p.Text.TrimEnd().EndsWith('.')))
             {
                 var st = new StrippableText(next!.Text);
-                if (st.StrippedText.Length > 0 && char.IsUpper(st.StrippedText[0])) merge = false;
+                if (st.StrippedText.Length > 0 && char.IsUpper(st.StrippedText[0]))
+                {
+                    merge = false;
+                }
             }
-            if (merge && (p.Text.Length >= SingleLineMaxLength - 5 || next!.Text.Length >= SingleLineMaxLength - 5)) merge = false;
+            if (merge && (p.Text.Length >= SingleLineMaxLength - 5 || next!.Text.Length >= SingleLineMaxLength - 5))
+            {
+                merge = false;
+            }
 
             if (merge)
             {
                 temp.Paragraphs.Add(new Paragraph(p) { Text = p.Text + Environment.NewLine + next!.Text });
                 skipNext = true;
             }
-            else temp.Paragraphs.Add(new Paragraph(p));
+            else
+            {
+                temp.Paragraphs.Add(new Paragraph(p));
+            }
         }
         FixedSubtitle = temp;
     }
@@ -355,15 +409,25 @@ public partial class ImportPlainTextViewModel : ObservableObject
     {
         var encoding = SelectedEncoding?.Encoding ?? Encoding.UTF8;
         if (fileName.EndsWith(".rtf", StringComparison.OrdinalIgnoreCase))
+        {
             return Regex.Replace(File.ReadAllText(fileName, encoding), @"\{\*?\\[^{}]+\}|\\\n|\n|\r|\\|[{}]+", "");
+        }
+
         if (fileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
+        {
             return WebUtility.HtmlDecode(Regex.Replace(File.ReadAllText(fileName, encoding), "<.*?>", string.Empty));
+        }
+
         return File.ReadAllText(fileName, encoding);
     }
 
     private static bool IsHtmlIndexExportFromSubtitleEdit(string fileName)
     {
-        if (string.IsNullOrEmpty(fileName)) return false;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return false;
+        }
+
         return GetSubtitleFromHtmlIndex(FileUtil.ReadAllTextShared(fileName, Encoding.UTF8)).Paragraphs.Count > 0;
     }
 
@@ -374,7 +438,11 @@ public partial class ImportPlainTextViewModel : ObservableObject
         foreach (var line in lines)
         {
             var idxText = line.IndexOf("background-color:", StringComparison.OrdinalIgnoreCase);
-            if (idxText >= 0) idxText = line.IndexOf('>', idxText);
+            if (idxText >= 0)
+            {
+                idxText = line.IndexOf('>', idxText);
+            }
+
             var idxColon = line.IndexOf(':');
             var idxSplit = line.IndexOf("->", StringComparison.Ordinal);
             var idxDiv = line.IndexOf("<div", StringComparison.OrdinalIgnoreCase);
@@ -388,7 +456,9 @@ public partial class ImportPlainTextViewModel : ObservableObject
                     var text = WebUtility.HtmlDecode(line.Substring(idxText + 1).Replace("</div>", "").Replace("<br />", Environment.NewLine).Replace("<br>", Environment.NewLine).Trim());
                     subtitle.Paragraphs.Add(new Paragraph(text, DecodeTimeCode(start), DecodeTimeCode(end)));
                 }
-                catch { }
+                catch
+                {
+                }
             }
         }
         subtitle.Renumber();
@@ -397,14 +467,28 @@ public partial class ImportPlainTextViewModel : ObservableObject
 
     private static double DecodeTimeCode(string tc)
     {
-        var parts = tc.Split(new[] { ',', '.', ':' }, StringSplitOptions.RemoveEmptyEntries);
+        var parts = tc.Split([',', '.', ':'], StringSplitOptions.RemoveEmptyEntries);
         try
         {
-            if (parts.Length == 2) return new TimeCode(0, 0, int.Parse(parts[0]), int.Parse(parts[1])).TotalMilliseconds;
-            if (parts.Length == 3) return new TimeCode(0, int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])).TotalMilliseconds;
-            if (parts.Length == 4) return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3])).TotalMilliseconds;
+            if (parts.Length == 2)
+            {
+                return new TimeCode(0, 0, int.Parse(parts[0]), int.Parse(parts[1])).TotalMilliseconds;
+            }
+
+            if (parts.Length == 3)
+            {
+                return new TimeCode(0, int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])).TotalMilliseconds;
+            }
+
+            if (parts.Length == 4)
+            {
+                return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3])).TotalMilliseconds;
+            }
         }
-        catch { }
+        catch
+        {
+        }
+
         return 0;
     }
 
@@ -432,24 +516,56 @@ public partial class ImportPlainTextViewModel : ObservableObject
     }
 
     [RelayCommand] private void Cancel() => Close();
+
     [RelayCommand]
     private async Task FileImport()
     {
-        if (Window == null) return;
+        if (Window == null)
+        {
+            return;
+        }
+
         var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.General.Title, Se.Language.General.TextFiles, ".txt", Se.Language.General.TextFiles);
-        if (string.IsNullOrEmpty(fileName)) return;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
         _currentFileName = fileName;
         PlainText = LoadTextFromFile(fileName);
     }
+
     [RelayCommand]
     private async Task FilesImport()
     {
-        if (Window == null) return;
+        if (Window == null)
+        {
+            return;
+        }
+
         var fileNames = await _fileHelper.PickOpenFiles(Window, Se.Language.File.Import.OpenTextFiles, Se.Language.General.TextFiles, _textExtensions, string.Empty, new List<string>());
-        if (fileNames.Length == 0) return;
-        foreach (var f in fileNames) Files.Add(f);
+        if (fileNames.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var f in fileNames)
+        {
+            Files.Add(f);
+        }
+
         MultipleFilesOneFileIsOneSubtitle = true;
+
+        GeneratePreview();
     }
+
     private void Close() => Dispatcher.UIThread.Post(() => Window?.Close());
-    internal void KeyDown(object? sender, KeyEventArgs e) { if (e.Key == Key.Escape) Close(); }
+
+    internal void KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            Close();
+        }
+    }
 }
