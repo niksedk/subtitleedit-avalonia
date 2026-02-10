@@ -1775,6 +1775,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 UseShellExecute = false,
             }
         };
+
+        //TODO: expose in UI process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = "1"; // -fa false
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             if (!string.IsNullOrEmpty(Se.Settings.General.FfmpegPath) &&
