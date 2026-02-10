@@ -14,6 +14,7 @@ public interface IWhisperDownloadService
     Task DownloadWhisperCppCuBlas(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperConstMe(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperPurfviewFasterWhisperXxl(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task? DownloadWhisperCppVulcan(Stream stream, Progress<float> progress, CancellationToken cancellationToken);
 }
 
 public class WhisperDownloadService : IWhisperDownloadService
@@ -25,8 +26,9 @@ public class WhisperDownloadService : IWhisperDownloadService
     private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/WhisperCppLinux64.zip";
 
     private const string WindowsUrlCuBlass = "https://github.com/ggml-org/whisper.cpp/releases/download/v1.8.3/whisper-cublas-12.4.0-bin-x64.zip";
+    private const string WindowsUrlCppVulcan = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/WhisperCppWindowsVulcan.zip";
     private const string LinuxUrlCuBlass = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/WhisperCppCudaLinux64.zip";
-
+    
     private const string DownloadUrlConstMe = "https://github.com/Const-me/Whisper/releases/download/1.12.0/cli.zip";
 
     // smaller file for testing download: private const string DownloadUrlPurfviewFasterWhisperXxl = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-182/whisper-cublas-11.8.0-bin-x64.7z";
@@ -78,6 +80,21 @@ public class WhisperDownloadService : IWhisperDownloadService
         await DownloadHelper.DownloadFileAsync(_httpClient, url, destinationFileName, progress, cancellationToken);
     }
 
+    public async Task DownloadWhisperCppVulcan(Stream stream,  Progress<float> progress, CancellationToken cancellationToken)
+    {
+        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrlCppVulcan(), stream, progress, cancellationToken);
+    }
+
+    private string GetUrlCppVulcan()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return WindowsUrlCppVulcan;
+        }
+
+        throw new PlatformNotSupportedException();
+    }
+    
     private static string GetUrl()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

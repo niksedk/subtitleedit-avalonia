@@ -126,6 +126,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Engines.Add(new WhisperEngineCppCuBlas());
+            Engines.Add(new WhisperEngineCppVulcan());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
             Engines.Add(new WhisperEngineConstMe());
         }
@@ -1169,12 +1170,30 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
-            Window!, viewModel =>
+            Window, viewModel =>
             {
                 viewModel.Engine = engine;
                 viewModel.StartDownload();
             });
     }
+    
+    [RelayCommand]
+    private async Task ReDownloadWhisperEngineVulcan()
+    {
+        var engine = SelectedEngine;
+        if (Window == null || engine == null)
+        {
+            return;
+        }
+
+        var vm = await _windowService.ShowDialogAsync<DownloadWhisperEngineWindow, DownloadWhisperEngineViewModel>(
+            Window, viewModel =>
+            {
+                viewModel.Engine = engine;
+                viewModel.StartDownload();
+            });
+    }
+
 
     [RelayCommand]
     private void SingleMode()

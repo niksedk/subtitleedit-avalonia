@@ -278,6 +278,10 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         {
             _downloadTask = _whisperDownloadService.DownloadWhisperCppCuBlas(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
         }
+        else if (Engine is WhisperEngineCppVulcan)
+        {
+            _downloadTask = _whisperDownloadService.DownloadWhisperCppVulcan(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
+        }
         else if (Engine is WhisperEngineConstMe)
         {
             _downloadTask = _whisperDownloadService.DownloadWhisperConstMe(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
