@@ -129,10 +129,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Engines.Add(new WhisperEngineCppVulcan());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
             Engines.Add(new WhisperEngineConstMe());
+            Engines.Add(new WhisperEngineCppCuBlas());
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
-            Engines.Add(new WhisperEngineCppCuBlas());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
         }
 
