@@ -7,7 +7,6 @@ using Avalonia.Themes.Fluent;
 using AvaloniaEdit;
 using AvaloniaEdit.Editing;
 using Nikse.SubtitleEdit.Logic.Config;
-using Projektanker.Icons.Avalonia;
 using System;
 
 namespace Nikse.SubtitleEdit.Logic;

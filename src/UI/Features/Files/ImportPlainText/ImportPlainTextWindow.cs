@@ -85,7 +85,9 @@ public class ImportPlainTextWindow : Window
 
         var checkBoxMultiple = UiUtil.MakeCheckBox(Se.Language.File.Import.MultipleFiles, vm, nameof(vm.MultipleFilesOneFileIsOneSubtitle));
         var buttonOpen = UiUtil.MakeButton(Se.Language.File.Import.OpenTextFile, vm.FileImportCommand);
+        buttonOpen.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle)) { Converter = new InverseBooleanConverter() });
         var buttonOpenMultiple = UiUtil.MakeButtonBrowse(vm.FilesImportCommand);
+        buttonOpenMultiple.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.MultipleFilesOneFileIsOneSubtitle)));
 
         var panelTop = new Grid
         {
