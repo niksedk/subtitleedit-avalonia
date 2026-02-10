@@ -1744,11 +1744,23 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         var settings = Se.Settings.Tools.AudioToText;
-        settings.WhisperCustomCommandLineArguments = settings.WhisperCustomCommandLineArguments.Trim();
-        if (settings.WhisperCustomCommandLineArguments == "--standard" &&
+        var args = settings.WhisperCustomCommandLineArguments.Trim();
+        if (args == "--standard" &&
             (engine.Name != WhisperEnginePurfviewFasterWhisperXxl.StaticName))
         {
-            settings.WhisperCustomCommandLineArguments = string.Empty;
+            args = string.Empty;
+        }
+
+        var cppVulcanDevice = string.Empty;
+        if (args.Contains("--device", StringComparison.Ordinal) &&
+            engine.Name == WhisperEngineCppVulcan.StaticName)
+        {
+            var deviceMatch = Regex.Match(args, @"--device\s+(\d+)");
+            if (deviceMatch.Success)
+            {
+                cppVulcanDevice = deviceMatch.Groups[1].Value;
+                args = Regex.Replace(args, @"--device\s+\d+", "").Trim(); // Remove --device and its value from args
+            }
         }
 
         var translateToEnglish = translate ? GetWhisperTranslateParameter(engine) : string.Empty;
@@ -1758,9 +1770,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             translateToEnglish = string.Empty;
         }
 
-        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas)
+        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.CppVulcan)
         {
-            if (!settings.WhisperCustomCommandLineArguments.Contains("--print-progress"))
+            if (!args.Contains("--print-progress"))
             {
                 translateToEnglish += "--print-progress ";
             }
@@ -1768,7 +1780,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         var outputSrt = string.Empty;
         var postParams = string.Empty;
-        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.ConstMe)
+        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.ConstMe or WhisperChoice.CppVulcan)
         {
             outputSrt = "--output-srt ";
         }
@@ -1781,7 +1793,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var w = engine.GetExecutable();
         var m = engine.GetModelForCmdLine(model);
         var parameters =
-            $"--language {language} --model \"{m}\" {outputSrt}{translateToEnglish}{settings.WhisperCustomCommandLineArguments} \"{waveFileName}\"{postParams}";
+            $"--language {language} --model \"{m}\" {outputSrt}{translateToEnglish}{args} \"{waveFileName}\"{postParams}";
 
         SeLogger.WhisperInfo($"{w} {parameters}");
 
@@ -1795,7 +1807,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
         };
 
-        //TODO: expose in UI process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = "1"; // -fa false
+        if (!string.IsNullOrEmpty(cppVulcanDevice))
+        {
+            process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = "1";
+        }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
