@@ -26,14 +26,18 @@ public class AssaApplyCustomOverrideTagsWindow : Window
 
         var labelOverrideTag = UiUtil.MakeLabel(Se.Language.Assa.ChooseOverrideTagToAdd);
         var comboBoxOverrideTags = UiUtil.MakeComboBox(vm.OverrideTags, vm, nameof(vm.SelectedOverrideTag));
-        var buttonApplyOverrideTag = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
+        var buttonUseOverrideTag = UiUtil.MakeButton(Se.Language.General.Use, vm.UseCommand);
+        var buttonAppendOverrideTag = UiUtil.MakeButton(Se.Language.General.Append, vm.AppendCommand);
+        var buttonClear = UiUtil.MakeButton(Se.Language.General.Clear, vm.ClearCommand);
         var panelOverrideTags = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Children =
             {
                 comboBoxOverrideTags,
-                buttonApplyOverrideTag,
+                buttonUseOverrideTag,
+                buttonAppendOverrideTag,
+                buttonClear,
             }
         };
 

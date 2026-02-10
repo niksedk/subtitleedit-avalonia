@@ -619,6 +619,9 @@ public class LanguageGeneral
     public string ImageSaved { get; set; }
     public string Hex { get; set; }
     public string SelectedlinesX { get; set; }
+    public string Replace { get; set; }
+    public string Append { get; set; }
+    public string Use { get; set; }
 
     public LanguageGeneral()
     {
@@ -1237,5 +1240,8 @@ public class LanguageGeneral
         ImageSaved = "Image saved";
         Hex = "Hex";
         SelectedlinesX = "Selected lines: {0}";
+        Replace = "Replace";
+        Append = "Append";
+        Use = "Use";
     }
 }

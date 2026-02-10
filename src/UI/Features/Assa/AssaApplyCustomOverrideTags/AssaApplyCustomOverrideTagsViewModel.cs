@@ -160,7 +160,7 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Add()
+    private void Append()
     {
         var tag = SelectedOverrideTag;
         if (tag == null)
@@ -171,6 +171,24 @@ public partial class AssaApplyCustomOverrideTagsViewModel : ObservableObject
         var newTag = CurrentTag + tag.Tag;
         newTag = newTag.Replace("}{", string.Empty);
         CurrentTag = newTag;
+    }
+
+    [RelayCommand]
+    private void Use()
+    {
+        var tag = SelectedOverrideTag;
+        if (tag == null)
+        {
+            return;
+        }
+
+        CurrentTag = tag.Tag;
+    }
+
+    [RelayCommand]
+    private void Clear()
+    {
+        CurrentTag = string.Empty;
     }
 
     [RelayCommand]
