@@ -137,9 +137,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         Engines.Add(new WhisperEngineOpenAi());
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || 
-            RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) 
-            //(RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        //(RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64))
         {
             Engines.Add(new ChatLlmCppEngine());
         }
@@ -833,7 +833,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var jsonFileName = waveFileName + ".json";
         if (File.Exists(jsonFileName))
         {
-            var json = File.ReadAllText(jsonFileName);  
+            var json = File.ReadAllText(jsonFileName);
             var jsonTranscription = WhisperCppJson.GetTranscription(json);
             if (jsonTranscription.Count > 0)
             {
@@ -846,21 +846,17 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                         .Replace(" </u>", "</u> "),
                 })).ToList();
 
+                filesToDelete?.Add(jsonFileName);
                 return true;
             }
         }
 
         var whisperFolder = engine.GetAndCreateWhisperFolder();
-        var srtCandidates = GetResultFileCandidates(".srt", waveFileName, videoFileName, whisperFolder);
-        var vttCandidates = GetResultFileCandidates(".vtt", waveFileName, videoFileName, whisperFolder);
+        var srtCandidates = GetResultFileCandidates(".srt", waveFileName, videoFileName, whisperFolder, outputText);
+        var vttCandidates = GetResultFileCandidates(".vtt", waveFileName, videoFileName, whisperFolder, outputText);
 
         var srtFileName = srtCandidates.FirstOrDefault(File.Exists);
         var vttFileName = vttCandidates.FirstOrDefault(File.Exists);
-
-        if (string.IsNullOrEmpty(srtFileName) && string.IsNullOrEmpty(vttFileName))
-        {
-            srtFileName = TryFindFilePathInOutput(outputText);
-        }
 
         if (string.IsNullOrEmpty(srtFileName) && string.IsNullOrEmpty(vttFileName))
         {
@@ -869,20 +865,17 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         var sub = new Subtitle();
-        var foundFileName = string.Empty;
 
         if (File.Exists(srtFileName))
         {
             var rawText = FileUtil.ReadAllLinesShared(srtFileName, Encoding.UTF8);
             new SubRip().LoadSubtitle(sub, rawText, srtFileName);
-            foundFileName = srtFileName;
             outputText?.Enqueue($"Loading result from {srtFileName}");
         }
         else if (File.Exists(vttFileName))
         {
             var rawText = FileUtil.ReadAllLinesShared(vttFileName, Encoding.UTF8);
             new WebVTT().LoadSubtitle(sub, rawText, vttFileName);
-            foundFileName = vttFileName;
             outputText?.Enqueue($"Loading result from {vttFileName}");
         }
 
@@ -895,15 +888,19 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Text = p.Text
         }).ToList();
 
-        if (!string.IsNullOrEmpty(foundFileName))
+        if (!string.IsNullOrEmpty(srtFileName))
         {
-            filesToDelete?.Add(foundFileName);
+            filesToDelete?.Add(srtFileName);
+        }
+        if (!string.IsNullOrEmpty(vttFileName))
+        {
+            filesToDelete?.Add(vttFileName);
         }
 
         return true;
     }
 
-    private static List<string> GetResultFileCandidates(string ext, string waveFileName, string videoFileName, string whisperFolder)
+    private static List<string> GetResultFileCandidates(string ext, string waveFileName, string videoFileName, string whisperFolder, ConcurrentQueue<string> outputText)
     {
         var candidates = new List<string>
         {
@@ -931,19 +928,25 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             candidates.Add(Path.Combine(whisperFolder, Path.GetFileNameWithoutExtension(waveFileName) + ext));
         }
 
+        var pathFromOutput = TryFindFilePathInOutput(ext.Trim('.'), outputText);
+        if (!string.IsNullOrEmpty(pathFromOutput))
+        {
+            candidates.Insert(0, pathFromOutput);
+        }
+
         return candidates;
     }
 
-    private static string? TryFindFilePathInOutput(ConcurrentQueue<string> outputText)
+    private static string? TryFindFilePathInOutput(string format, ConcurrentQueue<string> outputText)
     {
-        const string findText = "output_srt: saving output to";
+        string findText = "output_" + format + ": saving output to";
         foreach (var line in outputText)
         {
             if (line.Contains(findText, StringComparison.OrdinalIgnoreCase))
             {
                 var filePath = line.Substring(line.IndexOf(findText, StringComparison.OrdinalIgnoreCase) + findText.Length + 1)
                     .Trim('"', ' ', '\'', '\r', '\n');
-                
+
                 if (File.Exists(filePath))
                 {
                     return filePath;
