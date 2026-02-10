@@ -52,6 +52,21 @@ public class SeTools
     public string BinEditBackgroundColor { get; set; }
     public decimal BinEditOutlineWidth { get; set; }
     public decimal BinEditShadowWidth { get; set; }
+    
+    public string ImportTextSplitting { get; set; }
+    public string ImportTextSplittingLineMode { get; set; }
+    public string ImportTextLineBreak { get; set; }
+    public bool ImportTextMergeShortLines { get; set; }
+    public bool ImportTextAutoSplitAtBlank { get; set; }
+    public bool ImportTextRemoveLinesNoLetters { get; set; }
+    public bool ImportTextGenerateTimeCodes { get; set; }
+    public bool ImportTextAutoBreak { get; set; }
+    public bool ImportTextAutoBreakAtEnd { get; set; }
+    public int ImportTextGap { get; set; }
+    public int ImportTextAutoSplitNumberOfLines { get; set; }
+    public string ImportTextAutoBreakAtEndMarkerText { get; set; }
+    public bool ImportTextDurationAuto { get; set; }
+    public int ImportTextFixedDuration { get; set; }
 
     public string LastColorPickerColor { get; set; }
     public string LastColorPickerColor1 { get; set; }
@@ -61,6 +76,7 @@ public class SeTools
     public string LastColorPickerColor5 { get; set; }
     public string LastColorPickerColor6 { get; set; }
     public string LastColorPickerColor7 { get; set; }
+    public bool ImportTextTryToFindTimeCodes { get; set; }
 
     public SeTools()
     {
@@ -95,6 +111,22 @@ public class SeTools
         BinEditOutlineWidth = 2;
         BinEditShadowWidth = 1;
 
+        ImportTextSplitting = "auto";
+        ImportTextSplittingLineMode = "OneLineIsOneSubtitle";
+        ImportTextLineBreak = "|";
+        ImportTextMergeShortLines = false;
+        ImportTextAutoSplitAtBlank = true;
+        ImportTextRemoveLinesNoLetters = false;
+        ImportTextGenerateTimeCodes = true;
+        ImportTextAutoBreak = true;
+        ImportTextAutoBreakAtEnd = true;
+        ImportTextGap = 90;
+        ImportTextAutoSplitNumberOfLines = 2;
+        ImportTextAutoBreakAtEndMarkerText = ".!?";
+        ImportTextDurationAuto = true;
+        ImportTextFixedDuration = 3000;
+        ImportTextTryToFindTimeCodes = false;
+
         LastColorPickerColor = Colors.Yellow.FromColorToHex();
         LastColorPickerColor1 = Colors.Red.FromColorToHex();
         LastColorPickerColor2 = Colors.Green.FromColorToHex();
@@ -102,6 +134,6 @@ public class SeTools
         LastColorPickerColor4 = Colors.White.FromColorToHex();
         LastColorPickerColor5 = Colors.Black.FromColorToHex();
         LastColorPickerColor6 = Colors.Cyan.FromColorToHex();
-        LastColorPickerColor7 = Colors.Orange.FromColorToHex(); 
+        LastColorPickerColor7 = Colors.Orange.FromColorToHex();
     }
 }

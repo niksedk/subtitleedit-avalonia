@@ -12,9 +12,11 @@ namespace Nikse.SubtitleEdit.Logic;
 
 internal static class SubtitleGridCopyPasteHelper
 {
-    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat)
+    internal static async Task Copy(Window window, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
     {
         var subtitle = new Subtitle();
+        subtitle.Header = sourceSubtitle.Header;
+        subtitle.Footer = sourceSubtitle.Footer;
         foreach (var item in selectedItems)
         {
             subtitle.Paragraphs.Add(item.ToParagraph(subtitleFormat));
@@ -24,9 +26,11 @@ internal static class SubtitleGridCopyPasteHelper
         await ClipboardHelper.SetTextAsync(window, text);
     }
 
-    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat)
+    internal static async Task Cut(Window window, ObservableCollection<SubtitleLineViewModel> subtitles, List<SubtitleLineViewModel> selectedItems, SubtitleFormat subtitleFormat, Subtitle sourceSubtitle)
     {
         var subtitle = new Subtitle();
+        subtitle.Header = sourceSubtitle.Header;
+        subtitle.Footer = sourceSubtitle.Footer;
         foreach (var item in selectedItems)
         {
             subtitle.Paragraphs.Add(item.ToParagraph(subtitleFormat));
@@ -50,19 +54,23 @@ internal static class SubtitleGridCopyPasteHelper
         }
 
         var addTimeMilliseconds = (double)0;
-        if (subtitles.Count > 0)
+        if (subtitles.Count > 0 && index >= 0 && index < subtitles.Count)
         {
             addTimeMilliseconds = (double)subtitles[index].EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines;
             index++;
         }
+        else if (subtitles.Count > 0)
+        {
+             // If index is invalid (e.g. -1), append to end
+             addTimeMilliseconds = (double)subtitles[subtitles.Count - 1].EndTime.TotalMilliseconds + Se.Settings.General.MinimumMillisecondsBetweenLines;
+             index = subtitles.Count;
+        }
+
 
         var lines = text.SplitToLines();
         var subtitle = Subtitle.Parse(lines, subtitleFormat.Extension);
         if (subtitle?.Paragraphs.Count > 0)
         {
-            var firstSubtitleTime = subtitle.Paragraphs[0].StartTime.TotalMilliseconds;
-            var adjust = addTimeMilliseconds - firstSubtitleTime;
-            subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(adjust));
             LoadParagraphs(subtitles, index, subtitleFormat, subtitle);
             return;
         }
@@ -72,9 +80,6 @@ internal static class SubtitleGridCopyPasteHelper
             if (item.IsMine(lines, string.Empty) && subtitle != null)
             {
                 item.LoadSubtitle(subtitle, lines, string.Empty);
-                var firstSubtitleTime = subtitle.Paragraphs[0].StartTime.TotalMilliseconds;
-                var adjust = addTimeMilliseconds - firstSubtitleTime;
-                subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(adjust));
                 LoadParagraphs(subtitles, index, subtitleFormat, subtitle);
                 return;
             }

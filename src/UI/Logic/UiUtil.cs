@@ -928,13 +928,7 @@ public static class UiUtil
         return control;
     }
 
-    public static Button WithHorizontalAlignmentStretch(this Button control)
-    {
-        control.HorizontalAlignment = HorizontalAlignment.Stretch;
-        return control;
-    }
-
-    public static TextBox WithHorizontalAlignmentStretch(this TextBox control)
+    public static T WithHorizontalAlignmentStretch<T>(this T control) where T : Control
     {
         control.HorizontalAlignment = HorizontalAlignment.Stretch;
         return control;
@@ -1644,6 +1638,7 @@ public static class UiUtil
             Maximum = max,
             Increment = 1,
             FormatString = "F0",
+            Foreground = GetTextColor(),
         };
 
         if (propertyValuePath != null)
@@ -1681,7 +1676,8 @@ public static class UiUtil
             Minimum = min,
             Maximum = max,
             Increment = 0.01m,
-            FormatString = "F2" // Force two decimals
+            FormatString = "F2", // Force two decimals
+            Foreground = GetTextColor(),
         };
 
         if (propertyValuePath != null)
