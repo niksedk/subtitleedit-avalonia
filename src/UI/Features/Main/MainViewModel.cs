@@ -898,18 +898,25 @@ public partial class MainViewModel :
         Renumber();
         _updateAudioVisualizer = true;
     }
+
     [RelayCommand]
     private async Task ShowAssaChangeResolution()
     {
         var result = await ShowDialogAsync<AssaResolutionResamplerWindow, AssaResolutionResamplerViewModel>(vm =>
         {
-            //vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
+            vm.Initialize(GetUpdateSubtitle(), _videoFileName, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
         });
 
-        if (result.OkPressed)
+        if (!result.OkPressed)
         {
+            return;
         }
+
+        SetSubtitles(result.ResultSubtitle);
+        _subtitle.Header = result.ResultSubtitle.Header;
+        ShowStatus(Se.Language.Main.AssaResolutionResamplerDone);
     }
+
     [RelayCommand]
     private async Task ShowAssaGenerateBackground()
     {

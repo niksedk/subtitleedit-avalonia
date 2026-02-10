@@ -91,6 +91,7 @@ public class LanguageMain
     public string SortedByEndTime { get; set; }
     public string ColorHint { get; set; }
     public string RemoveFormattingHint { get; set; }
+    public string AssaResolutionResamplerDone { get; set; }
 
     public LanguageMain()
     {
@@ -176,5 +177,6 @@ public class LanguageMain
         SortedByEndTime = "Sorted by \"Hide\" time";
         ColorHint = "Color selected lines";
         RemoveFormattingHint = "Remove formatting from selected lines";
+        AssaResolutionResamplerDone = "ASSA resolution changed.";
     }
 }

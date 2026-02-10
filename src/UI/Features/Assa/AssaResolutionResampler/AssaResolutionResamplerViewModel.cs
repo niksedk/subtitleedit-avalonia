@@ -20,8 +20,8 @@ public partial class AssaResolutionResamplerViewModel : ObservableObject
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
 
-    [ObservableProperty] private int _sourceWidth = 1920;
-    [ObservableProperty] private int _sourceHeight = 1080;
+    [ObservableProperty] private int _sourceWidth = 384;
+    [ObservableProperty] private int _sourceHeight = 288;
     [ObservableProperty] private int _targetWidth = 1920;
     [ObservableProperty] private int _targetHeight = 1080;
     [ObservableProperty] private bool _changeMargins = true;
