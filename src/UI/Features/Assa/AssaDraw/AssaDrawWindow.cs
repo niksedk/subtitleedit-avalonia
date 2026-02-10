@@ -347,7 +347,7 @@ public class AssaDrawWindow : Window
         {
             Minimum = -10000,
             Maximum = 10000,
-            Width = 100,
+            Width = 120,
             Increment = 1,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PointX)) { Mode = BindingMode.TwoWay },
         };
@@ -360,7 +360,7 @@ public class AssaDrawWindow : Window
         {
             Minimum = -10000,
             Maximum = 10000,
-            Width = 100,
+            Width = 120,
             Increment = 1,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.PointY)) { Mode = BindingMode.TwoWay },
         };
