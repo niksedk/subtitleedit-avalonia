@@ -1,11 +1,11 @@
 ﻿using Avalonia.Media.Imaging;
 using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Video.EmbeddedSubtitlesEdit;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -299,6 +299,58 @@ public class FfmpegGenerator
 
         process.WaitForExit();
         return outputFileName;
+    }
+
+    internal static string? GetScreenShotWithSubtitle(Subtitle previewSubtite, int width, int height)
+    {
+        var advancedSubStationAlphaContent = previewSubtite.ToText(new AdvancedSubStationAlpha());
+
+        var tempAssFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.ass");
+        File.WriteAllText(tempAssFileName, advancedSubStationAlphaContent);
+
+        var outputFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.png");
+
+        if (width % 2 == 1)
+        {
+            width++;
+        }
+
+        if (height % 2 == 1)
+        {
+            height++;
+        }
+
+        var process = new Process
+        {
+            StartInfo =
+            {
+                FileName = GetFfmpegLocation(),
+                Arguments = $"-f lavfi -i \"color=c=black@0.0:s={width}x{height}:d=0.1,format=rgba,subtitles=f={Path.GetFileName(tempAssFileName)}:alpha=1\" -frames:v 1 -c:v png \"{outputFileName}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(tempAssFileName) ?? string.Empty
+            }
+        };
+
+#pragma warning disable CA1416
+        _ = process.Start();
+#pragma warning restore CA1416
+
+        process.WaitForExit();
+
+        try
+        {
+            if (File.Exists(tempAssFileName))
+            {
+                File.Delete(tempAssFileName);
+            }
+        }
+        catch
+        {
+            // Ignore cleanup errors
+        }
+
+        return File.Exists(outputFileName) ? outputFileName : null;
     }
 
     public static string[] GetScreenShotsForEachFrame(string videoFileName, string outputFolder)
@@ -874,5 +926,5 @@ public class FfmpegGenerator
         args.Add($"\"{outputFileName}\"");
 
         return string.Join(" ", args);
-    }
+    }    
 }

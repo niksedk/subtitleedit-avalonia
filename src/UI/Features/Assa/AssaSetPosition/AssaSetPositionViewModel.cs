@@ -71,8 +71,19 @@ public partial class AssaSetPositionViewModel : ObservableObject
         _subtitle = new Subtitle(subtitle, false);
 
         ScreenshotOverlayText = CreateTextImage(subtitle, line);
-        //var byes = ScreenshotOverlayText.ToSkBitmap().ToPngArray();
-        //System.IO.File.WriteAllBytes(@"C:\temp\overlay.png", byes);
+
+
+        var previewSubtite = new Subtitle(subtitle);
+        previewSubtite.Paragraphs.Clear();
+        var previewParagraph = line.ToParagraph();
+        previewParagraph.StartTime.TotalSeconds = 0;
+        previewParagraph.EndTime.TotalSeconds = 10;
+        previewSubtite.Paragraphs.Add(previewParagraph);
+        var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtite, videoWidth ?? 1920, videoHeight ?? 1080);
+
+        var bitmap = new Bitmap(previewScreenshotFileName);
+        var byes = bitmap.ToSkBitmap().ToPngArray();
+        System.IO.File.WriteAllBytes(@"C:\temp\overlay.png", byes);
 
         if (string.IsNullOrEmpty(_subtitle.Header))
         {
