@@ -214,7 +214,7 @@ public class FfmpegGenerator
         }
 
         return
-            $"{cutStart}-i \"{inputVideoFileName}\"{cutEnd} -vf scale={width}:{height} -vf \"ass={Path.GetFileName(assaSubtitleFileName)}\" -g 30 -bf 2 -s {width}x{height} {videoEncodingSettings} {passSettings} {presetSettings} {crfSettings} {pixelFormat} {audioSettings}{tuneParameter} -use_editlist 0 -movflags +faststart {outputVideoFileName}";
+            $"{cutStart}-i \"{inputVideoFileName}\"{cutEnd} -vf \"scale={width}:{height},ass={Path.GetFileName(assaSubtitleFileName)}\" -g 30 -bf 2 -s {width}x{height} {videoEncodingSettings} {passSettings} {presetSettings} {crfSettings} {pixelFormat} {audioSettings}{tuneParameter} -use_editlist 0 -movflags +faststart {outputVideoFileName}";
     }
 
     private static Process GetFFmpegProcess(string imageFileName, string outputFileName, int videoWidth, int videoHeight, int seconds, decimal frameRate, bool addTimeCode = false, string addTimeColor = "white")
