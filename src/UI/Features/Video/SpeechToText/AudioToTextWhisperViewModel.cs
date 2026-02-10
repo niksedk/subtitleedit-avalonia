@@ -1176,7 +1176,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 viewModel.StartDownload();
             });
     }
-    
+
     [RelayCommand]
     private async Task ReDownloadWhisperEngineVulcan()
     {

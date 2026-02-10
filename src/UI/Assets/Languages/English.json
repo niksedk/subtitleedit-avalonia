@@ -613,7 +613,12 @@
     "snapSelectedLinesToNearestShotChange": "Snap selected lines start/end to nearest shot change",
     "moveAllShotChangeOneFrameBack": "Move all shot changes one frame back",
     "moveAllShotChangeOneFrameForward": "Move all shot changes one frame forward",
-    "linesChangedX": "Lines changed: {0}"
+    "linesChangedX": "Lines changed: {0}",
+    "fade": "Fade",
+    "fileSavedToX": "File saved to {0}",
+    "imageSaved": "Image saved",
+    "hex": "Hex",
+    "selectedlinesX": "Selected lines: {0}"
   },
   "main": {
     "menu": {
@@ -715,7 +720,8 @@
       "pointSync": "_Point sync...",
       "pointSyncViaOther": "Point sync via _other subtitle...",
       "sortSubtitles": "_Sort subtitles...",
-      "setLayer": "Set layer..."
+      "setLayer": "Set layer...",
+      "filterLayersForDisplayDotDotDot": "Filter layers for display..."
     },
     "toolbar": {
       "newHint": "Start a new subtitle file {0}",
@@ -900,7 +906,22 @@
       "oneLineIsOneSubtitle": "One line is one subtitle",
       "twoLinesAreOneSubtitle": "Two lines are one subtitle",
       "importFilesDotDotDot": "Import files...",
-      "multipleFiles": "Import from multiple text files (one file is one subtitle)"
+      "multipleFiles": "Import from multiple text files (one file is one subtitle)",
+      "importOptions": "Import options",
+      "autoSplitText": "Auto split text",
+      "lineMode": "Line mode",
+      "maxLineLength": "Max line length",
+      "maxLinesPerSubtitle": "Max lines per subtitle",
+      "minGapBetweenSubtitles": "Min gap between subtitles",
+      "mergeShortLines": "Merge short lines",
+      "removeLinesWithoutLetters": "Remove lines without letters",
+      "splitAtEndCharsSetting": "Split at end chars",
+      "takeTimeFromCurrentFile": "Take time from current file",
+      "fixed": "Fixed",
+      "lineBreak": "Line break",
+      "openTextFile": "Open text file",
+      "openTextFiles": "Open text files",
+      "tryToFindTimeCodes": "Try to parse time codes"
     },
     "export": {
       "exportImagesProfiles": "Export images profiles",
@@ -1019,7 +1040,8 @@
     "pickMatroskaTrackX": "Pick Matroska track - {0}",
     "rosettaProperties": "Timed Text Rosetta IMSC properties",
     "rosettaFontSize": "Font size (row height)",
-    "tmpegEncXmlProperties": "TMPGEnc VME properties"
+    "tmpegEncXmlProperties": "TMPGEnc VME properties",
+    "general": null
   },
   "edit": {
     "modifySelection": {
@@ -1113,7 +1135,6 @@
       "startWithUppercaseLetterAfterColon": "Start with uppercase letter after colon/semicolon",
       "fixLowercaseIToUppercaseI": "Fix alone lowercase \u0027i\u0027 to \u0027I\u0027 (English)",
       "fixCommonOcrErrors": "Fix common OCR errors (using OCR replace list)",
-      "fixCommonOcrErrorExample": null,
       "commonOcrErrorsFixed": "Common OCR errors fixed (OcrReplaceList file used): {0}",
       "removeSpaceBetweenNumber": "Remove space between numbers",
       "breakDialogsOnOneLine": "Split dialogs on one line",
@@ -1300,7 +1321,8 @@
       "rebalanceLongLines": "Rebalance long lines"
     },
     "mergeShortLines": {
-      "title": "Merge short lines"
+      "title": "Merge short lines",
+      "highlightParts": "Highlight parts (karaoke)"
     },
     "mergeLinesWithSameText": {
       "title": "Merge lines with same text",
@@ -1332,9 +1354,10 @@
     "pickAlignmentTitle": "Choose alignment",
     "pickFontNameTitle": "Choose font name",
     "colorPickerTitle": "Choose color",
-    "pickLayersTitle": "Choose layers to display in audio waveform/spectrogram",
+    "filterLayersTitle": "Filter layers for display",
     "pickSubtitleFormat": "Choose subtitle format",
-    "pickLayerTitle": "Set layer"
+    "pickLayerTitle": "Set layer",
+    "recentColors": "Recent colors"
   },
   "spellCheck": {
     "spellCheck": "Spell check",
@@ -1419,10 +1442,10 @@
       "whisperXxlSentence": "Sentence-level",
       "whisperXxlSingleWords": "Single words",
       "whisperXxlHighlightWord": "Highlight word",
-      "downloadingWhisperModel": "Downloading Whisper model",
       "selectModel": "Select model",
       "viewWhisperLogFile": "View Whisper log file",
-      "reDownloadX": "Re-download {0}"
+      "reDownloadX": "Re-download {0}",
+      "downloadingSpeechToTextModel": "Downloading speech-to-text model"
     },
     "textToSpeech": {
       "title": "Text to speech",
@@ -1627,6 +1650,7 @@
       "gridCompactMode": "Use compact mode for grids",
       "uiFont": "UI font",
       "theme": "Theme",
+      "darkThemeForegroundColor": "Dark theme foreground color",
       "darkThemeBackgroundColor": "Dark theme background color",
       "showGridLines": "Show grid lines",
       "resetSettings": "Reset settings?",
@@ -1693,6 +1717,7 @@
       "showToolbarLayout": "Show layout icon",
       "showToolbarHelp": "Show help icon",
       "showToolbarEncoding": "Show encoding",
+      "showToolbarFrameRate": "Show frame rate",
       "proxyAddress": "Proxy address",
       "username": "Username",
       "password": "Password",
@@ -2116,32 +2141,6 @@
     "removeXFromUnknownWordsList": "Remove \u0022{0}\u0022 from unknown words list"
   },
   "assa": {
-    "stylesTitle": "Advanced Sub Station Alpha styles",
-    "stylesInFile": "Styles in file",
-    "stylesSaved": "Styles saved",
-    "stylesTitleX": "Styles - {0}",
-    "propertiesTitleX": "Properties - {0}",
-    "attachmentsTitleX": "Attachments - {0}",
-    "smartWrappingTopWide": "0: Smart wrapping (top wide)",
-    "endOfLineWrapping": "1: End-of-line word wrapping, only \\N breaks",
-    "noWrapping": "2: No wrapping, both \\N an \\n breaks",
-    "smartWrappingBottomWide": "3: Smart wrapping (bottom wide)",
-    "fontsAndGraphics": "Fonts and graphics",
-    "wrapStyle": "Wrap style",
-    "borderAndShadowScaling": "Border and shadow scaling",
-    "originalScript": "Original script",
-    "graphics": "Graphics",
-    "copyToStorageStyles": "Copy to storage styles",
-    "copyToFileStyles": "Copy to file styles",
-    "setStyleAsDefault": "Set style as default",
-    "takeUsagesFromDotDotDot": "Take usages from...",
-    "noAttachmentsFound": "No attachments found in selected ASSA file.",
-    "deleteStyleQuestion": "Delete style?",
-    "deleteStylesQuestion": "Delete styles?",
-    "openStyleImportFile": "Open subtitle file to import styles from",
-    "primary": "Primary",
-    "secondary": "Secondary",
-    "applyOverrideTags": "Apply override tags",
     "assaDraw": "ASSA Draw",
     "drawSelectTool": "Select (move points)",
     "drawLineTool": "Line Tool (F4)",
@@ -2150,6 +2149,7 @@
     "drawCircleTool": "Circle (F7)",
     "drawCloseShape": "Close Shape (F8/Enter)",
     "drawDeleteShape": "Delete Shape (Del)",
+    "drawChangeLayer": "Change Layer",
     "drawClearAll": "Clear All (Ctrl\u002BN)",
     "drawZoomIn": "Zoom In (Ctrl\u002B\u002B)",
     "drawZoomOut": "Zoom Out (Ctrl\u002B-)",
@@ -2158,6 +2158,8 @@
     "drawCopyToClipboard": "Copy to Clipboard (Ctrl\u002BC)",
     "drawShapes": "Shapes",
     "drawSelectedPoint": "Selected point",
+    "drawSelectedShape": "Selected shape",
+    "drawSelectedLayer": "Selected layer",
     "drawToolX": "Tool: {0}",
     "drawHelpText": "Click to add points \u2022 Enter/F8 to close shape \u2022 Shift\u002BDrag to pan \u2022 Ctrl\u002BScroll to zoom",
     "progressBarTitle": "ASSA progress bar",
@@ -2195,6 +2197,45 @@
     "backgroundBoxRadius": "Radius",
     "backgroundBoxCircle": "Circle",
     "backgroundBoxSpikes": "Spikes",
-    "backgroundBoxBubbles": "Bubbles"
+    "backgroundBoxBubbles": "Bubbles",
+    "stylesTitle": "Advanced Sub Station Alpha styles",
+    "stylesInFile": "Styles in file",
+    "stylesSaved": "Styles saved",
+    "stylesTitleX": "Styles - {0}",
+    "propertiesTitleX": "Properties - {0}",
+    "attachmentsTitleX": "Attachments - {0}",
+    "smartWrappingTopWide": "0: Smart wrapping (top wide)",
+    "endOfLineWrapping": "1: End-of-line word wrapping, only \\N breaks",
+    "noWrapping": "2: No wrapping, both \\N an \\n breaks",
+    "smartWrappingBottomWide": "3: Smart wrapping (bottom wide)",
+    "fontsAndGraphics": "Fonts and graphics",
+    "wrapStyle": "Wrap style",
+    "borderAndShadowScaling": "Border and shadow scaling",
+    "originalScript": "Original script",
+    "graphics": "Graphics",
+    "copyToStorageStyles": "Copy to storage styles",
+    "copyToFileStyles": "Copy to file styles",
+    "setStyleAsDefault": "Set style as default",
+    "takeUsagesFromDotDotDot": "Take usages from...",
+    "noAttachmentsFound": "No attachments found in selected ASSA file.",
+    "deleteStyleQuestion": "Delete style?",
+    "deleteStylesQuestion": "Delete styles?",
+    "openStyleImportFile": "Open subtitle file to import styles from",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "applyOverrideTags": "Apply override tags",
+    "chooseOverrideTagToAdd": "Choose override tag to add",
+    "fontSizeChange": "Font size change",
+    "moveTextFromLeftToRight": "Move text from left to right",
+    "colorFromWhiteToRed": "Color from white to red",
+    "rotateXSlow": "Rotate X (slow)",
+    "rotateX": "Rotate X",
+    "rotateY": "Rotate Y",
+    "rotateTilt": "Rotate tilt",
+    "spaceIncrease": "Space increase",
+    "playCurrent": "Play current",
+    "setPosition": "Set position",
+    "imageColorPicker": "Image color picker",
+    "copyColorAsHextoClipboard": "Copy color as hex to clipboard"
   }
 }
