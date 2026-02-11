@@ -144,8 +144,8 @@ public class AssaDrawCanvas : Control
         ZoomChanged?.Invoke(this, _zoomFactor);
     }
 
-    public void ZoomIn() => ZoomFactor += 0.1f;
-    public void ZoomOut() => ZoomFactor -= 0.1f;
+    public void ZoomIn() => ZoomFactor += 0.02f;
+    public void ZoomOut() => ZoomFactor -= 0.02f;
 
     private float ToZoomFactorX(float v) => v * _zoomFactor + _panX;
     private float ToZoomFactorY(float v) => v * _zoomFactor + _panY;

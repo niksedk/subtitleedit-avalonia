@@ -640,8 +640,11 @@ public partial class AssaDrawViewModel : ObservableObject
 
     private Subtitle GenerateSubtitle()
     {
-        var subtitle = new Subtitle();
-        subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+        var subtitle = new Subtitle
+        {
+            Header = AdvancedSubStationAlpha.DefaultHeader
+        };
+        
         if (_subtitle != null)
         {
             subtitle.Header = _subtitle.Header;
@@ -670,7 +673,7 @@ public partial class AssaDrawViewModel : ObservableObject
                 var style = new SsaStyle
                 {
                     Name = styleName,
-                    Alignment = "1", // top/left
+                    Alignment = "7", // top/left
                     MarginVertical = 0,
                     MarginLeft = 0,
                     MarginRight = 0,
