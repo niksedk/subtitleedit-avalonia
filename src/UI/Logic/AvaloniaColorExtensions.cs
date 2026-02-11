@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Logic;
 
@@ -51,5 +52,13 @@ public static class AvaloniaColorExtensions
         }
 
         return new Avalonia.Media.Color(a, r, g, b);
+    }
+
+    /// <summary>
+    /// Converts an Avalonia Color to an SKColor.
+    /// </summary>
+    public static SKColor ToSkColor(this Avalonia.Media.Color color)
+    {
+        return new SKColor(color.R, color.G, color.B, color.A);
     }
 }

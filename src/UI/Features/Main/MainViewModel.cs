@@ -871,6 +871,7 @@ public partial class MainViewModel :
             {
                 selectedItems[index].Text = p.Text;
                 selectedItems[index].Style = p.Extra;
+                selectedItems[index].Layer = p.Layer;
                 lastParagraph = selectedItems[index];
             }
             else

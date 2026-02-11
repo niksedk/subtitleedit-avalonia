@@ -87,7 +87,7 @@ public partial class AssaDrawViewModel : ObservableObject
                     style = new SsaStyle();
                 }
 
-                ImportAssaDrawingFromText(line.Text, line.Layer, style.Background.ToAvaloniaColor(), false);
+                ImportAssaDrawingFromText(line.Text, line.Layer, style.Primary.ToAvaloniaColor(), false);
             }
         }
         RefreshTreeView();
@@ -596,10 +596,41 @@ public partial class AssaDrawViewModel : ObservableObject
         subtitle.Header = subtitle.Header.Replace("PlayResX: 384", $"PlayResX: {CanvasWidth}");
         subtitle.Header = subtitle.Header.Replace("PlayResY: 288", $"PlayResY: {CanvasHeight}");
 
-        var layers = Shapes.Where(s => !s.Hidden).GroupBy(s => s.Layer).OrderBy(g => g.Key);
+        // Collect unique colors from all layers
+        var colorToStyleName = new Dictionary<Color, string>();
+        var layers = Shapes.Where(s => !s.Hidden).GroupBy(s => s.Layer).OrderBy(g => g.Key).ToList();
+        
+        foreach (var layer in layers)
+        {
+            var firstShape = layer.FirstOrDefault(p => !p.IsEraser);
+            if (firstShape != null && !colorToStyleName.ContainsKey(firstShape.ForeColor))
+            {
+                var color = firstShape.ForeColor;
+                var colorName = GetColorName(color);
+                var styleName = $"AssaDraw{colorName}";
+                colorToStyleName[color] = styleName;
+
+                // Create and add style to header
+                var style = new SsaStyle
+                {
+                    Name = styleName,
+                    Alignment = "1", // top/left
+                    MarginVertical = 0,
+                    MarginLeft = 0,
+                    MarginRight = 0,
+                    ShadowWidth = 0,
+                    OutlineWidth = 0,
+                    Primary = color.ToSkColor(),
+                };
+                subtitle.Header = AdvancedSubStationAlpha.AddSsaStyle(style, subtitle.Header);
+            }
+        }
+
+        // Generate paragraphs with style names
         foreach (var layer in layers)
         {
             var sb = new StringBuilder();
+            var firstShape = layer.FirstOrDefault(p => !p.IsEraser);
             foreach (var shape in layer.Where(p => !p.IsEraser))
             {
                 sb.Append(shape.ToAssa());
@@ -607,18 +638,37 @@ public partial class AssaDrawViewModel : ObservableObject
             }
 
             var drawText = sb.ToString().Trim();
-            if (!string.IsNullOrEmpty(drawText))
+            if (!string.IsNullOrEmpty(drawText) && firstShape != null)
             {
                 drawText = $"{{\\p1}}{drawText}{{\\p0}}";
+                var styleName = colorToStyleName.GetValueOrDefault(firstShape.ForeColor, "Default");
                 var p = new Paragraph(drawText, 0, 10000)
                 {
                     Layer = layer.Key,
+                    Extra = styleName,
                 };
                 subtitle.Paragraphs.Add(p);
             }
         }
 
         return subtitle;
+    }
+
+    private static string GetColorName(Color color)
+    {
+        // Create a readable color name based on RGB values
+        if (color.R == 255 && color.G == 255 && color.B == 255) return "White";
+        if (color.R == 0 && color.G == 0 && color.B == 0) return "Black";
+        if (color.R == 255 && color.G == 0 && color.B == 0) return "Red";
+        if (color.R == 0 && color.G == 255 && color.B == 0) return "Green";
+        if (color.R == 0 && color.G == 0 && color.B == 255) return "Blue";
+        if (color.R == 255 && color.G == 255 && color.B == 0) return "Yellow";
+        if (color.R == 255 && color.G == 0 && color.B == 255) return "Magenta";
+        if (color.R == 0 && color.G == 255 && color.B == 255) return "Cyan";
+        if (color.R == 255 && color.G == 165 && color.B == 0) return "Orange";
+        
+        // For other colors, use hex representation
+        return $"{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 
     private string GenerateAssaCode()
@@ -800,10 +850,25 @@ public partial class AssaDrawViewModel : ObservableObject
             CanvasHeight = height;
         }
 
+        // Get styles from header
+        var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(subtitle.Header);
+
         // Import drawing codes from paragraphs
         foreach (var paragraph in subtitle.Paragraphs)
         {
-            ImportAssaDrawingFromText(paragraph.Text, paragraph.Layer, Colors.White, false);
+            var color = Colors.White;
+            
+            // Try to get style from paragraph.Extra
+            if (!string.IsNullOrEmpty(paragraph.Extra))
+            {
+                var style = styles.FirstOrDefault(s => s.Name.Equals(paragraph.Extra, StringComparison.OrdinalIgnoreCase));
+                if (style != null)
+                {
+                    color = style.Primary.ToAvaloniaColor();
+                }
+            }
+            
+            ImportAssaDrawingFromText(paragraph.Text, paragraph.Layer, color, false);
         }
 
         RefreshTreeView();
