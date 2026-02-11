@@ -898,7 +898,7 @@ public partial class MainViewModel :
             var width = _mediaInfo?.Dimension.Width ?? 1920;
             var height = _mediaInfo?.Dimension.Height ?? 1080;
             var duration = (double)(_mediaInfo?.Duration?.TotalMilliseconds ?? 60_000);
-            vm.Initialize(_subtitle, width, height, duration);
+            vm.Initialize(_subtitle, width, height, duration, _videoFileName);
         });
 
         if (!result.OkPressed)

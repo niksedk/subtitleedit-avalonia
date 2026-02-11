@@ -6,6 +6,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Main.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -62,6 +63,7 @@ public class AssaProgressBarWindow : Window
         Content = mainGrid;
 
         Activated += delegate { buttonOk.Focus(); };
+        Loaded += (_, __) => vm.LoadVideoAndSubtitle();
         KeyDown += vm.KeyDown;
     }
 
@@ -552,24 +554,10 @@ public class AssaProgressBarWindow : Window
         Grid.SetRow(titleLabel, 0);
         grid.Children.Add(titleLabel);
 
-        var textBox = new TextBox
-        {
-            [!TextBox.TextProperty] = new Binding(nameof(vm.PreviewCode)),
-            IsReadOnly = true,
-            TextWrapping = TextWrapping.Wrap,
-            AcceptsReturn = true,
-            FontFamily = new FontFamily("Consolas,Courier New,monospace"),
-            FontSize = 11,
-        };
-
-        var scrollViewer = new ScrollViewer
-        {
-            Content = textBox,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-        };
-
-        Grid.SetRow(scrollViewer, 1);
-        grid.Children.Add(scrollViewer);
+        vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
+        vm.VideoPlayerControl.FullScreenIsVisible = false;
+        Grid.SetRow(vm.VideoPlayerControl, 1);
+        grid.Children.Add(vm.VideoPlayerControl);
 
         return new Border
         {

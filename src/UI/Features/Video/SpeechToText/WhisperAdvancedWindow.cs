@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -57,7 +58,8 @@ public class WhisperAdvancedWindow : Window
             Margin = new Thickness(0, 0, 0, 5),
             VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalAlignment = HorizontalAlignment.Stretch,  
-            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,            
+            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,   
+            FontFamily = new FontFamily("Consolas,Courier New,monospace"), 
         };
         textBoxHelp.Bind(TextBox.TextProperty, new Binding(nameof(vm.HelpText))
         {

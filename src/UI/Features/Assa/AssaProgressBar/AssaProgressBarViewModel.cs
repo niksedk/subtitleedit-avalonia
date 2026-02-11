@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -8,10 +9,12 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaProgressBar;
 
@@ -57,8 +60,16 @@ public partial class AssaProgressBarViewModel : ObservableObject
 
     private Subtitle _subtitle = new();
     private Subtitle _progressBarSubtitle = new();
+    private string? _videoFileName;
+    private LibMpvDynamicPlayer? _mpvPlayer;
+    private bool _isSubtitleLoaded;
+    private string _oldSubtitleText = string.Empty;
+    private DispatcherTimer _positionTimer = new DispatcherTimer();
+    private readonly SubtitleFormat _assaFormat = new AdvancedSubStationAlpha();
+    private readonly string _tempSubtitleFileName;
 
     public Subtitle ResultSubtitle => _subtitle;
+    public VideoPlayerControl? VideoPlayerControl { get; set; }
 
     public AssaProgressBarViewModel()
     {
@@ -83,18 +94,83 @@ public partial class AssaProgressBarViewModel : ObservableObject
         {
             FontName = Fonts[0];
         }
+        
+        _tempSubtitleFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".ass");
     }
 
-    public void Initialize(Subtitle subtitle, int videoWidth, int videoHeight, double videoDurationMs)
+    public void Initialize(Subtitle subtitle, int videoWidth, int videoHeight, double videoDurationMs, string? videoFileName)
     {
         _subtitle = new Subtitle(subtitle, false);
         _videoWidth = videoWidth > 0 ? videoWidth : 1920;
         _videoHeight = videoHeight > 0 ? videoHeight : 1080;
         _videoDurationMs = videoDurationMs > 0 ? videoDurationMs : 3600000;
+        _videoFileName = videoFileName;
 
         LoadExistingSettings();
         _subtitle.Paragraphs.Clear();
         GeneratePreview();
+        
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!string.IsNullOrEmpty(videoFileName) && VideoPlayerControl != null)
+            {
+                _ = VideoPlayerControl.Open(videoFileName);
+            }
+
+            StartTitleTimer();
+        });
+    }
+    
+    private void StartTitleTimer()
+    {
+        _positionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _positionTimer.Tick += (s, e) =>
+        {
+            if (_mpvPlayer == null)
+            {
+                return;
+            }
+
+            var subtitle = new Subtitle();
+            // int firstSelectedIndex = Paragraphs.IndexOf(Paragraphs.First(p => p.Subtitle.Id == _subtitleLines[0].Id));
+            // var idx = 0;
+            // foreach (var item in Paragraphs)
+            // {
+            //     var p = new SubtitleLineViewModel(item.Subtitle);
+            //
+            //     if (AdjustAll ||
+            //         AdjustSelectedLines && _selectedSubtitleLines.Any(x => x.Id == item.Subtitle.Id) ||
+            //         AdjustSelectedLinesAndForward && idx >= firstSelectedIndex)
+            //     {
+            //         p.Text = CurrentTag + p.Text;
+            //     }
+            //
+            //     subtitle.Paragraphs.Add(p.ToParagraph());
+            //     idx++;
+            // }
+            //
+            // var text = _assaFormat.ToText(subtitle, string.Empty);
+            // if (_oldSubtitleText == text)
+            // {
+            //     return;
+            // }
+            //
+            // File.WriteAllText(_tempSubtitleFileName, text);
+            // if (!_isSubtitleLoaded)
+            // {
+            //     _isSubtitleLoaded = true;
+            //     _mpvPlayer.SubAdd(_tempSubtitleFileName);
+            // }
+            // else
+            // {
+            //     _mpvPlayer.SubReload();
+            // }
+            //
+            // _oldSubtitleText = text;
+            // UpdatedSubtitle = subtitle;
+        };
+
+        _positionTimer.Start();
     }
 
     private void LoadExistingSettings()
@@ -499,5 +575,36 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         {
             Close();
         }
+    }
+
+    public async void LoadVideoAndSubtitle()
+    {
+        if (VideoPlayerControl == null)
+        {
+            return;
+        }
+        
+        // Wait a bit for video players to finish opening the file (or until they report a duration)
+        await VideoPlayerControl.WaitForPlayersReadyAsync();
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            _mpvPlayer = VideoPlayerControl.VideoPlayerInstance as LibMpvDynamicPlayer;
+
+            // if (Paragraphs.Count == 0)
+            // {
+            //     return;
+            // }
+            //
+            // if (_selectedSubtitleLines.Count == 0)
+            // {
+            //     SelectedParagraphIndex = 0;
+            //     return;
+            // }
+            //
+            // var firstSelected = _selectedSubtitleLines[0];
+            // SelectedParagraphIndex = Paragraphs.IndexOf(Paragraphs.First(p => p.Subtitle.Id == firstSelected.Id));
+            // VideoPlayerControl.Position = firstSelected.StartTime.TotalSeconds;
+        });
     }
 }
