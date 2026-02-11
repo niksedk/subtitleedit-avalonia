@@ -934,6 +934,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaImageColorPicker()
     {
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
         var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
         if (selectedItem == null || string.IsNullOrEmpty(_videoFileName))
         {
@@ -951,6 +957,12 @@ public partial class MainViewModel :
     {
         var selectedItem = SubtitleGrid.SelectedItem as SubtitleLineViewModel;
         if (selectedItem == null)
+        {
+            return;
+        }
+
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
         {
             return;
         }
