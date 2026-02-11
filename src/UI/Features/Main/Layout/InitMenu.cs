@@ -542,8 +542,6 @@ public static class InitMenu
         menuItemAudioTracks.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsAudioTracksVisible)));
         vm.AudioTraksMenuItem = menuItemAudioTracks;
 
-
-
         var videoMore = new List<MenuItem>
         {
             new MenuItem
@@ -588,7 +586,7 @@ public static class InitMenu
         var menuItemVideoMore = new MenuItem
         {
             Header = Se.Language.General.More,
-            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
+            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsVideoLoaded)),
         };
 
         foreach (var item in videoMore.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
