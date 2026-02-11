@@ -1,5 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Text;
 using Avalonia.Media;
 
@@ -59,31 +60,33 @@ public class DrawShape
         var sb = new StringBuilder();
         var first = Points[0];
 
-        // Start with move command
-        sb.Append($"m {first.X:0.##} {first.Y:0.##} ");
+        // Start with move command using the first point
+        sb.Append(CultureInfo.InvariantCulture, $"m {first.X:0.##} {first.Y:0.##} ");
 
-        var i = 1;
-        while (i < Points.Count)
+        // Determine if this is a bezier shape by checking if first point or any following points are bezier type
+        var isBezierShape = Points.Any(p => p.DrawType == DrawCoordinateType.BezierCurve || 
+                                             p.DrawType == DrawCoordinateType.BezierCurveSupport1 || 
+                                             p.DrawType == DrawCoordinateType.BezierCurveSupport2);
+
+        if (isBezierShape)
         {
-            var point = Points[i];
-
-            if (point.DrawType == DrawCoordinateType.Line)
+            // Bezier shape: output as "b x1 y1 x2 y2 x3 y3 ..."
+            // The coordinates after index 0 should be in triplets: (Support1, Support2, BezierCurve)
+            sb.Append("b ");
+            
+            for (var i = 1; i < Points.Count; i++)
             {
-                sb.Append($"l {point.X:0.##} {point.Y:0.##} ");
+                sb.Append(CultureInfo.InvariantCulture, $"{Points[i].X:0.##} {Points[i].Y:0.##} ");
             }
-            else if (point.DrawType == DrawCoordinateType.BezierCurveSupport1 && i + 2 < Points.Count)
+        }
+        else
+        {
+            // Line shape: output each point with "l" command
+            for (var i = 1; i < Points.Count; i++)
             {
-                var support2 = Points[i + 1];
-                var endPoint = Points[i + 2];
-                sb.Append($"b {point.X:0.##} {point.Y:0.##} {support2.X:0.##} {support2.Y:0.##} {endPoint.X:0.##} {endPoint.Y:0.##} ");
-                i += 2;
+                var point = Points[i];
+                sb.Append(CultureInfo.InvariantCulture, $"l {point.X:0.##} {point.Y:0.##} ");
             }
-            else if (point.DrawType == DrawCoordinateType.BezierCurve)
-            {
-                sb.Append($"l {point.X:0.##} {point.Y:0.##} ");
-            }
-
-            i++;
         }
 
         return sb.ToString().Trim();
