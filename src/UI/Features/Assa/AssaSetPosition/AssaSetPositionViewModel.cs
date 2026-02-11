@@ -46,12 +46,6 @@ public partial class AssaSetPositionViewModel : ObservableObject
     private bool _isVerticalCentered = false;
     private bool _isBottomAligned = true;
 
-    private int _marginLeft = 0;
-    private int _marginRight = 0;
-
-    private int _marginTop = 0;
-    private int _marginBottom = 0;
-
     public Subtitle ResultSubtitle => _subtitle;
 
     public AssaSetPositionViewModel()
@@ -70,7 +64,12 @@ public partial class AssaSetPositionViewModel : ObservableObject
                 return (int)Math.Round(ScreenshotX + ScreenshotOverlayText.Size.Width / 2.0, MidpointRounding.AwayFromZero);
             }
 
-            return ScreenshotX; //TODO: margin
+            if (_isRightAligned)
+            {
+                return (int)Math.Round(ScreenshotX + ScreenshotOverlayText.Size.Width, MidpointRounding.AwayFromZero);
+            }
+
+            return ScreenshotX;
         }
     }
 
@@ -84,7 +83,12 @@ public partial class AssaSetPositionViewModel : ObservableObject
                 return (int)Math.Round(ScreenshotY + ScreenshotOverlayText.Size.Height, MidpointRounding.AwayFromZero);
             }
 
-            return ScreenshotY; //TODO: margin
+            if (_isVerticalCentered)
+            {
+                return (int)Math.Round(ScreenshotY + ScreenshotOverlayText.Size.Height / 2.0, MidpointRounding.AwayFromZero);
+            }
+
+            return ScreenshotY;
         }
     }
 
@@ -121,12 +125,6 @@ public partial class AssaSetPositionViewModel : ObservableObject
             _isTopAligned = style.Alignment == "7" || style.Alignment == "8" || style.Alignment == "9";
             _isVerticalCentered = style.Alignment == "4" || style.Alignment == "5" || style.Alignment == "6";
             _isBottomAligned = style.Alignment == "1" || style.Alignment == "2" || style.Alignment == "3";
-
-            _marginLeft = style.MarginLeft;
-            _marginRight = style.MarginRight;
-
-            _marginTop = style.MarginVertical;
-            _marginBottom = style.MarginVertical;
         }
 
         var previewSubtitle = new Subtitle(subtitle);

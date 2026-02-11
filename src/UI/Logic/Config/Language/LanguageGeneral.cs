@@ -586,7 +586,7 @@ public class LanguageGeneral
     public string Position { get; set; }
     public string FontHeight { get; set; }
     public string OffsetX { get; set; }
-    public string OffsetY { get;  set; }
+    public string OffsetY { get; set; }
     public string InsertSubtitleFileAtVideoPositionDotDotDot { get; set; }
     public string Smart { get; set; }
     public string ImagedBasedSubtitles { get; set; }
@@ -609,10 +609,10 @@ public class LanguageGeneral
     public string PickLayer { get; set; }
     public string GoToPreviousShotChange { get; set; }
     public string GoToNextShotChange { get; set; }
-    public string ExtendSelectedLinesToNextShotChangeOrNextSubtitle { get;  set; }
-    public string SnapSelectedLinesToNearestShotChange { get;  set; }
-    public string MoveAllShotChangeOneFrameBack { get;  set; }
-    public string MoveAllShotChangeOneFrameForward { get;  set; }
+    public string ExtendSelectedLinesToNextShotChangeOrNextSubtitle { get; set; }
+    public string SnapSelectedLinesToNearestShotChange { get; set; }
+    public string MoveAllShotChangeOneFrameBack { get; set; }
+    public string MoveAllShotChangeOneFrameForward { get; set; }
     public string LinesChangedX { get; set; }
     public string Fade { get; set; }
     public string FileSavedToX { get; set; }
@@ -622,6 +622,8 @@ public class LanguageGeneral
     public string Replace { get; set; }
     public string Append { get; set; }
     public string Use { get; set; }
+    public string CenterHorizontally { get; set; }
+    public string CenterVertically { get; set; }
 
     public LanguageGeneral()
     {
@@ -1243,5 +1245,7 @@ public class LanguageGeneral
         Replace = "Replace";
         Append = "Append";
         Use = "Use";
+        CenterHorizontally = "Center horizontally";
+        CenterVertically = "Center vertically";
     }
 }

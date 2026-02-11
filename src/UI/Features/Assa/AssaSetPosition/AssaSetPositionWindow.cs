@@ -145,8 +145,8 @@ public class AssaSetPositionWindow : Window
         };
 
         // Position buttons
-        var buttonCenterHorizontally = UiUtil.MakeButton("Center horizontal", vm.CenterHorizontallyCommand);
-        var buttonCenterVertically = UiUtil.MakeButton("Center vertical", vm.CenterVerticallyCommand);
+        var buttonCenterHorizontally = UiUtil.MakeButton(Se.Language.General.CenterHorizontally, vm.CenterHorizontallyCommand);
+        var buttonCenterVertically = UiUtil.MakeButton(Se.Language.General.CenterVertically, vm.CenterVerticallyCommand);
         var panelPositionButtons = UiUtil.MakeButtonBar(buttonCenterHorizontally, buttonCenterVertically).WithAlignmentLeft();
 
         // Buttons
