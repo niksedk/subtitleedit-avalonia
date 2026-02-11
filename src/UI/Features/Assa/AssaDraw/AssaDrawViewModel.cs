@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
@@ -79,7 +80,42 @@ public partial class AssaDrawViewModel : ObservableObject
 
     private void ZoomToFitCurrentVideoResolution()
     {
-        //TODO: zoom canvas to fit current video resolution if available
+        if (Canvas == null)
+        {
+            return;
+        }
+
+        // Wait a bit to ensure the canvas bounds are updated
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (Canvas == null || Canvas.Bounds.Width < 1 || Canvas.Bounds.Height < 1)
+            {
+                return;
+            }
+
+            // Calculate zoom factor to fit the entire canvas (video resolution) in the visible area
+            var availableWidth = Canvas.Bounds.Width;
+            var availableHeight = Canvas.Bounds.Height;
+
+            // Add some padding (e.g., 20 pixels on each side)
+            var padding = 40.0;
+            availableWidth -= padding;
+            availableHeight -= padding;
+
+            // Calculate zoom factors for width and height
+            var zoomX = (float)(availableWidth / CanvasWidth);
+            var zoomY = (float)(availableHeight / CanvasHeight);
+
+            // Use the smaller zoom factor to ensure the entire canvas fits
+            var newZoomFactor = Math.Min(zoomX, zoomY);
+
+            // Clamp the zoom factor to reasonable bounds
+            newZoomFactor = Math.Clamp(newZoomFactor, 0.1f, 10f);
+
+            // Set the zoom factor
+            Canvas.ZoomFactor = newZoomFactor;
+            UpdateZoomText();
+        }, DispatcherPriority.Background);
     }
 
     public void Initialize(Subtitle subtitle, List<SubtitleLineViewModel> selectedLines, int? width, int? height)
