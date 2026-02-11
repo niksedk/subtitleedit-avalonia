@@ -30,6 +30,7 @@ public class AssaSetPositionWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -143,6 +144,11 @@ public class AssaSetPositionWindow : Window
             }
         };
 
+        // Position buttons
+        var buttonCenterHorizontally = UiUtil.MakeButton("Center horizontal", vm.CenterHorizontallyCommand);
+        var buttonCenterVertically = UiUtil.MakeButton("Center vertical", vm.CenterVerticallyCommand);
+        var panelPositionButtons = UiUtil.MakeButtonBar(buttonCenterHorizontally, buttonCenterVertically).WithAlignmentLeft();
+
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -151,6 +157,7 @@ public class AssaSetPositionWindow : Window
 
         grid.Add(label, 0);
         grid.Add(videoGrid, 1);
+        grid.Add(panelPositionButtons, 2);
         grid.Add(panelButtons, 3);
 
         Content = grid;

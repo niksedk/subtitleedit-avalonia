@@ -1,11 +1,11 @@
 using Avalonia.Controls;
-using Avalonia.VisualTree;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using AvaloniaEdit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -138,6 +138,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -964,9 +965,15 @@ public partial class MainViewModel :
             return;
         }
 
-        var x = result.ScreenshotX;
-        var y = result.ScreenshotY;
-        selectedItem.Text = $"{{\\pos({x},{y})}}" + selectedItem.Text;
+        var x = result.ResultX;
+        var y = result.ResultY;
+        selectedItem.Text = $"{{\\pos({x},{y})}}" + RemovePositionTags(selectedItem.Text);
+    }
+
+    private static string RemovePositionTags(string text)
+    {
+        string result = Regex.Replace(text, @"\\pos\(\d+,\d+\)", string.Empty).Replace("{}", string.Empty);
+        return result;
     }
 
     [RelayCommand]
@@ -13530,7 +13537,7 @@ public partial class MainViewModel :
                     if (path != null && File.Exists(path))
                     {
                         var ext = Path.GetExtension(path).ToLowerInvariant();
-                        var subtitelExtensions = new List<string>
+                        var subtitleExtensions = new List<string>
                         {
                             ".ass",
                             ".cap",
@@ -13549,7 +13556,7 @@ public partial class MainViewModel :
                             ".xml",
                         };
 
-                        if (subtitelExtensions.Contains(ext))
+                        if (subtitleExtensions.Contains(ext))
                         {
                             var doContinue = await HasChangesContinue();
                             if (!doContinue)

@@ -134,5 +134,92 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
         {
             return a1.SequenceEqual(a2);
         }
+
+        public class TrimResult
+        {
+            public SKBitmap TrimmedBitmap { get; set; }
+            public int Top { get; set; }
+            public int Left { get; set; }
+            public int Right { get; set; }
+            public int Bottom { get; set; }
+        }
+
+        public static TrimResult TrimTransparentPixels(this SKBitmap bitmap)
+        {
+            if (bitmap == null)
+                throw new ArgumentNullException(nameof(bitmap));
+
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+
+            // Find the bounds of non-transparent pixels
+            int top = height;
+            int left = width;
+            int right = -1;
+            int bottom = -1;
+
+            unsafe
+            {
+                byte* ptr = (byte*)bitmap.GetPixels().ToPointer();
+                int bytesPerPixel = bitmap.BytesPerPixel;
+                int rowBytes = bitmap.RowBytes;
+
+                // Find top and bottom in one pass
+                for (int y = 0; y < height; y++)
+                {
+                    byte* row = ptr + (y * rowBytes);
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        // Alpha is the 4th byte in RGBA/BGRA formats
+                        byte alpha = row[x * bytesPerPixel + 3];
+
+                        if (alpha > 0)
+                        {
+                            if (y < top) top = y;
+                            if (y > bottom) bottom = y;
+                            if (x < left) left = x;
+                            if (x > right) right = x;
+                        }
+                    }
+                }
+            }
+
+            // If the entire bitmap is transparent, return the original
+            if (top > bottom || left > right)
+            {
+                return new TrimResult
+                {
+                    TrimmedBitmap = bitmap.Copy(),
+                    Top = 0,
+                    Left = 0,
+                    Right = 0,
+                    Bottom = 0
+                };
+            }
+
+            // Calculate the new dimensions
+            int newWidth = right - left + 1;
+            int newHeight = bottom - top + 1;
+
+            // Create the trimmed bitmap
+            SKBitmap trimmedBitmap = new SKBitmap(newWidth, newHeight, bitmap.ColorType, bitmap.AlphaType);
+
+            using (SKCanvas canvas = new SKCanvas(trimmedBitmap))
+            {
+                SKRect sourceRect = new SKRect(left, top, right + 1, bottom + 1);
+                SKRect destRect = new SKRect(0, 0, newWidth, newHeight);
+                canvas.DrawBitmap(bitmap, sourceRect, destRect);
+            }
+
+            return new TrimResult
+            {
+                TrimmedBitmap = trimmedBitmap,
+                Top = top,
+                Left = left,
+                Right = width - right - 1,
+                Bottom = height - bottom - 1
+            };
+        }
     }
 }

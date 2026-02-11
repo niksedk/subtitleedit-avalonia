@@ -2,19 +2,19 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared.BinaryEdit.BinaryAdjustAlpha;
 using Nikse.SubtitleEdit.Logic;
-using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
-using System.Collections.Generic;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetPosition;
@@ -38,6 +38,19 @@ public partial class AssaSetPositionViewModel : ObservableObject
     [ObservableProperty] private string _screenshotOverlayPosiion;
 
     private Subtitle _subtitle = new();
+    private bool _isLeftAligned = false;
+    private bool _isHorizontalCentered = true;
+    private bool _isRightAligned = false;
+
+    private bool _isTopAligned = false;
+    private bool _isVerticalCentered = false;
+    private bool _isBottomAligned = true;
+
+    private int _marginLeft = 0;
+    private int _marginRight = 0;
+
+    private int _marginTop = 0;
+    private int _marginBottom = 0;
 
     public Subtitle ResultSubtitle => _subtitle;
 
@@ -46,6 +59,33 @@ public partial class AssaSetPositionViewModel : ObservableObject
         Screenshot = new SKBitmap(1, 1).ToAvaloniaBitmap();
         ScreenshotOverlayText = new SKBitmap(1, 1).ToAvaloniaBitmap();
         ScreenshotOverlayPosiion = string.Empty;
+    }
+
+    public int ResultX
+    {
+        get
+        {
+            if (_isHorizontalCentered)
+            {
+                return (int)Math.Round(ScreenshotX + ScreenshotOverlayText.Size.Width / 2.0, MidpointRounding.AwayFromZero);
+            }
+
+            return ScreenshotX; //TODO: margin
+        }
+    }
+
+
+    public int ResultY
+    {
+        get
+        {
+            if (_isBottomAligned)
+            {
+                return (int)Math.Round(ScreenshotY + ScreenshotOverlayText.Size.Height, MidpointRounding.AwayFromZero);
+            }
+
+            return ScreenshotY; //TODO: margin
+        }
     }
 
     partial void OnScreenshotXChanged(int value)
@@ -70,20 +110,38 @@ public partial class AssaSetPositionViewModel : ObservableObject
     {
         _subtitle = new Subtitle(subtitle, false);
 
-        ScreenshotOverlayText = CreateTextImage(subtitle, line);
+        var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(subtitle.Header);
+        var style = styles.FirstOrDefault(s => s.Name.Equals(line.Style, StringComparison.OrdinalIgnoreCase));
+        if (style != null)
+        {
+            _isLeftAligned = style.Alignment == "1" || style.Alignment == "4" || style.Alignment == "7";
+            _isHorizontalCentered = style.Alignment == "2" || style.Alignment == "5" || style.Alignment == "8";
+            _isRightAligned = style.Alignment == "3" || style.Alignment == "6" || style.Alignment == "9";
 
+            _isTopAligned = style.Alignment == "7" || style.Alignment == "8" || style.Alignment == "9";
+            _isVerticalCentered = style.Alignment == "4" || style.Alignment == "5" || style.Alignment == "6";
+            _isBottomAligned = style.Alignment == "1" || style.Alignment == "2" || style.Alignment == "3";
 
-        var previewSubtite = new Subtitle(subtitle);
-        previewSubtite.Paragraphs.Clear();
+            _marginLeft = style.MarginLeft;
+            _marginRight = style.MarginRight;
+
+            _marginTop = style.MarginVertical;
+            _marginBottom = style.MarginVertical;
+        }
+
+        var previewSubtitle = new Subtitle(subtitle);
+        previewSubtitle.Paragraphs.Clear();
         var previewParagraph = line.ToParagraph();
         previewParagraph.StartTime.TotalSeconds = 0;
         previewParagraph.EndTime.TotalSeconds = 10;
-        previewSubtite.Paragraphs.Add(previewParagraph);
-        var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtite, videoWidth ?? 1920, videoHeight ?? 1080);
+        previewSubtitle.Paragraphs.Add(previewParagraph);
+        var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, videoWidth ?? 1920, videoHeight ?? 1080);
+        var skBitmap = SKBitmap.Decode(previewScreenshotFileName);
+        var trimResult = skBitmap.TrimTransparentPixels();
 
-        var bitmap = new Bitmap(previewScreenshotFileName);
-        var byes = bitmap.ToSkBitmap().ToPngArray();
-        System.IO.File.WriteAllBytes(@"C:\temp\overlay.png", byes);
+        ScreenshotOverlayText = trimResult.TrimmedBitmap.ToAvaloniaBitmap();
+        ScreenshotX = trimResult.Left;
+        ScreenshotY = trimResult.Top;
 
         if (string.IsNullOrEmpty(_subtitle.Header))
         {
@@ -122,17 +180,10 @@ public partial class AssaSetPositionViewModel : ObservableObject
             TargetHeight = SourceHeight;
         }
 
-        if (TargetWidth <= 0 || TargetHeight <= 0)   
+        if (TargetWidth <= 0 || TargetHeight <= 0)
         {
             TargetWidth = 1820;
             TargetHeight = 1080;
-        }
-
-        // Initialize position (center horizontally, bottom vertically with some margin)
-        if (ScreenshotOverlayText != null)
-        {
-            ScreenshotX = (int)((TargetWidth - ScreenshotOverlayText.Size.Width) / 2);
-            ScreenshotY = (int)(TargetHeight - ScreenshotOverlayText.Size.Height - 50); // 50px margin from bottom
         }
 
         if (string.IsNullOrEmpty(videoFileName))
@@ -157,126 +208,18 @@ public partial class AssaSetPositionViewModel : ObservableObject
         {
             Screenshot = BinaryAdjustAlphaViewModel.CreateCheckeredBackground(TargetHeight, TargetHeight);
         }
-
     }
 
-    private Bitmap CreateTextImage(Subtitle subtitle, SubtitleLineViewModel line)
+    [RelayCommand]
+    private async Task CenterHorizontally()
     {
-        // Get the style for this line
-        var styleName = line.Style;
-        if (string.IsNullOrEmpty(styleName))
-        {
-            styleName = "Default";
-        }
+        ScreenshotX = (int)Math.Round((double)(SourceWidth / 2.0) - (double)(ScreenshotOverlayText.Size.Width / 2.0), MidpointRounding.AwayFromZero);
+    }
 
-        var style = AdvancedSubStationAlpha.GetSsaStyle(styleName, subtitle.Header);
-        if (style == null)
-        {
-            style = new SsaStyle();
-        }
-
-        // Remove ASSA tags for simple rendering
-        var text = Utilities.RemoveSsaTags(line.Text);
-        if (string.IsNullOrEmpty(text))
-        {
-            return new SKBitmap(1, 1).ToAvaloniaBitmap();
-        }
-
-        // Create font
-        var fontStyle = SKFontStyle.Normal;
-        if (style.Bold && style.Italic)
-        {
-            fontStyle = SKFontStyle.BoldItalic;
-        }
-        else if (style.Bold)
-        {
-            fontStyle = SKFontStyle.Bold;
-        }
-        else if (style.Italic)
-        {
-            fontStyle = SKFontStyle.Italic;
-        }
-
-        using var typeface = SKTypeface.FromFamilyName(style.FontName, fontStyle);
-        using var font = new SKFont(typeface, (float)(style.FontSize * 1.3m));
-        
-        // Measure text
-        var textBounds = new SKRect();
-        font.MeasureText(text, out textBounds);
-        
-        // Calculate dimensions with outline and shadow
-        var outlineWidth = (float)style.OutlineWidth;
-        var shadowWidth = (float)style.ShadowWidth;
-        var padding = 20f;
-        
-        var width = (int)(textBounds.Width + padding * 2 + outlineWidth * 2 + shadowWidth);
-        var height = (int)(textBounds.Height + padding * 2 + outlineWidth * 2 + shadowWidth);
-        
-        if (width < 1) width = 1;
-        if (height < 1) height = 1;
-        
-        // Create bitmap
-        var bitmap = new SKBitmap(width, height);
-        using var canvas = new SKCanvas(bitmap);
-        canvas.Clear(SKColors.Transparent);
-        
-        // Calculate text position
-        var x = padding + outlineWidth;
-        var y = height - padding - outlineWidth;
-        
-        // Draw shadow if needed
-        if (shadowWidth > 0)
-        {
-            using var shadowPaint = new SKPaint
-            {
-                Color = style.Background,
-                IsAntialias = true,
-                Style = SKPaintStyle.Fill,
-            };
-            
-            canvas.DrawText(text, x + shadowWidth, y + shadowWidth, font, shadowPaint);
-            
-            // Draw shadow outline
-            if (outlineWidth > 0)
-            {
-                using var shadowOutlinePaint = new SKPaint
-                {
-                    Color = style.Background,
-                    IsAntialias = true,
-                    Style = SKPaintStyle.Stroke,
-                    StrokeWidth = outlineWidth,
-                    StrokeJoin = SKStrokeJoin.Round,
-                    StrokeCap = SKStrokeCap.Round,
-                };
-                canvas.DrawText(text, x + shadowWidth, y + shadowWidth, font, shadowOutlinePaint);
-            }
-        }
-        
-        // Draw outline
-        if (outlineWidth > 0)
-        {
-            using var outlinePaint = new SKPaint
-            {
-                Color = style.Outline,
-                IsAntialias = true,
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = outlineWidth,
-                StrokeJoin = SKStrokeJoin.Round,
-                StrokeCap = SKStrokeCap.Round,
-            };
-            canvas.DrawText(text, x, y, font, outlinePaint);
-        }
-        
-        // Draw main text
-        using var textPaint = new SKPaint
-        {
-            Color = style.Primary,
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill,
-        };
-        canvas.DrawText(text, x, y, font, textPaint);
-        
-        return bitmap.ToAvaloniaBitmap();
+    [RelayCommand]
+    private async Task CenterVertically()
+    {
+        ScreenshotY = (int)Math.Round((double)(SourceHeight / 2.0) - (double)(ScreenshotOverlayText.Size.Height / 2.0), MidpointRounding.AwayFromZero);
     }
 
     [RelayCommand]
@@ -317,7 +260,7 @@ public partial class AssaSetPositionViewModel : ObservableObject
 
         var screenshotImageWidth = ScreenshotImage.Bounds.Width;
         var screenshotImageHeight = ScreenshotImage.Bounds.Height;
-        
+
         if (screenshotImageWidth <= 0 || screenshotImageHeight <= 0)
         {
             return;
