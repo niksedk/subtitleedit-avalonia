@@ -557,15 +557,19 @@ public partial class CutVideoViewModel : ObservableObject
     [RelayCommand]
     private void Delete()
     {
-        var segment = SelectedSegment;
-        if (segment == null || Segments.Count == 0)
+        var selectedSegments = SegmentGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedSegments.Count == 0)        
         {
             return;
         }
 
-        var idx = Segments.IndexOf(segment);
-        Segments.Remove(segment);
-
+        var idx = Segments.IndexOf(selectedSegments.First());
+        
+        foreach (var segment in selectedSegments)
+        {
+            Segments.Remove(segment);
+        }
+        
         if (idx < Segments.Count)
         {
             SelectedSegment = Segments[idx];
@@ -778,7 +782,7 @@ public partial class CutVideoViewModel : ObservableObject
     private void UpdateSelection()
     {
         IsDeleteEnabled = SelectedSegment != null;
-        IsSetStartEnabled = SelectedSegment != null;
-        IsSetEndEnabled = SelectedSegment != null;
+        IsSetStartEnabled = SegmentGrid.SelectedItems.Count == 1;
+        IsSetEndEnabled = SegmentGrid.SelectedItems.Count == 1;
     }
 }
