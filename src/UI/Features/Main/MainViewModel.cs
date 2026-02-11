@@ -853,23 +853,35 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
-        {
-            vm.Initialize(GetUpdateSubtitle(), selectedItems, _videoFileName ?? string.Empty);
-        });
+        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm => { vm.Initialize(GetUpdateSubtitle(), selectedItems, _videoFileName ?? string.Empty); });
 
         if (!result.OkPressed)
         {
             return;
         }
 
+        _subtitle = result.ResultSubtitle;
         var assa = new SubStationAlpha();
+        var firstParagraph = selectedItems.FirstOrDefault();
+        var lastParagraph = selectedItems.LastOrDefault();
         for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
         {
             var p = result.ResultSubtitle.Paragraphs[index];
-            Subtitles.Insert(index, new SubtitleLineViewModel(p, assa));
+            if (index < selectedItems.Count)
+            {
+                selectedItems[index].Text = p.Text;
+                selectedItems[index].Style = p.Extra;
+                lastParagraph = selectedItems[index];
+            }
+            else
+            {
+                var newP = new SubtitleLineViewModel(p, assa);
+                var insertIndex = lastParagraph == null ? 0 : Subtitles.IndexOf(lastParagraph) + 1;
+                Subtitles.Insert(insertIndex, new SubtitleLineViewModel(p, SelectedSubtitleFormat));
+            }
         }
 
+        Renumber();
         _updateAudioVisualizer = true;
     }
 
@@ -1411,10 +1423,7 @@ public partial class MainViewModel :
         var format = SelectedSubtitleFormat;
         if (format is TimedTextImscRosetta)
         {
-            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm =>
-            {
-                vm.Initialize(GetUpdateSubtitle());
-            });
+            var result = await ShowDialogAsync<RosettaPropertiesWindow, RosettaPropertiesViewModel>(vm => { vm.Initialize(GetUpdateSubtitle()); });
             SetLibSeSettings();
         }
 
@@ -1959,6 +1968,7 @@ public partial class MainViewModel :
             {
                 Subtitles.Add(item);
             }
+
             Renumber();
             _updateAudioVisualizer = true;
         }
@@ -4619,8 +4629,8 @@ public partial class MainViewModel :
             if (nearestStartShotChange == nearestEndShotChange)
             {
                 nearestEndShotChange = AudioVisualizer.ShotChanges
-                .OrderBy(s => Math.Abs(s - line.EndTime.TotalSeconds))
-                .FirstOrDefault(s => Math.Abs(s - line.EndTime.TotalSeconds) < 0.5); //TODO: customizable
+                    .OrderBy(s => Math.Abs(s - line.EndTime.TotalSeconds))
+                    .FirstOrDefault(s => Math.Abs(s - line.EndTime.TotalSeconds) < 0.5); //TODO: customizable
 
                 if (nearestEndShotChange > 0 && nearestEndShotChange > line.StartTime.TotalSeconds)
                 {
@@ -12174,6 +12184,7 @@ public partial class MainViewModel :
                 {
                     return true;
                 }
+
                 parent = parent.GetVisualParent();
             }
         }
