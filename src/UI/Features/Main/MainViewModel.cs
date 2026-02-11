@@ -843,7 +843,6 @@ public partial class MainViewModel :
         }
     }
 
-
     [RelayCommand]
     private async Task ShowAssaDraw()
     {
@@ -853,7 +852,10 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm => { vm.Initialize(GetUpdateSubtitle(), selectedItems, _videoFileName ?? string.Empty); });
+        var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
+        {
+            vm.Initialize(GetUpdateSubtitle(), selectedItems, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
+        });
 
         if (!result.OkPressed)
         {

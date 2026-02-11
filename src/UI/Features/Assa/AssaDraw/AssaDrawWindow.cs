@@ -69,6 +69,7 @@ public class AssaDrawWindow : Window
         Content = mainGrid;
 
         Loaded += OnLoaded;
+        Closing += (_, e) => vm.OnClosing();
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 

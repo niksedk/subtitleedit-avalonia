@@ -62,6 +62,7 @@ public partial class AssaDrawViewModel : ObservableObject
     private readonly Regex _regexEnd = new(@"\{[^{]*\\p0[^}]*\}");
     private readonly IFileHelper _fileHelper;
     private string _fileName = string.Empty;
+    private Subtitle? _subtitle;
 
     public AssaDrawViewModel(IFileHelper fileHelper)
     {
@@ -70,12 +71,26 @@ public partial class AssaDrawViewModel : ObservableObject
 
     public void Initialize()
     {
+        UiUtil.RestoreWindowPosition(Window);
+        ZoomToFitCurrentVideoResolution();
         RefreshTreeView();
         Canvas?.InvalidateVisual();
     }
 
-    public void Initialize(Subtitle subtitle, List<SubtitleLineViewModel> selectedLines, string videoFileName)
+    private void ZoomToFitCurrentVideoResolution()
     {
+        //TODO: zoom canvas to fit current video resolution if available
+    }
+
+    public void Initialize(Subtitle subtitle, List<SubtitleLineViewModel> selectedLines, int? width, int? height)
+    {
+        _subtitle = subtitle;
+        if (width.HasValue &&  height.HasValue && width.Value >= 0 && height.Value >= 0)
+        {
+            CanvasWidth = width.Value;
+            CanvasHeight = height.Value;
+        }
+        
         var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(subtitle.Header);
         foreach (var line in selectedLines)
         {
@@ -591,6 +606,11 @@ public partial class AssaDrawViewModel : ObservableObject
     {
         var subtitle = new Subtitle();
         subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+        if (_subtitle != null)
+        {
+            subtitle.Header = _subtitle.Header;
+            subtitle.Footer = _subtitle.Footer;
+        }
 
         // Update resolution in header
         subtitle.Header = subtitle.Header.Replace("PlayResX: 384", $"PlayResX: {CanvasWidth}");
@@ -657,15 +677,15 @@ public partial class AssaDrawViewModel : ObservableObject
     private static string GetColorName(Color color)
     {
         // Create a readable color name based on RGB values
-        if (color.R == 255 && color.G == 255 && color.B == 255) return "White";
-        if (color.R == 0 && color.G == 0 && color.B == 0) return "Black";
-        if (color.R == 255 && color.G == 0 && color.B == 0) return "Red";
-        if (color.R == 0 && color.G == 255 && color.B == 0) return "Green";
-        if (color.R == 0 && color.G == 0 && color.B == 255) return "Blue";
-        if (color.R == 255 && color.G == 255 && color.B == 0) return "Yellow";
-        if (color.R == 255 && color.G == 0 && color.B == 255) return "Magenta";
-        if (color.R == 0 && color.G == 255 && color.B == 255) return "Cyan";
-        if (color.R == 255 && color.G == 165 && color.B == 0) return "Orange";
+        if (color is { R: 255, G: 255, B: 255 }) return "White";
+        if (color.R == 0 && color is { G: 0, B: 0 }) return "Black";
+        if (color is { R: 255, G: 0, B: 0 }) return "Red";
+        if (color is { R: 0, G: 255, B: 0 }) return "Green";
+        if (color is { R: 0, G: 0, B: 255 }) return "Blue";
+        if (color is { R: 255, G: 255, B: 0 }) return "Yellow";
+        if (color is { R: 255, G: 0, B: 255 }) return "Magenta";
+        if (color is { R: 0, G: 255, B: 255 }) return "Cyan";
+        if (color is { R: 255, G: 165, B: 0 }) return "Orange";
         
         // For other colors, use hex representation
         return $"{color.R:X2}{color.G:X2}{color.B:X2}";
@@ -1146,6 +1166,11 @@ public partial class AssaDrawViewModel : ObservableObject
             Canvas.SelectedShapes = SelectedShapes;
         }
         Canvas?.InvalidateVisual();
+    }
+
+    public void OnClosing()
+    {
+        UiUtil.SaveWindowPosition(Window);
     }
 }
 
