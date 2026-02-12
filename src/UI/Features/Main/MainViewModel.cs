@@ -785,6 +785,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaStyles()
     {
+        if (Window == null || !IsFormatAssa)
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaStylesWindow, AssaStylesViewModel>(vm =>
         {
             vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
@@ -815,6 +820,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaProperties()
     {
+        if (Window == null || !IsFormatAssa)
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaPropertiesWindow, AssaPropertiesViewModel>(vm =>
         {
             vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
@@ -831,6 +841,11 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaAttachments()
     {
+        if (Window == null || !IsFormatAssa)
+        {
+            return;
+        }
+
         var result = await ShowDialogAsync<AssaAttachmentsWindow, AssaAttachmentsViewModel>(vm =>
         {
             vm.Initialize(GetUpdateSubtitle(), SelectedSubtitleFormat, _subtitleFileName ?? string.Empty);
@@ -846,11 +861,12 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaDraw()
     {
-        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (Window == null)
+        if (Window == null || !IsFormatAssa)
         {
             return;
         }
+
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
 
         SetAssaResolution(false);
 

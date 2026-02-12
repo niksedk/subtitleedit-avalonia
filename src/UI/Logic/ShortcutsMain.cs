@@ -317,7 +317,12 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowAssaImageColorPickerCommand), Se.Language.Assa.ImageColorPicker },
         { nameof(MainViewModel.ShowAssaSetPositionCommand), Se.Language.Assa.SetPosition },
         { nameof(MainViewModel.ShowAssaApplyCustomOverrideTagsCommand), Se.Language.Assa.ApplyOverrideTags },
-
+        { nameof(MainViewModel.ShowAssaDrawCommand), Se.Language.Options.Shortcuts.AssaDraw },
+        { nameof(MainViewModel.ShowAssaGenerateProgressBarCommand), Se.Language.Options.Shortcuts.AssaGenerateProgressBar },
+        { nameof(MainViewModel.ShowAssaGenerateBackgroundCommand), Se.Language.Options.Shortcuts.AssaGenerateBackgroundBox },
+        { nameof(MainViewModel.ShowAssaStylesCommand), Se.Language.Options.Shortcuts.AssaStyles },
+        { nameof(MainViewModel.ShowAssaPropertiesCommand), Se.Language.Options.Shortcuts.AssaProperties },
+        { nameof(MainViewModel.ShowAssaAttachmentsCommand), Se.Language.Options.Shortcuts.AssaAttachments },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -582,6 +587,12 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowAssaImageColorPickerCommand, nameof(vm.ShowAssaImageColorPickerCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowAssaSetPositionCommand, nameof(vm.ShowAssaSetPositionCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowAssaApplyCustomOverrideTagsCommand, nameof(vm.ShowAssaApplyCustomOverrideTagsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaDrawCommand, nameof(vm.ShowAssaDrawCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaGenerateProgressBarCommand, nameof(vm.ShowAssaGenerateProgressBarCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaGenerateBackgroundCommand, nameof(vm.ShowAssaGenerateBackgroundCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaStylesCommand, nameof(vm.ShowAssaStylesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaPropertiesCommand, nameof(vm.ShowAssaPropertiesCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.ShowAssaAttachmentsCommand, nameof(vm.ShowAssaAttachmentsCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
