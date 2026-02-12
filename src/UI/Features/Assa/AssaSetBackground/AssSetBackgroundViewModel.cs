@@ -170,6 +170,8 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         Close();
     }
 
+    private Lock _addSubtitleLock = new Lock();
+
     private async Task ApplyBackgroundBoxes()
     {
         if (string.IsNullOrEmpty(_subtitle.Header))
@@ -185,42 +187,49 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         // Generate background boxes for each paragraph
         var count = 0;
         var total = _selectedItems.Count;
-        foreach (var p in _selectedItems)
+
+        await Task.Run(() =>
         {
-            count++;
-            Dispatcher.UIThread.Post(() => ProgressText = string.Format(Se.Language.Assa.GeneratingBackgroundBoxXOfY, count, total));
-
-            var previewSubtitle = new Subtitle();
-            previewSubtitle.Header = _subtitle.Header;
-            previewSubtitle.Footer = _subtitle.Footer;
-            previewSubtitle.Paragraphs.Add(p.ToParagraph(_assaFormat));
-
-            var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
-
-            // one retry
-            if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
+            Parallel.ForEach(_selectedItems, p =>
             {
-                previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
-            }
+                var currentCount = Interlocked.Increment(ref count);
+                Dispatcher.UIThread.Post(() => ProgressText = string.Format(Se.Language.Assa.GeneratingBackgroundBoxXOfY, currentCount, total));
 
-            // skip if still not valid
-            if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
-            {
-                continue;
-            }
+                var previewSubtitle = new Subtitle();
+                previewSubtitle.Header = _subtitle.Header;
+                previewSubtitle.Footer = _subtitle.Footer;
+                previewSubtitle.Paragraphs.Add(p.ToParagraph(_assaFormat));
 
-            var skBitmap = SKBitmap.Decode(previewScreenshotFileName);
-            _trimResult = skBitmap.TrimTransparentPixels();
+                var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
 
-            var left = FillWidth ? FillWidthMarginLeft : _trimResult.Left - PaddingLeft;
-            var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_trimResult.Left + _trimResult.TrimmedBitmap.Width + PaddingRight);
-            var top = _trimResult.Top - PaddingTop;
-            var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
-            var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
-            var boxParagraph = MakeBoxParagraph(boxStyleName, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds, boxDrawing);
+                // one retry
+                if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
+                {
+                    previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
+                }
 
-            _subtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
-        }
+                // skip if still not valid
+                if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
+                {
+                    return;
+                }
+
+                var skBitmap = SKBitmap.Decode(previewScreenshotFileName);
+                var trimResult = skBitmap.TrimTransparentPixels();
+
+                var left = FillWidth ? FillWidthMarginLeft : trimResult.Left - PaddingLeft;
+                var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (trimResult.Left + trimResult.TrimmedBitmap.Width + PaddingRight);
+                var top = trimResult.Top - PaddingTop;
+                var bottom = trimResult.Top + trimResult.TrimmedBitmap.Height + PaddingBottom;
+                var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
+                var boxParagraph = MakeBoxParagraph(boxStyleName, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds, boxDrawing);
+
+                lock (_addSubtitleLock)
+                {
+                    _subtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
+                }
+            });
+        });
 
         _subtitle.Renumber();
     }
