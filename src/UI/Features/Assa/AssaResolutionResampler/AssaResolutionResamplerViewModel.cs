@@ -173,71 +173,10 @@ public partial class AssaResolutionResamplerViewModel : ObservableObject
             return;
         }
 
-        ApplyResampling();
+        AssaResamplerHelper.
+                ApplyResampling(_subtitle, SourceWidth, SourceHeight, TargetWidth, TargetHeight, ChangeMargins, ChangeFontSize, ChangeDrawing, ChangePositions);
         OkPressed = true;
         Close();
-    }
-
-    private void ApplyResampling()
-    {
-        if (string.IsNullOrEmpty(_subtitle.Header))
-        {
-            _subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
-        }
-
-        decimal sourceWidth = SourceWidth;
-        decimal sourceHeight = SourceHeight;
-        decimal targetWidth = TargetWidth;
-        decimal targetHeight = TargetHeight;
-
-        // Resample styles
-        var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(_subtitle.Header);
-        foreach (var style in styles)
-        {
-            if (ChangeMargins)
-            {
-                style.MarginLeft = AssaResampler.Resample(sourceWidth, targetWidth, style.MarginLeft);
-                style.MarginRight = AssaResampler.Resample(sourceWidth, targetWidth, style.MarginRight);
-                style.MarginVertical = AssaResampler.Resample(sourceHeight, targetHeight, style.MarginVertical);
-            }
-
-            if (ChangeFontSize)
-            {
-                style.FontSize = AssaResampler.Resample(sourceHeight, targetHeight, style.FontSize);
-            }
-
-            if (ChangeFontSize || ChangeDrawing)
-            {
-                style.OutlineWidth = AssaResampler.Resample(sourceHeight, targetHeight, style.OutlineWidth);
-                style.ShadowWidth = AssaResampler.Resample(sourceHeight, targetHeight, style.ShadowWidth);
-                style.Spacing = AssaResampler.Resample(sourceWidth, targetWidth, style.Spacing);
-            }
-        }
-
-        _subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(_subtitle.Header, styles);
-
-        // Update PlayRes in header
-        _subtitle.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResX", "PlayResX: " + TargetWidth.ToString(CultureInfo.InvariantCulture), "[Script Info]", _subtitle.Header);
-        _subtitle.Header = AdvancedSubStationAlpha.AddTagToHeader("PlayResY", "PlayResY: " + TargetHeight.ToString(CultureInfo.InvariantCulture), "[Script Info]", _subtitle.Header);
-
-        // Resample paragraphs
-        foreach (var p in _subtitle.Paragraphs)
-        {
-            if (ChangeFontSize)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsFont(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text);
-            }
-
-            if (ChangePositions)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsPosition(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text);
-            }
-
-            if (ChangeDrawing)
-            {
-                p.Text = AssaResampler.ResampleOverrideTagsDrawing(sourceWidth, targetWidth, sourceHeight, targetHeight, p.Text, null);
-            }
-        }
     }
 
     [RelayCommand]

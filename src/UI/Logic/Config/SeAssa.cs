@@ -7,6 +7,8 @@ namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeAssa
 {
+    public bool AutoSetResolution { get; set; }
+    public bool AutoSetResolutionConvert { get; set; }
     public List<SeAssaStyle> StoredStyles { get; set; }
     public string LastOverrideTag { get; internal set; }
     public int ProgressBarHeight { get; set; }
@@ -28,6 +30,9 @@ public class SeAssa
 
     public SeAssa()
     {
+        AutoSetResolution = true;
+        AutoSetResolutionConvert = true;
+
         StoredStyles = new List<SeAssaStyle>();
         LastOverrideTag = OverrideTagDisplay.List().First().Tag;
         

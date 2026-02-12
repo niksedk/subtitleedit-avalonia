@@ -852,6 +852,8 @@ public partial class MainViewModel :
             return;
         }
 
+        SetAssaResolution(false);
+
         var result = await ShowDialogAsync<AssaDrawWindow, AssaDrawViewModel>(vm =>
         {
             vm.Initialize(GetUpdateSubtitle(), selectedItems, _mediaInfo?.Dimension.Width, _mediaInfo?.Dimension.Height);
@@ -866,6 +868,16 @@ public partial class MainViewModel :
         var assa = new SubStationAlpha();
         var firstParagraph = selectedItems.FirstOrDefault();
         var lastParagraph = selectedItems.LastOrDefault();
+        if (lastParagraph == null)
+        {
+            lastParagraph = new SubtitleLineViewModel()
+            {
+                StartTime = TimeSpan.FromSeconds(0),
+                EndTime = TimeSpan.FromSeconds(2000),
+                Text = string.Empty
+            };
+        }
+
         for (var index = 0; index < result.ResultSubtitle.Paragraphs.Count; index++)
         {
             var p = result.ResultSubtitle.Paragraphs[index];
@@ -893,6 +905,13 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaGenerateProgressBar()
     {
+        if (!IsFormatAssa)
+        {
+            return;
+        }
+
+        SetAssaResolution(false);
+
         var result = await ShowDialogAsync<AssaProgressBarWindow, AssaProgressBarViewModel>(vm =>
         {
             var width = _mediaInfo?.Dimension.Width ?? 1920;
@@ -938,7 +957,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowAssaGenerateBackground()
     {
-        if (string.IsNullOrEmpty(_videoFileName))
+        if (string.IsNullOrEmpty(_videoFileName) || !IsFormatAssa)
         {
             return;
         }
@@ -954,6 +973,8 @@ public partial class MainViewModel :
         {
             return;
         }
+
+        SetAssaResolution(false);
 
         var result = await ShowDialogAsync<AssSetBackgroundWindow, AssSetBackgroundViewModel>(vm =>
         {
@@ -11235,10 +11256,56 @@ public partial class MainViewModel :
             SelectedFrameRate = _mediaInfo?.FramesRate.ToString(CultureInfo.InvariantCulture) ?? FrameRates[0];
             Se.Settings.General.CurrentFrameRate = (double)(_mediaInfo?.FramesRate ?? 23.976m);
             Configuration.Settings.General.CurrentFrameRate = (double)(_mediaInfo?.FramesRate ?? 23.976m);
+
+            if (IsFormatAssa)
+            {
+                SetAssaResolution(true);
+            }
         }
         catch
         {
             _mediaInfo = null;
+        }
+    }
+
+    private void SetAssaResolution(bool checkSettings)
+    {
+        if (checkSettings && !Se.Settings.Assa.AutoSetResolution)
+        {
+            return;
+        }
+
+        if (_mediaInfo == null || _mediaInfo.Dimension.Width <= 0)
+        {
+            return;
+        }
+
+        var oldHeader = _subtitle.Header;
+        _subtitle.Header = AdvancedSubStationAlpha.SetResolution(_subtitle.Header, _mediaInfo.Dimension.Width, _mediaInfo.Dimension.Height);
+
+        if (Se.Settings.Assa.AutoSetResolutionConvert && oldHeader != _subtitle.Header)
+        {
+            if (string.IsNullOrEmpty(oldHeader) || !oldHeader.Contains("[V4+ Styles]", StringComparison.OrdinalIgnoreCase))
+            {
+                oldHeader = AdvancedSubStationAlpha.DefaultHeader;
+            }
+
+            var oldWidth = AdvancedSubStationAlpha.DefaultWidth;
+            var oldHeight = AdvancedSubStationAlpha.DefaultHeight;
+
+            var playResX = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", oldHeader);
+            if (int.TryParse(playResX, out var width) && width >= 125 && width <= 4096)
+            {
+                oldWidth = width;
+            }
+
+            var playResY = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", oldHeader);
+            if (int.TryParse(playResY, out var height) && height >= 125 && height <= 4096)
+            {
+                oldHeight = height;
+            }
+
+            AssaResamplerHelper.ApplyResampling(_subtitle, oldWidth, oldHeight, _mediaInfo.Dimension.Width, _mediaInfo.Dimension.Height, true, true, true, true);
         }
     }
 
@@ -13430,6 +13497,8 @@ public partial class MainViewModel :
 
         AutoFitColumns();
 
+        var idx = SubtitleGrid.SelectedIndex;
+
         if (!_opening && e.RemovedItems.Count == 1 && e.AddedItems.Count == 1)
         {
             var format = e.AddedItems[0] as SubtitleFormat;
@@ -13473,7 +13542,7 @@ public partial class MainViewModel :
                         _subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
                     }
 
-                    //SetAssaResolutionWithChecks();
+                    SetAssaResolution(true);
                 }
 
                 SetSubtitles(_subtitle);
@@ -13490,6 +13559,8 @@ public partial class MainViewModel :
                 FilePropertiesText = string.Format(Se.Language.Main.XPropertiesDotDotDot, format.Name);
             }
         }
+
+        SelectAndScrollToRow(idx);
     }
 
     internal void AutoSelectOnPlayCheckedChanged()

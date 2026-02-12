@@ -61,6 +61,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public const string NameOfFormat = "Advanced Sub Station Alpha";
         public override string Name => NameOfFormat;
 
+        public const int DefaultWidth = 384;
+        public const int DefaultHeight = 288;
+
         public override bool IsMine(List<string> lines, string fileName)
         {
             var subtitle = new Subtitle();
@@ -2790,6 +2793,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
             var styles = GetSsaStylesFromHeader(header).Where(p => p.Name != style.Name).ToList();
             styles.Add(style);
             return GetHeaderAndStylesFromAdvancedSubStationAlpha(header, styles);
+        }
+
+        public static string SetResolution(string header, int width, int height)
+        {
+            var h = (string.IsNullOrEmpty(header) || !header.Contains("[V4+ Styles]")) ? DefaultHeader : header;
+
+            h = AdvancedSubStationAlpha.AddTagToHeader("PlayResX", "PlayResX: " + width.ToString(CultureInfo.InvariantCulture), "[Script Info]", h);
+            h = AdvancedSubStationAlpha.AddTagToHeader("PlayResY", "PlayResY: " + height.ToString(CultureInfo.InvariantCulture), "[Script Info]", h);
+
+            return h;
         }
     }
 }
