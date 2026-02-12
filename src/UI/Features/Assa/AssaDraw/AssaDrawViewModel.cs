@@ -49,6 +49,7 @@ public partial class AssaDrawViewModel : ObservableObject
     [ObservableProperty] private bool _isPointSelected;
     [ObservableProperty] private bool _isLayerSelected;
     [ObservableProperty] private bool _isShapeSelected;
+    [ObservableProperty] private bool _shapeIsEraser;
     [ObservableProperty] private Color _layerColor = Colors.White;
     [ObservableProperty] private bool _showGrid = true;
     [ObservableProperty] private ObservableCollection<ShapeTreeItem> _shapeTreeItems = [];
@@ -688,25 +689,54 @@ public partial class AssaDrawViewModel : ObservableObject
         // Generate paragraphs with style names
         foreach (var layer in layers)
         {
-            var sb = new StringBuilder();
+            var sbDraw = new StringBuilder();
+            var sbErase = new StringBuilder();
             var firstShape = layer.FirstOrDefault(p => !p.IsEraser);
+
+            // Collect draw shapes (normal shapes)
             foreach (var shape in layer.Where(p => !p.IsEraser))
             {
-                sb.Append(shape.ToAssa());
-                sb.Append("  ");
+                sbDraw.Append(shape.ToAssa());
+                sbDraw.Append("  ");
             }
 
-            var drawText = sb.ToString().Trim();
-            if (!string.IsNullOrEmpty(drawText) && firstShape != null)
+            // Collect erase shapes (iclip shapes)
+            foreach (var shape in layer.Where(p => p.IsEraser))
             {
-                drawText = $"{{\\p1}}{drawText}{{\\p0}}";
-                var styleName = colorToStyleName.GetValueOrDefault(firstShape.ForeColor, "Default");
-                var p = new Paragraph(drawText, 0, 10000)
+                sbErase.Append(shape.ToAssa());
+                sbErase.Append("  ");
+            }
+
+            var drawText = sbDraw.ToString().Trim();
+            var eraseText = sbErase.ToString().Trim();
+
+            // Build the final text with draw and optionally iclip
+            if (!string.IsNullOrEmpty(drawText) || !string.IsNullOrEmpty(eraseText))
+            {
+                var finalText = new StringBuilder();
+
+                // Add iclip if we have erase shapes
+                if (!string.IsNullOrEmpty(eraseText))
                 {
-                    Layer = layer.Key,
-                    Extra = styleName,
-                };
-                subtitle.Paragraphs.Add(p);
+                    finalText.Append($"{{\\iclip({eraseText})}}");
+                }
+
+                // Add draw shapes
+                if (!string.IsNullOrEmpty(drawText))
+                {
+                    finalText.Append($"{{\\p1}}{drawText}{{\\p0}}");
+                }
+
+                if (finalText.Length > 0 && firstShape != null)
+                {
+                    var styleName = colorToStyleName.GetValueOrDefault(firstShape.ForeColor, "Default");
+                    var p = new Paragraph(finalText.ToString(), 0, 10000)
+                    {
+                        Layer = layer.Key,
+                        Extra = styleName,
+                    };
+                    subtitle.Paragraphs.Add(p);
+                }
             }
         }
 
@@ -1132,6 +1162,16 @@ public partial class AssaDrawViewModel : ObservableObject
         {
             ActivePoint.Y = value;
             UpdateSelectedPointName();
+            Canvas?.InvalidateVisual();
+        }
+    }
+
+    partial void OnShapeIsEraserChanged(bool value)
+    {
+        if (ActiveShape != null && ActiveShape.IsEraser != value)
+        {
+            ActiveShape.IsEraser = value;
+            RefreshTreeView();
             Canvas?.InvalidateVisual();
         }
     }

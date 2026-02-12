@@ -299,8 +299,20 @@ public class AssaDrawCanvas : Control
             return;
         }
 
+        // Use different colors for eraser shapes to visually distinguish them
         var color = isSelected ? Colors.Yellow : (isActive ? DrawSettings.ActiveShapeLineColor : DrawSettings.ShapeLineColor);
+        if (shape.IsEraser && !isSelected)
+        {
+            // Draw eraser shapes in red/orange to indicate they are iclip masks
+            color = isActive ? Colors.OrangeRed : Colors.DarkOrange;
+        }
+
+        // Use dashed lines for eraser shapes
         var pen = new Pen(new SolidColorBrush(color), 2, lineCap: PenLineCap.Round);
+        if (shape.IsEraser)
+        {
+            pen.DashStyle = DashStyle.Dash;
+        }
 
         var i = 0;
         while (i < shape.Points.Count)

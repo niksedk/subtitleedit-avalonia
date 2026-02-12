@@ -281,7 +281,7 @@ public class AssaDrawWindow : Window
             if (treeView.SelectedItem is ShapeTreeItem selectedItem)
             {
                 vm.SelectedTreeItem = selectedItem;
-                
+
                 // Update point editor if a point is selected
                 if (selectedItem.Point != null)
                 {
@@ -295,11 +295,12 @@ public class AssaDrawWindow : Window
                     vm.ActivePoint = null;
                     vm.IsPointSelected = false;
                 }
-                
-                // Update active shape for canvas rendering
+
+                // Update active shape for canvas rendering and shape properties
                 if (selectedItem.Shape != null)
                 {
                     vm.ActiveShape = selectedItem.Shape;
+                    vm.ShapeIsEraser = selectedItem.Shape.IsEraser;
                 }
             }
         };
@@ -401,6 +402,14 @@ public class AssaDrawWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
         };
         panel.Children.Add(changeLayerButton);
+
+        var isEraserCheckBox = new CheckBox
+        {
+            Content = "Use shape for erase (iclip)",
+            [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ShapeIsEraser)) { Mode = BindingMode.TwoWay },
+            Margin = new Thickness(0, 5, 0, 0),
+        };
+        panel.Children.Add(isEraserCheckBox);
 
         return panel;
     }
