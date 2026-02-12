@@ -55,12 +55,6 @@ public class AssSetBackgroundWindow : Window
         // Colors
         leftPanel.Add(CreateColorsPanel(vm), 3);
 
-        // Buttons
-        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
-        leftPanel.Add(panelButtons, 5);
-
         var mainGrid = new Grid
         {
             ColumnDefinitions =
@@ -68,12 +62,23 @@ public class AssSetBackgroundWindow : Window
                 new ColumnDefinition { Width = GridLength.Auto },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = GridLength.Auto },
+            },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 12,
         };
 
+        // Buttons
+        var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
+        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
+        var panelButtons = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+
         mainGrid.Add(leftPanel, 0, 0);
         mainGrid.Add(videoPanel, 0, 1);
+        mainGrid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = mainGrid;
 

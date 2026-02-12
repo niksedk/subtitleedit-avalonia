@@ -28,12 +28,14 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     public bool OkPressed { get; private set; }
     public VideoPlayerControl VideoPlayerControl { get; set; }
 
+    [ObservableProperty] private string _progressText = string.Empty;
+
     // Padding settings
     [ObservableProperty] private int _paddingLeft = 10;
     [ObservableProperty] private int _paddingRight = 10;
     [ObservableProperty] private int _paddingTop = 5;
     [ObservableProperty] private int _paddingBottom = 5;
-
+    
     // Style settings
     [ObservableProperty] private Color _boxColor = Color.FromRgb(0, 0, 0);
     [ObservableProperty] private Color _outlineColor = Colors.White;
@@ -154,6 +156,8 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        _positionTimer.Stop();
+        ProgressText = Se.Language.Assa.GeneratingBackgroundBoxes;
         ApplyBackgroundBoxes();
         OkPressed = true;
         Close();
