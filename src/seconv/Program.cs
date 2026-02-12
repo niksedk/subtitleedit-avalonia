@@ -19,26 +19,23 @@ internal class Program
             return 0;
         }
 
-        // Set up Spectre.Console CLI
-        var app = new CommandApp();
+        // Handle /formats or formats command
+        if (args.Length > 0 && (args[0].Equals("/formats", StringComparison.OrdinalIgnoreCase) || 
+                                 args[0].Equals("formats", StringComparison.OrdinalIgnoreCase) ||
+                                 args[0].Equals("--formats", StringComparison.OrdinalIgnoreCase)))
+        {
+            var formatsCommand = new FormatsCommand();
+            return formatsCommand.Execute(null!, new FormatsCommand.Settings(), CancellationToken.None);
+        }
+
+        // Set up Spectre.Console CLI with default command
+        var app = new CommandApp<ConvertCommand>();
         app.Configure(config =>
         {
             config.SetApplicationName("SubtitleEdit");
             config.SetApplicationVersion("5.0.0");
 
             config.ValidateExamples();
-
-            // Add convert command
-            config.AddCommand<ConvertCommand>("convert")
-                .WithDescription("Convert subtitle files to different formats")
-                .WithExample(["convert", "*.srt", "sami"])
-                .WithExample(["convert", "sub1.srt", "subrip", "--encoding:windows-1252"])
-                .WithExample(["convert", "*.sub", "subrip", "--fps:25", "--outputfolder:C:\\Temp"]);
-
-            // Add formats command
-            config.AddCommand<FormatsCommand>("formats")
-                .WithDescription("List all available subtitle formats")
-                .WithExample(["formats"]);
         });
 
         try

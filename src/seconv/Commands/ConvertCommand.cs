@@ -234,11 +234,15 @@ internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
             };
 
             // Display conversion info
+            var normalizedFormat = LibSEIntegration.NormalizeFormatName(settings.Format);
+            var extension = LibSEIntegration.GetExtensionForFormat(settings.Format);
+            var formatDisplay = $"{normalizedFormat} (*{extension})";
+
             var table = new Table();
             table.AddColumn("[yellow]Parameter[/]");
             table.AddColumn("[green]Value[/]");
             table.AddRow("Pattern", settings.Pattern);
-            table.AddRow("Format", settings.Format);
+            table.AddRow("Format", formatDisplay);
 
             if (!string.IsNullOrEmpty(settings.InputFolder))
                 table.AddRow("Input Folder", settings.InputFolder);

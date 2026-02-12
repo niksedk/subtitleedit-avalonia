@@ -24,16 +24,14 @@ internal sealed class FormatsCommand : Command<FormatsCommand.Settings>
         table.AddColumn("[yellow]#[/]");
         table.AddColumn("[green]Format Name[/]");
         table.AddColumn("[cyan]Extension[/]");
-        table.AddColumn("[blue]Description[/]");
 
         int index = 1;
-        foreach (var (name, extension, description) in formats)
+        foreach (var (name, extension, _) in formats)
         {
             table.AddRow(
                 index.ToString(),
                 $"[green]{name}[/]",
-                $"[cyan]{extension}[/]",
-                description);
+                $"[cyan]{extension}[/]");
             index++;
         }
 
@@ -47,6 +45,12 @@ internal sealed class FormatsCommand : Command<FormatsCommand.Settings>
     {
         // Get formats from LibSE integration
         var formats = LibSEIntegration.GetAvailableFormats();
-        return formats.Select(f => (f.Name, f.Extension, f.GetType().Name)).ToList();
+
+        // Group by name to show unique formats (some formats may have same name but different implementations)
+        return formats
+            .GroupBy(f => f.Name)
+            .Select(g => g.First())
+            .Select(f => (f.Name, f.Extension, f.Name))
+            .ToList();
     }
 }

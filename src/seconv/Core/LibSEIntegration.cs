@@ -307,8 +307,11 @@ internal static class LibSEIntegration
     /// </summary>
     public static string GetExtensionForFormat(string formatName)
     {
+        // Normalize the format name first to handle shortcuts
+        var normalized = NormalizeFormatName(formatName);
+
         var format = SubtitleFormat.AllSubtitleFormats.FirstOrDefault(f => 
-            f.Name.Replace(" ", "").Equals(formatName.Replace(" ", ""), StringComparison.OrdinalIgnoreCase));
+            f.Name.Replace(" ", "").Equals(normalized.Replace(" ", ""), StringComparison.OrdinalIgnoreCase));
 
         return format?.Extension ?? ".txt";
     }

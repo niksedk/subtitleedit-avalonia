@@ -12,7 +12,7 @@ internal static class HelpDisplay
         AnsiConsole.WriteLine();
 
         AnsiConsole.MarkupLine("[bold cyan]Usage:[/]");
-        AnsiConsole.MarkupLine("  [green]SubtitleEdit /convert[/] [yellow][[pattern]] [[name-of-format-without-spaces]][/] [blue][[optional-parameters]][/]");
+        AnsiConsole.MarkupLine("  [green]SubtitleEdit[/] [yellow][[pattern]] [[name-of-format-without-spaces]][/] [blue][[optional-parameters]][/]");
         AnsiConsole.WriteLine();
 
         ShowSection("Pattern", "One or more file name patterns separated by commas\nRelative patterns are relative to /inputfolder if specified");
@@ -70,13 +70,13 @@ internal static class HelpDisplay
         AnsiConsole.WriteLine();
         ShowSection("Examples", null);
         ShowExample(
-            "SubtitleEdit convert *.srt sami",
+            "SubtitleEdit *.srt sami",
             "Convert all .srt files to SAMI format");
         ShowExample(
-            "SubtitleEdit convert sub1.srt subrip --encoding:windows-1252",
+            "SubtitleEdit sub1.srt subrip --encoding:windows-1252",
             "Convert with specific encoding");
         ShowExample(
-            "SubtitleEdit convert *.sub subrip --fps:25 --outputfolder:C:\\Temp",
+            "SubtitleEdit *.sub subrip --fps:25 --outputfolder:C:\\Temp",
             "Convert frame-based to time-based with FPS");
         ShowExample(
             "SubtitleEdit formats",
