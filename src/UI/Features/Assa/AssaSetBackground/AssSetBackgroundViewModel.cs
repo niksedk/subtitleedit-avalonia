@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 
@@ -154,16 +155,15 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
         _positionTimer.Stop();
-        ProgressText = Se.Language.Assa.GeneratingBackgroundBoxes;
-        ApplyBackgroundBoxes();
+        await ApplyBackgroundBoxes();
         OkPressed = true;
         Close();
     }
 
-    private void ApplyBackgroundBoxes()
+    private async Task ApplyBackgroundBoxes()
     {
         if (string.IsNullOrEmpty(_subtitle.Header))
         {
@@ -176,8 +176,13 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         _subtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(_subtitle.Header, styleBoxBg);
 
         // Generate background boxes for each paragraph
+        var count = 0;
+        var total = _selectedItems.Count;
         foreach (var p in _selectedItems)
         {
+            count++;
+            Dispatcher.UIThread.Post(() => ProgressText = string.Format(Se.Language.Assa.GeneratingBackgroundBoxXOfY, count, total));
+
             var previewSubtitle = new Subtitle();
             previewSubtitle.Header = _subtitle.Header;
             previewSubtitle.Footer = _subtitle.Footer;

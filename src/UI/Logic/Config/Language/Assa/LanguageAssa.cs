@@ -107,7 +107,7 @@ public class LanguageAssa
     public string SetPosition { get; set; }
     public string ImageColorPicker { get; set; }
     public string CopyColorAsHextoClipboard { get; set; }
-    public string GeneratingBackgroundBoxes { get; set; }
+    public string GeneratingBackgroundBoxXOfY { get; set; }
 
     public LanguageAssa()
     {
@@ -217,6 +217,6 @@ public class LanguageAssa
         SetPosition = "Set position";
         ImageColorPicker = "Image color picker";
         CopyColorAsHextoClipboard = "Copy color as hex to clipboard";
-        GeneratingBackgroundBoxes = "Generating background boxes...";
+        GeneratingBackgroundBoxXOfY = "Generating background box {0} of {1}...";
     }
 }
