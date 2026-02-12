@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Newtonsoft.Json.Linq;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
@@ -20,6 +14,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using SkiaSharp;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 
@@ -169,34 +168,38 @@ public partial class AssSetBackgroundViewModel : ObservableObject
 
         // Generate unique style name
         var boxStyleName = GenerateUniqueStyleName();
-
-        // Add style
-        var styleBoxBg = new SsaStyle
-        {
-            Alignment = "7",
-            Name = boxStyleName,
-            MarginLeft = 0,
-            MarginRight = 0,
-            MarginVertical = 0,
-            Primary = SkiaSharp.SKColor.Parse($"#{BoxColor.A:X2}{BoxColor.B:X2}{BoxColor.G:X2}{BoxColor.R:X2}"),
-            Secondary = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Tertiary = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Background = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Outline = SkiaSharp.SKColor.Parse($"#{OutlineColor.A:X2}{OutlineColor.B:X2}{OutlineColor.G:X2}{OutlineColor.R:X2}"),
-            ShadowWidth = ShadowDistance,
-            OutlineWidth = OutlineWidth,
-        };
+        var styleBoxBg = MakeBoxStyle(boxStyleName);
         _subtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(_subtitle.Header, styleBoxBg);
 
         // Generate background boxes for each paragraph
         foreach (var p in _selectedItems)
         {
-            // For simplicity, create a basic box that covers the full width if FillWidth is enabled
-            var left = FillWidth ? FillWidthMarginLeft : PaddingLeft;
-            var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_videoWidth - PaddingRight);
-            var top = PaddingTop;
-            var bottom = _videoHeight - PaddingBottom;
+            var previewSubtitle = new Subtitle();
+            previewSubtitle.Header = _subtitle.Header;
+            previewSubtitle.Footer = _subtitle.Footer;
+            previewSubtitle.Paragraphs.Add(p.ToParagraph(_assaFormat));
 
+            var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
+
+            // one retry
+            if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
+            {
+                previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
+            }
+
+            // skip if still not valid
+            if (string.IsNullOrEmpty(previewScreenshotFileName) || !File.Exists(previewScreenshotFileName))
+            {
+                continue;
+            }
+
+            var skBitmap = SKBitmap.Decode(previewScreenshotFileName);
+            _trimResult = skBitmap.TrimTransparentPixels();
+
+            var left = FillWidth ? FillWidthMarginLeft : _trimResult.Left - PaddingLeft;
+            var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_trimResult.Left + _trimResult.TrimmedBitmap.Width + PaddingRight);
+            var top = _trimResult.Top - PaddingTop;
+            var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
             var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
 
             var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)
@@ -209,6 +212,27 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         }
 
         _subtitle.Renumber();
+    }
+
+    private SsaStyle MakeBoxStyle(string boxStyleName)
+    {
+
+        // Add style
+        return new SsaStyle
+        {
+            Alignment = "7",
+            Name = boxStyleName,
+            MarginLeft = 0,
+            MarginRight = 0,
+            MarginVertical = 0,
+            Primary = SKColor.Parse($"#{BoxColor.A:X2}{BoxColor.R:X2}{BoxColor.G:X2}{BoxColor.B:X2}"),
+            Secondary = SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.R:X2}{ShadowColor.G:X2}{ShadowColor.B:X2}"),
+            Tertiary = SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.R:X2}{ShadowColor.G:X2}{ShadowColor.B:X2}"),
+            Background = SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.R:X2}{ShadowColor.G:X2}{ShadowColor.B:X2}"),
+            Outline = SKColor.Parse($"#{OutlineColor.A:X2}{OutlineColor.R:X2}{OutlineColor.G:X2}{OutlineColor.B:X2}"),
+            ShadowWidth = ShadowDistance,
+            OutlineWidth = OutlineWidth,
+        };
     }
 
     private string GenerateBackgroundBox(int left, int right, int top, int bottom)
@@ -335,21 +359,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
 
         // Temporarily apply background boxes
         var boxStyleName = "SE-box-bg-preview";
-        var styleBoxBg = new SsaStyle
-        {
-            Alignment = "7",
-            Name = boxStyleName,
-            MarginLeft = 0,
-            MarginRight = 0,
-            MarginVertical = 0,
-            Primary = SkiaSharp.SKColor.Parse($"#{BoxColor.A:X2}{BoxColor.B:X2}{BoxColor.G:X2}{BoxColor.R:X2}"),
-            Secondary = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Tertiary = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Background = SkiaSharp.SKColor.Parse($"#{ShadowColor.A:X2}{ShadowColor.B:X2}{ShadowColor.G:X2}{ShadowColor.R:X2}"),
-            Outline = SkiaSharp.SKColor.Parse($"#{OutlineColor.A:X2}{OutlineColor.B:X2}{OutlineColor.G:X2}{OutlineColor.R:X2}"),
-            ShadowWidth = ShadowDistance,
-            OutlineWidth = OutlineWidth,
-        };
+        var styleBoxBg = MakeBoxStyle(boxStyleName);
         previewSubtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(previewSubtitle.Header, styleBoxBg);
 
         var p = _previewParagraph;
@@ -358,7 +368,6 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_trimResult.Left + _trimResult.TrimmedBitmap.Width + PaddingRight);
         var top = _trimResult.Top - PaddingTop;
         var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
-
         var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
 
         var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)

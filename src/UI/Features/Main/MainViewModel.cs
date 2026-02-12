@@ -954,15 +954,19 @@ public partial class MainViewModel :
         {
             return;
         }
-        
+
         var result = await ShowDialogAsync<AssSetBackgroundWindow, AssSetBackgroundViewModel>(vm =>
         {
             vm.Initialize(GetUpdateSubtitle(), selectedItems, _mediaInfo?.Dimension.Width ?? 1920, _mediaInfo?.Dimension.Height ?? 1080, _videoFileName);
         });
 
-        if (result.OkPressed)
+        if (!result.OkPressed)
         {
+            return;
         }
+
+        _subtitle.Header = result.ResultSubtitle.Header;
+        SetSubtitles(result.ResultSubtitle);
     }
 
     [RelayCommand]
