@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280 d18.0
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "src\UI\UI.csproj", "{C27E3654-FA0B-41EB-87C2-9B9A6B27566F}"
 EndProject
@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSE", "src\libse\LibSE.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSETests", "tests\libse\LibSETests.csproj", "{21C390BF-0785-5EC6-6F63-787A969378AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeConv", "SeConv\SeConv.csproj", "{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
