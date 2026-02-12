@@ -1,4 +1,5 @@
-using System.Text;
+using Nikse.SubtitleEdit.Core.Common;
+using Spectre.Console;
 
 namespace SeConv.Core;
 
@@ -14,6 +15,12 @@ internal class SubtitleConverter
             var inputFiles = GetInputFiles(options);
             result.TotalFiles = inputFiles.Count;
 
+            if (inputFiles.Count == 0)
+            {
+                result.Errors.Add($"No files found matching pattern: {options.Pattern}");
+                return result;
+            }
+
             foreach (var inputFile in inputFiles)
             {
                 try
@@ -24,7 +31,7 @@ internal class SubtitleConverter
                 catch (Exception ex)
                 {
                     result.FailedFiles++;
-                    result.Errors.Add($"{inputFile}: {ex.Message}");
+                    result.Errors.Add($"{Path.GetFileName(inputFile)}: {ex.Message}");
                 }
             }
         }
@@ -66,8 +73,6 @@ internal class SubtitleConverter
 
     private async Task ConvertFileAsync(string inputFile, ConversionOptions options)
     {
-        // TODO: Implement actual conversion using LibSE
-        
         // Determine output file
         var outputFile = GetOutputFileName(inputFile, options);
 
@@ -77,19 +82,50 @@ internal class SubtitleConverter
             throw new InvalidOperationException($"Output file already exists: {outputFile}. Use --overwrite to replace.");
         }
 
-        // Simulate async work
-        await Task.Delay(100);
-
-        // TODO: Load subtitle file using LibSE
-        // TODO: Apply operations in order
-        // TODO: Convert to target format
-        // TODO: Save to output file
-
-        // For now, just create a placeholder file
-        var outputDir = Path.GetDirectoryName(outputFile);
-        if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+        // Simulate async work for UI responsiveness
+        await Task.Run(() =>
         {
-            Directory.CreateDirectory(outputDir);
+            // Load subtitle file using LibSE
+            var subtitle = LibSEIntegration.LoadSubtitle(inputFile, options.Encoding);
+
+            if (subtitle == null || subtitle.Paragraphs.Count == 0)
+            {
+                throw new InvalidOperationException($"No subtitles found in file: {inputFile}");
+            }
+
+            // Apply FPS conversion if needed
+            if (options.Fps.HasValue && options.TargetFps.HasValue)
+            {
+                // Convert between different frame rates
+                ChangeFrameRate(subtitle, options.Fps.Value, options.TargetFps.Value);
+            }
+            else if (options.Fps.HasValue)
+            {
+                // If only source FPS is specified, this might be for frame-based formats
+                // The format itself should handle this during loading
+            }
+
+            // Apply operations in order
+            if (options.Operations.Count > 0)
+            {
+                LibSEIntegration.ApplyOperations(subtitle, options.Operations);
+            }
+
+            // Normalize format name (handle shortcuts like "srt", "ass", etc.)
+            var normalizedFormat = LibSEIntegration.NormalizeFormatName(options.Format);
+
+            // Save to target format
+            LibSEIntegration.SaveSubtitle(subtitle, outputFile, normalizedFormat, options.Encoding);
+        });
+    }
+
+    private static void ChangeFrameRate(Subtitle subtitle, double fromFrameRate, double toFrameRate)
+    {
+        double ratio = toFrameRate / fromFrameRate;
+        foreach (var p in subtitle.Paragraphs)
+        {
+            p.StartTime.TotalMilliseconds = p.StartTime.TotalMilliseconds * ratio;
+            p.EndTime.TotalMilliseconds = p.EndTime.TotalMilliseconds * ratio;
         }
     }
 
@@ -101,30 +137,13 @@ internal class SubtitleConverter
         }
 
         var fileName = Path.GetFileNameWithoutExtension(inputFile);
-        var extension = GetExtensionForFormat(options.Format);
+        var extension = LibSEIntegration.GetExtensionForFormat(options.Format);
 
         var outputFolder = string.IsNullOrEmpty(options.OutputFolder)
             ? Path.GetDirectoryName(inputFile) ?? Directory.GetCurrentDirectory()
             : options.OutputFolder;
 
         return Path.Combine(outputFolder, fileName + extension);
-    }
-
-    private string GetExtensionForFormat(string format)
-    {
-        // TODO: Get extension from LibSE format
-        return format.ToLowerInvariant() switch
-        {
-            "subrip" => ".srt",
-            "sami" => ".smi",
-            "adobeencore" => ".txt",
-            "substationalpha" => ".ssa",
-            "advancedsubstationalpha" => ".ass",
-            "webvtt" => ".vtt",
-            "microdvd" => ".sub",
-            "timedtext" => ".xml",
-            _ => ".txt"
-        };
     }
 }
 

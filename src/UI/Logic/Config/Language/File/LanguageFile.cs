@@ -29,7 +29,6 @@ public class LanguageFile
     public string RosettaProperties { get; set; }
     public string RosettaFontSize { get; set; }
     public string TmpegEncXmlProperties { get; set; }
-    public object General { get; internal set; }
 
     public LanguageFile()
     {

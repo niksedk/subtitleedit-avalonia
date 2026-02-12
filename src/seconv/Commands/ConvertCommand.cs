@@ -1,6 +1,7 @@
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
+using SeConv.Core;
 
 namespace SeConv.Commands;
 
@@ -198,6 +199,40 @@ internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
                 return 1;
             }
 
+            // Build operations list
+            var operations = new List<string>();
+            if (settings.ApplyDurationLimits) operations.Add("ApplyDurationLimits");
+            if (settings.BalanceLines) operations.Add("BalanceLines");
+            if (settings.BeautifyTimeCodes) operations.Add("BeautifyTimeCodes");
+            if (settings.ConvertColorsToDialog) operations.Add("ConvertColorsToDialog");
+            if (settings.FixCommonErrors) operations.Add("FixCommonErrors");
+            if (settings.FixRtlViaUnicodeChars) operations.Add("FixRtlViaUnicodeChars");
+            if (settings.MergeSameTexts) operations.Add("MergeSameTexts");
+            if (settings.MergeSameTimeCodes) operations.Add("MergeSameTimeCodes");
+            if (settings.MergeShortLines) operations.Add("MergeShortLines");
+            if (settings.RedoCasing) operations.Add("RedoCasing");
+            if (settings.RemoveFormatting) operations.Add("RemoveFormatting");
+            if (settings.RemoveLineBreaks) operations.Add("RemoveLineBreaks");
+            if (settings.RemoveTextForHI) operations.Add("RemoveTextForHI");
+            if (settings.RemoveUnicodeControlChars) operations.Add("RemoveUnicodeControlChars");
+            if (settings.ReverseRtlStartEnd) operations.Add("ReverseRtlStartEnd");
+            if (settings.SplitLongLines) operations.Add("SplitLongLines");
+
+            // Create conversion options
+            var options = new ConversionOptions
+            {
+                Pattern = settings.Pattern,
+                Format = settings.Format,
+                InputFolder = settings.InputFolder,
+                OutputFolder = settings.OutputFolder,
+                OutputFilename = settings.OutputFilename,
+                Encoding = settings.Encoding,
+                Fps = settings.Fps,
+                TargetFps = settings.TargetFps,
+                Overwrite = settings.Overwrite,
+                Operations = operations
+            };
+
             // Display conversion info
             var table = new Table();
             table.AddColumn("[yellow]Parameter[/]");
@@ -207,36 +242,78 @@ internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
 
             if (!string.IsNullOrEmpty(settings.InputFolder))
                 table.AddRow("Input Folder", settings.InputFolder);
-            
+
             if (!string.IsNullOrEmpty(settings.OutputFolder))
                 table.AddRow("Output Folder", settings.OutputFolder);
-            
+
             if (settings.Fps.HasValue)
                 table.AddRow("FPS", settings.Fps.Value.ToString());
-            
+
+            if (settings.TargetFps.HasValue)
+                table.AddRow("Target FPS", settings.TargetFps.Value.ToString());
+
             if (!string.IsNullOrEmpty(settings.Encoding))
                 table.AddRow("Encoding", settings.Encoding);
+
+            if (operations.Count > 0)
+                table.AddRow("Operations", string.Join(", ", operations));
 
             AnsiConsole.Write(table);
             AnsiConsole.WriteLine();
 
             // Perform conversion
+            ConversionResult result = null!;
             AnsiConsole.Status()
                 .Start("Converting subtitles...", ctx =>
                 {
                     ctx.Spinner(Spinner.Known.Star);
                     ctx.SpinnerStyle(Style.Parse("green"));
 
-                    // TODO: Implement actual conversion logic using LibSE
-                    Thread.Sleep(1000); // Simulate work
+                    var converter = new SubtitleConverter();
+                    result = converter.ConvertAsync(options).GetAwaiter().GetResult();
                 });
 
-            AnsiConsole.MarkupLine("[green]✓[/] Conversion completed successfully!");
+            // Display results
+            if (result.Success)
+            {
+                AnsiConsole.MarkupLine($"[green]✓[/] Conversion completed successfully!");
+                AnsiConsole.MarkupLine($"[dim]Converted {result.SuccessfulFiles} file(s)[/]");
+            }
+            else
+            {
+                if (result.SuccessfulFiles > 0)
+                {
+                    AnsiConsole.MarkupLine($"[yellow]⚠[/] Conversion completed with errors");
+                    AnsiConsole.MarkupLine($"[green]Successful: {result.SuccessfulFiles}[/]");
+                    AnsiConsole.MarkupLine($"[red]Failed: {result.FailedFiles}[/]");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]✗[/] Conversion failed");
+                }
+
+                if (result.Errors.Count > 0)
+                {
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.MarkupLine("[red]Errors:[/]");
+                    foreach (var error in result.Errors)
+                    {
+                        AnsiConsole.MarkupLine($"  [red]•[/] {error}");
+                    }
+                }
+
+                return 1;
+            }
+
             return 0;
         }
         catch (Exception ex)
         {
             AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
+            if (ex.InnerException != null)
+            {
+                AnsiConsole.MarkupLine($"[dim]{ex.InnerException.Message}[/]");
+            }
             return 1;
         }
     }

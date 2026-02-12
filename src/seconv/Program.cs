@@ -24,7 +24,7 @@ internal class Program
         app.Configure(config =>
         {
             config.SetApplicationName("SubtitleEdit");
-            config.SetApplicationVersion("4.0.14");
+            config.SetApplicationVersion("5.0.0");
 
             config.ValidateExamples();
 

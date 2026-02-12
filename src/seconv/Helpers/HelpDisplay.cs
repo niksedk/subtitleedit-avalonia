@@ -6,7 +6,7 @@ internal static class HelpDisplay
 {
     public static void ShowHelp()
     {
-        var rule = new Rule("[bold yellow]Subtitle Edit 4.0.14 - Batch Converter[/]");
+        var rule = new Rule("[bold yellow]Subtitle Edit 5.0 - Batch Converter[/]");
         rule.LeftJustified();
         AnsiConsole.Write(rule);
         AnsiConsole.WriteLine();

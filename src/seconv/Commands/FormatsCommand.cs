@@ -47,6 +47,6 @@ internal sealed class FormatsCommand : Command<FormatsCommand.Settings>
     {
         // Get formats from LibSE integration
         var formats = LibSEIntegration.GetAvailableFormats();
-        return formats.Select(f => (f.Name, f.Extension, f.Description)).ToList();
+        return formats.Select(f => (f.Name, f.Extension, f.GetType().Name)).ToList();
     }
 }

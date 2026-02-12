@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSE", "src\libse\LibSE.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSETests", "tests\libse\LibSETests.csproj", "{21C390BF-0785-5EC6-6F63-787A969378AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeConv", "SeConv\SeConv.csproj", "{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seconv", "src\seconv\seconv.csproj", "{77D87C12-39A0-C3B3-774C-FC013291D389}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21C390BF-0785-5EC6-6F63-787A969378AF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69D08B9E-1CD0-4D69-A4D7-4B5D7D05C05A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77D87C12-39A0-C3B3-774C-FC013291D389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77D87C12-39A0-C3B3-774C-FC013291D389}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77D87C12-39A0-C3B3-774C-FC013291D389}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77D87C12-39A0-C3B3-774C-FC013291D389}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
