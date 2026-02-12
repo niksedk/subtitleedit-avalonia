@@ -506,9 +506,9 @@ public class OcrWindow : Window
             },
             ColumnDefinitions =
             {
+                new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) },
             },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -517,7 +517,6 @@ public class OcrWindow : Window
 
         var textBoxText = new TextBox
         {
-            Width = 320,
             Height = double.NaN,
             MinHeight = 80,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -606,24 +605,39 @@ public class OcrWindow : Window
         };
 
         var tabControl = new TabControl
-        {
+        {            
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Items =
             {
                 new TabItem
                 {
-                    Header = Se.Language.Ocr.UnknownWords,
-                    Content = MakeUnknownWordsView(vm)
+                    Header = new TextBlock
+                    {
+                        Text = Se.Language.Ocr.UnknownWords,
+                        FontSize = 16,
+                        FontWeight = Avalonia.Media.FontWeight.Bold,
+                    },
+                    Content = MakeUnknownWordsView(vm),
                 },
                 new TabItem
                 {
-                    Header = Se.Language.Ocr.AllFixes,
+                    Header = new TextBlock
+                    {
+                        Text = Se.Language.Ocr.AllFixes,
+                        FontSize = 16,
+                        FontWeight = Avalonia.Media.FontWeight.Bold,
+                    },
                     Content = MakeAllFixesView(vm)
                 },
                 new TabItem
                 {
-                    Header = Se.Language.Ocr.GuessesUsed,
+                    Header = new TextBlock
+                    {
+                        Text = Se.Language.Ocr.GuessesUsed,
+                        FontSize = 16,
+                        FontWeight = Avalonia.Media.FontWeight.Bold,
+                    },
                     Content = MakeGuessesUsedView(vm)
                 },
             }

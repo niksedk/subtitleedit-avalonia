@@ -3005,6 +3005,7 @@ public partial class OcrViewModel : ObservableObject
     internal void OnClosing(WindowClosingEventArgs e)
     {
         SaveSettings();
+        UiUtil.SaveWindowPosition(Window);
     }
 
     internal void SubtitleGridContextOpening(object? sender, EventArgs e)
@@ -3019,6 +3020,7 @@ public partial class OcrViewModel : ObservableObject
 
     internal void OnLoaded()
     {
+        UiUtil.RestoreWindowPosition(Window);
         DictionaryChanged();
         Dispatcher.UIThread.Post(() =>
         {
