@@ -167,7 +167,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         Configuration.Settings.Tools.AvalAiUrl = Se.Settings.AutoTranslate.AvalAiUrl;
         Configuration.Settings.Tools.AvalAiModel = Se.Settings.AutoTranslate.AvalAiModel;
         Configuration.Settings.Tools.AvalAiPrompt = Se.Settings.AutoTranslate.AvalAiPrompt;
-        
+
         Configuration.Settings.Tools.PerplexityApiKey = Se.Settings.AutoTranslate.PerplexityApiKey;
         Configuration.Settings.Tools.PerplexityUrl = Se.Settings.AutoTranslate.PerplexityUrl;
         Configuration.Settings.Tools.PerplexityModel = Se.Settings.AutoTranslate.PerplexityModel;
@@ -264,12 +264,12 @@ public partial class AutoTranslateViewModel : ObservableObject
             Configuration.Settings.Tools.AnthropicApiKey = apiKey.Trim();
             Configuration.Settings.Tools.AnthropicApiModel = apiModel.Trim();
         }
-        
+
         if (engineType == typeof(PerplexityTranslate))
         {
             Configuration.Settings.Tools.PerplexityApiKey = apiKey.Trim();
             Configuration.Settings.Tools.PerplexityModel = apiModel.Trim();
-            Configuration.Settings.Tools.PerplexityUrl = apiUrl.Trim();
+            Configuration.Settings.Tools.PerplexityUrl = Se.Settings.AutoTranslate.PerplexityUrl.Trim();
         }
 
         if (engineType == typeof(GroqTranslate))
@@ -480,7 +480,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
         if (SelectedSourceLanguage?.Name == SelectedTargetLanguage?.Name && TargetLanguages.Count > 1)
         {
-            if (SelectedSourceLanguage?.Code == "en" || SelectedSourceLanguage?.Name =="English")
+            if (SelectedSourceLanguage?.Code == "en" || SelectedSourceLanguage?.Name == "English")
             {
                 SelectedTargetLanguage = TargetLanguages.FirstOrDefault(p => p.Code == "de");
             }
@@ -1068,7 +1068,7 @@ public partial class AutoTranslateViewModel : ObservableObject
 
             return;
         }
-        
+
         if (engineType == typeof(PerplexityTranslate))
         {
             ApiKeyText = Configuration.Settings.Tools.PerplexityApiKey;

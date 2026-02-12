@@ -27,17 +27,17 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
         /// </summary>
         public static string[] Models => new[]
         {
-            "perplexity/sonar",                   
-            "google/gemini-2.5-flash",            
-            "google/gemini-3-flash-preview",      
-            "anthropic/claude-haiku-4-5",         
-            "google/gemini-2.5-pro",              
-            "openai/gpt-5.1",                     
-            "openai/gpt-5.2",                     
-            "google/gemini-3-pro-preview",        
-            "anthropic/claude-sonnet-4-5",        
-            "anthropic/claude-opus-4-5",          
-            "anthropic/claude-opus-4-6", 
+            "perplexity/sonar",
+            "google/gemini-2.5-flash",
+            "google/gemini-3-flash-preview",
+            "anthropic/claude-haiku-4-5",
+            "google/gemini-2.5-pro",
+            "openai/gpt-5.1",
+            "openai/gpt-5.2",
+            "google/gemini-3-pro-preview",
+            "anthropic/claude-sonnet-4-5",
+            "anthropic/claude-opus-4-5",
+            "anthropic/claude-opus-4-6",
         };
 
         public void Initialize()
@@ -51,7 +51,7 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
 
             if (!string.IsNullOrEmpty(Configuration.Settings.Tools.PerplexityApiKey))
             {
-                _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", "Bearer " + Configuration.Settings.Tools.PerplexityUrl);
+                _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", "Bearer " + Configuration.Settings.Tools.PerplexityApiKey);
             }
         }
 
@@ -65,42 +65,42 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
             return ListLanguages();
         }
 
-    // CURL example for Perplexity API:
-    // curl https://api.perplexity.ai/v1/responses \
-    //     -H "Authorization: Bearer $PERPLEXITY_API_KEY" \
-    //     -H "Content-Type: application/json" \
-    //     -d '{
-    //     "model": "openai/gpt-5-mini",
-    //     "input": "Translate this to French: Hello, how are you?",
-    //     "instructions": "You are a professional translator."
-    // }'
-    
-    // Response example:
-    // {
-    //     "id": "resp_1234567890",
-    //     "object": "response",
-    //     "created_at": 1756485272,
-    //     "model": "openai/gpt-5.1",
-    //     "status": "completed",
-    //     "output": [
-    //     {
-    //         "type": "message",
-    //         "role": "assistant",
-    //         "content": [
-    //         {
-    //             "type": "output_text",
-    //             "text": "Recent developments in AI include...",
-    //             "annotations": [
-    //             {
-    //                 "type": "citation",
-    //                 "url": "https://example.com/article1"
-    //             }
-    //             ]
-    //         }
-    //         ]
-    //     }
-    //     ]
-    // }
+        // CURL example for Perplexity API:
+        // curl https://api.perplexity.ai/v1/responses \
+        //     -H "Authorization: Bearer $PERPLEXITY_API_KEY" \
+        //     -H "Content-Type: application/json" \
+        //     -d '{
+        //     "model": "openai/gpt-5-mini",
+        //     "input": "Translate this to French: Hello, how are you?",
+        //     "instructions": "You are a professional translator."
+        // }'
+
+        // Response example:
+        // {
+        //     "id": "resp_1234567890",
+        //     "object": "response",
+        //     "created_at": 1756485272,
+        //     "model": "openai/gpt-5.1",
+        //     "status": "completed",
+        //     "output": [
+        //     {
+        //         "type": "message",
+        //         "role": "assistant",
+        //         "content": [
+        //         {
+        //             "type": "output_text",
+        //             "text": "Recent developments in AI include...",
+        //             "annotations": [
+        //             {
+        //                 "type": "citation",
+        //                 "url": "https://example.com/article1"
+        //             }
+        //             ]
+        //         }
+        //         ]
+        //     }
+        //     ]
+        // }
 
         public async Task<string> Translate(string text, string sourceLanguageCode, string targetLanguageCode, CancellationToken cancellationToken)
         {
@@ -115,10 +115,10 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
             {
                 Configuration.Settings.Tools.PerplexityPrompt = new ToolsSettings().PerplexityPrompt;
             }
-            
+
             var prompt = string.Format(Configuration.Settings.Tools.PerplexityPrompt, sourceLanguageCode, targetLanguageCode);
-            var input = $"Translate this to {targetLanguageCode}: {text}";
-            
+            var input = prompt + Environment.NewLine + Environment.NewLine + text;
+
             // Build JSON request body according to Perplexity API
             var requestBody = $"{{\"model\":\"{Json.EncodeJsonText(model)}\",\"input\":\"{Json.EncodeJsonText(input)}\",\"instructions\":\"{Json.EncodeJsonText(prompt)}\"}}";
 
@@ -129,7 +129,10 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
             if (!result.IsSuccessStatusCode)
             {
                 Error = json;
-                SeLogger.Error("Perplexity Translate failed calling API: Status code=" + result.StatusCode + Environment.NewLine + json);
+                SeLogger.Error("Perplexity Translate failed calling API: Status code=" + result.StatusCode + Environment.NewLine +
+                    json + Environment.NewLine +
+                    "input: " + input + Environment.NewLine +
+                    "url: " + _httpClient.BaseAddress + "/v1/responses");
             }
 
             result.EnsureSuccessStatusCode();
