@@ -127,7 +127,7 @@
 		<AvaloniaResource Include="Assets\Whisper\WhisperCPPcuBLAS.txt">
 		  <CopyToOutputDirectory></CopyToOutputDirectory>
 		</AvaloniaResource>
-		<AvaloniaResource Include="Assets\Whisper\WhisperCPPVulcan.txt">
+		<AvaloniaResource Include="Assets\Whisper\WhisperCPPVulkan.txt">
 		  <CopyToOutputDirectory></CopyToOutputDirectory>
 		</AvaloniaResource>
 		<AvaloniaResource Include="Assets\Whisper\WhisperCPP.txt">

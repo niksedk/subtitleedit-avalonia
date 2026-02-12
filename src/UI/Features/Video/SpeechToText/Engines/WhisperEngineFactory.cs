@@ -22,9 +22,9 @@ public static class WhisperEngineFactory
             return new WhisperEngineCppCuBlas();
         }
 
-        if (staticName == WhisperEngineCppVulcan.StaticName)
+        if (staticName == WhisperEngineCppVulkan.StaticName)
         {
-            return new WhisperEngineCppVulcan();
+            return new WhisperEngineCppVulkan();
         }
 
         if (staticName == WhisperEngineConstMe.StaticName)

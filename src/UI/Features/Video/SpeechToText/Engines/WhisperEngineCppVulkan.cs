@@ -10,11 +10,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class WhisperEngineCppVulcan : ISpeechToTextEngine
+public class WhisperEngineCppVulkan : ISpeechToTextEngine
 {
-    public static string StaticName => "Whisper CPP Vulcan";
+    public static string StaticName => "Whisper CPP Vulkan";
     public string Name => StaticName;
-    public string Choice => WhisperChoice.CppVulcan;
+    public string Choice => WhisperChoice.CppVulkan;
     public string Url => "https://github.com/ggerganov/whisper.cpp";
 
     public List<WhisperLanguage> Languages => WhisperLanguage.Languages.OrderBy(p => p.Name).ToList();
@@ -50,7 +50,7 @@ public class WhisperEngineCppVulcan : ISpeechToTextEngine
             Directory.CreateDirectory(baseFolder);
         }
 
-        var folder = Path.Combine(baseFolder, "CppVulcan");
+        var folder = Path.Combine(baseFolder, "CppVulkan");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);

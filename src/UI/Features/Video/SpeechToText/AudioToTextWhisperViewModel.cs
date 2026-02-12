@@ -126,7 +126,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Engines.Add(new WhisperEngineCppCuBlas());
-            Engines.Add(new WhisperEngineCppVulcan());
+            Engines.Add(new WhisperEngineCppVulkan());
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
             Engines.Add(new WhisperEngineConstMe());
             Engines.Add(new WhisperEngineCppCuBlas());
@@ -1181,7 +1181,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task ReDownloadWhisperEngineVulcan()
+    private async Task ReDownloadWhisperEngineVulkan()
     {
         var engine = SelectedEngine;
         if (Window == null || engine == null)
@@ -1758,14 +1758,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             args = string.Empty;
         }
 
-        var cppVulcanDevice = string.Empty;
+        var cppVulkanDevice = string.Empty;
         if (args.Contains("--device", StringComparison.Ordinal) &&
-            engine.Name == WhisperEngineCppVulcan.StaticName)
+            engine.Name == WhisperEngineCppVulkan.StaticName)
         {
             var deviceMatch = Regex.Match(args, @"--device\s+(\d+)");
             if (deviceMatch.Success)
             {
-                cppVulcanDevice = deviceMatch.Groups[1].Value;
+                cppVulkanDevice = deviceMatch.Groups[1].Value;
                 args = Regex.Replace(args, @"--device\s+\d+", "").Trim(); // Remove --device and its value from args
             }
         }
@@ -1777,7 +1777,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             translateToEnglish = string.Empty;
         }
 
-        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.CppVulcan)
+        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.CppVulkan)
         {
             if (!args.Contains("--print-progress"))
             {
@@ -1787,7 +1787,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         var outputSrt = string.Empty;
         var postParams = string.Empty;
-        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.ConstMe or WhisperChoice.CppVulcan)
+        if (settings.WhisperChoice is WhisperChoice.Cpp or WhisperChoice.CppCuBlas or WhisperChoice.ConstMe or WhisperChoice.CppVulkan)
         {
             outputSrt = "--output-srt ";
         }
@@ -1814,7 +1814,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             }
         };
 
-        if (!string.IsNullOrEmpty(cppVulcanDevice))
+        if (!string.IsNullOrEmpty(cppVulkanDevice))
         {
             process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = "1";
         }

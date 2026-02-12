@@ -50,5 +50,5 @@ public class SeAudioToText
     public bool WhisperPostProcessingFixShortDuration { get; set; } = true;
     public bool WhisperPostProcessingChangeUnderlineToColor { get; set; }
     public string WhisperPostProcessingChangeUnderlineToColorColor { get; set; } = Colors.Red.FromColorToHex();
-    public string WhisperCppVulcanGpuDevice { get; set; } = string.Empty;
+    public string WhisperCppVulkanGpuDevice { get; set; } = string.Empty;
 }
