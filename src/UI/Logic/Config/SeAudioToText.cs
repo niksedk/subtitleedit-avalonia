@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config;
+﻿using Avalonia.Media;
+
+namespace Nikse.SubtitleEdit.Logic.Config;
 
 public class SeAudioToText
 {
@@ -46,5 +48,7 @@ public class SeAudioToText
     public bool WhisperPostProcessingFixCasing { get; set; } = false;
 
     public bool WhisperPostProcessingFixShortDuration { get; set; } = true;
+    public bool WhisperPostProcessingChangeUnderlineToColor { get; set; }
+    public string WhisperPostProcessingChangeUnderlineToColorColor { get; set; } = Colors.Red.FromColorToHex();
     public string WhisperCppVulcanGpuDevice { get; set; } = string.Empty;
 }

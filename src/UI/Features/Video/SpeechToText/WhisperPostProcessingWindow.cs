@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
@@ -14,9 +15,9 @@ public class WhisperPostProcessingWindow : Window
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = "Whisper post-processing";
-        Width = 350;
-        Height = 350;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
+        MinWidth = 400;
 
         _vm = vm;
         vm.Window = this;
@@ -40,6 +41,28 @@ public class WhisperPostProcessingWindow : Window
         var labelAddPeriods = UiUtil.MakeTextBlock("Add periods");
         var checkAddPeriods = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.AddPeriods));
 
+        var labelChangeUnderlineToColor = UiUtil.MakeTextBlock("Change underline to color");
+        var checkChangeUnderlineToColor = UiUtil.MakeCheckBox(vm, nameof(WhisperPostProcessingViewModel.ChangeUnderlineToColor));
+        var colorPickerUnderlineToColor = new ColorPicker()
+        {
+            Width = 200,
+            IsAlphaEnabled = true,
+            IsAlphaVisible = true,
+            IsColorSpectrumSliderVisible = false,
+            IsColorComponentsVisible = true,
+            IsColorModelVisible = false,
+            IsColorPaletteVisible = false,
+            IsAccentColorsVisible = false,
+            IsColorSpectrumVisible = true,
+            IsComponentTextInputVisible = true,
+            [!ColorPicker.ColorProperty] = new Binding(nameof(_vm.ChangeUnderlineToColorColor))
+            {
+                Source = _vm,
+                Mode = BindingMode.TwoWay
+            },
+        };
+
+
         var buttonPanel = UiUtil.MakeButtonBar(
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OKCommand),
             UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand)
@@ -55,12 +78,14 @@ public class WhisperPostProcessingWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
             },
             ColumnDefinitions =
             {
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
             },
             Margin = UiUtil.MakeWindowMargin(),
             ColumnSpacing = 10,
@@ -71,64 +96,36 @@ public class WhisperPostProcessingWindow : Window
 
         var row = 0;
 
-        grid.Children.Add(labelAdjustTimings);
-        Grid.SetRow(labelAdjustTimings, row);
-        Grid.SetColumn(labelAdjustTimings, 0);
-
-        grid.Children.Add(checkAdjustTimings);
-        Grid.SetRow(checkAdjustTimings, row);
-        Grid.SetColumn(checkAdjustTimings, 1);
+        grid.Add(labelAdjustTimings, row, 0);
+        grid.Add(checkAdjustTimings, row, 1);
         row++;
 
-        grid.Children.Add(labelMergeShortLines);
-        Grid.SetRow(labelMergeShortLines, row);
-        Grid.SetColumn(labelMergeShortLines, 0);
-
-        grid.Children.Add(checkMergeShortLines);
-        Grid.SetRow(checkMergeShortLines, row);
-        Grid.SetColumn(checkMergeShortLines, 1);
+        grid.Add(labelMergeShortLines, row, 0);
+        grid.Add(checkMergeShortLines, row, 1);
         row++;
 
-        grid.Children.Add(labelBreakSplitLongLines);
-        Grid.SetRow(labelBreakSplitLongLines, row);
-        Grid.SetColumn(labelBreakSplitLongLines, 0);
-
-        grid.Children.Add(checkBreakSplitLongLines);
-        Grid.SetRow(checkBreakSplitLongLines, row);
-        Grid.SetColumn(checkBreakSplitLongLines, 1);
+        grid.Add(labelBreakSplitLongLines, row, 0);
+        grid.Add(checkBreakSplitLongLines, row, 1);
         row++;
 
-        grid.Children.Add(labelFixShortDuration);
-        Grid.SetRow(labelFixShortDuration, row);
-        Grid.SetColumn(labelFixShortDuration, 0);
-
-        grid.Children.Add(checkFixShortDuration);
-        Grid.SetRow(checkFixShortDuration, row);
-        Grid.SetColumn(checkFixShortDuration, 1);
+        grid.Add(labelFixShortDuration, row, 0);
+        grid.Add(checkFixShortDuration, row, 1);
         row++;
 
-        grid.Children.Add(labelFixCasing);
-        Grid.SetRow(labelFixCasing, row);
-        Grid.SetColumn(labelFixCasing, 0);
-
-        grid.Children.Add(checkFixCasing);
-        Grid.SetRow(checkFixCasing, row);
-        Grid.SetColumn(checkFixCasing, 1);
+        grid.Add(labelFixCasing, row, 0);
+        grid.Add(checkFixCasing, row, 1);
         row++;
 
-        grid.Children.Add(labelAddPeriods);
-        Grid.SetRow(labelAddPeriods, row);
-        Grid.SetColumn(labelAddPeriods, 0);
-
-        grid.Children.Add(checkAddPeriods);
-        Grid.SetRow(checkAddPeriods, row);
-        Grid.SetColumn(checkAddPeriods, 1);
+        grid.Add(labelAddPeriods, row, 0);
+        grid.Add(checkAddPeriods, row, 1);
         row++;
 
-        grid.Children.Add(buttonPanel);
-        Grid.SetRow(buttonPanel, row);
-        Grid.SetColumn(buttonPanel, 0);
-        Grid.SetColumnSpan(buttonPanel, 3);
+        grid.Add(labelChangeUnderlineToColor, row, 0);
+        grid.Add(checkChangeUnderlineToColor, row, 1);
+        grid.Add(colorPickerUnderlineToColor, row, 2);
+        row++;
+
+        grid.Add(buttonPanel, row, 0, 1, 3);
 
         Content = grid;
 

@@ -718,7 +718,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             settings.WhisperPostProcessingMergeLines,
             settings.WhisperPostProcessingFixCasing,
             settings.WhisperPostProcessingFixShortDuration,
-            settings.WhisperPostProcessingSplitLines);
+            settings.WhisperPostProcessingSplitLines,
+            settings.WhisperPostProcessingChangeUnderlineToColor,
+            settings.WhisperPostProcessingChangeUnderlineToColorColor.FromHexToColor()
+            );
 
         return transcript;
     }
@@ -1315,6 +1318,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
                 viewModal.AddPeriods = Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods;
                 viewModal.MergeShortLines = Se.Settings.Tools.AudioToText.WhisperPostProcessingMergeLines;
                 viewModal.BreakSplitLongLines = Se.Settings.Tools.AudioToText.WhisperPostProcessingSplitLines;
+                viewModal.ChangeUnderlineToColor = Se.Settings.Tools.AudioToText.WhisperPostProcessingChangeUnderlineToColor;
+                viewModal.ChangeUnderlineToColorColor = Se.Settings.Tools.AudioToText.WhisperPostProcessingChangeUnderlineToColorColor.FromHexToColor();
             });
 
         if (vm.OkPressed)
@@ -1325,6 +1330,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Se.Settings.Tools.AudioToText.WhisperPostProcessingAddPeriods = vm.AddPeriods;
             Se.Settings.Tools.AudioToText.WhisperPostProcessingMergeLines = vm.MergeShortLines;
             Se.Settings.Tools.AudioToText.WhisperPostProcessingSplitLines = vm.BreakSplitLongLines;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingChangeUnderlineToColor = vm.ChangeUnderlineToColor;
+            Se.Settings.Tools.AudioToText.WhisperPostProcessingChangeUnderlineToColorColor = vm.ChangeUnderlineToColorColor.FromColorToHex();
         }
     }
 

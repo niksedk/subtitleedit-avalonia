@@ -19,7 +19,7 @@ public static class FormattingReplacer
         }
 
         var isAssa = format is AdvancedSubStationAlpha;
-        
+
         // Replace tags in place, preserving their positions
         return ReplaceFormattingTags(text, from, to, color, isAssa);
     }
@@ -103,13 +103,13 @@ public static class FormattingReplacer
             // Replace formatting tags with color
             var skColor = new SkiaSharp.SKColor((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A);
             var colorTag = "{\\" + AdvancedSubStationAlpha.GetSsaColorStringForEvent(skColor) + "&}";
-            
+
             var fromTag = GetAssaTagLetter(from);
             var pattern1 = $@"{{\{{\\{fromTag}1}}}}".Replace("{", @"\{").Replace("}", @"\}");
             var pattern2 = $@"{{\{{\\{fromTag}0}}}}".Replace("{", @"\{").Replace("}", @"\}");
             var pattern3 = $@"\\{fromTag}1";
             var pattern4 = $@"\\{fromTag}0";
-            
+
             result = Regex.Replace(result, pattern1, Regex.Escape(colorTag), RegexOptions.IgnoreCase);
             result = Regex.Replace(result, pattern2, @"{\\r}", RegexOptions.IgnoreCase);
             result = Regex.Replace(result, pattern3, Regex.Escape(colorTag.TrimStart('{').TrimEnd('}')), RegexOptions.IgnoreCase);
@@ -120,7 +120,7 @@ public static class FormattingReplacer
             // Replace formatting tags with other formatting tags
             var fromTag = GetAssaTagLetter(from);
             var toTag = GetAssaTagLetter(to);
-            
+
             result = result.Replace($"{{\\{fromTag}1}}", $"{{\\{toTag}1}}", StringComparison.OrdinalIgnoreCase);
             result = result.Replace($"{{\\{fromTag}0}}", $"{{\\{toTag}0}}", StringComparison.OrdinalIgnoreCase);
             result = result.Replace($"\\{fromTag}1", $"\\{toTag}1", StringComparison.OrdinalIgnoreCase);

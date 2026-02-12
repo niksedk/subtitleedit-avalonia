@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
@@ -14,6 +15,8 @@ public partial class WhisperPostProcessingViewModel : ObservableObject
     [ObservableProperty] private bool _fixShortDuration;
     [ObservableProperty] private bool _fixCasing;
     [ObservableProperty] private bool _addPeriods;
+    [ObservableProperty] private bool _changeUnderlineToColor;
+    [ObservableProperty] private Color _changeUnderlineToColorColor;
 
     public Window? Window { get; set; }
 
