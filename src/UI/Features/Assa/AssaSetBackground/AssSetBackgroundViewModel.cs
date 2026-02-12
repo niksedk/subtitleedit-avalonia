@@ -4,6 +4,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Google.Api;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
@@ -19,6 +20,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
@@ -36,7 +38,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     [ObservableProperty] private int _paddingRight = 10;
     [ObservableProperty] private int _paddingTop = 5;
     [ObservableProperty] private int _paddingBottom = 5;
-    
+
     // Style settings
     [ObservableProperty] private Color _boxColor = Color.FromRgb(0, 0, 0);
     [ObservableProperty] private Color _outlineColor = Colors.White;
@@ -67,6 +69,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     private string _oldSubtitleText = string.Empty;
     private DispatcherTimer _positionTimer = new();
     private SkiaExt.TrimResult? _trimResult;
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     public Subtitle ResultSubtitle => _subtitle;
 
@@ -158,7 +161,11 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     private async Task Ok()
     {
         _positionTimer.Stop();
-        await ApplyBackgroundBoxes();
+
+        var backgroundTask = Task.Run(async () => await ApplyBackgroundBoxes(), _cancellationTokenSource.Token);
+        SaveSettings();
+        await backgroundTask;
+
         OkPressed = true;
         Close();
     }
@@ -210,17 +217,21 @@ public partial class AssSetBackgroundViewModel : ObservableObject
             var top = _trimResult.Top - PaddingTop;
             var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
             var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
-
-            var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)
-            {
-                Layer = -1000,
-                Extra = boxStyleName,
-            };
+            var boxParagraph = MakeBoxParagraph(boxStyleName, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds, boxDrawing);
 
             _subtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
         }
 
         _subtitle.Renumber();
+    }
+
+    private static Paragraph MakeBoxParagraph(string boxStyleName, double startMs, double endMs, string boxDrawing)
+    {
+        return new Paragraph(boxDrawing, startMs, endMs)
+        {
+            Layer = -1000,
+            Extra = boxStyleName,
+        };
     }
 
     private SsaStyle MakeBoxStyle(string boxStyleName)
@@ -303,6 +314,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        _cancellationTokenSource.Cancel();
         Close();
     }
 
@@ -378,12 +390,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         var top = _trimResult.Top - PaddingTop;
         var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
         var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
-
-        var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)
-        {
-            Layer = -1000,
-            Extra = boxStyleName,
-        };
+        var boxParagraph = MakeBoxParagraph(boxStyleName, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds, boxDrawing);
 
         previewSubtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
 
@@ -407,6 +414,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     internal void OnClosing()
     {
         _positionTimer.Stop();
+        _cancellationTokenSource.Cancel();
         VideoPlayerControl.VideoPlayerInstance.CloseFile();
         try
         {

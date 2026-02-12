@@ -71,6 +71,9 @@ public class AssSetBackgroundWindow : Window
             ColumnSpacing = 12,
         };
 
+        // Progress text
+        var labelProgress = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.ProgressText));
+
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
@@ -78,6 +81,7 @@ public class AssSetBackgroundWindow : Window
 
         mainGrid.Add(leftPanel, 0, 0);
         mainGrid.Add(videoPanel, 0, 1);
+        mainGrid.Add(labelProgress, 1, 0, 1, 2);
         mainGrid.Add(panelButtons, 1, 0, 1, 2);
 
         Content = mainGrid;
