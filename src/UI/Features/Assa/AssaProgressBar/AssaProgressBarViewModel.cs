@@ -26,7 +26,7 @@ public partial class AssaProgressBarViewModel : ObservableObject
     // Progress bar settings
     [ObservableProperty] private bool _positionTop;
     [ObservableProperty] private bool _positionBottom = true;
-    [ObservableProperty] private int _barHeight = 10;
+    [ObservableProperty] private int _barHeight = 40;
     [ObservableProperty] private Color _foregroundColor = Colors.LimeGreen;
     [ObservableProperty] private Color _backgroundColor = Color.FromRgb(64, 64, 64);
     [ObservableProperty] private Color _textColor = Colors.White;
@@ -62,11 +62,11 @@ public partial class AssaProgressBarViewModel : ObservableObject
     private Subtitle _progressBarSubtitle = new();
     private string? _videoFileName;
     private LibMpvDynamicPlayer? _mpvPlayer;
-    private bool _isSubtitleLoaded;
     private string _oldSubtitleText = string.Empty;
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private readonly SubtitleFormat _assaFormat = new AdvancedSubStationAlpha();
     private readonly string _tempSubtitleFileName;
+    private bool _isSubtitleLoaded;
 
     public Subtitle ResultSubtitle => _subtitle;
     public VideoPlayerControl? VideoPlayerControl { get; set; }
@@ -96,6 +96,14 @@ public partial class AssaProgressBarViewModel : ObservableObject
         }
         
         _tempSubtitleFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".ass");
+
+        BarHeight = Se.Settings.Assa.ProgressBarHeight;
+        ForegroundColor = Se.Settings.Assa.ProgressBarForegroundColor.FromHexToColor();
+        BackgroundColor = Se.Settings.Assa.ProgressBarBackgroundColor.FromHexToColor();
+        if (Se.Settings.Assa.ProgressBarCornerStyleIndex >= 0 && Se.Settings.Assa.ProgressBarCornerStyleIndex < CornerStyles.Count)
+        {
+            CornerStyleIndex = Se.Settings.Assa.ProgressBarCornerStyleIndex;
+        }
     }
 
     public void Initialize(Subtitle subtitle, int videoWidth, int videoHeight, double videoDurationMs, string? videoFileName)
@@ -131,43 +139,27 @@ public partial class AssaProgressBarViewModel : ObservableObject
                 return;
             }
 
+            ApplyProgressBar();
+            var text = _assaFormat.ToText(_subtitle, string.Empty);
+            if (text == _oldSubtitleText)
+            {
+                return;
+            }
+            
             var subtitle = new Subtitle();
-            // int firstSelectedIndex = Paragraphs.IndexOf(Paragraphs.First(p => p.Subtitle.Id == _subtitleLines[0].Id));
-            // var idx = 0;
-            // foreach (var item in Paragraphs)
-            // {
-            //     var p = new SubtitleLineViewModel(item.Subtitle);
-            //
-            //     if (AdjustAll ||
-            //         AdjustSelectedLines && _selectedSubtitleLines.Any(x => x.Id == item.Subtitle.Id) ||
-            //         AdjustSelectedLinesAndForward && idx >= firstSelectedIndex)
-            //     {
-            //         p.Text = CurrentTag + p.Text;
-            //     }
-            //
-            //     subtitle.Paragraphs.Add(p.ToParagraph());
-            //     idx++;
-            // }
-            //
-            // var text = _assaFormat.ToText(subtitle, string.Empty);
-            // if (_oldSubtitleText == text)
-            // {
-            //     return;
-            // }
-            //
-            // File.WriteAllText(_tempSubtitleFileName, text);
-            // if (!_isSubtitleLoaded)
-            // {
-            //     _isSubtitleLoaded = true;
-            //     _mpvPlayer.SubAdd(_tempSubtitleFileName);
-            // }
-            // else
-            // {
-            //     _mpvPlayer.SubReload();
-            // }
-            //
-            // _oldSubtitleText = text;
-            // UpdatedSubtitle = subtitle;
+            
+            File.WriteAllText(_tempSubtitleFileName, text);
+            if (!_isSubtitleLoaded)
+            {
+                _isSubtitleLoaded = true;
+                _mpvPlayer.SubAdd(_tempSubtitleFileName);
+            }
+            else
+            {
+                _mpvPlayer.SubReload();
+            }
+            
+            _oldSubtitleText = text;
         };
 
         _positionTimer.Start();
@@ -201,12 +193,9 @@ public partial class AssaProgressBarViewModel : ObservableObject
             {
                 FontName = style.FontName;
                 FontSize = (int)style.FontSize;
-                // TextColor = style.Primary.ToAvaloniaColor();
             }
             else if (style.Name == "SE-progress-bar-bg")
             {
-                // ForegroundColor = style.Primary.ToAvaloniaColor();
-                // BackgroundColor = style.Secondary.ToAvaloniaColor();
                 PositionTop = style.Alignment == "7";
                 PositionBottom = !PositionTop;
             }
@@ -495,6 +484,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     [RelayCommand]
     private void Ok()
     {
+        Se.Settings.Assa.ProgressBarHeight = BarHeight;
+        Se.Settings.Assa.ProgressBarForegroundColor = ForegroundColor.FromColorToHex();
+        Se.Settings.Assa.ProgressBarBackgroundColor = BackgroundColor.FromColorToHex();
+        Se.Settings.Assa.ProgressBarCornerStyleIndex = CornerStyleIndex;
+        
         ApplyProgressBar();
         OkPressed = true;
         Close();
@@ -517,7 +511,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         _subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(_subtitle.Header, styles);
 
         // Remove existing progress bar paragraphs
-        for (int i = _subtitle.Paragraphs.Count - 1; i >= 0; i--)
+        for (var i = _subtitle.Paragraphs.Count - 1; i >= 0; i--)
         {
             if (ignoreStyleNames.Contains(_subtitle.Paragraphs[i].Extra))
             {
@@ -586,25 +580,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         
         // Wait a bit for video players to finish opening the file (or until they report a duration)
         await VideoPlayerControl.WaitForPlayersReadyAsync();
-
         Dispatcher.UIThread.Post(() =>
         {
             _mpvPlayer = VideoPlayerControl.VideoPlayerInstance as LibMpvDynamicPlayer;
-
-            // if (Paragraphs.Count == 0)
-            // {
-            //     return;
-            // }
-            //
-            // if (_selectedSubtitleLines.Count == 0)
-            // {
-            //     SelectedParagraphIndex = 0;
-            //     return;
-            // }
-            //
-            // var firstSelected = _selectedSubtitleLines[0];
-            // SelectedParagraphIndex = Paragraphs.IndexOf(Paragraphs.First(p => p.Subtitle.Id == firstSelected.Id));
-            // VideoPlayerControl.Position = firstSelected.StartTime.TotalSeconds;
         });
     }
 }
