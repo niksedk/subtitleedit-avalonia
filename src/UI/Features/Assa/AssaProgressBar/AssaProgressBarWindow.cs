@@ -384,6 +384,7 @@ public class AssaProgressBarWindow : Window
                 new RowDefinition { Height = GridLength.Auto },
                 new RowDefinition { Height = GridLength.Auto },
                 new RowDefinition { Height = GridLength.Auto },
+                new RowDefinition { Height = GridLength.Auto },
             },
             ColumnDefinitions =
             {
@@ -400,44 +401,39 @@ public class AssaProgressBarWindow : Window
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5),
         };
-        Grid.SetRow(titleLabel, 0);
-        Grid.SetColumnSpan(titleLabel, 2);
-        grid.Children.Add(titleLabel);
+        grid.Add(titleLabel, 0, 0, 1, 2);
 
-        // Splitter width/height
-        var splitterPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
-        
+        // Splitter width
         var splitterWidthLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarSplitterWidth + ":", VerticalAlignment = VerticalAlignment.Center };
+        grid.Add(splitterWidthLabel, 1);
+
         var splitterWidthBox = new NumericUpDown
         {
             Minimum = 0,
             Maximum = 50,
             Width = 120,
+            HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SplitterWidth)) { Mode = BindingMode.TwoWay },
         };
-        
-        var splitterHeightLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarSplitterHeight + ":", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0) };
+        grid.Add(splitterWidthBox, 1, 1);
+
+        // Splitter height
+        var splitterHeightLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarSplitterHeight + ":", VerticalAlignment = VerticalAlignment.Center };
+        grid.Add(splitterHeightLabel, 2);
+
         var splitterHeightBox = new NumericUpDown
         {
             Minimum = 0,
             Maximum = 200,
             Width = 120,
+            HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.SplitterHeight)) { Mode = BindingMode.TwoWay },
         };
-
-        splitterPanel.Children.Add(splitterWidthLabel);
-        splitterPanel.Children.Add(splitterWidthBox);
-        splitterPanel.Children.Add(splitterHeightLabel);
-        splitterPanel.Children.Add(splitterHeightBox);
-
-        Grid.SetRow(splitterPanel, 1);
-        Grid.SetColumnSpan(splitterPanel, 2);
-        grid.Children.Add(splitterPanel);
+        grid.Add(splitterHeightBox, 2, 1);
 
         // Font
         var fontLabel = new TextBlock { Text = Se.Language.General.Font + ":", VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(fontLabel, 2);
-        grid.Children.Add(fontLabel);
+        grid.Add(fontLabel, 3);
 
         var fontCombo = new ComboBox
         {
@@ -446,14 +442,11 @@ public class AssaProgressBarWindow : Window
             MinWidth = 150,
             HorizontalAlignment = HorizontalAlignment.Left,
         };
-        Grid.SetRow(fontCombo, 2);
-        Grid.SetColumn(fontCombo, 1);
-        grid.Children.Add(fontCombo);
+        grid.Add(fontCombo, 3, 1);
 
         // Font size
         var sizeLabel = new TextBlock { Text = Se.Language.General.Size + ":", VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(sizeLabel, 3);
-        grid.Children.Add(sizeLabel);
+        grid.Add(sizeLabel, 4);
 
         var sizeBox = new NumericUpDown
         {
@@ -463,55 +456,47 @@ public class AssaProgressBarWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.FontSize)) { Mode = BindingMode.TwoWay },
         };
-        Grid.SetRow(sizeBox, 3);
-        Grid.SetColumn(sizeBox, 1);
-        grid.Children.Add(sizeBox);
+        grid.Add(sizeBox, 4, 1);
 
         // Text color
         var colorLabel = new TextBlock { Text = Se.Language.General.Color + ":", VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(colorLabel, 4);
-        grid.Children.Add(colorLabel);
+        grid.Add(colorLabel, 5);
 
         var colorPicker = UiUtil.MakeColorPicker(vm, nameof(vm.TextColor));
         colorPicker.HorizontalAlignment = HorizontalAlignment.Left;
-        Grid.SetRow(colorPicker, 4);
-        Grid.SetColumn(colorPicker, 1);
-        grid.Children.Add(colorPicker);
+        grid.Add(colorPicker, 5, 1);
 
-        // X/Y adjustment
-        var adjustPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
-        
+        // X adjustment
         var xLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarXAdjustment + ":", VerticalAlignment = VerticalAlignment.Center };
+        grid.Add(xLabel, 6);
+
         var xBox = new NumericUpDown
         {
             Minimum = -500,
             Maximum = 500,
             Width = 120,
+            HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.XAdjustment)) { Mode = BindingMode.TwoWay },
         };
-        
-        var yLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarYAdjustment + ":", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0) };
+        grid.Add(xBox, 6, 1);
+
+        // Y adjustment
+        var yLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarYAdjustment + ":", VerticalAlignment = VerticalAlignment.Center };
+        grid.Add(yLabel, 7);
+
         var yBox = new NumericUpDown
         {
             Minimum = -500,
             Maximum = 500,
             Width = 120,
+            HorizontalAlignment = HorizontalAlignment.Left,
             [!NumericUpDown.ValueProperty] = new Binding(nameof(vm.YAdjustment)) { Mode = BindingMode.TwoWay },
         };
-
-        adjustPanel.Children.Add(xLabel);
-        adjustPanel.Children.Add(xBox);
-        adjustPanel.Children.Add(yLabel);
-        adjustPanel.Children.Add(yBox);
-
-        Grid.SetRow(adjustPanel, 5);
-        Grid.SetColumnSpan(adjustPanel, 2);
-        grid.Children.Add(adjustPanel);
+        grid.Add(yBox, 7, 1);
 
         // Text alignment
         var alignLabel = new TextBlock { Text = Se.Language.Assa.ProgressBarTextAlignment + ":", VerticalAlignment = VerticalAlignment.Center };
-        Grid.SetRow(alignLabel, 6);
-        grid.Children.Add(alignLabel);
+        grid.Add(alignLabel, 8);
 
         var alignCombo = new ComboBox
         {
@@ -520,9 +505,7 @@ public class AssaProgressBarWindow : Window
             [!ComboBox.ItemsSourceProperty] = new Binding(nameof(vm.TextAlignments)),
             [!ComboBox.SelectedIndexProperty] = new Binding(nameof(vm.TextAlignmentIndex)) { Mode = BindingMode.TwoWay },
         };
-        Grid.SetRow(alignCombo, 6);
-        Grid.SetColumn(alignCombo, 1);
-        grid.Children.Add(alignCombo);
+        grid.Add(alignCombo, 8, 1);
 
         return new Border
         {
