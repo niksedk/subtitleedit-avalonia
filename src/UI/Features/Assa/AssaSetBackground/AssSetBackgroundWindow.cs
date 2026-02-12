@@ -27,7 +27,6 @@ public class AssSetBackgroundWindow : Window
 
         vm.VideoPlayerControl = InitVideoPlayer.MakeVideoPlayer();
         vm.VideoPlayerControl.FullScreenIsVisible = false;
-
         var videoPanel = UiUtil.MakeBorderForControl(vm.VideoPlayerControl);
 
         var leftPanel = new Grid

@@ -1,18 +1,25 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Newtonsoft.Json.Linq;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
+using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
+using SkiaSharp;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaSetBackground;
 
@@ -44,7 +51,9 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     [ObservableProperty] private int _fillWidthMarginRight;
 
     private Subtitle _subtitle = new();
-    private int[]? _selectedIndices;
+    private Subtitle _previewSubtitle = new();
+    private Paragraph _previewParagraph = new Paragraph();
+    private List<SubtitleLineViewModel> _selectedItems;
     private int _videoWidth = 1920;
     private int _videoHeight = 1080;
     private readonly Random _random = new();
@@ -55,6 +64,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     private bool _isSubtitleLoaded;
     private string _oldSubtitleText = string.Empty;
     private DispatcherTimer _positionTimer = new();
+    private SkiaExt.TrimResult? _trimResult;
 
     public Subtitle ResultSubtitle => _subtitle;
 
@@ -65,24 +75,68 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         BoxStyles.Add(Se.Language.Assa.BackgroundBoxCircle);
 
         VideoPlayerControl = new VideoPlayerControl(new VideoPlayerInstanceNone());
-        VideoPlayerControl.SurfacePointerPressed += (_, __) => VideoPlayerControl.TogglePlayPause();
 
         _assaFormat = new AdvancedSubStationAlpha();
-        _tempSubtitleFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".ass");
+        _tempSubtitleFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".ass");
+        _selectedItems = new List<SubtitleLineViewModel>();
+        LoadSettings();
+    }
+
+    private void LoadSettings()
+    {
+        PaddingLeft = Se.Settings.Assa.BackgroundBoxesPaddingLeft;
+        PaddingRight = Se.Settings.Assa.BackgroundBoxesPaddingRight;
+        PaddingTop = Se.Settings.Assa.BackgroundBoxesPaddingTop;
+        PaddingBottom = Se.Settings.Assa.BackgroundBoxesPaddingBottom;
+
+        FillWidth = Se.Settings.Assa.BackgroundBoxesFillWidth;
+        FillWidthMarginLeft = Se.Settings.Assa.BackgroundBoxesFillWidthMarginLeft;
+        FillWidthMarginRight = Se.Settings.Assa.BackgroundBoxesFillWidthMarginRight;
+
+        BoxStyleIndex = Se.Settings.Assa.BackgroundBoxesStyleIndex;
+        Radius = Se.Settings.Assa.BackgroundBoxesStyleRadius;
+
+        BoxColor = Se.Settings.Assa.BackgroundBoxesBoxColor.FromHexToColor();
+        ShadowColor = Se.Settings.Assa.BackgroundBoxesShadowColor.FromHexToColor();
+        OutlineColor = Se.Settings.Assa.BackgroundBoxesOutlineColor.FromHexToColor();
+    }
+
+    private void SaveSettings()
+    {
+        Se.Settings.Assa.BackgroundBoxesPaddingLeft = PaddingLeft;
+        Se.Settings.Assa.BackgroundBoxesPaddingRight = PaddingRight;
+        Se.Settings.Assa.BackgroundBoxesPaddingTop = PaddingTop;
+        Se.Settings.Assa.BackgroundBoxesPaddingBottom = PaddingBottom;
+
+        Se.Settings.Assa.BackgroundBoxesFillWidth = FillWidth;
+        Se.Settings.Assa.BackgroundBoxesFillWidthMarginLeft = FillWidthMarginLeft;
+        Se.Settings.Assa.BackgroundBoxesFillWidthMarginRight = FillWidthMarginRight;
+
+        Se.Settings.Assa.BackgroundBoxesStyleIndex = BoxStyleIndex;
+        Se.Settings.Assa.BackgroundBoxesStyleRadius = Radius;
+
+        Se.Settings.Assa.BackgroundBoxesBoxColor = BoxColor.FromColorToHex();
+        Se.Settings.Assa.BackgroundBoxesShadowColor = ShadowColor.FromColorToHex();
+        Se.Settings.Assa.BackgroundBoxesOutlineColor = OutlineColor.FromColorToHex();
     }
 
     public void Initialize(
         Subtitle subtitle,
-        int[]? selectedIndices,
+        List<SubtitleLineViewModel> selectedItems,
         int videoWidth,
         int videoHeight,
         string? videoFileName)
     {
         _subtitle = new Subtitle(subtitle, false);
-        _selectedIndices = selectedIndices;
+        _selectedItems = selectedItems;
         _videoWidth = videoWidth > 0 ? videoWidth : 1920;
         _videoHeight = videoHeight > 0 ? videoHeight : 1080;
         _videoFileName = videoFileName;
+
+        _previewParagraph = _selectedItems.First().ToParagraph(_assaFormat);
+        _previewSubtitle = new Subtitle(subtitle, false);
+        _previewSubtitle.Paragraphs.Clear();
+        _previewSubtitle.Paragraphs.Add(_previewParagraph);
 
         if (string.IsNullOrWhiteSpace(_subtitle.Header))
         {
@@ -95,8 +149,6 @@ public partial class AssSetBackgroundViewModel : ObservableObject
             {
                 await VideoPlayerControl.Open(videoFileName);
             }
-
-            StartPreviewTimer();
         });
     }
 
@@ -136,23 +188,9 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         };
         _subtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(_subtitle.Header, styleBoxBg);
 
-        // Get indices to process
-        var indices = _selectedIndices ?? Enumerable.Range(0, _subtitle.Paragraphs.Count).ToArray();
-
         // Generate background boxes for each paragraph
-        foreach (var index in indices)
+        foreach (var p in _selectedItems)
         {
-            if (index < 0 || index >= _subtitle.Paragraphs.Count)
-            {
-                continue;
-            }
-
-            var p = _subtitle.Paragraphs[index];
-            if (p.IsComment)
-            {
-                continue;
-            }
-
             // For simplicity, create a basic box that covers the full width if FillWidth is enabled
             var left = FillWidth ? FillWidthMarginLeft : PaddingLeft;
             var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_videoWidth - PaddingRight);
@@ -181,7 +219,8 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         if (BoxStyleIndex == 1 && Radius > 0) // Rounded corners
         {
             var r = Math.Min(Radius, Math.Min(width / 2, height / 2));
-            return $"{{\\p1}}m {left + r} {top} l {right - r} {top} b {right} {top} {right} {top + r} {right} {top + r} l {right} {bottom - r} b {right} {bottom} {right - r} {bottom} {right - r} {bottom} l {left + r} {bottom} b {left} {bottom} {left} {bottom - r} {left} {bottom - r} l {left} {top + r} b {left} {top} {left + r} {top} {left + r} {top}{{\\p0}}";
+            return
+                $"{{\\p1}}m {left + r} {top} l {right - r} {top} b {right} {top} {right} {top + r} {right} {top + r} l {right} {bottom - r} b {right} {bottom} {right - r} {bottom} {right - r} {bottom} l {left + r} {bottom} b {left} {bottom} {left} {bottom - r} {left} {bottom - r} l {left} {top + r} b {left} {top} {left + r} {top} {left + r} {top}{{\\p0}}";
         }
         else if (BoxStyleIndex == 2) // Circle
         {
@@ -195,7 +234,8 @@ public partial class AssSetBackgroundViewModel : ObservableObject
             var ox = (int)(radiusX * kappa);
             var oy = (int)(radiusY * kappa);
 
-            return $"{{\\p1}}m {centerX} {centerY - radiusY} b {centerX + ox} {centerY - radiusY} {centerX + radiusX} {centerY - oy} {centerX + radiusX} {centerY} b {centerX + radiusX} {centerY + oy} {centerX + ox} {centerY + radiusY} {centerX} {centerY + radiusY} b {centerX - ox} {centerY + radiusY} {centerX - radiusX} {centerY + oy} {centerX - radiusX} {centerY} b {centerX - radiusX} {centerY - oy} {centerX - ox} {centerY - radiusY} {centerX} {centerY - radiusY}{{\\p0}}";
+            return
+                $"{{\\p1}}m {centerX} {centerY - radiusY} b {centerX + ox} {centerY - radiusY} {centerX + radiusX} {centerY - oy} {centerX + radiusX} {centerY} b {centerX + radiusX} {centerY + oy} {centerX + ox} {centerY + radiusY} {centerX} {centerY + radiusY} b {centerX - ox} {centerY + radiusY} {centerX - radiusX} {centerY + oy} {centerX - radiusX} {centerY} b {centerX - radiusX} {centerY - oy} {centerX - ox} {centerY - radiusY} {centerX} {centerY - radiusY}{{\\p0}}";
         }
 
         // Square corners (default)
@@ -220,6 +260,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
             {
                 return name;
             }
+
             tryCount++;
         }
 
@@ -234,10 +275,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     internal void KeyDown(object? sender, KeyEventArgs e)
@@ -285,9 +323,15 @@ public partial class AssSetBackgroundViewModel : ObservableObject
     private Subtitle GeneratePreviewSubtitle()
     {
         var previewSubtitle = new Subtitle(_subtitle, false);
+        previewSubtitle.Paragraphs.Clear();
+        previewSubtitle.Paragraphs.Add(_previewParagraph);
 
-        // Get indices to process
-        var indices = _selectedIndices ?? Enumerable.Range(0, _subtitle.Paragraphs.Count).ToArray();
+        if (_trimResult == null)
+        {
+            var previewScreenshotFileName = FfmpegGenerator.GetScreenShotWithSubtitle(previewSubtitle, _videoWidth, _videoHeight);
+            var skBitmap = SKBitmap.Decode(previewScreenshotFileName);
+            _trimResult = skBitmap.TrimTransparentPixels();
+        }
 
         // Temporarily apply background boxes
         var boxStyleName = "SE-box-bg-preview";
@@ -308,36 +352,23 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         };
         previewSubtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(previewSubtitle.Header, styleBoxBg);
 
-        foreach (var index in indices)
+        var p = _previewParagraph;
+
+        var left = FillWidth ? FillWidthMarginLeft : _trimResult.Left - PaddingLeft;
+        var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_trimResult.Left + _trimResult.TrimmedBitmap.Width + PaddingRight);
+        var top = _trimResult.Top - PaddingTop;
+        var bottom = _trimResult.Top + _trimResult.TrimmedBitmap.Height + PaddingBottom;
+
+        var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
+
+        var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)
         {
-            if (index < 0 || index >= _subtitle.Paragraphs.Count)
-            {
-                continue;
-            }
+            Layer = -1000,
+            Extra = boxStyleName,
+        };
 
-            var p = _subtitle.Paragraphs[index];
-            if (p.IsComment)
-            {
-                continue;
-            }
+        previewSubtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
 
-            var left = FillWidth ? FillWidthMarginLeft : PaddingLeft;
-            var right = FillWidth ? (_videoWidth - FillWidthMarginRight) : (_videoWidth - PaddingRight);
-            var top = PaddingTop;
-            var bottom = _videoHeight - PaddingBottom;
-
-            var boxDrawing = GenerateBackgroundBox(left, right, top, bottom);
-
-            var boxParagraph = new Paragraph(boxDrawing, p.StartTime.TotalMilliseconds, p.EndTime.TotalMilliseconds)
-            {
-                Layer = -1000,
-                Extra = boxStyleName,
-            };
-
-            previewSubtitle.InsertParagraphInCorrectTimeOrder(boxParagraph);
-        }
-
-        previewSubtitle.Renumber();
         return previewSubtitle;
     }
 
@@ -349,11 +380,10 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         }
 
         await VideoPlayerControl.WaitForPlayersReadyAsync();
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            _mpvPlayer = VideoPlayerControl.VideoPlayerInstance as LibMpvDynamicPlayer;
-        });
+        VideoPlayerControl.HideVideoControls();
+        VideoPlayerControl.Position = _previewParagraph.StartTime.TotalSeconds + (_previewParagraph.Duration.TotalSeconds / 2.0);
+        _mpvPlayer = VideoPlayerControl.VideoPlayerInstance as LibMpvDynamicPlayer;
+        StartPreviewTimer();
     }
 
     internal void OnClosing()
@@ -362,10 +392,7 @@ public partial class AssSetBackgroundViewModel : ObservableObject
         VideoPlayerControl.VideoPlayerInstance.CloseFile();
         try
         {
-            if (File.Exists(_tempSubtitleFileName))
-            {
-                File.Delete(_tempSubtitleFileName);
-            }
+            File.Delete(_tempSubtitleFileName);
         }
         catch
         {

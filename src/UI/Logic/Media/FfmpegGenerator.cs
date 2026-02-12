@@ -303,8 +303,17 @@ public class FfmpegGenerator
 
     internal static string? GetScreenShotWithSubtitle(Subtitle previewSubtitle, int width, int height)
     {
-        var advancedSubStationAlphaContent = previewSubtitle.ToText(new AdvancedSubStationAlpha());
+        previewSubtitle = new Subtitle(previewSubtitle);
+        var first = previewSubtitle.Paragraphs.FirstOrDefault();
+        if (first == null)
+        {
+            return null;
+        }
 
+        first.StartTime.TotalMilliseconds = 0;
+
+        var advancedSubStationAlphaContent = previewSubtitle.ToText(new AdvancedSubStationAlpha());
+        
         var tempAssFileName = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.ass");
         File.WriteAllText(tempAssFileName, advancedSubStationAlphaContent);
 

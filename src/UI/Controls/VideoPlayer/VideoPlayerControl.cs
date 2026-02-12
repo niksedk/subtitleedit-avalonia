@@ -705,6 +705,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
         {
             _videoPlayerInstance.Speed = speed;
         }
+
+        public void HideVideoControls()
+        {
+            _gridProgress.IsVisible = false;
+        }
     }
 }
 
