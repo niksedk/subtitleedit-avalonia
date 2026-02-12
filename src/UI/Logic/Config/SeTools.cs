@@ -22,6 +22,7 @@ public class SeTools
     public string LlamaCppPrompt { get; set; }
     public string LmStudioPrompt { get; set; }
     public string AnthropicPrompt { get; set; }
+    public string PerplexityPrompt { get; set; }
     public string GroqPrompt { get; set; }
     public string OpenRouterPrompt { get; set; }
     public bool JoinKeepTimeCodes { get; set; }
@@ -84,6 +85,7 @@ public class SeTools
         LmStudioPrompt = string.Empty;
         LlamaCppPrompt = string.Empty;
         AnthropicPrompt = string.Empty;
+        PerplexityPrompt = string.Empty;
         GroqPrompt = string.Empty;
         OpenRouterPrompt = string.Empty;
         JoinKeepTimeCodes = true;

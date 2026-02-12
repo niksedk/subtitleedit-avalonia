@@ -92,6 +92,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             new AnthropicTranslate(),
             new GroqTranslate(),
             new OpenRouterTranslate(),
+            new PerplexityTranslate(),
             new GeminiTranslate(),
             new PapagoTranslate(),
             new NoLanguageLeftBehindServe(),
@@ -166,6 +167,11 @@ public partial class AutoTranslateViewModel : ObservableObject
         Configuration.Settings.Tools.AvalAiUrl = Se.Settings.AutoTranslate.AvalAiUrl;
         Configuration.Settings.Tools.AvalAiModel = Se.Settings.AutoTranslate.AvalAiModel;
         Configuration.Settings.Tools.AvalAiPrompt = Se.Settings.AutoTranslate.AvalAiPrompt;
+        
+        Configuration.Settings.Tools.PerplexityApiKey = Se.Settings.AutoTranslate.PerplexityApiKey;
+        Configuration.Settings.Tools.PerplexityUrl = Se.Settings.AutoTranslate.PerplexityUrl;
+        Configuration.Settings.Tools.PerplexityModel = Se.Settings.AutoTranslate.PerplexityModel;
+        Configuration.Settings.Tools.PerplexityPrompt = Se.Settings.AutoTranslate.PerplexityPrompt;
 
         Configuration.Settings.Tools.KoboldCppPrompt = Se.Settings.AutoTranslate.KoboldCppPrompt;
         Configuration.Settings.Tools.KoboldCppUrl = Se.Settings.AutoTranslate.KoboldCppUrl;
@@ -257,6 +263,13 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Configuration.Settings.Tools.AnthropicApiKey = apiKey.Trim();
             Configuration.Settings.Tools.AnthropicApiModel = apiModel.Trim();
+        }
+        
+        if (engineType == typeof(PerplexityTranslate))
+        {
+            Configuration.Settings.Tools.PerplexityApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.PerplexityModel = apiModel.Trim();
+            Configuration.Settings.Tools.PerplexityUrl = apiUrl.Trim();
         }
 
         if (engineType == typeof(GroqTranslate))
@@ -1052,6 +1065,19 @@ public partial class AutoTranslateViewModel : ObservableObject
             ModelIsVisible = true;
             ButtonModelIsVisible = true;
             ModelText = Configuration.Settings.Tools.AnthropicApiModel;
+
+            return;
+        }
+        
+        if (engineType == typeof(PerplexityTranslate))
+        {
+            ApiKeyText = Configuration.Settings.Tools.PerplexityApiKey;
+            ApiKeyIsVisible = true;
+
+            _apiModels = PerplexityTranslate.Models.ToList();
+            ModelIsVisible = true;
+            ButtonModelIsVisible = true;
+            ModelText = Configuration.Settings.Tools.PerplexityModel;
 
             return;
         }

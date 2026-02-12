@@ -53,6 +53,7 @@ public partial class TranslateSettingsViewModel : ObservableObject
             engineType == typeof(OllamaTranslate) ||
             engineType == typeof(LmStudioTranslate) ||
             engineType == typeof(AnthropicTranslate) ||  
+            engineType == typeof(PerplexityTranslate) ||  
             engineType == typeof(GroqTranslate) ||
             engineType == typeof(OpenRouterTranslate) ||
             engineType == typeof(LlamaCppTranslate))
@@ -110,6 +111,10 @@ public partial class TranslateSettingsViewModel : ObservableObject
             else if (engineType == typeof(AnthropicTranslate))
             {
                 Se.Settings.Tools.AnthropicPrompt = PromptText;
+            }
+            else if (engineType == typeof(PerplexityTranslate))
+            {
+                Se.Settings.Tools.PerplexityPrompt = PromptText;
             }
             else if (engineType == typeof(GroqTranslate))
             {
@@ -179,6 +184,14 @@ public partial class TranslateSettingsViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(PromptText))
             {
                 PromptText = new SeAutoTranslate().AnthropicPrompt;
+            }
+        }
+        else if (engineType == typeof(PerplexityTranslate))
+        {
+            PromptText = Se.Settings.Tools.PerplexityPrompt;
+            if (string.IsNullOrWhiteSpace(PromptText))
+            {
+                PromptText = new SeAutoTranslate().PerplexityPrompt;
             }
         }
         else if (engineType == typeof(GroqTranslate))

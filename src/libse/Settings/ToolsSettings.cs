@@ -88,6 +88,12 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string AvalAiPrompt { get; set; }
         public string AvalAiApiKey { get; set; }
         public string AvalAiModel { get; set; }
+        
+        public string PerplexityUrl { get; set; }
+        public string PerplexityPrompt { get; set; }
+        public string PerplexityApiKey { get; set; }
+        public string PerplexityModel { get; set; }
+        
         public string OpenRouterUrl { get; set; }
         public string OpenRouterPrompt { get; set; }
         public string OpenRouterApiKey { get; set; }
