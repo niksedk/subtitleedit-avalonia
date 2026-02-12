@@ -38,7 +38,7 @@ public class AssaImageColorPickerWindow : Window
                 new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
             },
             Margin = UiUtil.MakeWindowMargin(),
-            RowSpacing = 15,
+            RowSpacing = 5,
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
@@ -71,7 +71,7 @@ public class AssaImageColorPickerWindow : Window
         videoGrid.Children.Add(bitmapImage);
 
         // subtitle bitmap overlay
-        
+
 
         // Store references
         vm.ScreenshotImage = bitmapImage;
@@ -92,7 +92,7 @@ public class AssaImageColorPickerWindow : Window
         var colorPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Spacing = 15,
+            Spacing = 5,
         };
 
         var mouseColorBox = new Border
@@ -107,15 +107,15 @@ public class AssaImageColorPickerWindow : Window
 
         var mouseColorInfo = new StackPanel
         {
-            Spacing = 5,
+            Spacing = 2,
             VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
-                UiUtil.MakeLabel("Mouse-over color:"),
+                UiUtil.MakeLabel("Mouse-over color"),
                 new TextBlock
                 {
                     [!TextBlock.TextProperty] = new Binding(nameof(vm.CurrentMouseColorHex)),
-                    FontFamily = new FontFamily("Consolas,Courier New,monospace"),
                     FontSize = 14,
                 }
             }
@@ -128,31 +128,32 @@ public class AssaImageColorPickerWindow : Window
             BorderThickness = new Thickness(1),
             BorderBrush = new SolidColorBrush(Colors.Gray),
             [!Border.BackgroundProperty] = new Binding(nameof(vm.ClickedColor)),
+            Margin = new Thickness(40, 0, 0, 0),
         };
         ToolTip.SetTip(clickedColorBox, "Clicked color");
 
+        var copyButton = new Button
+        {
+            [!Button.ContentProperty] = new Binding(nameof(vm.CopyButtonContent)),
+            Command = vm.CopyColorToClipboardCommand,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+
         var clickedColorInfo = new StackPanel
         {
-            Spacing = 5,
+            Spacing = 2,
             VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
-                UiUtil.MakeLabel("Clicked color:"),
+                UiUtil.MakeLabel("Clicked color"),
                 new TextBlock
                 {
                     [!TextBlock.TextProperty] = new Binding(nameof(vm.ClickedColorHex)),
-                    FontFamily = new FontFamily("Consolas,Courier New,monospace"),
                     FontSize = 14,
                 }
             }
-        };
-
-        var copyButton = new Button
-        {
-            Content = Se.Language.Assa.CopyColorAsHextoClipboard,
-            Command = vm.CopyColorToClipboardCommand,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(20, 0, 0, 0),
         };
 
         colorPanel.Children.Add(mouseColorBox);

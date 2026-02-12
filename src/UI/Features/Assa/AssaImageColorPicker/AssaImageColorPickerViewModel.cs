@@ -39,6 +39,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     [ObservableProperty] private SolidColorBrush _clickedColor = new SolidColorBrush(Colors.Transparent);
     [ObservableProperty] private string _currentMouseColorHex = "#00000000";
     [ObservableProperty] private string _clickedColorHex = "#00000000";
+    [ObservableProperty] private string _copyButtonContent = "Copy";
 
     private Subtitle _subtitle = new();
 
@@ -48,6 +49,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     {
         Screenshot = new SKBitmap(1, 1).ToAvaloniaBitmap();
         ScreenshotOverlayPosiion = string.Empty;
+        CopyButtonContent = Se.Language.Assa.CopyColorAsHextoClipboard;
     }
 
     partial void OnScreenshotXChanged(int value)
@@ -159,6 +161,14 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
         if (Window?.Clipboard != null)
         {
             await Window.Clipboard.SetTextAsync(ClickedColorHex);
+
+            // Show check icon temporarily
+            var originalContent = CopyButtonContent;
+            CopyButtonContent = "✓ Copied!";
+
+            // Reset after 2 seconds
+            await Task.Delay(2000);
+            CopyButtonContent = originalContent;
         }
     }
 
