@@ -16,7 +16,7 @@ public class ModifySelectionRule
     public bool HasText { get; set; }
     public bool HasMatchCase { get; set; }
     public bool MatchCase { get; set; }
-    public bool HasMultiSelect { get; set; }    
+    public bool HasMultiSelect { get; set; }
 
     public double Number { get; set; }
     public bool HasNumber { get; set; }
@@ -39,7 +39,7 @@ public class ModifySelectionRule
         NumberMinValue = 0;
         NumberMaxValue = 0;
         DefaultValue = 0;
-        MultiSelectItems = new List<MultiSelectItem>(); 
+        MultiSelectItems = new List<MultiSelectItem>();
     }
 
     public override string ToString()
@@ -200,7 +200,7 @@ public class ModifySelectionRule
                 HasMultiSelect = true,
                 MultiSelectItems = lines
                     .Where(p=>!string.IsNullOrEmpty(p.Style))
-                    .DistinctBy(p => p.Style)   
+                    .DistinctBy(p => p.Style)
                     .Select(p=> new MultiSelectItem(p.Style))
                     .OrderBy(s => s.Name)
                     .ToList(),
@@ -340,20 +340,20 @@ public class ModifySelectionRule
                 return string.IsNullOrWhiteSpace(text);
 
             case RuleType.Style:
-                if (string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(item.Style))
+                if (string.IsNullOrEmpty(item.Style))
                 {
                     return false;
                 }
 
-                return HasMatchCase && MatchCase ? item.Style.Equals(Text) : item.Style.Equals(Text, StringComparison.OrdinalIgnoreCase);
+                return MultiSelectItems.Any(p => p.Apply && p.Name == item.Style);
 
             case RuleType.Actor:
-                if (string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(item.Actor))
+                if (string.IsNullOrEmpty(item.Actor))
                 {
                     return false;
                 }
 
-                return HasMatchCase && MatchCase ? item.Actor.Equals(Text) : item.Actor.Equals(Text, StringComparison.OrdinalIgnoreCase);
+                return MultiSelectItems.Any(p => p.Apply && p.Name == item.Actor);
 
             default:
                 return false;

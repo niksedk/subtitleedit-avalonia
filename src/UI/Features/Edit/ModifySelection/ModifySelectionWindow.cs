@@ -119,13 +119,7 @@ public class ModifySelectionWindow : Window
                     {
                         Background = Brushes.Transparent, // Prevents highlighting
                         Padding = new Thickness(4),
-                        Child = new CheckBox
-                        {
-                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(MultiSelectItem.Apply)),
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            //TODO   CheckChanged += (sender, args) => vm.OnRuleChanged();
-
-                        }
+                        Child = MakeCheckBox(vm)
                     }),
                     Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
                 },
@@ -163,6 +157,20 @@ public class ModifySelectionWindow : Window
         grid.Add(checkBoxRuleCaseSensitive, 1);
 
         return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static CheckBox MakeCheckBox(ModifySelectionViewModel vm)
+    {
+        var checkBox = new CheckBox
+        {
+            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(MultiSelectItem.Apply)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
+
+
+        checkBox.IsCheckedChanged += (sender, args) => vm.OnRuleChanged();
+
+        return checkBox;
     }
 
     private static Border MakeSelectionView(ModifySelectionViewModel vm)

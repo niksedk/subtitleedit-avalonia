@@ -7047,6 +7047,8 @@ public partial class MainViewModel :
             if (result.SelectionNew)
             {
                 SubtitleGrid.SelectedItems.Clear();
+                SelectedSubtitleIndex = null;
+                SelectedSubtitle = null;
                 foreach (var item in Subtitles)
                 {
                     if (result.Selection.Contains(item))
@@ -7088,6 +7090,8 @@ public partial class MainViewModel :
                 }
             }
         }
+
+        _updateAudioVisualizer = true;
     }
 
     [RelayCommand]
