@@ -452,59 +452,6 @@ public static class InitMenu
             Command = vm.ShowToolsSplitCommand,
         });
 
-        var assaTools = new List<MenuItem>
-        {
-            new MenuItem
-            {
-                Header = l.AssaProgressBar,
-                Command = vm.ShowAssaGenerateProgressBarCommand,
-            },
-            new MenuItem
-            {
-                Header = l.AssaChangeResolution,
-                Command = vm.ShowAssaChangeResolutionCommand,
-            },
-            new MenuItem
-            {
-                Header = l.AssaGenerateBackground,
-                Command = vm.ShowAssaGenerateBackgroundCommand,
-            },
-            new MenuItem
-            {
-                Header = l.AssaImageColorPicker,
-                Command = vm.ShowAssaImageColorPickerCommand,
-            },
-            new MenuItem
-            {
-                Header = l.AssaSetPosition,
-                Command = vm.ShowAssaSetPositionCommand,
-            },
-            new MenuItem
-            {
-                Header = l.AssaApplyCustomOverrideTags,
-                Command = vm.ShowAssaApplyCustomOverrideTagsCommand,
-            },
-        };
-
-        var menuItemAssaTools = new MenuItem
-        {
-            Header = l.AssaTools,
-            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
-        };
-
-        foreach (var item in assaTools.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
-        {
-            menuItemAssaTools.Items.Add(item);
-        }
-
-        menuItemAssaTools.Items.Add(new Separator());
-        menuItemAssaTools.Items.Add(new MenuItem
-        {
-            Header = l.FilterLayersForDisplayDotDotDot,
-            Command = vm.ShowPickLayerFilterCommand,
-        });
-
-        menu.Items.Add(menuItemAssaTools);
 
         menu.Items.Add(new MenuItem
         {
@@ -769,6 +716,81 @@ public static class InitMenu
                 },
             }
         });
+
+
+        var assaTools = new List<MenuItem>
+        {
+            new MenuItem
+            {
+                Header = l.AssaProgressBar,
+                Command = vm.ShowAssaGenerateProgressBarCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaChangeResolution,
+                Command = vm.ShowAssaChangeResolutionCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaGenerateBackground,
+                Command = vm.ShowAssaGenerateBackgroundCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaImageColorPicker,
+                Command = vm.ShowAssaImageColorPickerCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaSetPosition,
+                Command = vm.ShowAssaSetPositionCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaApplyCustomOverrideTags,
+                Command = vm.ShowAssaApplyCustomOverrideTagsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaDraw,
+                Command = vm.ShowAssaDrawCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaProperties,
+                Command = vm.ShowAssaPropertiesCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaAttachments,
+                Command = vm.ShowAssaAttachmentsCommand,
+            },
+            new MenuItem
+            {
+                Header = l.AssaStyles,
+                Command = vm.ShowAssaStylesCommand,
+            },
+        };
+
+        var menuItemAssaTools = new MenuItem
+        {
+            Header = l.AssaTools,
+            [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa)),
+        };
+
+        foreach (var item in assaTools.OrderBy(p => p.Header?.ToString()?.TrimStart('_', ' ')))
+        {
+            menuItemAssaTools.Items.Add(item);
+        }
+
+        menuItemAssaTools.Items.Add(new Separator());
+        menuItemAssaTools.Items.Add(new MenuItem
+        {
+            Header = l.FilterLayersForDisplayDotDotDot,
+            Command = vm.ShowPickLayerFilterCommand,
+        });
+
+        menu.Items.Add(menuItemAssaTools);
     }
 
     public static void UpdateRecentFiles(MainViewModel vm)

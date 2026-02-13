@@ -63,13 +63,17 @@ public class LanguageMainMenu
     public string AssaApplyCustomOverrideTags { get; set; }
     public string AssaSetPosition { get; set; }
     public string AssaImageColorPicker { get; set; }
+    public string AssaDraw { get; set; }
+    public string AssaStyles { get; set; }
+    public string AssaProperties { get; set; }
+    public string AssaAttachments { get; set; }
+
 
     public string SpellCheckTitle { get; set; }
     public string SpellCheck { get; set; }
     public string FindDoubleWords { get; set; }
     public string AddNameToNamesList { get; set; }
     public string GetDictionaries { get; set; }
-
 
     public string Video { get; set; }
     public string OpenVideo { get; set; }
@@ -177,6 +181,10 @@ public class LanguageMainMenu
         AssaApplyCustomOverrideTags = "Apply _override tags...";
         AssaSetPosition = "_Set position...";
         AssaImageColorPicker = "_Image color picker...";
+        AssaDraw = "_Draw...";
+        AssaStyles = "S_tyles...";
+        AssaProperties = "P_roperties...";
+        AssaAttachments = "_Attachments...";
 
         SpellCheckTitle = "_Spell check";
         FindDoubleWords = "_Find double words...";
