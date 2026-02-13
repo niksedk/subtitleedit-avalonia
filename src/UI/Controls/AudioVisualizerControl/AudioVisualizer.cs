@@ -990,10 +990,12 @@ public class AudioVisualizer : Control
                     (previous != null && _originalStartSeconds < previous.EndTime.TotalSeconds) ||
                     (next != null && _originalEndSeconds > next.StartTime.TotalSeconds))
                 {
-                    // overlap - keep current duration
-                    if (newStart < 0 && _originalStartSeconds >= 0)
+                    if (previous != null && next != null &&
+                        _originalStartSeconds >= previous.EndTime.TotalSeconds && _originalStartSeconds < previous.EndTime.TotalSeconds + MinGapSeconds &&
+                        _originalStartSeconds + _originalDurationSeconds <= next.StartTime.TotalSeconds &&
+                        _originalStartSeconds + _originalDurationSeconds > next.StartTime.TotalSeconds - MinGapSeconds)
                     {
-                        break;
+                        break; // no roome to move
                     }
 
                     _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
