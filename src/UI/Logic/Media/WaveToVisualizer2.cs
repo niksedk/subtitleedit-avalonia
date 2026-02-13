@@ -993,24 +993,27 @@ public class WavePeakGenerator2 : IDisposable
         {
             int width = samples.Length / _nfft;
             int height = _nfft / 2;
+            var nnftQuarter = _nfft / 4;
             var bmp = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
 
             IntPtr pixelsPtr = bmp.GetPixels();
             byte* pixels = (byte*)pixelsPtr.ToPointer();
-            int stride = bmp.RowBytes;
+            var stride = bmp.RowBytes;
 
-            for (int x = 0; x < width; x++)
+            for (var x = 0; x < width; x++)
             {
-                ProcessSegment(samples, (x * _nfft) - (x > 0 ? _nfft / 4 : 0), _magnitude1);
-                ProcessSegment(samples, (x * _nfft) + (x < width - 1 ? _nfft / 4 : 0), _magnitude2);
+                var offset = x * _nfft;
+                ProcessSegment(samples, offset - (x > 0 ? nnftQuarter : 0), _magnitude1);
+                ProcessSegment(samples, offset + (x < width - 1 ? nnftQuarter : 0), _magnitude2);
 
-                for (int y = 0; y < height; y++)
+                var xOffset = x * 4;
+                for (var y = 0; y < height; y++)
                 {
                     int colorIndex = _mapper.Map((_magnitude1[y] + _magnitude2[y]) / 2.0);
                     SKColor color = _palette[colorIndex];
 
                     int pixelY = height - y - 1;
-                    byte* pixel = pixels + (pixelY * stride) + (x * 4);
+                    byte* pixel = pixels + (pixelY * stride) + xOffset;
                     pixel[0] = color.Red;
                     pixel[1] = color.Green;
                     pixel[2] = color.Blue;
