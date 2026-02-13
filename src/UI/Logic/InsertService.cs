@@ -219,9 +219,9 @@ public class InsertService : IInsertService
         return subtitles.Count - 1;
     }
 
-    private void SetStyleForNewParagraph(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel newParagraph, int nearestIndex)
+    private static void SetStyleForNewParagraph(SubtitleFormat format, Subtitle subtitle, ObservableCollection<SubtitleLineViewModel> subtitles, SubtitleLineViewModel newParagraph, int nearestIndex)
     {
-        bool useExtraForStyle = format.HasStyleSupport;
+        bool hasStyleSupport = format.HasStyleSupport;
         var formatType = format.GetType();
         var styles = new List<string>();
         if (formatType == typeof(AdvancedSubStationAlpha) || formatType == typeof(SubStationAlpha))
@@ -243,9 +243,9 @@ public class InsertService : IInsertService
             style = styles[0];
         }
 
-        if (useExtraForStyle)
+        if (hasStyleSupport)
         {
-            newParagraph.Extra = style;
+            newParagraph.Style = style;
             if (format.GetType() == typeof(TimedText10) || format.GetType() == typeof(ItunesTimedText) || formatType == typeof(TimedTextImsc11))
             {
                 if (styles.Count > 0)
@@ -259,6 +259,7 @@ public class InsertService : IInsertService
                     newParagraph.Style = c.Style;
                     newParagraph.Region = c.Region;
                     newParagraph.Language = c.Language;
+                    newParagraph.Actor = c.Actor;
                 }
 
                 newParagraph.Extra = TimedText10.SetExtra(new Paragraph
@@ -277,6 +278,7 @@ public class InsertService : IInsertService
                 if (c != null)
                 {
                     newParagraph.Extra = c.Extra;
+                    newParagraph.Actor = c.Actor;
                 }
             }
         }
