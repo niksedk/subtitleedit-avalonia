@@ -873,6 +873,12 @@ public static class UiUtil
         return control;
     }
 
+    public static ComboBox WithTopAlignment(this ComboBox control)
+    {
+        control.VerticalAlignment = VerticalAlignment.Top;
+        return control;
+    }
+
     public static Button WithBindEnabled(this Button control, string isEnabledPropertyPath)
     {
         control.Bind(Button.IsEnabledProperty, new Binding

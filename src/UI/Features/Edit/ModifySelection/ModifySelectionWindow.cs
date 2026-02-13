@@ -5,7 +5,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
@@ -19,9 +19,9 @@ public class ModifySelectionWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Edit.ModifySelection.Title;
         CanResize = true;
-        Width = 800;
+        Width = 900;
         Height = 700;
-        MinWidth = 725;
+        MinWidth = 825;
         MinHeight = 450;
         vm.Window = this;
         DataContext = vm;
@@ -87,7 +87,7 @@ public class ModifySelectionWindow : Window
             VerticalAlignment = VerticalAlignment.Top,
         };
 
-        var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule)).WithWidth(175);
+        var comboBoxRules = UiUtil.MakeComboBox(vm.Rules, vm, nameof(vm.SelectedRule)).WithWidth(175).WithTopAlignment();
         comboBoxRules.SelectionChanged += (sender, args) => vm.OnRuleChanged();
 
         textBoxRuleText = UiUtil.MakeTextBox(150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Text));
@@ -97,6 +97,49 @@ public class ModifySelectionWindow : Window
         var numericUpDownRuleNumber = UiUtil.MakeNumericUpDownInt(0, 10000, 100, 150, vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.Number));
         numericUpDownRuleNumber.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasNumber));
         numericUpDownRuleNumber.ValueChanged += (sender, args) => vm.OnRuleChanged();
+
+        var dataGridMultiSelect = new DataGrid
+        {
+            AutoGenerateColumns = false,
+            SelectionMode = DataGridSelectionMode.Single,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Width = double.NaN,
+            Height = double.NaN,
+            DataContext = vm,
+            MaxHeight = 200,
+            Columns =
+            {
+                new DataGridTemplateColumn
+                {
+                    Header = Se.Language.General.Enabled,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    CellTemplate = new FuncDataTemplate<MultiSelectItem>((item, _) =>
+                    new Border
+                    {
+                        Background = Brushes.Transparent, // Prevents highlighting
+                        Padding = new Thickness(4),
+                        Child = new CheckBox
+                        {
+                            [!ToggleButton.IsCheckedProperty] = new Binding(nameof(MultiSelectItem.Apply)),
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            //TODO   CheckChanged += (sender, args) => vm.OnRuleChanged();
+
+                        }
+                    }),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Auto)
+                },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Name,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(StyleDisplay.Name)),
+                    IsReadOnly = true,
+                },
+            },
+        };
+        dataGridMultiSelect.BindIsVisible(vm, nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.HasMultiSelect));
+        dataGridMultiSelect.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.SelectedRule) + "." + nameof(vm.SelectedRule.MultiSelectItems)) { Source = vm });
 
         var panelRule = new StackPanel
         {
@@ -108,6 +151,7 @@ public class ModifySelectionWindow : Window
                 comboBoxRules,
                 textBoxRuleText,
                 numericUpDownRuleNumber,
+                dataGridMultiSelect,
             },
         };
 

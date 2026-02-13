@@ -35,8 +35,7 @@ public partial class ModifySelectionViewModel : ObservableObject
 
     public ModifySelectionViewModel()
     {
-        Rules = new ObservableCollection<ModifySelectionRule>(ModifySelectionRule.List());
-        SelectedRule = Rules.First();
+        Rules = new ObservableCollection<ModifySelectionRule>();
         Subtitles = new ObservableCollection<PreviewItem>();
         Selection = new List<SubtitleLineViewModel>();
 
@@ -166,6 +165,14 @@ public partial class ModifySelectionViewModel : ObservableObject
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels, List<SubtitleLineViewModel> selectedItems)
     {
         _allSubtitles = subtitleLineViewModels;
+
+        foreach (var rule in ModifySelectionRule.List(subtitleLineViewModels))
+        {
+            Rules.Add(rule);
+        }
+
+        SelectedRule = Rules.First();
+
         _previewTimer.Start();
     }
 

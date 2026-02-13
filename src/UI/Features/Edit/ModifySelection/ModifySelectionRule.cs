@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Features.Edit.ModifySelection;
@@ -15,6 +16,7 @@ public class ModifySelectionRule
     public bool HasText { get; set; }
     public bool HasMatchCase { get; set; }
     public bool MatchCase { get; set; }
+    public bool HasMultiSelect { get; set; }    
 
     public double Number { get; set; }
     public bool HasNumber { get; set; }
@@ -22,6 +24,7 @@ public class ModifySelectionRule
     public double NumberMinValue { get; set; }
     public double NumberMaxValue { get; set; }
     public double DefaultValue { get; set; }
+    public List<MultiSelectItem> MultiSelectItems { get; set; }
 
     public ModifySelectionRule()
     {
@@ -36,6 +39,7 @@ public class ModifySelectionRule
         NumberMinValue = 0;
         NumberMaxValue = 0;
         DefaultValue = 0;
+        MultiSelectItems = new List<MultiSelectItem>(); 
     }
 
     public override string ToString()
@@ -43,7 +47,7 @@ public class ModifySelectionRule
         return Name;
     }
 
-    public static List<ModifySelectionRule> List()
+    public static List<ModifySelectionRule> List(List<SubtitleLineViewModel> lines)
     {
         var l = Se.Language.Edit.ModifySelection;
         var g = Se.Language.General;
@@ -193,15 +197,25 @@ public class ModifySelectionRule
             {
                 RuleType = RuleType.Style,
                 Name = g.Style,
-                HasText = true,
-                HasMatchCase = true,
+                HasMultiSelect = true,
+                MultiSelectItems = lines
+                    .Where(p=>!string.IsNullOrEmpty(p.Style))
+                    .DistinctBy(p => p.Style)   
+                    .Select(p=> new MultiSelectItem(p.Style))
+                    .OrderBy(s => s.Name)
+                    .ToList(),
             },
             new()
             {
                 RuleType = RuleType.Actor,
                 Name = g.Actor,
-                HasText = true,
-                HasMatchCase = true,
+                HasMultiSelect = true,
+                MultiSelectItems = lines
+                    .Where(p=>!string.IsNullOrEmpty(p.Actor))
+                    .DistinctBy(p => p.Style)
+                    .Select(p=> new MultiSelectItem(p.Actor))
+                    .OrderBy(s => s.Name)
+                    .ToList(),
             }
         };
 
