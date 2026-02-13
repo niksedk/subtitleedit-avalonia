@@ -31,10 +31,8 @@ public class LanguageImport
     public string SplitAtEndCharsSetting { get; set; }
     public string TakeTimeFromCurrentFile { get; set; }
     public string Fixed { get; set; }
-    public string LineBreak { get; internal set; }
-    public string OpenTextFile { get; internal set; }
-    public string OpenTextFiles { get; internal set; }
-    public string TryToFindTimeCodes { get; internal set; }
+    public string NumberOfSubtitlesX { get; set; }
+    public string GapMs { get; set; }
 
     public LanguageImport()
     {
@@ -77,9 +75,7 @@ Rules:
         SplitAtEndCharsSetting = "Split at end chars";
         TakeTimeFromCurrentFile = "Take time from current file";
         Fixed = "Fixed";
-        LineBreak = "Line break";
-        OpenTextFile = "Open text file";
-        OpenTextFiles = "Open text files";
-        TryToFindTimeCodes = "Try to parse time codes";
+        NumberOfSubtitlesX = "Number of subtitles: {0}";
+        GapMs = "Gap (ms)";
     }
 }
