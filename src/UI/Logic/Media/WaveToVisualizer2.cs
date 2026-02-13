@@ -379,18 +379,18 @@ public class WavePeakGenerator2 : IDisposable
         {
             Directory.CreateDirectory(dir);
         }
-        
-        if (!string.IsNullOrEmpty(videoFileName) && 
+
+        if (!string.IsNullOrEmpty(videoFileName) &&
             (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
              videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
         {
             return Path.Combine(dir, $"{MovieHasher.GenerateHashFromString(videoFileName)}.wav");
         }
-        
+
         var hash = MovieHasher.GenerateHash(videoFileName);
 
         var files = Directory.GetFiles(dir, $"{hash}_*.wav")
-            .OrderBy(p=>p)
+            .OrderBy(p => p)
             .ToList();
         if (files.Count > 0 && trackNumber < 0)
         {
@@ -603,20 +603,16 @@ public class WavePeakGenerator2 : IDisposable
             return new WavePeak2();
         }
 
-        var max = chunk[0];
-        var min = chunk[0];
-        for (var i = 1; i < count; i++)
+        float max = chunk[0];
+        float min = chunk[0];
+
+        for (var i = 1; i < chunk.Length; i++)
         {
-            var value = chunk[i];
-            if (value > max)
-            {
-                max = value;
-            }
-            else if (value < min)
-            {
-                min = value;
-            }
+            float value = chunk[i];
+            max = Math.Max(max, value);
+            min = Math.Min(min, value);
         }
+
         return new WavePeak2((short)(short.MaxValue * max), (short)(short.MaxValue * min));
     }
 
@@ -949,7 +945,7 @@ public class WavePeakGenerator2 : IDisposable
                 Directory.CreateDirectory(dir);
             }
 
-            if (string.IsNullOrEmpty(videoFileName) && 
+            if (string.IsNullOrEmpty(videoFileName) &&
                 (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                  videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
             {
@@ -957,9 +953,9 @@ public class WavePeakGenerator2 : IDisposable
             }
 
             var hash = MovieHasher.GenerateHash(videoFileName);
-            
+
             var dirs = Directory.GetDirectories(Se.SpectrogramsFolder, $"{hash}_*.wav")
-                .OrderBy(p=>p)
+                .OrderBy(p => p)
                 .ToList();
             if (dirs.Count > 0 && trackNumber < 0)
             {
