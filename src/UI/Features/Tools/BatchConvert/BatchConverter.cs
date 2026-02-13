@@ -1602,7 +1602,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
 
         var doAutoTranslate = new DoAutoTranslate();
         var translatedSubtitle = await doAutoTranslate.DoTranslate(subtitle, _config.AutoTranslate.SourceLanguage, _config.AutoTranslate.TargetLanguage,
-            _config.AutoTranslate.Translator, default);
+            _config.AutoTranslate.Translator, cancellationToken);
 
         for (var i = 0; i < subtitle.Paragraphs.Count && i < translatedSubtitle.Count; i++)
         {

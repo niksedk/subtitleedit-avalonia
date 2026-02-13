@@ -151,12 +151,10 @@ public class SeAutoTranslate
         NnlbApiUrl = string.Empty;
         NnlbServeUrl = "http://127.0.0.1:6060/";
         NnlbServeUrl = string.Empty;
-        OllamaModel = "llama3.2";
         OllamaModel = string.Empty;
         OllamaModels = "llama3.2,llama3.2:1b,phi3,gemma2,qwen2,mistral";
         OllamaPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments or notes:";
         OllamaUrl = "http://localhost:11434/api/generate";
-        OllamaUrl = "http://localhost:11434/api/generate/";
         OpenRouterApiKey = string.Empty;
         OpenRouterModel = OpenRouterTranslate.Models[0];
         OpenRouterPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";

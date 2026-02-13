@@ -748,9 +748,9 @@ public partial class BatchConvertViewModel : ObservableObject
         }
 
         var stats = BatchStatics.CalculateGeneralStatistics(BatchItems.ToList());
-        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm => 
-        { 
-            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true); 
+        var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
+        {
+            vm.Initialize(Se.Language.File.Statistics.Title, stats, 1000, 600, false, true);
         });
     }
 
@@ -1334,42 +1334,82 @@ public partial class BatchConvertViewModel : ObservableObject
 
         if (engineType == typeof(LibreTranslate))
         {
-            Configuration.Settings.Tools.AutoTranslateLibreUrl = AutoTranslateUrl.Trim();
-            Configuration.Settings.Tools.AutoTranslateLibreApiKey = AutoTranslateUrl.Trim();
+            if (!string.IsNullOrEmpty(AutoTranslateUrl.Trim()))
+            {
+                Configuration.Settings.Tools.AutoTranslateLibreUrl = AutoTranslateUrl.Trim();
+            }
+            else if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.LibreTranslateUrl))
+            {
+                Configuration.Settings.Tools.AutoTranslateLibreUrl = Se.Settings.AutoTranslate.LibreTranslateUrl;
+            }
+
+            if (!string.IsNullOrEmpty(AutoTranslateApiKey.Trim()))
+            {
+                Configuration.Settings.Tools.AutoTranslateLibreApiKey = AutoTranslateApiKey.Trim();
+                Se.Settings.AutoTranslate.LibreTranslateApiKey = AutoTranslateApiKey.Trim();
+            }
+            else if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.LibreTranslateApiKey))
+            {
+                Configuration.Settings.Tools.AutoTranslateLibreApiKey = Se.Settings.AutoTranslate.LibreTranslateApiKey;
+            }
         }
 
         if (engineType == typeof(LmStudioTranslate))
         {
-            Configuration.Settings.Tools.LmStudioApiUrl = AutoTranslateUrl.Trim();
-            Configuration.Settings.Tools.LmStudioModel = AutoTranslateUrl.Trim();
+            if (!string.IsNullOrEmpty(AutoTranslateUrl.Trim()))
+            {
+                Configuration.Settings.Tools.LmStudioApiUrl = AutoTranslateUrl.Trim();
+            }
+            else if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.LmStudioApiUrl))
+            {
+                Configuration.Settings.Tools.LmStudioApiUrl = Se.Settings.AutoTranslate.LmStudioApiUrl;
+            }
+
+            Configuration.Settings.Tools.LmStudioModel = AutoTranslateModel.Trim();
         }
 
         if (engineType == typeof(OllamaTranslate))
         {
-            Configuration.Settings.Tools.OllamaApiUrl = AutoTranslateUrl.Trim();
-            Configuration.Settings.Tools.OllamaModel = AutoTranslateModel.Trim();
-            Se.Settings.AutoTranslate.OllamaUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.OllamaModel = AutoTranslateModel.Trim();
+            if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.OllamaUrl))
+            {
+                Configuration.Settings.Tools.OllamaApiUrl = Se.Settings.AutoTranslate.OllamaUrl;
+            }
+
+            if (!string.IsNullOrEmpty(AutoTranslateModel))
+            {
+                Configuration.Settings.Tools.OllamaModel = AutoTranslateModel.Trim();
+                Se.Settings.AutoTranslate.OllamaModel = AutoTranslateModel.Trim();
+            }
         }
 
         if (engineType == typeof(NoLanguageLeftBehindServe))
         {
-            Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.NnlbServeUrl = AutoTranslateUrl.Trim();
+            if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.NllbServeUrl))
+            {
+                Configuration.Settings.Tools.AutoTranslateNllbServeUrl = Se.Settings.AutoTranslate.NllbServeUrl;
+            }
         }
 
         if (engineType == typeof(NoLanguageLeftBehindApi))
         {
-            Configuration.Settings.Tools.AutoTranslateNllbApiUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.NnlbApiUrl = AutoTranslateUrl.Trim();
+            if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.NllbApiUrl))
+            {
+                Configuration.Settings.Tools.AutoTranslateNllbApiUrl = Se.Settings.AutoTranslate.NllbApiUrl;
+            }
         }
 
         if (engineType == typeof(DeepLTranslate))
         {
-            Configuration.Settings.Tools.AutoTranslateDeepLUrl = AutoTranslateUrl.Trim();
-            Configuration.Settings.Tools.AutoTranslateDeepLApiKey = AutoTranslateApiKey.Trim();
-            Se.Settings.AutoTranslate.DeepLUrl = AutoTranslateUrl.Trim();
-            Se.Settings.AutoTranslate.DeepLApiKey = AutoTranslateApiKey.Trim();
+            if (!string.IsNullOrEmpty(Se.Settings.AutoTranslate.DeepLUrl))
+            {
+                Configuration.Settings.Tools.AutoTranslateDeepLUrl = Se.Settings.AutoTranslate.DeepLUrl;
+            }
+
+            if (!string.IsNullOrEmpty(AutoTranslateApiKey))
+            {
+                Configuration.Settings.Tools.AutoTranslateDeepLApiKey = AutoTranslateApiKey.Trim();
+                Se.Settings.AutoTranslate.DeepLApiKey = AutoTranslateApiKey.Trim();
+            }
         }
     }
 
