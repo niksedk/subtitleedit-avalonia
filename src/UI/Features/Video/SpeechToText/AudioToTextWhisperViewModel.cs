@@ -705,8 +705,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (DoAdjustTimings && wavePeaks != null)
         {
             transcript = WhisperTimingFixer.ShortenLongDuration(transcript);
-            var wp = new WavePeakData(wavePeaks.SampleRate, wavePeaks.Peaks.Select(p => new WavePeak(p.Max, p.Min)).ToList());
-            transcript = WhisperTimingFixer.ShortenViaWavePeaks(transcript, wp);
+            transcript = WhisperTimingFixer.ShortenViaWavePeaks(transcript, wavePeaks);
         }
 
         var settings = Se.Settings.Tools.AudioToText;

@@ -11450,7 +11450,7 @@ public partial class MainViewModel :
         await vp.WaitForPlayersReadyAsync(10_000);
         if (vp.VideoPlayerInstance.Duration > 0)
         {
-            var peakWaveFileName = WavePeakGenerator.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
+            var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName ?? string.Empty, _audioTrack?.FfIndex ?? -1);
             AudioVisualizer.ZoomFactor = 1.0;
             AudioVisualizer.VerticalZoomFactor = 1.0;
             AudioVisualizer.WavePeaks = WavePeakGenerator2.GenerateEmptyPeaks(peakWaveFileName, (int)vp.VideoPlayerInstance.Duration);

@@ -446,7 +446,7 @@ public class WavePeakGenerator2 : IDisposable
     /// <summary>
     /// Returns true if the current wave file can be processed. Compressed wave files are not supported.
     /// </summary>
-    public bool IsSupported => Header.AudioFormat == WaveHeader.AudioFormatPcm && Header.Format == "WAVE";
+    public bool IsSupported => Header.AudioFormat == WaveHeader2.AudioFormatPcm && Header.Format == "WAVE";
 
     /// <summary>
     /// Generates peaks and saves them to disk.
