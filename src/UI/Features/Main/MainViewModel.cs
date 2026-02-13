@@ -5359,7 +5359,7 @@ public partial class MainViewModel :
                             var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, _audioTrack?.FfIndex ?? -1, tempWaveFileName,
                                 Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                            Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, _videoFileName); });
+                            Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, _videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                         }
                     }
@@ -11228,7 +11228,7 @@ public partial class MainViewModel :
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, trackNumber, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, videoFileName); });
+                Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
@@ -11461,6 +11461,7 @@ public partial class MainViewModel :
         Process process,
         string tempWaveFileName,
         string peakWaveFileName,
+        string spectrogramFolderName,
         string videoFileName)
     {
         IsWaveformGenerating = true;
@@ -11497,7 +11498,7 @@ public partial class MainViewModel :
                 if (Se.Settings.Waveform.GenerateSpectrogram)
                 {
                     WaveformGeneratingText = Se.Language.Main.GeneratingSpectrogramDotDotDot;
-                    var spectrogram = waveFile.GenerateSpectrogram(0, WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName), _videoOpenTokenSource.Token);
+                    var spectrogram = waveFile.GenerateSpectrogram(0, spectrogramFolderName, _videoOpenTokenSource.Token);
                     AudioVisualizer?.SetSpectrogram(spectrogram);
                 }
 
