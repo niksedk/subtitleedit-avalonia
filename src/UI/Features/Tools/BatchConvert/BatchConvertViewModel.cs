@@ -1450,8 +1450,11 @@ public partial class BatchConvertViewModel : ObservableObject
     private async Task ShowStatus(string statusText)
     {
         StatusText = statusText;
-        await Task.Delay(6000, _cancellationToken).ConfigureAwait(false);
-        StatusText = string.Empty;
+        var _ = Task.Run(async () =>
+        {
+            await Task.Delay(6000, _cancellationToken).ConfigureAwait(false);
+            StatusText = string.Empty;
+        }); 
     }
 
     internal void FileGridOnDragOver(object? sender, DragEventArgs e)

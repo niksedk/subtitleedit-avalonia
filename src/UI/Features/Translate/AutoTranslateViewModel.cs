@@ -585,7 +585,7 @@ public partial class AutoTranslateViewModel : ObservableObject
         IsProgressEnabled = true;
         var engineType = translator.GetType();
 
-        if (ApiKeyIsVisible && string.IsNullOrWhiteSpace(ApiKeyText))
+        if (ApiKeyIsVisible && string.IsNullOrWhiteSpace(ApiKeyText) && engineType != typeof(LibreTranslate))
         {
             await MessageBox.Show(
                 Window!,
