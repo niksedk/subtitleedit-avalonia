@@ -246,7 +246,7 @@ public static partial class MergeAndSplitHelper
 
         var totalProcessed = currentRowIndex - index;
         if (totalProcessed == mergeResult.ParagraphCount &&
-            HasSameEmptyLines(rows.Skip(index).Take(totalProcessed).Select(p => p.TranslatedText).ToList(), 
+            HasSameEmptyLines(rows.Skip(index).Take(totalProcessed).Select(p => p.TranslatedText).ToList(),
                               rows.Skip(index).Take(totalProcessed).Select(p => p.Text).ToList(), 0))
         {
             return ApplyFormattingToExistingTranslations(rows, index, formattingList, mergeResult.ParagraphCount);
