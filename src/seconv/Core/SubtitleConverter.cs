@@ -21,18 +21,32 @@ internal class SubtitleConverter
                 return result;
             }
 
+            var fileIndex = 1;
             foreach (var inputFile in inputFiles)
             {
+                var outputFile = GetOutputFileName(inputFile, options);
+
+                // Show progress: "1: source.srt -> target.ass..."
+                AnsiConsole.Markup($"[dim]{fileIndex}:[/] [cyan]{Path.GetFileName(inputFile)}[/] [dim]->[/] [green]{outputFile}[/]...");
+
                 try
                 {
                     await ConvertFileAsync(inputFile, options);
                     result.SuccessfulFiles++;
+
+                    // Show completion
+                    AnsiConsole.MarkupLine(" [green]done.[/]");
                 }
                 catch (Exception ex)
                 {
                     result.FailedFiles++;
                     result.Errors.Add($"{Path.GetFileName(inputFile)}: {ex.Message}");
+
+                    // Show error
+                    AnsiConsole.MarkupLine($" [red]error: {ex.Message.EscapeMarkup()}[/]");
                 }
+
+                fileIndex++;
             }
         }
         catch (Exception ex)

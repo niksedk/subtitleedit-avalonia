@@ -5,7 +5,7 @@ using SeConv.Core;
 
 namespace SeConv.Commands;
 
-internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
+internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
 {
     public sealed class Settings : CommandSettings
     {
@@ -179,7 +179,7 @@ internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
         public bool SplitLongLines { get; init; }
     }
 
-    public override int Execute(CommandContext context, Settings settings, CancellationToken cancellationToken)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         try
         {
@@ -266,18 +266,11 @@ internal sealed class ConvertCommand : Command<ConvertCommand.Settings>
             AnsiConsole.WriteLine();
 
             // Perform conversion
-            ConversionResult result = null!;
-            AnsiConsole.Status()
-                .Start("Converting subtitles...", ctx =>
-                {
-                    ctx.Spinner(Spinner.Known.Star);
-                    ctx.SpinnerStyle(Style.Parse("green"));
-
-                    var converter = new SubtitleConverter();
-                    result = converter.ConvertAsync(options).GetAwaiter().GetResult();
-                });
+            var converter = new SubtitleConverter();
+            var result = await converter.ConvertAsync(options);
 
             // Display results
+            AnsiConsole.WriteLine();
             if (result.Success)
             {
                 AnsiConsole.MarkupLine($"[green]✓[/] Conversion completed successfully!");

@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSE", "src\libse\LibSE.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSETests", "tests\libse\LibSETests.csproj", "{21C390BF-0785-5EC6-6F63-787A969378AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seconv", "src\seconv\seconv.csproj", "{77D87C12-39A0-C3B3-774C-FC013291D389}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeConv", "src\seconv\SeConv.csproj", "{77D87C12-39A0-C3B3-774C-FC013291D389}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
