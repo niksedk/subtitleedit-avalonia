@@ -6194,7 +6194,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>();
+        var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(vm => vm.Initialize(Se.Settings.Tools.LastColorPickerColor.FromHexToColor()));
         if (!result.OkPressed)
         {
             return;
@@ -6255,34 +6255,8 @@ public partial class MainViewModel :
         var tb = GetFocusedTextBoxWrapper();
         if (tb != null)
         {
-            var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-            var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
-            var selectionLength = selectionEnd - selectionStart;
-            if (selectionLength > 0 && selectionLength != tb.Text.Length)
-            {
-                var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
-                var isWebVtt = SelectedSubtitleFormat is WebVTT;
-                var selectedText = tb.Text.Substring(selectionStart, selectionLength);
-
-                if (_colorService.ContainsColor(color, selectedText, SelectedSubtitleFormat))
-                {
-                    selectedText = _colorService.RemoveColorTag(selectedText, color, isAssa, isWebVtt, GetUpdateSubtitle());
-                    tb.SelectedText = selectedText;
-                    tb.SelectionStart = selectionStart;
-                    tb.SelectionEnd = selectionStart + selectedText.Length;
-                }
-                else
-                {
-                    selectedText = _colorService.SetColorTag(selectedText, color, isAssa, isWebVtt,
-                        GetUpdateSubtitle());
-                    tb.SelectedText = selectedText;
-                    tb.SelectionStart = selectionStart;
-                    tb.SelectionEnd = selectionStart + selectedText.Length;
-                }
-
-                _updateAudioVisualizer = true;
-                return true;
-            }
+            SetTextBoxColor(tb, color);
+            return true;
         }
 
         return false;
@@ -7618,27 +7592,30 @@ public partial class MainViewModel :
             return;
         }
 
-        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
-        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
-        var selectionLength = selectionEnd - selectionStart;
-
         var result = await ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>();
         if (!result.OkPressed)
         {
             return;
         }
 
+        SetTextBoxColor(tb, result.SelectedColor);
+    }
+
+    private void SetTextBoxColor(ITextBoxWrapper tb, Color color)
+    {
+        var selectionStart = Math.Min(tb.SelectionStart, tb.SelectionEnd);
+        var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
+        var selectionLength = selectionEnd - selectionStart;
         var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         var isWebVtt = SelectedSubtitleFormat is WebVTT;
         if (selectionLength == 0 || selectionLength == tb.Text.Length)
         {
-            tb.Text = _colorService.SetColorTag(tb.Text, result.SelectedColor, isAssa, isWebVtt, GetUpdateSubtitle());
+            tb.Text = _colorService.SetColorTag(tb.Text, color, isAssa, isWebVtt, GetUpdateSubtitle());
         }
         else
         {
             var selectedText = tb.Text.Substring(selectionStart, selectionLength);
-            selectedText = _colorService.SetColorTag(selectedText, result.SelectedColor, isAssa, isWebVtt,
-                GetUpdateSubtitle());
+            selectedText = _colorService.SetColorTag(selectedText, color, isAssa, isWebVtt, GetUpdateSubtitle());
 
             if (isAssa) // close color tag (display normal style color)
             {
@@ -7665,6 +7642,8 @@ public partial class MainViewModel :
                 tb.SelectionStart = selectionStart;
                 tb.SelectionEnd = selectionStart + selectedText.Length;
             });
+
+            _updateAudioVisualizer = true;
         }
     }
 
