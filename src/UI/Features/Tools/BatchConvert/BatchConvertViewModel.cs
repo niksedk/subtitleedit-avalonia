@@ -209,7 +209,7 @@ public partial class BatchConvertViewModel : ObservableObject
         _allBatchItems = new List<BatchConvertItem>();
         BatchFunctions = new ObservableCollection<BatchConvertFunction>();
 
-        TargetFormats = new ObservableCollection<string>(SubtitleFormat.AllSubtitleFormats.Select(p => p.Name))
+        TargetFormats = new ObservableCollection<string>(SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop().Select(p => p.Name))
         {
             BatchConverter.FormatAyato,
             BatchConverter.FormatBdnXml,

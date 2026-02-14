@@ -34,7 +34,7 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
 
     public PickSubtitleFormatViewModel()
     {
-       _allSubtitleFormatNames = SubtitleFormat.AllSubtitleFormats
+       _allSubtitleFormatNames = SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()
            .Select(x => x.FriendlyName)
            .ToList();
         

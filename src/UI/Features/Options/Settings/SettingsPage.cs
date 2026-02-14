@@ -689,7 +689,6 @@ public class SettingsPage : UserControl
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
             {
@@ -698,22 +697,33 @@ public class SettingsPage : UserControl
             },
             Margin = new Thickness(0, 5, 0, 0),
         };
-        
+
         var listBox = new ListBox
         {
             DataContext = vm,
+            Height = 250,
+            Width = 250,
             [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.FavoriteSubtitleFormats)),
             [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(vm.SelectedFavoriteSubtitleFormat)) { Mode = BindingMode.TwoWay },
-            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
-                new TextBlock { Text = f?.Name }, true)
+            ItemTemplate = new FuncDataTemplate<string>((f, _) =>
+                new TextBlock { Text = f }, true)
         };
 
-        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddFavoriteSubtitleFormatCommand).WithMinWidth(75);   
-        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveFavoriteSubtitleFormatCommand).WithMinWidth(75);
-        var buttonMoveUp = UiUtil.MakeButton(Se.Language.General.MoveUp, vm.MoveUpFavoriteSubtitleFormatCommand).WithMinWidth(75);
-        var buttonMoveDown = UiUtil.MakeButton(Se.Language.General.MoveDown, vm.MoveDownFavoriteSubtitleFormatCommand).WithMinWidth(75);
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddFavoriteSubtitleFormatCommand).WithMinWidth(100);   
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveFavoriteSubtitleFormatCommand).WithMinWidth(100);
+        var buttonMoveUp = UiUtil.MakeButton(Se.Language.General.MoveUp, vm.MoveUpFavoriteSubtitleFormatCommand).WithMinWidth(100);
+        var buttonMoveDown = UiUtil.MakeButton(Se.Language.General.MoveDown, vm.MoveDownFavoriteSubtitleFormatCommand).WithMinWidth(100);
 
-        grid.Add(listBox, 0);
+        var buttonStack = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Spacing = 5,
+            Margin = new Thickness(5, 0, 0, 0),
+            Children = { buttonAdd, buttonRemove, buttonMoveUp, buttonMoveDown }
+        };
+
+        grid.Add(UiUtil.MakeBorderForControlNoPadding(listBox), 0, 0);
+        grid.Add(buttonStack, 0, 1);
 
         return grid;
     }

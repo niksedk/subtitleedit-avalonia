@@ -1518,20 +1518,55 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveFavoriteSubtitleFormat()
     {
+        if (SelectedFavoriteSubtitleFormat != null && FavoriteSubtitleFormats.Contains(SelectedFavoriteSubtitleFormat))
+        {
+            var index = FavoriteSubtitleFormats.IndexOf(SelectedFavoriteSubtitleFormat);
+            FavoriteSubtitleFormats.Remove(SelectedFavoriteSubtitleFormat);
 
+            if (FavoriteSubtitleFormats.Count > 0)
+            {
+                SelectedFavoriteSubtitleFormat = index < FavoriteSubtitleFormats.Count 
+                    ? FavoriteSubtitleFormats[index] 
+                    : FavoriteSubtitleFormats[FavoriteSubtitleFormats.Count - 1];
+            }
+        }
+
+        await Task.CompletedTask;
     }
 
 
     [RelayCommand]
     private async Task MoveUpFavoriteSubtitleFormat()
     {
+        if (SelectedFavoriteSubtitleFormat != null && FavoriteSubtitleFormats.Contains(SelectedFavoriteSubtitleFormat))
+        {
+            var index = FavoriteSubtitleFormats.IndexOf(SelectedFavoriteSubtitleFormat);
+            if (index > 0)
+            {
+                var selectedItem = SelectedFavoriteSubtitleFormat;
+                FavoriteSubtitleFormats.Move(index, index - 1);
+                SelectedFavoriteSubtitleFormat = selectedItem;
+            }
+        }
 
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task MoveDownFavoriteSubtitleFormat()
     {
+        if (SelectedFavoriteSubtitleFormat != null && FavoriteSubtitleFormats.Contains(SelectedFavoriteSubtitleFormat))
+        {
+            var index = FavoriteSubtitleFormats.IndexOf(SelectedFavoriteSubtitleFormat);
+            if (index < FavoriteSubtitleFormats.Count - 1)
+            {
+                var selectedItem = SelectedFavoriteSubtitleFormat;
+                FavoriteSubtitleFormats.Move(index, index + 1);
+                SelectedFavoriteSubtitleFormat = selectedItem;
+            }
+        }
 
+        await Task.CompletedTask;
     }
 
     [RelayCommand]

@@ -53,7 +53,7 @@ public partial class SplitSubtitleViewModel : ObservableObject
         _windowService = windowService;
 
         SplitItems = new ObservableCollection<SplitDisplayItem>();
-        Formats = new ObservableCollection<SubtitleFormat>(SubtitleFormat.AllSubtitleFormats);
+        Formats = new ObservableCollection<SubtitleFormat>(SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop());
         SelectedSubtitleFormat = Formats[0];
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings[0];

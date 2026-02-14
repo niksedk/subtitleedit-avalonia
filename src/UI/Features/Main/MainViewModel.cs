@@ -424,12 +424,12 @@ public partial class MainViewModel :
         Subtitles = [];
         FilePropertiesText = string.Empty;
 
-        SubtitleFormats = [.. SubtitleFormat.AllSubtitleFormats];
-        var defaultFormat =
-            SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ??
-            SubtitleFormats[0];
-        SubtitleFormats.Remove(defaultFormat);
-        SubtitleFormats.Insert(0, defaultFormat);
+        SubtitleFormats = [..SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()];
+        //var defaultFormat =
+        //    SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ??
+        //    SubtitleFormats[0];
+        //SubtitleFormats.Remove(defaultFormat);
+        //SubtitleFormats.Insert(0, defaultFormat);
         SelectedSubtitleFormat = SubtitleFormats[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
@@ -5450,6 +5450,14 @@ public partial class MainViewModel :
 
         UpdateVideoOffsetStatus();
         SetLibSeSettings();
+
+        var selectedSubtitleFormatName = SelectedSubtitleFormat.Name;
+        SubtitleFormats.Clear();
+        foreach (var format in SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop())
+        {
+            SubtitleFormats.Add(format);
+        }   
+        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First();
     }
 
     public VideoPlayerControl? GetVideoPlayerControl()
