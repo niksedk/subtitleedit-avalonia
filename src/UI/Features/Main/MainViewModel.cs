@@ -2976,7 +2976,7 @@ public partial class MainViewModel :
 
         var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(vm =>
         {
-            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat);
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat, this);
         });
 
         if (!result.OkPressed)

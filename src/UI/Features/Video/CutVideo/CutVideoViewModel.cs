@@ -8,6 +8,7 @@ using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Video.BurnIn;
 using Nikse.SubtitleEdit.Logic;
@@ -17,12 +18,14 @@ using Nikse.SubtitleEdit.Logic.VideoPlayers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -66,7 +69,7 @@ public partial class CutVideoViewModel : ObservableObject
     private long _processedFrames;
     private Process? _ffmpegProcess;
     private Process? _ffmpegListKeyFramesProcess;
-    private readonly Timer _timerGenerate;
+    private readonly System.Timers.Timer _timerGenerate;
     private bool _doAbort;
     private int _jobItemIndex = -1;
     private SubtitleFormat? _subtitleFormat;
@@ -75,18 +78,23 @@ public partial class CutVideoViewModel : ObservableObject
     private DispatcherTimer _positionTimer = new DispatcherTimer();
     private string _importFileName;
     private Subtitle _currentSubtitle;
+    private long _lastKeyPressedMs;
+    private SubtitleLineViewModel? _setEndAtKeyUpLine;
 
     private readonly IWindowService _windowService;
     private readonly IFolderHelper _folderHelper;
     private readonly IFileHelper _fileHelper;
     private readonly IInsertService _insertService;
+    private readonly IShortcutManager _shortcutManager;
 
-    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService, IInsertService insertService)
+
+    public CutVideoViewModel(IFolderHelper folderHelper, IFileHelper fileHelper, IWindowService windowService, IInsertService insertService, IShortcutManager shortcutManager)
     {
         _folderHelper = folderHelper;
         _fileHelper = fileHelper;
         _windowService = windowService;
         _insertService = insertService;
+        _shortcutManager = shortcutManager;
 
         VideoWidth = 1920;
         VideoHeight = 1080;
@@ -125,7 +133,7 @@ public partial class CutVideoViewModel : ObservableObject
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, Subtitle subtitle, SubtitleFormat subtitleFormat)
+    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, Subtitle subtitle, SubtitleFormat subtitleFormat, MainViewModel mainVm)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
@@ -160,6 +168,8 @@ public partial class CutVideoViewModel : ObservableObject
             }
             _updateAudioVisualizer = true;
         });
+
+        LoadShortcuts(mainVm);
     }
 
     private void StartTitleTimer()
@@ -206,6 +216,11 @@ public partial class CutVideoViewModel : ObservableObject
 
         av.CurrentVideoPositionSeconds = vp.Position;
         var isPlaying = vp.IsPlaying;
+
+        if (!isPlaying)
+        {
+            startPos = av.StartPositionSeconds;
+        }
 
         var selectedSubtitles = new List<SubtitleLineViewModel>
         {
@@ -558,18 +573,18 @@ public partial class CutVideoViewModel : ObservableObject
     private void Delete()
     {
         var selectedSegments = SegmentGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
-        if (selectedSegments.Count == 0)        
+        if (selectedSegments.Count == 0)
         {
             return;
         }
 
         var idx = Segments.IndexOf(selectedSegments.First());
-        
+
         foreach (var segment in selectedSegments)
         {
             Segments.Remove(segment);
         }
-        
+
         if (idx < Segments.Count)
         {
             SelectedSegment = Segments[idx];
@@ -586,35 +601,6 @@ public partial class CutVideoViewModel : ObservableObject
     private void Clear()
     {
         Segments.Clear();
-        _updateAudioVisualizer = true;
-    }
-
-    [RelayCommand]
-    private void SetStart()
-    {
-        var segment = SelectedSegment;
-        if (segment == null || Segments.Count == 0)
-        {
-            return;
-        }
-
-        var seconds = VideoPlayer.Position;
-        segment.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
-        _updateAudioVisualizer = true;
-
-    }
-
-    [RelayCommand]
-    private void SetEnd()
-    {
-        var segment = SelectedSegment;
-        if (segment == null || Segments.Count == 0)
-        {
-            return;
-        }
-
-        var seconds = VideoPlayer.Position;
-        segment.EndTime = TimeSpan.FromSeconds(seconds);
         _updateAudioVisualizer = true;
     }
 
@@ -682,7 +668,7 @@ public partial class CutVideoViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Cancel()
+    private async Task Cancel()
     {
         if (IsGenerating)
         {
@@ -691,21 +677,140 @@ public partial class CutVideoViewModel : ObservableObject
             return;
         }
 
+        if (Segments.Count > 0)
+        {
+            var message = "Are you sure you want to discard segments and close window? All segments will be lost.";
+            var result = await MessageBox.Show(Window!, Se.Language.General.Cancel.Replace("_", string.Empty), message, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+        }
+
         Window?.Close();
     }
 
-    internal void OnKeyDown(KeyEventArgs e)
+    private readonly Lock _onKeyDownHandlerLock = new();
+
+    internal void OnKeyDownHandler(object? sender, KeyEventArgs keyEventArgs)
     {
-        if (e.Key == Key.Escape)
+        lock (_onKeyDownHandlerLock)
         {
-            e.Handled = true;
-            Window?.Close();
+            if (keyEventArgs.Key == Key.Escape)
+            {
+                keyEventArgs.Handled = true;
+                Cancel();
+                return;
+            }
+            else if (keyEventArgs.Key == Key.Space)
+            {
+                keyEventArgs.Handled = true;
+                VideoPlayer.TogglePlayPause();
+                return;
+            }
+
+            AudioVisualizer?.SetKeyModifiers(keyEventArgs);
+            var ms = Environment.TickCount64;
+            var msDiff = ms - _lastKeyPressedMs;
+            var k = keyEventArgs.Key;
+            if (msDiff > 5000)
+            {
+                _shortcutManager.ClearKeys(); // reset shortcuts if no key pressed for 5 seconds
+            }
+
+            _lastKeyPressedMs = ms;
+
+            _shortcutManager.OnKeyPressed(this, keyEventArgs);
+            if (_shortcutManager.GetActiveKeys().Count == 0)
+            {
+                return;
+            }
+
+            if (SegmentGrid.IsFocused)
+            {
+                if (keyEventArgs.Key == Key.Home && keyEventArgs.KeyModifiers == KeyModifiers.None && Segments.Count > 0)
+                {
+                    keyEventArgs.Handled = true;
+                    SelectAndScrollToRow(0);
+                    return;
+                }
+                else if (keyEventArgs.Key == Key.End && keyEventArgs.KeyModifiers == KeyModifiers.None && Segments.Count > 0)
+                {
+                    keyEventArgs.Handled = true;
+                    SelectAndScrollToRow(Segments.Count - 1);
+                    return;
+                }
+                else if (keyEventArgs.Key == Key.Enter && keyEventArgs.KeyModifiers == KeyModifiers.None)
+                {
+                    if (Se.Settings.General.SubtitleEnterKeyAction == SubtitleEnterKeyActionType.GoToSubtitleAndSetVideoPosition.ToString())
+                    {
+                        keyEventArgs.Handled = true;
+                        var idx = SegmentGrid.SelectedIndex;
+                        var item = SegmentGrid.SelectedItem as SubtitleLineViewModel;
+                        var vp = VideoPlayer;
+                        if (idx >= 0 && item != null && vp != null)
+                        {
+                            vp.Position = item.StartTime.TotalSeconds;
+                            SelectAndScrollToRow(idx);
+                            if (AudioVisualizer != null &&
+                                (item.StartTime.TotalSeconds < AudioVisualizer.StartPositionSeconds ||
+                                 item.StartTime.TotalSeconds + 0.2 > AudioVisualizer.EndPositionSeconds))
+                            {
+                                AudioVisualizer.CenterOnPosition(item);
+                            }
+
+                            _updateAudioVisualizer = true;
+                        }
+                    }
+
+                    return;
+                }
+
+                var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGrid.ToString());
+                if (relayCommand == null)
+                {
+                    relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.SubtitleGridAndTextBox.ToString());
+                }
+
+                if (relayCommand != null)
+                {
+                    keyEventArgs.Handled = true;
+                    relayCommand.Execute(null);
+                    return;
+                }
+            }
+
+            if (AudioVisualizer != null && AudioVisualizer.IsFocused)
+            {
+                var relayCommand = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.Waveform.ToString());
+                if (relayCommand != null)
+                {
+                    keyEventArgs.Handled = true;
+                    relayCommand.Execute(null);
+                    return;
+                }
+            }
+
+            var keys = _shortcutManager.GetActiveKeys().Select(p => p.ToString()).ToList();
+            var hashCode = ShortCut.CalculateHash(keys, ShortcutCategory.General.ToString());
+            var rc = _shortcutManager.CheckShortcuts(keyEventArgs, ShortcutCategory.General.ToString().ToLowerInvariant());
+            if (rc != null)
+            {
+                keyEventArgs.Handled = true;
+                rc.Execute(null);
+            }
         }
-        else if (e.Key == Key.Space)
+    }
+
+    public void OnKeyUpHandler(object? sender, KeyEventArgs e)
+    {
+        if (_setEndAtKeyUpLine != null)
         {
-            e.Handled = true;
-            VideoPlayer.TogglePlayPause();
+            _setEndAtKeyUpLine = null;
         }
+
+        _shortcutManager.OnKeyReleased(this, e);
+        AudioVisualizer?.SetKeyModifiers(e);
     }
 
     internal void AudioVisualizerPositionChanged(object sender, AudioVisualizer.PositionEventArgs e)
@@ -717,7 +822,6 @@ public partial class CutVideoViewModel : ObservableObject
     internal void OnClosing()
     {
         _positionTimer.Stop();
-
         VideoPlayer.VideoPlayerInstance.CloseFile();
 
         if (_ffmpegListKeyFramesProcess != null && !_ffmpegListKeyFramesProcess.HasExited)
@@ -920,5 +1024,193 @@ public partial class CutVideoViewModel : ObservableObject
                 _updateAudioVisualizer = true;
             }
         }
+    }
+
+    private void LoadShortcuts(MainViewModel mainVm)
+    {
+        Se.Settings.InitializeMainShortcuts(mainVm);
+        var mainShortCuts = ShortcutsMain.GetUsedShortcuts(mainVm);
+
+        var shortcuts = new List<ShortCut?>
+        {
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.WaveformSetStartCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.WaveformSetEndCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.WaveformSetEndAndGoToNextCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.PlayCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.PauseCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.PlayNextCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.TogglePlayPauseCommand),
+            mainShortCuts.FirstOrDefault(p => p.Action == mainVm.TogglePlayPause2Command),
+        };
+
+        foreach (var sc in shortcuts.Where(p => p != null))
+        {
+            var mappedShortcut = MappShortcut(sc, mainVm);
+            if (mappedShortcut != null)
+            {
+                _shortcutManager.RegisterShortcut(mappedShortcut);
+            }
+        }
+    }
+
+    private ShortCut? MappShortcut(ShortCut? sc, MainViewModel mainVm)
+    {
+        if (sc == null)
+        {
+            return null;
+        }
+
+        var action = MapAction(sc.Action, mainVm);
+        if (action == null)
+        {
+            return null;
+        }
+
+        return new ShortCut(sc.Name, sc.Keys, sc.Category, action);
+    }
+
+    private IRelayCommand? MapAction(IRelayCommand action, MainViewModel mainVm)
+    {
+        if (action == mainVm.WaveformSetStartCommand)
+        {
+            return SetStartCommand;
+        }
+
+        if (action == mainVm.WaveformSetEndCommand)
+        {
+            return SetEndCommand;
+        }
+
+        if (action == mainVm.WaveformSetEndAndGoToNextCommand)
+        {
+            return SetEndAndGoToNextCommand;
+        }
+
+        if (action == mainVm.PlayCommand)
+        {
+            return PlayCommand;
+        }
+
+        if (action == mainVm.PauseCommand)
+        {
+            return PauseCommand;
+        }
+
+        if (action == mainVm.PlayNextCommand)
+        {
+            return PlayNextCommand;
+        }
+
+        if (action == mainVm.TogglePlayPauseCommand)
+        {
+            return TogglePlayPauseCommand;
+        }
+
+        return null;
+    }
+
+
+    [RelayCommand]
+    private void SetStart()
+    {
+        var segment = SelectedSegment;
+        if (segment == null || Segments.Count == 0)
+        {
+            return;
+        }
+
+        var seconds = VideoPlayer.Position;
+        segment.SetStartTimeOnly(TimeSpan.FromSeconds(seconds));
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void SetEnd()
+    {
+        var segment = SelectedSegment;
+        if (segment == null || Segments.Count == 0)
+        {
+            return;
+        }
+
+        var seconds = VideoPlayer.Position;
+        segment.EndTime = TimeSpan.FromSeconds(seconds);
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void SetEndAndGoToNext()
+    {
+        var s = SelectedSegment;
+        var vp = VideoPlayer;
+        if (s == null || vp == null)
+        {
+            return;
+        }
+
+        var idx = Segments.IndexOf(s);
+        if (idx < 0)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = vp.Position;
+        var gap = Se.Settings.General.MinimumMillisecondsBetweenLines / 1000.0;
+        if (videoPositionSeconds < s.StartTime.TotalSeconds + gap)
+        {
+            return;
+        }
+
+        s.EndTime = TimeSpan.FromSeconds(videoPositionSeconds);
+
+        SelectAndScrollToRow(idx + 1);
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
+    private void Play()
+    {
+        VideoPlayer.VideoPlayerInstance.Play();
+    }
+
+    [RelayCommand]
+    private void Pause()
+    {
+        VideoPlayer.VideoPlayerInstance.Pause();
+    }
+
+    [RelayCommand]
+    private void PlayNext()
+    {
+        var s = SelectedSegment;
+        var vp = VideoPlayer;
+        if (s == null || vp == null)
+        {
+            return;
+        }
+
+        var idx = Segments.IndexOf(s) + 1;
+        if (idx <= 0)
+        {
+            return;
+        }
+
+        var nextSegment = idx < Segments.Count ? Segments[idx] : null;
+        if (nextSegment == null)
+        {
+            return;
+        }
+
+        vp.Position = nextSegment.StartTime.TotalSeconds;
+        SelectAndScrollToRow(idx);
+        _updateAudioVisualizer = true;
+        vp.VideoPlayerInstance.Play();
+    }
+
+    [RelayCommand]
+    private void TogglePlayPause()
+    {
+        VideoPlayer.TogglePlayPause();
     }
 }

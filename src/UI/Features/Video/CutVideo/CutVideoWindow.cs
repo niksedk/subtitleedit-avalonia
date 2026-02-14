@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -16,8 +16,6 @@ namespace Nikse.SubtitleEdit.Features.Video.CutVideo;
 
 public class CutVideoWindow : Window
 {
-    private readonly CutVideoViewModel _vm;
-
     public CutVideoWindow(CutVideoViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
@@ -27,8 +25,6 @@ public class CutVideoWindow : Window
         Height = 800;
         MinWidth = 800;
         MinHeight = 600;
-
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -97,6 +93,8 @@ public class CutVideoWindow : Window
         Activated += delegate { buttonGenerate.Focus(); }; // hack to make OnKeyDown work
         Loaded += (s, e) => vm.OnLoaded();
         Closing += (s, e) => vm.OnClosing();
+        AddHandler(KeyDownEvent, vm.OnKeyDownHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: false);
+        AddHandler(KeyUpEvent, vm.OnKeyUpHandler, RoutingStrategies.Tunnel | RoutingStrategies.Bubble, handledEventsToo: true);
     }
 
     private static Border MakeSegmentsView(CutVideoViewModel vm)
@@ -285,11 +283,5 @@ public class CutVideoWindow : Window
         grid.Add(statusText, 0, 0);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }
