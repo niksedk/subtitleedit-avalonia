@@ -7146,6 +7146,16 @@ public partial class MainViewModel :
         }
 
         SelectAndScrollToRow(idx);
+
+        if (WaveformCenter)
+        {
+            var selectedLine = Subtitles.GetOrNull(idx);
+            if (selectedLine != null)
+            {
+                AudioVisualizer?.CenterOnPosition(selectedLine);
+                _updateAudioVisualizer = true;
+            }
+        }
     }
 
     [RelayCommand]
@@ -7164,6 +7174,16 @@ public partial class MainViewModel :
         }
 
         SelectAndScrollToRow(idx);
+
+        if (WaveformCenter)
+        {
+            var selectedLine = Subtitles.GetOrNull(idx);
+            if (selectedLine != null)
+            {
+                AudioVisualizer?.CenterOnPosition(selectedLine);
+                _updateAudioVisualizer = true;
+            }
+        }
     }
 
     [RelayCommand]
