@@ -59,7 +59,11 @@ public class PickLayerFilterWindow : Window
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += delegate 
+        { 
+            buttonOk.Focus();
+            vm.Loaded();
+        }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
     }
 
@@ -103,9 +107,18 @@ public class PickLayerFilterWindow : Window
                     Binding = new Binding(nameof(LayerItem.Layer)),
                     IsReadOnly = true,
                 },
+                new DataGridTextColumn
+                {
+                    Header = Se.Language.General.Usages,
+                    CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
+                    Binding = new Binding(nameof(LayerItem.UsageCount)),
+                    IsReadOnly = true,
+                },
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedLayer)));
+        vm.LayerGrid = dataGrid;
+        dataGrid.KeyDown += (s, e) => vm.LayerGridKeyDown(e);
 
         return UiUtil.MakeBorderForControlNoPadding(dataGrid);
     }

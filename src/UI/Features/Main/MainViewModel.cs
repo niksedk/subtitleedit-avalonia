@@ -2511,7 +2511,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowPickLayerFilter()
     {
-        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        if (Window == null)
         {
             return;
         }
