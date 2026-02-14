@@ -234,6 +234,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.VideoGenerateBlankCommand),  Se.Language.Options.Shortcuts.GenerateBlankVideo },
         { nameof(MainViewModel.VideoReEncodeCommand),  Se.Language.Options.Shortcuts.ReencodeVideo},
         { nameof(MainViewModel.VideoCutCommand),  Se.Language.Options.Shortcuts.CutVideo},
+        { nameof(MainViewModel.CutVideoSelectedLinesCommand),  Se.Language.Options.Shortcuts.CutVideoSelectedLines},
         { nameof(MainViewModel.ResetWaveformZoomAndSpeedCommand),  Se.Language.Waveform.ResetWaveformZoomAndSpeed },
         { nameof(MainViewModel.ExtendSelectedToPreviousCommand),  Se.Language.General.ExtendSelectedToPrevious },
         { nameof(MainViewModel.ExtendSelectedToNextCommand),  Se.Language.General.ExtendSelectedToNext },
@@ -466,6 +467,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.VideoGenerateBlankCommand, nameof(vm.VideoGenerateBlankCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoReEncodeCommand, nameof(vm.VideoReEncodeCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoCutCommand, nameof(vm.VideoCutCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CutVideoSelectedLinesCommand, nameof(vm.CutVideoSelectedLinesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.VideoFullScreenCommand, nameof(vm.VideoFullScreenCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.ShowSyncAdjustAllTimesCommand, nameof(vm.ShowSyncAdjustAllTimesCommand), ShortcutCategory.General);

@@ -2986,6 +2986,42 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task CutVideoSelectedLines()
+    {
+        var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (Window == null || selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        var ffmpegOk = await RequireFfmpegOk();
+        if (!ffmpegOk)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            await CommandVideoOpen();
+        }
+
+        if (string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        var result = await ShowDialogAsync<CutVideoWindow, CutVideoViewModel>(vm =>
+        {
+            vm.Initialize(_videoFileName, AudioVisualizer?.WavePeaks, GetUpdateSubtitle(), SelectedSubtitleFormat, this, selectedItems);
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+    }
+
+    [RelayCommand]
     private async Task VideoEmbed()
     {
         var ffmpegOk = await RequireFfmpegOk();

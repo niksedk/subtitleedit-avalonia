@@ -133,7 +133,13 @@ public partial class CutVideoViewModel : ObservableObject
         LoadSettings();
     }
 
-    public void Initialize(string videoFileName, WavePeakData2? wavePeakData, Subtitle subtitle, SubtitleFormat subtitleFormat, MainViewModel mainVm)
+    public void Initialize(
+        string videoFileName,
+        WavePeakData2? wavePeakData,
+        Subtitle subtitle,
+        SubtitleFormat subtitleFormat,
+        MainViewModel mainVm,
+        List<SubtitleLineViewModel>? selectedItems = null)
     {
         VideoFileName = videoFileName;
         _inputVideoFileName = videoFileName;
@@ -166,6 +172,16 @@ public partial class CutVideoViewModel : ObservableObject
                 AudioVisualizer.WavePeaks = wavePeakData;
                 IsAudioVisualizerVisible = true;
             }
+
+            if (selectedItems != null)
+            {
+                foreach (var item in selectedItems)
+                {
+                    var segment = new SubtitleLineViewModel(new Paragraph(item.Text, item.StartTime.TotalMilliseconds, item.EndTime.TotalMilliseconds), subtitleFormat);
+                    _insertService.InsertInCorrectPosition(Segments, segment);
+                }
+            }
+
             _updateAudioVisualizer = true;
         });
 
@@ -699,7 +715,7 @@ public partial class CutVideoViewModel : ObservableObject
             if (keyEventArgs.Key == Key.Escape)
             {
                 keyEventArgs.Handled = true;
-                Cancel();
+                _ = Cancel();
                 return;
             }
             else if (keyEventArgs.Key == Key.Space)
@@ -757,6 +773,10 @@ public partial class CutVideoViewModel : ObservableObject
                                  item.StartTime.TotalSeconds + 0.2 > AudioVisualizer.EndPositionSeconds))
                             {
                                 AudioVisualizer.CenterOnPosition(item);
+                            }
+                            else
+                            {
+                                AudioVisualizerCenterOnPositionIfNeeded(item.StartTime.TotalSeconds);
                             }
 
                             _updateAudioVisualizer = true;
@@ -899,6 +919,7 @@ public partial class CutVideoViewModel : ObservableObject
         }
 
         VideoPlayer.Position = selectedSegment.StartTime.TotalSeconds;
+        AudioVisualizerCenterOnPositionIfNeeded(selectedSegment.StartTime.TotalSeconds);
     }
 
     internal void AudioVisualizerSelectRequested(object sender, ParagraphEventArgs e)
@@ -925,6 +946,7 @@ public partial class CutVideoViewModel : ObservableObject
                 case WaveformSingleClickActionType.SetVideoPositionAndPauseAndSelectSubtitle:
                     vp.VideoPlayerInstance.Pause();
                     vp.Position = e.Seconds;
+                    AudioVisualizerCenterOnPositionIfNeeded(e.Seconds);
                     if (e.Paragraph != null)
                     {
                         var p1 = Segments.FirstOrDefault(p => p.Id == e.Paragraph.Id);
@@ -938,6 +960,7 @@ public partial class CutVideoViewModel : ObservableObject
                 case WaveformSingleClickActionType.SetVideopositionAndPauseAndSelectSubtitleAndCenter:
                     vp.VideoPlayerInstance.Pause();
                     vp.Position = e.Seconds;
+                    AudioVisualizerCenterOnPositionIfNeeded(e.Seconds);
                     if (e.Paragraph != null)
                     {
                         var p2 = Segments.FirstOrDefault(p => p.Id == e.Paragraph.Id);
@@ -952,6 +975,7 @@ public partial class CutVideoViewModel : ObservableObject
                 case WaveformSingleClickActionType.SetVideoPositionAndPause:
                     vp.VideoPlayerInstance.Pause();
                     vp.Position = e.Seconds;
+                    AudioVisualizerCenterOnPositionIfNeeded(e.Seconds);
                     break;
                 case WaveformSingleClickActionType.SetVideopositionAndPauseAndCenter:
                     vp.VideoPlayerInstance.Pause();
@@ -964,6 +988,7 @@ public partial class CutVideoViewModel : ObservableObject
                     break;
                 case WaveformSingleClickActionType.SetVideoposition:
                     vp.Position = e.Seconds;
+                    AudioVisualizerCenterOnPositionIfNeeded(e.Seconds);
                     break;
             }
 
@@ -1010,6 +1035,19 @@ public partial class CutVideoViewModel : ObservableObject
             }
 
             _updateAudioVisualizer = true;
+        }
+    }
+
+    private void AudioVisualizerCenterOnPositionIfNeeded(double seconds)
+    {
+        if (AudioVisualizer != null)
+        {
+            if (seconds <= AudioVisualizer.StartPositionSeconds ||
+                seconds + 0.2 >= AudioVisualizer.EndPositionSeconds)
+            {
+                AudioVisualizer.CenterOnPosition(seconds);
+                _updateAudioVisualizer = true;
+            }
         }
     }
 
@@ -1203,6 +1241,7 @@ public partial class CutVideoViewModel : ObservableObject
         }
 
         vp.Position = nextSegment.StartTime.TotalSeconds;
+        AudioVisualizerCenterOnPositionIfNeeded(nextSegment.StartTime.TotalSeconds);
         SelectAndScrollToRow(idx);
         _updateAudioVisualizer = true;
         vp.VideoPlayerInstance.Play();

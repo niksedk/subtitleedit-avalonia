@@ -193,6 +193,7 @@ public class LanguageSettingsShortcuts
     public string GenerateBlankVideo { get; set; }
     public string ReencodeVideo { get; set; }
     public string CutVideo { get; set; }
+    public string CutVideoSelectedLines { get; set; }
     public string AdjustAllTimes { get; set; }
     public string VisualSync { get; set; }
     public string TranslateViaCopyPaste { get; set; }
@@ -451,6 +452,7 @@ public class LanguageSettingsShortcuts
         GenerateBlankVideo = "Generate blank video";
         ReencodeVideo = "Re-encode video";
         CutVideo = "Cut video";
+        CutVideoSelectedLines = "Cut video (selected lines)";
         AdjustAllTimes = "Adjust all times";
         VisualSync = "Visual sync";
         TranslateViaCopyPaste = "Translate via copy-paste";

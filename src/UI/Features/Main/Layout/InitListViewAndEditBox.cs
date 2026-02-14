@@ -785,6 +785,12 @@ public static partial class InitListViewAndEditBox
             {
                 new MenuItem
                 {
+                    Header = Se.Language.Main.Menu.TextToSpeech,
+                    Command = vm.SpeechToTextSelectedLinesCommand,
+                    DataContext = vm,
+                },
+                new MenuItem
+                {
                     Header = Se.Language.Main.Menu.AutoTranslate,
                     Command = vm.AutoTranslateSelectedLinesCommand,
                     DataContext = vm,
@@ -835,8 +841,8 @@ public static partial class InitListViewAndEditBox
                 },
                 new MenuItem
                 {
-                    Header = Se.Language.Main.Menu.TextToSpeech,
-                    Command = vm.SpeechToTextSelectedLinesCommand,
+                    Header = Se.Language.Video.CutVideoDotDotDot,
+                    Command = vm.CutVideoSelectedLinesCommand,
                     DataContext = vm,
                 },
                 new MenuItem
