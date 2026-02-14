@@ -17,6 +17,7 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
@@ -1492,6 +1493,45 @@ public partial class SettingsViewModel : ObservableObject
         };
 
         return animation.RunAsync(control);
+    }
+
+    [RelayCommand]
+    private async Task AddFavoriteSubtitleFormat()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var viewModel = await _windowService.ShowDialogAsync<PickSubtitleFormatWindow, PickSubtitleFormatViewModel>(Window, vm => { vm.Initialize(null, new Subtitle()); });
+
+        if (viewModel.OkPressed)
+        {
+            var selectedFormat = viewModel.GetSelectedFormat();
+            if (selectedFormat != null)
+            {
+                FavoriteSubtitleFormats.Add(selectedFormat.FriendlyName);
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveFavoriteSubtitleFormat()
+    {
+
+    }
+
+
+    [RelayCommand]
+    private async Task MoveUpFavoriteSubtitleFormat()
+    {
+
+    }
+
+    [RelayCommand]
+    private async Task MoveDownFavoriteSubtitleFormat()
+    {
+
     }
 
     [RelayCommand]

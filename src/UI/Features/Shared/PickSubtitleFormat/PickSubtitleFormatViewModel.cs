@@ -49,9 +49,9 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
         _sampleSubtitle.Paragraphs.Add(new Paragraph("This is a sample subtitle.", 3500, 6000));
     }
 
-    internal void Initialize(SubtitleFormat subtitleFormat, Subtitle subtitle)
+    internal void Initialize(SubtitleFormat? subtitleFormat, Subtitle subtitle)
     {
-        SelectedSubtitleFormatName = subtitleFormat.FriendlyName;
+        SelectedSubtitleFormatName = subtitleFormat?.FriendlyName;
 
         if (subtitle.Paragraphs.Count > 1)
         {
