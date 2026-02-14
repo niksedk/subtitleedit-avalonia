@@ -785,4 +785,140 @@ public partial class CutVideoViewModel : ObservableObject
         IsSetStartEnabled = SegmentGrid.SelectedItems.Count == 1;
         IsSetEndEnabled = SegmentGrid.SelectedItems.Count == 1;
     }
+
+    internal void SegmentsGridDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        var selectedSegment = SelectedSegment;
+        if (selectedSegment == null)
+        {
+            return;
+        }
+
+        VideoPlayer.Position = selectedSegment.StartTime.TotalSeconds;
+    }
+
+    internal void AudioVisualizerSelectRequested(object sender, ParagraphEventArgs e)
+    {
+        var s = Segments.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+        if (s != null)
+        {
+            SegmentGrid.SelectedItem = s;
+        }
+    }
+
+    internal void AudioVisualizerOnPrimarySingleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        var vp = VideoPlayer;
+        if (vp == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        if (Enum.TryParse<WaveformSingleClickActionType>(Se.Settings.Waveform.SingleClickAction, out var action))
+        {
+            switch (action)
+            {
+                case WaveformSingleClickActionType.SetVideoPositionAndPauseAndSelectSubtitle:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        var p1 = Segments.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+                        if (p1 != null)
+                        {
+                            SelectAndScrollToRow(Segments.IndexOf(p1));
+                        }
+                    }
+
+                    break;
+                case WaveformSingleClickActionType.SetVideopositionAndPauseAndSelectSubtitleAndCenter:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        var p2 = Segments.FirstOrDefault(p => p.Id == e.Paragraph.Id);
+                        if (p2 != null)
+                        {
+                            SelectAndScrollToRow(Segments.IndexOf(p2));
+                            AudioVisualizer.CenterOnPosition(e.Seconds);
+                        }
+                    }
+
+                    break;
+                case WaveformSingleClickActionType.SetVideoPositionAndPause:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    break;
+                case WaveformSingleClickActionType.SetVideopositionAndPauseAndCenter:
+                    vp.VideoPlayerInstance.Pause();
+                    vp.Position = e.Seconds;
+                    if (e.Paragraph != null)
+                    {
+                        AudioVisualizer.CenterOnPosition(e.Seconds);
+                    }
+
+                    break;
+                case WaveformSingleClickActionType.SetVideoposition:
+                    vp.Position = e.Seconds;
+                    break;
+            }
+
+            _updateAudioVisualizer = true;
+        }
+    }
+
+    internal void AudioVisualizerOnPrimaryDoubleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        var vp = VideoPlayer;
+        if (vp == null || AudioVisualizer == null)
+        {
+            return;
+        }
+
+        if (Enum.TryParse<WaveformDoubleClickActionType>(Se.Settings.Waveform.DoubleClickAction, out var action))
+        {
+            switch (action)
+            {
+                case WaveformDoubleClickActionType.SelectSubtitle:
+                    if (e.Paragraph != null)
+                    {
+                        var p = Segments.FirstOrDefault(p => Math.Abs(p.StartTime.TotalMilliseconds - e.Paragraph.StartTime.TotalMilliseconds) < 0.01);
+                        if (p != null)
+                        {
+                            SelectAndScrollToRow(Segments.IndexOf(p));
+                        }
+                    }
+
+                    break;
+                case WaveformDoubleClickActionType.Center:
+                    if (e.Paragraph != null)
+                    {
+                        AudioVisualizerCenterOnPositionIfNeeded(e.Paragraph, e.Seconds);
+                    }
+
+                    break;
+                case WaveformDoubleClickActionType.Pause:
+                    vp.VideoPlayerInstance.Pause();
+                    break;
+                case WaveformDoubleClickActionType.Play:
+                    vp.VideoPlayerInstance.Play();
+                    break;
+            }
+
+            _updateAudioVisualizer = true;
+        }
+    }
+
+    private void AudioVisualizerCenterOnPositionIfNeeded(SubtitleLineViewModel selectedItem, double seconds)
+    {
+        if (AudioVisualizer != null)
+        {
+            if (seconds <= AudioVisualizer.StartPositionSeconds ||
+                seconds + 0.2 >= AudioVisualizer.EndPositionSeconds)
+            {
+                AudioVisualizer.CenterOnPosition(selectedItem);
+                _updateAudioVisualizer = true;
+            }
+        }
+    }
 }

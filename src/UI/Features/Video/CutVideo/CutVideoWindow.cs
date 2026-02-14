@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
@@ -150,6 +149,7 @@ public class CutVideoWindow : Window
         };
         dataGridSubtitle.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedSegment)) { Source = vm });
         dataGridSubtitle.SelectionChanged += vm.SegmentsGridChanged;
+        dataGridSubtitle.DoubleTapped += vm.SegmentsGridDoubleTapped;
         vm.SegmentGrid = dataGridSubtitle;
 
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddCommand);
@@ -177,7 +177,7 @@ public class CutVideoWindow : Window
         {
             Orientation = Orientation.Horizontal,
             Children =
-            { 
+            {
                 buttonAdd,
                 buttonSetStart,
                 buttonSetEnd,
@@ -224,6 +224,9 @@ public class CutVideoWindow : Window
         vm.AudioVisualizer.DrawGridLines = Se.Settings.Waveform.DrawGridLines;
         vm.AudioVisualizer.WaveformColor = Se.Settings.Waveform.WaveformColor.FromHexToColor();
         vm.AudioVisualizer.WaveformSelectedColor = Se.Settings.Waveform.WaveformSelectedColor.FromHexToColor();
+        vm.AudioVisualizer.OnSelectRequested += vm.AudioVisualizerSelectRequested;
+        vm.AudioVisualizer.OnPrimarySingleClicked += vm.AudioVisualizerOnPrimarySingleClicked;
+        vm.AudioVisualizer.OnPrimaryDoubleClicked += vm.AudioVisualizerOnPrimaryDoubleClicked;
 
         return UiUtil.MakeBorderForControl(vm.AudioVisualizer);
     }
@@ -288,5 +291,5 @@ public class CutVideoWindow : Window
     {
         base.OnKeyDown(e);
         _vm.OnKeyDown(e);
-    }    
+    }
 }
