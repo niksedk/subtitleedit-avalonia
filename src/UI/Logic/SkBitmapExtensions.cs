@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using SkiaSharp;
 using System;
 using System.IO;
@@ -107,7 +109,7 @@ internal static class SkBitmapExtensions
 
         return bitmap;
     }
-    
+
     public static SKBitmap MakeImageBrighter(byte[] originalBitmap, float brightnessIncrease = 0.25f)
     {
         using var ms = new MemoryStream(originalBitmap);
@@ -228,7 +230,7 @@ internal static class SkBitmapExtensions
         return data.ToArray();
     }
 
-    public static Bitmap ToAvaloniaBitmap(this SKBitmap skBitmap)
+    public static Bitmap ToAvaloniaBitmapOld(this SKBitmap skBitmap)
     {
         if (skBitmap.Width == 0 || skBitmap.Height == 0)
         {
@@ -242,11 +244,97 @@ internal static class SkBitmapExtensions
         return new Bitmap(stream);
     }
 
-    public static SKBitmap ToSkBitmap(this Bitmap avaloniaBitmap)
+
+    public static Bitmap ToAvaloniaBitmap(this SKBitmap skBitmap)
+    {
+        if (skBitmap.Width <= 0 || skBitmap.Height <= 0)
+            return new WriteableBitmap(new PixelSize(1, 1), Vector.One, PixelFormat.Bgra8888, AlphaFormat.Premul);
+
+        var bitmap = new WriteableBitmap(
+            new PixelSize(skBitmap.Width, skBitmap.Height),
+            new Vector(96, 96),
+            PixelFormat.Bgra8888,
+            AlphaFormat.Premul);
+
+        using (var lockedBitmap = bitmap.Lock())
+        {
+            int width = skBitmap.Width;
+            int height = skBitmap.Height;
+            int srcStride = skBitmap.RowBytes;
+            int dstStride = lockedBitmap.RowBytes;
+
+            unsafe
+            {
+                byte* srcBase = (byte*)skBitmap.GetPixels();
+                byte* dstBase = (byte*)lockedBitmap.Address;
+
+                for (int y = 0; y < height; y++)
+                {
+                    // Pointer arithmetic is faster than repeated multiplication
+                    uint* srcRow = (uint*)(srcBase + (y * srcStride));
+                    uint* dstRow = (uint*)(dstBase + (y * dstStride));
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        uint pixel = srcRow[x];
+                        uint a = pixel >> 24;
+
+                        if (a == 255)
+                        {
+                            dstRow[x] = pixel; // Fully opaque, no math needed
+                        }
+                        else if (a == 0)
+                        {
+                            dstRow[x] = 0; // Fully transparent
+                        }
+                        else
+                        {
+                            // Fast Premultiply Approximation: (color * alpha + 128) >> 8
+                            // We do this for R, G, and B in one block
+                            uint r = (pixel >> 16) & 0xFF;
+                            uint g = (pixel >> 8) & 0xFF;
+                            uint b = pixel & 0xFF;
+
+                            r = (r * a + 128) >> 8;
+                            g = (g * a + 128) >> 8;
+                            b = (b * a + 128) >> 8;
+
+                            dstRow[x] = (a << 24) | (r << 16) | (g << 8) | b;
+                        }
+                    }
+                }
+            }
+        }
+
+        return bitmap;
+    }
+
+    public static SKBitmap ToSkBitmapOld(this Bitmap avaloniaBitmap)
     {
         using var stream = new MemoryStream();
         avaloniaBitmap.Save(stream);
         stream.Seek(0, SeekOrigin.Begin);
         return SKBitmap.Decode(stream);
+    }
+
+
+    public static SKBitmap ToSkBitmap(this Bitmap avaloniaBitmap)
+    {
+        using var ms = new MemoryStream();
+        avaloniaBitmap.Save(ms);
+        using var data = SKData.CreateCopy(ms.GetBuffer(), (nuint)ms.Length);
+        using var image = SKImage.FromEncodedData(data);
+        if (image == null)
+        {
+            return new SKBitmap(1, 1, true);
+        }
+
+        var skBitmap = new SKBitmap(image.Width, image.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        using (var canvas = new SKCanvas(skBitmap))
+        {
+            canvas.DrawImage(image, 0, 0);
+        }
+
+        return skBitmap;
     }
 }
