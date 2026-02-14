@@ -28,6 +28,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using DownloadFfmpegViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadFfmpegViewModel;
 using DownloadLibMpvViewModel = Nikse.SubtitleEdit.Features.Shared.DownloadLibMpvViewModel;
@@ -80,6 +81,9 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<string> _saveSubtitleFormats;
     [ObservableProperty] private string _selectedSaveSubtitleFormat;
+
+    [ObservableProperty] private ObservableCollection<string> _favoriteSubtitleFormats;
+    [ObservableProperty] private string? _selectedFavoriteSubtitleFormat;
 
     [ObservableProperty] private ObservableCollection<TextEncoding> _encodings;
     [ObservableProperty] private TextEncoding _defaultEncoding;
@@ -369,6 +373,7 @@ public partial class SettingsViewModel : ObservableObject
 
         DefaultSubtitleFormats = new ObservableCollection<string>(defaultSubtitleFormats);
         SaveSubtitleFormats = new ObservableCollection<string>(saveSubtitleFormats);
+        FavoriteSubtitleFormats = new ObservableCollection<string>();
         SelectedDefaultSubtitleFormat = DefaultSubtitleFormats.First();
         SelectedSaveSubtitleFormat = SaveSubtitleFormats.First();
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
@@ -553,6 +558,19 @@ public partial class SettingsViewModel : ObservableObject
         if (!SaveSubtitleFormats.Contains(SelectedSaveSubtitleFormat))
         {
             SelectedSaveSubtitleFormat = SaveSubtitleFormats.FirstOrDefault() ?? string.Empty;
+        }
+
+        if (!string.IsNullOrEmpty(general.FavoriteSubtitleFormats))
+        {
+            var favoriteFormats = general.FavoriteSubtitleFormats.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            FavoriteSubtitleFormats.Clear();
+            foreach (var format in favoriteFormats)
+            {
+                if (SaveSubtitleFormats.Contains(format))
+                {
+                    FavoriteSubtitleFormats.Add(format);
+                }
+            }
         }
 
         GoToLineNumberAlsoSetVideoPosition = Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition;
@@ -1093,6 +1111,13 @@ public partial class SettingsViewModel : ObservableObject
 
         general.DefaultSubtitleFormat = SelectedDefaultSubtitleFormat;
         general.DefaultSaveAsFormat = SelectedSaveSubtitleFormat;
+
+        var sbFavorites = new StringBuilder();
+        foreach (var format in FavoriteSubtitleFormats)
+        {
+            sbFavorites.Append(format + ";");
+        }
+        general.FavoriteSubtitleFormats = sbFavorites.ToString().TrimEnd(';');
 
         Se.Settings.Tools.GoToLineNumberAlsoSetVideoPosition = GoToLineNumberAlsoSetVideoPosition;
         Se.Settings.Synchronization.AdjustAllTimesRememberLineSelectionChoice = AdjustAllTimesRememberLineSelectionChoice;

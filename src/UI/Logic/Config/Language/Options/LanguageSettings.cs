@@ -160,6 +160,7 @@ public class LanguageSettings
 
     public string DefaultFormat { get; set; }
     public string DefaultSaveAsFormat { get; set; }
+    public string FavoriteSubtitleFormats { get; set; }
 
     public string ShowStopButton { get; set; }
     public string ShowFullscreenButton { get; set; }
@@ -422,6 +423,7 @@ public class LanguageSettings
         AdjustAllTimesRememberLineSelectionChoice = "Adjust all times, remember line selection choice";
         DefaultFormat = "Default format";
         DefaultSaveAsFormat = "Default \"Save as\" format";
+        FavoriteSubtitleFormats = "Favorite subtitle formats";
         FilesAndLogs = "Files and logs";
         ShowErrorLogFile = "Show error log file";
         ShowWhisperLogFile = "Show Whisper log file";

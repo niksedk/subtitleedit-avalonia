@@ -302,6 +302,8 @@ public class SettingsPage : UserControl
                 ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                     new TextBlock { Text = f?.Name }, true)
             }),
+
+            new SettingsItem(Se.Language.Options.Settings.FavoriteSubtitleFormats, () => MakeFavoritesGrid(_vm)),
         ]));
 
         sections.Add(new SettingsSection(Se.Language.Options.Settings.SyntaxColoring,
@@ -676,6 +678,44 @@ public class SettingsPage : UserControl
 
 
         return sections;
+    }
+
+    private Grid MakeFavoritesGrid(SettingsViewModel vm)
+    {
+        // Grid with list of favorite formats, with buttons to add/remove/move-up/move-down
+
+        var grid = new Grid
+        {
+            RowDefinitions =
+            {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+            },
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+            },
+            Margin = new Thickness(0, 5, 0, 0),
+        };
+        
+        var listBox = new ListBox
+        {
+            DataContext = vm,
+            [!ItemsControl.ItemsSourceProperty] = new Binding(nameof(vm.FavoriteSubtitleFormats)),
+            [!SelectingItemsControl.SelectedItemProperty] = new Binding(nameof(vm.SelectedFavoriteSubtitleFormat)) { Mode = BindingMode.TwoWay },
+            ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
+                new TextBlock { Text = f?.Name }, true)
+        };
+
+        var buttonAdd = UiUtil.MakeButton(Se.Language.General.Add, vm.AddFavoriteSubtitleFormatCommand).WithMinWidth(75);   
+        var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveFavoriteSubtitleFormatCommand).WithMinWidth(75);
+        var buttonMoveUp = UiUtil.MakeButton(Se.Language.General.MoveUp, vm.MoveUpFavoriteSubtitleFormatCommand).WithMinWidth(75);
+        var buttonMoveDown = UiUtil.MakeButton(Se.Language.General.MoveDown, vm.MoveDownFavoriteSubtitleFormatCommand).WithMinWidth(75);
+
+        grid.Add(listBox, 0);
+
+        return grid;
     }
 
     private Control MakeMpvPreviewSettings(SettingsViewModel vm)
