@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -679,9 +680,7 @@ public class WavePeakGenerator2 : IDisposable
 
     private static int ReadValue16Bit(byte[] data, ref int index)
     {
-        int result = (short)
-            ((data[index]) |
-             (data[index + 1] << 8));
+        short result = Unsafe.ReadUnaligned<short>(ref data[index]);
         index += 2;
         return result;
     }
@@ -698,11 +697,7 @@ public class WavePeakGenerator2 : IDisposable
 
     private static int ReadValue32Bit(byte[] data, ref int index)
     {
-        int result =
-            (data[index]) |
-            (data[index + 1] << 8) |
-            (data[index + 2] << 16) |
-            (data[index + 3] << 24);
+        int result = Unsafe.ReadUnaligned<int>(ref data[index]);
         index += 4;
         return result;
     }
