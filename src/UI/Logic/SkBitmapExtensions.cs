@@ -207,10 +207,9 @@ internal static class SkBitmapExtensions
                             uint r = (pixel >> 16) & 0xFF;
                             uint g = (pixel >> 8) & 0xFF;
                             uint b = pixel & 0xFF;
-                            var a128 = a + 128; // Precompute alpha + 128 for reuse
-                            r = (r * a128) >> 8;
-                            g = (g * a128) >> 8;
-                            b = (b * a128) >> 8;
+                            r = (r * a + 128) >> 8;
+                            g = (g * a + 128) >> 8;
+                            b = (b * a + 128) >> 8;
 
                             dstRow[x] = (a << 24) | (r << 16) | (g << 8) | b;
                         }
