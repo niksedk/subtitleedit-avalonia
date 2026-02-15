@@ -14,7 +14,6 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -133,7 +132,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
         _dirty = true;
     }
 
-    private static IEnumerable<RuleTreeNode> GetNodes()
+    private static List<RuleTreeNode> GetNodes()
     {
         var nodes = new List<RuleTreeNode>();
 
@@ -251,39 +250,55 @@ public partial class MultipleReplaceViewModel : ObservableObject
             {
                 new MenuItem
                 {
-                    Header = Se.Language.General.EditDotDotDot, Command = CategoryEditCommand, CommandParameter = node
-                },
-                new Separator(),
-                new MenuItem
-                {
-                    Header = Se.Language.Edit.MultipleReplace.NewCategory, Command = CategoryAddCategoryCommand,
-                    CommandParameter = node
-                },
-                new MenuItem
-                {
-                    Header = Se.Language.Edit.MultipleReplace.NewRule, Command = CategoryAddRuleCommand,
+                    Header = Se.Language.General.EditDotDotDot,
+                    Command = CategoryEditCommand,
                     CommandParameter = node
                 },
                 new Separator(),
                 new MenuItem
-                    { Header = Se.Language.General.MoveUp, Command = CategoryMoveUpCommand, CommandParameter = node },
+                {
+                    Header = Se.Language.Edit.MultipleReplace.NewCategory,
+                    Command = CategoryAddCategoryCommand,
+                    CommandParameter = node
+                },
                 new MenuItem
                 {
-                    Header = Se.Language.General.MoveDown, Command = CategoryMoveDownCommand, CommandParameter = node
+                    Header = Se.Language.Edit.MultipleReplace.NewRule,
+                    Command = CategoryAddRuleCommand,
+                    CommandParameter = node
                 },
                 new Separator(),
                 new MenuItem
                 {
-                    Header = Se.Language.General.Delete, Command = CategoryDeleteCommand, CommandParameter = node,
+                    Header = Se.Language.General.MoveUp,
+                    Command = CategoryMoveUpCommand,
+                    CommandParameter = node
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.MoveDown,
+                    Command = CategoryMoveDownCommand,
+                    CommandParameter = node
                 },
                 new Separator(),
                 new MenuItem
                 {
-                    Header = Se.Language.General.ImportDotDotDot, Command = CategoryImportCommand, CommandParameter = node,
+                    Header = Se.Language.General.Delete,
+                    Command = CategoryDeleteCommand,
+                    CommandParameter = node,
+                },
+                new Separator(),
+                new MenuItem
+                {
+                    Header = Se.Language.General.ImportDotDotDot,
+                    Command = CategoryImportCommand,
+                    CommandParameter = node,
                 },
                 new MenuItem
                 {
-                    Header = Se.Language.General.ExportDotDotDot, Command = CategoryExportCommand, CommandParameter = node,
+                    Header = Se.Language.General.ExportDotDotDot,
+                    Command = CategoryExportCommand,
+                    CommandParameter = node,
                 },
             }
         };
@@ -324,7 +339,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
         var category = new RuleTreeNode(node, string.Empty, new ObservableCollection<RuleTreeNode>(), true);
         var result = await _windowService.ShowDialogAsync<EditCategoryWindow, EditCategoryViewModel>(Window!,
-            vm => { vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, category); });
+            vm =>
+            {
+                vm.Initialize(Se.Language.Edit.MultipleReplace.NewCategory, category);
+            });
 
         if (result.OkPressed)
         {
@@ -352,6 +370,20 @@ public partial class MultipleReplaceViewModel : ObservableObject
         {
             var rule = MakeRuleTreeNode(node, result);
             node.SubNodes?.Add(rule);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                var allTreeViewItems = FindAllTreeViewItems(RulesTreeView);
+                foreach (var item in allTreeViewItems)
+                {
+                    if (item.DataContext == node)
+                    {
+                        item.IsExpanded = true;
+                        break;
+                    }
+                }
+            }, DispatcherPriority.Background);
+
             SelectedNode = rule;
             _dirty = true;
         }
@@ -537,29 +569,49 @@ public partial class MultipleReplaceViewModel : ObservableObject
             {
                 new MenuItem
                 {
-                    Header = Se.Language.Edit.MultipleReplace.EditRule, Command = NodeEditCommand,
+                    Header = Se.Language.Edit.MultipleReplace.EditRule,
+                    Command = NodeEditCommand,
                     CommandParameter = node
                 },
                 new Separator(),
                 new MenuItem
-                    { Header = Se.Language.General.Duplicate, Command = NodeDuplicateCommand, CommandParameter = node },
-                new MenuItem
                 {
-                    Header = Se.Language.General.InsertBefore, Command = NodeInsertBeforeCommand,
+                    Header = Se.Language.General.Duplicate,
+                    Command = NodeDuplicateCommand,
                     CommandParameter = node
                 },
                 new MenuItem
                 {
-                    Header = Se.Language.General.InsertAfter, Command = NodeInsertAfterCommand, CommandParameter = node
+                    Header = Se.Language.General.InsertBefore,
+                    Command = NodeInsertBeforeCommand,
+                    CommandParameter = node
+                },
+                new MenuItem
+                {
+                    Header = Se.Language.General.InsertAfter,
+                    Command = NodeInsertAfterCommand,
+                    CommandParameter = node
                 },
                 new Separator(),
                 new MenuItem
-                    { Header = Se.Language.General.MoveUp, Command = NodeMoveUpCommand, CommandParameter = node },
+                {
+                    Header = Se.Language.General.MoveUp,
+                    Command = NodeMoveUpCommand,
+                    CommandParameter = node
+                },
                 new MenuItem
-                    { Header = Se.Language.General.MoveDown, Command = NodeMoveDownCommand, CommandParameter = node },
+                {
+                    Header = Se.Language.General.MoveDown,
+                    Command = NodeMoveDownCommand,
+                    CommandParameter = node
+                },
                 new Separator(),
                 new MenuItem
-                    { Header = Se.Language.General.Delete, Command = NodeDeleteCommand, CommandParameter = node }
+                {
+                    Header = Se.Language.General.Delete,
+                    Command = NodeDeleteCommand,
+                    CommandParameter = node
+                },
             }
         };
 
@@ -680,7 +732,10 @@ public partial class MultipleReplaceViewModel : ObservableObject
             return;
         }
 
-        Nodes.Remove(node);
+        if (node.Parent != null && node.Parent.SubNodes != null)
+        {
+            node.Parent.SubNodes.Remove(node);
+        }
 
         _dirty = true;
     }
@@ -698,9 +753,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         if (index > 0)
         {
             nodes.Move(index, index - 1);
+            _dirty = true;
         }
-
-        _dirty = true;
     }
 
     [RelayCommand]
@@ -716,9 +770,8 @@ public partial class MultipleReplaceViewModel : ObservableObject
         if (index < nodes.Count - 1)
         {
             nodes.Move(index, index + 1);
+            _dirty = true;
         }
-
-        _dirty = true;
     }
 
     internal void OnKeyDown(object? sender, KeyEventArgs e)
@@ -732,6 +785,11 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
     public void ExpandAll()
     {
+        if (RulesTreeView.ItemCount > 30)
+        {
+            return;
+        }
+
         Dispatcher.UIThread.Post(() =>
         {
             var allTreeViewItems = FindAllTreeViewItems(RulesTreeView);
@@ -889,11 +947,6 @@ public partial class MultipleReplaceViewModel : ObservableObject
         IsEditPanelVisible = node is { IsCategory: false };
     }
 
-    internal void OnLoaded(RoutedEventArgs e)
-    {
-        ExpandAll();
-    }
-
     public void OnActiveChanged(object? sender, RoutedEventArgs e)
     {
         _dirty = true;
@@ -930,6 +983,7 @@ public partial class MultipleReplaceViewModel : ObservableObject
 
     internal void OnLoaded()
     {
+        ExpandAll();
         UiUtil.RestoreWindowPosition(Window);
     }
 }

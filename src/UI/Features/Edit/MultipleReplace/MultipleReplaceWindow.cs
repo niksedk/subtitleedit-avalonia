@@ -75,6 +75,7 @@ public class MultipleReplaceWindow : Window
         Loaded += (_,_) => vm.OnLoaded();
         KeyDown += vm.OnKeyDown;
     }
+
     private static Border MakeRulesView(MultipleReplaceViewModel vm)
     {
         var treeView = new TreeView

@@ -13,9 +13,9 @@ public partial class EditRuleViewModel : ObservableObject
     [ObservableProperty] private bool _isRegularExpression;
     [ObservableProperty] private bool _isCaseSensitive;
     [ObservableProperty] private bool _isCaseInsensitive;
-    
+
     public Window? Window { get; set; }
-    
+
     public bool OkPressed { get; private set; }
     public string? Title { get; internal set; }
 
@@ -41,7 +41,7 @@ public partial class EditRuleViewModel : ObservableObject
         }
         else if (node.Type == MultipleReplaceType.CaseSensitive)
         {
-            IsCaseSensitive= true;
+            IsCaseSensitive = true;
         }
         else
         {
@@ -49,15 +49,15 @@ public partial class EditRuleViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
         OkPressed = true;
         Window?.Close();
     }
-    
-    [RelayCommand]                   
-    private void Cancel() 
+
+    [RelayCommand]
+    private void Cancel()
     {
         Window?.Close();
     }
@@ -68,6 +68,11 @@ public partial class EditRuleViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else if (e.Key == Key.Enter || e.Key == Key.Return)
+        {
+            e.Handled = true;
+            Ok();
         }
     }
 }
