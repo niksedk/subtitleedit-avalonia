@@ -71,8 +71,8 @@ public class MultipleReplaceWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
-        Closing += (_,_) => vm.OnClosing();
-        Loaded += (_,_) => vm.OnLoaded();
+        Closing += (_, _) => vm.OnClosing();
+        Loaded += (_, _) => vm.OnLoaded();
         KeyDown += vm.OnKeyDown;
     }
 
@@ -246,6 +246,8 @@ public class MultipleReplaceWindow : Window
         treeView.ItemTemplate = factory;
         vm.RulesTreeView = treeView;
         treeView.SelectionChanged += vm.RulesTreeView_SelectionChanged;
+        treeView.KeyDown += vm.RulesTreeView_KeyDown;
+        treeView.DoubleTapped += (_, e) => vm.TreeViewDoubleTapped(e);
 
         var scrollViewer = new ScrollViewer
         {
@@ -285,7 +287,7 @@ public class MultipleReplaceWindow : Window
             ColumnSpacing = 5,
         }.WithBindVisible(vm, nameof(vm.IsEditPanelVisible));
 
-        var labelFind =  UiUtil.MakeLabel(Se.Language.General.Find);
+        var labelFind = UiUtil.MakeLabel(Se.Language.General.Find);
         var textBoxFind = new TextBox
         {
             MinWidth = 100,

@@ -783,6 +783,30 @@ public partial class MultipleReplaceViewModel : ObservableObject
         }
     }
 
+
+    internal void RulesTreeView_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete)
+        {
+            e.Handled = true;
+            var node = SelectedNode;
+            if (node != null && !node.IsCategory)
+            {
+                NodeDelete(node);
+            }
+        }
+        else if (e.Key == Key.Space)
+        {
+            e.Handled = true;
+            var node = SelectedNode;
+            if (node != null)
+            {
+                node.IsActive = !node.IsActive;
+                _dirty = true;
+            }
+        }
+    }
+
     public void ExpandAll()
     {
         if (RulesTreeView.ItemCount > 30)
@@ -985,5 +1009,19 @@ public partial class MultipleReplaceViewModel : ObservableObject
     {
         ExpandAll();
         UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void TreeViewDoubleTapped(TappedEventArgs e)
+    {
+        var node = SelectedNode;
+        if (node is null)
+        {
+            return;
+        }
+
+        if (!node.IsCategory)
+        {
+            _ = NodeEdit(node);
+        }
     }
 }
