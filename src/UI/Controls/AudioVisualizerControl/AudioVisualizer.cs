@@ -272,6 +272,7 @@ public class AudioVisualizer : Control
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
     private bool _isCtrlDown;
+    private bool _isMetaDown;
     private bool _isAltDown;
     private bool _isShiftDown;
     private long _lastMouseWheelScroll = -1;
@@ -386,16 +387,18 @@ public class AudioVisualizer : Control
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
         if (e.Key == Key.Escape)
         {
@@ -425,6 +428,10 @@ public class AudioVisualizer : Control
         {
             _isCtrlDown = true;
         }
+        else if (e.Key == Key.LWin || e.Key == Key.RWin)
+        {
+            _isMetaDown = true;
+        }
         else if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
         {
             _isShiftDown = true;
@@ -439,12 +446,13 @@ public class AudioVisualizer : Control
     private void OnTapped(object? sender, TappedEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
-        var isWinDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
+        
         if (OperatingSystem.IsMacOS())
         {
-            _isCtrlDown = isWinDown;
+            _isCtrlDown = _isMetaDown;
         }
 
         var point = e.GetPosition(this);
@@ -571,9 +579,12 @@ public class AudioVisualizer : Control
 
         _audioVisualizerLastScroll = Environment.TickCount64; // Update the last scroll time
         StartPositionSeconds = newStart;
-        if (OnHorizontalScroll != null)
-        {
-            OnHorizontalScroll.Invoke(this, new PositionEventArgs { PositionInSeconds = newStart });
+        OnHorizontalScroll?.Invoke(this, new PositionEventArgs { PositionInSeconds = newStart });
+
+        if (_isCtrlDown || _isMetaDown)
+        { 
+            var videoPosition = RelativeXPositionToSeconds(point.X);
+            OnVideoPositionChanged?.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
         }
 
         InvalidateVisual();
@@ -582,8 +593,9 @@ public class AudioVisualizer : Control
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
         var nsp = NewSelectionParagraph;
         if (nsp is { Duration.TotalMilliseconds: <= 1 })
@@ -629,6 +641,7 @@ public class AudioVisualizer : Control
             _isAltDown = false;
             _isCtrlDown = false;
             _isShiftDown = false;
+            _isMetaDown = false;
             _interactionMode = InteractionMode.None;
             nsp?.UpdateDuration();
             _audioVisualizerLastScroll = 0;
@@ -725,8 +738,9 @@ public class AudioVisualizer : Control
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
 
         _lastPointerPressed = Environment.TickCount64;
         e.Handled = true;
@@ -2601,5 +2615,6 @@ public class AudioVisualizer : Control
         _isCtrlDown = e.KeyModifiers.HasFlag(KeyModifiers.Control);
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
     }
 }

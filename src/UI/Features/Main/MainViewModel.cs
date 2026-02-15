@@ -13104,6 +13104,8 @@ public partial class MainViewModel :
         newPosition = Math.Max(0, newPosition);
         newPosition = Math.Min(vp.Duration, newPosition);
 
+        vp.Position = newPosition;
+
         _updateAudioVisualizer = true; // Update the audio visualizer position
     }
 
