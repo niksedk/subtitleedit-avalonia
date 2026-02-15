@@ -354,8 +354,8 @@ public static class Unpacker
     public static void Extract7ZipSlow(string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
     {
         using Stream stream = File.OpenRead(tempFileName);
-        using var archive = SevenZipArchive.Open(stream);
-        double totalSize = archive.TotalUncompressSize;
+        using var archive = SevenZipArchive.OpenArchive(stream);
+        double totalSize = archive.TotalUncompressedSize;
         double unpackedSize = 0;
 
         var reader = archive.ExtractAllEntries();
@@ -405,11 +405,7 @@ public static class Unpacker
                     updateProgressText(string.Format(Se.Language.General.UnpackingX, displayName));
                 });
 
-                reader.WriteEntryToDirectory(fullPath, new ExtractionOptions()
-                {
-                    ExtractFullPath = false,
-                    Overwrite = true
-                });
+                reader.WriteEntryToDirectory(fullPath);
                 unpackedSize += reader.Entry.Size;
             }
         }
