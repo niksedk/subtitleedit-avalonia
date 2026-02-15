@@ -20,7 +20,7 @@ namespace Nikse.SubtitleEdit
 {
     internal class Program
     {
-        private static string? _pendingFileToOpen;
+        public static string? PendingFileToOpen { get; set; }
         public static bool FileOpenedViaActivation { get; set; }
 
         [STAThread]
@@ -195,7 +195,7 @@ namespace Nikse.SubtitleEdit
                             }
                             else
                             {
-                                _pendingFileToOpen = filePath;
+                                PendingFileToOpen = filePath;
                             }
 
                             break;
@@ -236,11 +236,11 @@ namespace Nikse.SubtitleEdit
             {
                 if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
                 {
+                    PendingFileToOpen = e.Args[0];
                     Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(e.Args[0]); });
-                    FileOpenedViaActivation = true;
                 }
                 
-                if (!string.IsNullOrEmpty(_pendingFileToOpen) || FileOpenedViaActivation)
+                if (!string.IsNullOrEmpty(PendingFileToOpen))
                 {
                     FileOpenedViaActivation = true;
                 }
@@ -248,10 +248,9 @@ namespace Nikse.SubtitleEdit
 
             lifetime.MainWindow.Opened += (_, _) =>
             {
-                if (!string.IsNullOrEmpty(_pendingFileToOpen))
+                if (!string.IsNullOrEmpty(PendingFileToOpen))
                 {
-                    var fileToOpen = _pendingFileToOpen;
-                    _pendingFileToOpen = null;
+                    var fileToOpen = PendingFileToOpen;
                     Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(fileToOpen); });
                 }
             };

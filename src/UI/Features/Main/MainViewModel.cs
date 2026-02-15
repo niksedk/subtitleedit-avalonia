@@ -424,12 +424,7 @@ public partial class MainViewModel :
         Subtitles = [];
         FilePropertiesText = string.Empty;
 
-        SubtitleFormats = [..SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()];
-        //var defaultFormat =
-        //    SubtitleFormats.Where(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat).FirstOrDefault() ??
-        //    SubtitleFormats[0];
-        //SubtitleFormats.Remove(defaultFormat);
-        //SubtitleFormats.Insert(0, defaultFormat);
+        SubtitleFormats = [.. SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()];
         SelectedSubtitleFormat = SubtitleFormats[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
@@ -5456,7 +5451,7 @@ public partial class MainViewModel :
         foreach (var format in SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop())
         {
             SubtitleFormats.Add(format);
-        }   
+        }
         SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First();
     }
 
@@ -11046,14 +11041,33 @@ public partial class MainViewModel :
                     Se.LogError(e);
                 }
             }, DispatcherPriority.Background);
-        }
+       }
 
         if (AudioVisualizer != null)
         {
             AudioVisualizer.IsReadOnly = LockTimeCodes;
         }
 
-        if (!Program.FileOpenedViaActivation && Se.Settings.File.ShowRecentFiles)
+        if (Program.FileOpenedViaActivation && !string.IsNullOrEmpty(Program.PendingFileToOpen))
+        {
+            Dispatcher.UIThread.Post(async void () =>
+            {
+                if (Se.Settings.General.RememberPositionAndSize)
+                {
+                    if (Se.Settings.General.UndockVideoControls)
+                    {
+                        VideoUndockControls();
+                    }
+
+                    InitLayout.RestoreLayoutPositions(Se.Settings.Appearance.CurrentLayoutPositions, ContentGrid.Children.FirstOrDefault() as Grid);
+                }
+
+                await Task.Delay(100);
+                await SubtitleOpen(Program.PendingFileToOpen);
+                Program.PendingFileToOpen = null;
+            });
+        }
+        else if (Se.Settings.File.ShowRecentFiles)
         {
             var first = Se.Settings.File.RecentFiles.FirstOrDefault();
             if (first != null && File.Exists(first.SubtitleFileName))
@@ -11065,11 +11079,6 @@ public partial class MainViewModel :
                         // Delay to allow Activated event to set FileOpenedViaActivation flag, the Activated event fires asynchronously during startup
                         // and may not have completed by the time OnLoaded runs so wait and recheck the flag
                         await Task.Delay(100);
-
-                        if (Program.FileOpenedViaActivation)
-                        {
-                            return;
-                        }
 
                         bool skipLoadVideo = false;
                         _videoFileName = first.VideoFileName;
