@@ -102,6 +102,12 @@
     "Description": "Persian Spellchecker Dictionary - 2009.07.07"
   },
   {
+    "EnglishName": "Finnish",
+    "NativeName": "Suomi",
+    "DownloadLink": "https://github.com/fginter/hunspell-fi/releases/download/0.2/fi-spell-0.2.xpi",
+    "Description": "Finnish Spellchecker Dictionary - Dec 6, 2023"
+  },
+  {
     "EnglishName": "French",
     "NativeName": "Français",
     "DownloadLink": "https://extensions.libreoffice.org/assets/downloads/z/lo-oo-ressources-linguistiques-fr-v5-7.oxt",
