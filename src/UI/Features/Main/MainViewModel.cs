@@ -753,8 +753,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task ShowHelp()
     {
-        await Window!.Launcher.LaunchUriAsync(new Uri("https://www.nikse.dk/subtitleedit/help"));
-        _shortcutManager.ClearKeys();
+        UiUtil.ShowHelp("index");
     }
 
     [RelayCommand]
