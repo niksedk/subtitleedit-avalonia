@@ -41,11 +41,11 @@ public partial class FindViewModel : ObservableObject
     {
         WholeWord = Se.Settings.Edit.Find.FindWholeWords;
 
-        if (Se.Settings.Edit.Find.FindSearchType == FindMode.CaseInsensitive.ToString())
+        if (Se.Settings.Edit.Find.FindSearchType == nameof(FindMode.CaseInsensitive))
         {
             FindTypeCanseInsensitive = true;
         }
-        else if (Se.Settings.Edit.Find.FindSearchType == FindMode.CaseSensitive.ToString())
+        else if (Se.Settings.Edit.Find.FindSearchType == nameof(FindMode.CaseSensitive))
         {
             FindTypeNormal = true;
         }

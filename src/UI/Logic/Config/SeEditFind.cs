@@ -11,6 +11,6 @@ public class SeEditFind
     public SeEditFind()
     {
         FindWholeWords = false;
-        FindSearchType = FindMode.CaseSensitive.ToString();
+        FindSearchType = nameof(FindMode.CaseInsensitive);
     }
 }
