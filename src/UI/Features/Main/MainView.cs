@@ -111,11 +111,14 @@ public class MainView : ViewBase
 
     internal async Task OpenFile(string fileName)
     {
-        //if (_vm == null || !System.IO.File.Exists(fileName))
-        //{
-        //    return;
-        //}
+        if (_vm == null || !System.IO.File.Exists(fileName))
+        {
+            return;
+        }
 
-        //await _vm.SubtitleOpen(fileName);
+        Dispatcher.UIThread.Post(async () =>
+        {
+            await _vm.SubtitleOpen(fileName);
+        });
     }
 }

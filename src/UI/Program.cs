@@ -237,21 +237,7 @@ namespace Nikse.SubtitleEdit
                 if (e.Args.Length > 0 && System.IO.File.Exists(e.Args[0]))
                 {
                     PendingFileToOpen = e.Args[0];
-                    Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(e.Args[0]); });
-                }
-                
-                if (!string.IsNullOrEmpty(PendingFileToOpen))
-                {
                     FileOpenedViaActivation = true;
-                }
-            };
-
-            lifetime.MainWindow.Opened += (_, _) =>
-            {
-                if (!string.IsNullOrEmpty(PendingFileToOpen))
-                {
-                    var fileToOpen = PendingFileToOpen;
-                    Dispatcher.UIThread.Post(async void () => { await mainView.OpenFile(fileToOpen); });
                 }
             };
         }
