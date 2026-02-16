@@ -133,7 +133,7 @@ namespace Nikse.SubtitleEdit.Core.AudioToText
 
         private static bool IsNonStandardLineTerminationLanguage(string language)
         {
-            return language == "jp" || language == "cn" || language == "yue";
+            return language is "jp" or "ja" or "cn" or "yue";
         }
 
         public Subtitle Fix(Subtitle subtitle, bool usePostProcessing, bool addPeriods, bool mergeLines, bool fixCasing, bool fixShortDuration, bool splitLines, Engine engine)
