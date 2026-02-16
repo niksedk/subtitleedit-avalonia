@@ -583,6 +583,8 @@ public partial class MainViewModel :
 
     private static void InitializeLibMpv()
     {
+        LibMpvDynamicPlayer.MpvPath = Se.DataFolder;
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var newFileName = DownloadLibMpvViewModel.GetFallbackLibMpvFileName(false);
