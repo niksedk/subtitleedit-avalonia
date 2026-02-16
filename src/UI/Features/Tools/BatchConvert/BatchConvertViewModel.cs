@@ -1157,6 +1157,11 @@ public partial class BatchConvertViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/batch-convert");
+        }
     }
 
     private BatchConvertConfig MakeBatchConvertConfig()

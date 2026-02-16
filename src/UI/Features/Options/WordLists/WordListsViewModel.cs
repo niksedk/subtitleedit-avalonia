@@ -370,6 +370,11 @@ public partial class WordListsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/word-lists");
+        }
     }
 
     internal void SelectedLanguageChanged()

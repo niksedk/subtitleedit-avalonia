@@ -481,5 +481,10 @@ public partial class ReEncodeVideoViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/re-encode-video");
+        }
     }
 }

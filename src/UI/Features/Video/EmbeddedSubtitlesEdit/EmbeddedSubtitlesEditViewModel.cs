@@ -568,6 +568,11 @@ public partial class EmbeddedSubtitlesEditViewModel : ObservableObject
             e.Handled = true;
             Cancel();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/embedded-subtitles");
+        }
     }
 
     internal void OnClosing()

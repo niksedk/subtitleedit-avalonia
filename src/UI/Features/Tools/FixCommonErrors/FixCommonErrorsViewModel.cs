@@ -435,6 +435,11 @@ public partial class FixCommonErrorsViewModel : ObservableObject, IFixCallbacks
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/fix-common-errors");
+        }
     }
 
     internal void TextBoxSearch_TextChanged(object? sender, TextChangedEventArgs e)

@@ -2077,6 +2077,11 @@ public partial class SettingsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/settings");
+        }
     }
 
     internal void Initialize(MainViewModel mainViewModel)

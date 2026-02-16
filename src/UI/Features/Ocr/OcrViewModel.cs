@@ -2804,6 +2804,11 @@ public partial class OcrViewModel : ObservableObject
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/ocr");
+        }
     }
 
     internal void DataGridTracksSelectionChanged(object? sender, SelectionChangedEventArgs e)

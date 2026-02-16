@@ -137,6 +137,11 @@ public partial class PointSyncViewModel : ObservableObject
         {
             Cancel();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/point-sync");
+        }
     }
 
     internal void PointSyncContextMenuOpening(object? sender, EventArgs e)

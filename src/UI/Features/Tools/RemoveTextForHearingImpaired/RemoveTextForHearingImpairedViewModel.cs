@@ -335,6 +335,11 @@ public partial class RemoveTextForHearingImpairedViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/remove-text-hi");
+        }
     }
 
     public void OnLoaded(RoutedEventArgs routedEventArgs)

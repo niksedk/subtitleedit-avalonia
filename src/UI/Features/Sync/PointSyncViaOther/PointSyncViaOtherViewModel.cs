@@ -172,6 +172,11 @@ public partial class PointSyncViaOtherViewModel : ObservableObject
         {
             Cancel();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/point-sync-via-other");
+        }
     }
 
     internal void PointSyncContextMenuOpening(object? sender, EventArgs e)

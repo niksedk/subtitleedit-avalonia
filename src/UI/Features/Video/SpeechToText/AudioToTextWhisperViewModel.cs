@@ -2128,6 +2128,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/speech-to-text");
+        }
     }
 
     private void RefreshDownloadStatus(WhisperModel? result)

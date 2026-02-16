@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -148,6 +149,11 @@ public partial class ApplyMinGapViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/apply-min-gap");
         }
     }
 

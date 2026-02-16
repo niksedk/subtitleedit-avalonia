@@ -3,6 +3,7 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.ObjectModel;
 
@@ -73,6 +74,11 @@ public partial class ChangeSpeedViewModel : ObservableObject
         {
             e.Handled = true;
             Window?.Close();
+        }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/change-speed");
         }
     }
 

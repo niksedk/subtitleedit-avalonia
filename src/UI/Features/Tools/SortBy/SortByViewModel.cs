@@ -352,6 +352,11 @@ public partial class SortByViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/sort-by");
+        }
     }
 
     internal void ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)

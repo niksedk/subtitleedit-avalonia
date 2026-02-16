@@ -53,5 +53,9 @@ The main window consists of several key areas:
 - **Video Player** — Preview video with subtitles
 - **Audio Visualizer** — Waveform/spectrogram for precise timing adjustments
 
+Subtitle Edit offers **12 different layouts** for arranging these areas. You can choose and customize the layout via **Options → Choose layout**.
+
+For a detailed guide to each area, mouse interactions, and keyboard shortcuts, see the **[Main Window](features/main-window.md)** documentation.
+
 <!-- Screenshot: Main window with labeled areas -->
 ![Main Window Layout](screenshots/main-window-layout.png)

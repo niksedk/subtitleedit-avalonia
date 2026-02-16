@@ -5,6 +5,7 @@ Subtitle Edit is a free, open-source editor for video subtitles. This is the doc
 ## Getting Started
 
 - [Overview](overview.md) — What is Subtitle Edit and how to get started
+- [Main Window](features/main-window.md) — Main window layout, areas, and interaction guide
 - [FAQ](faq.md) — Frequently Asked Questions
 
 ## Feature Areas
@@ -64,10 +65,7 @@ Subtitle Edit is a free, open-source editor for video subtitles. This is the doc
 - [Find Double Words](features/find-double-words.md) — Find repeated words
 
 ### OCR (Optical Character Recognition)
-- [OCR](features/ocr.md) — Convert image-based subtitles to text
-- [nOCR](features/nocr.md) — Nikse's OCR engine
-- [Binary OCR](features/binary-ocr.md) — Binary image OCR
-- [Tesseract OCR](features/tesseract-ocr.md) — Tesseract-based OCR
+- [OCR](features/ocr.md) — Convert image-based subtitles to text (nOCR, Binary OCR, Tesseract)
 
 ### ASSA (Advanced SubStation Alpha)
 - [ASSA Styles](features/assa-styles.md) — Manage ASS/SSA styles

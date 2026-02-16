@@ -145,5 +145,10 @@ public partial class ChangeCasingViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/change-casing");
+        }
     }
 }

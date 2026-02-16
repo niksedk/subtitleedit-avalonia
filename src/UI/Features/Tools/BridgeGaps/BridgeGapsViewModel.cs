@@ -154,6 +154,11 @@ public partial class BridgeGapsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/bridge-gaps");
+        }
     }
 
     internal void ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)

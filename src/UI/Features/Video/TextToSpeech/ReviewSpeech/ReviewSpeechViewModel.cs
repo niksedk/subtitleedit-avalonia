@@ -710,6 +710,11 @@ public partial class ReviewSpeechViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/text-to-speech");
+        }
         else if (e.Key == Key.R && e.KeyModifiers == KeyModifiers.Control)
         {
             e.Handled = true;

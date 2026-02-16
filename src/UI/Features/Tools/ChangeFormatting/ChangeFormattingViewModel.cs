@@ -136,6 +136,11 @@ public partial class ChangeFormattingViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/change-formatting");
+        }
     }
 
     internal void SelectionChanged(object? sender, SelectionChangedEventArgs e)

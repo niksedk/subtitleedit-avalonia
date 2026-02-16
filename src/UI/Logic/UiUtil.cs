@@ -17,6 +17,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Nikse.SubtitleEdit.Logic;
@@ -2252,13 +2253,20 @@ public static class UiUtil
         }
     }
 
-    internal static object MakeLabel(object position)
+    internal static void ShowHelp(string helpName)
     {
-        throw new NotImplementedException();
-    }
-
-    internal static object MakeToolTip(object playSelectedRepeatHint, List<ShortCut> shortcuts, string v)
-    {
-        throw new NotImplementedException();
+        var helpUrl = string.Format($"https://github.com/niksedk/subtitleedit-avalonia/blob/main/docs/{helpName}.md");
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = helpUrl,
+                UseShellExecute = true
+            });
+        }
+        catch 
+        { 
+            // ignore
+        }
     }
 }

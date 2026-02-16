@@ -500,6 +500,11 @@ public partial class ShotChangesViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/shot-changes");
+        }
     }
 
     internal void Initialize(string videoFileName)

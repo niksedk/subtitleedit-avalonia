@@ -330,6 +330,11 @@ public partial class SpellCheckViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/spell-check");
+        }
     }
 
     private void DoSpellCheck()

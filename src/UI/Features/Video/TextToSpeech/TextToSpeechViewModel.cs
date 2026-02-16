@@ -1105,6 +1105,11 @@ public partial class TextToSpeechViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/text-to-speech");
+        }
     }
 
     internal void OnClosing(WindowClosingEventArgs e)

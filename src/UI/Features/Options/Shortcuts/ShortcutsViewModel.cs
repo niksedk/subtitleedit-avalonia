@@ -923,6 +923,11 @@ public partial class ShortcutsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/shortcuts");
+        }
     }
 
     internal void ComboBoxFilter_SelectionChanged(object? sender, SelectionChangedEventArgs e)

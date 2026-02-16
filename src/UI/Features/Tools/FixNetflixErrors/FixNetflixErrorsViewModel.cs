@@ -325,6 +325,11 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/fix-common-errors");
+        }
     }
 
     public void OnLoaded(RoutedEventArgs routedEventArgs)

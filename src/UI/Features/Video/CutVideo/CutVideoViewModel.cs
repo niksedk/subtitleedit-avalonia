@@ -718,6 +718,12 @@ public partial class CutVideoViewModel : ObservableObject
                 _ = Cancel();
                 return;
             }
+            else if (keyEventArgs.Key == Key.F1)
+            {
+                keyEventArgs.Handled = true;
+                UiUtil.ShowHelp("features/cut-video");
+                return;
+            }
             else if (keyEventArgs.Key == Key.Space)
             {
                 keyEventArgs.Handled = true;

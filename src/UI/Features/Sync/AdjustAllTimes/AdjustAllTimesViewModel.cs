@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
@@ -268,6 +269,11 @@ public partial class AdjustAllTimesViewModel : ObservableObject
         else if ((e.Key == Key.Left || e.Key == Key.FnLeftArrow) && e.KeyModifiers == KeyModifiers.Alt)
         {
             ShowEarlierTimeSpan(TimeSpan.FromMilliseconds(500));
+        }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/adjust-all-times");
         }
     }
 

@@ -530,6 +530,11 @@ public partial class VisualSyncViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/visual-sync");
+        }
 
         if (IsLeftFocused())
         {

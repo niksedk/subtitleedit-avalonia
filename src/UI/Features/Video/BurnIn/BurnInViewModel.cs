@@ -1342,6 +1342,11 @@ public partial class BurnInViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            UiUtil.ShowHelp("features/burn-in");
+        }
     }
 
     private static string TryGetSubtitleFileName(string fileName)
