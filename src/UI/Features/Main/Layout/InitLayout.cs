@@ -614,13 +614,16 @@ public static partial class InitLayout
             }
         };
 
-        // hide video player
-        if (vm.VideoPlayerControl != null)
+        // video player
+        var borderVideo = new Border
         {
-            vm.VideoPlayerControl.RemoveControlFromParent();
-            contentGrid.Children.Add(vm.VideoPlayerControl);
-            vm.VideoPlayerControl.IsVisible = false;
-        }
+            Child = InitVideoPlayer.MakeLayoutVideoPlayer(vm),
+            Width = 0, 
+            Height = 0,  
+            ZIndex = -1000,
+        };
+        Grid.SetRow(borderVideo, 0);
+        contentGrid.Children.Add(borderVideo);
 
         // Top section
         var topContent = new Border
