@@ -206,6 +206,7 @@ public partial class MainViewModel :
     [ObservableProperty] private bool _lockTimeCodes;
     [ObservableProperty] private bool _areVideoControlsUndocked;
     [ObservableProperty] private bool _isFormatAssa;
+    [ObservableProperty] private bool _isFormatSsa;
     [ObservableProperty] private bool _hasFormatStyle;
     [ObservableProperty] private bool _areAssaContentMenuItemsVisible;
     [ObservableProperty] private bool _selectCurrentSubtitleWhilePlaying;
@@ -12253,7 +12254,7 @@ public partial class MainViewModel :
         {
             IsMergeWithNextOrPreviousVisible = SubtitleGrid.SelectedItems.Count == 1;
 
-            if (IsFormatAssa)
+            if (IsFormatAssa || IsFormatSsa)
             {
                 AreAssaContentMenuItemsVisible = true;
 
@@ -13562,7 +13563,8 @@ public partial class MainViewModel :
     internal void ComboBoxSubtitleFormatChanged(object? sender, SelectionChangedEventArgs e)
     {
         IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
-        HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha;
+        IsFormatSsa = SelectedSubtitleFormat is SubStationAlpha;
+        HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha or SubStationAlpha;
         ShowLayer = IsFormatAssa && Se.Settings.Appearance.ShowLayer;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
 
