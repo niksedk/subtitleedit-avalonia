@@ -29,6 +29,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibSETests", "tests\libse\L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeConv", "src\seconv\SeConv.csproj", "{77D87C12-39A0-C3B3-774C-FC013291D389}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2FFE3E54-97BC-4DC1-865D-B9B4ED339E8E}"
+	ProjectSection(SolutionItems) = preProject
+		docs\faq.md = docs\faq.md
+		docs\index.md = docs\index.md
+		docs\overview.md = docs\overview.md
+		docs\SevenZipCrossPlatform.md = docs\SevenZipCrossPlatform.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +65,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{20ABFC11-A537-4519-BC53-961E337091C3} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+		{2FFE3E54-97BC-4DC1-865D-B9B4ED339E8E} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}
