@@ -1936,10 +1936,16 @@ public partial class OcrViewModel : ObservableObject
             var match = matches[i];
             if (match.Text.EndsWith("1", StringComparison.Ordinal) && !match.Italic)
             {
+                var pixelsLess = 0;
+                if (pixelsAreSpace > 7)
+                { 
+                    pixelsLess = (int)Math.Round(pixelsAreSpace * 0.3m, MidpointRounding.AwayFromZero);
+                }
+
                 var nextMatch = matches[i + 1];
                 if (nextMatch.ImageSplitterItem != null &&
                     nextMatch.ImageSplitterItem.SpecialCharacter == " " &&
-                    nextMatch.ImageSplitterItem.SpacePixels - 3 < pixelsAreSpace)
+                    nextMatch.ImageSplitterItem.SpacePixels - pixelsLess < pixelsAreSpace)
                 {
                     deleteItems.Add(nextMatch);
                 }
