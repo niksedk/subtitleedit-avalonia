@@ -23,12 +23,13 @@ Subtitle Edit is a free, open-source editor for video subtitles. It allows you t
 - **ASSA/SSA styling** with advanced override tags, drawing, and positioning
 - **Waveform/spectrogram** for precise timing
 - **Shot change detection** for professional workflows
+- **Export to image based subtitles** (Blu-ray SUP, BDN-xml, VobSub, etc.)
 
 ## System Requirements
 
-- Windows 10+ / Linux / macOS (arm64)
+- Windows 10+ / Linux / macOS 
 - [FFmpeg](https://ffmpeg.org/) (for audio/video processing)
-- Optional: [VLC](https://www.videolan.org/) or [libmpv](https://mpv.io/) for video playback
+- Optional: [libmpv](https://mpv.io/) for video playback
 
 ## Getting Started
 

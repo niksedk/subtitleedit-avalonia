@@ -37,6 +37,67 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2FFE3E54-9
 		docs\SevenZipCrossPlatform.md = docs\SevenZipCrossPlatform.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{882DC26E-87FC-41CD-937E-8A187C0C058C}"
+	ProjectSection(SolutionItems) = preProject
+		docs\features\adjust-all-times.md = docs\features\adjust-all-times.md
+		docs\features\adjust-duration.md = docs\features\adjust-duration.md
+		docs\features\apply-duration-limits.md = docs\features\apply-duration-limits.md
+		docs\features\apply-min-gap.md = docs\features\apply-min-gap.md
+		docs\features\assa-attachments.md = docs\features\assa-attachments.md
+		docs\features\assa-draw.md = docs\features\assa-draw.md
+		docs\features\assa-image-color-picker.md = docs\features\assa-image-color-picker.md
+		docs\features\assa-override-tags.md = docs\features\assa-override-tags.md
+		docs\features\assa-progress-bar.md = docs\features\assa-progress-bar.md
+		docs\features\assa-properties.md = docs\features\assa-properties.md
+		docs\features\assa-resolution-resampler.md = docs\features\assa-resolution-resampler.md
+		docs\features\assa-set-background.md = docs\features\assa-set-background.md
+		docs\features\assa-set-position.md = docs\features\assa-set-position.md
+		docs\features\assa-styles.md = docs\features\assa-styles.md
+		docs\features\audio-visualizer.md = docs\features\audio-visualizer.md
+		docs\features\auto-translate.md = docs\features\auto-translate.md
+		docs\features\batch-convert.md = docs\features\batch-convert.md
+		docs\features\blank-video.md = docs\features\blank-video.md
+		docs\features\bridge-gaps.md = docs\features\bridge-gaps.md
+		docs\features\burn-in.md = docs\features\burn-in.md
+		docs\features\change-casing.md = docs\features\change-casing.md
+		docs\features\change-formatting.md = docs\features\change-formatting.md
+		docs\features\change-frame-rate.md = docs\features\change-frame-rate.md
+		docs\features\change-speed.md = docs\features\change-speed.md
+		docs\features\compare.md = docs\features\compare.md
+		docs\features\copy-paste-translate.md = docs\features\copy-paste-translate.md
+		docs\features\cut-video.md = docs\features\cut-video.md
+		docs\features\edit.md = docs\features\edit.md
+		docs\features\file.md = docs\features\file.md
+		docs\features\find-double-words.md = docs\features\find-double-words.md
+		docs\features\fix-common-errors.md = docs\features\fix-common-errors.md
+		docs\features\join-subtitles.md = docs\features\join-subtitles.md
+		docs\features\main-window.md = docs\features\main-window.md
+		docs\features\merge-same-text.md = docs\features\merge-same-text.md
+		docs\features\merge-same-timecodes.md = docs\features\merge-same-timecodes.md
+		docs\features\merge-short-lines.md = docs\features\merge-short-lines.md
+		docs\features\ocr.md = docs\features\ocr.md
+		docs\features\point-sync-via-other.md = docs\features\point-sync-via-other.md
+		docs\features\point-sync.md = docs\features\point-sync.md
+		docs\features\re-encode-video.md = docs\features\re-encode-video.md
+		docs\features\remove-text-hi.md = docs\features\remove-text-hi.md
+		docs\features\settings.md = docs\features\settings.md
+		docs\features\shortcuts.md = docs\features\shortcuts.md
+		docs\features\shot-changes.md = docs\features\shot-changes.md
+		docs\features\sort-by.md = docs\features\sort-by.md
+		docs\features\speech-to-text.md = docs\features\speech-to-text.md
+		docs\features\spell-check.md = docs\features\spell-check.md
+		docs\features\split-break-long-lines.md = docs\features\split-break-long-lines.md
+		docs\features\split-subtitle.md = docs\features\split-subtitle.md
+		docs\features\statistics.md = docs\features\statistics.md
+		docs\features\subtitle-grid.md = docs\features\subtitle-grid.md
+		docs\features\text-editor.md = docs\features\text-editor.md
+		docs\features\text-to-speech.md = docs\features\text-to-speech.md
+		docs\features\transparent-subtitles.md = docs\features\transparent-subtitles.md
+		docs\features\video-player.md = docs\features\video-player.md
+		docs\features\visual-sync.md = docs\features\visual-sync.md
+		docs\features\word-lists.md = docs\features\word-lists.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +127,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{20ABFC11-A537-4519-BC53-961E337091C3} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 		{2FFE3E54-97BC-4DC1-865D-B9B4ED339E8E} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
+		{882DC26E-87FC-41CD-937E-8A187C0C058C} = {2FFE3E54-97BC-4DC1-865D-B9B4ED339E8E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {27E960EC-896F-428C-95A2-C250321C16D5}

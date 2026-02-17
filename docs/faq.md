@@ -43,17 +43,21 @@ Use **File → Import image subtitle for edit (OCR)...** to import Blu-ray SUP, 
 
 ### What video players are supported?
 Subtitle Edit supports:
-- **libmpv** (recommended) — High-quality, wide format support
-- **VLC** — Popular cross-platform player
-- **Built-in** — Basic playback
+- **libmpv** — High-quality, wide format support
+- **VLC** - Popular player, limited support in SE
 
 Configure the video player in **Options → Settings → Video Player**.
 
+If you have problems with a video, try **Video → More → Re-encode video for better subtitling**.
+
 ### How do I generate a waveform?
-Open a video file, and Subtitle Edit will offer to generate a waveform automatically. You can also right-click the waveform area to generate it manually. FFmpeg is required.
+Open a video file, and Subtitle Edit will offer to generate a waveform automatically. FFmpeg is required.
+
+To generate enable spectrogram go to **Options → Settings**.
+
 
 ### Where do I get FFmpeg?
-On first use, Subtitle Edit can download FFmpeg for you. You can also set the FFmpeg path manually in **Options → Settings**.
+Subtitle Edit will ask for download on first use. You can also download FFmpeg in **Options → Settings**.
 
 ---
 
@@ -71,7 +75,7 @@ Subtitle Edit supports several Whisper-based engines:
 
 ### How do I use Speech to Text?
 1. Open a video file
-2. Go to **Video → Speech to text (Whisper)...**
+2. Go to **Video → Speech to text...**
 3. Choose an engine and model (download if needed)
 4. Select the language
 5. Click **Transcribe**
@@ -148,11 +152,10 @@ See the [Keyboard Shortcuts Reference](reference/keyboard-shortcuts.md) for the 
 ### Subtitle Edit won't play video
 - Ensure you have a video player installed (libmpv or VLC)
 - Check that the video player path is correctly set in **Options → Settings → Video Player**
-- Try a different video player
+- Try to re-encode the video for better compatibility via **Video → More → Re-encode video for better subtitling**
 
 ### Waveform is not showing
 - Ensure FFmpeg is installed and the path is set in settings
-- Try regenerating the waveform by right-clicking the waveform area
 
 ### Speech to Text fails
 - Ensure the Whisper engine is downloaded (it will prompt you)
