@@ -21,6 +21,11 @@ public class OcrSubtitleMkvBluRay : IOcrSubtitle
 
     public SKBitmap GetBitmap(int index)
     {
+        if (index < 0 || index >= Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
+        }
+
         return _pcsDataList[index].GetBitmap();
     }
 
@@ -43,12 +48,6 @@ public class OcrSubtitleMkvBluRay : IOcrSubtitle
         }
 
         return ocrSubtitleItems;
-    }
-
-    public void Delete(int index)
-    {
-        _pcsDataList.RemoveAt(index);
-        Count = _pcsDataList.Count;
     }
 
     public SKPointI GetPosition(int index)

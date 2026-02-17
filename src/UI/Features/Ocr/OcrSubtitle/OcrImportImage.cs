@@ -42,12 +42,6 @@ public class OcrImportImage : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _images.RemoveAt(index);
-        Count = _images.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         return new SKPointI(0, 0);

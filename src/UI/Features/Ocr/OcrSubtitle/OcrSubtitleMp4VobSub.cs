@@ -46,12 +46,6 @@ public class OcrSubtitleMp4VobSub : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _paragraphs.RemoveAt(index);
-        Count = _paragraphs.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         return new SKPointI(-1, -1);

@@ -49,12 +49,6 @@ public class OcrSubtitleMkvDvb : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _subtitleImages.RemoveAt(index);
-        Count = _subtitleImages.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         var position = _subtitleImages[index].GetPosition();    

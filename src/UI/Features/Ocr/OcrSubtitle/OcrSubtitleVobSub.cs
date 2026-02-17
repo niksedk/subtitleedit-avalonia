@@ -51,12 +51,6 @@ public class OcrSubtitleVobSub : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _vobSubMergedPack.RemoveAt(index);
-        Count = _vobSubMergedPack.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         var item = _vobSubMergedPack[index];

@@ -48,12 +48,6 @@ public class OcrSubtitleImageParameter : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _imageParameterList.RemoveAt(index);
-        Count = _imageParameterList.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         if (index < 0 || index >= _imageParameterList.Count)

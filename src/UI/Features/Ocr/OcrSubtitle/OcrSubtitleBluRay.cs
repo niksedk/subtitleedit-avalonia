@@ -48,12 +48,6 @@ public class OcrSubtitleBluRay : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _pcsDataList.RemoveAt(index);
-        Count = _pcsDataList.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         if (index < 0 || index >= _pcsDataList.Count)

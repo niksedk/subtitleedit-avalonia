@@ -44,12 +44,6 @@ public class OcrSubtitleDivX : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _list.RemoveAt(index);
-        Count = _list.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         return new SKPointI(-1, -1);

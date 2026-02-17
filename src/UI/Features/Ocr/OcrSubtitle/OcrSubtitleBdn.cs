@@ -296,12 +296,6 @@ public class OcrSubtitleBdn : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _bdnXmlSubtitle.Paragraphs.RemoveAt(index);
-        Count = _bdnXmlSubtitle.Paragraphs.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         return new SKPointI(-1, -1);

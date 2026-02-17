@@ -46,12 +46,6 @@ public class OcrSubtitleTransportStream : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _subtitles.RemoveAt(index);
-        Count = _subtitles.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         var position = _subtitles[index].GetPosition();

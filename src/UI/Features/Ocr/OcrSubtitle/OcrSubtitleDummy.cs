@@ -42,12 +42,6 @@ public class OcrSubtitleDummy : IOcrSubtitle
         return ocrSubtitleItems;
     }
 
-    public void Delete(int index)
-    {
-        _subtitle.Paragraphs.RemoveAt(index);
-        Count = _subtitle.Paragraphs.Count;
-    }
-
     public SKPointI GetPosition(int index)
     {
         return new SKPointI(-1, -1);

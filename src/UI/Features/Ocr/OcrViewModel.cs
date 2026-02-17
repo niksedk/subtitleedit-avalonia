@@ -1230,10 +1230,10 @@ public partial class OcrViewModel : ObservableObject
             OcrSubtitleItems.Remove(item);
         }
 
-        foreach (var index in selectedIndices.OrderByDescending(p => p))
-        {
-            _ocrSubtitle?.Delete(index);
-        }
+        //foreach (var index in selectedIndices.OrderByDescending(p => p))
+        //{
+        //    _ocrSubtitle?.Delete(index);
+        //}
 
         Renumber();
 
