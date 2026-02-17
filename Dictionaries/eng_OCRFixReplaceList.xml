@@ -2799,6 +2799,10 @@
 		<Word from="Ifi" to="If I" />
 		<Word from="Isjust" to="Is just" />
 		<Word from="Ofmaking" to="Of making" />		
+		<Word from="you'II" to="you'll" />		
+		<Word from="he'II" to="he'll" />
+		<Word from="we'II" to="we'll" />
+		<Word from="I'II" to="I'll" />
 	</WholeWords>
 	<PartialWordsAlways>
 		<!-- Will be replaced always -->
@@ -3393,8 +3397,11 @@
 		<RegEx find="([456789])( th\b)" replaceWith="$1th" />
 	</RegularExpressions>
 	<RegularExpressionsIfSpelledCorrectly>
+		<RegEx find="\b([A-Z][a-zæøåöääöéèàùâêîôûëï]+)I([a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1l$2" replaceWith="$1l$2" />
 		<RegEx find="\b([A-Z][a-zæøåöääöéèàùâêîôûëï]+)['’]s\b" spellCheck="$1" replaceWith="$1's" /> <!-- David's (spell check "David") -->
 		<RegEx find="\b([a-zæøåöääöéèàùâêîôûëï]+)['’]s\b" spellCheck="$1" replaceWith="$1's" /> <!-- there's  (spell check "there") -->
+		<RegEx find="\bl([a-zæøåöääöéèàùâêîôûëï]{2,})\b" spellCheck="I$1" replaceWith="I$1" />
+		<RegEx find="\b([a-zæøåöääöéèàùâêîôûëï]+)I\b" spellCheck="$1l" replaceWith="$1l" />
 		<RegEx find="\bl([A-Z]+)\b" spellCheck="I$1" replaceWith="I$1" /> 
     	<RegEx find="\b([A-Z]+)l\b" spellCheck="$1I" replaceWith="$1I" />
     	<RegEx find="\b([A-Z]+)l([A-Z]+)\b" spellCheck="$1I$2" replaceWith="$1I$2" /> <!-- SlNG to SING -->
