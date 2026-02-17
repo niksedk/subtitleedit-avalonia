@@ -146,6 +146,8 @@ public partial class OcrViewModel : ObservableObject
     private readonly List<SkipOnceChar> _skipOnceChars;
     private readonly NOcrAddHistoryManager _nOcrAddHistoryManager;
     private readonly BinaryOcrAddHistoryManager _binaryOcrAddHistoryManager;
+    private int _pendingScrollIndex = -1;
+    private readonly object _scrollLock = new object();
 
     public OcrViewModel(
         INOcrCaseFixer nOcrCaseFixer,
@@ -2841,14 +2843,27 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        await Dispatcher.UIThread.InvokeAsync(async () =>
+        lock (_scrollLock)
         {
-            SelectedOcrSubtitleItem = OcrSubtitleItems[index];
-            SubtitleGrid.SelectedIndex = index;
-            await Task.Delay(1);
-            SubtitleGrid.ScrollIntoView(OcrSubtitleItems[index], null);
-            await Task.Delay(1);
-            SubtitleGrid.ScrollIntoView(OcrSubtitleItems[index], null);
+            _pendingScrollIndex = index;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            int indexToScroll;
+            lock (_scrollLock)
+            {
+                indexToScroll = _pendingScrollIndex;
+                _pendingScrollIndex = -1;
+            }
+
+            // Only execute if this is the latest scroll request
+            if (indexToScroll >= 0 && indexToScroll < OcrSubtitleItems.Count)
+            {
+                SelectedOcrSubtitleItem = OcrSubtitleItems[indexToScroll];
+                SubtitleGrid.SelectedIndex = indexToScroll;
+                SubtitleGrid.ScrollIntoView(OcrSubtitleItems[indexToScroll], null);
+            }
         }, DispatcherPriority.Background);
     }
 

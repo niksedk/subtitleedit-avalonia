@@ -282,6 +282,9 @@ public partial class MainViewModel :
     string _dropDownFormatsSearchText = string.Empty;
     private System.Timers.Timer _dropDownFormatsSearchTimer = new System.Timers.Timer(1000);
     private PlaySelectionItem? _playSelectionItem;
+    private int _pendingScrollIndex = -1;
+    private SubtitleLineViewModel? _pendingScrollSubtitle = null;
+    private readonly object _scrollLock = new object();
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -9211,13 +9214,30 @@ public partial class MainViewModel :
             return;
         }
 
+        lock (_scrollLock)
+        {
+            _pendingScrollIndex = index;
+        }
+
         try
         {
             var item = Subtitles[index];
             Dispatcher.UIThread.Post(() =>
             {
-                SubtitleGrid.SelectedItem = item;
-                SubtitleGrid.ScrollIntoView(item, null);
+                int indexToScroll;
+                lock (_scrollLock)
+                {
+                    indexToScroll = _pendingScrollIndex;
+                    _pendingScrollIndex = -1;
+                }
+
+                // Only execute if this is the latest scroll request
+                if (indexToScroll >= 0 && indexToScroll < Subtitles.Count)
+                {
+                    var itemToScroll = Subtitles[indexToScroll];
+                    SubtitleGrid.SelectedItem = itemToScroll;
+                    SubtitleGrid.ScrollIntoView(itemToScroll, null);
+                }
             });
         }
         catch
@@ -9233,10 +9253,26 @@ public partial class MainViewModel :
             return;
         }
 
+        lock (_scrollLock)
+        {
+            _pendingScrollSubtitle = subtitle;
+        }
+
         Dispatcher.UIThread.Post(() =>
         {
-            SubtitleGrid.SelectedItem = subtitle;
-            SubtitleGrid.ScrollIntoView(subtitle, null);
+            SubtitleLineViewModel? subtitleToScroll;
+            lock (_scrollLock)
+            {
+                subtitleToScroll = _pendingScrollSubtitle;
+                _pendingScrollSubtitle = null;
+            }
+
+            // Only execute if this is the latest scroll request
+            if (subtitleToScroll != null && Subtitles.Contains(subtitleToScroll))
+            {
+                SubtitleGrid.SelectedItem = subtitleToScroll;
+                SubtitleGrid.ScrollIntoView(subtitleToScroll, null);
+            }
         }, DispatcherPriority.Background);
     }
 
