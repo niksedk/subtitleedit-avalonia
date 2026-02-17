@@ -2,7 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
@@ -498,7 +501,18 @@ public class AudioToTextWhisperWindow : Window
             },
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
-        gridBatch.Add(dataGrid, 0, 0);
+
+        // hack to make drag and drop work on the DataGrid - also on empty rows
+        var dropHost = new Border
+        {
+            Background = Brushes.Transparent,
+            Child = dataGrid,
+        };
+        DragDrop.SetAllowDrop(dropHost, true);
+        dropHost.AddHandler(DragDrop.DragOverEvent, vm.FileGridOnDragOver, RoutingStrategies.Bubble);
+        dropHost.AddHandler(DragDrop.DropEvent, vm.FileGridOnDrop, RoutingStrategies.Bubble);
+
+        gridBatch.Add(dropHost, 0, 0);
         gridBatch.Add(panelFileControls, 1, 0);
 
         var borderBatch = UiUtil.MakeBorderForControl(gridBatch);

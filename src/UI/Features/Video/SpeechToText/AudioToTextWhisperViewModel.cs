@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
@@ -2291,6 +2292,37 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         else
         {
             ReDownloadText = string.Format(Se.Language.General.DownloadX, engine.Name);
+        }
+    }
+
+    internal void FileGridOnDragOver(object? sender, DragEventArgs e)
+    {
+        if (e.DataTransfer.Contains(DataFormat.File))
+        {
+            e.DragEffects = DragDropEffects.Copy; // show copy cursor
+        }
+        else
+        {
+            e.DragEffects = DragDropEffects.None;
+        }
+
+        e.Handled = true;
+    }
+
+    internal void FileGridOnDrop(object? sender, DragEventArgs e)
+    {
+        if (!e.DataTransfer.Contains(DataFormat.File))
+        {
+            return;
+        }
+
+        var files = e.DataTransfer.TryGetFiles();
+        if (files != null)
+        {
+            Dispatcher.UIThread.Post(async() =>
+            {
+                await AddFiles(files.Select(p => p.Path.LocalPath).ToArray());
+            });
         }
     }
 }
