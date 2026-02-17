@@ -84,6 +84,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             xmlStructure = xmlStructure.Replace("[FONT_SIZE]", FontSize);
 
             var currentFrameRate = Configuration.Settings.General.CurrentFrameRate;
+            if (currentFrameRate < 0.1)
+            {
+                currentFrameRate = Configuration.Settings.General.DefaultFrameRate;
+            }
+
             string frameRate;
             string frameRateMultiplier;
 
