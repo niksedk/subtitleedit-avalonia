@@ -29,20 +29,11 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
     private readonly HashSet<string> _wordSpellOkList = new HashSet<string>();
     private string[] _wordSplitList;
     private SpellCheckWordLists2 _spellCheckWordLists;
-    //private string _spellCheckDictionaryName;
     private string _threeLetterIsoLanguageName;
-    //private readonly HashSet<char> _expectedChars = new HashSet<char> { ' ', '¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $
-    //private readonly HashSet<char> _expectedCharsNoComma = new HashSet<char> { ' ', '¡', '¿', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟' }; // removed $ + comma
     private Subtitle _subtitle;
     private List<OcrSubtitleItem> _subtitles;
     private HashSet<string> _wordSkipList = new HashSet<string>();
     private Dictionary<string, string> _changeAllDictionary;
-
-    //private static readonly Regex RegexAloneIasL = new Regex(@"\bl\b", RegexOptions.Compiled);
-    //private static readonly Regex RegexLowercaseL = new Regex("[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]l[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏ]", RegexOptions.Compiled);
-    //private static readonly Regex RegexUppercaseI = new Regex("[a-zæøåöääöéèàùâêîôûëï]I.", RegexOptions.Compiled);
-    //private static readonly Regex RegexNumber1 = new Regex(@"(?<=\d) 1(?!/\d)", RegexOptions.Compiled);
-
 
     private readonly ISpellCheckManager _spellCheckManager;
 
@@ -431,7 +422,6 @@ public partial class OcrFixEngine2 : IOcrFixEngine2, IDoSpell
         _isLoaded = false;
         _subtitle = new Subtitle();
         _subtitles = new List<OcrSubtitleItem>();
-        //_spellCheckDictionaryName = string.Empty;
         _threeLetterIsoLanguageName = string.Empty;
     }
 

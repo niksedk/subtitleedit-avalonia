@@ -3411,5 +3411,6 @@
         <RegEx find="\bof([A-Z][a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1" replaceWith="of $1" /> <!-- ofDavid → of David -->
         <RegEx find="\bin([A-Z][a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1" replaceWith="in $1" /> <!-- inLondon → in London -->
 		<RegEx find="\bl\b" replaceWith="I" /> <!-- lowercase l (L) to I (i) -->
+		<RegEx find="\[([A-Z ]*)l([A-Z ]*)\]" spellCheck="[$1I$2]" replaceWith="[$1I$2]" /> <!-- [GEARS GRlNDlNG] to [GEARS GRINDING] -->
 	</RegularExpressionsIfSpelledCorrectly>
 </OCRFixReplaceList>

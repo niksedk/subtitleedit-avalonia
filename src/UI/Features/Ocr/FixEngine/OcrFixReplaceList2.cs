@@ -382,7 +382,11 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             {
                 foreach (var spellCheckRegex in _regExSpellCheckList)
                 {
-                    var x = spellCheckRegex.Apply(newText, wordsToIgnore, (word) => spellCheckManager.IsWordCorrect(word));
+                    var x = spellCheckRegex.Apply(newText, wordsToIgnore,
+                        (word) =>
+                        {
+                            return spellCheckManager.IsWordCorrect(word.TrimStart('[').TrimEnd(']'));
+                        });
                     if (x != newText)
                     {
                         newText = x;
