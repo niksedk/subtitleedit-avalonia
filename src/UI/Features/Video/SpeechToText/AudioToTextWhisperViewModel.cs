@@ -131,16 +131,14 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Engines.Add(new WhisperEngineConstMe());
             Engines.Add(new WhisperEngineCppCuBlas());
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
         }
 
         Engines.Add(new WhisperEngineOpenAi());
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        //(RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             Engines.Add(new ChatLlmCppEngine());
         }
