@@ -6,6 +6,7 @@ public class ImageSplitterItem2
     public int Y { get; set; }
     public int ParentY { get; set; }
     public int Top { get; set; }
+    public int SpacePixels { get; set; }
     public NikseBitmap2? NikseBitmap { get; set; }
     public string? SpecialCharacter { get; set; }
     public bool CouldBeSpaceBefore { get; set; }

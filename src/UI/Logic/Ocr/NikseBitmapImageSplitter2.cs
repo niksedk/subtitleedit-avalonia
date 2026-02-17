@@ -850,8 +850,7 @@ public class NikseBitmapImageSplitter2
         return true;
     }
 
-
-    private static IEnumerable<ImageSplitterItem2> SplitHorizontalNew(ImageSplitterItem2 lineSplitterItem, int xOrMorePixelsMakesSpace)
+    private static List<ImageSplitterItem2> SplitHorizontalNew(ImageSplitterItem2 lineSplitterItem, int xOrMorePixelsMakesSpace)
     {
         var bmp = new NikseBitmap2(lineSplitterItem.NikseBitmap!);
         bmp.AddTransparentLineRight();
@@ -901,7 +900,7 @@ public class NikseBitmapImageSplitter2
 
                 if (spacePixels >= xOrMorePixelsMakesSpace && parts.Count > 0)
                 {
-                    parts.Add(new ImageSplitterItem2(" ") { Y = addY + lineSplitterItem.Y });
+                    parts.Add(new ImageSplitterItem2(" ") { Y = addY + lineSplitterItem.Y, SpacePixels = spacePixels });
                 }
 
                 if (b1.Width > 0 && b1.Height > 0)

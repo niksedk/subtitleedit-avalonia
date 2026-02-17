@@ -1838,6 +1838,8 @@ public partial class OcrViewModel : ObservableObject
                 return;
             }
 
+            matches = RemoveSpacesAfter1(matches, SelectedNOcrPixelsAreSpace);
+
             item.Text = ItalicTextMerger.MergeWithItalicTags(matches).Trim();
             var ocrFixResultTemp = OcrFixLine(i, item);
             if (ocrFixResultTemp.UnknownWords.Count > 0 && item.Text.Contains("<i>", StringComparison.Ordinal))
@@ -1924,6 +1926,32 @@ public partial class OcrViewModel : ObservableObject
 
         _isCtrlDown = false;
         IsOcrRunning = false;
+    }
+
+    private List<NOcrChar> RemoveSpacesAfter1(List<NOcrChar> matches, int pixelsAreSpace)
+    {
+        var deleteItems = new List<NOcrChar>();
+        for (int i = 0; i < matches.Count - 1; i++)
+        {
+            var match = matches[i];
+            if (match.Text.EndsWith("1", StringComparison.Ordinal) && !match.Italic)
+            {
+                var nextMatch = matches[i + 1];
+                if (nextMatch.ImageSplitterItem != null &&
+                    nextMatch.ImageSplitterItem.SpecialCharacter == " " &&
+                    nextMatch.ImageSplitterItem.SpacePixels - 3 < pixelsAreSpace)
+                {
+                    deleteItems.Add(nextMatch);
+                }
+            }
+        }
+
+        foreach (var deleteItem in deleteItems)
+        {
+            matches.Remove(deleteItem);
+        }
+
+        return matches;
     }
 
     private static string GetTextWithMoreSpacesInItalic(
