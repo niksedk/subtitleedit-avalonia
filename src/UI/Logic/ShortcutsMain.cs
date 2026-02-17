@@ -324,6 +324,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowAssaStylesCommand), Se.Language.Options.Shortcuts.AssaStyles },
         { nameof(MainViewModel.ShowAssaPropertiesCommand), Se.Language.Options.Shortcuts.AssaProperties },
         { nameof(MainViewModel.ShowAssaAttachmentsCommand), Se.Language.Options.Shortcuts.AssaAttachments },
+        { nameof(MainViewModel.RecalculateDurationSelectedLinesCommand), Se.Language.Options.Shortcuts.RecalculateDurationSelectedLines },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -595,6 +596,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowAssaStylesCommand, nameof(vm.ShowAssaStylesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowAssaPropertiesCommand, nameof(vm.ShowAssaPropertiesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowAssaAttachmentsCommand, nameof(vm.ShowAssaAttachmentsCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.RecalculateDurationSelectedLinesCommand, nameof(vm.RecalculateDurationSelectedLinesCommand), ShortcutCategory.General);
 
         return shortcuts;
     }

@@ -2417,6 +2417,59 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task RecalculateDurationSelectedLines()
+    {
+        var selectedLines = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
+        if (selectedLines.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var selectedLine in selectedLines)
+        {
+            var idx = Subtitles.IndexOf(selectedLine);
+            if (idx < 0)
+            {
+                continue;
+            }
+            
+            var nextSubtitle = Subtitles.GetOrNull(idx + 1);
+            var charCount = selectedLine.Text?.Length ?? 0;
+
+            var optimalDuration = TimeSpan.FromSeconds(charCount / Se.Settings.General.SubtitleOptimalCharactersPerSeconds);
+            var maxDuration = TimeSpan.FromSeconds(charCount / Se.Settings.General.SubtitleMaximumCharactersPerSeconds);
+            var maxEndTime = TimeSpan.FromMilliseconds(selectedLine.StartTime.TotalMilliseconds + Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
+            if (nextSubtitle != null)
+            {
+                var tempMaxEntTime = TimeSpan.FromMilliseconds(nextSubtitle.StartTime.TotalMilliseconds - Se.Settings.General.MinimumMillisecondsBetweenLines);
+                if (tempMaxEntTime < maxEndTime)
+                {
+                    maxEndTime = tempMaxEntTime;
+                }
+            }
+
+            var proposedEndTime = selectedLine.StartTime + optimalDuration;
+            if (proposedEndTime.TotalMilliseconds < Se.Settings.General.SubtitleMaximumDisplayMilliseconds)
+            {
+                proposedEndTime = TimeSpan.FromMilliseconds(selectedLine.StartTime.TotalMilliseconds + Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
+            }
+            
+            var fallbackEndTime = selectedLine.StartTime + maxDuration;
+
+            if (proposedEndTime <= maxEndTime)
+            {
+                selectedLine.EndTime = proposedEndTime;
+            }
+            else if (fallbackEndTime <= maxEndTime)
+            {
+                selectedLine.EndTime = fallbackEndTime;
+            }
+        }
+
+        _updateAudioVisualizer = true;
+    }
+
+    [RelayCommand]
     private void DoWaveformCenter()
     {
         var vp = GetVideoPlayerControl();
@@ -5392,7 +5445,10 @@ public partial class MainViewModel :
                             var process = WaveFileExtractor.GetCommandLineProcess(_videoFileName, _audioTrack?.FfIndex ?? -1, tempWaveFileName,
                                 Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                            Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, _videoFileName); });
+                            Task.Run(async () =>
+                            {
+                                await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, _videoFileName);
+                            });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                         }
                     }
@@ -5454,6 +5510,7 @@ public partial class MainViewModel :
         {
             SubtitleFormats.Add(format);
         }
+
         SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First();
     }
 
@@ -11043,7 +11100,7 @@ public partial class MainViewModel :
                     Se.LogError(e);
                 }
             }, DispatcherPriority.Background);
-       }
+        }
 
         if (AudioVisualizer != null)
         {

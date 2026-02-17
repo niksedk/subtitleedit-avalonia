@@ -257,6 +257,7 @@ public class LanguageSettingsShortcuts
     public string AssaProperties { get; set; }
     public string AssaAttachments { get; set; }
     public string AssaVideoColorPicker { get; set; }
+    public string RecalculateDurationSelectedLines { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -516,5 +517,6 @@ public class LanguageSettingsShortcuts
         AssaAttachments = "ASSA Attachments";   
         AssaProperties = "ASSA Properties";
         AssaVideoColorPicker = "ASSA Video color picker";
+        RecalculateDurationSelectedLines = "Recalculate duration (selected lines)";
     }
 }
