@@ -11,6 +11,7 @@ namespace Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 //        <RegEx find = "\bl([A-Z]+)\b" spellCheck="I$1" replaceWith="I$1" />
 //        <RegEx find = "\b([A-Z]+)l\b" spellCheck="$1I" replaceWith="$1I" />
 //        <RegEx find = "\b([A-Z]+)l([A-Z]+)\b" spellCheck="$1I$2" replaceWith="$1I$2" />
+//        <RegEx find = "\[([A-Zl]+)\]" replaceAllFrom="l" replaceAllTo="I" spellCheck="$1" replaceWith="[$1]" />		
 //    </RegularExpressionsIfSpelledCorrectly>
 
 public class SpellCheckRegex
@@ -18,6 +19,8 @@ public class SpellCheckRegex
     public string Find { get; set; } = string.Empty;
     public required Regex FindRegEx { get; set; }
     public string SpellCheckWord { get; set; } = string.Empty;
+    public string ReplaceAllFrom { get; set; } = string.Empty;
+    public string ReplaceAllTo { get; set; } = string.Empty;
     public string ReplaceWith { get; set; } = string.Empty;
 
     /// <summary>
@@ -32,11 +35,23 @@ public class SpellCheckRegex
             // Convert "$1" or "I$1" into the actual word to check (e.g., "ITEM")
             string wordToCheck = match.Result(SpellCheckWord);
 
+            if (!string.IsNullOrEmpty(ReplaceAllFrom))
+            {
+                wordToCheck = wordToCheck.Replace(ReplaceAllFrom, ReplaceAllTo);
+            }
+
             // If the fixed version is a real word, apply the replacement
-            if (isWordSpelledCorrectly(wordToCheck))
+            if (isWordSpelledCorrectly(wordToCheck.TrimStart('[').TrimEnd(']')))
             {
                 wordsToIgnore.Add(match.Value);
-                return match.Result(ReplaceWith);
+                if (!string.IsNullOrEmpty(ReplaceAllFrom))
+                {
+                    return match.Value.Replace(ReplaceAllFrom, ReplaceAllTo);
+                }
+                else
+                {
+                    return match.Result(ReplaceWith);
+                }
             }
 
             // Otherwise, leave the original text alone
@@ -59,6 +74,8 @@ public class SpellCheckRegex
             var find = item.Attributes?["find"]?.Value;
             var spellCheck = item.Attributes?["spellCheck"]?.Value;
             var replaceWith = item.Attributes?["replaceWith"]?.Value;
+            var replaceAllFrom = item.Attributes?["replaceAllFrom"]?.Value;
+            var replaceAllTo = item.Attributes?["replaceAllTo"]?.Value;
             if (string.IsNullOrEmpty(find) || string.IsNullOrEmpty(spellCheck) || string.IsNullOrEmpty(replaceWith))
             {
                 continue;
@@ -72,6 +89,8 @@ public class SpellCheckRegex
                     FindRegEx = new Regex(find, RegexOptions.Compiled),
                     SpellCheckWord = spellCheck,
                     ReplaceWith = replaceWith,
+                    ReplaceAllFrom = replaceAllFrom ?? string.Empty,
+                    ReplaceAllTo = replaceAllTo ?? string.Empty
                 });
             }
             catch

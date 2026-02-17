@@ -3397,6 +3397,7 @@
 		<RegEx find="([456789])( th\b)" replaceWith="$1th" />
 	</RegularExpressions>
 	<RegularExpressionsIfSpelledCorrectly>
+		<RegEx find="\[([A-Zl]+)\]" replaceAllFrom="l" replaceAllTo="I" spellCheck="$1" replaceWith="[$1]" />		
 		<RegEx find="\b([A-Z][a-zæøåöääöéèàùâêîôûëï]+)I([a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1l$2" replaceWith="$1l$2" />
 		<RegEx find="\b([A-Z][a-zæøåöääöéèàùâêîôûëï]+)['’]s\b" spellCheck="$1" replaceWith="$1's" /> <!-- David's (spell check "David") -->
 		<RegEx find="\b([a-zæøåöääöéèàùâêîôûëï]+)['’]s\b" spellCheck="$1" replaceWith="$1's" /> <!-- there's  (spell check "there") -->
@@ -3412,5 +3413,6 @@
         <RegEx find="\bin([A-Z][a-zæøåöääöéèàùâêîôûëï]+)\b" spellCheck="$1" replaceWith="in $1" /> <!-- inLondon → in London -->
 		<RegEx find="\bl\b" replaceWith="I" /> <!-- lowercase l (L) to I (i) -->
 		<RegEx find="\[([A-Z ]*)l([A-Z ]*)\]" spellCheck="[$1I$2]" replaceWith="[$1I$2]" /> <!-- [GEARS GRlNDlNG] to [GEARS GRINDING] -->
+		<RegEx find="\b([A-Z]+)l([A-Z]+)\b" spellCheck="$1I$2" replaceWith="$1I$2" />
 	</RegularExpressionsIfSpelledCorrectly>
 </OCRFixReplaceList>
