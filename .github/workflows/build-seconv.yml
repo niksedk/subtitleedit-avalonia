@@ -240,5 +240,3 @@ jobs:
             ./release-assets/SeConv-macOS-x64.zip
             ./release-assets/SeConv-Linux-x64.tar.gz
             ./release-assets/SeConv-Linux-ARM64.tar.gz
-            ./release-assets/SeConv-Linux-x64.tar.gz
-            ./release-assets/SeConv-Linux-ARM64.tar.gz
