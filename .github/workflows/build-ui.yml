@@ -1,4 +1,4 @@
-name: Build and release Subtitle Edit (Multi-Platform)
+name: Build and release UI
 
 on:
   workflow_dispatch:
