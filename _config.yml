@@ -8,7 +8,7 @@ plugins:
 # Site settings
 title: Subtitle Edit
 tagline: A free and open source subtitle editor
-description: Subtitle Edit is a powerful subtitle editor for creating, editing, and synchronizing subtitles for video files across multiple platforms.
+description: Subtitle Edit is a powerful tool for creating, editing, and synchronizing subtitles across multiple platforms.
 
-# Optional settings
-show_downloads: false
+# UI settings
+show_downloads: true  # Setting this to true adds a nice "View on GitHub" button in Midnight
