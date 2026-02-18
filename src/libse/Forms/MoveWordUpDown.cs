@@ -250,143 +250,145 @@ namespace Nikse.SubtitleEdit.Core.Forms
 
             var s1Trimmed = S1.Trim();
 
-            // First, extract leading and trailing tags from the entire S1
-            var leadingTags = new StringBuilder();
-            var trailingTags = new StringBuilder();
-            var contentStart = 0;
-            var contentEnd = s1Trimmed.Length;
+            // Find start of last word and any active tags
+            var openTags = new System.Collections.Generic.Stack<(string opening, string closing)>();
+            var lastWordStart = -1;
+            var lastWordTags = new System.Collections.Generic.List<(string opening, string closing)>();
+            var inWord = false;
 
-            // Extract leading tags
-            var i = 0;
-            while (i < s1Trimmed.Length)
+            for (int i = 0; i < s1Trimmed.Length; i++)
             {
-                if (s1Trimmed[i] == '<' || (s1Trimmed[i] == '{' && i + 1 < s1Trimmed.Length && s1Trimmed[i + 1] == '\\'))
+                var ch = s1Trimmed[i];
+
+                if (ch == '<' || (ch == '{' && i + 1 < s1Trimmed.Length && s1Trimmed[i + 1] == '\\'))
                 {
                     var tagStart = i;
-                    var tagChar = s1Trimmed[i];
-                    var endChar = tagChar == '<' ? '>' : '}';
+                    var endChar = ch == '<' ? '>' : '}';
+                    var tagSb = new StringBuilder();
+                    tagSb.Append(ch);
+                    i++;
 
                     while (i < s1Trimmed.Length && s1Trimmed[i] != endChar)
                     {
+                        tagSb.Append(s1Trimmed[i]);
                         i++;
                     }
 
                     if (i < s1Trimmed.Length)
                     {
-                        i++; // Include the end character
-                        leadingTags.Append(s1Trimmed.Substring(tagStart, i - tagStart));
-                        contentStart = i;
+                        tagSb.Append(s1Trimmed[i]);
+                    }
+
+                    var tag = tagSb.ToString();
+
+                    if (tag.StartsWith("</", StringComparison.Ordinal)) // HTML closing
+                    {
+                        if (inWord)
+                        {
+                            inWord = false;
+                        }
+                        if (openTags.Count > 0)
+                        {
+                            openTags.Pop();
+                        }
+                    }
+                    else if (tag.StartsWith("<", StringComparison.Ordinal)) // HTML opening
+                    {
+                        var tagName = tag.Substring(1, tag.IndexOf('>') > 1 ? tag.IndexOf('>') - 1 : tag.Length - 2).Split(' ')[0].ToLowerInvariant();
+                        var closingTag = $"</{tagName}>";
+                        openTags.Push((tag, closingTag));
+                    }
+                    else if (tag.Contains("{\\i0}") || tag.Contains("{\\b0}") || tag.Contains("{\\u0}")) // ASS closing
+                    {
+                        if (inWord)
+                        {
+                            inWord = false;
+                        }
+                        if (openTags.Count > 0)
+                        {
+                            openTags.Pop();
+                        }
+                    }
+                    else if (tag.StartsWith("{\\", StringComparison.Ordinal)) // ASS opening
+                    {
+                        var closingTag = tag.Contains("\\i1") ? "{\\i0}" : "";
+                        openTags.Push((tag, closingTag));
                     }
                 }
-                else if (s1Trimmed[i] != ' ' && s1Trimmed[i] != '\r' && s1Trimmed[i] != '\n')
+                else if (char.IsWhiteSpace(ch))
                 {
-                    // Hit actual content
-                    contentStart = i;
-                    break;
+                    if (inWord)
+                    {
+                        inWord = false;
+                    }
                 }
                 else
                 {
-                    i++;
-                }
-            }
-
-            // Extract trailing tags from the end
-            i = s1Trimmed.Length - 1;
-            var trailingTagsList = new System.Collections.Generic.List<string>();
-            while (i >= contentStart)
-            {
-                if (s1Trimmed[i] == '>' || s1Trimmed[i] == '}')
-                {
-                    var tagEnd = i;
-                    var endChar = s1Trimmed[i];
-                    var startChar = endChar == '>' ? '<' : '{';
-
-                    while (i >= contentStart && s1Trimmed[i] != startChar)
+                    if (!inWord)
                     {
-                        i--;
-                    }
-
-                    if (i >= contentStart)
-                    {
-                        var tagText = s1Trimmed.Substring(i, tagEnd - i + 1);
-                        trailingTagsList.Insert(0, tagText);
-                        contentEnd = i;
-                        i--;
+                        inWord = true;
+                        lastWordStart = i;
+                        lastWordTags = openTags.Reverse().ToList();
                     }
                 }
-                else if (s1Trimmed[i] != ' ' && s1Trimmed[i] != '\r' && s1Trimmed[i] != '\n')
-                {
-                    // Hit actual content
-                    contentEnd = i + 1;
-                    break;
-                }
-                else
-                {
-                    i--;
-                }
             }
 
-            foreach (var tag in trailingTagsList)
-            {
-                trailingTags.Append(tag);
-            }
-
-            // Now extract the last word from the content
-            var content = s1Trimmed.Substring(contentStart, contentEnd - contentStart).Trim();
-            var words = content.Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (words.Length == 0)
+            if (lastWordStart == -1)
             {
                 return;
             }
 
-            var lastWord = words[words.Length - 1];
-            var remainingWords = words.Length > 1 ? string.Join(" ", words.Take(words.Length - 1)) : string.Empty;
-
-            // Build S1 with remaining words
-            if (!string.IsNullOrWhiteSpace(remainingWords))
+            var lastWordContent = s1Trimmed.Substring(lastWordStart);
+            var newS1Pre = s1Trimmed.Substring(0, lastWordStart).Replace('\n', ' ').Replace('\r', ' ');
+            while (newS1Pre.Contains("  "))
             {
-                S1 = (leadingTags.ToString() + remainingWords + trailingTags.ToString()).Trim();
+                newS1Pre = newS1Pre.Replace("  ", " ");
             }
-            else
+            newS1Pre = newS1Pre.TrimEnd();
+
+            // Close tags for S1
+            var s1ClosingTags = new StringBuilder();
+            var movedWordOpeningTags = new StringBuilder();
+
+            foreach (var (opening, closing) in lastWordTags)
             {
-                S1 = string.Empty;
+                if (!string.IsNullOrEmpty(closing))
+                {
+                    s1ClosingTags.Insert(0, closing);
+                }
+                movedWordOpeningTags.Append(opening);
             }
 
-            S1 = RemoveEmptyTags(S1);
+            S1 = newS1Pre + s1ClosingTags;
+            S1 = RemoveEmptyTags(S1).Trim();
 
-            // Build the word with tags for S2
-            var wordWithTags = leadingTags.ToString() + lastWord + trailingTags.ToString();
+            var movedWord = movedWordOpeningTags + lastWordContent;
 
-            // Add word to S2 with space outside tags
+            // Add word to S2
             var s2Trimmed = S2.Trim();
             if (!string.IsNullOrWhiteSpace(s2Trimmed))
             {
-                // Check if S2 starts with the same opening tag
-                if (trailingTags.Length > 0 && leadingTags.Length > 0 && s2Trimmed.StartsWith(leadingTags.ToString(), StringComparison.Ordinal))
+                var movedWordTrimmed = movedWord.Trim();
+                foreach (var tag in lastWordTags)
                 {
-                    // Remove opening tag from S2 and don't add closing tag to word
-                    s2Trimmed = s2Trimmed.Substring(leadingTags.Length).TrimStart();
-                    // Also check if S2 ends with the closing tag
-                    if (s2Trimmed.EndsWith(trailingTags.ToString(), StringComparison.Ordinal))
+                    if (s2Trimmed.StartsWith(tag.opening, StringComparison.OrdinalIgnoreCase))
                     {
-                        s2Trimmed = s2Trimmed.Substring(0, s2Trimmed.Length - trailingTags.Length).TrimEnd();
-                        wordWithTags = lastWord;
-                        S2 = (leadingTags.ToString() + wordWithTags.Trim() + " " + s2Trimmed + trailingTags.ToString()).Trim();
+                        s2Trimmed = s2Trimmed.Substring(tag.opening.Length).TrimStart();
+                        if (!string.IsNullOrEmpty(tag.closing) && movedWordTrimmed.EndsWith(tag.closing, StringComparison.OrdinalIgnoreCase))
+                        {
+                            movedWordTrimmed = movedWordTrimmed.Substring(0, movedWordTrimmed.Length - tag.closing.Length).TrimEnd();
+                        }
                     }
                     else
                     {
-                        S2 = (leadingTags.ToString() + wordWithTags.Trim() + " " + s2Trimmed + trailingTags.ToString()).Trim();
+                        break;
                     }
                 }
-                else
-                {
-                    S2 = wordWithTags.Trim() + " " + s2Trimmed;
-                }
+                S2 = movedWordTrimmed + " " + s2Trimmed;
             }
             else
             {
-                S2 = wordWithTags.Trim();
+                S2 = movedWord.Trim();
             }
 
             S2 = AutoBreakIfNeeded(S2);

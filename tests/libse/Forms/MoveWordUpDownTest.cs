@@ -54,7 +54,25 @@ public class MoveWordUpDownTest
         Assert.Equal("", mover.S2);
     }
 
+    [Fact]
+    public void MoveWordDown_WithItalicTag3()
+    {
+        var mover = new MoveWordUpDown("Hello, how are <i>the world</i>", "today");
+        mover.MoveWordDown();
 
+        Assert.Equal("Hello, how are <i>the</i>", mover.S1);
+        Assert.Equal("<i>world</i> today", mover.S2);
+    }
+
+    [Fact]
+    public void MoveWordDown_WithItalicTag_Merge_Tags()
+    {
+        var mover = new MoveWordUpDown("Hello, how are <i>the</i>", "<i>world</i> today");
+        mover.MoveWordDown();
+
+        Assert.Equal("Hello, how are", mover.S1);
+        Assert.Equal("<i>the world</i> today", mover.S2);
+    }
 
     [Fact]
     public void MoveWordUp_WithBoldTag()
