@@ -1,3 +1,8 @@
+---
+layout: default
+title: Change Speed
+---
+
 # Change Speed
 
 Adjust subtitle timings for videos with different playback speeds.

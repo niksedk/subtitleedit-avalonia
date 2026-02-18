@@ -1,3 +1,8 @@
+---
+layout: default
+title: 7-Zip Cross-Platform Support
+---
+
 # 7-Zip Cross-Platform Support
 
 ## Overview

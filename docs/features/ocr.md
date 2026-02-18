@@ -1,3 +1,8 @@
+---
+layout: default
+title: OCR (Optical Character Recognition)
+---
+
 # OCR (Optical Character Recognition)
 
 Subtitle Edit can convert image-based subtitle formats to text using OCR.

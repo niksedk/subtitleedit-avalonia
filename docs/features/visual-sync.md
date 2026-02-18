@@ -1,3 +1,8 @@
+---
+layout: default
+title: Visual Sync
+---
+
 # Visual Sync
 
 Synchronize subtitles visually by matching two points in the video.

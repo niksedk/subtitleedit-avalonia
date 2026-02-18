@@ -1,3 +1,8 @@
+---
+layout: default
+title: Re-encode Video
+---
+
 # Re-encode Video
 
 Re-encode a video file with different resolution, frame rate, or container format using FFmpeg.

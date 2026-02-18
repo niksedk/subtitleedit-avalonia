@@ -1,3 +1,8 @@
+---
+layout: default
+title: ASSA Progress Bar
+---
+
 # ASSA Progress Bar
 
 Generate an animated progress bar overlay in ASSA format, with optional chapter markers.

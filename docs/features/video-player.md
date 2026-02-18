@@ -1,3 +1,8 @@
+---
+layout: default
+title: Video Player
+---
+
 # Video Player
 
 Subtitle Edit includes an integrated video player for previewing subtitles with video.

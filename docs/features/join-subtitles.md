@@ -1,3 +1,8 @@
+---
+layout: default
+title: Join Subtitles
+---
+
 # Join Subtitles
 
 Join multiple subtitle files into a single file.

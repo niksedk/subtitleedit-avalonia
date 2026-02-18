@@ -1,3 +1,8 @@
+---
+layout: default
+title: Transparent Subtitles
+---
+
 # Transparent Subtitles
 
 Generate a transparent video overlay with rendered subtitles that can be composited over other video.

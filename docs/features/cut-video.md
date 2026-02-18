@@ -1,3 +1,8 @@
+---
+layout: default
+title: Cut Video
+---
+
 # Cut Video
 
 Cut segments from a video file using an audio visualizer and video player.

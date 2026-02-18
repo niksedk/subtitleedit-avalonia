@@ -1,3 +1,8 @@
+---
+layout: default
+title: Split / Break Long Lines
+---
+
 # Split / Break Long Lines
 
 Split subtitle lines that exceed maximum character limits.

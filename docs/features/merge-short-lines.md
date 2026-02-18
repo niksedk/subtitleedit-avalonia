@@ -1,3 +1,8 @@
+---
+layout: default
+title: Merge Short Lines
+---
+
 # Merge Short Lines
 
 Merge consecutive short subtitle lines into single lines.

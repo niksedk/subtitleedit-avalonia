@@ -1,3 +1,8 @@
+---
+layout: default
+title: Shot Changes
+---
+
 # Shot Changes
 
 Detect scene/shot changes in a video using FFmpeg, or import them from a file.

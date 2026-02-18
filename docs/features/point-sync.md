@@ -1,3 +1,8 @@
+---
+layout: default
+title: Point Sync
+---
+
 # Point Sync
 
 Synchronize subtitles using multiple reference points.

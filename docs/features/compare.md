@@ -1,3 +1,8 @@
+---
+layout: default
+title: Compare
+---
+
 # Compare
 
 Compare two subtitle files side by side to identify differences in text, timing, and formatting.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Blank Video
+---
+
 # Blank Video
 
 Generate a blank video file for testing or subtitle preview purposes.

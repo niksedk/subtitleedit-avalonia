@@ -11,4 +11,11 @@ tagline: A free and open source subtitle editor
 description: Subtitle Edit is a powerful tool for creating, editing, and synchronizing subtitles across multiple platforms.
 
 # UI settings
-show_downloads: true  # Setting this to true adds a nice "View on GitHub" button in Midnight
+show_downloads: true
+
+# GitHub Pages defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

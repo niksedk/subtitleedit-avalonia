@@ -1,3 +1,8 @@
+---
+layout: default
+title: ASSA Resolution Resampler
+---
+
 # ASSA Resolution Resampler
 
 Resample ASSA subtitle styles and positions from one video resolution to another, so subtitles look correct at a different resolution.

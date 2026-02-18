@@ -1,3 +1,8 @@
+---
+layout: default
+title: ASSA Attachments
+---
+
 # ASSA Attachments
 
 Manage fonts and images embedded as attachments in an Advanced SubStation Alpha (ASS/SSA) subtitle file.

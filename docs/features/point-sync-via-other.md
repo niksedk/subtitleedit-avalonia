@@ -1,3 +1,8 @@
+---
+layout: default
+title: Point Sync Via Other Subtitle
+---
+
 # Point Sync Via Other Subtitle
 
 Synchronize a subtitle file using another subtitle file as reference.

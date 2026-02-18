@@ -1,3 +1,8 @@
+---
+layout: default
+title: Find Double Words
+---
+
 # Find Double Words
 
 Find and fix repeated/double words in subtitle text (e.g., "the the").

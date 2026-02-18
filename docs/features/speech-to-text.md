@@ -1,4 +1,9 @@
-# Speech to Text (Whisper)
+---
+layout: default
+title: Speech to Text
+---
+
+# Speech to Text
 
 Subtitle Edit can automatically transcribe audio to text using Whisper-based speech recognition engines.
 

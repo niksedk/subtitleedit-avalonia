@@ -1,3 +1,8 @@
+---
+layout: default
+title: Word Lists
+---
+
 # Word Lists
 
 Manage custom word lists used by spell check and OCR error fixing.

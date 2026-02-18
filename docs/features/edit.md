@@ -1,3 +1,8 @@
+---
+layout: default
+title: Edit Menu
+---
+
 # Edit Menu
 
 The Edit menu provides tools for finding, replacing, and modifying subtitle text and selections.

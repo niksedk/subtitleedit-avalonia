@@ -1,3 +1,8 @@
+---
+layout: default
+title: Merge Lines with Same Text
+---
+
 # Merge Lines with Same Text
 
 Merge subtitle lines that have identical text content.

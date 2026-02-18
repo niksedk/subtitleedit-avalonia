@@ -1,3 +1,8 @@
+---
+layout: default
+title: Main Window
+---
+
 # Main Window
 
 The main window is where you spend most of your time in Subtitle Edit. It combines all the key editing areas into a single, customizable interface.

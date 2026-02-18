@@ -1,3 +1,8 @@
+---
+layout: default
+title: Overview
+---
+
 # Overview
 
 ## What is Subtitle Edit?

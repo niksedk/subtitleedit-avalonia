@@ -1,3 +1,8 @@
+---
+layout: default
+title: Split Subtitle
+---
+
 # Split Subtitle
 
 Split a single subtitle file into two or more parts.

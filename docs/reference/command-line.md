@@ -1,4 +1,9 @@
-# Command Line (seconv)
+---
+layout: default
+title: Command Line
+---
+
+# Command Line
 
 Subtitle Edit includes a command-line tool called **seconv** for batch converting subtitle files without opening the graphical interface.
 

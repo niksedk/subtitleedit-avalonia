@@ -1,3 +1,8 @@
+---
+layout: default
+title: Copy/Paste Translate
+---
+
 # Copy/Paste Translate
 
 Translate subtitles by copying text blocks for translation in an external tool, then pasting back the results.

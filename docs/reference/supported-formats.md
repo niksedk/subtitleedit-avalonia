@@ -1,3 +1,8 @@
+---
+layout: default
+title: Supported Subtitle Formats
+---
+
 # Supported Subtitle Formats
 
 Subtitle Edit supports a wide range of subtitle formats for reading and writing. Below is a summary of the major categories.

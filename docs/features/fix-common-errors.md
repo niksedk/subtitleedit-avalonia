@@ -1,3 +1,8 @@
+---
+layout: default
+title: Fix Common Errors
+---
+
 # Fix Common Errors
 
 Automatically detect and fix common subtitle errors.

@@ -1,4 +1,9 @@
-# Keyboard Shortcuts Reference
+---
+layout: default
+title: Keyboard Shortcuts
+---
+
+# Keyboard Shortcuts
 
 A complete reference of keyboard shortcuts available in Subtitle Edit. Shortcuts can be customized in **Options** → **Shortcuts**.
 
