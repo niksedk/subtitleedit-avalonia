@@ -1,8 +1,3 @@
----
-layout: default
-title: Remove Text for Hearing Impaired
----
-
 # Remove Text for Hearing Impaired
 
 Remove hearing-impaired annotations such as speaker names, sound descriptions, and music notations.

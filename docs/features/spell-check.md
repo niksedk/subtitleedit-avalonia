@@ -1,8 +1,3 @@
----
-layout: default
-title: Spell Check
----
-
 # Spell Check
 
 Check spelling of subtitle text and correct misspelled words.

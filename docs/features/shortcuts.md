@@ -1,8 +1,3 @@
----
-layout: default
-title: Shortcuts
----
-
 # Shortcuts
 
 View, assign, and manage keyboard shortcuts for all commands in Subtitle Edit.

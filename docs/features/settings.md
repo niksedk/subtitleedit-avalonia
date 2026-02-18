@@ -1,8 +1,3 @@
----
-layout: default
-title: Settings
----
-
 # Settings
 
 Configure application preferences, profiles, subtitle defaults, video player, and more.

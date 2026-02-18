@@ -1,8 +1,3 @@
----
-layout: default
-title: Statistics
----
-
 # Statistics
 
 View detailed statistics about the currently loaded subtitle file, including line counts, word frequencies, and duration information.

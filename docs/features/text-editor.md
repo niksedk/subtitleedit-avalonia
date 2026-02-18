@@ -1,8 +1,3 @@
----
-layout: default
-title: Text Editor
----
-
 # Text Editor
 
 The text editor allows you to edit the text content of the currently selected subtitle line.

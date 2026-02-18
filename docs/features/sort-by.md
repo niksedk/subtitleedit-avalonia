@@ -1,8 +1,3 @@
----
-layout: default
-title: Sort By
----
-
 # Sort By
 
 Sort subtitle lines by various criteria.

@@ -1,8 +1,3 @@
----
-layout: default
-title: Subtitle Grid
----
-
 # Subtitle Grid
 
 The subtitle grid is the main area for viewing and managing all subtitle lines.
