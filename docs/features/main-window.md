@@ -7,7 +7,7 @@ The main window is where you spend most of your time in Subtitle Edit. It combin
 
 ## Window Areas
 
-The main window is divided into the following areas. The yellow lines at draggable area splitters:
+The main window is divided into the following areas (the yellow lines at draggable area splitters):
 
 <!-- Screenshot: Annotated main window with numbered labels for each area -->
 ![Main Window Annotated](../screenshots/main-window-annotated.png)
