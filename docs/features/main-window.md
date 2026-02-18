@@ -52,7 +52,7 @@ Available toolbar buttons include:
 | **Help** | Show help / about |
 | *...and more* | Configurable in Settings |
 
-Note: You can right click on the **Subtitle format** combobox for an format search window.
+Note: You can right click on the **Subtitle format** combobox for a format search window.
 
 ### 3. S
 
