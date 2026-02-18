@@ -2255,7 +2255,7 @@ public static class UiUtil
 
     internal static void ShowHelp(string helpName)
     {
-        var helpUrl = string.Format($"https://github.com/niksedk/subtitleedit-avalonia/blob/main/docs/{helpName}.md");
+        var helpUrl = string.Format($"https://niksedk.github.io/subtitleedit-avalonia/{helpName}.html");
         try
         {
             Process.Start(new ProcessStartInfo

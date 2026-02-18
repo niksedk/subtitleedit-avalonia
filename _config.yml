@@ -1,0 +1,14 @@
+# GitHub Pages configuration for Subtitle Edit documentation
+
+# Theme
+remote_theme: pages-themes/midnight@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# Site settings
+title: Subtitle Edit
+tagline: A free and open source subtitle editor
+description: Subtitle Edit is a powerful subtitle editor for creating, editing, and synchronizing subtitles for video files across multiple platforms.
+
+# Optional settings
+show_downloads: false
