@@ -1,8 +1,3 @@
----
-layout: default
-title: Adjust Duration
----
-
 # Adjust Duration
 
 Adjust the display duration of subtitle lines.

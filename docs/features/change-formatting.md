@@ -1,8 +1,3 @@
----
-layout: default
-title: Change Formatting
----
-
 # Change Formatting
 
 Add or remove formatting (bold, italic, underline, etc.) from subtitle text.

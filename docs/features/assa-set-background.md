@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Set Background
----
-
 # ASSA Set Background
 
 Add styled background boxes behind subtitle text using ASSA drawing commands.

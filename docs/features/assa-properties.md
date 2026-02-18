@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Properties
----
-
 # ASSA Properties
 
 Edit the script info header properties of an Advanced SubStation Alpha (ASS/SSA) subtitle file.

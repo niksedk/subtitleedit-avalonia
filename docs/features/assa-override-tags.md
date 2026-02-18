@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Apply Custom Override Tags
----
-
 # ASSA Apply Custom Override Tags
 
 Apply custom ASSA override tags to subtitle lines with a live video preview.

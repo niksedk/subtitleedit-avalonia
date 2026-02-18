@@ -36,6 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2FFE3E54-9
 		docs\index.md = docs\index.md
 		docs\overview.md = docs\overview.md
 		docs\SevenZipCrossPlatform.md = docs\SevenZipCrossPlatform.md
+		docs\_config.yml = docs\_config.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{882DC26E-87FC-41CD-937E-8A187C0C058C}"

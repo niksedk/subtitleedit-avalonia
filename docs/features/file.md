@@ -1,8 +1,3 @@
----
-layout: default
-title: File Menu
----
-
 # File Menu
 
 The File menu provides operations for creating, opening, saving, importing, and exporting subtitle files.

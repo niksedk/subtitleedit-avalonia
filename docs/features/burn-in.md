@@ -1,8 +1,3 @@
----
-layout: default
-title: Burn-In Subtitles
----
-
 # Burn-In Subtitles
 
 Hardcode (burn-in) subtitles permanently into a video file using FFmpeg.

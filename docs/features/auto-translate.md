@@ -1,8 +1,3 @@
----
-layout: default
-title: Auto Translate
----
-
 # Auto Translate
 
 Automatically translate subtitles using various translation engines and AI services.

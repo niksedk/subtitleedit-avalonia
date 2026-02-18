@@ -1,8 +1,3 @@
----
-layout: default
-title: Batch Convert
----
-
 # Batch Convert
 
 Convert multiple subtitle files between formats and apply various transformations.

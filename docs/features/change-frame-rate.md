@@ -1,8 +1,3 @@
----
-layout: default
-title: Change Frame Rate
----
-
 # Change Frame Rate
 
 Convert subtitle timings from one frame rate to another.

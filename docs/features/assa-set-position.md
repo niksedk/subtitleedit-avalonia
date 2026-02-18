@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Set Position
----
-
 # ASSA Set Position
 
 Visually position subtitles on screen by dragging them over a video screenshot, generating the appropriate ASSA \pos override tag.

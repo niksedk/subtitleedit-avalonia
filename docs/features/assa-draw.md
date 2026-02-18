@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Draw
----
-
 # ASSA Draw
 
 A vector drawing tool for creating ASSA drawing commands (\p1 ... \p0) used in Advanced SubStation Alpha subtitles.

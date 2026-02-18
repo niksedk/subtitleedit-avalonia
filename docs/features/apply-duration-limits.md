@@ -1,8 +1,3 @@
----
-layout: default
-title: Apply Duration Limits
----
-
 # Apply Duration Limits
 
 Enforce minimum and maximum duration limits on subtitle lines.

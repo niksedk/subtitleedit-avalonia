@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Image Color Picker
----
-
 # ASSA Image Color Picker
 
 Pick colors directly from a video frame screenshot for use in ASSA subtitle styles and override tags.

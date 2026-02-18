@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Styles
----
-
 # ASSA Styles
 
 Manage Advanced SubStation Alpha (ASS/SSA) subtitle styles, including file styles and storage (template) styles.

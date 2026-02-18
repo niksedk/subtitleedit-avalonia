@@ -1,8 +1,3 @@
----
-layout: default
-title: Audio Visualizer
----
-
 # Audio Visualizer
 
 The audio visualizer displays the audio waveform (or spectrogram) of the loaded video, enabling precise visual timing of subtitles.

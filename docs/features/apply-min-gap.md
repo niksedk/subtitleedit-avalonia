@@ -1,8 +1,3 @@
----
-layout: default
-title: Apply Minimum Gap
----
-
 # Apply Minimum Gap
 
 Set a minimum time gap between consecutive subtitles.

@@ -1,8 +1,3 @@
----
-layout: default
-title: Bridge Gaps
----
-
 # Bridge Gaps
 
 Extend subtitle durations to fill gaps between consecutive subtitles.

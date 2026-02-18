@@ -1,8 +1,3 @@
----
-layout: default
-title: Change Casing
----
-
 # Change Casing
 
 Fix the casing (capitalization) of subtitle text.

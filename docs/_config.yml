@@ -7,9 +7,11 @@ plugins:
 title: Subtitle Edit
 tagline: A free and open source subtitle editor
 description: Subtitle Edit is a powerful tool for creating, editing, and synchronizing subtitles across multiple platforms.
+url: https://niksedk.github.io
+baseurl: /subtitleedit-avalonia
 
 # UI settings
-show_downloads: true
+show_downloads: false
 
 # GitHub Pages defaults
 defaults:

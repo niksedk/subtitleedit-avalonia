@@ -1,8 +1,3 @@
----
-layout: default
-title: Adjust All Times
----
-
 # Adjust All Times
 
 Shift all subtitle timings by a fixed amount.
