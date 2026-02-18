@@ -2435,7 +2435,7 @@ public partial class MainViewModel :
             {
                 continue;
             }
-            
+
             var nextSubtitle = Subtitles.GetOrNull(idx + 1);
             var charCount = selectedLine.Text?.Length ?? 0;
 
@@ -2456,7 +2456,7 @@ public partial class MainViewModel :
             {
                 proposedEndTime = TimeSpan.FromMilliseconds(selectedLine.StartTime.TotalMilliseconds + Se.Settings.General.SubtitleMaximumDisplayMilliseconds);
             }
-            
+
             var fallbackEndTime = selectedLine.StartTime + maxDuration;
 
             if (proposedEndTime <= maxEndTime)

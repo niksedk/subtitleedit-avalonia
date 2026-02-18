@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,7 +13,6 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.AssaImageColorPicker;
@@ -111,7 +109,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
             TargetHeight = SourceHeight;
         }
 
-        if (TargetWidth <= 0 || TargetHeight <= 0)   
+        if (TargetWidth <= 0 || TargetHeight <= 0)
         {
             TargetWidth = 1820;
             TargetHeight = 1080;
@@ -197,7 +195,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
 
         var screenshotImageWidth = ScreenshotImage.Bounds.Width;
         var screenshotImageHeight = ScreenshotImage.Bounds.Height;
-        
+
         if (screenshotImageWidth <= 0 || screenshotImageHeight <= 0)
         {
             return;
