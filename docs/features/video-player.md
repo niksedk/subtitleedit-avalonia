@@ -68,6 +68,19 @@ Configure the video player backend in **Options → Settings → Video Player**:
 - **VLC** — Popular alternative
 - **None** — Disable video playback
 
+## Video Info
+
+You can view detailed information about the video file by right-clicking on the video file name.
+
+This displays:
+- Video codec, resolution, frame rate, and bitrate
+- Audio tracks with codec and channel information
+- Subtitle tracks (if embedded)
+- Duration and file size
+
+<!-- Screenshot: Video info dialog -->
+![Video Info](../screenshots/video-info.png)
+
 ## Audio Tracks
 
-If the video has multiple audio tracks, you can toggle between them.
+If the video has multiple audio tracks, you can toggle between them via the video menu or a shortcut.
