@@ -419,30 +419,85 @@ public static class InitToolbar
         }
 
         var foregroundColor = UiTheme.GetDarkThemeForegroundColor();
-            
+
+        if (bitmap is WriteableBitmap writeableBitmap)
+        {
+            return MakeOneColorDirect(writeableBitmap, foregroundColor);
+        }
+
+        return MakeOneColorFallback(bitmap, foregroundColor);
+    }
+
+    private static unsafe Bitmap MakeOneColorDirect(WriteableBitmap bitmap, Avalonia.Media.Color foregroundColor)
+    {
+        var width = bitmap.PixelSize.Width;
+        var height = bitmap.PixelSize.Height;
+
+        var result = new WriteableBitmap(
+            new PixelSize(width, height),
+            new Vector(96, 96),
+            Avalonia.Platform.PixelFormat.Bgra8888,
+            Avalonia.Platform.AlphaFormat.Premul);
+
+        using var srcLock = bitmap.Lock();
+        using var dstLock = result.Lock();
+
+        byte* srcBase = (byte*)srcLock.Address;
+        byte* dstBase = (byte*)dstLock.Address;
+        int srcStride = srcLock.RowBytes;
+        int dstStride = dstLock.RowBytes;
+
+        for (int y = 0; y < height; y++)
+        {
+            uint* srcRow = (uint*)(srcBase + y * srcStride);
+            uint* dstRow = (uint*)(dstBase + y * dstStride);
+
+            for (int x = 0; x < width; x++)
+            {
+                uint pixel = srcRow[x];
+                byte b = (byte)(pixel & 0xFF);
+                byte g = (byte)((pixel >> 8) & 0xFF);
+                byte r = (byte)((pixel >> 16) & 0xFF);
+                byte a = (byte)(pixel >> 24);
+
+                var intensity = (r * 0.299 + g * 0.587 + b * 0.114) / 255.0;
+
+                byte newR = (byte)(foregroundColor.R * intensity);
+                byte newG = (byte)(foregroundColor.G * intensity);
+                byte newB = (byte)(foregroundColor.B * intensity);
+
+                dstRow[x] = (uint)(a << 24) | (uint)(newR << 16) | (uint)(newG << 8) | newB;
+            }
+        }
+
+        return result;
+    }
+
+    private static Bitmap MakeOneColorFallback(Bitmap bitmap, Avalonia.Media.Color foregroundColor)
+    {
         using var skBitmap = bitmap.ToSkBitmap();
         var width = skBitmap.Width;
         var height = skBitmap.Height;
-            
+
         var result = new SKBitmap(width, height);
-            
+
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
             {
                 var pixel = skBitmap.GetPixel(x, y);
-                    
+
                 var intensity = (pixel.Red * 0.299 + pixel.Green * 0.587 + pixel.Blue * 0.114) / 255.0;
-                    
+
                 var newRed = (byte)(foregroundColor.R * intensity);
                 var newGreen = (byte)(foregroundColor.G * intensity);
                 var newBlue = (byte)(foregroundColor.B * intensity);
-                    
+
                 var newColor = new SKColor(newRed, newGreen, newBlue, pixel.Alpha);
                 result.SetPixel(x, y, newColor);
             }
         }
-            
+
         return result.ToAvaloniaBitmap();
     }
 
