@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using SkiaSharp;
 
@@ -25,21 +26,21 @@ public class ToSkBitmapBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public SKBitmap CurrentImplementation()
+    public SKBitmap PngEncodeDecode()
     {
-        return ToSkBitmapCurrent(_testBitmap);
+        return ToSkBitmapViaPng(_testBitmap);
     }
 
     [Benchmark]
-    public SKBitmap OptimizedImplementation()
+    public SKBitmap DirectMemoryCopy()
     {
-        return ToSkBitmapOptimized(_testBitmap);
+        return ToSkBitmapDirect(_testBitmap);
     }
 
     [Benchmark]
-    public SKBitmap StreamlinedFallback()
+    public SKBitmap CopyPixels()
     {
-        return ToSkBitmapStreamlined(_testBitmap);
+        return ToSkBitmapViaCopyPixels(_testBitmap);
     }
 
     private SKBitmap CreateTestBitmap(int width, int height)
@@ -68,14 +69,15 @@ public class ToSkBitmapBenchmark
         return bitmap;
     }
 
-    private SKBitmap ToSkBitmapCurrent(SKBitmap sourceBitmap)
+    // Simulates the old ToSkBitmap: PNG encode → decode → canvas draw
+    private SKBitmap ToSkBitmapViaPng(SKBitmap sourceBitmap)
     {
         using var image = SKImage.FromBitmap(sourceBitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
         using var ms = new MemoryStream();
         data.SaveTo(ms);
         ms.Position = 0;
-        
+
         using var skData = SKData.CreateCopy(ms.GetBuffer(), (nuint)ms.Length);
         using var skImage = SKImage.FromEncodedData(skData);
         if (skImage == null)
@@ -92,9 +94,10 @@ public class ToSkBitmapBenchmark
         return result;
     }
 
-    private SKBitmap ToSkBitmapOptimized(SKBitmap sourceBitmap)
+    // Simulates WriteableBitmap path: Lock() + Buffer.MemoryCopy
+    private SKBitmap ToSkBitmapDirect(SKBitmap sourceBitmap)
     {
-        var result = new SKBitmap(sourceBitmap.Width, sourceBitmap.Height, 
+        var result = new SKBitmap(sourceBitmap.Width, sourceBitmap.Height,
                                   SKColorType.Bgra8888, SKAlphaType.Premul);
 
         unsafe
@@ -102,21 +105,36 @@ public class ToSkBitmapBenchmark
             byte* src = (byte*)sourceBitmap.GetPixels();
             byte* dst = (byte*)result.GetPixels();
             int bytesToCopy = sourceBitmap.RowBytes * sourceBitmap.Height;
-            
+
             Buffer.MemoryCopy(src, dst, result.ByteCount, bytesToCopy);
         }
 
         return result;
     }
 
-    private SKBitmap ToSkBitmapStreamlined(SKBitmap sourceBitmap)
+    // Simulates ImmutableBitmap path: Bitmap.CopyPixels (row-by-row Unsafe.CopyBlock)
+    private SKBitmap ToSkBitmapViaCopyPixels(SKBitmap sourceBitmap)
     {
-        using var image = SKImage.FromBitmap(sourceBitmap);
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var ms = new MemoryStream();
-        data.SaveTo(ms);
-        ms.Position = 0;
+        var width = sourceBitmap.Width;
+        var height = sourceBitmap.Height;
+        var result = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
 
-        return SKBitmap.Decode(ms) ?? new SKBitmap(1, 1, true);
+        unsafe
+        {
+            byte* src = (byte*)sourceBitmap.GetPixels();
+            byte* dst = (byte*)result.GetPixels();
+            int srcRowBytes = sourceBitmap.RowBytes;
+            int dstRowBytes = result.RowBytes;
+            int minStride = width * 4;
+
+            for (int y = 0; y < height; y++)
+            {
+                var srcAddr = src + srcRowBytes * y;
+                var dstAddr = dst + dstRowBytes * y;
+                Unsafe.CopyBlock(dstAddr, srcAddr, (uint)minStride);
+            }
+        }
+
+        return result;
     }
 }

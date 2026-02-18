@@ -8,6 +8,7 @@ namespace Benchmarks;
 public class MakeOneColorBenchmark
 {
     private SKBitmap _testBitmap = null!;
+    private byte[] _pngBytes = null!;
     private SKColor _targetColor;
 
     [Params(32, 64, 128)]
@@ -18,6 +19,10 @@ public class MakeOneColorBenchmark
     {
         _targetColor = new SKColor(200, 200, 200);
         _testBitmap = CreateTestBitmap(BitmapSize, BitmapSize);
+
+        using var image = SKImage.FromBitmap(_testBitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        _pngBytes = data.ToArray();
     }
 
     [GlobalCleanup]
@@ -27,15 +32,27 @@ public class MakeOneColorBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public SKBitmap CurrentImplementation()
+    public SKBitmap PixelOnly_GetSetPixel()
     {
-        return MakeOneColorCurrent(_testBitmap);
+        return MakeOneColorGetSetPixel(_testBitmap);
     }
 
     [Benchmark]
-    public SKBitmap OptimizedImplementation()
+    public SKBitmap PixelOnly_UnsafePointers()
     {
-        return MakeOneColorOptimized(_testBitmap);
+        return MakeOneColorUnsafe(_testBitmap);
+    }
+
+    [Benchmark]
+    public SKBitmap FullPipeline_PngRoundTrip()
+    {
+        return MakeOneColorFullPipelineOld(_pngBytes);
+    }
+
+    [Benchmark]
+    public SKBitmap FullPipeline_DirectDecode()
+    {
+        return MakeOneColorFullPipelineNew(_pngBytes);
     }
 
     private SKBitmap CreateTestBitmap(int width, int height)
@@ -62,11 +79,11 @@ public class MakeOneColorBenchmark
         return bitmap;
     }
 
-    private SKBitmap MakeOneColorCurrent(SKBitmap bitmap)
+    // Old pixel loop: GetPixel/SetPixel
+    private SKBitmap MakeOneColorGetSetPixel(SKBitmap bitmap)
     {
         var width = bitmap.Width;
         var height = bitmap.Height;
-
         var result = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
 
         for (var y = 0; y < height; y++)
@@ -74,26 +91,22 @@ public class MakeOneColorBenchmark
             for (var x = 0; x < width; x++)
             {
                 var pixel = bitmap.GetPixel(x, y);
-
                 var intensity = (pixel.Red * 0.299 + pixel.Green * 0.587 + pixel.Blue * 0.114) / 255.0;
-
                 var newRed = (byte)(_targetColor.Red * intensity);
                 var newGreen = (byte)(_targetColor.Green * intensity);
                 var newBlue = (byte)(_targetColor.Blue * intensity);
-
-                var newColor = new SKColor(newRed, newGreen, newBlue, pixel.Alpha);
-                result.SetPixel(x, y, newColor);
+                result.SetPixel(x, y, new SKColor(newRed, newGreen, newBlue, pixel.Alpha));
             }
         }
 
         return result;
     }
 
-    private SKBitmap MakeOneColorOptimized(SKBitmap bitmap)
+    // Optimized pixel loop: unsafe pointers
+    private SKBitmap MakeOneColorUnsafe(SKBitmap bitmap)
     {
         var width = bitmap.Width;
         var height = bitmap.Height;
-        
         var result = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
 
         unsafe
@@ -128,5 +141,51 @@ public class MakeOneColorBenchmark
         }
 
         return result;
+    }
+
+    // Old full pipeline: PNG decode → PNG encode (ToSkBitmap) → GetPixel/SetPixel → PNG encode (ToAvaloniaBitmap)
+    private SKBitmap MakeOneColorFullPipelineOld(byte[] pngBytes)
+    {
+        // Simulate ToSkBitmap: PNG decode
+        using var ms = new MemoryStream(pngBytes);
+        using var skData = SKData.CreateCopy(pngBytes);
+        using var skImage = SKImage.FromEncodedData(skData);
+        var decoded = new SKBitmap(skImage!.Width, skImage.Height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        using (var canvas = new SKCanvas(decoded))
+        {
+            canvas.DrawImage(skImage, 0, 0);
+        }
+
+        // GetPixel/SetPixel processing
+        var result = MakeOneColorGetSetPixel(decoded);
+        decoded.Dispose();
+
+        // Simulate ToAvaloniaBitmap: PNG encode (just encode to measure the cost)
+        using var outImage = SKImage.FromBitmap(result);
+        using var outData = outImage.Encode(SKEncodedImageFormat.Png, 100);
+        _ = outData.ToArray();
+
+        return result;
+    }
+
+    // New full pipeline: SKBitmap.Decode → unsafe pointers → direct pixel copy out
+    private unsafe SKBitmap MakeOneColorFullPipelineNew(byte[] pngBytes)
+    {
+        // Direct decode (simulates SKBitmap.Decode(filePath))
+        using var decoded = SKBitmap.Decode(pngBytes);
+
+        // Unsafe pointer processing
+        var result = MakeOneColorUnsafe(decoded);
+
+        // Simulate ToAvaloniaBitmap optimized path: direct pixel copy (no PNG)
+        var width = result.Width;
+        var height = result.Height;
+        var output = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
+        byte* src = (byte*)result.GetPixels();
+        byte* dst = (byte*)output.GetPixels();
+        Buffer.MemoryCopy(src, dst, output.ByteCount, result.RowBytes * height);
+
+        result.Dispose();
+        return output;
     }
 }

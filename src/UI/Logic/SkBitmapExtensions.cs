@@ -237,6 +237,11 @@ internal static class SkBitmapExtensions
             return ToSkBitmapDirect(writeableBitmap);
         }
 
+        if (avaloniaBitmap.Format == PixelFormat.Bgra8888)
+        {
+            return ToSkBitmapViaCopyPixels(avaloniaBitmap);
+        }
+
         using var ms = new MemoryStream();
         avaloniaBitmap.Save(ms);
         using var data = SKData.CreateCopy(ms.GetBuffer(), (nuint)ms.Length);
@@ -251,6 +256,21 @@ internal static class SkBitmapExtensions
         {
             canvas.DrawImage(image, 0, 0);
         }
+
+        return skBitmap;
+    }
+
+    private static SKBitmap ToSkBitmapViaCopyPixels(Bitmap bitmap)
+    {
+        var width = bitmap.PixelSize.Width;
+        var height = bitmap.PixelSize.Height;
+        var skBitmap = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
+
+        bitmap.CopyPixels(
+            new PixelRect(0, 0, width, height),
+            skBitmap.GetPixels(),
+            skBitmap.ByteCount,
+            skBitmap.RowBytes);
 
         return skBitmap;
     }
