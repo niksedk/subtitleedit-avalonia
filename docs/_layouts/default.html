@@ -17,27 +17,14 @@
   </head>
   <body>
 
-      <header>
-        <h1><a href="{{ site.baseurl }}/" style="color: inherit; text-decoration: none;">{{ site.title | default: site.github.repository_name }}</a></h1>
-        <p>{{ site.description | default: site.github.project_tagline }}</p>
-      </header>
-
-      <div id="banner">
-        <span id="logo"></span>
-
-        {% if site.show_downloads %}
-          <a href="{{ site.github.zip_url }}" class="button fork"><strong>Download</strong></a>
-          {% if site.github.is_project_page %}
-            <a href="{{ site.github.repository_url }}" class="button fork"><strong>View On GitHub</strong></a>
-          {% endif %}
-        {% endif %}
-      </div><!-- end banner -->
-
     <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
       <section>
+        <div id="title">
+          <h1><a href="{{ site.baseurl }}/" style="color: inherit; text-decoration: none;">{{ site.title | default: site.github.repository_name }}</a></h1>
+          <p>{{ site.description | default: site.github.project_tagline }}</p>
+          <hr>
+        </div>
+
         {{ content }}
 
       </section>
