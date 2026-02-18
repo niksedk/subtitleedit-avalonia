@@ -14,37 +14,39 @@ A modern command-line utility for batch converting subtitle files between variou
 
 Build the project:
 ```bash
-dotnet build SeConv/SeConv.csproj
+dotnet build src/seconv/SeConv.csproj
 ```
+
+Or build from the solution root:
+```bash
+dotnet build
+```
+
+The executable will be named `seconv` (or `seconv.exe` on Windows).
 
 ## Usage
 
 ### Basic Syntax
 
 ```bash
-SubtitleEdit convert <pattern> <format> [options]
+seconv <pattern> <format> [options]
 ```
 
 ### Examples
 
 **Convert all SRT files to SAMI format:**
 ```bash
-SubtitleEdit convert *.srt sami
+seconv *.srt sami
 ```
 
 **Convert with specific encoding:**
 ```bash
-SubtitleEdit convert *.srt subrip --encoding:windows-1252
-```
-
-**Convert frame-based subtitles to time-based:**
-```bash
-SubtitleEdit convert *.sub subrip --fps:25 --outputfolder:C:\Temp
+seconv *.srt subrip --encoding:windows-1252
 ```
 
 **List all available formats:**
 ```bash
-SubtitleEdit formats
+seconv formats
 ```
 
 ## Command Line Options
@@ -59,6 +61,23 @@ SubtitleEdit formats
 - `--encoding:<name>` - Character encoding (e.g., utf-8, windows-1252)
 - `--fps:<rate>` - Frame rate for conversion
 - `--targetfps:<rate>` - Target frame rate
+
+### Additional Options
+- `--adjustduration:<ms>` - Adjust duration in milliseconds
+- `--assa-style-file:<file>` - ASSA style file name
+- `--ebuheaderfile:<file>` - EBU header file name
+- `--forcedonly` - Process forced subtitles only
+- `--multiplereplace` - Use default replace rules
+- `--multiplereplace:<files>` - Comma separated file name list
+- `--ocrengine:<engine>` - OCR engine (tesseract/nOCR)
+- `--offset:hh:mm:ss:ms` - Time offset
+- `--pac-codepage:<page>` - PAC code page
+- `--profile:<name>` - Profile name
+- `--renumber:<number>` - Renumber subtitles from this number
+- `--resolution:<width>x<height>` - Video resolution (e.g., 1920x1080)
+- `--teletextonly` - Process teletext only
+- `--teletextonlypage:<page>` - Teletext page number
+- `--track-number:<tracks>` - Comma separated track number list
 
 ### Processing Operations
 
@@ -87,38 +106,47 @@ Some popular formats include:
 - MicroDVD (.sub)
 - Timed Text (.xml)
 
-Run `SubtitleEdit formats` to see the complete list of 300+ supported formats.
+Run `seconv formats` to see the complete list of 300+ supported formats.
 
 ## Getting Help
 
 ```bash
-SubtitleEdit --help
-SubtitleEdit /?
+seconv --help
+seconv /?
 ```
 
 ## Project Structure
 
 ```
-SeConv/
+src/seconv/
 ├── Commands/
 │   ├── ConvertCommand.cs     # Main conversion command
 │   └── FormatsCommand.cs     # List available formats
 ├── Core/
-│   └── SubtitleConverter.cs  # Core conversion logic
+│   ├── SubtitleConverter.cs  # Core conversion logic
+│   └── LibSEIntegration.cs   # LibSE integration
 ├── Helpers/
 │   └── HelpDisplay.cs        # Help text display
-└── Program.cs                # Application entry point
+├── OldCommandLineConverter.cs # Legacy converter support
+└── Program.cs                 # Application entry point
 ```
 
 ## Dependencies
 
-- **Spectre.Console** - Modern console UI framework
-- **Spectre.Console.Cli** - Command-line parsing
-- **LibSE** - Subtitle Edit core library (referenced from main project)
+- **Spectre.Console** (v0.54.0) - Modern console UI framework
+- **Spectre.Console.Cli** (v0.53.1) - Command-line parsing
+- **LibSE** - Subtitle Edit core library (project reference)
+- **UI** - UI project reference
 
 ## Development
 
-The project uses .NET 10.0 and C# 14.0.
+The project uses .NET 10.0 and targets modern .NET features.
+
+The executable is named `seconv` (configured via `<AssemblyName>seconv</AssemblyName>` in the .csproj file).
+
+### Legacy Command Support
+
+The tool supports legacy `/parameter` syntax from older versions of SubtitleEdit, automatically converting it to the modern `--parameter` syntax.
 
 To add new features:
 1. The conversion logic should be implemented in `Core/SubtitleConverter.cs`
