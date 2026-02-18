@@ -93,4 +93,5 @@ Subtitle Edit is a free, open-source editor for video subtitles. This is the doc
 - [Keyboard Shortcuts Reference](reference/keyboard-shortcuts.md) — Complete list of keyboard shortcuts
 - [Mouse Controls Reference](reference/mouse-controls.md) — Mouse interactions
 - [Supported Formats](reference/supported-formats.md) — List of supported subtitle formats
+- [ASSA Override Tags Reference](reference/assa-override-tags.md) — Complete ASS/SSA override tags reference
 - [Command Line (seconv)](reference/command-line.md) — Command-line converter
