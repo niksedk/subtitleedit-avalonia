@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -270,10 +270,23 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
         }
     }
 
-    private static Color GetPixelColor(Bitmap bitmap, int x, int y)
+    private static unsafe Color GetPixelColor(Bitmap bitmap, int x, int y)
     {
         try
         {
+            if (bitmap.Format is { BitsPerPixel: 32 })
+            {
+                var stride = bitmap.PixelSize.Width * 4;
+                var pixel = stackalloc byte[4];
+                bitmap.CopyPixels(
+                    new Avalonia.PixelRect(x, y, 1, 1),
+                    (nint)pixel,
+                    4,
+                    stride);
+
+                return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
+            }
+
             using var skBitmap = bitmap.ToSkBitmap();
             var skColor = skBitmap.GetPixel(x, y);
             return Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);

@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using SkiaSharp;
@@ -232,6 +232,16 @@ internal static class SkBitmapExtensions
 
     public static SKBitmap ToSkBitmap(this Bitmap avaloniaBitmap)
     {
+        if (avaloniaBitmap is WriteableBitmap writeableBitmap)
+        {
+            return ToSkBitmapDirect(writeableBitmap);
+        }
+
+        if (avaloniaBitmap.Format == PixelFormat.Bgra8888)
+        {
+            return ToSkBitmapViaCopyPixels(avaloniaBitmap);
+        }
+
         using var ms = new MemoryStream();
         avaloniaBitmap.Save(ms);
         using var data = SKData.CreateCopy(ms.GetBuffer(), (nuint)ms.Length);
@@ -246,6 +256,37 @@ internal static class SkBitmapExtensions
         {
             canvas.DrawImage(image, 0, 0);
         }
+
+        return skBitmap;
+    }
+
+    private static SKBitmap ToSkBitmapViaCopyPixels(Bitmap bitmap)
+    {
+        var width = bitmap.PixelSize.Width;
+        var height = bitmap.PixelSize.Height;
+        var skBitmap = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
+
+        bitmap.CopyPixels(
+            new PixelRect(0, 0, width, height),
+            skBitmap.GetPixels(),
+            skBitmap.ByteCount,
+            skBitmap.RowBytes);
+
+        return skBitmap;
+    }
+
+    private static unsafe SKBitmap ToSkBitmapDirect(WriteableBitmap writeableBitmap)
+    {
+        using var framebuffer = writeableBitmap.Lock();
+        var width = writeableBitmap.PixelSize.Width;
+        var height = writeableBitmap.PixelSize.Height;
+        var skBitmap = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
+
+        byte* src = (byte*)framebuffer.Address;
+        byte* dst = (byte*)skBitmap.GetPixels();
+        int bytesToCopy = framebuffer.RowBytes * height;
+
+        Buffer.MemoryCopy(src, dst, skBitmap.ByteCount, bytesToCopy);
 
         return skBitmap;
     }
