@@ -16,6 +16,7 @@ The following screenshots are referenced in the documentation and should be adde
 - `main-text-editor.png` — Text editor with time code controls
 - `main-video-player.png` — Video player with subtitles visible
 - `main-audio-visualizer.png` — Audio visualizer with waveform and subtitle bars
+- `main-audio-visualizer-spec.png` — Audio visualizer with waveform and spectrogram
 - `main-status-bar.png` — Status bar / footer
 - `main-translation-mode.png` — Main window in translation mode
 - `layout-chooser.png` — Layout chooser window

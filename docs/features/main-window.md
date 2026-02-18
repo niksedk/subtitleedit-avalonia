@@ -7,7 +7,7 @@ The main window is where you spend most of your time in Subtitle Edit. It combin
 
 ## Window Areas
 
-The main window is divided into the following areas (top to bottom, left to right):
+The main window is divided into the following areas. The yellow lines at draggable area splitters:
 
 <!-- Screenshot: Annotated main window with numbered labels for each area -->
 ![Main Window Annotated](../screenshots/main-window-annotated.png)
@@ -126,10 +126,13 @@ See [Video Player](video-player.md) for full details.
 
 ### 6. Audio Visualizer (Waveform / Spectrogram)
 
-The audio visualizer shows the audio waveform or spectrogram, enabling precise visual timing of subtitles. Subtitle time spans are shown as colored bars overlaid on the waveform, and the current video position is displayed as a vertical cursor line.
+The audio visualizer shows the audio waveform and/or spectrogram, enabling precise visual timing of subtitles. Subtitle time spans are shown as colored bars overlaid on the waveform, and the current video position is displayed as a vertical cursor line.
 
 <!-- Screenshot: Audio visualizer with waveform, subtitle bars, and shot changes -->
 ![Audio Visualizer](../screenshots/main-audio-visualizer.png)
+
+<!-- Screenshot: Audio visualizer with waveform and spectrogram -->
+![Audio Visualizer](../screenshots/main-audio-visualizer-spec.png)
 
 #### Display Modes
 
