@@ -9,21 +9,13 @@ namespace Nikse.SubtitleEdit.Logic;
 public static class SubtitleFormatHelper
 {
 
-    public static List<SubtitleFormat> GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()
+    public static List<SubtitleFormat> GetSubtitleFormatsWithFavoritesAtTop()
     {
         var list = SubtitleFormat.AllSubtitleFormats.ToList();
         var defaultFormat = Se.Settings.General.DefaultSubtitleFormat;
         var favorites = Se.Settings.General.FavoriteSubtitleFormats.Split([';'], StringSplitOptions.RemoveEmptyEntries);
 
         var result = new List<SubtitleFormat>();
-
-        // Add default format first
-        var defaultSubtitleFormat = list.FirstOrDefault(f => f.FriendlyName == defaultFormat);
-        if (defaultSubtitleFormat != null)
-        {
-            result.Add(defaultSubtitleFormat);
-            list.Remove(defaultSubtitleFormat);
-        }
 
         // Add favorites in order (keeping the order from settings)
         foreach (var favorite in favorites)

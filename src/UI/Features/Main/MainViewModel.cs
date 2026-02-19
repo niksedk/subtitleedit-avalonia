@@ -428,7 +428,7 @@ public partial class MainViewModel :
         Subtitles = [];
         FilePropertiesText = string.Empty;
 
-        SubtitleFormats = [.. SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop()];
+        SubtitleFormats = [.. SubtitleFormatHelper.GetSubtitleFormatsWithFavoritesAtTop()];
         SelectedSubtitleFormat = SubtitleFormats[0];
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
@@ -5509,7 +5509,7 @@ public partial class MainViewModel :
 
         var selectedSubtitleFormatName = SelectedSubtitleFormat.Name;
         SubtitleFormats.Clear();
-        foreach (var format in SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop())
+        foreach (var format in SubtitleFormatHelper.GetSubtitleFormatsWithFavoritesAtTop())
         {
             SubtitleFormats.Add(format);
         }

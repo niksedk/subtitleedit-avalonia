@@ -77,7 +77,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
     public void Initialize(BatchConvertConfig config)
     {
         _config = config;
-        _subtitleFormats = SubtitleFormatHelper.GetSubtitleFormatsWithDefaultFormatAndFavoritesAtTop();
+        _subtitleFormats = SubtitleFormatHelper.GetSubtitleFormatsWithFavoritesAtTop();
     }
 
     public async Task Convert(BatchConvertItem item, CancellationToken cancellationToken)

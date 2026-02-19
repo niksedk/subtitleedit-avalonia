@@ -182,9 +182,9 @@ public class SeGeneral
         AutoBackupOn = true;
         AutoBackupIntervalMinutes = 5;
         AutoBackupDeleteAfterDays = 90;
-        DefaultSaveAsFormat = "SubRip";
-        FavoriteSubtitleFormats = "SubRip";
-        CpsLineLengthStrategy = "";//TODO: Add default value
+        DefaultSaveAsFormat = new SubRip().FriendlyName;
+        FavoriteSubtitleFormats = new SubRip().FriendlyName + ";" + new SubStationAlpha().FriendlyName;
+        CpsLineLengthStrategy = nameof(CalcAll);
         RememberPositionAndSize = true;
 
         ColorDurationTooShort = true;
