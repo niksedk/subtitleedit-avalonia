@@ -120,7 +120,6 @@ public class CompareWindow : Window
         }
         var buttonExport = UiUtil.MakeButton(Se.Language.General.Export, vm.ExportCommand).WithMarginLeft(15);
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
-        var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
         var panelButtons = UiUtil.MakeButtonBar(
             checkBoxIgnoreWhiteSpace,
             checkBoxIgnoreFormatting,
@@ -128,7 +127,6 @@ public class CompareWindow : Window
             buttonNextDifference,
             buttonExport,
             buttonOk
-            //buttonCancel
             );
         grid.Add(panelButtons, 3, 0, 1, 2);
 
