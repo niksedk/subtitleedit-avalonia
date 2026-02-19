@@ -449,7 +449,7 @@ public class AudioVisualizer : Control
         _isShiftDown = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         _isAltDown = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
         _isMetaDown = e.KeyModifiers.HasFlag(KeyModifiers.Meta);
-        
+
         if (OperatingSystem.IsMacOS())
         {
             _isCtrlDown = _isMetaDown;
@@ -585,8 +585,13 @@ public class AudioVisualizer : Control
         OnHorizontalScroll?.Invoke(this, new PositionEventArgs { PositionInSeconds = newStart });
 
         if (_isCtrlDown || _isMetaDown)
-        { 
+        {
             var videoPosition = RelativeXPositionToSeconds(point.X);
+            if (Se.Settings.Waveform.CenterVideoPosition && WavePeaks != null)
+            {
+                var halfWidthInSeconds = (Bounds.Width / 2) / (WavePeaks.SampleRate * ZoomFactor);
+                videoPosition = StartPositionSeconds + halfWidthInSeconds;
+            }
             OnVideoPositionChanged?.Invoke(this, new PositionEventArgs { PositionInSeconds = videoPosition });
         }
 

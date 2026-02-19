@@ -13752,7 +13752,7 @@ public partial class MainViewModel :
         Dispatcher.UIThread.Post(() =>
         {
             Task.Delay(50);
-            Se.Settings.General.SelectCurrentSubtitleWhilePlaying = SelectCurrentSubtitleWhilePlaying;
+            Se.Settings.Waveform.CenterVideoPosition = WaveformCenter;
         });
     }
 
