@@ -1,8 +1,3 @@
----
-layout: default
-title: Mouse Controls
----
-
 # Mouse Controls
 
 A reference for mouse interactions in the main areas of Subtitle Edit.

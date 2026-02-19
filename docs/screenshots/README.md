@@ -1,8 +1,3 @@
----
-layout: default
-title: Screenshots
----
-
 # Screenshots
 
 This directory is a placeholder for documentation screenshots.
