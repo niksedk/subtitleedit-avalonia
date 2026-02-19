@@ -26,35 +26,41 @@ public class RestoreAutoBackupWindow : Window
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            ItemsSource = vm.Files,
             SelectionMode = DataGridSelectionMode.Single,
             IsReadOnly = true,
+            DataContext = vm,
             AutoGenerateColumns = false,
             Columns =
             {
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.DateAndTime,
-                    Binding = new Binding(nameof(DisplayFile.DateAndTime))
+                    Binding = new Binding(nameof(DisplayFile.DateAndTime)),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.FileName,
-                    Binding = new Binding(nameof(DisplayFile.FileName))
+                    Binding = new Binding(nameof(DisplayFile.FileName)),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.FileExtension,
-                    Binding = new Binding(nameof(DisplayFile.Extension))
+                    Binding = new Binding(nameof(DisplayFile.Extension)),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Size,
-                    Binding = new Binding(nameof(DisplayFile.Size))
+                    Binding = new Binding(nameof(DisplayFile.Size)),
+                    CellTheme = UiUtil.DataGridNoBorderCellTheme,
                 }
             }
         };
 
+        dataGrid.Bind(DataGrid.ItemsSourceProperty, new Binding(nameof(vm.Files)));
+        dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedFile)));
         dataGrid.SelectionChanged += vm.DataGridSelectionChanged;
 
         var linkOpenFolder = UiUtil.MakeLink(Se.Language.File.RestoreAutoBackup.OpenAutoBackupFolder, vm.OpenFolderCommand);

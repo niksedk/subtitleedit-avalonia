@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,17 +34,18 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     {
         _autoBackupService = autoBackupService;
         _folderHelper = folderHelper;
-        _files = new ObservableCollection<DisplayFile>();
+        Files = new ObservableCollection<DisplayFile>();
         Initialize();
     }
 
     private void Initialize()
     {
+        var files = new List<DisplayFile>();
         foreach (var fileName in _autoBackupService.GetAutoBackupFiles())
         {
             var fileInfo = new FileInfo(fileName);
 
-            var path = System.IO.Path.GetFileName(fileName);
+            var path = Path.GetFileName(fileName);
             if (string.IsNullOrEmpty(path))
             {
                 continue;
@@ -53,10 +55,14 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
             displayDate = displayDate.Remove(13, 1).Insert(13, ":");
             displayDate = displayDate.Remove(16, 1).Insert(16, ":");
 
-            Files.Add(new DisplayFile(fileName, displayDate, Utilities.FormatBytesToDisplayFileSize(fileInfo.Length)));
+            files.Add(new DisplayFile(fileName, displayDate, Utilities.FormatBytesToDisplayFileSize(fileInfo.Length)));
         }
 
-        Files = new ObservableCollection<DisplayFile>(Files.OrderByDescending(f => f.DateAndTime));
+        foreach (var file in files.OrderByDescending(f => f.DateAndTime))
+        {
+            Files.Add(file);
+        }
+        
         if (Files.Count > 0)
         {
             SelectedFile = Files[0];
@@ -130,6 +136,11 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenFolder()
     {
+        if (Window == null)
+        {
+            return;
+        }
+        
         var folder = Se.AutoBackupFolder;
         if (!Directory.Exists(folder))
         {
@@ -143,7 +154,7 @@ public partial class RestoreAutoBackupViewModel : ObservableObject
             }
         }
 
-        await _folderHelper.OpenFolder(Window!, folder);
+        await _folderHelper.OpenFolder(Window, folder);
     }
 
     internal void OnKeyDown(KeyEventArgs e)
