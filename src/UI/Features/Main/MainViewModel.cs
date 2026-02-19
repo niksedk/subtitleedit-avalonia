@@ -2382,6 +2382,26 @@ public partial class MainViewModel :
             vp.Position = seconds;
         }
     }
+    
+    [RelayCommand]
+    private async Task WaveformToggleWaveformSpectrogramHeight()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        Se.Settings.Waveform.SpectrogramCombinedWaveformHeight += 10;
+        if (Se.Settings.Waveform.SpectrogramCombinedWaveformHeight > 90)
+        {
+            Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = 10;
+        }
+        
+        AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
+        AudioVisualizer.ResetCache();
+        _updateAudioVisualizer = true;
+    }
+
 
     [RelayCommand]
     private async Task ShowWaveformGuessTimeCodes()
