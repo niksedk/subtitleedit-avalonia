@@ -618,7 +618,12 @@
     "fileSavedToX": "File saved to {0}",
     "imageSaved": "Image saved",
     "hex": "Hex",
-    "selectedlinesX": "Selected lines: {0}"
+    "selectedlinesX": "Selected lines: {0}",
+    "replace": "Replace",
+    "append": "Append",
+    "use": "Use",
+    "centerHorizontally": "Center horizontally",
+    "centerVertically": "Center vertically"
   },
   "main": {
     "menu": {
@@ -677,6 +682,10 @@
       "assaApplyCustomOverrideTags": "Apply _override tags...",
       "assaSetPosition": "_Set position...",
       "assaImageColorPicker": "_Image color picker...",
+      "assaDraw": "_Draw...",
+      "assaStyles": "S_tyles...",
+      "assaProperties": "P_roperties...",
+      "assaAttachments": "_Attachments...",
       "spellCheckTitle": "_Spell check",
       "spellCheck": "_Spell check...",
       "findDoubleWords": "_Find double words...",
@@ -840,7 +849,8 @@
     "sortedByStartTime": "Sorted by \u0022Show\u0022 time",
     "sortedByEndTime": "Sorted by \u0022Hide\u0022 time",
     "colorHint": "Color selected lines",
-    "removeFormattingHint": "Remove formatting from selected lines"
+    "removeFormattingHint": "Remove formatting from selected lines",
+    "assaResolutionResamplerDone": "ASSA resolution changed."
   },
   "file": {
     "ebuSaveOptions": {
@@ -918,10 +928,8 @@
       "splitAtEndCharsSetting": "Split at end chars",
       "takeTimeFromCurrentFile": "Take time from current file",
       "fixed": "Fixed",
-      "lineBreak": "Line break",
-      "openTextFile": "Open text file",
-      "openTextFiles": "Open text files",
-      "tryToFindTimeCodes": "Try to parse time codes"
+      "numberOfSubtitlesX": "Number of subtitles: {0}",
+      "gapMs": "Gap (ms)"
     },
     "export": {
       "exportImagesProfiles": "Export images profiles",
@@ -1040,8 +1048,7 @@
     "pickMatroskaTrackX": "Pick Matroska track - {0}",
     "rosettaProperties": "Timed Text Rosetta IMSC properties",
     "rosettaFontSize": "Font size (row height)",
-    "tmpegEncXmlProperties": "TMPGEnc VME properties",
-    "general": null
+    "tmpegEncXmlProperties": "TMPGEnc VME properties"
   },
   "edit": {
     "modifySelection": {
@@ -1516,6 +1523,7 @@
     "guessTimeCodesScanBlockAverageMin": "Scan block average minimum (% of max):",
     "guessTimeCodesScanBlockAverageMax": "Scan block average maximum (% of max):",
     "guessTimeCodesSplitLongSubtitlesAt": "Split long subtitles at (ms):",
+    "speechToTextSelectedLinesDotDotDot": "Speech to text selected lines...",
     "seekSilence": "Seek silence",
     "minSilenceDurationSeconds": "Min. silence duration (seconds):",
     "maxSilenceVolume": "Max. silence volume (0.0 - 1.0):",
@@ -1723,6 +1731,7 @@
       "password": "Password",
       "defaultFormat": "Default format",
       "defaultSaveAsFormat": "Default \u0022Save as\u0022 format",
+      "favoriteSubtitleFormats": "Favorite subtitle formats",
       "showStopButton": "Show stop button",
       "showFullscreenButton": "Show full-screen button",
       "autoOpenVideoFile": "Auto-open video file when opening subtitle",
@@ -1999,6 +2008,7 @@
       "generateBlankVideo": "Generate blank video",
       "reencodeVideo": "Re-encode video",
       "cutVideo": "Cut video",
+      "cutVideoSelectedLines": "Cut video (selected lines)",
       "adjustAllTimes": "Adjust all times",
       "visualSync": "Visual sync",
       "translateViaCopyPaste": "Translate via copy-paste",
@@ -2054,7 +2064,15 @@
       "sortByEndTime": "Sort by \u0022Hide\u0022 time",
       "duplicatesFound": "The following duplicate shortcuts were found:",
       "copyTextToClipboard": "Copy text to clipboard (selected lines)",
-      "copyTextFromOriginalToClipboard": "Copy text from original to clipboard (selected lines)"
+      "copyTextFromOriginalToClipboard": "Copy text from original to clipboard (selected lines)",
+      "assaDraw": "ASSA Draw",
+      "assaGenerateProgressBar": "ASSA Generate progress bar",
+      "assaGenerateBackgroundBox": "ASSA Generate background box",
+      "assaStyles": "ASSA Styles",
+      "assaProperties": "ASSA Properties",
+      "assaAttachments": "ASSA Attachments",
+      "assaVideoColorPicker": "ASSA Video color picker",
+      "recalculateDurationSelectedLines": "Recalculate duration (selected lines)"
     },
     "wordLists": {
       "title": "Word lists",
@@ -2236,6 +2254,7 @@
     "playCurrent": "Play current",
     "setPosition": "Set position",
     "imageColorPicker": "Image color picker",
-    "copyColorAsHextoClipboard": "Copy color as hex to clipboard"
+    "copyColorAsHextoClipboard": "Copy color as hex to clipboard",
+    "generatingBackgroundBoxXOfY": "Generating background box {0} of {1}..."
   }
 }
