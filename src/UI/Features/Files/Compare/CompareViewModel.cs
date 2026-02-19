@@ -47,9 +47,9 @@ public partial class CompareViewModel : ObservableObject
     private List<SubtitleLineViewModel> _rightLines = new();
     private string _language = string.Empty;
 
-    private static readonly IBrush ListViewRed = new SolidColorBrush(Color.FromArgb(120, 255, 0, 0));
-    private static readonly IBrush ListViewGreen = new SolidColorBrush(Color.FromArgb(120, 0, 255, 0));
-    private static readonly IBrush ListViewOrange = new SolidColorBrush(Colors.Yellow, 0.6);
+    private static readonly IBrush ListViewRed = new SolidColorBrush(Color.FromArgb(180, 255, 235, 233));
+    private static readonly IBrush ListViewGreen = new SolidColorBrush(Color.FromArgb(180, 230, 255, 237));
+    private static readonly IBrush ListViewOrange = new SolidColorBrush(Color.FromArgb(180, 255, 248, 220));
     private static readonly IBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
 
     public CompareViewModel(IFileHelper fileHelper, IFolderHelper folderHelper)
@@ -156,12 +156,18 @@ public partial class CompareViewModel : ObservableObject
                 if (left == null || left.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
+                    if (right != null && !right.IsDefault)
+                    {
+                        SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
+                    }
                 }
                 else if (right == null || right.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
+                    if (left != null && !left.IsDefault)
+                    {
+                        SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
+                    }
                 }
                 else if (!AreTextsEqual(left, right))
                 {
@@ -190,63 +196,58 @@ public partial class CompareViewModel : ObservableObject
                 if (left == null || left.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
+                    if (right != null && !right.IsDefault)
+                    {
+                        SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
+                    }
                 }
                 else if (right == null || right.IsDefault)
                 {
                     addIndexToDifferences = true;
-                    SetItemBackgroundColor(index, false, ListViewRed, ItemColumn.All);
+                    if (left != null && !left.IsDefault)
+                    {
+                        SetItemBackgroundColor(index, true, ListViewRed, ItemColumn.All);
+                    }
                 }
                 else
                 {
-                    var columnsAlike = GetColumnsEqualExceptNumber(left, right);
-                    // Not alike paragraphs
-                    if (columnsAlike == 0)
+                    var timingsMatch = IsTimeEqual(left.StartTime, right.StartTime) && 
+                                      IsTimeEqual(left.EndTime, right.EndTime);
+                    var textsMatch = AreTextsEqual(left, right);
+                    var numbersMatch = left.Number == right.Number;
+
+                    // Check if there are any differences at all
+                    if (!timingsMatch || !textsMatch || !numbersMatch)
                     {
                         addIndexToDifferences = true;
-                        SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.All);
-                        SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.All);
-                        // Keep number column with default background
-                        SetItemBackgroundColor(index, true, TransparentBrush, ItemColumn.Number);
-                        SetItemBackgroundColor(index, false, TransparentBrush, ItemColumn.Number);
-                    }
-                    else if (columnsAlike < 4)
-                    {
-                        addIndexToDifferences = true;
-                        // Start time
+
+                        // Start time difference
                         if (!IsTimeEqual(left.StartTime, right.StartTime))
                         {
                             SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.StartTime);
                             SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.StartTime);
                         }
-                        // End time
+
+                        // End time difference
                         if (!IsTimeEqual(left.EndTime, right.EndTime))
                         {
                             SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.EndTime);
                             SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.EndTime);
                         }
-                        // Duration
-                        if (!IsTimeEqual(left.Duration, right.Duration))
-                        {
-                            // Since we don't have a duration column in the grid, we can highlight the time columns
-                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.StartTime);
-                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.StartTime);
-                            SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.EndTime);
-                            SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.EndTime);
-                        }
-                        // Text
-                        else if (!AreTextsEqual(left, right))
+
+                        // Text difference
+                        if (!textsMatch)
                         {
                             SetItemBackgroundColor(index, true, ListViewGreen, ItemColumn.Text);
                             SetItemBackgroundColor(index, false, ListViewGreen, ItemColumn.Text);
                         }
-                    }
-                    // Number
-                    if (left.Number != right.Number)
-                    {
-                        addIndexToDifferences = true;
-                        SetItemBackgroundColor(index, true, ListViewOrange, ItemColumn.Number);
-                        SetItemBackgroundColor(index, false, ListViewOrange, ItemColumn.Number);
+
+                        // Number difference
+                        if (!numbersMatch)
+                        {
+                            SetItemBackgroundColor(index, true, ListViewOrange, ItemColumn.Number);
+                            SetItemBackgroundColor(index, false, ListViewOrange, ItemColumn.Number);
+                        }
                     }
                 }
 

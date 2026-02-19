@@ -2,13 +2,14 @@
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using System;
+using System.Collections.Generic;
 
 public static class TextDiffHighlighter
 {
-    private static readonly IBrush ForegroundDifferenceColor = Brushes.Red;
-    private static readonly IBrush BackDifferenceColor = Brushes.Yellow;
+    private static readonly IBrush ForegroundDifferenceColor = new SolidColorBrush(Color.FromRgb(183, 28, 28));
+    private static readonly IBrush BackDifferenceColor = new SolidColorBrush(Color.FromRgb(255, 235, 238));
     private static readonly IBrush NormalColor = Brushes.Black;
-    private static readonly IBrush DiffBackgroundColor = Brushes.LightGreen;
+    private static readonly IBrush DiffBackgroundColor = new SolidColorBrush(Color.FromRgb(230, 255, 237));
 
     public static (TextBlock left, TextBlock right) Compare(string text1, string text2)
     {
@@ -20,161 +21,225 @@ public static class TextDiffHighlighter
             return (left, right);
         }
 
-        bool hasDifferences = false;
-
-        // One string is a pure prefix of the other
-        if (text1.StartsWith(text2, StringComparison.Ordinal))
+        if (string.IsNullOrEmpty(text1) && string.IsNullOrEmpty(text2))
         {
-            left.Inlines.Add(new Run(text2)
-            {
-                Foreground = NormalColor
-            });
-            left.Inlines.Add(new Run(text1.Substring(text2.Length))
-            {
-                Foreground = ForegroundDifferenceColor,
-                Background = BackDifferenceColor
-            });
+            return (left, right);
+        }
 
+        if (string.IsNullOrEmpty(text1))
+        {
             right.Inlines.Add(new Run(text2)
             {
-                Foreground = NormalColor
+                Foreground = ForegroundDifferenceColor,
+                Background = BackDifferenceColor
             });
-
-            hasDifferences = true;
+            return (left, right);
         }
-        else if (text2.StartsWith(text1, StringComparison.Ordinal))
+
+        if (string.IsNullOrEmpty(text2))
         {
-            right.Inlines.Add(new Run(text1)
-            {
-                Foreground = NormalColor
-            });
-            right.Inlines.Add(new Run(text2.Substring(text1.Length))
+            left.Inlines.Add(new Run(text1)
             {
                 Foreground = ForegroundDifferenceColor,
                 Background = BackDifferenceColor
             });
-
-            left.Inlines.Add(new Run(text1)
-            {
-                Foreground = NormalColor
-            });
-
-            hasDifferences = true;
+            return (left, right);
         }
-        else
+
+        // Use longest common substring to find the best match
+        var (commonStart, commonEnd, middleCommon1, middleCommon2) = FindCommonParts(text1, text2);
+
+        bool hasDifferences = commonStart != text1.Length || commonEnd != 0 || middleCommon1.Count > 0;
+
+        if (!hasDifferences)
         {
-            // Diff from start
-            int startOk = 0;
-            int minLength = Math.Min(text1.Length, text2.Length);
-
-            for (int i = 0; i < minLength; i++)
-            {
-                if (text1[i] == text2[i])
-                {
-                    left.Inlines.Add(new Run(text1[i].ToString())
-                    {
-                        Foreground = NormalColor
-                    });
-                    right.Inlines.Add(new Run(text2[i].ToString())
-                    {
-                        Foreground = NormalColor
-                    });
-                    startOk++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            // Diff from end
-            int endOk = 0;
-            while (endOk < minLength - startOk &&
-                   text1[text1.Length - 1 - endOk] == text2[text2.Length - 1 - endOk])
-            {
-                endOk++;
-            }
-
-            // Middle difference (per character)
-            string mid1 = text1.Substring(startOk, text1.Length - startOk - endOk);
-            string mid2 = text2.Substring(startOk, text2.Length - startOk - endOk);
-
-            int maxMid = Math.Max(mid1.Length, mid2.Length);
-            for (int i = 0; i < maxMid; i++)
-            {
-                char? c1 = i < mid1.Length ? mid1[i] : (char?)null;
-                char? c2 = i < mid2.Length ? mid2[i] : (char?)null;
-
-                if (c1 == c2 && c1 != null)
-                {
-                    left.Inlines.Add(new Run(c1.ToString())
-                    {
-                        Foreground = NormalColor
-                    });
-                    right.Inlines.Add(new Run(c2!.ToString())
-                    {
-                        Foreground = NormalColor
-                    });
-                }
-                else
-                {
-                    if (c1 != null)
-                    {
-                        left.Inlines.Add(new Run(c1.ToString())
-                        {
-                            Foreground = ForegroundDifferenceColor,
-                            Background = BackDifferenceColor
-                        });
-                        hasDifferences = true;
-                    }
-                    if (c2 != null)
-                    {
-                        right.Inlines.Add(new Run(c2.ToString())
-                        {
-                            Foreground = ForegroundDifferenceColor,
-                            Background = BackDifferenceColor
-                        });
-                        hasDifferences = true;
-                    }
-                }
-            }
-
-            // Add suffix (if any)
-            if (endOk > 0)
-            {
-                string suffix = text1.Substring(text1.Length - endOk);
-                left.Inlines.Add(new Run(suffix)
-                {
-                    Foreground = NormalColor
-                });
-
-                suffix = text2.Substring(text2.Length - endOk);
-                right.Inlines.Add(new Run(suffix)
-                {
-                    Foreground = NormalColor
-                });
-            }
+            // Texts are identical
+            left.Inlines.Add(new Run(text1) { Foreground = NormalColor });
+            right.Inlines.Add(new Run(text2) { Foreground = NormalColor });
+            return (left, right);
         }
 
-        // Apply green background only to normal text if differences exist
-        if (hasDifferences)
-        {
-            foreach (var run in left.Inlines)
-            {
-                if (run is Run r && r.Background == null)
-                {
-                    r.Background = DiffBackgroundColor;
-                }
-            }
-            foreach (var run in right.Inlines)
-            {
-                if (run is Run r && r.Background == null)
-                {
-                    r.Background = DiffBackgroundColor;
-                }
-            }
-        }
+        // Build the visual representation
+        BuildDiffRuns(left, text1, commonStart, commonEnd, middleCommon1, hasDifferences);
+        BuildDiffRuns(right, text2, commonStart, commonEnd, middleCommon2, hasDifferences);
 
         return (left, right);
+    }
+
+    private static void BuildDiffRuns(TextBlock textBlock, string text, int commonStart, int commonEnd, 
+        List<(int start, int length)> middleCommon, bool hasDifferences)
+    {
+        int currentPos = 0;
+
+        // Add prefix if common
+        if (commonStart > 0)
+        {
+            textBlock.Inlines!.Add(new Run(text.Substring(0, commonStart))
+            {
+                Foreground = NormalColor,
+                Background = hasDifferences ? DiffBackgroundColor : null
+            });
+            currentPos = commonStart;
+        }
+
+        // Add middle parts (mix of common and different)
+        int middleEnd = text.Length - commonEnd;
+        if (middleCommon.Count > 0)
+        {
+            foreach (var (start, length) in middleCommon)
+            {
+                // Add different part before this common part
+                if (start > currentPos)
+                {
+                    textBlock.Inlines!.Add(new Run(text.Substring(currentPos, start - currentPos))
+                    {
+                        Foreground = ForegroundDifferenceColor,
+                        Background = BackDifferenceColor
+                    });
+                }
+
+                // Add common part
+                textBlock.Inlines!.Add(new Run(text.Substring(start, length))
+                {
+                    Foreground = NormalColor,
+                    Background = DiffBackgroundColor
+                });
+
+                currentPos = start + length;
+            }
+        }
+
+        // Add remaining different part in the middle
+        if (currentPos < middleEnd)
+        {
+            textBlock.Inlines!.Add(new Run(text.Substring(currentPos, middleEnd - currentPos))
+            {
+                Foreground = ForegroundDifferenceColor,
+                Background = BackDifferenceColor
+            });
+            currentPos = middleEnd;
+        }
+
+        // Add suffix if common
+        if (commonEnd > 0)
+        {
+            textBlock.Inlines!.Add(new Run(text.Substring(text.Length - commonEnd))
+            {
+                Foreground = NormalColor,
+                Background = hasDifferences ? DiffBackgroundColor : null
+            });
+        }
+    }
+
+    private static (int commonStart, int commonEnd, List<(int start, int length)> middleCommon1, List<(int start, int length)> middleCommon2) FindCommonParts(string text1, string text2)
+    {
+        int commonStart = 0;
+        int minLength = Math.Min(text1.Length, text2.Length);
+
+        // Find common prefix
+        while (commonStart < minLength && text1[commonStart] == text2[commonStart])
+        {
+            commonStart++;
+        }
+
+        // If everything matches
+        if (commonStart == text1.Length && commonStart == text2.Length)
+        {
+            return (commonStart, 0, new List<(int, int)>(), new List<(int, int)>());
+        }
+
+        // Find common suffix
+        int commonEnd = 0;
+        while (commonEnd < minLength - commonStart &&
+               text1[text1.Length - 1 - commonEnd] == text2[text2.Length - 1 - commonEnd])
+        {
+            commonEnd++;
+        }
+
+        // Find common parts in the middle using longest common substring
+        var middleCommon1 = new List<(int start, int length)>();
+        var middleCommon2 = new List<(int start, int length)>();
+
+        if (commonStart < text1.Length && commonStart < text2.Length)
+        {
+            string middle1 = text1.Substring(commonStart, text1.Length - commonStart - commonEnd);
+            string middle2 = text2.Substring(commonStart, text2.Length - commonStart - commonEnd);
+
+            if (middle1.Length > 0 && middle2.Length > 0)
+            {
+                // Find longest common substrings in the middle
+                var commonSubstrings = FindLongestCommonSubstrings(middle1, middle2, 3); // Minimum length of 3
+
+                // Convert positions back to original text positions and store both
+                foreach (var (pos1, pos2, length) in commonSubstrings)
+                {
+                    middleCommon1.Add((commonStart + pos1, length));
+                    middleCommon2.Add((commonStart + pos2, length));
+                }
+            }
+        }
+
+        return (commonStart, commonEnd, middleCommon1, middleCommon2);
+    }
+
+    private static List<(int pos1, int pos2, int length)> FindLongestCommonSubstrings(string s1, string s2, int minLength)
+    {
+        var result = new List<(int pos1, int pos2, int length)>();
+        var used1 = new bool[s1.Length];
+        var used2 = new bool[s2.Length];
+
+        // Find multiple common substrings
+        while (true)
+        {
+            int maxLen = 0;
+            int maxPos1 = 0;
+            int maxPos2 = 0;
+
+            // Build LCS table for unused parts
+            for (int i = 0; i < s1.Length; i++)
+            {
+                if (used1[i]) continue;
+
+                for (int j = 0; j < s2.Length; j++)
+                {
+                    if (used2[j]) continue;
+
+                    int len = 0;
+                    while (i + len < s1.Length && j + len < s2.Length &&
+                           !used1[i + len] && !used2[j + len] &&
+                           s1[i + len] == s2[j + len])
+                    {
+                        len++;
+                    }
+
+                    if (len > maxLen)
+                    {
+                        maxLen = len;
+                        maxPos1 = i;
+                        maxPos2 = j;
+                    }
+                }
+            }
+
+            // If no common substring found or too short, stop
+            if (maxLen < minLength)
+            {
+                break;
+            }
+
+            // Mark as used
+            for (int k = 0; k < maxLen; k++)
+            {
+                used1[maxPos1 + k] = true;
+                used2[maxPos2 + k] = true;
+            }
+
+            result.Add((maxPos1, maxPos2, maxLen));
+        }
+
+        // Sort by position in first string
+        result.Sort((a, b) => a.pos1.CompareTo(b.pos1));
+
+        return result;
     }
 }
