@@ -528,11 +528,11 @@ public class AudioVisualizer : Control
 
         var point = e.GetPosition(this);
         var properties = e.GetCurrentPoint(this).Properties;
-        var delta = InvertMouseWheel ? -e.Delta.Y : e.Delta.Y;
 
         if (_isAltDown)
         {
-            var newZoomFactor = ZoomFactor + delta / 10.0;
+            var deltaAlt = InvertMouseWheel ? -e.Delta.Y : e.Delta.Y;
+            var newZoomFactor = ZoomFactor + deltaAlt / 10.0;
 
             if (newZoomFactor < MinZoomFactor)
             {
@@ -552,7 +552,8 @@ public class AudioVisualizer : Control
 
         if (_isShiftDown)
         {
-            var newZoomFactor = VerticalZoomFactor + delta / 10.0;
+            var deltaShift = e.Delta.Y;
+            var newZoomFactor = VerticalZoomFactor + deltaShift / 10.0;
 
             if (newZoomFactor < MinZoomFactor)
             {
@@ -569,6 +570,8 @@ public class AudioVisualizer : Control
             InvalidateVisual();
             return;
         }
+
+        var delta = InvertMouseWheel ? -e.Delta.Y : e.Delta.Y;
 
         e.Handled = true;
         var newStart = StartPositionSeconds + delta / 2;
