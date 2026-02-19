@@ -346,23 +346,6 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 Patterns = new List<string> { "*" + currentFormat.Extension }
             };
             var fileTypes = new List<FilePickerFileType> { fileType };
-
-            //foreach (var format in SubtitleFormat.AllSubtitleFormats)
-            //{
-            //    if (format.IsTextBased && format.Name != currentFormat.Name)
-            //    {
-            //        var patterns = new List<string>
-            //        {
-            //            "*" + format.Extension
-            //        };
-
-            //        fileTypes.Add(new FilePickerFileType(format.Name)
-            //        {
-            //            Patterns = patterns
-            //        });
-            //    }
-            //}            
-
             return fileTypes;
         }
         
@@ -501,7 +484,7 @@ namespace Nikse.SubtitleEdit.Logic.Media
             return fileTypes;
         }
 
-        public void OpenFileWithDefaultProgram(Window window, string filePath)
+        public static void OpenFileWithDefaultProgram(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {

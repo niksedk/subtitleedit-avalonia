@@ -11,6 +11,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media;
 using Nikse.SubtitleEdit.Logic.ValueConverters;
 using Projektanker.Icons.Avalonia;
 using SkiaSharp;
@@ -2253,20 +2254,43 @@ public static class UiUtil
         }
     }
 
-    internal static void ShowHelp(string helpName)
+    public static void ShowHelp(string helpName)
     {
         var helpUrl = string.Format($"https://niksedk.github.io/subtitleedit-avalonia/{helpName}.html");
+        OpenUrl(helpUrl);
+    }
+
+    public static void ShowHelp()
+    {
+        var helpUrl = string.Format($"https://niksedk.github.io/subtitleedit-avalonia");
+        OpenUrl(helpUrl);
+    }
+
+    public static void OpenUrl(string url)
+    {
         try
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = helpUrl,
+                FileName = url,
                 UseShellExecute = true
             });
         }
-        catch 
-        { 
-            // ignore
+        catch
+        {
+            // UseShellExecute might not work on some platforms, try platform-specific commands
+            if (OperatingSystem.IsLinux())
+            {
+                Process.Start("xdg-open", url);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Process.Start("open", url);
+            }
+            else
+            {
+                throw;
+            }
         }
     }
 }

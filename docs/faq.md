@@ -35,7 +35,10 @@ Subtitle Edit supports over 300 subtitle formats including SubRip (.srt), WebVTT
 For batch conversion, use **Tools → Batch convert...**.
 
 ### How do I import image-based subtitles?
-Use **File → Import image subtitle for edit (OCR)...** to import Blu-ray SUP, VobSub, or other image-based subtitles and convert them to text using OCR.
+Use **File → Import image subtitle for OCR...** to import Blu-ray SUP, VobSub, or other image-based subtitles and convert them to text using OCR.
+
+You can use **File → Import image subtitle for edit...** to work/export the images.
+
 
 ---
 
@@ -51,13 +54,15 @@ Configure the video player in **Options → Settings → Video Player**.
 If you have problems with a video, try **Video → More → Re-encode video for better subtitling**.
 
 ### How do I generate a waveform?
-Open a video file, and Subtitle Edit will offer to generate a waveform automatically. FFmpeg is required.
+Open a video file, and Subtitle Edit will generate a waveform automatically if FFmpeg is installed.
 
 To generate enable spectrogram go to **Options → Settings**.
 
 
 ### Where do I get FFmpeg?
-Subtitle Edit will ask for download on first use. You can also download FFmpeg in **Options → Settings**.
+Some functions in Subtitle Edit will prompt for downloading FFmpeg.
+
+You can also download FFmpeg in **Options → Settings**.
 
 ---
 

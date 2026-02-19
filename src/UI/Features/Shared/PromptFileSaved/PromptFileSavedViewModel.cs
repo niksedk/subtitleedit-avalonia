@@ -59,7 +59,7 @@ public partial class PromptFileSavedViewModel : ObservableObject
             return;
         }
 
-        _fileHelper.OpenFileWithDefaultProgram(Window, _fileName);
+        FileHelper.OpenFileWithDefaultProgram(_fileName);
     }
 
     [RelayCommand]

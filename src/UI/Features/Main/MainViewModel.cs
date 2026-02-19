@@ -516,8 +516,8 @@ public partial class MainViewModel :
                 Se.LogError(e);
             }
         }, DispatcherPriority.Loaded);
-        InitializeLibMpv();
         InitializeFfmpeg();
+        InitializeLibMpv();
         LoadShortcuts();
 
         StartTimers();
@@ -587,7 +587,7 @@ public partial class MainViewModel :
         }
     }
 
-    private static void InitializeLibMpv()
+    private void InitializeLibMpv()
     {
         LibMpvDynamicPlayer.MpvPath = Se.DataFolder;
 
@@ -619,6 +619,11 @@ public partial class MainViewModel :
                 if (File.Exists(libMpvFileName))
                 {
                     Se.Settings.General.LibMpvPath = libMpvFileName;
+
+                    Dispatcher.UIThread.Post(async void () =>
+                    {
+                        var _ = await RequireFfmpegOk();
+                    });
                 }
             }
         }
@@ -9022,7 +9027,7 @@ public partial class MainViewModel :
             var answer = await MessageBox.Show(
                 Window!,
                 "Download ffmpeg?",
-                $"{Environment.NewLine}\"Speech to text\" requires ffmpeg.{Environment.NewLine}{Environment.NewLine}Download and use ffmpeg?",
+                $"{Environment.NewLine}Some functions in Subtitle Edit requires ffmpeg.{Environment.NewLine}{Environment.NewLine}Download and use ffmpeg?",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 
