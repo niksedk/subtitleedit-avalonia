@@ -1,15 +1,46 @@
-﻿using Avalonia.Controls;
+﻿﻿using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 
+namespace Nikse.SubtitleEdit.Features.Files.Compare;
+
 public static class TextDiffHighlighter
 {
-    private static readonly IBrush ForegroundDifferenceColor = new SolidColorBrush(Color.FromRgb(183, 28, 28));
-    private static readonly IBrush BackDifferenceColor = new SolidColorBrush(Color.FromRgb(255, 235, 238));
-    private static readonly IBrush NormalColor = Brushes.Black;
-    private static readonly IBrush DiffBackgroundColor = new SolidColorBrush(Color.FromRgb(230, 255, 237));
+    private static IBrush GetForegroundDifferenceColor()
+    {
+        if (UiTheme.IsDarkThemeEnabled())
+        {
+            // Bright red for dark theme - easier to read
+            return new SolidColorBrush(Color.FromRgb(255, 100, 100));
+        }
+        // Dark red for light theme
+        return new SolidColorBrush(Color.FromRgb(183, 28, 28));
+    }
+
+    private static IBrush GetBackDifferenceColor()
+    {
+        if (UiTheme.IsDarkThemeEnabled())
+        {
+            // Darker red background for dark theme
+            return new SolidColorBrush(Color.FromRgb(80, 30, 30));
+        }
+        // Light pink background for light theme
+        return new SolidColorBrush(Color.FromRgb(255, 235, 238));
+    }
+
+    private static IBrush GetDiffBackgroundColor()
+    {
+        if (UiTheme.IsDarkThemeEnabled())
+        {
+            // Darker green background for dark theme
+            return new SolidColorBrush(Color.FromRgb(30, 60, 30));
+        }
+        // Light green background for light theme
+        return new SolidColorBrush(Color.FromRgb(230, 255, 237));
+    }
 
     public static (TextBlock left, TextBlock right) Compare(string text1, string text2)
     {
@@ -30,8 +61,8 @@ public static class TextDiffHighlighter
         {
             right.Inlines.Add(new Run(text2)
             {
-                Foreground = ForegroundDifferenceColor,
-                Background = BackDifferenceColor
+                Foreground = GetForegroundDifferenceColor(),
+                Background = GetBackDifferenceColor()
             });
             return (left, right);
         }
@@ -40,8 +71,8 @@ public static class TextDiffHighlighter
         {
             left.Inlines.Add(new Run(text1)
             {
-                Foreground = ForegroundDifferenceColor,
-                Background = BackDifferenceColor
+                Foreground = GetForegroundDifferenceColor(),
+                Background = GetBackDifferenceColor()
             });
             return (left, right);
         }
@@ -53,9 +84,9 @@ public static class TextDiffHighlighter
 
         if (!hasDifferences)
         {
-            // Texts are identical
-            left.Inlines.Add(new Run(text1) { Foreground = NormalColor });
-            right.Inlines.Add(new Run(text2) { Foreground = NormalColor });
+            // Texts are identical - don't set Foreground to allow theme color inheritance
+            left.Inlines.Add(new Run(text1));
+            right.Inlines.Add(new Run(text2));
             return (left, right);
         }
 
@@ -76,8 +107,7 @@ public static class TextDiffHighlighter
         {
             textBlock.Inlines!.Add(new Run(text.Substring(0, commonStart))
             {
-                Foreground = NormalColor,
-                Background = hasDifferences ? DiffBackgroundColor : null
+                Background = hasDifferences ? GetDiffBackgroundColor() : null
             });
             currentPos = commonStart;
         }
@@ -93,16 +123,15 @@ public static class TextDiffHighlighter
                 {
                     textBlock.Inlines!.Add(new Run(text.Substring(currentPos, start - currentPos))
                     {
-                        Foreground = ForegroundDifferenceColor,
-                        Background = BackDifferenceColor
+                        Foreground = GetForegroundDifferenceColor(),
+                        Background = GetBackDifferenceColor()
                     });
                 }
 
                 // Add common part
                 textBlock.Inlines!.Add(new Run(text.Substring(start, length))
                 {
-                    Foreground = NormalColor,
-                    Background = DiffBackgroundColor
+                    Background = GetDiffBackgroundColor()
                 });
 
                 currentPos = start + length;
@@ -114,8 +143,8 @@ public static class TextDiffHighlighter
         {
             textBlock.Inlines!.Add(new Run(text.Substring(currentPos, middleEnd - currentPos))
             {
-                Foreground = ForegroundDifferenceColor,
-                Background = BackDifferenceColor
+                Foreground = GetForegroundDifferenceColor(),
+                Background = GetBackDifferenceColor()
             });
             currentPos = middleEnd;
         }
@@ -125,8 +154,7 @@ public static class TextDiffHighlighter
         {
             textBlock.Inlines!.Add(new Run(text.Substring(text.Length - commonEnd))
             {
-                Foreground = NormalColor,
-                Background = hasDifferences ? DiffBackgroundColor : null
+                Background = hasDifferences ? GetDiffBackgroundColor() : null
             });
         }
     }

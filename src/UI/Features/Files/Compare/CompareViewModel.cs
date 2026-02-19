@@ -36,6 +36,10 @@ public partial class CompareViewModel : ObservableObject
     [ObservableProperty] private string _statusText = string.Empty;
     [ObservableProperty] private CompareVisual _selectedCompareVisual;
 
+    // Display properties for shortened file names in UI
+    public string LeftFileNameDisplay => GetShortFileName(LeftFileName);
+    public string RightFileNameDisplay => GetShortFileName(RightFileName);
+
     public Window? Window { get; internal set; }
     public bool OkPressed { get; private set; }
     public DataGrid? LeftDataGrid { get; set; } = new();
@@ -743,6 +747,60 @@ public partial class CompareViewModel : ObservableObject
         {
             return fileName;
         }
+    }
+
+    private static string GetShortFileName(string fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var name = System.IO.Path.GetFileName(fileName);
+            const int maxLength = 40;
+            
+            if (name.Length <= maxLength)
+            {
+                return name;
+            }
+
+            // Show beginning and end of filename with ellipsis in the middle
+            var extension = System.IO.Path.GetExtension(name);
+            var nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(name);
+            
+            if (nameWithoutExt.Length + extension.Length <= maxLength)
+            {
+                return name;
+            }
+
+            var charsToShow = maxLength - extension.Length - 3; // 3 for "..."
+            if (charsToShow < 5)
+            {
+                // Filename is very long, just truncate
+                return name.Substring(0, maxLength - 3) + "...";
+            }
+
+            var frontChars = charsToShow * 2 / 3; // Show more of the beginning
+            var backChars = charsToShow - frontChars;
+            
+            return nameWithoutExt.Substring(0, frontChars) + "..." + nameWithoutExt.Substring(nameWithoutExt.Length - backChars) + extension;
+        }
+        catch
+        {
+            return fileName;
+        }
+    }
+
+    partial void OnLeftFileNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(LeftFileNameDisplay));
+    }
+
+    partial void OnRightFileNameChanged(string value)
+    {
+        OnPropertyChanged(nameof(RightFileNameDisplay));
     }
 
     private static string GetHtmlText(CompareItem p, string text)

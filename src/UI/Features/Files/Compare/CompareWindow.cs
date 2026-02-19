@@ -1,4 +1,4 @@
-﻿using Avalonia;
+﻿﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
@@ -48,7 +48,12 @@ public class CompareWindow : Window
         };
 
         var buttonLeftFileName = UiUtil.MakeButtonBrowse(vm.PickLeftSubtitleFileCommand);
-        var labelLeftFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LeftFileName));
+        var labelLeftFileName = new TextBlock
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.LeftFileNameDisplay)),
+            [!ToolTip.TipProperty] = new Binding(nameof(vm.LeftFileName)),
+        };
         var labelLeftFileNameHasChanges = UiUtil.MakeLabel("*").WithBindVisible(vm, nameof(vm.LeftFileNameHasChanges));
         var panelLeftBrowse = new StackPanel
         {
@@ -60,7 +65,12 @@ public class CompareWindow : Window
         var buttonRightFileName = UiUtil.MakeButtonBrowse(vm.PickRightSubtitleFileCommand);
         var buttonRightReload = UiUtil.MakeButton(string.Format(Se.Language.File.LoadXFromFile, System.IO.Path.GetFileName(vm.LeftFileName)), vm.ReloadRightFromFileCommand)
             .WithBindIsVisible(nameof(vm.IsReloadFromFileVisible));
-        var labelRightFileName = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.RightFileName));
+        var labelRightFileName = new TextBlock
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            [!TextBlock.TextProperty] = new Binding(nameof(vm.RightFileNameDisplay)),
+            [!ToolTip.TipProperty] = new Binding(nameof(vm.RightFileName)),
+        };
         var panelRightBrowse = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
