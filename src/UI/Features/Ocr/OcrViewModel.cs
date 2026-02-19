@@ -2840,7 +2840,7 @@ public partial class OcrViewModel : ObservableObject
             e.Handled = true; // prevent further handling if needed
             Dispatcher.UIThread.Post(async void () => { await ShowGoToLine(); });
         }
-        else if (e.Key == Key.F1)
+        else if (UiUtil.IsHelp(e))
         {
             e.Handled = true;
             UiUtil.ShowHelp("features/ocr");

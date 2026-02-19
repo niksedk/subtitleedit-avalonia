@@ -2293,4 +2293,9 @@ public static class UiUtil
             }
         }
     }
+
+    internal static bool IsHelp(KeyEventArgs e)
+    {
+        return e.Key == Key.F1;
+    }
 }
