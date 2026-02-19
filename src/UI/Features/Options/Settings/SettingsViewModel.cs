@@ -2018,50 +2018,85 @@ public partial class SettingsViewModel : ObservableObject
             return;
         }
 
-        foreach (var item in FileTypeAssociations)
+        try
         {
-            var ext = item.Extension;
-            if (item.IsAssociated)
+            foreach (var item in FileTypeAssociations)
             {
-                var avaResIconPath = item.IconPath;
-                var folder = Path.Combine(Se.DataFolder, "FileTypes");
-                if (!Directory.Exists(folder))
+                var ext = item.Extension;
+                if (item.IsAssociated)
                 {
-                    Directory.CreateDirectory(folder);
-                }
-
-                var iconFileName = Path.Combine(folder, ext.TrimStart('.') + ".ico");
-                if (!File.Exists(iconFileName))
-                {
-                    try
+                    var avaResIconPath = item.IconPath;
+                    var folder = Path.Combine(Se.DataFolder, "FileTypes");
+                    if (!Directory.Exists(folder))
                     {
-                        var uri = new Uri(avaResIconPath);
-                        using var stream = AssetLoader.Open(uri);
-                        if (stream != null)
+                        Directory.CreateDirectory(folder);
+                    }
+
+                    var iconFileName = Path.Combine(folder, ext.TrimStart('.') + ".ico");
+                    if (!File.Exists(iconFileName))
+                    {
+                        try
                         {
-                            // If the source is already an ICO file, just copy it
-                            if (avaResIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
+                            var uri = new Uri(avaResIconPath);
+                            using var stream = AssetLoader.Open(uri);
+                            if (stream != null)
                             {
-                                using var fileStream = new FileStream(iconFileName, FileMode.Create, FileAccess.Write);
-                                stream.CopyTo(fileStream);
+                                // If the source is already an ICO file, just copy it
+                                if (avaResIconPath.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    using var fileStream = new FileStream(iconFileName, FileMode.Create, FileAccess.Write);
+                                    stream.CopyTo(fileStream);
+                                }
                             }
                         }
+                        catch (Exception exception)
+                        {
+                            Se.LogError(exception, "SaveFileTypeAssociations");
+                        }
                     }
-                    catch (Exception exception)
-                    {
-                        Se.LogError(exception, "SaveFileTypeAssociations");
-                    }
-                }
 
-                FileTypeAssociationsHelper.SetFileAssociationViaRegistry(ext, exeFileName, iconFileName, "SubtitleEdit5");
+                    FileTypeAssociationsHelper.SetFileAssociationViaRegistry(ext, exeFileName, iconFileName, "SubtitleEdit5");
+                }
+                else
+                {
+                    FileTypeAssociationsHelper.DeleteFileAssociationViaRegistry(ext, "SubtitleEdit5");
+                }
             }
-            else
+
+            FileTypeAssociationsHelper.Refresh();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Se.LogError(ex, "SaveFileTypeAssociations - Unauthorized access");
+            if (Window != null)
             {
-                FileTypeAssociationsHelper.DeleteFileAssociationViaRegistry(ext, "SubtitleEdit5");
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    await MessageBox.Show(
+                        Window,
+                        "Error",
+                        "Unable to modify file associations. Administrator privileges are required to modify registry keys.\n\nPlease run the application as administrator or modify file associations manually.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                });
             }
         }
-
-        FileTypeAssociationsHelper.Refresh();
+        catch (System.Security.SecurityException ex)
+        {
+            Se.LogError(ex, "SaveFileTypeAssociations - Security exception");
+            if (Window != null)
+            {
+                Dispatcher.UIThread.Post(async () =>
+                {
+                    await MessageBox.Show(
+                        Window,
+                        "Error",
+                        "Unable to modify file associations due to security restrictions.\n\nPlease run the application as administrator or modify file associations manually.",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                });
+            }
+        }
     }
 
     [RelayCommand]

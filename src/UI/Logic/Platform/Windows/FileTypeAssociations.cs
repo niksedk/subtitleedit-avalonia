@@ -107,34 +107,45 @@ internal static class FileTypeAssociationsHelper
     internal static void DeleteFileAssociationViaRegistry(string ext, string appName)
     {
 #pragma warning disable CA1416 // Validate platform compatibility
-        var appExtensionRegKey = $"{appName}{ext}";
-        using (var registryKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\", true))
+        try
         {
-            if (registryKey?.OpenSubKey(appExtensionRegKey) != null)
+            var appExtensionRegKey = $"{appName}{ext}";
+            using (var registryKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\", true))
             {
-                registryKey.DeleteSubKeyTree($"{appName}{ext}");
+                if (registryKey?.OpenSubKey(appExtensionRegKey) != null)
+                {
+                    registryKey.DeleteSubKeyTree($"{appName}{ext}");
+                }
+            }
+
+            // (Default)
+            const string defaultRegValueName = "";
+            using (var registryKey = Registry.CurrentUser.OpenSubKey("Software\\Classes\\" + ext, true))
+            {
+                if (registryKey == null)
+                {
+                    return;
+                }   
+
+                var registryValue = registryKey.GetValue(defaultRegValueName);
+                if (registryValue == null)
+                {
+                    return;
+                }
+
+                if (appExtensionRegKey.Equals((string)registryValue, StringComparison.Ordinal))
+                {
+                    registryKey.DeleteValue(defaultRegValueName);
+                }
             }
         }
-
-        // (Default)
-        const string defaultRegValueName = "";
-        using (var registryKey = Registry.CurrentUser.OpenSubKey("Software\\Classes\\" + ext, true))
+        catch (UnauthorizedAccessException)
         {
-            if (registryKey == null)
-            {
-                return;
-            }   
-
-            var registryValue = registryKey.GetValue(defaultRegValueName);
-            if (registryValue == null)
-            {
-                return;
-            }
-
-            if (appExtensionRegKey.Equals((string)registryValue, StringComparison.Ordinal))
-            {
-                registryKey.DeleteValue(defaultRegValueName);
-            }
+            throw;
+        }
+        catch (System.Security.SecurityException)
+        {
+            throw;
         }
 #pragma warning restore CA1416 // Validate platform compatibility
     }
