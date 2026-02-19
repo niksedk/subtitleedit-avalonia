@@ -331,6 +331,7 @@ public partial class MainViewModel :
     public MenuItem MenuItemAudioVisualizerSplitAtPosition { get; set; }
     public MenuItem MenuItemAudioVisualizerMergeWithPrevious { get; set; }
     public MenuItem MenuItemAudioVisualizerMergeWithNext { get; set; }
+    public MenuItem MenuItemAudioVisualizerSpeechToTextSelectedLines { get; set; }
     public ITextBoxWrapper EditTextBoxOriginal { get; set; }
     public ITextBoxWrapper EditTextBox { get; set; }
     public TextEditorBindingHelper? EditTextBoxHelper { get; set; }
@@ -416,6 +417,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSplitAtPosition = new MenuItem();
         MenuItemAudioVisualizerMergeWithPrevious = new MenuItem();
         MenuItemAudioVisualizerMergeWithNext = new MenuItem();
+        MenuItemAudioVisualizerSpeechToTextSelectedLines = new MenuItem();
         MenuItemStyles = new MenuItem();
         MenuItemActors = new MenuItem();
         AudioTraksMenuItem = new MenuItem();
@@ -13572,6 +13574,7 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerSplit.IsVisible = false;
         MenuItemAudioVisualizerMergeWithPrevious.IsVisible = false;
         MenuItemAudioVisualizerMergeWithNext.IsVisible = false;
+        MenuItemAudioVisualizerSpeechToTextSelectedLines.IsVisible = false;
 
         if (e.NewParagraph != null)
         {
@@ -13629,6 +13632,7 @@ public partial class MainViewModel :
         {
             MenuItemAudioVisualizerDeleteAtPosition.IsVisible = true;
             MenuItemAudioVisualizerSplitAtPosition.IsVisible = true;
+            MenuItemAudioVisualizerSpeechToTextSelectedLines.IsVisible = true;
             return;
         }
     }

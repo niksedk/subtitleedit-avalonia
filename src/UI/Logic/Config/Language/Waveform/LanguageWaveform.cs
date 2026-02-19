@@ -7,6 +7,7 @@ public class LanguageWaveform
     public string GuessTimeCodesScanBlockAverageMin { get; set; }
     public string GuessTimeCodesScanBlockAverageMax { get; set; }
     public string GuessTimeCodesSplitLongSubtitlesAt { get; set; }
+    public object SpeechToTextSelectedLinesDotDotDot { get; internal set; }
     public string SeekSilence { get; set; }
     public string MinSilenceDurationSeconds { get; set; }
     public string MaxSilenceVolume { get; set; }
@@ -39,6 +40,7 @@ public class LanguageWaveform
         GuessTimeCodesScanBlockAverageMax = "Scan block average maximum (% of max):";
         GuessTimeCodesSplitLongSubtitlesAt = "Split long subtitles at (ms):";
 
+        SpeechToTextSelectedLinesDotDotDot = "Speech to text selected lines...";
         SeekSilence = "Seek silence";
         SeekSilenceDotDotDot = "Seek silence...";
         MinSilenceDurationSeconds = "Min. silence duration (seconds):";

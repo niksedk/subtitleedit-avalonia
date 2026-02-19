@@ -208,6 +208,14 @@ public class InitWaveform
             };
             flyout.Items.Add(menuItemSeekSilence);
 
+            var menuItemSpeechToTextSelectedLines = new MenuItem
+            {
+                Header = Se.Language.Waveform.SpeechToTextSelectedLinesDotDotDot,
+                Command = vm.SpeechToTextSelectedLinesCommand,
+            };
+            flyout.Items.Add(menuItemSpeechToTextSelectedLines);
+            vm.MenuItemAudioVisualizerSpeechToTextSelectedLines = menuItemSpeechToTextSelectedLines;
+
             var separatorDisplayMode = new Separator();
             separatorDisplayMode.DataContext = vm;
             separatorDisplayMode.Bind(Separator.IsVisibleProperty, new Binding(nameof(vm.ShowWaveformDisplayModeSeparator)));
