@@ -252,6 +252,7 @@ public partial class ApplyDurationLimitsViewModel : ObservableObject
         IsDoNotGoPastShotChangeVisible = shotChanges.Count > 0;
         IsDoNotGoPastShotChangeVisible = false; //TODO: not implemented
         _previewTimer.Start();
+        _isDirty = true;
     }
 
     internal void SetChanged()
