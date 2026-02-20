@@ -10,7 +10,7 @@ public class SpectrogramDrawerOptimized
 {
     private const double RaisedCosineWindowScale = 0.5;
     private const int MagnitudeIndexRange = 256;
-    
+
     private readonly int _nfft;
     private readonly MagnitudeToIndexMapper _mapper;
     private readonly RealFFT _fft;
@@ -19,18 +19,18 @@ public class SpectrogramDrawerOptimized
     private readonly double[] _window;
     private readonly double[] _magnitude1;
     private readonly double[] _magnitude2;
-    
-    public SpectrogramDrawerOptimized(int nfft)
+
+    public SpectrogramDrawerOptimized(int nfft, SKColor[]? sharedPalette = null)
     {
         _nfft = nfft;
         _mapper = new MagnitudeToIndexMapper(100.0, MagnitudeIndexRange - 1);
         _fft = new RealFFT(nfft);
-        _palette = GeneratePalette();
+        _palette = sharedPalette ?? GeneratePalette();
         _segment = new double[nfft];
         _window = CreateRaisedCosineWindow(nfft);
         _magnitude1 = new double[nfft / 2];
         _magnitude2 = new double[nfft / 2];
-        
+
         double scaleCorrection = 1.0 / (RaisedCosineWindowScale * _fft.ForwardScaleFactor);
         for (int i = 0; i < _window.Length; i++)
         {
@@ -38,9 +38,9 @@ public class SpectrogramDrawerOptimized
         }
     }
     
-    public SKBitmap Draw(double[] samples)
+    public SKBitmap Draw(double[] samples, int sampleCount = -1)
     {
-        int width = samples.Length / _nfft;
+        int width = (sampleCount >= 0 ? sampleCount : samples.Length) / _nfft;
         int height = _nfft / 2;
         
         // Validate dimensions
@@ -182,40 +182,38 @@ public class SpectrogramDrawerOptimized
         return a * a + b * b;
     }
     
-    private static SKColor[] GeneratePalette()
+    public static SKColor[] GeneratePalette()
     {
         var palette = new SKColor[MagnitudeIndexRange];
-        if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicViridis.ToString())
-        {
-            for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
-            {
-                palette[colorIndex] = PaletteValueViridis(colorIndex, MagnitudeIndexRange);
-            }
-        }
-        else if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
-        {
-            for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
-            {
-                palette[colorIndex] = PaletteValuePlasma(colorIndex, MagnitudeIndexRange);
-            }
-        }
+        var style = Se.Settings.Waveform.SpectrogramStyle;
+
+        Func<int, int, SKColor> paletteFunc;
+        if (style == SeSpectrogramStyle.ClassicViridis.ToString())
+            paletteFunc = PaletteValueViridis;
+        else if (style == SeSpectrogramStyle.ClassicPlasma.ToString())
+            paletteFunc = PaletteValuePlasma;
+        else if (style == SeSpectrogramStyle.ClassicInferno.ToString())
+            paletteFunc = PaletteValueInferno;
+        else if (style == SeSpectrogramStyle.ClassicTurbo.ToString())
+            paletteFunc = PaletteValueTurbo;
         else
+            paletteFunc = PaletteValueClassic;
+
+        for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
         {
-            for (int colorIndex = 0; colorIndex < MagnitudeIndexRange; colorIndex++)
-            {
-                palette[colorIndex] = PaletteValue(colorIndex, MagnitudeIndexRange);
-            }
+            palette[colorIndex] = paletteFunc(colorIndex, MagnitudeIndexRange);
         }
+
         return palette;
     }
-    
-    private static SKColor PaletteValue(int index, int count)
+
+    private static SKColor PaletteValueClassic(int index, int count)
     {
         var h = (double)index / count;
         HsvToRgb(h, 1.0, 1.0, out byte r, out byte g, out byte b);
         return new SKColor(r, g, b, 255);
     }
-    
+
     private static SKColor PaletteValueViridis(int index, int count)
     {
         double t = (double)index / (count - 1);
@@ -224,7 +222,7 @@ public class SpectrogramDrawerOptimized
         byte b = (byte)(255 * Math.Clamp(0.329415 + t * (0.617668 + t * (-0.963814 + t * (1.135455 + t * (-0.525790)))), 0, 1));
         return new SKColor(r, g, b, 255);
     }
-    
+
     private static SKColor PaletteValuePlasma(int index, int count)
     {
         double t = (double)index / (count - 1);
@@ -232,6 +230,75 @@ public class SpectrogramDrawerOptimized
         byte g = (byte)(255 * Math.Clamp(0.029803 + t * (0.256790 + t * (0.712953)), 0, 1));
         byte b = (byte)(255 * Math.Clamp(0.529803 + t * (0.741791 + t * (-1.271584)), 0, 1));
         return new SKColor(r, g, b, 255);
+    }
+
+    private static SKColor PaletteValueInferno(int index, int count)
+    {
+        double t = (double)index / (count - 1);
+        double r = 0.001462 + t * (1.217761 + t * (1.795470 + t * (-7.361869 + t * (13.446884 + t * (-9.555991 + t * 2.455710)))));
+        double g = 0.000466 + t * (0.125098 + t * (3.875940 + t * (-10.418160 + t * (11.001100 + t * (-4.909755)))));
+        double b = 0.013866 + t * (2.565590 + t * (-6.945260 + t * (9.287860 + t * (-5.684940 + t * 1.316750))));
+        return new SKColor(
+            (byte)(255 * Math.Clamp(r, 0, 1)),
+            (byte)(255 * Math.Clamp(g, 0, 1)),
+            (byte)(255 * Math.Clamp(b, 0, 1)), 255);
+    }
+
+    private static SKColor PaletteValueTurbo(int index, int count)
+    {
+        double t = (double)index / (count - 1);
+        double r, g, b;
+
+        if (t < 0.125)
+        {
+            double lt = t / 0.125;
+            r = 0.0; g = 0.3 * lt; b = 0.5 + 0.5 * lt;
+        }
+        else if (t < 0.25)
+        {
+            double lt = (t - 0.125) / 0.125;
+            r = 0.0; g = 0.3 + 0.7 * lt; b = 1.0 - 0.5 * lt;
+        }
+        else if (t < 0.375)
+        {
+            double lt = (t - 0.25) / 0.125;
+            r = 0.6 * lt; g = 1.0; b = 0.5 - 0.5 * lt;
+        }
+        else if (t < 0.5)
+        {
+            double lt = (t - 0.375) / 0.125;
+            r = 0.6 + 0.4 * lt; g = 1.0; b = 0.0;
+        }
+        else if (t < 0.625)
+        {
+            double lt = (t - 0.5) / 0.125;
+            r = 1.0; g = 1.0 - 0.3 * lt; b = 0.0;
+        }
+        else if (t < 0.75)
+        {
+            double lt = (t - 0.625) / 0.125;
+            r = 1.0; g = 0.7 - 0.4 * lt; b = 0.2 * lt;
+        }
+        else if (t < 0.875)
+        {
+            double lt = (t - 0.75) / 0.125;
+            r = 1.0; g = 0.3 - 0.3 * lt; b = 0.2 + 0.5 * lt;
+        }
+        else
+        {
+            double lt = (t - 0.875) / 0.125;
+            r = 1.0; g = 0.4 * lt; b = 0.7 + 0.3 * lt;
+        }
+
+        // Gamma correction for better perceptual uniformity
+        r = Math.Pow(r, 0.8);
+        g = Math.Pow(g, 0.8);
+        b = Math.Pow(b, 0.8);
+
+        return new SKColor(
+            (byte)(255 * Math.Clamp(r, 0, 1)),
+            (byte)(255 * Math.Clamp(g, 0, 1)),
+            (byte)(255 * Math.Clamp(b, 0, 1)), 255);
     }
     
     /// <summary>

@@ -1,6 +1,7 @@
 using Nikse.SubtitleEdit.Core.Common;
 using SkiaSharp;
 using System;
+using System.Buffers;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -17,12 +18,15 @@ public class SpectrogramGeneratorOptimized : IDisposable
 
     private readonly WaveHeader2 _header;
     private readonly Stream _stream;
-    private readonly ThreadLocal<SpectrogramDrawerOptimized> _drawerPool = new(() => new SpectrogramDrawerOptimized(FftSize));
-    
+    private readonly SKColor[] _sharedPalette;
+    private readonly ThreadLocal<SpectrogramDrawerOptimized> _drawerPool;
+
     public SpectrogramGeneratorOptimized(Stream stream, WaveHeader2 header)
     {
         _stream = stream;
         _header = header;
+        _sharedPalette = SpectrogramDrawerOptimized.GeneratePalette();
+        _drawerPool = new ThreadLocal<SpectrogramDrawerOptimized>(() => new SpectrogramDrawerOptimized(FftSize, _sharedPalette));
     }
     
     public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, CancellationToken token)
@@ -33,12 +37,12 @@ public class SpectrogramGeneratorOptimized : IDisposable
         if (Configuration.Settings.VideoControls.UseExperimentalRenderer && BinarySpectrogramFormat.Exists(spectrogramDirectory))
         {
             // If exists, try to load it instead of regenerating
-            try 
+            try
             {
-                var loader = BinarySpectrogramFormat.CreateMemoryMappedLoader(spectrogramDirectory);
+                var loader = BinarySpectrogramFormat.CreateLazyLoader(spectrogramDirectory);
                 if (loader != null)
                 {
-                    System.Diagnostics.Debug.WriteLine("[PERF] Spectrogram already exists (memory mapped), skipping generation");
+                    System.Diagnostics.Debug.WriteLine("[PERF] Spectrogram already exists (lazy loader), skipping generation");
                     return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, new BinarySpectrogramFormat.SpectrogramImageList(loader));
                 }
             }
@@ -100,17 +104,22 @@ public class SpectrogramGeneratorOptimized : IDisposable
                 int batchStartIndex = processedChunks;
                 try
                 {
+                    int sampleCount = chunkSampleCount;
                     Parallel.For(0, batchSize, parallelOptions, i =>
                     {
                         var drawer = _drawerPool.Value!;
-                        images[batchStartIndex + i] = drawer.Draw(batchSamples[i]);
+                        images[batchStartIndex + i] = drawer.Draw(batchSamples[i], sampleCount);
                     });
                 }
                 catch (OperationCanceledException)
                 {
+                    ReturnBatchSamples(batchSamples, chunkSampleCount);
                     break;
                 }
-                
+
+                // Return rented arrays to the pool
+                ReturnBatchSamples(batchSamples, chunkSampleCount);
+
                 processedChunks += batchSize;
                 
                 System.Diagnostics.Debug.WriteLine($"[PERF] Spectrogram: Processed {processedChunks}/{chunkCount} chunks");
@@ -188,7 +197,8 @@ public class SpectrogramGeneratorOptimized : IDisposable
         
         for (int chunkIdx = 0; chunkIdx < batchSize; chunkIdx++)
         {
-            var chunkSamples = new double[chunkSampleCount];
+            var chunkSamples = ArrayPool<double>.Shared.Rent(chunkSampleCount);
+            Array.Clear(chunkSamples, 0, chunkSampleCount);
             batchSamples[chunkIdx] = chunkSamples;
             
             int sampleIndex = 0;
@@ -243,7 +253,19 @@ public class SpectrogramGeneratorOptimized : IDisposable
         
         return batchSamples;
     }
-    
+
+    private static void ReturnBatchSamples(double[][] batchSamples, int chunkSampleCount)
+    {
+        for (int i = 0; i < batchSamples.Length; i++)
+        {
+            if (batchSamples[i] != null)
+            {
+                ArrayPool<double>.Shared.Return(batchSamples[i]);
+                batchSamples[i] = null!;
+            }
+        }
+    }
+
     private void SaveMetadata(string spectrogramDirectory, int chunkSampleCount, CancellationToken token)
     {
         if (token.IsCancellationRequested) return;
