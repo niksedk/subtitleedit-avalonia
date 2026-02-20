@@ -60,15 +60,13 @@ public class PeakGeneratorOptimized
             int blockAlign = _header.BlockAlign;
             int bytesPerSample = _header.BytesPerSample;
             int numberOfChannels = _header.NumberOfChannels;
-            int bytesPerPeak = samplesPerPeak * blockAlign;
-            
+
             long totalBytesToRead = _header.DataChunkSize;
             long bytesRead = 0;
-            
+
             // Accumulator for samples across buffer boundaries
             var sampleAccumulator = new List<float>(samplesPerPeak * 2);
-            int samplesNeededForNextPeak = samplesPerPeak - remainingDelaySamples;
-            
+
             // Skip samples for partial delay peak (will be filled with zeros)
             if (remainingDelaySamples > 0)
             {
@@ -79,23 +77,46 @@ public class PeakGeneratorOptimized
                     sampleAccumulator.Add(0f);
                 }
             }
-            
+
+            // Track leftover bytes that don't make up a full block so we never
+            // split WAV frames across buffer boundaries.
+            int leftoverBytes = 0;
+
             while (bytesRead < totalBytesToRead)
             {
-                int bytesToRead = (int)Math.Min(StreamingBufferSize, totalBytesToRead - bytesRead);
-                int actualBytesRead = _stream.Read(buffer, 0, bytesToRead);
-                
+                int bytesAvailableInBuffer = StreamingBufferSize - leftoverBytes;
+                int bytesRemainingInFile = (int)Math.Min(bytesAvailableInBuffer, totalBytesToRead - bytesRead);
+                int bytesToRead = Math.Min(bytesAvailableInBuffer, bytesRemainingInFile);
+
+                int actualBytesRead = _stream.Read(buffer, leftoverBytes, bytesToRead);
+
                 if (actualBytesRead == 0)
                     break;
-                
+
                 bytesRead += actualBytesRead;
-                
-                // Process buffer in parallel chunks for better CPU utilization
-                ProcessBufferIntoPeaks(
-                    buffer, actualBytesRead, 
-                    blockAlign, bytesPerSample, numberOfChannels, 
-                    sampleAndChannelScale, samplesPerPeak,
-                    sampleAccumulator, peaks);
+
+                // Total valid bytes currently in buffer (leftover + newly read)
+                int totalInBuffer = leftoverBytes + actualBytesRead;
+
+                // Only process whole blocks to avoid splitting frames
+                int processLength = totalInBuffer - (totalInBuffer % blockAlign);
+
+                if (processLength > 0)
+                {
+                    // Process buffer in parallel chunks for better CPU utilization
+                    ProcessBufferIntoPeaks(
+                        buffer, processLength,
+                        blockAlign, bytesPerSample, numberOfChannels,
+                        sampleAndChannelScale, samplesPerPeak,
+                        sampleAccumulator, peaks);
+                }
+
+                // Move leftover bytes (less than one block) to start of buffer
+                leftoverBytes = totalInBuffer - processLength;
+                if (leftoverBytes > 0)
+                {
+                    Buffer.BlockCopy(buffer, processLength, buffer, 0, leftoverBytes);
+                }
             }
             
             // Handle any remaining samples in accumulator
@@ -198,24 +219,21 @@ public class PeakGeneratorOptimized
     {
         int endOffset = offset + length;
         int currentOffset = offset;
-        
-        while (currentOffset < endOffset)
+
+        while (currentOffset + blockAlign <= endOffset)
         {
             float valuePositive = 0f;
             float valueNegative = 0f;
-            
+
             for (int iChannel = 0; iChannel < numberOfChannels; iChannel++)
             {
-                if (currentOffset + bytesPerSample > endOffset)
-                    break;
-                    
                 var v = WaveDataReader.ReadSampleValue(buffer, ref currentOffset, bytesPerSample);
                 if (v < 0)
                     valueNegative += v;
                 else
                     valuePositive += v;
             }
-            
+
             sampleAccumulator.Add(valueNegative * scale);
             sampleAccumulator.Add(valuePositive * scale);
         }
