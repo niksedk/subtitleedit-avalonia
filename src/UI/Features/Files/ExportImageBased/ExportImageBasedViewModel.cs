@@ -7,13 +7,16 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Nikse.SubtitleEdit.Core.BluRaySup;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Shared;
+using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,8 +24,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Nikse.SubtitleEdit.Features.Shared.PromptFileSaved;
-using SkiaSharp.HarfBuzz;
 
 namespace Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 
@@ -712,7 +713,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var shadowWidth = ip.ShadowWidth;
 
         // Parse text and create text segments with styling
-        var text = ReverseNumberAndLatinOnly(ip.Text, ip.IsRightToLeft);    
+        var text = ReverseNumberAndLatinOnly(ip.Text, ip.IsRightToLeft);
 
         var segments = ParseTextWithStyling(text, fontColor);
 
@@ -735,106 +736,30 @@ public partial class ExportImageBasedViewModel : ObservableObject
         var baseLineHeight = Math.Abs(fontMetrics.Ascent) + Math.Abs(fontMetrics.Descent);
         var lineSpacing = (float)(baseLineHeight * ip.LineSpacingPercent / 100.0);
 
-        var paddingLeftRight = (float)ip.PaddingLeftRight;
-        var paddingTopBottom = (float)ip.PaddingTopBottom;
-
         // Create oversized temporary bitmap for rendering (with fixed margin for effects)
-        const float tempMargin = 50f;
         var tempWidth = Math.Max(4000, ip.ScreenWidth);
         var tempHeight = Math.Max(2000, ip.ScreenHeight);
-        using var tempBitmap = new SKBitmap(tempWidth, tempHeight, false);
+        using var tempBitmap = new SKBitmap(tempWidth, tempHeight);
         using var tempCanvas = new SKCanvas(tempBitmap);
         tempCanvas.Clear(SKColors.Transparent);
 
         // Render text to temporary bitmap to measure actual bounds
-        var textStartX = tempMargin;
-        var textStartY = tempMargin + Math.Abs(fontMetrics.Ascent);
-        
+        var paddingLeftRight = (float)ip.PaddingLeftRight;
         RenderTextToCanvas(tempCanvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
-            textStartX, textStartY, baseLineHeight, lineSpacing, paddingLeftRight, 
+            5, 5, baseLineHeight, lineSpacing, paddingLeftRight,
             fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, tempWidth, isForMeasurement: true);
 
-        // Measure actual bounds by scanning for non-transparent pixels
-        var bounds = MeasureActualBounds(tempBitmap);
-
-        // Calculate final bitmap size (bounds already includes effects, just add user padding)
-        var finalWidth = (int)Math.Ceiling(bounds.Width + paddingLeftRight * 2);
-        var finalHeight = (int)Math.Ceiling(bounds.Height + paddingTopBottom * 2);
-
-        // Ensure minimum size
-        finalWidth = Math.Max(finalWidth, 1);
-        finalHeight = Math.Max(finalHeight, 1);
-
-        // Create final bitmap
-        var bitmap = new SKBitmap(finalWidth, finalHeight, false);
-        using var canvas = new SKCanvas(bitmap);
-        canvas.Clear(SKColors.Transparent);
-
-        // Draw background only if it has some alpha (not fully transparent)
-        if (ip.BackgroundColor.Alpha > 0)
+        var bitmapNoPadding = tempBitmap.TrimTransparentPixels();
+        //System.IO.File.WriteAllBytes(@"C:\temp\debug_no_padding.png", bitmapNoPadding.TrimmedBitmap.ToPngArray());
+        if (ip.PaddingTopBottom == 0 && ip.PaddingLeftRight == 0)
         {
-            using var paint = new SKPaint
-            {
-                Color = ip.BackgroundColor,
-                IsAntialias = true,
-            };
-
-            var boxRect = new SKRect(
-                0,
-                0,
-                finalWidth,
-                finalHeight
-            );
-            var cornerRadius = (float)ip.BackgroundCornerRadius;
-            canvas.DrawRoundRect(boxRect, cornerRadius, cornerRadius, paint);
+            return bitmapNoPadding.TrimmedBitmap;
         }
 
-        // Render text to final bitmap - offset accounts for where content actually rendered
-        var offsetX = bounds.Left - tempMargin;
-        var offsetY = bounds.Top - tempMargin;
-        textStartX = paddingLeftRight - offsetX;
-        textStartY = paddingTopBottom + Math.Abs(fontMetrics.Ascent) - offsetY;
+        var bitmapWithMargins = bitmapNoPadding.TrimmedBitmap.AddTransparentMargins(ip.PaddingLeftRight, ip.PaddingTopBottom, ip.PaddingLeftRight, ip.PaddingTopBottom);
+        //System.IO.File.WriteAllBytes(@"C:\temp\debug_with_margins.png", bitmapWithMargins.ToPngArray());
 
-        RenderTextToCanvas(canvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
-            textStartX, textStartY, baseLineHeight, lineSpacing, paddingLeftRight,
-            fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, finalWidth, isForMeasurement: false);
-
-        return bitmap;
-    }
-
-    private static SKRect MeasureActualBounds(SKBitmap bitmap)
-    {
-        var left = bitmap.Width;
-        var top = bitmap.Height;
-        var right = 0;
-        var bottom = 0;
-
-        var pixels = bitmap.Pixels;
-        var width = bitmap.Width;
-        var height = bitmap.Height;
-
-        for (var y = 0; y < height; y++)
-        {
-            for (var x = 0; x < width; x++)
-            {
-                var pixel = pixels[y * width + x];
-                if (pixel.Alpha > 0)
-                {
-                    left = Math.Min(left, x);
-                    top = Math.Min(top, y);
-                    right = Math.Max(right, x);
-                    bottom = Math.Max(bottom, y);
-                }
-            }
-        }
-
-        // If no pixels found, return minimal bounds
-        if (left > right)
-        {
-            return new SKRect(0, 0, 1, 1);
-        }
-
-        return new SKRect(left, top, right + 1, bottom + 1);
+        return bitmapWithMargins;
     }
 
     private static void RenderTextToCanvas(
@@ -872,7 +797,7 @@ public partial class ExportImageBasedViewModel : ObservableObject
                 var seg = line[j];
                 var font = GetFont(seg, regularFont, boldFont, italicFont, boldItalicFont);
                 lineWidth += MeasureTextWithShaping(seg.Text, font);
-                
+
                 if ((seg.IsItalic || seg.IsBold) && j < line.Count - 1)
                 {
                     lineWidth += regularFont.Size * 0.17f;
@@ -1002,11 +927,11 @@ public partial class ExportImageBasedViewModel : ObservableObject
     {
         using var shaper = new SKShaper(font.Typeface);
         var result = shaper.Shape(text, font);
-        
+
         // Measure visual bounds to account for glyph overhang (important for italic text)
         var bounds = new SKRect();
         font.MeasureText(text, out bounds);
-        
+
         // Use the maximum of advance width and visual right edge
         return Math.Max(result.Width, bounds.Right);
     }

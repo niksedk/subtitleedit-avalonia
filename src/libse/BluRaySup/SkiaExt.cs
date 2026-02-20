@@ -129,6 +129,20 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
             }
         }
 
+        public static SKBitmap AddTransparentMargins(this SKBitmap bitmap, int marginLeft, int marginTop, int marginRight, int marginBottom)
+        {
+            var newWidth = bitmap.Width + marginLeft + marginRight;
+            var newHeight = bitmap.Height + marginTop + marginBottom;
+            var newBitmap = new SKBitmap(newWidth, newHeight, bitmap.ColorType, bitmap.AlphaType);
+            using (SKCanvas canvas = new SKCanvas(newBitmap))
+            {
+                canvas.Clear(SKColors.Transparent); // Fill the new bitmap with transparent color
+                canvas.DrawBitmap(bitmap, marginLeft, marginTop); // Draw the original bitmap at the correct position
+            }
+
+            return newBitmap;
+        }
+
         // byte[] is implicitly convertible to ReadOnlySpan<byte>
         private static bool ByteArraysEqual(ReadOnlySpan<byte> a1, ReadOnlySpan<byte> a2)
         {
@@ -147,7 +161,9 @@ namespace Nikse.SubtitleEdit.Core.BluRaySup
         public static TrimResult TrimTransparentPixels(this SKBitmap bitmap)
         {
             if (bitmap == null)
+            {
                 throw new ArgumentNullException(nameof(bitmap));
+            }
 
             int width = bitmap.Width;
             int height = bitmap.Height;
