@@ -29,7 +29,7 @@ Subtitle Edit is a free, open-source editor for video subtitles. It allows you t
 
 - Windows 10+ / Linux / macOS 
 - [FFmpeg](https://ffmpeg.org/) (for audio/video processing)
-- Optional: [libmpv](https://mpv.io/) for video playback
+- [libmpv](https://mpv.io/) for video playback
 
 ## Getting Started
 
@@ -58,5 +58,5 @@ Subtitle Edit offers **12 different layouts** for arranging these areas. You can
 
 For a detailed guide to each area, mouse interactions, and keyboard shortcuts, see the **[Main Window](features/main-window.md)** documentation.
 
-<!-- Screenshot: Main window with labeled areas -->
-![Main Window Layout](screenshots/main-window-layout.png)
+<!-- Screenshot: Main window with light mode -->
+![Main Window (light mode)](screenshots/main-window-light.png)

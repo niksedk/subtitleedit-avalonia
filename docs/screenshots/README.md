@@ -9,7 +9,7 @@ The following screenshots are referenced in the documentation and should be adde
 ### Main Window
 - `main-window.png` — Full main window overview
 - `main-window-annotated.png` — Main window with numbered labels for each area
-- `main-window-layout.png` — Main window with labeled areas
+- `main-window-light.png` — Main window with light mode
 - `main-menu-bar.png` — Menu bar with a menu expanded
 - `main-toolbar.png` — Toolbar buttons
 - `main-subtitle-grid.png` — Subtitle grid with some lines selected
@@ -36,8 +36,8 @@ The following screenshots are referenced in the documentation and should be adde
 - `show-history.png` — Show history window
 
 ### Tools
-- `fix-common-errors.png` — Fix common errors window
 - `fix-common-errors-rules.png` — Fix common errors rules list
+- `fix-common-errors-fixes.png` — Fix common errors fixes
 - `batch-convert.png` — Batch convert window
 - `change-casing.png` — Change casing window
 - `fix-names.png` — Fix names window
