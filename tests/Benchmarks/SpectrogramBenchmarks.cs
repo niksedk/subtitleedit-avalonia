@@ -55,7 +55,7 @@ public class SpectrogramGenerationBenchmarks
         {
             using var stream = File.OpenRead(_wavFile);
             var header = new WaveHeader2(stream);
-            var generator = new SpectrogramGeneratorOptimized(stream, header);
+            using var generator = new SpectrogramGeneratorOptimized(stream, header);
             generator.GenerateSpectrogram(0, specDir, CancellationToken.None);
         }
         finally

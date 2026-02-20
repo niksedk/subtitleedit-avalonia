@@ -360,7 +360,7 @@ public class SpectrogramData2 : IDisposable
         }
         catch (Exception exception)
         {
-            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
+            Se.LogError(exception, $"Unable to load spectrogram from {xmlInfoFileName}");
         }
     }
 
@@ -408,23 +408,27 @@ public class SpectrogramData2 : IDisposable
                 .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
                 .ToList();
 
-            var images = new SKBitmap[fileNames.Count];
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 10, CancellationToken = cancellationToken };
+            var images = new SKBitmap?[fileNames.Count];
+            var maxParallelism = Math.Max(1, Math.Min(Environment.ProcessorCount, 10));
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxParallelism, CancellationToken = cancellationToken };
 
             await Parallel.ForEachAsync(
                 fileNames.Select((fileName, index) => (fileName, index)),
                 parallelOptions,
-                async (item, ct) =>
+                (item, ct) =>
                 {
-                    var bitmap = await Task.Run(() =>
+                    ct.ThrowIfCancellationRequested();
+                    using var fileStream = File.OpenRead(item.fileName);
+                    var bitmap = SKBitmap.Decode(fileStream);
+                    if (bitmap == null)
                     {
-                        using var fileStream = File.OpenRead(item.fileName);
-                        return SKBitmap.Decode(fileStream);
-                    }, ct);
+                        Se.LogError($"Unable to decode spectrogram image '{item.fileName}'");
+                    }
                     images[item.index] = bitmap;
+                    return ValueTask.CompletedTask;
                 });
 
-            Images = images.ToList();
+            Images = images.Where(img => img != null).ToList()!;
 
             if (Images.Count == 0)
             {
@@ -433,7 +437,7 @@ public class SpectrogramData2 : IDisposable
         }
         catch (Exception exception)
         {
-            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
+            Se.LogError(exception, $"Unable to load spectrogram from {xmlInfoFileName}");
         }
     }
 

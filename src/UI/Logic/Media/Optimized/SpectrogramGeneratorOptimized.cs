@@ -9,12 +9,12 @@ using System.Xml;
 
 namespace Nikse.SubtitleEdit.Logic.Media.Optimized;
 
-public class SpectrogramGeneratorOptimized
+public class SpectrogramGeneratorOptimized : IDisposable
 {
     private const int FftSize = 256;
     private const int ImageWidth = 1024;
     private const int StreamingBufferSize = 32 * 1024 * 1024; // 32MB buffer for streaming reads
-    
+
     private readonly WaveHeader2 _header;
     private readonly Stream _stream;
     private readonly ThreadLocal<SpectrogramDrawerOptimized> _drawerPool = new(() => new SpectrogramDrawerOptimized(FftSize));
@@ -210,23 +210,32 @@ public class SpectrogramGeneratorOptimized
             if (samplesToRead > 0)
             {
                 int bytesToRead = samplesToRead * blockAlign;
-                int bytesRead = _stream.Read(buffer, 0, bytesToRead);
-                
+
+                // Read loop to handle partial reads from Stream.Read
+                int totalBytesRead = 0;
+                while (totalBytesRead < bytesToRead)
+                {
+                    int read = _stream.Read(buffer, totalBytesRead, bytesToRead - totalBytesRead);
+                    if (read == 0)
+                        break;
+                    totalBytesRead += read;
+                }
+
+                // Only process complete frames to avoid infinite loop on partial blocks
                 int bufferOffset = 0;
-                while (bufferOffset < bytesRead && sampleIndex < chunkSampleCount)
+                while (bufferOffset + blockAlign <= totalBytesRead && sampleIndex < chunkSampleCount)
                 {
                     double value = 0.0;
                     for (int iChannel = 0; iChannel < numberOfChannels; iChannel++)
                     {
-                        if (bufferOffset + bytesPerSample <= bytesRead)
-                        {
-                            value += WaveDataReader.ReadSampleValue(buffer, ref bufferOffset, bytesPerSample);
-                        }
+                        value += WaveDataReader.ReadSampleValue(buffer, ref bufferOffset, bytesPerSample);
                     }
                     chunkSamples[sampleIndex++] = value * sampleAndChannelScale;
                 }
-                
-                fileSampleOffset += samplesToRead;
+
+                // Advance by actual complete samples read
+                int actualSamplesRead = totalBytesRead / blockAlign;
+                fileSampleOffset += actualSamplesRead;
             }
             
             // Remaining samples stay zero (end padding)
@@ -258,5 +267,10 @@ public class SpectrogramGeneratorOptimized
     private SpectrogramData2 CreateEmptyResult(double sampleDuration)
     {
         return new SpectrogramData2(FftSize, ImageWidth, sampleDuration, Array.Empty<SKBitmap>());
+    }
+
+    public void Dispose()
+    {
+        _drawerPool.Dispose();
     }
 }

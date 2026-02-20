@@ -55,9 +55,25 @@ public static class BinarySpectrogramFormat
         BitConverter.TryWriteBytes(header.Slice(16), height);
         stream.Write(header);
         
+        int tightRowBytes = width * 4; // RGBA, tightly packed on disk
         for (int i = 0; i < images.Length; i++)
         {
-            stream.Write(images[i].GetPixelSpan());
+            var bitmap = images[i];
+            var pixelSpan = bitmap.GetPixelSpan();
+            int rowBytes = bitmap.RowBytes;
+
+            if (rowBytes == tightRowBytes)
+            {
+                stream.Write(pixelSpan);
+            }
+            else
+            {
+                // Write row-by-row to avoid per-row padding in the file
+                for (int y = 0; y < height; y++)
+                {
+                    stream.Write(pixelSpan.Slice(y * rowBytes, tightRowBytes));
+                }
+            }
         }
         
         sw.Stop();
@@ -88,11 +104,27 @@ public static class BinarySpectrogramFormat
         
         var header = ReadHeader(stream);
         var images = new SKBitmap[header.ChunkCount];
-        
+        int tightRowBytes = header.Width * 4;
+
         for (int i = 0; i < header.ChunkCount; i++)
         {
             var bitmap = new SKBitmap(header.Width, header.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            stream.ReadExactly(bitmap.GetPixelSpan());
+            int rowBytes = bitmap.RowBytes;
+
+            if (rowBytes == tightRowBytes)
+            {
+                stream.ReadExactly(bitmap.GetPixelSpan());
+            }
+            else
+            {
+                // Read row-by-row when bitmap has per-row padding
+                var pixelSpan = bitmap.GetPixelSpan();
+                for (int y = 0; y < header.Height; y++)
+                {
+                    stream.ReadExactly(pixelSpan.Slice(y * rowBytes, tightRowBytes));
+                }
+            }
+
             images[i] = bitmap;
         }
         
@@ -272,13 +304,27 @@ public static class BinarySpectrogramFormat
             _stream ??= new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read,
                 bufferSize: _header.BytesPerChunk,
                 FileOptions.RandomAccess);
-            
+
             long offset = HeaderSize + (long)index * _header.BytesPerChunk;
             _stream.Seek(offset, SeekOrigin.Begin);
-            
+
             var bitmap = new SKBitmap(_header.Width, _header.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            _stream.ReadExactly(bitmap.GetPixelSpan());
-            
+            int rowBytes = bitmap.RowBytes;
+            int tightRowBytes = _header.Width * 4;
+
+            if (rowBytes == tightRowBytes)
+            {
+                _stream.ReadExactly(bitmap.GetPixelSpan());
+            }
+            else
+            {
+                var pixelSpan = bitmap.GetPixelSpan();
+                for (int y = 0; y < _header.Height; y++)
+                {
+                    _stream.ReadExactly(pixelSpan.Slice(y * rowBytes, tightRowBytes));
+                }
+            }
+
             return bitmap;
         }
         
@@ -354,24 +400,45 @@ public static class BinarySpectrogramFormat
         {
             if (index < 0 || index >= _header.ChunkCount)
                 throw new ArgumentOutOfRangeException(nameof(index));
-                
+
             long offset = HeaderSize + (long)index * _header.BytesPerChunk;
-            
+
+            // Bounds check against mapped view capacity
+            long requiredEnd = offset + _header.BytesPerChunk;
+            if (requiredEnd > (long)_accessor.SafeMemoryMappedViewHandle.ByteLength)
+                throw new InvalidDataException($"Spectrogram file is truncated: need {requiredEnd} bytes but file has {_accessor.SafeMemoryMappedViewHandle.ByteLength}");
+
             var bitmap = new SKBitmap(_header.Width, _header.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
-            
-            // Use unsafe pointer for direct memory copy
+            int rowBytes = bitmap.RowBytes;
+            int tightRowBytes = _header.Width * 4;
+
             byte* ptr = null;
             _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
             try
             {
                 var destPixels = (byte*)bitmap.GetPixels();
-                Buffer.MemoryCopy(ptr + offset, destPixels, _header.BytesPerChunk, _header.BytesPerChunk);
+
+                if (rowBytes == tightRowBytes)
+                {
+                    Buffer.MemoryCopy(ptr + offset, destPixels, _header.BytesPerChunk, _header.BytesPerChunk);
+                }
+                else
+                {
+                    // Copy row-by-row when bitmap has per-row padding
+                    for (int y = 0; y < _header.Height; y++)
+                    {
+                        Buffer.MemoryCopy(
+                            ptr + offset + y * tightRowBytes,
+                            destPixels + y * rowBytes,
+                            tightRowBytes, tightRowBytes);
+                    }
+                }
             }
             finally
             {
                 _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             }
-            
+
             return bitmap;
         }
 
