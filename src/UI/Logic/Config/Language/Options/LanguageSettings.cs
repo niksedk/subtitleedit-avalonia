@@ -227,7 +227,6 @@ public class LanguageSettings
     public string GridGoToSubtitleOnlyWaveformOnly { get; set; }
     public string GridGoToSubtitleAndPause { get; set; }
     public string GridGoToSubtitleAndPlay { get; set; }
-    public string GridGoToSubtitleOnly { get; set; }
     public string GridGoToSubtitleAndPauseAndFocusTextBox { get; set; }
     public string SubtitleGridFormattingNone { get; set; }
     public string SubtitleGridFormattingShowFormatting { get; set; }
@@ -481,7 +480,6 @@ public class LanguageSettings
         GridGoToSubtitleOnlyWaveformOnly = "Go to subtitle only (waveform only)";
         GridGoToSubtitleAndPause = "Go to subtitle and pause";
         GridGoToSubtitleAndPlay = "Go to subtitle and play";
-        GridGoToSubtitleOnly = "Go to subtitle only";
         GridGoToSubtitleAndPauseAndFocusTextBox = "Go to subtitle and pause and focus text box";
         SubtitleGridFormattingNone = "No formatting";
         SubtitleGridFormattingShowFormatting = "Show formatting";

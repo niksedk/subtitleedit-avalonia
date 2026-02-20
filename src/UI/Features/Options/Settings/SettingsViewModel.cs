@@ -393,7 +393,7 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.Options.Settings.GridGoToSubtitleOnlyWaveformOnly,
             Se.Language.Options.Settings.GridGoToSubtitleAndPause,
             Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
-            Se.Language.Options.Settings.GridGoToSubtitleOnly,
+            Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition,
             Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox
         ];
         SelectedSubtitleSingleClickActionType = SubtitleSingleClickActionTypes[0];
@@ -403,7 +403,7 @@ public partial class SettingsViewModel : ObservableObject
             Se.Language.General.None,
             Se.Language.Options.Settings.GridGoToSubtitleAndPause,
             Se.Language.Options.Settings.GridGoToSubtitleAndPlay,
-            Se.Language.Options.Settings.GridGoToSubtitleOnly,
+            Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition,
             Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox
         ];
         SelectedSubtitleDoubleClickActionType = SubtitleDoubleClickActionTypes[0];
@@ -1004,10 +1004,10 @@ public partial class SettingsViewModel : ObservableObject
     private static readonly Dictionary<string, string> _singleClickActionToTextMap = new Dictionary<string, string>
     {
         { SubtitleSingleClickActionType.None.ToString(), Se.Language.General.None },
-        { SubtitleSingleClickActionType.GoToWaveformOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnlyWaveformOnly },
+        { SubtitleSingleClickActionType.GoToWaveformOnlyNoVideoPosition.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnlyWaveformOnly },
         { SubtitleSingleClickActionType.GoToSubtitleAndPause.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPause },
         { SubtitleSingleClickActionType.GoToSubtitleAndPlay.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPlay },
-        { SubtitleSingleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
+        { SubtitleSingleClickActionType.GoToSubtitleAndSetVideoPosition.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition },
         { SubtitleSingleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
     };
 
@@ -1042,7 +1042,7 @@ public partial class SettingsViewModel : ObservableObject
         { SubtitleDoubleClickActionType.None.ToString(), Se.Language.General.None },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPause.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPause },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPlay.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPlay },
-        { SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleOnly },
+        { SubtitleDoubleClickActionType.GoToSubtitleOnly.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndSetVideoPosition },
         { SubtitleDoubleClickActionType.GoToSubtitleAndPauseAndFocusTextBox.ToString(), Se.Language.Options.Settings.GridGoToSubtitleAndPauseAndFocusTextBox },
     };
 

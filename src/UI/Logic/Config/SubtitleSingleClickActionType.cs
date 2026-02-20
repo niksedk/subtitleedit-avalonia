@@ -3,9 +3,9 @@
 public enum SubtitleSingleClickActionType
 {
     None,
-    GoToWaveformOnly,
+    GoToWaveformOnlyNoVideoPosition,
     GoToSubtitleAndPause,
     GoToSubtitleAndPlay,
-    GoToSubtitleOnly,
+    GoToSubtitleAndSetVideoPosition,
     GoToSubtitleAndPauseAndFocusTextBox,
 }

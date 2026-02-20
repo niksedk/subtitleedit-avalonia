@@ -171,7 +171,7 @@ public class SeGeneral
         DefaultSubtitleFormat = new SubRip().FriendlyName;
         DefaultEncoding = TextEncoding.Utf8WithBom;
         SubtitleEnterKeyAction = nameof(SubtitleEnterKeyActionType.GoToSubtitleAndSetVideoPosition);
-        SubtitleSingleClickAction = nameof(SubtitleSingleClickActionType.GoToWaveformOnly);
+        SubtitleSingleClickAction = nameof(SubtitleSingleClickActionType.None);
         SubtitleDoubleClickAction = nameof(SubtitleDoubleClickActionType.GoToSubtitleAndPause);
         SaveAsBehavior = nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName);
         SaveAsAppendLanguageCode = nameof(SaveAsLanguageAppendType.None);

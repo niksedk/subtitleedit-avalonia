@@ -13371,7 +13371,7 @@ public partial class MainViewModel :
             }
 
             var seconds = selectedItem.StartTime.TotalSeconds;
-            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToWaveformOnly.ToString())
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToWaveformOnlyNoVideoPosition.ToString())
             {
                 AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
                 return;
@@ -13385,7 +13385,7 @@ public partial class MainViewModel :
                 return;
             }
 
-            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleOnly.ToString())
+            if (Se.Settings.General.SubtitleSingleClickAction == SubtitleSingleClickActionType.GoToSubtitleAndSetVideoPosition.ToString())
             {
                 vp.Position = seconds;
                 AudioVisualizerCenterOnPositionIfNeeded(selectedItem, seconds);
@@ -14104,5 +14104,35 @@ public partial class MainViewModel :
 
             _updateAudioVisualizer = true;
         }
+    }
+
+    internal void AudioVisualizerSetStartAndOffsetTheRest(object sender, AudioVisualizer.PositionEventArgs e)
+    {
+        var s = SelectedSubtitle;
+        if (s == null || LockTimeCodes)
+        {
+            return;
+        }
+
+        var videoPositionSeconds = e.PositionInSeconds;
+        var index = Subtitles.IndexOf(s);
+        if (index < 0 || index >= Subtitles.Count)
+        {
+            return;
+        }
+
+        var videoStartTime = TimeSpan.FromSeconds(videoPositionSeconds);
+        var subtitleStartTime = s.StartTime;
+        var difference = videoStartTime - subtitleStartTime;
+
+        _undoRedoManager.StopChangeDetection();
+        for (var i = index; i < Subtitles.Count; i++)
+        {
+            var subtitle = Subtitles[i];
+            subtitle.StartTime += difference;
+        }
+
+        _updateAudioVisualizer = true;
+        _undoRedoManager.StartChangeDetection();
     }
 }

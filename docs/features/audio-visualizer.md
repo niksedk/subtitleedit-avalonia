@@ -23,6 +23,9 @@ The audio visualizer displays the audio waveform (or spectrogram) of the loaded 
 ### Subtitle Timing
 | Mouse Action | Effect |
 |--------------|--------|
+| **Click + Ctrl (cmd on mac) + Shift ** | Set start and offset the rest |
+| **Click + Shift ** | Set start of current |
+| **Click + Ctrl (cmd on mac) ** | Set end of current |
 | **Click** on empty area | Set video position |
 | **Click** on subtitle | Select the subtitle |
 | **Double-click** on subtitle | Set video position and select subtitle |

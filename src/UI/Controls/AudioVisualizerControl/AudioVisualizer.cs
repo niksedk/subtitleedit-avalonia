@@ -341,6 +341,7 @@ public class AudioVisualizer : Control
     public event ParagraphEventHandler? OnSelectRequested;
     public event ParagraphNullableEventHandler? OnPrimarySingleClicked;
     public event ParagraphNullableEventHandler? OnPrimaryDoubleClicked;
+    public event PositionEventHandler? OnSetStartAndOffsetTheRest;
 
     public AudioVisualizer()
     {
@@ -468,6 +469,13 @@ public class AudioVisualizer : Control
             }
 
             _activeParagraph = null;
+            return;
+        }
+
+        if (_isShiftDown && _isCtrlDown && !_isAltDown && e.Pointer.IsPrimary)
+        {
+            var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
+            OnSetStartAndOffsetTheRest?.Invoke(this, new PositionEventArgs { PositionInSeconds = position });    
             return;
         }
 
