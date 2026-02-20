@@ -52,8 +52,6 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public double WaveformSeeksSilenceMaxVolume { get; set; }
         public bool WaveformUnwrapText { get; set; }
         public bool WaveformHideWpmCpsLabels { get; set; }
-        public bool UseExperimentalRenderer { get; set; }
-
 
         public VideoControlsSettings()
         {

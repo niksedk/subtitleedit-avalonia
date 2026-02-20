@@ -1,4 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Enums;
 using SkiaSharp;
 using System;
@@ -5662,12 +5662,6 @@ namespace Nikse.SubtitleEdit.Core.Settings
                 settings.VideoControls.WaveformHideWpmCpsLabels = Convert.ToBoolean(subNode.InnerText, CultureInfo.InvariantCulture);
             }
 
-            subNode = node.SelectSingleNode("UseExperimentalRenderer");
-            if (subNode != null)
-            {
-                settings.VideoControls.UseExperimentalRenderer = Convert.ToBoolean(subNode.InnerText, CultureInfo.InvariantCulture);
-            }
-
             // Network
             node = doc.DocumentElement.SelectSingleNode("NetworkSettings");
             if (node != null)
@@ -9863,7 +9857,6 @@ namespace Nikse.SubtitleEdit.Core.Settings
                 xmlWriter.WriteElementString("WaveformSeeksSilenceMaxVolume", settings.VideoControls.WaveformSeeksSilenceMaxVolume.ToString(CultureInfo.InvariantCulture));
                 xmlWriter.WriteElementString("WaveformUnwrapText", settings.VideoControls.WaveformUnwrapText.ToString(CultureInfo.InvariantCulture));
                 xmlWriter.WriteElementString("WaveformHideWpmCpsLabels", settings.VideoControls.WaveformHideWpmCpsLabels.ToString(CultureInfo.InvariantCulture));
-                xmlWriter.WriteElementString("UseExperimentalRenderer", settings.VideoControls.UseExperimentalRenderer.ToString(CultureInfo.InvariantCulture));
                 xmlWriter.WriteEndElement();
 
                 xmlWriter.WriteStartElement("NetworkSettings", string.Empty);
