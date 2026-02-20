@@ -96,10 +96,10 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
 
             response.EnsureSuccessStatusCode();
 
-            // Parse response according to Perplexity API structure: output[0].content[0].text
             var parser = new SeJsonParser();
             var resultText = parser.GetFirstObject(json, "translation");
             resultText = resultText.Replace("&#10;", "<br />");
+            resultText = resultText.Replace("&nbsp;", " ");
             var outputText = Json.DecodeJsonText(resultText).Trim();
             if (outputText.StartsWith('"') && outputText.EndsWith('"') && !text.StartsWith('"'))
             {

@@ -1,5 +1,4 @@
 ﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -65,7 +64,7 @@ public class SeAutoTranslate
     public string AvalAiPrompt { get; set; }
     public string AvalAiApiKey { get; set; }
     public string AvalAiModel { get; set; }
-    
+
     public string PerplexityUrl { get; set; }
     public string PerplexityPrompt { get; set; }
     public string PerplexityApiKey { get; set; }
