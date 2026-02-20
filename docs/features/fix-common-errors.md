@@ -5,8 +5,17 @@ Automatically detect and fix common subtitle errors.
 - **Menu:** Tools → Fix common errors...
 - **Shortcut:** Configurable
 
-<!-- Screenshot: Fix common errors window -->
-![Fix Common Errors](../screenshots/fix-common-errors.png)
+## Step 1 - Rules
+
+<!-- Screenshot: Fix common errors rules -->
+![Fix Common Errors Rules](../screenshots/fix-common-errors-rules.png)
+
+
+## Step 2 - Fixes
+
+<!-- Screenshot: Fix common errors fixes -->
+![Fix Common Errors Fixes](../screenshots/fix-common-errors-fixes.png)
+
 
 ## How to Use
 
@@ -43,5 +52,3 @@ You can save different sets of fix rules as profiles for different workflows (e.
 - **Save profile** — Save current rule selections
 - **Load profile** — Load a previously saved profile
 
-<!-- Screenshot: Fix common errors rules -->
-![Fix Common Errors Rules](../screenshots/fix-common-errors-rules.png)
