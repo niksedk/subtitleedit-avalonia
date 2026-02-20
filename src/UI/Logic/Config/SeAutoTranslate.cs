@@ -169,5 +169,7 @@ public class SeAutoTranslate
         PapagoApiKeyId = string.Empty;
         RequestMaxBytes = 1000;
         SeamlessM4TUrl = "http://localhost:5000/";
+        LaraApiId = string.Empty;
+        LaraApiSecret = string.Empty;
     }
 }

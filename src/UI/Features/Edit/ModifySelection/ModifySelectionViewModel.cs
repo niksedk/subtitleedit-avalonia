@@ -14,7 +14,7 @@ namespace Nikse.SubtitleEdit.Features.Edit.ModifySelection;
 public partial class ModifySelectionViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<ModifySelectionRule> _rules;
-    [ObservableProperty] private ModifySelectionRule _selectedRule;
+    [ObservableProperty] private ModifySelectionRule? _selectedRule;
 
     [ObservableProperty] private ObservableCollection<PreviewItem> _subtitles;
     [ObservableProperty] private PreviewItem? _selectedSubtitle;

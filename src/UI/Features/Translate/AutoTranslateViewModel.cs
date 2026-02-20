@@ -80,6 +80,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         ApiKeyText = string.Empty;
         ApiUrlText = string.Empty;
         ModelText = string.Empty;
+        ApiIdText = string.Empty;
+        ApiSecretText = string.Empty;
 
         AutoTranslators = new ObservableCollection<IAutoTranslator>
         {
