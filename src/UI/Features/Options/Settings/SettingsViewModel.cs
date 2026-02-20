@@ -201,6 +201,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _waveformSnapToShotChanges;
     [ObservableProperty] private bool _waveformShotChangesAutoGenerate;
     [ObservableProperty] private bool _waveformAllowOverlap;
+    [ObservableProperty] private bool _useExperimentalRenderer;
 
     [ObservableProperty] private ObservableCollection<string> _waveformSingleClickActionTypes;
     [ObservableProperty] private string _selectedWaveformSingleClickActionType;
@@ -697,6 +698,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedWaveformDoubleClickActionType = MapWaveformDoubleClickToTranslation(Se.Settings.Waveform.DoubleClickAction);
 
         WaveformRightClickSelectsSubtitle = Se.Settings.Waveform.RightClickSelectsSubtitle;
+        UseExperimentalRenderer = Configuration.Settings.VideoControls.UseExperimentalRenderer;
 
         ColorDurationTooLong = general.ColorDurationTooLong;
         ColorDurationTooShort = general.ColorDurationTooShort;
@@ -1237,6 +1239,7 @@ public partial class SettingsViewModel : ObservableObject
         Se.Settings.Waveform.DoubleClickAction = MapWaveformDoubleClickFromTranslation(SelectedWaveformDoubleClickActionType);
 
         Se.Settings.Waveform.RightClickSelectsSubtitle = WaveformRightClickSelectsSubtitle;
+        Configuration.Settings.VideoControls.UseExperimentalRenderer = UseExperimentalRenderer;
 
         general.ColorDurationTooLong = ColorDurationTooLong;
         general.ColorDurationTooShort = ColorDurationTooShort;
