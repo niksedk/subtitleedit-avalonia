@@ -53,7 +53,6 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public bool WaveformUnwrapText { get; set; }
         public bool WaveformHideWpmCpsLabels { get; set; }
 
-
         public VideoControlsSettings()
         {
             CustomSearchText1 = "The Free Dictionary";

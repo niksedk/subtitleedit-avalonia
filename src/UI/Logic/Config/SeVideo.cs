@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using Nikse.SubtitleEdit.Features.Assa;
 using System;
 
@@ -33,6 +33,7 @@ public class SeVideo
     public decimal MpvPreviewOutlineWidth { get; set; }
     public decimal MpvPreviewShadowWidth { get; set; }
     public int MpvPreviewBorderType { get; set; }
+    public bool UseExperimentalRenderer { get; set; }
 
     public SeVideo()
     {
