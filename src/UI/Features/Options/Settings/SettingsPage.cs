@@ -436,6 +436,9 @@ public class SettingsPage : UserControl
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarVideoPositionSlider, nameof(_vm.ShowWaveformToolbarVideoPositionSlider)),
             MakeCheckboxSetting(Se.Language.Options.Settings.ShowWaveformToolbarPlaybackSpeed, nameof(_vm.ShowWaveformToolbarPlaybackSpeed)),
 
+            MakeSeparator(),
+            MakeCheckboxSetting("Use Experimental Waveform Renderer", nameof(_vm.UseExperimentalRenderer)),
+
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformFocusOnMouseOver, nameof(_vm.WaveformFocusOnMouseOver)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformCenterVideoPosition, nameof(_vm.WaveformCenterVideoPosition)),
             MakeCheckboxSetting(Se.Language.Options.Settings.WaveformAllowOverlap, nameof(_vm.WaveformAllowOverlap)),

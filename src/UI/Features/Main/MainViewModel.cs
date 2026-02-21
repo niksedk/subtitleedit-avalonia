@@ -126,6 +126,7 @@ using Nikse.SubtitleEdit.Logic.Config.Language;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Initializers;
 using Nikse.SubtitleEdit.Logic.Media;
+using Nikse.SubtitleEdit.Logic.Media.Optimized;
 using Nikse.SubtitleEdit.Logic.UndoRedo;
 using Nikse.SubtitleEdit.Logic.VideoPlayers.LibMpvDynamic;
 using System;
@@ -5383,6 +5384,7 @@ public partial class MainViewModel :
     private DataGrid _oldSubtitleGrid = new DataGrid();
     private ITextBoxWrapper _oldEditTextBox = new TextBoxWrapper(new TextBox());
     private bool _oldGenerateSpectrogram;
+    private bool _oldUseExperimentalRenderer;
     private string _oldSpectrogramStyle = string.Empty;
 
     [RelayCommand]
@@ -5391,6 +5393,7 @@ public partial class MainViewModel :
         _oldSubtitleGrid = SubtitleGrid;
         _oldEditTextBox = EditTextBox;
         _oldGenerateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
+        _oldUseExperimentalRenderer = Configuration.Settings.VideoControls.UseExperimentalRenderer;
         _oldSpectrogramStyle = Se.Settings.Waveform.SpectrogramStyle;
 
         Se.Settings.General.WindowPositions = Se.Settings.General.WindowPositions.OrderBy(p => p.WindowName).ToList();
@@ -5461,7 +5464,8 @@ public partial class MainViewModel :
             if (!string.IsNullOrEmpty(_videoFileName))
             {
                 if (_oldGenerateSpectrogram == false && Se.Settings.Waveform.GenerateSpectrogram ||
-                    _oldSpectrogramStyle != Se.Settings.Waveform.SpectrogramStyle)
+                    _oldSpectrogramStyle != Se.Settings.Waveform.SpectrogramStyle ||
+                    _oldUseExperimentalRenderer != Configuration.Settings.VideoControls.UseExperimentalRenderer)
                 {
                     SettingsViewModel.DeleteWaveformAndSpectrogramFiles();
 
@@ -11666,13 +11670,18 @@ public partial class MainViewModel :
             if (File.Exists(tempWaveFileName))
             {
                 WaveformGeneratingText = Se.Language.Main.GeneratingWaveformDotDotDot;
-                using var waveFile = new WavePeakGenerator2(tempWaveFileName);
-                var wavePeaks = waveFile.GeneratePeaks(0, peakWaveFileName);
+                var generateSpectrogram = Se.Settings.Waveform.GenerateSpectrogram;
 
-                if (Se.Settings.Waveform.GenerateSpectrogram)
+                var (wavePeaks, spectrogram) = WaveProcessorFactory.GeneratePeaksAndSpectrogram(
+                    tempWaveFileName,
+                    0,
+                    peakWaveFileName,
+                    spectrogramFolderName,
+                    generateSpectrogram,
+                    _videoOpenTokenSource.Token);
+
+                if (spectrogram != null)
                 {
-                    WaveformGeneratingText = Se.Language.Main.GeneratingSpectrogramDotDotDot;
-                    var spectrogram = waveFile.GenerateSpectrogram(0, spectrogramFolderName, _videoOpenTokenSource.Token);
                     AudioVisualizer?.SetSpectrogram(spectrogram);
                 }
 

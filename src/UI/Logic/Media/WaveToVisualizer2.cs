@@ -1,5 +1,6 @@
-﻿using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Media.Optimized;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -320,6 +322,21 @@ public class SpectrogramData2 : IDisposable
             ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
             SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
 
+            // Try binary format first (faster)
+            if (BinarySpectrogramFormat.Exists(directory))
+            {
+                var lazyLoader = BinarySpectrogramFormat.CreateLazyLoader(directory);
+                if (lazyLoader != null)
+                {
+                    Images = new BinarySpectrogramFormat.SpectrogramImageList(lazyLoader);
+                    return;
+                }
+
+                Images = BinarySpectrogramFormat.Load(directory);
+                return;
+            }
+
+            // Fall back to JPEG files
             var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
                 .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
                 .ToList();
@@ -343,21 +360,105 @@ public class SpectrogramData2 : IDisposable
         }
         catch (Exception exception)
         {
-            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
+            Se.LogError(exception, $"Unable to load spectrogram from {xmlInfoFileName}");
+        }
+    }
+
+    public async Task LoadAsync(CancellationToken cancellationToken = default)
+    {
+        if (_loadFromDirectory == null)
+        {
+            return;
+        }
+
+        string directory = _loadFromDirectory;
+        string xmlInfoFileName = Path.Combine(directory, "Info.xml");
+        _loadFromDirectory = null;
+
+        try
+        {
+            if (!File.Exists(xmlInfoFileName))
+            {
+                return;
+            }
+
+            var doc = new XmlDocument();
+            var culture = CultureInfo.InvariantCulture;
+            doc.Load(xmlInfoFileName);
+            FftSize = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("NFFT")?.InnerText, culture);
+            ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
+            SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
+
+            // Try binary format first (faster)
+            if (BinarySpectrogramFormat.Exists(directory))
+            {
+                var lazyLoader = await Task.Run(() => BinarySpectrogramFormat.CreateLazyLoader(directory), cancellationToken);
+                if (lazyLoader != null)
+                {
+                    Images = new BinarySpectrogramFormat.SpectrogramImageList(lazyLoader);
+                    return;
+                }
+
+                Images = await Task.Run(() => BinarySpectrogramFormat.Load(directory), cancellationToken);
+                return;
+            }
+
+            // Fall back to JPEG files
+            var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
+                .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
+                .ToList();
+
+            var images = new SKBitmap?[fileNames.Count];
+            var maxParallelism = Math.Max(1, Math.Min(Environment.ProcessorCount, 10));
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maxParallelism, CancellationToken = cancellationToken };
+
+            await Parallel.ForEachAsync(
+                fileNames.Select((fileName, index) => (fileName, index)),
+                parallelOptions,
+                (item, ct) =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    using var fileStream = File.OpenRead(item.fileName);
+                    var bitmap = SKBitmap.Decode(fileStream);
+                    if (bitmap == null)
+                    {
+                        Se.LogError($"Unable to decode spectrogram image '{item.fileName}'");
+                    }
+                    images[item.index] = bitmap;
+                    return ValueTask.CompletedTask;
+                });
+
+            Images = images.Where(img => img != null).ToList()!;
+
+            if (Images.Count == 0)
+            {
+                Se.LogError($"No spectrogram images found in {directory}");
+            }
+        }
+        catch (Exception exception)
+        {
+            Se.LogError(exception, $"Unable to load spectrogram from {xmlInfoFileName}");
         }
     }
 
     public void Dispose()
     {
-        foreach (var image in Images)
+        if (Images is IDisposable disposableList)
         {
-            try
+            disposableList.Dispose();
+        }
+        else
+        {
+            foreach (var image in Images)
             {
-                image.Dispose();
-            }
-            catch
-            {
-                // ignore
+                try
+                {
+                    image.Dispose();
+                }
+                catch
+                {
+                    // ignore
+                }
             }
         }
         Images = Array.Empty<SKBitmap>();
