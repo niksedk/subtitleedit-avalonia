@@ -110,8 +110,11 @@ public class WhisperAdvancedWindow : Window
         var buttonPanel = UiUtil.MakeButtonBar(
             buttonXxlOptions,
             UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCppCommand)
-                .WithBindIsVisible(nameof(vm.IsVadCppVisible)),
-            UiUtil.MakeButton(Se.Language.Video.AudioToText.WhisperXxlHighlightWord, vm.EnableWordLevelCppCommand),
+                .WithBindIsVisible(nameof(vm.IsWhisperCppVisible)),
+            UiUtil.MakeButton(Se.Language.Video.AudioToText.WhisperXxlHighlightWord, vm.EnableWordLevelCppCommand)
+                .WithBindIsVisible(nameof(vm.IsWhisperCppVisible)),
+            UiUtil.MakeButton(Se.Language.Video.AudioToText.WhisperXxlHighlightWord, vm.WhisperCTranslate2HighLightWordCommand)
+                .WithBindIsVisible(nameof(vm.IsWhisperCTranslate2Visible)),
             UiUtil.MakeButton(Se.Language.General.Ok, vm.OkCommand),
             UiUtil.MakeButton(Se.Language.General.Cancel, vm.CancelCommand)
         );

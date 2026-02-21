@@ -14,7 +14,8 @@ public interface IWhisperDownloadService
     Task DownloadWhisperCppCuBlas(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperConstMe(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
     Task DownloadWhisperPurfviewFasterWhisperXxl(string destinationFileName, IProgress<float>? progress, CancellationToken cancellationToken);
-    Task? DownloadWhisperCppVulkan(Stream stream, Progress<float> progress, CancellationToken cancellationToken);
+    Task DownloadWhisperCppVulkan(Stream stream, Progress<float> progress, CancellationToken cancellationToken);
+    Task DownloadWhisperCTranslate2(Stream stream, Progress<float> progress, CancellationToken cancellationToken);
 }
 
 public class WhisperDownloadService : IWhisperDownloadService
@@ -35,6 +36,8 @@ public class WhisperDownloadService : IWhisperDownloadService
     private const string DownloadUrlPurfviewFasterWhisperXxl = "https://github.com/Purfview/whisper-standalone-win/releases/download/Faster-Whisper-XXL/Faster-Whisper-XXL_r245.4_windows.7z";
     private const string DownloadUrlPurfviewFasterWhisperXxlLinux = "https://github.com/Purfview/whisper-standalone-win/releases/download/Faster-Whisper-XXL/Faster-Whisper-XXL_r245.4_linux.7z";
 
+    private const string MacArmCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-mac.zip";
+    
     public WhisperDownloadService(HttpClient httpClient)
     {
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
@@ -84,8 +87,23 @@ public class WhisperDownloadService : IWhisperDownloadService
     {
         await DownloadHelper.DownloadFileAsync(_httpClient, GetUrlCppVulkan(), stream, progress, cancellationToken);
     }
+    
+    public async Task DownloadWhisperCTranslate2(Stream stream,  Progress<float> progress, CancellationToken cancellationToken)
+    {
+        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrlTranslate2(), stream, progress, cancellationToken);
+    }
 
-    private string GetUrlCppVulkan()
+    private static string GetUrlTranslate2()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        {
+            return MacArmCTranslate2;
+        }
+
+        throw new PlatformNotSupportedException();
+    }
+
+    private static string GetUrlCppVulkan()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {

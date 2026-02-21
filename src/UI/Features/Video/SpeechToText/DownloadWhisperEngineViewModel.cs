@@ -137,6 +137,24 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     OkPressed = true;
                     Close();
                 }
+                else if (Engine.Name == WhisperEngineCTranslate2.StaticName)
+                {
+                    var dir = Engine.GetAndCreateWhisperFolder();
+                    
+                    TitleText = string.Format(Se.Language.General.UnpackingX, Engine.Name);
+                    StartIndeterminateProgress();
+                    Unpack(dir, string.Empty);
+                    StopIndeterminateProgress();
+                   
+                    if (_cancellationTokenSource.IsCancellationRequested)
+                    {
+                        Cancel();
+                        return;
+                    }
+
+                    OkPressed = true;
+                    Close();
+                }
                 else
                 {
                     if (_downloadStream.Length == 0)
@@ -193,6 +211,15 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
             if (Engine is WhisperEnginePurfviewFasterWhisperXxl purfviewEngine)
             {
                 path = Path.Combine(folder, purfviewEngine.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    MacHelper.MakeExecutable(path);
+                }
+            }
+            
+            if (Engine is WhisperEngineCTranslate2 cTranslate2)
+            {
+                path = Path.Combine(folder, cTranslate2.GetExecutable());
                 if (File.Exists(path))
                 {
                     MacHelper.MakeExecutable(path);
@@ -281,6 +308,10 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
         else if (Engine is WhisperEngineCppVulkan)
         {
             _downloadTask = _whisperDownloadService.DownloadWhisperCppVulkan(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
+        }
+        else if (Engine is WhisperEngineCTranslate2)
+        {
+            _downloadTask = _whisperDownloadService.DownloadWhisperCTranslate2(_downloadStream, downloadProgress, _cancellationTokenSource.Token);
         }
         else if (Engine is WhisperEngineConstMe)
         {
