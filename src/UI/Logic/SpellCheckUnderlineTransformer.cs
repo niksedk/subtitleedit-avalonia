@@ -15,7 +15,7 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
     private bool _isEnabled;
     private TextView? _textView;
 
-    private static readonly Color ErrorColor = Se.Settings.General.ErrorColor.FromHexToColor();
+    private static readonly Color ErrorColor = Colors.Red;
     private static readonly TextDecoration WavyUnderline = new()
     {
         Location = TextDecorationLocation.Underline,
