@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 using Microsoft.Win32;
 using Nikse.SubtitleEdit.Features.Shared;
-using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Platform.Windows;
 using System;
@@ -136,7 +135,6 @@ public static class FileTypeAssociationsManager
             }
         }
     }
-
     private static void RegisterApplicationCapabilities(
         string exeFileName,
         List<FileTypeAssociationViewModel> associations)
@@ -144,6 +142,7 @@ public static class FileTypeAssociationsManager
         try
         {
             // Register under HKEY_CURRENT_USER (doesn't require admin)
+#pragma warning disable CA1416 // Validate platform compatibility
             using var capabilitiesKey = Registry.CurrentUser.CreateSubKey(
                 @"Software\SubtitleEdit5\Capabilities");
 
@@ -188,6 +187,8 @@ public static class FileTypeAssociationsManager
                     }
                 }
             }
+
+#pragma warning restore CA1416 // Validate platform compatibility
         }
         catch (Exception ex)
         {
