@@ -5543,6 +5543,8 @@ public partial class MainViewModel :
         }
 
         SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First();
+
+        SetupLiveSpellCheck();
     }
 
     public VideoPlayerControl? GetVideoPlayerControl()
@@ -9735,8 +9737,15 @@ public partial class MainViewModel :
             _undoRedoManager.StartChangeDetection();
             _opening = false;
 
-            // Enable spell checking
-            if (Se.Settings.Appearance.SubtitleTextBoxLiveSpellCheck && EditTextBox is TextEditorWrapper wrapper)
+            SetupLiveSpellCheck();
+        }
+    }
+
+    private void SetupLiveSpellCheck()
+    {
+        if (EditTextBox is TextEditorWrapper wrapper)
+        {
+            if (Se.Settings.Appearance.SubtitleTextBoxLiveSpellCheck)
             {
                 var twoLetterLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
                 var threeLetterLanguageCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(twoLetterLanguageCode);
@@ -9750,6 +9759,10 @@ public partial class MainViewModel :
                         wrapper.EnableSpellCheck(_spellCheckManager);
                     }
                 }
+            }
+            else if (!Se.Settings.Appearance.SubtitleTextBoxLiveSpellCheck)
+            {   
+                wrapper.DisableSpellCheck();
             }
         }
     }

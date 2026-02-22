@@ -13,6 +13,7 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
 {
     private ISpellCheckManager? _spellCheckManager;
     private bool _isEnabled;
+    private TextView? _textView;
 
     private static readonly Color ErrorColor = Se.Settings.General.ErrorColor.FromHexToColor();
     private static readonly TextDecoration WavyUnderline = new()
@@ -37,6 +38,11 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
         }
     }
 
+    public void SetTextView(TextView textView)
+    {
+        _textView = textView;
+    }
+
     public void SetSpellCheckManager(ISpellCheckManager? spellCheckManager)
     {
         _spellCheckManager = spellCheckManager;
@@ -45,13 +51,12 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
 
     public void Refresh()
     {
-        // Trigger a redraw by invalidating the visual layer
-        OnEnabledChanged();
+        _textView?.Redraw();
     }
 
     private void OnEnabledChanged()
     {
-        // Request redraw - the CurrentContext will be available during ColorizeLine
+        _textView?.Redraw();
     }
 
     protected override void ColorizeLine(DocumentLine line)

@@ -24,6 +24,7 @@ public class TextEditorWrapper : ITextBoxWrapper
         _border = border;
 
         _spellCheckTransformer = new SpellCheckUnderlineTransformer();
+        _spellCheckTransformer.SetTextView(_textEditor.TextArea.TextView);
         _textEditor.TextArea.TextView.LineTransformers.Add(_spellCheckTransformer);
     }
 
