@@ -118,6 +118,15 @@ public static partial class InitListViewAndEditBox
         var booleanToGridLengthConverter = new BooleanToGridLengthConverter();
         var booleanAndConverter = BooleanAndConverter.Instance;
 
+        // Set up data binding for row visibility based on IsHidden property
+        vm.SubtitleGrid.LoadingRow += (sender, e) =>
+        {
+            e.Row.Bind(DataGridRow.IsVisibleProperty, new Binding(nameof(SubtitleLineViewModel.IsHidden))
+            {
+                Converter = inverseBooleanConverter
+            });
+        };
+
         vm.SubtitleGrid.Columns.Add(new DataGridTemplateColumn
         {
             Header = Se.Language.General.NumberSymbol,
