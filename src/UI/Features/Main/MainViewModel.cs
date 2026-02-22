@@ -6031,14 +6031,12 @@ public partial class MainViewModel :
     private async Task DeleteSelectedLines()
     {
         await DeleteSelectedItems();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
     private async Task RippleDeleteSelectedLines()
     {
         await RippleDeleteSelectedItems();
-        _shortcutManager.ClearKeys();
     }
 
     [RelayCommand]
@@ -7049,6 +7047,7 @@ public partial class MainViewModel :
                 if (s != null)
                 {
                     vp.Position = s.StartTime.TotalSeconds;
+                    AudioVisualizerCenterOnPositionIfNeeded(s.StartTime.TotalSeconds);
                     _updateAudioVisualizer = true;
                 }
             }
@@ -12070,7 +12069,7 @@ public partial class MainViewModel :
 
         var firstLine = Subtitles.GetOrNull(sortedIndices.FirstOrDefault());
 
-        var areLinesConsecutive = sortedIndices.Count > 1 &&
+        var areLinesConsecutive = sortedIndices.Count == 1 || 
             sortedIndices.Zip(sortedIndices.Skip(1), (a, b) => b - a).All(diff => diff == 1);
 
         var nextLine = Subtitles.GetOrNull(idx + selectedItems.Count);
@@ -12103,9 +12102,11 @@ public partial class MainViewModel :
 
             Renumber();
             
-            if (areLinesConsecutive && firstLine != null && nextLine != null && nextLine.StartTime.TotalSeconds < firstLine.EndTime.TotalSeconds + 10)
+            if (areLinesConsecutive && firstLine != null && 
+                nextLine != null && 
+                nextLine.StartTime.TotalSeconds < firstLine.EndTime.TotalSeconds + 15)
             {
-                nextLine.StartTime = firstLine.StartTime;
+                nextLine.SetStartTimeOnly(firstLine.StartTime);
             }
         }
         finally
