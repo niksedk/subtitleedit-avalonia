@@ -264,6 +264,7 @@ public partial class MainViewModel :
     private SubtitleFormat? _lastOpenSaveFormat;
     private string? _videoFileName;
     private AudioTrackInfo? _audioTrack;
+    private string? _audioTrackLangauge;
     private CancellationTokenSource? _statusFadeCts;
     private int _changeSubtitleHash = -1;
     private int _changeSubtitleHashOriginal = -1;
@@ -4137,33 +4138,52 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SpeechToTextSelectedLines()
     {
+        await SpeechToTextSelectedLines(false);        
+    }
+
+    [RelayCommand]
+    private async Task SpeechToTextSelectedLinesPromptForLangauge()
+    {
+        await SpeechToTextSelectedLines(true);
+    }
+
+    [RelayCommand]
+    private async Task SpeechToTextSelectedLinesPromptForLangaugeFirstTime()
+    {
+        var language = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
+        await SpeechToTextSelectedLines(_audioTrackLangauge == language);
+        _audioTrackLangauge = language;
+    }
+
+    private async Task<bool> SpeechToTextSelectedLines(bool promptEngineAndLanguage)
+    {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0 || string.IsNullOrEmpty(_videoFileName))
         {
-            return;
+            return false;
         }
 
         var ffmpegOk = await RequireFfmpegOk();
         if (!ffmpegOk)
         {
-            return;
+            return false;
         }
 
         var resultGetAudioClips = await ShowDialogAsync<GetAudioClipsWindow, GetAudioClipsViewModel>(vm => { vm.Initialize(_videoFileName ?? string.Empty, selectedItems); });
 
         if (!resultGetAudioClips.OkPressed || resultGetAudioClips.AudioClips.Count == 0)
         {
-            return;
+            return false;
         }
 
         var resultSpeechToText = await ShowDialogAsync<AudioToTextWhisperWindow, AudioToTextWhisperViewModel>(vm =>
         {
-            vm.InitializeBatch(resultGetAudioClips.AudioClips, _audioTrack?.FfIndex ?? -1);
+            vm.InitializeBatch(resultGetAudioClips.AudioClips, _audioTrack?.FfIndex ?? -1, promptEngineAndLanguage);
         });
 
         if (!resultSpeechToText.OkPressed)
         {
-            return;
+            return false;
         }
 
         // Update selected lines with transcribed text
@@ -4211,6 +4231,7 @@ public partial class MainViewModel :
         }
 
         _updateAudioVisualizer = true;
+        return true;
     }
 
     private void ResetPlaySelection()

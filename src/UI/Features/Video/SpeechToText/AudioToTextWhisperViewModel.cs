@@ -113,6 +113,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
     private int _batchIndex = -1;
     private string _error;
     private List<AudioClip>? _audioClips;
+    private bool _audioClipsAutoStart;
     private string _chatLlmText = string.Empty;
 
     private readonly IWindowService _windowService;
@@ -2259,11 +2260,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
     }
 
-    internal void InitializeBatch(List<AudioClip> audioClips, int audioTrackNumber)
+    internal void InitializeBatch(List<AudioClip> audioClips, int audioTrackNumber, bool autoStart)
     {
         _audioTrackNumber = audioTrackNumber;
         IsBatchMode = true;
         _audioClips = audioClips;
+        _audioClipsAutoStart = autoStart;
         ResultAudioClips = audioClips.Select(ac => new AudioClip(ac)).ToList();
     }
 
@@ -2276,7 +2278,10 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Dispatcher.UIThread.Post(async () =>
             {
                 await AddFiles(_audioClips.Select(ac => ac.AudioFileName).ToArray());
-                await Transcribe();
+                if (_audioClipsAutoStart)
+                {
+                    await Transcribe();
+                }
             });
         }
     }
