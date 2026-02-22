@@ -13340,11 +13340,15 @@ public partial class MainViewModel :
     {
         try
         {
+            var hasLayers = _visibleLayers != null && Se.Settings.Assa.HideLayersFromSubtitleGrid;
+
             for (var i = 0; i < Subtitles.Count - 1; i++)
             {
                 var p = Subtitles[i];
                 var next = Subtitles[i + 1];
                 p.Gap = next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds;
+
+                p.IsHidden = hasLayers && !_visibleLayers!.Contains(p.Layer);
             }
 
             Subtitles[Subtitles.Count - 1].Gap = double.MaxValue;

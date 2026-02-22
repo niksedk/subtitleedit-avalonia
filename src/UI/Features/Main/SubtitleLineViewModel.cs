@@ -44,12 +44,16 @@ public partial class SubtitleLineViewModel : ObservableObject
     [ObservableProperty]
     private double _gap;
 
+    [ObservableProperty]
+    private bool _isHidden;
+
     public Paragraph? Paragraph { get; set; }
     public string Extra { get; set; }
     public string Language { get; set; }
     public string Region { get; set; }
     public Guid Id { get; set; }
     public bool IsDefault => Text == string.Empty && Number == 0 && Duration == TimeSpan.Zero && StartTime == TimeSpan.Zero;
+
 
     private bool _skipUpdate = false;
     private static Color _errorColor = Se.Settings.General.ErrorColor.FromHexToColor();
