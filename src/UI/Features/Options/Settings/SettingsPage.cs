@@ -582,6 +582,7 @@ public class SettingsPage : UserControl
             MakeNumericSetting(Se.Language.Options.Settings.TextBoxFontSize, nameof(_vm.TextBoxFontSize)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxFontBold, nameof(_vm.TextBoxFontBold)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxColorTags, nameof(_vm.TextBoxColorTags)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxLiveSpellCheck, nameof(_vm.TextBoxLiveSpellCheck)),
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxCenterText, nameof(_vm.TextBoxCenterText), new Binding(nameof(_vm.TextBoxColorTags)) { Source =  _vm,  Converter = new InverseBooleanConverter(), Mode = BindingMode.OneWay }),
 
             MakeCheckboxSetting(Se.Language.Options.Settings.TextBoxButtonShowAutoBreak, nameof(_vm.TextBoxButtonShowAutoBreak)),

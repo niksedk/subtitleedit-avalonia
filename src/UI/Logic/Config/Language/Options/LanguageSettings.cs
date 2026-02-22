@@ -67,6 +67,7 @@ public class LanguageSettings
     public string Network { get; set; }
     public string FileTypeAssociations { get; set; }
     public string TextBoxColorTags { get; set; }
+    public string TextBoxLiveSpellCheck { get; set; }
     public string TextBoxCenterText { get; set; }
     public string TextBoxFontBold { get; set; }
     public string TextBoxFontSize { get; set; }
@@ -322,6 +323,7 @@ public class LanguageSettings
         FileTypeAssociations = "File type associations";
         TextBoxCenterText = "Center text in subtitle text box";
         TextBoxColorTags = "Color tags (HTML/ASSA) in subtitle text box";
+        TextBoxLiveSpellCheck = "Live spell check in subtitle text box";    
         TextBoxFontBold = "Bold text in subtitle text box";
         TextBoxFontSize = "Font size in subtitle text box";
         SubtitleTextBoxAndGridFontName = "UI font in subtitle text box and grid";

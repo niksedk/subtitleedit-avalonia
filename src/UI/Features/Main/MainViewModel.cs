@@ -9,6 +9,7 @@ using Avalonia.VisualTree;
 using AvaloniaEdit;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Controls.AudioVisualizerControl;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Core.BluRaySup;
@@ -2382,7 +2383,7 @@ public partial class MainViewModel :
             vp.Position = seconds;
         }
     }
-    
+
     [RelayCommand]
     private async Task WaveformToggleWaveformSpectrogramHeight()
     {
@@ -2396,7 +2397,7 @@ public partial class MainViewModel :
         {
             Se.Settings.Waveform.SpectrogramCombinedWaveformHeight = 10;
         }
-        
+
         AudioVisualizer.WaveformHeightPercentage = Se.Settings.Waveform.SpectrogramCombinedWaveformHeight;
         AudioVisualizer.ResetCache();
         _updateAudioVisualizer = true;
@@ -9733,6 +9734,23 @@ public partial class MainViewModel :
             _undoRedoManager.Do(MakeUndoRedoObject(string.Format(Se.Language.General.SubtitleLoadedX, fileName)));
             _undoRedoManager.StartChangeDetection();
             _opening = false;
+
+            // Enable spell checking
+            if (Se.Settings.Appearance.SubtitleTextBoxLiveSpellCheck && EditTextBox is TextEditorWrapper wrapper)
+            {
+                var twoLetterLanguageCode = LanguageAutoDetect.AutoDetectGoogleLanguage(GetUpdateSubtitle());
+                var threeLetterLanguageCode = Iso639Dash2LanguageCode.GetThreeLetterCodeFromTwoLetterCode(twoLetterLanguageCode);
+                if (!string.IsNullOrEmpty(threeLetterLanguageCode))
+                {
+                    var spellCheckLanguages = _spellCheckManager.GetDictionaryLanguages(Se.DictionariesFolder);
+                    var dictionary = spellCheckLanguages.FirstOrDefault(p => p.GetThreeLetterCode() == threeLetterLanguageCode);
+                    if (dictionary != null)
+                    {
+                        _spellCheckManager.Initialize(dictionary.DictionaryFileName, twoLetterLanguageCode);
+                        wrapper.EnableSpellCheck(_spellCheckManager);
+                    }
+                }
+            }
         }
     }
 
@@ -12069,7 +12087,7 @@ public partial class MainViewModel :
 
         var firstLine = Subtitles.GetOrNull(sortedIndices.FirstOrDefault());
 
-        var areLinesConsecutive = sortedIndices.Count == 1 || 
+        var areLinesConsecutive = sortedIndices.Count == 1 ||
             sortedIndices.Zip(sortedIndices.Skip(1), (a, b) => b - a).All(diff => diff == 1);
 
         var nextLine = Subtitles.GetOrNull(idx + selectedItems.Count);
@@ -12101,9 +12119,9 @@ public partial class MainViewModel :
             }
 
             Renumber();
-            
-            if (areLinesConsecutive && firstLine != null && 
-                nextLine != null && 
+
+            if (areLinesConsecutive && firstLine != null &&
+                nextLine != null &&
                 nextLine.StartTime.TotalSeconds < firstLine.EndTime.TotalSeconds + 15)
             {
                 nextLine.SetStartTimeOnly(firstLine.StartTime);

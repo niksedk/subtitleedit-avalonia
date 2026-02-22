@@ -18,6 +18,7 @@ public class SeAppearance
     public int SubtitleGridFormattingType { get; set; }
 
     public bool SubtitleTextBoxCenterText { get; set; }
+    public bool SubtitleTextBoxLiveSpellCheck { get; set; }
     public bool ShowHints { get; set; }
     public bool GridCompactMode { get; set; }
     public string BookmarkColor { get; set; }
@@ -69,6 +70,7 @@ public class SeAppearance
         SubtitleTextBoxColorTags = true;
         ShowHints = true;
         SubtitleTextBoxCenterText = false;
+        SubtitleTextBoxLiveSpellCheck = false;
         SubtitleGridFormattingType = (int)SubtitleGridFormattingTypes.ShowFormatting;
         GridLinesAppearance = DataGridGridLinesVisibility.None.ToString();
         DarkModeBackgroundColor = new Color(255, 33, 33, 33).FromColorToHex();

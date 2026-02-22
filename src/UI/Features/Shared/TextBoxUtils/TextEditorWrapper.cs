@@ -1,6 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using AvaloniaEdit;
+using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Logic;
 using System;
 
 namespace Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
@@ -12,6 +14,7 @@ public class TextEditorWrapper : ITextBoxWrapper
     private readonly TextEditor _textEditor;
     private readonly Border _border;
     private readonly int _instanceId = Counter++;
+    private readonly SpellCheckUnderlineTransformer _spellCheckTransformer;
 
     public bool HasFocus { get; set; }
 
@@ -19,6 +22,9 @@ public class TextEditorWrapper : ITextBoxWrapper
     {
         _textEditor = textEditor;
         _border = border;
+
+        _spellCheckTransformer = new SpellCheckUnderlineTransformer();
+        _textEditor.TextArea.TextView.LineTransformers.Add(_spellCheckTransformer);
     }
 
     public string Text
@@ -102,4 +108,22 @@ public class TextEditorWrapper : ITextBoxWrapper
     {
         // not supported in TextEditor
     }
+
+    public void EnableSpellCheck(ISpellCheckManager spellCheckManager)
+    {
+        _spellCheckTransformer.SetSpellCheckManager(spellCheckManager);
+        _spellCheckTransformer.IsEnabled = true;
+    }
+
+    public void DisableSpellCheck()
+    {
+        _spellCheckTransformer.IsEnabled = false;
+    }
+
+    public void RefreshSpellCheck()
+    {
+        _spellCheckTransformer.Refresh();
+    }
+
+    public bool IsSpellCheckEnabled => _spellCheckTransformer.IsEnabled;
 }

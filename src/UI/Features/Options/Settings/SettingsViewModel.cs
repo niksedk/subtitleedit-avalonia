@@ -219,6 +219,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private double _textBoxFontSize;
     [ObservableProperty] private bool _textBoxFontBold;
     [ObservableProperty] private bool _textBoxColorTags;
+    [ObservableProperty] private bool _textBoxLiveSpellCheck;
     [ObservableProperty] private bool _textBoxCenterText;
     [ObservableProperty] private bool _showButtonHints;
     [ObservableProperty] private bool _gridCompactMode;
@@ -598,6 +599,7 @@ public partial class SettingsViewModel : ObservableObject
         TextBoxFontSize = appearance.SubtitleTextBoxFontSize;
         TextBoxFontBold = appearance.SubtitleTextBoxFontBold;
         TextBoxColorTags = appearance.SubtitleTextBoxColorTags;
+        TextBoxLiveSpellCheck = appearance.SubtitleTextBoxLiveSpellCheck;
         TextBoxCenterText = appearance.SubtitleTextBoxCenterText;
         TextBoxButtonShowAutoBreak = appearance.TextBoxShowButtonAutoBreak;
         TextBoxButtonShowUnbreak = appearance.TextBoxShowButtonUnbreak;
@@ -1146,6 +1148,7 @@ public partial class SettingsViewModel : ObservableObject
         appearance.SubtitleTextBoxFontSize = TextBoxFontSize;
         appearance.SubtitleTextBoxFontBold = TextBoxFontBold;
         appearance.SubtitleTextBoxColorTags = TextBoxColorTags;
+        appearance.SubtitleTextBoxLiveSpellCheck = TextBoxLiveSpellCheck;
         appearance.SubtitleTextBoxCenterText = TextBoxCenterText;
         appearance.TextBoxShowButtonAutoBreak = TextBoxButtonShowAutoBreak;
         appearance.TextBoxShowButtonUnbreak = TextBoxButtonShowUnbreak;
