@@ -459,6 +459,8 @@
     "sourceViewX": "Source view - {0}",
     "spacing": "Spacing",
     "speechToTextSelectedLines": "Speech-to-text selected lines",
+    "speechToTextSelectedLinesPrompt": "Speech-to-text selected lines (prompt engine/language)",
+    "speechToTextSelectedLinesPromptFirstTime": "Speech-to-text selected lines (prompt engine/language first time)",
     "speed": "Speed",
     "splitAtTextBoxCursorPosition": "Split at text cursor position",
     "splitLine": "Split line",
@@ -623,7 +625,9 @@
     "append": "Append",
     "use": "Use",
     "centerHorizontally": "Center horizontally",
-    "centerVertically": "Center vertically"
+    "centerVertically": "Center vertically",
+    "id": "ID",
+    "apiSecret": "Secret"
   },
   "main": {
     "menu": {
@@ -907,7 +911,7 @@
       "subtitleWithManuallyChosenEncodingDotDotDot": "_Subtitle with manually chosen encoding...",
       "titleImportImages": "Import images",
       "importFileLabel": "Choose images to import (time codes in file names supported)",
-      "importFilesInfo": "Use time-coded filenames:\r\nstart_HH_MM_SS_MMM__end_HH_MM_SS_MMM[_index].ext\r\n\r\nExamples:\r\n0_00_01_042__0_00_03_919_0001.png\r\n0_00_01_042__0_00_03_919.png\r\n\r\nRules:\r\n\u2022 HH_MM_SS_MMM for start and end times\r\n\u2022 Double underscore separates start/end\r\n\u2022 Optional index after end time",
+      "importFilesInfo": "Use time-coded filenames:\nstart_HH_MM_SS_MMM__end_HH_MM_SS_MMM[_index].ext\n\nExamples:\n0_00_01_042__0_00_03_919_0001.png\n0_00_01_042__0_00_03_919.png\n\nRules:\n\u2022 HH_MM_SS_MMM for start and end times\n\u2022 Double underscore separates start/end\n\u2022 Optional index after end time",
       "formattingDotDotDot": "Formatting...",
       "imagedBasedSubtitleForEditDotDotDot": "Imaged-based subtitle for edit...",
       "imagedBasedSubtitleForOcrDotDotDot": "Imaged-based subtitle for OCR...",
@@ -1362,6 +1366,9 @@
     "pickFontNameTitle": "Choose font name",
     "colorPickerTitle": "Choose color",
     "filterLayersTitle": "Filter layers for display",
+    "filterLayersHideFromWaveform": "Hide from waveform/spectrogram",
+    "filterLayersHideFromSubtitleGrid": "Hide from subtitle grid",
+    "filterLayersHideFromVideoPreview": "Hide from video preview",
     "pickSubtitleFormat": "Choose subtitle format",
     "pickLayerTitle": "Set layer",
     "recentColors": "Recent colors"
@@ -1643,6 +1650,7 @@
       "network": "Network",
       "fileTypeAssociations": "File type associations",
       "textBoxColorTags": "Color tags (HTML/ASSA) in subtitle text box",
+      "textBoxLiveSpellCheck": "Live spell check in subtitle text box",
       "textBoxCenterText": "Center text in subtitle text box",
       "textBoxFontBold": "Bold text in subtitle text box",
       "textBoxFontSize": "Font size in subtitle text box",
@@ -1796,7 +1804,6 @@
       "gridGoToSubtitleOnlyWaveformOnly": "Go to subtitle only (waveform only)",
       "gridGoToSubtitleAndPause": "Go to subtitle and pause",
       "gridGoToSubtitleAndPlay": "Go to subtitle and play",
-      "gridGoToSubtitleOnly": "Go to subtitle only",
       "gridGoToSubtitleAndPauseAndFocusTextBox": "Go to subtitle and pause and focus text box",
       "subtitleGridFormattingNone": "No formatting",
       "subtitleGridFormattingShowFormatting": "Show formatting",
@@ -1917,6 +1924,7 @@
       "listSelectLast": "Select last",
       "listInverseSelection": "Inverse selection",
       "listDeleteSelection": "Delete selection",
+      "rippleDeleteSelection": "Ripple delete selection",
       "settings": "Settings",
       "assigned": "Assigned",
       "unassigned": "Unassigned",
@@ -2072,7 +2080,8 @@
       "assaProperties": "ASSA Properties",
       "assaAttachments": "ASSA Attachments",
       "assaVideoColorPicker": "ASSA Video color picker",
-      "recalculateDurationSelectedLines": "Recalculate duration (selected lines)"
+      "recalculateDurationSelectedLines": "Recalculate duration (selected lines)",
+      "toggleWaveformAndSpectrogramHeight": "Toggle waveform/spectrogram divided height"
     },
     "wordLists": {
       "title": "Word lists",
