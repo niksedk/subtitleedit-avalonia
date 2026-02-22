@@ -1457,6 +1457,12 @@ public static partial class InitListViewAndEditBox
         };
 
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
+        
+        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+        {
+            wrapper.SetAlignment(TextAlignment.Center);
+        }
+        
         vm.EditTextBox = wrapper;
 
         var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: false);
@@ -1547,6 +1553,12 @@ public static partial class InitListViewAndEditBox
         };
 
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
+        
+        if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
+        {
+            wrapper.SetAlignment(TextAlignment.Center);
+        }
+        
         vm.EditTextBoxOriginal = wrapper;
 
         var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: true);

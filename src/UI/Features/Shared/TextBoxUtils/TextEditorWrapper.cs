@@ -14,6 +14,7 @@ public class TextEditorWrapper : ITextBoxWrapper
     private readonly TextEditor _textEditor;
     private readonly Border _border;
     private readonly SpellCheckUnderlineTransformer _spellCheckTransformer;
+    private readonly SubtitleTextAlignmentTransformer _alignmentTransformer;
 
     public bool HasFocus { get; set; }
 
@@ -25,6 +26,9 @@ public class TextEditorWrapper : ITextBoxWrapper
         _spellCheckTransformer = new SpellCheckUnderlineTransformer();
         _spellCheckTransformer.SetTextView(_textEditor.TextArea.TextView);
         _textEditor.TextArea.TextView.LineTransformers.Add(_spellCheckTransformer);
+
+        _alignmentTransformer = new SubtitleTextAlignmentTransformer();
+        _textEditor.TextArea.TextView.LineTransformers.Add(_alignmentTransformer);
     }
 
     public string Text
@@ -106,7 +110,23 @@ public class TextEditorWrapper : ITextBoxWrapper
 
     public void SetAlignment(TextAlignment alignment)
     {
-        // not supported in TextEditor
+        _alignmentTransformer.Alignment = alignment;
+        
+        // Set horizontal content alignment on the text view canvas
+        if (alignment == TextAlignment.Center)
+        {
+            _textEditor.TextArea.TextView.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center;
+        }
+        else if (alignment == TextAlignment.Right)
+        {
+            _textEditor.TextArea.TextView.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right;
+        }
+        else
+        {
+            _textEditor.TextArea.TextView.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
+        }
+        
+        _textEditor.TextArea.TextView.Redraw();
     }
 
     public void EnableSpellCheck(ISpellCheckManager spellCheckManager)
