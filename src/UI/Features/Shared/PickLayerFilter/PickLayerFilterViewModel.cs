@@ -4,6 +4,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +16,9 @@ public partial class PickLayerFilterViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<LayerItem> _layers;
     [ObservableProperty] private LayerItem? _selectedLayer;
+    [ObservableProperty] private bool _hideFromWaveform;
+    [ObservableProperty] private bool _hideFromGridView;
+    [ObservableProperty] private bool _hideFromVideoPreview;
 
     public Window? Window { get; set; }
 
@@ -27,6 +31,9 @@ public partial class PickLayerFilterViewModel : ObservableObject
         Layers = new ObservableCollection<LayerItem>();
         SelectedLayers = new List<int>();
         LayerGrid = new DataGrid();
+        HideFromWaveform = Se.Settings.Assa.HideLayersFromWaveform;
+        HideFromGridView = Se.Settings.Assa.HideLayersFromSubtitleGrid;
+        HideFromVideoPreview = Se.Settings.Assa.HideLayersFromVideoPreview;
     }
 
     internal void Initialize(List<SubtitleLineViewModel> subtitleLineViewModels, List<int>? visibleLayers)
@@ -73,6 +80,11 @@ public partial class PickLayerFilterViewModel : ObservableObject
     [RelayCommand]
     private void Ok()
     {
+        Se.Settings.Assa.HideLayersFromWaveform = HideFromWaveform;
+        Se.Settings.Assa.HideLayersFromSubtitleGrid = HideFromGridView;
+        Se.Settings.Assa.HideLayersFromVideoPreview = HideFromVideoPreview;
+        Se.SaveSettings();
+
         SelectedLayers = Layers.Where(l => l.IsSelected).Select(l => l.Layer).ToList();
         OkPressed = true;
         Window?.Close();

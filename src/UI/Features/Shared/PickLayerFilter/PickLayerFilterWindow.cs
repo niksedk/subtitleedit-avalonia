@@ -24,6 +24,9 @@ public class PickLayerFilterWindow : Window
         vm.Window = this;
         DataContext = vm;
 
+
+        var settingsView = MakeSettings(vm);
+
         var fontsView = MakeLayersView(vm);
 
         var buttonRemoveFilter = UiUtil.MakeButton(Se.Language.General.RemoveFilter, vm.RemoveFilterCommand);
@@ -39,6 +42,7 @@ public class PickLayerFilterWindow : Window
         {
             RowDefinitions =
             {
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
@@ -53,9 +57,10 @@ public class PickLayerFilterWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(fontsView, 0);
-        grid.Add(panelButtonTools, 1);
-        grid.Add(buttonPanel, 1);
+        grid.Add(settingsView, 0);
+        grid.Add(fontsView, 1);
+        grid.Add(panelButtonTools, 2);
+        grid.Add(buttonPanel, 2);
 
         Content = grid;
 
@@ -67,7 +72,28 @@ public class PickLayerFilterWindow : Window
         KeyDown += vm.KeyDown;
     }
 
-    private Border MakeLayersView(PickLayerFilterViewModel vm)
+    private static Border MakeSettings(PickLayerFilterViewModel vm)
+    {
+        var checkBoxHideFromWaveform = UiUtil.MakeCheckBox(Se.Language.Tools.FilterLayersHideFromWaveform, vm, nameof(vm.HideFromWaveform));
+        var checkBoxHideFromGridView = UiUtil.MakeCheckBox(Se.Language.Tools.FilterLayersHideFromSubtitleGrid, vm, nameof(vm.HideFromGridView));
+        var checkBoxHideFromVideoPreview = UiUtil.MakeCheckBox(Se.Language.Tools.FilterLayersHideFromVideoPreview, vm, nameof(vm.HideFromVideoPreview));
+
+        var panel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Spacing = 5,
+            Children =
+            {
+                checkBoxHideFromWaveform,
+                checkBoxHideFromGridView,
+                checkBoxHideFromVideoPreview,
+            }
+        };
+
+        return UiUtil.MakeBorderForControl(panel);
+    }
+
+    private static Border MakeLayersView(PickLayerFilterViewModel vm)
     {
         var dataGrid = new DataGrid
         {
@@ -85,7 +111,7 @@ public class PickLayerFilterWindow : Window
             {
                 new DataGridTemplateColumn
                 {
-                    Header = Se.Language.General.Enabled,
+                    Header = Se.Language.General.Visible,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
                     CellTemplate = new FuncDataTemplate<LayerItem>((item, _) =>
                     new Border

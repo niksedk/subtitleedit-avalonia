@@ -27,6 +27,9 @@ public class SeAssa
     public string BackgroundBoxesBoxColor { get; set; }
     public string BackgroundBoxesShadowColor { get; set; }
     public string BackgroundBoxesOutlineColor { get; set; }
+    public bool HideLayersFromWaveform { get; set; }
+    public bool HideLayersFromSubtitleGrid { get; set; }
+    public bool HideLayersFromVideoPreview { get; set; }
 
     public SeAssa()
     {
@@ -54,5 +57,9 @@ public class SeAssa
         BackgroundBoxesBoxColor = Color.FromArgb(50, 0,0,0).FromColorToHex();
         BackgroundBoxesShadowColor = Color.FromArgb(50, 0,0,0).FromColorToHex();    
         BackgroundBoxesOutlineColor = Color.FromArgb(50, 200,200,200).FromColorToHex();
+
+        HideLayersFromWaveform = true;
+        HideLayersFromSubtitleGrid = false;
+        HideLayersFromVideoPreview = false;
     }
 }

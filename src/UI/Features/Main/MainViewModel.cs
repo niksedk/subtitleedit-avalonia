@@ -13147,10 +13147,11 @@ public partial class MainViewModel :
                     _setEndAtKeyUpLine.EndTime = TimeSpan.FromSeconds(vp.VideoPlayerInstance.Position);
                 }
 
+                var noLayers = _visibleLayers == null || !Se.Settings.Assa.HideLayersFromWaveform || _visibleLayers.Count == 0;
                 var subtitle = new ObservableCollection<SubtitleLineViewModel>(
                     Subtitles
                         .OrderBy(p => p.StartTime.TotalMilliseconds)
-                        .Where(p => _visibleLayers == null || _visibleLayers.Contains(p.Layer))
+                        .Where(p => noLayers || _visibleLayers!.Contains(p.Layer))
                 );
 
                 var mediaPlayerSeconds = vp.Position;
@@ -13277,7 +13278,16 @@ public partial class MainViewModel :
             var vp = GetVideoPlayerControl();
             if (vp?.VideoPlayerInstance is LibMpvDynamicPlayer mpv)
             {
-                _mpvReloader.RefreshMpv(mpv, GetUpdateSubtitle(), SelectedSubtitleFormat).ConfigureAwait(false);
+                var subtitle = GetUpdateSubtitle();
+                var hasVisibleLayers = _visibleLayers != null && Se.Settings.Assa.HideLayersFromVideoPreview;
+                if (hasVisibleLayers)
+                {
+                    var paragraphs = subtitle.Paragraphs.Where(p => _visibleLayers!.Contains(p.Layer)).ToList();
+                    subtitle.Paragraphs.Clear();
+                    subtitle.Paragraphs.AddRange(paragraphs);
+                }
+                
+                _mpvReloader.RefreshMpv(mpv, subtitle, SelectedSubtitleFormat).ConfigureAwait(false);
             }
         };
         _slowTimer.Start();

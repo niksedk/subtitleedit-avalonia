@@ -23,6 +23,9 @@ public class LanguageTools
     public string PickFontNameTitle { get; set; }
     public string ColorPickerTitle { get; set; }
     public string FilterLayersTitle { get; set; }
+    public string FilterLayersHideFromWaveform { get; set; }
+    public string FilterLayersHideFromSubtitleGrid { get; set; }
+    public string FilterLayersHideFromVideoPreview { get; set; }
     public string PickSubtitleFormat { get; set; }
     public string PickLayerTitle { get; set; }
     public string RecentColors { get; set; }
@@ -33,6 +36,9 @@ public class LanguageTools
         PickFontNameTitle = "Choose font name";
         ColorPickerTitle = "Choose color";
         FilterLayersTitle = "Filter layers for display";
+        FilterLayersHideFromWaveform = "Hide from waveform/spectrogram";
+        FilterLayersHideFromSubtitleGrid = "Hide from subtitle grid";
+        FilterLayersHideFromVideoPreview = "Hide from video preview";
         PickSubtitleFormat = "Choose subtitle format";
         PickLayerTitle = "Set layer";
         RecentColors = "Recent colors";
