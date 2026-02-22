@@ -138,7 +138,9 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
         }
         
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+            (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64) ||
+            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.ProcessArchitecture == Architecture.X64))
         {
             Engines.Add(new WhisperEngineCTranslate2());
         }
@@ -1809,7 +1811,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         if (engine is WhisperEngineCTranslate2)
         {
             //parameters = parameters.Replace("--model", "--local_files_only True --model_dir");
-            parameters = parameters.Replace("--model", "--model_dir");
+            parameters = parameters.Replace("--model", "--model_directory");
         }
 
         SeLogger.WhisperInfo($"{w} {parameters}");

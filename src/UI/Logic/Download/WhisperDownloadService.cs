@@ -37,6 +37,8 @@ public class WhisperDownloadService : IWhisperDownloadService
     private const string DownloadUrlPurfviewFasterWhisperXxlLinux = "https://github.com/Purfview/whisper-standalone-win/releases/download/Faster-Whisper-XXL/Faster-Whisper-XXL_r245.4_linux.7z";
 
     private const string MacArmCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-mac.zip";
+    private const string LinuxCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-Linux64.zip";
+    private const string WindowCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-windows.zip";
     
     public WhisperDownloadService(HttpClient httpClient)
     {
@@ -95,9 +97,19 @@ public class WhisperDownloadService : IWhisperDownloadService
 
     private static string GetUrlTranslate2()
     {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return WindowCTranslate2;
+        }
+        
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
             return MacArmCTranslate2;
+        }
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.ProcessArchitecture == Architecture.X64)
+        {
+            return LinuxCTranslate2;
         }
 
         throw new PlatformNotSupportedException();
