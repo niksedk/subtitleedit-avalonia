@@ -271,6 +271,7 @@ public partial class MainViewModel :
     private long _lastKeyPressedMs;
     private bool _loading;
     private bool _opening;
+    private PointerEventArgs? _lastTextEditorPointerArgs;
     private List<int>? _visibleLayers;
     private DispatcherTimer _positionTimer = new();
     private DispatcherTimer _slowTimer = new();
@@ -13688,6 +13689,87 @@ public partial class MainViewModel :
                 IsTextBoxSplitAtCursorAndVideoPositionVisible = true;
             }
         }
+
+        // Clear previous spell check menu items (identified by their Tag)
+        if (sender is MenuFlyout flyout)
+        {
+            var itemsToRemove = flyout.Items.Where(item => item is MenuItem mi && mi.Tag?.ToString() == "SpellCheck" ||
+                                                           item is Separator sep && sep.Tag?.ToString() == "SpellCheck")
+                                             .ToList();
+            foreach (var item in itemsToRemove)
+            {
+                flyout.Items.Remove(item);
+            }
+
+            // Add spell check suggestions if available
+            if (EditTextBox is TextEditorWrapper wrapper && wrapper.IsSpellCheckEnabled && _lastTextEditorPointerArgs != null)
+            {
+                var word = wrapper.GetWordAtPosition(_lastTextEditorPointerArgs);
+                if (word != null && wrapper.IsWordMisspelledAtOffset(word.Index))
+                {
+                    var suggestions = wrapper.GetSuggestionsForWordAtOffset(word.Index);
+                    if (suggestions != null && suggestions.Count > 0)
+                    {
+                        // Insert suggestions at the beginning of the menu
+                        var insertIndex = 0;
+
+                        // Add first 5 suggestions
+                        foreach (var suggestion in suggestions.Take(5))
+                        {
+                            var suggestionItem = new MenuItem
+                            {
+                                Header = suggestion,
+                                FontWeight = FontWeight.Bold,
+                                Tag = "SpellCheck"
+                            };
+                            suggestionItem.Click += (_, _) =>
+                            {
+                                var text = wrapper.Text;
+                                wrapper.Text = text.Remove(word.Index, word.Length)
+                                                  .Insert(word.Index, suggestion);
+                                wrapper.CaretIndex = word.Index + suggestion.Length;
+                            };
+                            flyout.Items.Insert(insertIndex++, suggestionItem);
+                        }
+
+                        // Add separator
+                        flyout.Items.Insert(insertIndex++, new Separator { Tag = "SpellCheck" });
+
+                        // Add "Add to Dictionary"
+                        var addToDictItem = new MenuItem
+                        {
+                            Header = $"Add \"{word.Text}\" to Dictionary",
+                            Tag = "SpellCheck"
+                        };
+                        addToDictItem.Click += (_, _) =>
+                        {
+                            _spellCheckManager.AdToUserDictionary(word.Text);
+                            wrapper.RefreshSpellCheck();
+                        };
+                        flyout.Items.Insert(insertIndex++, addToDictItem);
+
+                        // Add "Ignore All"
+                        var ignoreAllItem = new MenuItem
+                        {
+                            Header = $"Ignore All \"{word.Text}\"",
+                            Tag = "SpellCheck"
+                        };
+                        ignoreAllItem.Click += (_, _) =>
+                        {
+                            _spellCheckManager.AddIgnoreWord(word.Text);
+                            wrapper.RefreshSpellCheck();
+                        };
+                        flyout.Items.Insert(insertIndex++, ignoreAllItem);
+
+                        // Add separator after spell check items
+                        flyout.Items.Insert(insertIndex, new Separator { Tag = "SpellCheck" });
+                    }
+                }
+
+                // Clear the stored pointer args after use
+                _lastTextEditorPointerArgs = null;
+            }
+        }
     }
 
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
@@ -14049,6 +14131,11 @@ public partial class MainViewModel :
             e.Handled = args.Handled;
             _shortcutManager.ClearKeys();
         }
+    }
+
+    public void StoreTextEditorPointerArgs(PointerEventArgs e)
+    {
+        _lastTextEditorPointerArgs = e;
     }
 
     internal void VideoPlayerControlPointerPressed(PointerPressedEventArgs args)

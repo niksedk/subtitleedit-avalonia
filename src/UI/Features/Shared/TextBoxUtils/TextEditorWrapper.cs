@@ -1,19 +1,18 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using AvaloniaEdit;
 using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Logic;
 using System;
+using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Shared.TextBoxUtils;
 
 public class TextEditorWrapper : ITextBoxWrapper
 {
-    private static int Counter = 0;
-
     private readonly TextEditor _textEditor;
     private readonly Border _border;
-    private readonly int _instanceId = Counter++;
     private readonly SpellCheckUnderlineTransformer _spellCheckTransformer;
 
     public bool HasFocus { get; set; }
@@ -127,4 +126,77 @@ public class TextEditorWrapper : ITextBoxWrapper
     }
 
     public bool IsSpellCheckEnabled => _spellCheckTransformer.IsEnabled;
+
+    /// <summary>
+    /// Gets the word at the specified text offset position.
+    /// </summary>
+    public SpellCheckWord? GetWordAtOffset(int offset)
+    {
+        if (string.IsNullOrEmpty(Text) || offset < 0 || offset > Text.Length)
+        {
+            return null;
+        }
+
+        var words = SpellCheckWordLists2.Split(Text);
+        return words.FirstOrDefault(w => offset >= w.Index && offset < w.Index + w.Length);
+    }
+
+    /// <summary>
+    /// Gets the word at the current caret position.
+    /// </summary>
+    public SpellCheckWord? GetWordAtCaret()
+    {
+        return GetWordAtOffset(CaretIndex);
+    }
+
+    /// <summary>
+    /// Gets the word at the specified mouse position.
+    /// Returns null if the position is not over a word.
+    /// </summary>
+    public SpellCheckWord? GetWordAtPosition(PointerEventArgs e)
+    {
+        var position = e.GetPosition(_textEditor.TextArea.TextView);
+        var visualPosition = _textEditor.TextArea.TextView.GetPosition(position);
+
+        if (visualPosition == null)
+        {
+            return null;
+        }
+
+        var offset = _textEditor.Document.GetOffset(visualPosition.Value.Location);
+        return GetWordAtOffset(offset);
+    }
+
+    /// <summary>
+    /// Checks if the word at the specified offset is misspelled.
+    /// </summary>
+    public bool IsWordMisspelledAtOffset(int offset)
+    {
+        var word = GetWordAtOffset(offset);
+        if (word == null || string.IsNullOrWhiteSpace(word.Text))
+        {
+            return false;
+        }
+
+        if (!IsSpellCheckEnabled || _spellCheckTransformer == null)
+        {
+            return false;
+        }
+
+        return _spellCheckTransformer.IsWordMisspelled(word.Text);
+    }
+
+    /// <summary>
+    /// Gets spelling suggestions for the word at the specified offset.
+    /// </summary>
+    public System.Collections.Generic.List<string>? GetSuggestionsForWordAtOffset(int offset)
+    {
+        var word = GetWordAtOffset(offset);
+        if (word == null || string.IsNullOrWhiteSpace(word.Text))
+        {
+            return null;
+        }
+
+        return _spellCheckTransformer.GetSuggestions(word.Text);
+    }
 }

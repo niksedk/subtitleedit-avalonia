@@ -155,4 +155,35 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
 
         return false;
     }
+
+    /// <summary>
+    /// Checks if a specific word is misspelled according to the spell checker.
+    /// </summary>
+    public bool IsWordMisspelled(string word)
+    {
+        if (!_isEnabled || _spellCheckManager == null || string.IsNullOrWhiteSpace(word))
+        {
+            return false;
+        }
+
+        if (IsSpecialPattern(word))
+        {
+            return false;
+        }
+
+        return !_spellCheckManager.IsWordCorrect(word);
+    }
+
+    /// <summary>
+    /// Gets spelling suggestions for a word.
+    /// </summary>
+    public List<string>? GetSuggestions(string word)
+    {
+        if (_spellCheckManager == null || string.IsNullOrWhiteSpace(word))
+        {
+            return null;
+        }
+
+        return _spellCheckManager.GetSuggestions(word);
+    }
 }

@@ -1142,6 +1142,13 @@ public static partial class InitListViewAndEditBox
         textEditor.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
         textEditor.PointerReleased += vm.ControlMacPointerReleased;
+        textEditor.PointerPressed += (sender, e) =>
+        {
+            if (e.GetCurrentPoint(textEditor).Properties.IsRightButtonPressed)
+            {
+                vm.StoreTextEditorPointerArgs(e);
+            }
+        };
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;
