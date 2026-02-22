@@ -339,7 +339,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
             }
 
             var lastWordContent = s1Trimmed.Substring(lastWordStart);
-            var newS1Pre = s1Trimmed.Substring(0, lastWordStart).Replace('\n', ' ').Replace('\r', ' ');
+            var newS1Pre = s1Trimmed.Substring(0, lastWordStart);
             while (newS1Pre.Contains("  "))
             {
                 newS1Pre = newS1Pre.Replace("  ", " ");
