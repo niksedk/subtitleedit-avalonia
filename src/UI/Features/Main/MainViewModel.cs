@@ -6035,6 +6035,13 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task RippleDeleteSelectedLines()
+    {
+        await RippleDeleteSelectedItems();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private void InsertLineBefore()
     {
         _undoRedoManager.StopChangeDetection();
@@ -12002,6 +12009,104 @@ public partial class MainViewModel :
             }
 
             Renumber();
+        }
+        finally
+        {
+            // Reattach ItemsSource
+            if (isLargeDelete)
+            {
+                SubtitleGrid.ItemsSource = itemsSource;
+            }
+
+            _subtitleGridSelectionChangedSkip = false;
+            SelectAndScrollToRow(idx);
+            _undoRedoManager.StartChangeDetection();
+            SubtitleGridSelectionChanged();
+            _updateAudioVisualizer = true;
+        }
+    }
+
+    private async Task RippleDeleteSelectedItems()
+    {
+        var selectedItems = _selectedSubtitles?.ToList() ?? [];
+        if (selectedItems.Count == 0)
+        {
+            return;
+        }
+
+        if (Se.Settings.General.PromptDeleteLines)
+        {
+            var title = Se.Language.General.Delete;
+
+            var message = string.Format(Se.Language.General.DeleteXLinesPrompt, selectedItems.Count);
+            if (selectedItems.Count == 1)
+            {
+                message = string.Format(Se.Language.General.DeleteLineXPrompt, SelectedSubtitleIndex + 1);
+            }
+
+            var answer = await MessageBox.Show(
+                Window!,
+                title,
+                message,
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            if (answer != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            _shortcutManager.ClearKeys();
+        }
+
+        _subtitleGridSelectionChangedSkip = true;
+        var idx = Subtitles.IndexOf(selectedItems.First());
+        _undoRedoManager.StopChangeDetection();
+
+        var sortedIndices = selectedItems
+            .Select(item => Subtitles.IndexOf(item))
+            .OrderBy(i => i)
+            .ToList();
+
+        var firstLine = Subtitles.GetOrNull(sortedIndices.FirstOrDefault());
+
+        var areLinesConsecutive = sortedIndices.Count > 1 &&
+            sortedIndices.Zip(sortedIndices.Skip(1), (a, b) => b - a).All(diff => diff == 1);
+
+        var nextLine = Subtitles.GetOrNull(idx + selectedItems.Count);
+
+        // Detach ItemsSource to prevent updates
+        var itemsSource = SubtitleGrid.ItemsSource;
+        var isLargeDelete = selectedItems.Count > 10;
+        if (isLargeDelete)
+        {
+            SubtitleGrid.ItemsSource = null;
+        }
+
+        try
+        {
+            var indicesToRemove = selectedItems
+                .Select(Subtitles.IndexOf)
+                .Where(i => i >= 0)
+                .OrderByDescending(i => i)
+                .ToList();
+
+            foreach (var index in indicesToRemove)
+            {
+                Subtitles.RemoveAt(index);
+            }
+
+            if (idx >= Subtitles.Count)
+            {
+                idx = Subtitles.Count - 1;
+            }
+
+            Renumber();
+            
+            if (areLinesConsecutive && firstLine != null && nextLine != null && nextLine.StartTime.TotalSeconds < firstLine.EndTime.TotalSeconds + 10)
+            {
+                nextLine.StartTime = firstLine.StartTime;
+            }
         }
         finally
         {

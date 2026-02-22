@@ -100,6 +100,7 @@ public class LanguageSettingsShortcuts
     public string ListSelectLast { get; set; }
     public string ListInverseSelection { get; set; }
     public string ListDeleteSelection { get; set; }
+    public string RippleDeleteSelection { get; set; }
 
     public string Settings { get; set; }
     public string Assigned { get; set; }
@@ -355,6 +356,7 @@ public class LanguageSettingsShortcuts
         ListSelectLast = "Select last";
         ListInverseSelection = "Inverse selection";
         ListDeleteSelection = "Delete selection";
+        RippleDeleteSelection = "Ripple delete selection";
 
         TogglePlayPause = "Toggle play/pause";
 
