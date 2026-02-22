@@ -76,6 +76,7 @@
 		<None Remove="Assets\Languages\German.json" />
 		<None Remove="Assets\NetflixGlyphs.zip" />
 		<None Remove="Assets\SevenZip\7z-linux64.zip" />
+		<None Remove="Assets\SevenZip\7zaWindows64.zip" />
 		<None Remove="Assets\SevenZip\7zrLinux64.zip" />
 		<None Remove="Assets\SevenZip\7zxa.dll" />
 		<None Remove="Assets\TextToSpeech\AllTalkVoices.json" />
@@ -112,8 +113,8 @@
 		<AvaloniaResource Include="Assets\Layout\Layout11.png" />
 		<AvaloniaResource Include="Assets\Layout\Layout12.png" />
 		<AvaloniaResource Include="Assets\NetflixGlyphs.zip" />
+		<AvaloniaResource Include="Assets\SevenZip\7zaWindows64.zip" />
 		<AvaloniaResource Include="Assets\SevenZip\7zrLinux64.zip" />
-		<AvaloniaResource Include="Assets\SevenZip\7zxa.dll" />
 		<AvaloniaResource Include="Assets\Themes.zip" />
 		<AvaloniaResource Include="Assets\Whisper\PurfviewFasterWhisper.txt">
 			<CopyToOutputDirectory></CopyToOutputDirectory>
@@ -144,6 +145,8 @@
 		<AvaloniaResource Include="Assets\Ocr.zip" />
 		<None Remove="Assets\about.png" />
 		<AvaloniaResource Include="Assets\about.png" />
+		<None Remove="Assets\Whisper\CTranslate2.txt" />
+		<AvaloniaResource Include="Assets\Whisper\WhisperCTranslate2.txt" />
 	</ItemGroup>
 
 	<ItemGroup>

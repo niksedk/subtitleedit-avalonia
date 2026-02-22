@@ -143,10 +143,19 @@ public class AutoTranslateWindow : Window
         var dataGridBorder = UiUtil.MakeBorderForControlNoPadding(dataGrid);
 
         StackPanel settingsBar = UiUtil.MakeControlBarLeft(
+
+            UiUtil.MakeTextBlock(Se.Language.General.Id, vm, null, nameof(vm.ApiIdIsVisible)).WithMarginRight(5),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiIdText), nameof(vm.ApiIdIsVisible)).WithMarginRight(15),
+
+            UiUtil.MakeTextBlock(Se.Language.General.ApiSecret, vm, null, nameof(vm.ApiSecretIsVisible)).WithMarginRight(5),
+            UiUtil.MakeTextBox(150, vm, nameof(vm.ApiSecretText), nameof(vm.ApiSecretIsVisible)).WithMarginRight(15),
+
             UiUtil.MakeTextBlock(Se.Language.General.ApiKey, vm, null, nameof(vm.ApiKeyIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ApiKeyText), nameof(vm.ApiKeyIsVisible)).WithMarginRight(15),
+
             UiUtil.MakeTextBlock(Se.Language.General.Url, vm, null, nameof(vm.ApiUrlIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(200, vm, nameof(vm.ApiUrlText), nameof(vm.ApiUrlIsVisible)).WithMarginRight(15),
+
             UiUtil.MakeTextBlock(Se.Language.General.Model, vm, null, nameof(vm.ModelIsVisible)).WithMarginRight(5),
             UiUtil.MakeTextBox(150, vm, nameof(vm.ModelText), nameof(vm.ModelIsVisible)),
             UiUtil.MakeButtonBrowse(vm.BrowseModelCommand, nameof(vm.ModelBrowseIsVisible)).WithMarginLeft(5)

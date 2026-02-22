@@ -89,7 +89,7 @@ public partial class DownloadLibVlcViewModel : ObservableObject
                 }
 
                 StartIndeterminateProgress();
-                Unpacker.Extract7Zip(_tempFileName, Se.VlcFolder, "vlc-3.0.21", _cancellationTokenSource, text => ProgressText = text);
+                Unpacker.Extract7Zip(_tempFileName, Se.VlcFolder, "vlc-3.0.23", _cancellationTokenSource, text => ProgressText = text);
                 StopIndeterminateProgress();
 
                 OkPressed = true;

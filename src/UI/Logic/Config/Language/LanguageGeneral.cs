@@ -624,6 +624,8 @@ public class LanguageGeneral
     public string Use { get; set; }
     public string CenterHorizontally { get; set; }
     public string CenterVertically { get; set; }
+    public string Id { get; set; }
+    public string ApiSecret { get; set; }
 
     public LanguageGeneral()
     {
@@ -1247,5 +1249,7 @@ public class LanguageGeneral
         Use = "Use";
         CenterHorizontally = "Center horizontally";
         CenterVertically = "Center vertically";
+        Id = "ID";
+        ApiSecret = "Secret";
     }
 }

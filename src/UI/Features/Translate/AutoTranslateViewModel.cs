@@ -49,6 +49,10 @@ public partial class AutoTranslateViewModel : ObservableObject
 
     [ObservableProperty] private bool _apiKeyIsVisible;
     [ObservableProperty] private string _apiKeyText;
+    [ObservableProperty] private string _apiIdText;
+    [ObservableProperty] private bool _apiIdIsVisible;
+    [ObservableProperty] private string _apiSecretText;
+    [ObservableProperty] private bool _apiSecretIsVisible;
     [ObservableProperty] private bool _apiUrlIsVisible;
     [ObservableProperty] private string _apiUrlText;
     [ObservableProperty] private bool _buttonApiUrlIsVisible;
@@ -76,6 +80,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         ApiKeyText = string.Empty;
         ApiUrlText = string.Empty;
         ModelText = string.Empty;
+        ApiIdText = string.Empty;
+        ApiSecretText = string.Empty;
 
         AutoTranslators = new ObservableCollection<IAutoTranslator>
         {
@@ -92,6 +98,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             new AnthropicTranslate(),
             new GroqTranslate(),
             new OpenRouterTranslate(),
+            new LaraTranslate(),
             new PerplexityTranslate(),
             new GeminiTranslate(),
             new PapagoTranslate(),
@@ -204,6 +211,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         var apiKey = ApiKeyText ?? string.Empty;
         var apiUrl = ApiUrlText ?? string.Empty;
         var apiModel = ModelText ?? string.Empty;
+        var apiId = ApiIdText ?? string.Empty;
+        var apiSecret = ApiSecretText ?? string.Empty;
 
         if (engineType == typeof(GoogleTranslateV2))
         {
@@ -263,6 +272,15 @@ public partial class AutoTranslateViewModel : ObservableObject
         {
             Configuration.Settings.Tools.AnthropicApiKey = apiKey.Trim();
             Configuration.Settings.Tools.AnthropicApiModel = apiModel.Trim();
+        }
+
+        if (engineType == typeof(LaraTranslate))
+        {
+            Configuration.Settings.Tools.LaraApiId = apiId.Trim();
+            Configuration.Settings.Tools.LaraApiSecret = apiSecret.Trim();
+            Configuration.Settings.Tools.LaraUrl = Se.Settings.AutoTranslate.LaraUrl.Trim();
+            Se.Settings.AutoTranslate.LaraApiId = apiId.Trim();
+            Se.Settings.AutoTranslate.LaraApiSecret = apiSecret.Trim();
         }
 
         if (engineType == typeof(PerplexityTranslate))
@@ -847,6 +865,8 @@ public partial class AutoTranslateViewModel : ObservableObject
         ModelText = string.Empty;
         //LabelApiUrl.Text = "API url";
         //LabelApiKey.Text = "API key";
+        ApiIdIsVisible = false;
+        ApiSecretIsVisible = false;
 
         _apiUrls.Clear();
         _apiModels.Clear();
@@ -1065,6 +1085,17 @@ public partial class AutoTranslateViewModel : ObservableObject
             ModelIsVisible = true;
             ButtonModelIsVisible = true;
             ModelText = Configuration.Settings.Tools.AnthropicApiModel;
+
+            return;
+        }
+
+        if (engineType == typeof(LaraTranslate))
+        {
+            ApiIdText = Se.Settings.AutoTranslate.LaraApiId;
+            ApiIdIsVisible = true;
+
+            ApiSecretText = Se.Settings.AutoTranslate.LaraApiSecret;
+            ApiSecretIsVisible = true;
 
             return;
         }

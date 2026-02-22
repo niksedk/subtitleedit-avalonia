@@ -1,5 +1,4 @@
 ﻿using Nikse.SubtitleEdit.Core.AutoTranslate;
-using Nikse.SubtitleEdit.Core.Common;
 
 namespace Nikse.SubtitleEdit.Logic.Config;
 
@@ -65,12 +64,17 @@ public class SeAutoTranslate
     public string AvalAiPrompt { get; set; }
     public string AvalAiApiKey { get; set; }
     public string AvalAiModel { get; set; }
-    
+
     public string PerplexityUrl { get; set; }
     public string PerplexityPrompt { get; set; }
     public string PerplexityApiKey { get; set; }
     public string PerplexityModel { get; set; }
-    
+
+    public string LaraUrl { get; set; }
+    public string LaraApiId { get; set; }
+    public string LaraApiSecret { get; set; }
+
+
     public string KoboldCppUrl { get; set; }
     public string KoboldCppPrompt { get; set; }
     public decimal KoboldCppTemperature { get; set; }
@@ -99,6 +103,7 @@ public class SeAutoTranslate
         PerplexityModel = PerplexityTranslate.Models[0];
         PerplexityPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
         PerplexityUrl = "https://api.perplexity.ai/v1/responses";
+        LaraUrl = "https://api.laratranslate.com";
         BaiduApiKey = string.Empty;
         BaiduUrl = "https://fanyi-api.baidu.com";
         ChatGptApiKey = string.Empty;
@@ -163,5 +168,7 @@ public class SeAutoTranslate
         PapagoApiKeyId = string.Empty;
         RequestMaxBytes = 1000;
         SeamlessM4TUrl = "http://localhost:5000/";
+        LaraApiId = string.Empty;
+        LaraApiSecret = string.Empty;
     }
 }

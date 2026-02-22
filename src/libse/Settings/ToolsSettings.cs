@@ -93,7 +93,11 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string PerplexityPrompt { get; set; }
         public string PerplexityApiKey { get; set; }
         public string PerplexityModel { get; set; }
-        
+
+        public string LaraUrl { get; set; }
+        public string LaraApiId { get; set; }
+        public string LaraApiSecret { get; set; }
+
         public string OpenRouterUrl { get; set; }
         public string OpenRouterPrompt { get; set; }
         public string OpenRouterApiKey { get; set; }

@@ -1,9 +1,7 @@
 ﻿using Avalonia.Threading;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Initializers;
-using SevenZipExtractor;
 using SharpCompress.Archives.SevenZip;
-using SharpCompress.Common;
 using SharpCompress.Readers;
 using System;
 using System.IO;
@@ -23,7 +21,7 @@ public static class Unpacker
 
         if (OperatingSystem.IsWindows())
         {
-            Unpack7ZipViaNativeLibrary(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
+            Unpack7ZipVia77zExecutable(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
             return;
         }
 
@@ -44,51 +42,6 @@ public static class Unpacker
         }
 
         Extract7ZipSlow(tempFileName, dir, skipFolderLevel, cancellationTokenSource, updateProgressText);
-    }
-
-    private static void Unpack7ZipViaNativeLibrary(string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
-    {
-        using (var archiveFile = new ArchiveFile(tempFileName))
-        {
-            archiveFile.Extract(entry =>
-            {
-                if (cancellationTokenSource.IsCancellationRequested)
-                {
-                    return null;
-                }
-
-                var entryFullName = entry.FileName;
-                if (!string.IsNullOrEmpty(skipFolderLevel) && entryFullName.StartsWith(skipFolderLevel))
-                {
-                    entryFullName = entryFullName.Substring(skipFolderLevel.Length);
-                }
-
-                entryFullName = entryFullName.Replace('/', Path.DirectorySeparatorChar);
-                entryFullName = entryFullName.TrimStart(Path.DirectorySeparatorChar);
-
-                var fullFileName = Path.Combine(dir, entryFullName);
-
-                var fullPath = Path.GetDirectoryName(fullFileName);
-                if (fullPath == null)
-                {
-                    return null;
-                }
-
-
-                var displayName = entryFullName;
-                if (displayName.Length > 30)
-                {
-                    displayName = "..." + displayName.Remove(0, displayName.Length - 26).Trim();
-                }
-
-                Dispatcher.UIThread.Post(() =>
-                {
-                    updateProgressText(string.Format(Se.Language.General.UnpackingX, displayName));
-                });
-
-                return fullFileName;
-            });
-        }
     }
 
     private static string? GetMacSevenZipPath()
@@ -153,7 +106,7 @@ public static class Unpacker
                 }
 
                 var line = process.StandardOutput.ReadLine();
-                if (!string.IsNullOrWhiteSpace(line) && line.Contains("Extracting"))
+                if (!string.IsNullOrWhiteSpace(line) && (line.Contains("Extracting") || line.Contains("Unpacking")))
                 {
                     var displayLine = line.Length > 50 ? "..." + line.Substring(line.Length - 46) : line;
                     Dispatcher.UIThread.Post(() =>
@@ -197,11 +150,17 @@ public static class Unpacker
     private static void Unpack7ZipVia77zExecutable(string tempFileName, string dir, string skipFolderLevel, CancellationTokenSource cancellationTokenSource, Action<string> updateProgressText)
     {
         new SevenZipInitializer().UpdateSevenZipIfNeeded().Wait();
+
+
         var sevenZipPath = Path.Combine(Se.SevenZipFolder, "7zr"); // 7zr is the standalone version for 7zip archives
+        if (OperatingSystem.IsWindows())
+        {
+            sevenZipPath = Path.Combine(Se.SevenZipFolder, "7za.exe"); // 7za.exe is the windows executable for 7zip archives
+        }
 
         if (!File.Exists(sevenZipPath))
         {
-            throw new FileNotFoundException($"7zr executable not found at {sevenZipPath}");
+            throw new FileNotFoundException($"7-zip executable not found at {sevenZipPath}");
         }
 
         // Make sure 7zr is executable on Linux
@@ -266,7 +225,7 @@ public static class Unpacker
             if (process.ExitCode != 0)
             {
                 var error = process.StandardError.ReadToEnd();
-                throw new Exception($"7zr extraction failed with exit code {process.ExitCode}: {error}");
+                throw new Exception($"7zip extraction failed with exit code {process.ExitCode}: {error}");
             }
 
             // If we need to skip folder levels, move files from temp to final destination

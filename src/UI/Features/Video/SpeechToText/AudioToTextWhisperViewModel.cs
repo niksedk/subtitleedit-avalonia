@@ -136,7 +136,12 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         {
             Engines.Add(new WhisperEnginePurfviewFasterWhisperXxl());
         }
-
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+        {
+            Engines.Add(new WhisperEngineCTranslate2());
+        }
+        
         Engines.Add(new WhisperEngineOpenAi());
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -1799,6 +1804,11 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         var m = engine.GetModelForCmdLine(model);
         var parameters =
             $"--language {language} --model \"{m}\" {outputSrt}{translateToEnglish}{args} \"{waveFileName}\"{postParams}";
+
+        if (engine is WhisperEngineCTranslate2)
+        {
+            parameters = parameters.Replace("--model", "--local_files_only True --model_dir");
+        }
 
         SeLogger.WhisperInfo($"{w} {parameters}");
 

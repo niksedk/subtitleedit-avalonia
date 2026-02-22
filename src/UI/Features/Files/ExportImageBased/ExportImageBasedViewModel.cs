@@ -746,8 +746,10 @@ public partial class ExportImageBasedViewModel : ObservableObject
         // Render text to temporary bitmap to measure actual bounds
         var paddingLeftRight = (float)ip.PaddingLeftRight;
         RenderTextToCanvas(tempCanvas, lines, ip, regularFont, boldFont, italicFont, boldItalicFont,
-            5, 5, baseLineHeight, lineSpacing, paddingLeftRight,
+            100, 100, baseLineHeight, lineSpacing, paddingLeftRight,
             fontColor, outlineColor, shadowColor, outlineWidth, shadowWidth, tempWidth, isForMeasurement: true);
+
+        //System.IO.File.WriteAllBytes(@"C:\temp\debug_raw.png", tempBitmap.ToPngArray());
 
         var bitmapNoPadding = tempBitmap.TrimTransparentPixels();
         //System.IO.File.WriteAllBytes(@"C:\temp\debug_no_padding.png", bitmapNoPadding.TrimmedBitmap.ToPngArray());

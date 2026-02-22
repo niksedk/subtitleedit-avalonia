@@ -92,11 +92,10 @@ public class SevenZipInitializer() : ISevenZipInitializer
                 Directory.CreateDirectory(outputDir);
             }
 
-            var uri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7zxa.dll");
-            await using var stream = AssetLoader.Open(uri);
-            var outputPath = Path.Combine(outputDir, "7zxa.dll");
-            await using var fileStream = File.Create(outputPath);
-            await stream.CopyToAsync(fileStream);
+            var zipUri = new Uri("avares://SubtitleEdit/Assets/SevenZip/7zaWindows64.zip");
+            await using var zipStream = AssetLoader.Open(zipUri);
+            var zipUnpacker = new ZipUnpacker();
+            zipUnpacker.UnpackZipStream(zipStream, outputDir);
         }
         catch
         {
