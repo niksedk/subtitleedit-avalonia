@@ -90,7 +90,7 @@ public class WhisperEngineCTranslate2 : ISpeechToTextEngine
 
     public string GetModelForCmdLine(string modelName)
     {
-        var modelFileName = Path.Combine(GetAndCreateWhisperModelFolder(null), modelName);
+        var modelFileName = Path.Combine(GetAndCreateWhisperModelFolder(null), "faster-whisper-" + modelName);
         return modelFileName;
     }
 

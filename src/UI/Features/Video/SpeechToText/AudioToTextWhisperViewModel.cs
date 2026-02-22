@@ -1807,7 +1807,8 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (engine is WhisperEngineCTranslate2)
         {
-            parameters = parameters.Replace("--model", "--local_files_only True --model_dir");
+            //parameters = parameters.Replace("--model", "--local_files_only True --model_dir");
+            parameters = parameters.Replace("--model", "--model_dir");
         }
 
         SeLogger.WhisperInfo($"{w} {parameters}");
@@ -1824,7 +1825,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(cppVulkanDevice))
         {
-            process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = "1";
+            process.StartInfo.EnvironmentVariables["GGML_VULKAN_DEVICE"] = cppVulkanDevice;
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
