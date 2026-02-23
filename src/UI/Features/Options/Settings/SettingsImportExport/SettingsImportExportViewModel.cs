@@ -23,9 +23,81 @@ public partial class SettingsImportExportViewModel : ObservableObject
     [ObservableProperty] private bool _exportImportWaveform;
     [ObservableProperty] private bool _exportImportSyntaxColoring;
     [ObservableProperty] private bool _exportImportShortcuts;
-    [ObservableProperty] private string _filePath = string.Empty;
+
+    private bool _isRulesEnabled = true;
+    public bool IsRulesEnabled
+    {
+        get => _isRulesEnabled;
+        set
+        {
+            if (SetProperty(ref _isRulesEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditRules));
+            }
+        }
+    }
+
+    private bool _isAppearanceEnabled = true;
+    public bool IsAppearanceEnabled
+    {
+        get => _isAppearanceEnabled;
+        set
+        {
+            if (SetProperty(ref _isAppearanceEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditAppearance));
+            }
+        }
+    }
+
+    private bool _isAutoTranslateEnabled = true;
+    public bool IsAutoTranslateEnabled
+    {
+        get => _isAutoTranslateEnabled;
+        set
+        {
+            if (SetProperty(ref _isAutoTranslateEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditAutoTranslate));
+            }
+        }
+    }
+
+    private bool _isWaveformEnabled = true;
+    public bool IsWaveformEnabled
+    {
+        get => _isWaveformEnabled;
+        set
+        {
+            if (SetProperty(ref _isWaveformEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditWaveform));
+            }
+        }
+    }
+
+    private bool _isShortcutsEnabled = true;
+    public bool IsShortcutsEnabled
+    {
+        get => _isShortcutsEnabled;
+        set
+        {
+            if (SetProperty(ref _isShortcutsEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditShortcuts));
+            }
+        }
+    }
+
+    public bool CanEditRules => !ExportImportAll && _isRulesEnabled;
+    public bool CanEditAppearance => !ExportImportAll && _isAppearanceEnabled;
+    public bool CanEditAutoTranslate => !ExportImportAll && _isAutoTranslateEnabled;
+    public bool CanEditWaveform => !ExportImportAll && _isWaveformEnabled;
+    public bool CanEditShortcuts => !ExportImportAll && _isShortcutsEnabled;
 
     private bool _isExport;
+    private string _importFilePath = string.Empty;
+    private Se? _importData;
     public bool OkPressed { get; set; }
     public Window? Window { get; set; }
     private readonly IFileHelper _fileHelper;
@@ -37,6 +109,15 @@ public partial class SettingsImportExportViewModel : ObservableObject
         ExportImportAll = true;
     }
 
+    partial void OnExportImportAllChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanEditRules));
+        OnPropertyChanged(nameof(CanEditAppearance));
+        OnPropertyChanged(nameof(CanEditAutoTranslate));
+        OnPropertyChanged(nameof(CanEditWaveform));
+        OnPropertyChanged(nameof(CanEditShortcuts));
+    }
+
     public void SetIsExport(bool isExport)
     {
         _isExport = isExport;
@@ -44,53 +125,86 @@ public partial class SettingsImportExportViewModel : ObservableObject
     }
 
 
-    [RelayCommand]
-    private async Task BrowseFile()
+    public async Task<bool> PromptAndLoadImportFile()
     {
         if (Window == null)
         {
-            return;
+            return false;
         }
 
-        if (_isExport)
-        {
-            var fileName = await _fileHelper.PickSaveFile(
-                Window,
-                ".json",
-                "Settings.json",
-                Se.Language.General.ExportDotDotDot);
+        var fileName = await _fileHelper.PickOpenFile(
+            Window,
+            Se.Language.General.ImportDotDotDot,
+            "JSON files",
+            ".json");
 
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                FilePath = fileName;
-            }
+        if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
+        {
+            return false;
         }
-        else
-        {
-            var fileName = await _fileHelper.PickOpenFile(
-                Window,
-                Se.Language.General.ImportDotDotDot,
-                "JSON files",
-                ".json");
 
-            if (!string.IsNullOrEmpty(fileName))
+        _importFilePath = fileName;
+
+        try
+        {
+            var json = File.ReadAllText(_importFilePath);
+            _importData = JsonSerializer.Deserialize<Se>(json, new JsonSerializerOptions
             {
-                FilePath = fileName;
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
+            });
+
+            if (_importData == null)
+            {
+                return false;
             }
+
+            IsRulesEnabled = _importData.General != null;
+            IsAppearanceEnabled = _importData.Appearance != null;
+            IsAutoTranslateEnabled = _importData.AutoTranslate != null;
+            IsWaveformEnabled = _importData.Waveform != null;
+            IsShortcutsEnabled = _importData.Shortcuts != null;
+
+            if (!IsRulesEnabled)
+            {
+                ExportImportRules = false;
+            }
+
+            if (!IsAppearanceEnabled)
+            {
+                ExportImportAppearance = false;
+            }
+
+            if (!IsAutoTranslateEnabled)
+            {
+                ExportImportAutoTranslate = false;
+            }
+
+            if (!IsWaveformEnabled)
+            {
+                ExportImportWaveform = false;
+            }
+
+            if (!IsShortcutsEnabled)
+            {
+                ExportImportShortcuts = false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
-        if (string.IsNullOrWhiteSpace(FilePath))
-        {
-            return;
-        }
-
         if (_isExport)
         {
-            ExportSettings();
+            await ExportSettings();
         }
         else
         {
@@ -116,8 +230,24 @@ public partial class SettingsImportExportViewModel : ObservableObject
         }
     }
 
-    private void ExportSettings()
+    private async Task ExportSettings()
     {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(
+            Window,
+            ".json",
+            "Settings.json",
+            Se.Language.General.ExportDotDotDot);
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
         var exportData = new Se();
         var currentSettings = Se.Settings;
 
@@ -162,28 +292,17 @@ public partial class SettingsImportExportViewModel : ObservableObject
         }
 
         var json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(FilePath, json);
+        File.WriteAllText(fileName, json);
     }
 
     private void ImportSettings()
     {
-        if (!File.Exists(FilePath))
+        if (_importData == null)
         {
             return;
         }
 
-        var json = File.ReadAllText(FilePath);
-        var importData = JsonSerializer.Deserialize<Se>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        });
-
-        if (importData == null)
-        {
-            return;
-        }
+        var importData = _importData;
 
         if (ExportImportAll || ExportImportRules)
         {
@@ -251,11 +370,20 @@ public partial class SettingsImportExportViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    public void OnLoaded(object? sender, RoutedEventArgs e)
+    public async void OnLoaded(object? sender, RoutedEventArgs e)
     {
         if (Window != null)
         {
             UiUtil.RestoreWindowPosition(Window);
+        }
+
+        if (!_isExport)
+        {
+            var loaded = await PromptAndLoadImportFile();
+            if (!loaded)
+            {
+                Window?.Close();
+            }
         }
     }
 }

@@ -16,11 +16,6 @@ public class SettingsImportExportPage : UserControl
     {
         _vm = vm;
 
-        var labelSelectAreas = UiUtil.MakeLabel("Select areas to import/export:");
-        labelSelectAreas.FontSize = 14;
-        labelSelectAreas.FontWeight = Avalonia.Media.FontWeight.Bold;
-        labelSelectAreas.Margin = new Thickness(0, 0, 0, 10);
-
         var checkBoxExportImportAll = new CheckBox
         {
             Content = Se.Language.Options.Settings.AllSettings,
@@ -33,21 +28,24 @@ public class SettingsImportExportPage : UserControl
             Content = Se.Language.General.Rules,
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ExportImportRules)) { Mode = BindingMode.TwoWay },
-        }.WithBindEnabled(nameof(vm.ExportImportAll), new InverseBooleanConverter());
+            [!CheckBox.IsEnabledProperty] = new Binding(nameof(vm.CanEditRules))
+        };
 
         var checkBoxExportImportAppearance = new CheckBox
         {
             Content = Se.Language.General.Appearance,
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ExportImportAppearance)) { Mode = BindingMode.TwoWay },
-        }.WithBindEnabled(nameof(vm.ExportImportAll), new InverseBooleanConverter());
+            [!CheckBox.IsEnabledProperty] = new Binding(nameof(vm.CanEditAppearance))
+        };
 
         var checkBoxExportImportWaveform = new CheckBox
         {
             Content = Se.Language.General.WaveformSpectrogram,
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ExportImportWaveform)) { Mode = BindingMode.TwoWay },
-        }.WithBindEnabled(nameof(vm.ExportImportAll), new InverseBooleanConverter());
+            [!CheckBox.IsEnabledProperty] = new Binding(nameof(vm.CanEditWaveform))
+        };
 
         var checkBoxExportImportSyntaxColoring = new CheckBox
         {
@@ -61,14 +59,16 @@ public class SettingsImportExportPage : UserControl
             Content = Se.Language.General.Shortcuts,
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ExportImportShortcuts)) { Mode = BindingMode.TwoWay },
-        }.WithBindEnabled(nameof(vm.ExportImportAll), new InverseBooleanConverter());
+            [!CheckBox.IsEnabledProperty] = new Binding(nameof(vm.CanEditShortcuts))
+        };
 
         var checkBoxExportImportAutoTranslate = new CheckBox
         {
             Content = Se.Language.General.AutoTranslate,
             Margin = new Thickness(20, 0, 55, 0),
             [!CheckBox.IsCheckedProperty] = new Binding(nameof(vm.ExportImportAutoTranslate)) { Mode = BindingMode.TwoWay },
-        }.WithBindEnabled(nameof(vm.ExportImportAll), new InverseBooleanConverter());
+            [!CheckBox.IsEnabledProperty] = new Binding(nameof(vm.CanEditAutoTranslate))
+        };
 
         var checkBoxStack = new StackPanel
         {
@@ -86,24 +86,6 @@ public class SettingsImportExportPage : UserControl
             }
         };
 
-        var labelFilePath = UiUtil.MakeLabel("File path:");
-        labelFilePath.Margin = new Thickness(0, 10, 0, 5);
-
-        var textBoxFilePath = new TextBox
-        {
-            [!TextBox.TextProperty] = new Binding(nameof(_vm.FilePath)) { Source = _vm, Mode = BindingMode.TwoWay },
-            Margin = new Thickness(0, 0, 5, 0),
-            HorizontalAlignment = HorizontalAlignment.Stretch
-        };
-
-        var buttonBrowse = UiUtil.MakeButtonBrowse(_vm.BrowseFileCommand);
-
-        var filePathStack = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Children = { textBoxFilePath, buttonBrowse }
-        };
-
         var buttonOk = UiUtil.MakeButtonOk(_vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(_vm.CancelCommand);
         var buttonBar = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
@@ -115,10 +97,7 @@ public class SettingsImportExportPage : UserControl
             Spacing = 5,
             Children =
             {
-                labelSelectAreas,
                 checkBoxStack,
-                labelFilePath,
-                filePathStack,
                 buttonBar
             }
         };
