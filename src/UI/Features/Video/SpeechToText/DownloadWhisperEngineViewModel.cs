@@ -260,6 +260,15 @@ public partial class DownloadWhisperEngineViewModel : ObservableObject
                     LinuxHelper.MakeExecutable(path);
                 }
             }
+            
+            if (Engine is WhisperEngineCTranslate2)
+            {
+                path = Path.Combine(folder, WhisperEngineCTranslate2.GetExecutableFileName());
+                if (File.Exists(path))
+                {
+                    LinuxHelper.MakeExecutable(path);
+                }
+            }
         }
     }
 

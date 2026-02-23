@@ -114,7 +114,7 @@ public class WhisperEngineCTranslate2 : ISpeechToTextEngine
         return fileName;
     }
 
-    private static string GetExecutableFileName()
+    internal static string GetExecutableFileName()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
