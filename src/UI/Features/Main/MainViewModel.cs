@@ -3427,7 +3427,7 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
-    private void CopyTextFromOriginalToClipboard()
+    private async Task CopyTextFromOriginalToClipboard()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0 || !ShowColumnOriginalText)
@@ -3447,13 +3447,13 @@ public partial class MainViewModel :
             sb.AppendLine(subtitle.OriginalText);
         }
 
-        ClipboardHelper.SetTextAsync(Window, sb.ToString()).GetAwaiter().GetResult();
+        await ClipboardHelper.SetTextAsync(Window, sb.ToString());
 
         ShowStatus(string.Format("{0} lines copied to clipboard", selectedItems.Count));
     }
 
     [RelayCommand]
-    private void CopyTextToClipboard()
+    private async Task CopyTextToClipboard()
     {
         var selectedItems = SubtitleGrid.SelectedItems.Cast<SubtitleLineViewModel>().ToList();
         if (Window == null || selectedItems.Count == 0)
@@ -3473,7 +3473,7 @@ public partial class MainViewModel :
             sb.AppendLine(subtitle.Text);
         }
 
-        ClipboardHelper.SetTextAsync(Window, sb.ToString()).GetAwaiter().GetResult();
+        await ClipboardHelper.SetTextAsync(Window, sb.ToString());
 
         ShowStatus(string.Format("{0} lines copied to clipboard", selectedItems.Count));
     }
