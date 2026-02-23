@@ -287,6 +287,9 @@ public partial class MainViewModel :
     private int _pendingScrollIndex = -1;
     private SubtitleLineViewModel? _pendingScrollSubtitle = null;
     private readonly object _scrollLock = new object();
+    private bool _changingFormatProgrammatically;
+    private bool _formatChangedByUser;
+    private SubtitleFormat? _formatChangedFrom;
 
     private readonly IFileHelper _fileHelper;
     private readonly IFolderHelper _folderHelper;
@@ -433,7 +436,7 @@ public partial class MainViewModel :
         FilePropertiesText = string.Empty;
 
         SubtitleFormats = [.. SubtitleFormatHelper.GetSubtitleFormatsWithFavoritesAtTop()];
-        SelectedSubtitleFormat = SubtitleFormats[0];
+        SetSubtitleFormat(SubtitleFormats[0]);
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
@@ -532,6 +535,13 @@ public partial class MainViewModel :
             _dropDownFormatsSearchText = string.Empty;
             _dropDownFormatsSearchTimer.Stop();
         };
+    }
+
+    private void SetSubtitleFormat(SubtitleFormat format)
+    {
+        _changingFormatProgrammatically = true;
+        SelectedSubtitleFormat = format;
+        _changingFormatProgrammatically = false;
     }
 
     private static void SetLibSeSettings()
@@ -1169,15 +1179,14 @@ public partial class MainViewModel :
 
         if (format != null)
         {
-            SelectedSubtitleFormat =
-                SubtitleFormats.FirstOrDefault(f => f.FriendlyName == format.FriendlyName) ??
-                SubtitleFormats[0];
+            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(f => f.FriendlyName == format.FriendlyName) 
+                ?? SubtitleFormats[0]);
         }
         else
         {
-            SelectedSubtitleFormat =
-                SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ??
-                SubtitleFormats[0];
+            SetSubtitleFormat(
+                 SubtitleFormats.FirstOrDefault(f => f.FriendlyName == Se.Settings.General.DefaultSubtitleFormat) ??
+                SubtitleFormats[0]);
         }
 
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ??
@@ -1226,6 +1235,7 @@ public partial class MainViewModel :
             _mpvReloader.SmpteMode = IsSmpteTimingEnabled;
         }
 
+        _formatChangedByUser = false;
         _undoRedoManager.Reset();
         _shortcutManager.ClearKeys();
     }
@@ -3244,8 +3254,8 @@ public partial class MainViewModel :
 
         ResetSubtitle();
         SetSubtitles(result.JoinedSubtitle);
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == result.JoinedFormat.Name) ??
-                                 SubtitleFormats[0];
+        SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == result.JoinedFormat.Name) ??
+                                 SubtitleFormats[0]);
         SelectAndScrollToRow(0);
         ShowStatus(Se.Language.Main.JoinedSubtitleLoaded);
     }
@@ -3691,7 +3701,7 @@ public partial class MainViewModel :
             var selectedFormat = viewModel.GetSelectedFormat();
             if (selectedFormat != null && selectedFormat != SelectedSubtitleFormat)
             {
-                SelectedSubtitleFormat = selectedFormat;
+                SetSubtitleFormat(selectedFormat);
             }
         }
     }
@@ -5563,7 +5573,7 @@ public partial class MainViewModel :
             SubtitleFormats.Add(format);
         }
 
-        SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First();
+        SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == selectedSubtitleFormatName) ?? SubtitleFormats.First());
 
         SetupLiveSpellCheck();
     }
@@ -9694,8 +9704,8 @@ public partial class MainViewModel :
 
             ResetSubtitle();
 
-            SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
-                                     SelectedSubtitleFormat;
+            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
+                                     SelectedSubtitleFormat);
 
             if (fileEncoding.WebName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
             {
@@ -10062,8 +10072,8 @@ public partial class MainViewModel :
             if (mp4Parser.VttcSubtitle?.Paragraphs.Count > 0)
             {
                 ResetSubtitle();
-                SelectedSubtitleFormat = SubtitleFormats.FirstOrDefault(p => p.Name == new WebVTT().Name) ??
-                                         SelectedSubtitleFormat;
+                SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == new WebVTT().Name) ??
+                                         SelectedSubtitleFormat);
                 _subtitle = mp4Parser.VttcSubtitle;
                 _subtitle.Renumber();
                 _subtitleFileName = Utilities.GetPathAndFileNameWithoutExtension(fileName) +
@@ -10499,9 +10509,9 @@ public partial class MainViewModel :
         Utilities.LoadMatroskaTextSubtitle(matroskaSubtitleInfo, matroska, sub, _subtitle);
         Utilities.ParseMatroskaTextSt(matroskaSubtitleInfo, sub, _subtitle);
 
-        SelectedSubtitleFormat =
-            SubtitleFormats.FirstOrDefault(p => p.Name == Se.Settings.General.DefaultSubtitleFormat) ??
-            SelectedSubtitleFormat;
+        SetSubtitleFormat(
+             SubtitleFormats.FirstOrDefault(p => p.Name == Se.Settings.General.DefaultSubtitleFormat) ??
+            SelectedSubtitleFormat);
         _converted = true;
         ShowStatus(Se.Language.Main.SubtitleImportedFromMatroskaFile);
         _subtitle.Renumber();
@@ -10860,7 +10870,8 @@ public partial class MainViewModel :
     private async Task<bool> SaveSubtitleAs()
     {
         var newFileName = "New";
-        if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileNameThenVideoFileName))
+        var behavior = Se.Settings.General.SaveAsBehavior;
+        if (behavior == nameof(SaveAsBehaviourType.UseSubtitleFileNameThenVideoFileName))
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
@@ -10871,7 +10882,7 @@ public partial class MainViewModel :
                 newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
         }
-        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
+        else if (behavior == nameof(SaveAsBehaviourType.UseVideoFileNameThenSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
@@ -10883,14 +10894,14 @@ public partial class MainViewModel :
                 newFileName = GetFileNameWithoutExtension(_subtitleFileName);
             }
         }
-        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseVideoFileName))
+        else if (behavior == nameof(SaveAsBehaviourType.UseVideoFileName))
         {
             if (!string.IsNullOrEmpty(_videoFileName))
             {
                 newFileName = GetFileNameWithoutExtension(_videoFileName);
             }
         }
-        else if (Se.Settings.General.SaveAsBehavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
+        else if (behavior == nameof(SaveAsBehaviourType.UseSubtitleFileName))
         {
             if (!string.IsNullOrEmpty(_subtitleFileName))
             {
@@ -10940,8 +10951,12 @@ public partial class MainViewModel :
             title = Se.Language.General.SaveTranslationAsTitle;
         }
 
-        var subtitleFormat = SubtitleFormats.FirstOrDefault(p => p.FriendlyName == Se.Settings.General.DefaultSaveAsFormat)
+        var subtitleFormat = SelectedSubtitleFormat;
+        if (!_formatChangedByUser)
+        {
+            subtitleFormat = SubtitleFormats.FirstOrDefault(p => p.FriendlyName == Se.Settings.General.DefaultSaveAsFormat)
                              ?? SelectedSubtitleFormat;
+        }
 
         var saveAsResult = await _fileHelper.PickSaveSubtitleFileAs(
             Window!,
@@ -10956,11 +10971,16 @@ public partial class MainViewModel :
             return false;
         }
 
+        if (_formatChangedByUser)
+        {
+            _formatChangedByUser = false;
+        }
+
         _subtitleFileName = saveAsResult.FileName;
         _subtitle.FileName = saveAsResult.FileName;
         _converted = false;
         _lastOpenSaveFormat = saveAsResult.SubtitleFormat;
-        SelectedSubtitleFormat = saveAsResult.SubtitleFormat;
+        SetSubtitleFormat(saveAsResult.SubtitleFormat);
         var result = await SaveSubtitle();
         AddToRecentFiles(true);
         return result;
@@ -13960,6 +13980,12 @@ public partial class MainViewModel :
 
     internal void ComboBoxSubtitleFormatChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (!_changingFormatProgrammatically)
+        {
+            _formatChangedByUser = true;
+            _formatChangedFrom = e.RemovedItems.Count == 1 ? e.RemovedItems[0] as SubtitleFormat : null;
+        }
+
         IsFormatAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
         IsFormatSsa = SelectedSubtitleFormat is SubStationAlpha;
         HasFormatStyle = SelectedSubtitleFormat is AdvancedSubStationAlpha or SubStationAlpha;
