@@ -2001,6 +2001,38 @@ public partial class SettingsViewModel : ObservableObject
         Window?.Close();
     }
 
+    [RelayCommand]
+    private async Task ImportSettings()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var result = await _windowService.ShowDialogAsync<SettingsImportExport.SettingsImportExportWindow, SettingsImportExport.SettingsImportExportViewModel>(
+            Window,
+            vm => vm.SetIsExport(false));
+
+        if (result.OkPressed)
+        {
+            // Reload the settings from disk since they were updated
+            LoadSettings();
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportSettings()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<SettingsImportExport.SettingsImportExportWindow, SettingsImportExport.SettingsImportExportViewModel>(
+            Window,
+            vm => vm.SetIsExport(true));
+    }
+
     public void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.Escape)

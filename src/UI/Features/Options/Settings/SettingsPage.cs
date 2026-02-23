@@ -100,7 +100,28 @@ public class SettingsPage : UserControl
         Grid.SetRow(scrollViewer, 1);
         Grid.SetColumn(scrollViewer, 1);
 
-        var buttonReset = UiUtil.MakeButton(Se.Language.General.Reset, vm.ResetAllSettingsCommand);
+        var buttonReset = new SplitButton
+        {
+            Content = Se.Language.General.Reset,
+            Command = vm.ResetAllSettingsCommand,
+            Flyout = new MenuFlyout
+            {
+                Items =
+                {
+                    new Avalonia.Controls.MenuItem
+                    {
+                        Header = Se.Language.General.ImportDotDotDot,
+                        Command = vm.ImportSettingsCommand,
+                    },
+                    new Avalonia.Controls.MenuItem
+                    {
+                        Header = Se.Language.General.ExportDotDotDot,
+                        Command = vm.ExportSettingsCommand,
+                    },
+                }
+            }
+        };
+
         var buttonApply = UiUtil.MakeButton(Se.Language.General.Apply, vm.ApplyCommand);
         var buttonOk = UiUtil.MakeButtonOk(vm.CommandOkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CommandCancelCommand);
