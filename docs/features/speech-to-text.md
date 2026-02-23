@@ -15,6 +15,7 @@ Subtitle Edit can automatically transcribe audio to text using Whisper-based spe
 | Whisper.cpp (cuBLAS) | Windows | NVIDIA CUDA |
 | Whisper.cpp (Vulkan) | Windows | Vulkan GPU |
 | Purfview's Faster Whisper XXL | Windows, Linux | NVIDIA CUDA |
+| Whisper CTranslate2 | Windows, Linux, macOs | CPU only |
 | Const-me's Whisper | Windows | DirectX |
 | OpenAI Whisper | All (Python required) | NVIDIA CUDA |
 | Chat LLM cpp | Windows, Linux | CPU/GPU |
@@ -55,9 +56,10 @@ Transcribe multiple video files at once:
 
 ## Advanced Settings
 
-Click the **Advanced** button to configure:
-- Custom command-line arguments for the Whisper engine
-- Engine-specific parameters
+Click the **Advanced** button to configure custom command-line arguments for the Whisper engine:
+- Use VAD (voice activity detection) for better timing
+- Highlight spoken words in the transcript
+- Adjust temperature or other model parameters
 
 ## Post-Processing Settings
 
@@ -68,7 +70,7 @@ Click the **Post-processing** button to configure:
 - Add periods
 - Merge short lines
 - Split long lines
-- Change underline to color
+- Change underline to color (useful for highlight spoken words)
 
 ## Console Log
 
