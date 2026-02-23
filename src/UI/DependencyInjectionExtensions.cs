@@ -34,6 +34,7 @@ using Nikse.SubtitleEdit.Features.Ocr.FixEngine;
 using Nikse.SubtitleEdit.Features.Ocr.NOcr;
 using Nikse.SubtitleEdit.Features.Options.Language;
 using Nikse.SubtitleEdit.Features.Options.Settings;
+using Nikse.SubtitleEdit.Features.Options.Settings.SettingsImportExport;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.PickMilliseconds;
 using Nikse.SubtitleEdit.Features.Options.Shortcuts.SurroundWith;
@@ -352,6 +353,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<SetSyncPointViewModel>();
         collection.AddTransient<SetTextViewModel>();
         collection.AddTransient<SetVideoOffsetViewModel>();
+        collection.AddTransient<SettingsImportExportViewModel>();
         collection.AddTransient<SettingsResetViewModel>();
         collection.AddTransient<SettingsViewModel>();
         collection.AddTransient<ShortcutsViewModel>();
