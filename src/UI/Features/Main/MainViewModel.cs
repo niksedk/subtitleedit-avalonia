@@ -13863,9 +13863,7 @@ public partial class MainViewModel :
         if (e.NewParagraph != null)
         {
             MenuItemAudioVisualizerInsertNewSelection.IsVisible = true;
-
-            var text = Window?.Clipboard?.TryGetTextAsync().Result;
-            MenuItemAudioVisualizerPasteNewSelection.IsVisible = !string.IsNullOrEmpty(text);
+            MenuItemAudioVisualizerPasteNewSelection.IsVisible = true;
             return;
         }
 
@@ -13900,14 +13898,34 @@ public partial class MainViewModel :
         MenuItemAudioVisualizerInsertAtPosition.IsVisible = true;
         if (subtitlesAtPosition.Count == 0)
         {
-            if (Window != null && Window.Clipboard != null)
+            // Check clipboard safely with timeout to prevent UI freeze on Linux
+            _ = Task.Run(async () =>
             {
-                var clipboardText = Window.Clipboard.TryGetTextAsync().Result;
-                if (!string.IsNullOrEmpty(clipboardText))
+                try
                 {
-                    MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = true;
+                    if (Window?.Clipboard != null)
+                    {
+                        var clipboardTask = Window.Clipboard.TryGetTextAsync();
+                        var timeoutTask = Task.Delay(200); // 200ms timeout
+                        var completedTask = await Task.WhenAny(clipboardTask, timeoutTask);
+
+                        string? clipboardText = null;
+                        if (completedTask == clipboardTask)
+                        {
+                            clipboardText = await clipboardTask;
+                        }
+
+                        await Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = !string.IsNullOrEmpty(clipboardText);
+                        });
+                    }
                 }
-            }
+                catch
+                {
+                    // On error, hide paste menu item (safe default)
+                }
+            });
 
             return;
         }
