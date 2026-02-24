@@ -31,7 +31,6 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     public bool OkPressed { get; internal set; }
 
     private string _tempFolder;
-    private IPaddleOcrDownloadService _paddleOcrDownloadService;
     private Task? _downloadTask;
     private int _downloadTaskIndex;
     private List<string> _downloadTaskUrls;
@@ -41,10 +40,8 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     private PaddleOcrDownloadType _downloadType;
     private IndeterminateProgressHelper? _indeterminateProgressHelper;
 
-    public DownloadPaddleOcrViewModel(IPaddleOcrDownloadService paddleOcrDownloadService)
+    public DownloadPaddleOcrViewModel()
     {
-        _paddleOcrDownloadService = paddleOcrDownloadService;
-
         _cancellationTokenSource = new CancellationTokenSource();
 
         StatusText = Se.Language.General.StartingDotDotDot;
@@ -94,7 +91,16 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                     Dispatcher.UIThread.Post(() =>
                     {
                         ProgressText = $"Starting download {_downloadTaskIndex + 1} of {_downloadTaskUrls.Count}...";
-                        _downloadTaskUrls.Add(_downloadTaskUrls[_downloadTaskIndex]);
+                        var url = _downloadTaskUrls[_downloadTaskIndex];
+                        var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+                        _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, new Progress<float>(number =>
+                        {
+                            var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+                            var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+                            ProgressValue = percentage;
+                            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
+                        }), _cancellationTokenSource.Token);
+
                     });
                     return;
                 }
@@ -219,32 +225,37 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         if (_downloadType == PaddleOcrDownloadType.Models)
         {
             _downloadTaskUrls.AddRange(PaddleOcr.UrlsSupportFiles);
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
-                _cancellationTokenSource.Token);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
         }
         else if (_downloadType == PaddleOcrDownloadType.EngineGpu11)
         {
             _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsGpuCuda11);
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
-                _cancellationTokenSource.Token);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
         }
         else if (_downloadType == PaddleOcrDownloadType.EngineGpu12)
         {
             _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsGpuCuda12);
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
-                _cancellationTokenSource.Token);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
         }
         else if (_downloadType == PaddleOcrDownloadType.EngineCpu)
         {
-            _downloadTaskUrls.AddRange(PaddleOcr.UrlsLinuxGpu);
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
-                _cancellationTokenSource.Token);
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsCpu);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
         }
         else if (_downloadType == PaddleOcrDownloadType.EngineGpuLinux)
         {
             _downloadTaskUrls.AddRange(PaddleOcr.UrlsLinuxGpu);
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
-                _cancellationTokenSource.Token);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
         }
         else
         {

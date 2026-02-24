@@ -27,7 +27,7 @@ public partial class PaddleOcr
     private string _recPath;
     private CancellationToken _cancellationToken;
 
-    public static List<string> UrlsWindowsCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
+    public static List<string> UrlsWindowsCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0.7z"];
 
     public static List<string> UrlsLinuxCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
 
