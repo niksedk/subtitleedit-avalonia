@@ -8,8 +8,10 @@ using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.SevenZipExtractor;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -28,10 +30,12 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     public Window? Window { get; set; }
     public bool OkPressed { get; internal set; }
 
-    private string _tempFileName;
+    private string _tempFolder;
     private IPaddleOcrDownloadService _paddleOcrDownloadService;
     private Task? _downloadTask;
-    private  Timer _timer = new Timer(500);
+    private int _downloadTaskIndex;
+    private List<string> _downloadTaskUrls;
+    private Timer _timer = new Timer(500);
     private bool _done;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private PaddleOcrDownloadType _downloadType;
@@ -46,8 +50,10 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         StatusText = Se.Language.General.StartingDotDotDot;
         ProgressText = string.Empty;
         Error = string.Empty;
-        _tempFileName = string.Empty;
+        _tempFolder = string.Empty;
         _downloadType = PaddleOcrDownloadType.Models;
+        _downloadTaskUrls = new List<string>();
+        _downloadTaskIndex = 0;
     }
 
     private readonly Lock _lockObj = new();
@@ -55,11 +61,11 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
     public void Initialize(PaddleOcrDownloadType paddleOcrDownloadType)
     {
         _downloadType = paddleOcrDownloadType;
-        if (_downloadType == PaddleOcrDownloadType.EngineCpu)
-        {
-            StatusText = "Downloading Paddle OCR engine...";
-        }
-        else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+        if (_downloadType is PaddleOcrDownloadType.EngineCpu or
+            PaddleOcrDownloadType.EngineGpu11 or
+            PaddleOcrDownloadType.EngineGpu12 or
+            PaddleOcrDownloadType.EngineCpuLinux or
+            PaddleOcrDownloadType.EngineGpuLinux)
         {
             StatusText = "Downloading Paddle OCR engine...";
         }
@@ -78,20 +84,24 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 return;
             }
 
-            if (_downloadTask is { IsCompleted: true }) 
+            if (_downloadTask is { IsCompleted: true })
             {
                 _timer.Stop();
-                _done = true;
 
-                if (!File.Exists(_tempFileName))
+                if (_downloadTaskIndex < _downloadTaskUrls.Count - 1)
                 {
-                    ProgressText = "Download failed";
-                    Error = "No data received";
+                    _downloadTaskIndex++;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        ProgressText = $"Starting download {_downloadTaskIndex + 1} of {_downloadTaskUrls.Count}...";
+                        _downloadTaskUrls.Add(_downloadTaskUrls[_downloadTaskIndex]);
+                    });
                     return;
                 }
 
-                var fileInfo = new FileInfo(_tempFileName);
-                if (fileInfo.Length == 0)
+                _done = true;
+
+                if (!AllFileExists())
                 {
                     ProgressText = "Download failed";
                     Error = "No data received";
@@ -99,20 +109,16 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 }
 
                 StartIndeterminateProgress();
+                var firstFile = Path.Combine(_tempFolder, Path.GetFileName(_downloadTaskUrls[0]));
                 if (_downloadType == PaddleOcrDownloadType.Models)
                 {
                     StatusText = "Unpacking Paddle OCR models...";
-                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files", _cancellationTokenSource, text => ProgressText = text);
+                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files", _cancellationTokenSource, text => ProgressText = text);
                 }
-                else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+                else 
                 {
-                    StatusText = "Unpacking Paddle OCR GPU...";
-                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8", _cancellationTokenSource, text => ProgressText = text);
-                }
-                else if (_downloadType == PaddleOcrDownloadType.EngineCpu)
-                {
-                    StatusText = "Unpacking Paddle OCR CPU...";
-                    Unpacker.Extract7Zip(_tempFileName, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.3.2", _cancellationTokenSource, text => ProgressText = text);
+                    StatusText = "Unpacking Paddle OCR...";
+                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8", _cancellationTokenSource, text => ProgressText = text);
                 }
 
                 StopIndeterminateProgress();
@@ -138,6 +144,28 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
         }
     }
 
+    private bool AllFileExists()
+    {
+        foreach (var url in _downloadTaskUrls)
+        {
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            if (!File.Exists(fileName))
+            {
+                Se.LogError($"Expected file not found after download: {fileName}");
+                return false;
+            }
+
+            var fileInfo = new FileInfo(fileName);
+            if (fileInfo.Length == 0)
+            {
+                Se.LogError($"Downloaded file is empty: {fileName}");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void StartIndeterminateProgress()
     {
         _indeterminateProgressHelper?.Dispose();
@@ -155,10 +183,7 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
 
     private void Close()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            Window?.Close();
-        });
+        Dispatcher.UIThread.Post(() => { Window?.Close(); });
     }
 
     [RelayCommand]
@@ -186,23 +211,47 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             Directory.CreateDirectory(folder);
         }
 
-        _tempFileName = Path.Combine(folder, $"{Guid.NewGuid()}.7z");
-        //_tempFileName = "C:\\temp\\PaddleOCR-GPU-v1.3.2-CUDA-11.8.7z"; //TODO: remove;
-        //_timer.Elapsed += OnTimerOnElapsed;
-        //_timer.Start();
-        //return;
+        _tempFolder = Path.Combine(folder, $"{Guid.NewGuid()}");
+        Directory.CreateDirectory(_tempFolder);
+        _downloadTaskIndex = 0;
+        _downloadTaskUrls = new List<string>();
 
         if (_downloadType == PaddleOcrDownloadType.Models)
         {
-            _downloadTask = _paddleOcrDownloadService.DownloadModels(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsSupportFiles);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
+                _cancellationTokenSource.Token);
         }
-        else if (_downloadType == PaddleOcrDownloadType.EngineGpu)
+        else if (_downloadType == PaddleOcrDownloadType.EngineGpu11)
         {
-            _downloadTask = _paddleOcrDownloadService.DownloadEngineGpu(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsGpuCuda11);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
+                _cancellationTokenSource.Token);
+        }
+        else if (_downloadType == PaddleOcrDownloadType.EngineGpu12)
+        {
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsGpuCuda12);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
+                _cancellationTokenSource.Token);
+        }
+        else if (_downloadType == PaddleOcrDownloadType.EngineCpu)
+        {
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsLinuxGpu);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
+                _cancellationTokenSource.Token);
+        }
+        else if (_downloadType == PaddleOcrDownloadType.EngineGpuLinux)
+        {
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsLinuxGpu);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), _downloadTaskUrls[_downloadTaskIndex], _tempFolder, downloadProgress,
+                _cancellationTokenSource.Token);
         }
         else
         {
-            _downloadTask = _paddleOcrDownloadService.DownloadEngineCpu(_tempFileName, downloadProgress, _cancellationTokenSource.Token);
+            Se.LogError($"Unknown Paddle OCR download type: {_downloadType}");
+            ProgressText = "Download failed";
+            Error = "Unknown download type";
+            return;
         }
 
         _timer.Elapsed += OnTimerOnElapsed;

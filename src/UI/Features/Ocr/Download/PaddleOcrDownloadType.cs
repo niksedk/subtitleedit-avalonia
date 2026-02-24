@@ -4,5 +4,8 @@ public enum PaddleOcrDownloadType
 {
     Models,
     EngineCpu,
-    EngineGpu,
+    EngineCpuLinux,
+    EngineGpuLinux,
+    EngineGpu11,
+    EngineGpu12,
 }

@@ -27,36 +27,21 @@ public partial class PaddleOcr
     private string _recPath;
     private CancellationToken _cancellationToken;
 
-    public List<string> UrlsWindowsCpu = new List<string>
-    {
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"
-    };
+    public static List<string> UrlsWindowsCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
 
-    public List<string> UrlsLinuxCpu = new List<string>
-    {
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"
-    };
+    public static List<string> UrlsLinuxCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
 
-    public List<string> UrlsWindowsGpuCuda11 = new List<string>
-    {
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-11.8.7z"
-    };
+    public static List<string> UrlsWindowsGpuCuda11 = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-11.8.7z"];
 
-    public List<string> UrlsWindowsGpuCuda12 = new List<string>
-    {
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9.7z"
-    };
+    public static List<string> UrlsWindowsGpuCuda12 = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9.7z"];
 
-    public List<string> UrlsWindowsGpuLinux = new List<string>
-    {
+    public static List<string> UrlsLinuxGpu =
+    [
         "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9-Linux.7z.001",
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9-Linux.7z.002",
-    };
+        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9-Linux.7z.002"
+    ];
 
-    public List<string> UrlsSupportFiles = new List<string>
-    {
-        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR.PP-OCRv5.support.files.VideOCR.7z"
-    };
+    public static List<string> UrlsSupportFiles = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR.PP-OCRv5.support.files.VideOCR.7z"];
 
     private const string TextlineOrientationModelName = "PP-LCNet_x1_0_textline_ori";
 
