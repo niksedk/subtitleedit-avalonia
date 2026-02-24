@@ -65,6 +65,32 @@ Local OCR engine.
 6. Review and correct any errors
 7. Click **OK** to import the text subtitles
 
+## Keyboard Shortcuts
+
+### General
+| Shortcut | Action |
+|----------|--------|
+| Escape | Cancel OCR / Close window |
+| Ctrl+G | Go to line number |
+| F1 | Show help |
+
+### Subtitle Grid
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+I | Toggle italic formatting |
+| Ctrl+P | View selected image (use arrow keys to navigate) |
+| Delete | Delete selected line(s) |
+| Home | Jump to first line |
+| End | Jump to last line |
+| Double-click | Inspect line (nOCR/Binary OCR only) |
+
+### Unknown Words List
+| Shortcut | Action |
+|----------|--------|
+| Enter | Jump to subtitle line containing the selected unknown word |
+
+> **Note:** All shortcuts can be customized. Go to **Options → Shortcuts** to view and change key bindings.
+
 ## Pre-processing
 
 Before OCR, you can apply image pre-processing:

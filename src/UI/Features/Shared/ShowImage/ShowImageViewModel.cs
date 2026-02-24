@@ -87,13 +87,13 @@ public partial class ShowImageViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
-        else if (e.Key == Key.Left)
+        else if (e.Key == Key.Left || e.Key == Key.Up)
         {
             e.Handled = true;
             LeftPressed = true;
             Window?.Close();
         }
-        else if (e.Key == Key.Right)
+        else if (e.Key == Key.Right || e.Key == Key.Down)
         {
             e.Handled = true;
             RightPressed = true;
