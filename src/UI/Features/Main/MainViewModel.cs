@@ -74,6 +74,7 @@ using Nikse.SubtitleEdit.Features.Shared.PickLayerFilter;
 using Nikse.SubtitleEdit.Features.Shared.PickMatroskaTrack;
 using Nikse.SubtitleEdit.Features.Shared.PickMp4Track;
 using Nikse.SubtitleEdit.Features.Shared.PickRuleProfile;
+using Nikse.SubtitleEdit.Features.Shared.PickSpellCheckDictionary;
 using Nikse.SubtitleEdit.Features.Shared.PickSubtitleFormat;
 using Nikse.SubtitleEdit.Features.Shared.PickTsTrack;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
@@ -13798,7 +13799,7 @@ public partial class MainViewModel :
                         // Add "Add to Dictionary"
                         var addToDictItem = new MenuItem
                         {
-                            Header = $"Add \"{word.Text}\" to Dictionary",
+                            Header = string.Format(Se.Language.SpellCheck.AddXToUserDictionary, word.Text),
                             Tag = "SpellCheck"
                         };
                         addToDictItem.Click += (_, _) =>
@@ -13811,7 +13812,7 @@ public partial class MainViewModel :
                         // Add "Ignore All"
                         var ignoreAllItem = new MenuItem
                         {
-                            Header = $"Ignore All \"{word.Text}\"",
+                            Header = string.Format(Se.Language.SpellCheck.IgnoreAllX, word.Text),
                             Tag = "SpellCheck"
                         };
                         ignoreAllItem.Click += (_, _) =>
@@ -13820,6 +13821,17 @@ public partial class MainViewModel :
                             wrapper.RefreshSpellCheck();
                         };
                         flyout.Items.Insert(insertIndex++, ignoreAllItem);
+
+                        var changeDictionary = new MenuItem
+                        {
+                            Header = Se.Language.SpellCheck.PickSpellCheckDictionaryDotDotDot,
+                            Tag = "SpellCheck"
+                        };
+                        changeDictionary.Click += (_, _) =>
+                        {
+                            PickLiveSpellCheckDictionary(wrapper);
+                        };
+                        flyout.Items.Insert(insertIndex++, changeDictionary);
 
                         // Add separator after spell check items
                         flyout.Items.Insert(insertIndex, new Separator { Tag = "SpellCheck" });
@@ -13830,6 +13842,21 @@ public partial class MainViewModel :
                 _lastTextEditorPointerArgs = null;
             }
         }
+    }
+
+    private void PickLiveSpellCheckDictionary(TextEditorWrapper wrapper)
+    {
+        Dispatcher.UIThread.Post(async() =>
+        {
+            var result = await ShowDialogAsync<PickSpellCheckDictionaryWindow, PickSpellCheckDictionaryViewModel>();
+            if (result != null && result.SelectedDictionary != null)
+            {
+                var twoLetterLanguageCode = Iso639Dash2LanguageCode.GetTwoLetterCodeFromThreeLetterCode(result.SelectedDictionary.GetThreeLetterCode());
+                _spellCheckManager.Initialize(result.SelectedDictionary.DictionaryFileName, twoLetterLanguageCode);
+                wrapper.RefreshSpellCheck();
+                ShowStatus("Live spell check language " + result.SelectedDictionary.Name + " loaded");
+            }
+        });
     }
 
     private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)

@@ -20,6 +20,10 @@ public class LanguageSpellCheck
     public string WordXAddedToUserDictionary { get; set; }
     public string UseSuggestionX { get; set; }
     public string UseSuggestionXAlways { get; set; }
+    public string AddXToUserDictionary { get; set; }
+    public string IgnoreAllX { get; set; }
+    public string PickSpellCheckDictionaryDotDotDot { get; set; }
+    public string ChooseSpellCheckDictionary { get; set; }
 
     public LanguageSpellCheck()
     {
@@ -39,5 +43,9 @@ public class LanguageSpellCheck
         WordXAddedToUserDictionary = "Word '{0}' added to user dictionary";
         UseSuggestionX = "Use suggestion '{0}'";
         UseSuggestionXAlways = "Use suggestion '{0}' always";
+        AddXToUserDictionary = "Add '{0}' to user dictionary";
+        IgnoreAllX = "Ignore all '{0}'";
+        PickSpellCheckDictionaryDotDotDot = "Choose spell check dictionary...";
+        ChooseSpellCheckDictionary = "Choose spell check dictionary";
     }
 }
