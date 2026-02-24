@@ -146,13 +146,69 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
         {
             return true;
         }
-        
-        
 
-        // Skip if all uppercase (might be acronym)
-        if (word.Length > 1 && word.Text.All(c => char.IsUpper(c) || !char.IsLetter(c)))
+        if (IsBetweenAssaTags(word, text))
+        { 
+            return true;
+        }
+
+        if (IsInsideHtmlTag(word, text)) 
         {
             return true;
+        }   
+
+        return false;
+    }
+
+    private static bool IsBetweenAssaTags(SpellCheckWord word, string text)
+    {
+        if (word == null || string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        // 1. Find the last occurrence of an opening brace before the word starts
+        var openBrace = text.LastIndexOf('{', word.Index);
+
+        // 2. Find the first occurrence of a closing brace after the word starts
+        var closeBrace = text.IndexOf('}', word.Index);
+
+        // If both exist, check if there is another closing brace between 
+        // the opening brace and our word. 
+        // If not, it means we are currently inside an unclosed tag.
+        if (openBrace != -1 && closeBrace != -1 && openBrace < closeBrace)
+        {
+            // Check if there's a '}' between the '{' and the word.
+            // If there is, the word is actually OUTSIDE a tag.
+            var closingBeforeWord = text.IndexOf('}', openBrace, word.Index - openBrace);
+
+            return closingBeforeWord == -1;
+        }
+
+        return false;
+    }
+
+    private static bool IsInsideHtmlTag(SpellCheckWord word, string text)
+    {
+        if (word == null || string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        // 1. Find the last opening bracket before the word
+        var openBracket = text.LastIndexOf('<', word.Index);
+
+        // 2. Find the next closing bracket after the word starts
+        var closeBracket = text.IndexOf('>', word.Index);
+
+        // If both exist in the correct order
+        if (openBracket != -1 && closeBracket != -1 && openBracket < closeBracket)
+        {
+            // Ensure there isn't a '>' between the opening '<' and the word
+            // (which would mean the word is outside a tag)
+            var closingBeforeWord = text.IndexOf('>', openBracket, word.Index - openBracket);
+
+            return closingBeforeWord == -1;
         }
 
         return false;
