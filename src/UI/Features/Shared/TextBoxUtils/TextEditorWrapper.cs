@@ -289,7 +289,7 @@ public class TextEditorWrapper : ITextBoxWrapper
             return false;
         }
 
-        return _spellCheckTransformer.IsWordMisspelled(word.Text);
+        return _spellCheckTransformer.IsWordMisspelled(word, Text);
     }
 
     /// <summary>

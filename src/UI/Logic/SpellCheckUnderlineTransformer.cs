@@ -83,7 +83,7 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
                 }
 
                 // Skip words that are numbers, URLs, or special patterns
-                if (IsSpecialPattern(word.Text))
+                if (IsSpecialPattern(word, lineText))
                 {
                     continue;
                 }
@@ -119,36 +119,38 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
         }
     }
 
-    private static bool IsSpecialPattern(string text)
+    private static bool IsSpecialPattern(SpellCheckWord word, string text)
     {
         // Skip numbers
-        if (text.All(c => char.IsDigit(c) || c == '.' || c == ',' || c == '-'))
+        if (word.Text.All(c => char.IsDigit(c) || c == '.' || c == ',' || c == '-'))
         {
             return true;
         }
 
         // Skip URLs
-        if (text.Contains("http://", StringComparison.OrdinalIgnoreCase) ||
-            text.Contains("https://", StringComparison.OrdinalIgnoreCase) ||
-            text.Contains("www.", StringComparison.OrdinalIgnoreCase))
+        if (word.Text.Contains("http://", StringComparison.OrdinalIgnoreCase) ||
+            word.Text.Contains("https://", StringComparison.OrdinalIgnoreCase) ||
+            word.Text.Contains("www.", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
 
         // Skip email-like patterns
-        if (text.Contains('@'))
+        if (word.Text.Contains('@'))
         {
             return true;
         }
 
         // Skip hashtags
-        if (text.StartsWith('#'))
+        if (word.Text.StartsWith('#'))
         {
             return true;
         }
+        
+        
 
         // Skip if all uppercase (might be acronym)
-        if (text.Length > 1 && text.All(c => char.IsUpper(c) || !char.IsLetter(c)))
+        if (word.Length > 1 && word.Text.All(c => char.IsUpper(c) || !char.IsLetter(c)))
         {
             return true;
         }
@@ -159,19 +161,19 @@ public class SpellCheckUnderlineTransformer : DocumentColorizingTransformer
     /// <summary>
     /// Checks if a specific word is misspelled according to the spell checker.
     /// </summary>
-    public bool IsWordMisspelled(string word)
+    public bool IsWordMisspelled(SpellCheckWord word, string text)
     {
-        if (!_isEnabled || _spellCheckManager == null || string.IsNullOrWhiteSpace(word))
+        if (!_isEnabled || _spellCheckManager == null || string.IsNullOrWhiteSpace(word.Text))
         {
             return false;
         }
 
-        if (IsSpecialPattern(word))
+        if (IsSpecialPattern(word, text))
         {
             return false;
         }
 
-        return !_spellCheckManager.IsWordCorrect(word);
+        return !_spellCheckManager.IsWordCorrect(word.Text);
     }
 
     /// <summary>
