@@ -101,7 +101,7 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                 for (var index = 0; index < AllSubtitlesFixed.Count; index++)
                 {
                     var item = AllSubtitlesFixed[index];
-                    var rebalancedText = item.Text = Utilities.AutoBreakLine(item.Text, SingleLineMaxLength, Se.Settings.General.UnbreakLinesShorterThan, "en");
+                    var rebalancedText = Utilities.AutoBreakLine(item.Text, SingleLineMaxLength, Se.Settings.General.UnbreakLinesShorterThan, "en");
                     if (rebalancedText != item.Text)
                     {
                         rebalanceCount++;
@@ -595,6 +595,11 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
     }
 
     internal void SetChanged()
+    {
+        _isDirty = true;
+    }
+
+    internal void Loaded()
     {
         _isDirty = true;
     }

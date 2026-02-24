@@ -51,6 +51,7 @@ public class SplitBreakLongLinesWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         KeyDown += vm.KeyDown;
+        Loaded += (_, _)  => vm.Loaded();
     }
 
     private static Grid MakeControlsView(SplitBreakLongLinesViewModel vm)
