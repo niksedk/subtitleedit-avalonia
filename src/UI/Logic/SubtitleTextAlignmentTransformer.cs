@@ -5,8 +5,7 @@ namespace Nikse.SubtitleEdit.Logic;
 
 /// <summary>
 /// Stores text alignment preference for subtitle text editor.
-/// Note: AvaloniaEdit doesn't support text alignment natively through transformers.
-/// The actual alignment is applied through the TextView's HorizontalAlignment property.
+/// The actual alignment is applied through padding in the TextEditorWrapper.
 /// </summary>
 public class SubtitleTextAlignmentTransformer : IVisualLineTransformer
 {
@@ -20,7 +19,7 @@ public class SubtitleTextAlignmentTransformer : IVisualLineTransformer
 
     public void Transform(ITextRunConstructionContext context, System.Collections.Generic.IList<VisualLineElement> elements)
     {
-        // No transformation needed - alignment is handled by TextView.HorizontalAlignment
+        // Alignment is handled by padding in the TextEditorWrapper
     }
 }
 
