@@ -3737,7 +3737,7 @@ public partial class MainViewModel :
 
         var result = await _windowService
             .ShowDialogAsync<SplitBreakLongLinesWindow, SplitBreakLongLinesViewModel>(
-                Window!, vm => { vm.Initialize(Subtitles.ToList(), AudioVisualizer?.ShotChanges ?? new List<double>()); });
+                Window!, vm => { vm.Initialize(Subtitles.ToList()); });
 
         if (result.OkPressed && result.AllSubtitlesFixed.Count > 0)
         {

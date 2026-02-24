@@ -36,14 +36,12 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
 
     private readonly System.Timers.Timer _previewTimer;
     private bool _isDirty;
-    private List<double> _shotChanges;
 
     public SplitBreakLongLinesViewModel()
     {
         Fixes = new ObservableCollection<SplitBreakLongLinesItem>();
         Subtitles = new ObservableCollection<SubtitleLineViewModel>();
         _allSubtitles = new List<SubtitleLineViewModel>();
-        _shotChanges = new List<double>();
         AllSubtitlesFixed = new List<SubtitleLineViewModel>();
         FixesInfo = string.Empty;
 
@@ -86,13 +84,24 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                     if (splitLines.Count > 1)
                     {
                         splitCount++;
-                        var fixItem = new SplitBreakLongLinesItem("Split long line", index + 1, string.Format("Split into {0} lines", splitLines.Count), item);
+                        var originalPreview = GetTextPreview(item.Text, 50);
+                        var firstSplitPreview = GetTextPreview(splitLines[0].Text, 50);
+                        var fixDescription = string.Format(Se.Language.Tools.SplitBreakLongLines.SplitIntoXLines, splitLines.Count, originalPreview, firstSplitPreview);
+                        var fixItem = new SplitBreakLongLinesItem(Se.Language.Tools.SplitBreakLongLines.SplitLongLine, index + 1, fixDescription, item);
                         Fixes.Add(fixItem);
                     }
                     foreach (var s in splitLines)
                     {
                         AllSubtitlesFixed.Add(s);
                     }
+                }
+            }
+            else
+            {
+                // If not splitting, use original subtitles for rebalancing
+                foreach (var subtitle in _allSubtitles)
+                {
+                    AllSubtitlesFixed.Add(new SubtitleLineViewModel(subtitle));
                 }
             }
 
@@ -105,7 +114,10 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
                     if (rebalancedText != item.Text)
                     {
                         rebalanceCount++;
-                        var fixItem = new SplitBreakLongLinesItem("Rebalance long line", index + 1, "Rebalanced line", item);
+                        var beforePreview = GetTextPreview(item.Text.Replace("\r\n", " ↵ ").Replace("\n", " ↵ "), 60);
+                        var afterPreview = GetTextPreview(rebalancedText.Replace("\r\n", " ↵ ").Replace("\n", " ↵ "), 60);
+                        var fixDescription = $"'{beforePreview}' → '{afterPreview}'";
+                        var fixItem = new SplitBreakLongLinesItem(Se.Language.Tools.SplitBreakLongLines.RebalanceLongLine, index + 1, fixDescription, item);
                         Fixes.Add(fixItem);
                     }
                 }
@@ -119,11 +131,11 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
 
             if (rebalanceCount == 0)
             {
-                FixesInfo = string.Format("Lines split: {0}", splitCount);
+                FixesInfo = string.Format(Se.Language.Tools.SplitBreakLongLines.LinesSplitX, splitCount);
             }
             else
             {
-                FixesInfo = string.Format("Lines split: {0}, lines rebalanced: {1}", splitCount, rebalanceCount);
+                FixesInfo = string.Format(Se.Language.Tools.SplitBreakLongLines.LinesSplitXLinesRebalancedY, splitCount, rebalanceCount);
             }
         });
     }
@@ -587,10 +599,9 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
         }
     }
 
-    public void Initialize(List<SubtitleLineViewModel> toList, List<double> shotChanges)
+    public void Initialize(List<SubtitleLineViewModel> toList)
     {
         _allSubtitles = toList;
-        _shotChanges = shotChanges;
         _previewTimer.Start();
     }
 
@@ -602,5 +613,21 @@ public partial class SplitBreakLongLinesViewModel : ObservableObject
     internal void Loaded()
     {
         _isDirty = true;
+    }
+
+    private static string GetTextPreview(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+
+        var preview = HtmlUtil.RemoveHtmlTags(text, true).Replace("\r\n", " ").Replace("\n", " ").Trim();
+        if (preview.Length <= maxLength)
+        {
+            return preview;
+        }
+
+        return preview.Substring(0, maxLength) + "…";
     }
 }
