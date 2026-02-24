@@ -73,7 +73,8 @@ Subtitle Edit supports several Whisper-based engines:
 - **Whisper.cpp** — Cross-platform, CPU-based
 - **Whisper.cpp (cuBLAS)** — GPU-accelerated (Windows, NVIDIA)
 - **Whisper.cpp (Vulkan)** — GPU-accelerated via Vulkan (Windows)
-- **Purfview's Faster Whisper XXL** — Fast GPU-based (Windows, Linux)
+- **Purfview's Faster Whisper XXL** — Fast GPU/CPU-based (Windows, Linux)
+- **CTranslate2** — Fast CPU/GPU-based 
 - **Const-me's Whisper** — DirectX-based (Windows)
 - **OpenAI Whisper** — Original Python implementation
 - **Chat LLM cpp** — LLM-based transcription (Windows, Linux)
