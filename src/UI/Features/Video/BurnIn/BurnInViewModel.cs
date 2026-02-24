@@ -1730,7 +1730,7 @@ public partial class BurnInViewModel : ObservableObject
                 (float)(SelectedFontShadowWidth ?? 0));
         }
 
-        ImagePreview = bitmap.ToAvaloniaBitmap();
+        ImagePreview = bitmap.CropTransparentColors().ToAvaloniaBitmap();
     }
 
     internal void ColorChanged(object? sender, ColorChangedEventArgs e)
@@ -1880,5 +1880,13 @@ public partial class BurnInViewModel : ObservableObject
     internal void CheckBoxTargetFileChanged()
     {
         CalculateTargetFileBitRate();
+    }
+
+    internal void Loaded()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            UpdateNonAssaPreview();
+        }); 
     }
 }

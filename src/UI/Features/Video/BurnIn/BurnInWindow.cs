@@ -111,6 +111,7 @@ public class BurnInWindow : Window
         Content = grid;
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += (_, _) => vm.Loaded();
     }
 
     private static Border MakeSubtitlesView(BurnInViewModel vm)
@@ -492,7 +493,7 @@ public class BurnInWindow : Window
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            Width = 300,
+            Width = 420,
             Height = double.NaN,
         };
 
