@@ -1,6 +1,6 @@
 # Audio Visualizer
 
-The audio visualizer displays the audio waveform (or spectrogram) of the loaded video, enabling precise visual timing of subtitles.
+The audio visualizer displays the audio waveform (and/or spectrogram) of the loaded video, enabling precise visual timing of subtitles.
 
 <!-- Screenshot: Audio visualizer -->
 ![Audio Visualizer](../screenshots/audio-visualizer.png)
