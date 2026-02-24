@@ -1180,7 +1180,7 @@ public partial class MainViewModel :
 
         if (format != null)
         {
-            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(f => f.FriendlyName == format.FriendlyName) 
+            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(f => f.FriendlyName == format.FriendlyName)
                 ?? SubtitleFormats[0]);
         }
         else
@@ -4148,7 +4148,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SpeechToTextSelectedLines()
     {
-        await SpeechToTextSelectedLines(false);        
+        await SpeechToTextSelectedLines(false);
     }
 
     [RelayCommand]
@@ -4495,7 +4495,10 @@ public partial class MainViewModel :
         }
 
         var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
-        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
+        if (string.IsNullOrEmpty(peakWaveFileName) || !File.Exists(peakWaveFileName))
+        {
+            return;
+        }
 
         var wavePeaks = WavePeakData2.FromDisk(peakWaveFileName);
         if (AudioVisualizer != null)
@@ -4507,11 +4510,15 @@ public partial class MainViewModel :
                 AudioVisualizer.UseSmpteDropFrameTime();
             }
 
-            var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
-            if (spectrogram != null)
+            var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
+            if (Directory.Exists(spectrogramFolder))
             {
-                spectrogram.Load();
-                AudioVisualizer.SetSpectrogram(spectrogram);
+                var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+                if (spectrogram != null)
+                {
+                    spectrogram.Load();
+                    AudioVisualizer.SetSpectrogram(spectrogram);
+                }
             }
 
             InitializeWaveformDisplayMode();
@@ -9793,7 +9800,7 @@ public partial class MainViewModel :
                 }
             }
             else if (!Se.Settings.Appearance.SubtitleTextBoxLiveSpellCheck)
-            {   
+            {
                 wrapper.DisableSpellCheck();
             }
         }
@@ -13306,7 +13313,7 @@ public partial class MainViewModel :
                     subtitle.Paragraphs.Clear();
                     subtitle.Paragraphs.AddRange(paragraphs);
                 }
-                
+
                 _mpvReloader.RefreshMpv(mpv, subtitle, SelectedSubtitleFormat).ConfigureAwait(false);
             }
         };
@@ -13364,7 +13371,7 @@ public partial class MainViewModel :
             {
                 return;
             }
-            
+
             var hasLayers = _visibleLayers != null && Se.Settings.Assa.HideLayersFromSubtitleGrid;
 
             for (var i = 0; i < Subtitles.Count - 1; i++)
@@ -13377,7 +13384,7 @@ public partial class MainViewModel :
             }
 
             Subtitles[Subtitles.Count - 1].Gap = double.MaxValue;
-            Subtitles[Subtitles.Count - 1].IsHidden = hasLayers && !_visibleLayers!.Contains(Subtitles.Last().Layer);;
+            Subtitles[Subtitles.Count - 1].IsHidden = hasLayers && !_visibleLayers!.Contains(Subtitles.Last().Layer); ;
         }
         catch
         {
@@ -13846,7 +13853,7 @@ public partial class MainViewModel :
 
     private void PickLiveSpellCheckDictionary(TextEditorWrapper wrapper)
     {
-        Dispatcher.UIThread.Post(async() =>
+        Dispatcher.UIThread.Post(async () =>
         {
             var result = await ShowDialogAsync<PickSpellCheckDictionaryWindow, PickSpellCheckDictionaryViewModel>();
             if (result != null && result.SelectedDictionary != null)
