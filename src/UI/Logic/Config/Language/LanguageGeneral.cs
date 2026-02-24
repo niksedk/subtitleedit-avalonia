@@ -633,6 +633,7 @@ public class LanguageGeneral
     public string WaveformSpectrogram { get; set; }
     public string RecentFiles { get; set; }
     public string Shortcuts { get; set; }
+    public string Models { get; set; }
 
     public LanguageGeneral()
     {
@@ -1265,5 +1266,6 @@ public class LanguageGeneral
         WaveformSpectrogram = "Waveform/spectrogram";
         RecentFiles = "Recent files";
         Shortcuts = "Shortcuts";
+        Models = "Models";
     }
 }

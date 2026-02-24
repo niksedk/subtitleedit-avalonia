@@ -67,11 +67,11 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             PaddleOcrDownloadType.EngineCpuLinux or
             PaddleOcrDownloadType.EngineGpuLinux)
         {
-            StatusText = "Downloading Paddle OCR engine...";
+            StatusText = Se.Language.Ocr.DownloadingPaddleOcrEngineDotDotDot;
         }
         else if (_downloadType == PaddleOcrDownloadType.Models)
         {
-            StatusText = "Downloading Paddle OCR models...";
+            StatusText = Se.Language.Ocr.DownloadingPaddleOcrModelsDotDotDot;
         }
     }
 
@@ -112,12 +112,12 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 var firstFile = Path.Combine(_tempFolder, Path.GetFileName(_downloadTaskUrls[0]));
                 if (_downloadType == PaddleOcrDownloadType.Models)
                 {
-                    StatusText = "Unpacking Paddle OCR models...";
+                    StatusText =  string.Format(Se.Language.General.UnpackingX, Se.Language.General.Models);
                     Unpacker.Extract7Zip(firstFile, Se.PaddleOcrModelsFolder, "PaddleOCR.PP-OCRv5.support.files", _cancellationTokenSource, text => ProgressText = text);
                 }
                 else 
                 {
-                    StatusText = "Unpacking Paddle OCR...";
+                    StatusText = string.Format(Se.Language.General.UnpackingX, Se.Language.Ocr.PaddleOcr);
                     Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.3.2-CUDA-11.8", _cancellationTokenSource, text => ProgressText = text);
                 }
 
