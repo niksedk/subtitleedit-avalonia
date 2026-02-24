@@ -258,6 +258,7 @@ public class LanguageSettings
     public string TextBoxButtonShowRemoveFormatting { get; set; }
     public string WaveformSingleClickAction { get; set; }
     public string WaveformDoubleClickAction { get; set; }
+    public string AllSettings { get; set; }
 
     public LanguageSettings()
     {
@@ -512,6 +513,7 @@ public class LanguageSettings
         TextBoxButtonShowRemoveFormatting = "Text box: show remove formatting button";
         WaveformSingleClickAction = "Waveform single-click action";
         WaveformDoubleClickAction = "Waveform double-click action (after single-click action)";
+        AllSettings = "All settings";
     }
 
     public string GetContinuationStyleName(ContinuationStyle continuationStyle)

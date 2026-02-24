@@ -15,7 +15,7 @@ public class SettingsWindow : Window
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.General.Settings;
         Width = 900;
-        Height = 700;
+        Height = 695;
         MinWidth = 650;
         MinHeight = 500;
         CanResize = true;

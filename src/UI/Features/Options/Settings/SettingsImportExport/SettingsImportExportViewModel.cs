@@ -1,13 +1,12 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System.Collections.ObjectModel;
+using Nikse.SubtitleEdit.Logic.Media;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -16,17 +15,107 @@ namespace Nikse.SubtitleEdit.Features.Options.Settings.SettingsImportExport;
 public partial class SettingsImportExportViewModel : ObservableObject
 {
     public string TitleText { get; set; }
-    [ObservableProperty] private ObservableCollection<SettingsAreaItem> _settingsAreas = new();
-    [ObservableProperty] private string _filePath = string.Empty;
+    [ObservableProperty] private bool _exportImportAll;
+    [ObservableProperty] private bool _exportImportRecentFiles;
+    [ObservableProperty] private bool _exportImportRules;
+    [ObservableProperty] private bool _exportImportAppearance;
+    [ObservableProperty] private bool _exportImportAutoTranslate;
+    [ObservableProperty] private bool _exportImportWaveform;
+    [ObservableProperty] private bool _exportImportSyntaxColoring;
+    [ObservableProperty] private bool _exportImportShortcuts;
+
+    private bool _isRulesEnabled = true;
+    public bool IsRulesEnabled
+    {
+        get => _isRulesEnabled;
+        set
+        {
+            if (SetProperty(ref _isRulesEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditRules));
+            }
+        }
+    }
+
+    private bool _isAppearanceEnabled = true;
+    public bool IsAppearanceEnabled
+    {
+        get => _isAppearanceEnabled;
+        set
+        {
+            if (SetProperty(ref _isAppearanceEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditAppearance));
+            }
+        }
+    }
+
+    private bool _isAutoTranslateEnabled = true;
+    public bool IsAutoTranslateEnabled
+    {
+        get => _isAutoTranslateEnabled;
+        set
+        {
+            if (SetProperty(ref _isAutoTranslateEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditAutoTranslate));
+            }
+        }
+    }
+
+    private bool _isWaveformEnabled = true;
+    public bool IsWaveformEnabled
+    {
+        get => _isWaveformEnabled;
+        set
+        {
+            if (SetProperty(ref _isWaveformEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditWaveform));
+            }
+        }
+    }
+
+    private bool _isShortcutsEnabled = true;
+    public bool IsShortcutsEnabled
+    {
+        get => _isShortcutsEnabled;
+        set
+        {
+            if (SetProperty(ref _isShortcutsEnabled, value))
+            {
+                OnPropertyChanged(nameof(CanEditShortcuts));
+            }
+        }
+    }
+
+    public bool CanEditRules => !ExportImportAll && _isRulesEnabled;
+    public bool CanEditAppearance => !ExportImportAll && _isAppearanceEnabled;
+    public bool CanEditAutoTranslate => !ExportImportAll && _isAutoTranslateEnabled;
+    public bool CanEditWaveform => !ExportImportAll && _isWaveformEnabled;
+    public bool CanEditShortcuts => !ExportImportAll && _isShortcutsEnabled;
 
     private bool _isExport;
+    private string _importFilePath = string.Empty;
+    private Se? _importData;
     public bool OkPressed { get; set; }
     public Window? Window { get; set; }
+    private readonly IFileHelper _fileHelper;
 
-    public SettingsImportExportViewModel()
+    public SettingsImportExportViewModel(IFileHelper fileHelper)
     {
+        _fileHelper = fileHelper;
         TitleText = Se.Language.General.ImportDotDotDot;
-        InitializeSettingsAreas();
+        ExportImportAll = true;
+    }
+
+    partial void OnExportImportAllChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanEditRules));
+        OnPropertyChanged(nameof(CanEditAppearance));
+        OnPropertyChanged(nameof(CanEditAutoTranslate));
+        OnPropertyChanged(nameof(CanEditWaveform));
+        OnPropertyChanged(nameof(CanEditShortcuts));
     }
 
     public void SetIsExport(bool isExport)
@@ -35,99 +124,87 @@ public partial class SettingsImportExportViewModel : ObservableObject
         TitleText = isExport ? Se.Language.General.ExportDotDotDot : Se.Language.General.ImportDotDotDot;
     }
 
-    private void InitializeSettingsAreas()
-    {
-        SettingsAreas = new ObservableCollection<SettingsAreaItem>
-        {
-            new() { Name = Se.Language.General.Rules, IsSelected = true, Key = "Rules" },
-            new() { Name = Se.Language.General.General, IsSelected = true, Key = "General" },
-            new() { Name = Se.Language.General.SubtitleFormats, IsSelected = true, Key = "SubtitleFormats" },
-            new() { Name = Se.Language.Options.Settings.SyntaxColoring, IsSelected = true, Key = "SyntaxColoring" },
-            new() { Name = Se.Language.General.VideoPlayer, IsSelected = true, Key = "VideoPlayer" },
-            new() { Name = Se.Language.Options.Settings.WaveformSpectrogram, IsSelected = true, Key = "WaveformSpectrogram" },
-            new() { Name = Se.Language.General.Tools, IsSelected = true, Key = "Tools" },
-            new() { Name = Se.Language.General.Appearance, IsSelected = true, Key = "Appearance" },
-            new() { Name = Se.Language.General.Toolbar, IsSelected = true, Key = "Toolbar" },
-            new() { Name = Se.Language.Options.Settings.Network, IsSelected = true, Key = "Network" },
-            new() { Name = Se.Language.Options.Settings.FilesAndLogs, IsSelected = false, Key = "FilesAndLogs" },
-            new() { Name = "Shortcuts", IsSelected = true, Key = "Shortcuts" },
-            new() { Name = "Auto Translate", IsSelected = true, Key = "AutoTranslate" },
-            new() { Name = "Spell Check", IsSelected = true, Key = "SpellCheck" },
-        };
-    }
 
-    [RelayCommand]
-    private async Task BrowseFile()
+    public async Task<bool> PromptAndLoadImportFile()
     {
         if (Window == null)
         {
-            return;
+            return false;
         }
 
-        var storageProvider = Window.StorageProvider;
+        var fileName = await _fileHelper.PickOpenFile(
+            Window,
+            Se.Language.General.ImportDotDotDot,
+            "JSON files",
+            ".json");
 
-        if (_isExport)
+        if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
         {
-            var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-            {
-                Title = Se.Language.General.ExportDotDotDot,
-                DefaultExtension = "json",
-                SuggestedFileName = "Settings",
-                FileTypeChoices = new[]
-                {
-                    new FilePickerFileType("JSON files")
-                    {
-                        Patterns = new[] { "*.json" }
-                    },
-                    new FilePickerFileType("All files")
-                    {
-                        Patterns = new[] { "*.*" }
-                    }
-                }
-            });
-
-            if (file != null)
-            {
-                FilePath = file.Path.LocalPath;
-            }
+            return false;
         }
-        else
+
+        _importFilePath = fileName;
+
+        try
         {
-            var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            var json = File.ReadAllText(_importFilePath);
+            _importData = JsonSerializer.Deserialize<Se>(json, new JsonSerializerOptions
             {
-                Title = Se.Language.General.ImportDotDotDot,
-                AllowMultiple = false,
-                FileTypeFilter = new[]
-                {
-                    new FilePickerFileType("JSON files")
-                    {
-                        Patterns = new[] { "*.json" }
-                    },
-                    new FilePickerFileType("All files")
-                    {
-                        Patterns = new[] { "*.*" }
-                    }
-                }
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true
             });
 
-            if (files.Count > 0)
+            if (_importData == null)
             {
-                FilePath = files[0].Path.LocalPath;
+                return false;
             }
+
+            IsRulesEnabled = _importData.General != null;
+            IsAppearanceEnabled = _importData.Appearance != null;
+            IsAutoTranslateEnabled = _importData.AutoTranslate != null;
+            IsWaveformEnabled = _importData.Waveform != null;
+            IsShortcutsEnabled = _importData.Shortcuts != null;
+
+            if (!IsRulesEnabled)
+            {
+                ExportImportRules = false;
+            }
+
+            if (!IsAppearanceEnabled)
+            {
+                ExportImportAppearance = false;
+            }
+
+            if (!IsAutoTranslateEnabled)
+            {
+                ExportImportAutoTranslate = false;
+            }
+
+            if (!IsWaveformEnabled)
+            {
+                ExportImportWaveform = false;
+            }
+
+            if (!IsShortcutsEnabled)
+            {
+                ExportImportShortcuts = false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
     [RelayCommand]
-    private void Ok()
+    private async Task Ok()
     {
-        if (string.IsNullOrWhiteSpace(FilePath))
-        {
-            return;
-        }
-
         if (_isExport)
         {
-            ExportSettings();
+            await ExportSettings();
         }
         else
         {
@@ -144,147 +221,170 @@ public partial class SettingsImportExportViewModel : ObservableObject
         Window?.Close();
     }
 
-    private void ExportSettings()
+    internal void KeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            Window?.Close();
+        }
+    }
+
+    private async Task ExportSettings()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickSaveFile(
+            Window,
+            ".json",
+            "Settings.json",
+            Se.Language.General.ExportDotDotDot);
+
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
         var exportData = new Se();
-        var selectedAreas = SettingsAreas.Where(a => a.IsSelected).Select(a => a.Key).ToList();
         var currentSettings = Se.Settings;
 
-        // For simplicity, we'll export entire sections
-        if (selectedAreas.Contains("Rules") || selectedAreas.Contains("General") || selectedAreas.Contains("SubtitleFormats") ||
-            selectedAreas.Contains("SyntaxColoring") || selectedAreas.Contains("Toolbar"))
+        if (ExportImportAll || ExportImportRules)
         {
             exportData.General = currentSettings.General;
         }
 
-        if (selectedAreas.Contains("VideoPlayer"))
-        {
-            exportData.Video = currentSettings.Video;
-        }
-
-        if (selectedAreas.Contains("WaveformSpectrogram"))
+        if (ExportImportAll || ExportImportWaveform)
         {
             exportData.Waveform = currentSettings.Waveform;
         }
 
-        if (selectedAreas.Contains("Tools"))
+        if (ExportImportAll)
         {
             exportData.Tools = currentSettings.Tools;
         }
 
-        if (selectedAreas.Contains("Appearance"))
+        if (ExportImportAll || ExportImportAppearance)
         {
             exportData.Appearance = currentSettings.Appearance;
         }
 
-        if (selectedAreas.Contains("Network"))
+        if (ExportImportAll)
         {
             exportData.Options = currentSettings.Options;
         }
 
-        if (selectedAreas.Contains("Shortcuts"))
+        if (ExportImportAll || ExportImportShortcuts)
         {
             exportData.Shortcuts = currentSettings.Shortcuts;
         }
 
-        if (selectedAreas.Contains("AutoTranslate"))
+        if (ExportImportAll || ExportImportAutoTranslate)
         {
             exportData.AutoTranslate = currentSettings.AutoTranslate;
         }
 
-        if (selectedAreas.Contains("SpellCheck"))
+        if (ExportImportAll)
         {
             exportData.SpellCheck = currentSettings.SpellCheck;
         }
 
         var json = JsonSerializer.Serialize(exportData, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(FilePath, json);
+        File.WriteAllText(fileName, json);
     }
 
     private void ImportSettings()
     {
-        if (!File.Exists(FilePath))
+        if (_importData == null)
         {
             return;
         }
 
-        var json = File.ReadAllText(FilePath);
-        var importData = JsonSerializer.Deserialize<Se>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            ReadCommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true
-        });
+        var importData = _importData;
 
-        if (importData == null)
+        if (ExportImportAll || ExportImportRules)
         {
-            return;
+            if (importData.General != null)
+            {
+                Se.Settings.General = importData.General;
+            }
         }
 
-        var selectedAreas = SettingsAreas.Where(a => a.IsSelected).Select(a => a.Key).ToList();
-
-        // For simplicity, we'll import entire sections
-        if (selectedAreas.Contains("Rules") || selectedAreas.Contains("General") || selectedAreas.Contains("SubtitleFormats") ||
-            selectedAreas.Contains("SyntaxColoring") || selectedAreas.Contains("Toolbar"))
+        if (ExportImportAll || ExportImportWaveform)
         {
-            Se.Settings.General = importData.General;
+            if (importData.Waveform != null)
+            {
+                Se.Settings.Waveform = importData.Waveform;
+            }
         }
 
-        if (selectedAreas.Contains("VideoPlayer") && importData.Video != null)
+        if (ExportImportAll)
         {
-            Se.Settings.Video = importData.Video;
+            if (importData.Video != null)
+            {
+                Se.Settings.Video = importData.Video;
+            }
+
+            if (importData.Tools != null)
+            {
+                Se.Settings.Tools = importData.Tools;
+            }
+
+            if (importData.Options != null)
+            {
+                Se.Settings.Options = importData.Options;
+            }
+
+            if (importData.SpellCheck != null)
+            {
+                Se.Settings.SpellCheck = importData.SpellCheck;
+            }
         }
 
-        if (selectedAreas.Contains("WaveformSpectrogram") && importData.Waveform != null)
+        if (ExportImportAll || ExportImportAppearance)
         {
-            Se.Settings.Waveform = importData.Waveform;
+            if (importData.Appearance != null)
+            {
+                Se.Settings.Appearance = importData.Appearance;
+            }
         }
 
-        if (selectedAreas.Contains("Tools") && importData.Tools != null)
+        if (ExportImportAll || ExportImportShortcuts)
         {
-            Se.Settings.Tools = importData.Tools;
+            if (importData.Shortcuts != null)
+            {
+                Se.Settings.Shortcuts = importData.Shortcuts;
+            }
         }
 
-        if (selectedAreas.Contains("Appearance") && importData.Appearance != null)
+        if (ExportImportAll || ExportImportAutoTranslate)
         {
-            Se.Settings.Appearance = importData.Appearance;
-        }
-
-        if (selectedAreas.Contains("Network") && importData.Options != null)
-        {
-            Se.Settings.Options = importData.Options;
-        }
-
-        if (selectedAreas.Contains("Shortcuts") && importData.Shortcuts != null)
-        {
-            Se.Settings.Shortcuts = importData.Shortcuts;
-        }
-
-        if (selectedAreas.Contains("AutoTranslate") && importData.AutoTranslate != null)
-        {
-            Se.Settings.AutoTranslate = importData.AutoTranslate;
-        }
-
-        if (selectedAreas.Contains("SpellCheck") && importData.SpellCheck != null)
-        {
-            Se.Settings.SpellCheck = importData.SpellCheck;
+            if (importData.AutoTranslate != null)
+            {
+                Se.Settings.AutoTranslate = importData.AutoTranslate;
+            }
         }
 
         Se.SaveSettings();
     }
 
-    public void OnLoaded(object? sender, RoutedEventArgs e)
+    public async void OnLoaded(object? sender, RoutedEventArgs e)
     {
         if (Window != null)
         {
             UiUtil.RestoreWindowPosition(Window);
         }
+
+        if (!_isExport)
+        {
+            var loaded = await PromptAndLoadImportFile();
+            if (!loaded)
+            {
+                Window?.Close();
+            }
+        }
     }
 }
 
-public partial class SettingsAreaItem : ObservableObject
-{
-    [ObservableProperty] private string _name = string.Empty;
-    [ObservableProperty] private bool _isSelected;
-    [ObservableProperty] private string _key = string.Empty;
-}

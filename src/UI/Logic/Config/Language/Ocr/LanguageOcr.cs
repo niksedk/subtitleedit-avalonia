@@ -68,6 +68,9 @@ public class LanguageOcr
     public string EditBinaryOcrDatabase { get; set; }
     public string BinaryImageCompareDatabase { get; set; }
     public string RemoveXFromUnknownWordsList { get; set; }
+    public string DownloadingPaddleOcrEngineDotDotDot { get; set; }
+    public string DownloadingPaddleOcrModelsDotDotDot { get; set; }
+    public string PaddleOcr { get; set; }
 
     public LanguageOcr()
     {
@@ -135,5 +138,8 @@ public class LanguageOcr
         EditBinaryOcrDatabase = "Edit \"Binary image compare\" database";
         BinaryImageCompareDatabase = "\"Binary image compare\" database";
         RemoveXFromUnknownWordsList = "Remove \"{0}\" from unknown words list";
+        DownloadingPaddleOcrEngineDotDotDot = "Downloading Paddle OCR engine...";
+        DownloadingPaddleOcrModelsDotDotDot = "Downloading Paddle OCR models...";
+        PaddleOcr = "Paddle OCR";
     }
 }

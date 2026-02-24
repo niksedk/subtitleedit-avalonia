@@ -111,6 +111,8 @@ public class WhisperAdvancedWindow : Window
             buttonXxlOptions,
             UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCppCommand)
                 .WithBindIsVisible(nameof(vm.IsWhisperCppVisible)),
+            UiUtil.MakeButton(Se.Language.Video.AudioToText.EnableVad, vm.EnableVadCTranslate2Command)
+                .WithBindIsVisible(nameof(vm.IsWhisperCTranslate2Visible)),
             UiUtil.MakeButton(Se.Language.Video.AudioToText.WhisperXxlHighlightWord, vm.EnableWordLevelCppCommand)
                 .WithBindIsVisible(nameof(vm.IsWhisperCppVisible)),
             UiUtil.MakeButton(Se.Language.Video.AudioToText.WhisperXxlHighlightWord, vm.WhisperCTranslate2HighLightWordCommand)

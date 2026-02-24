@@ -478,6 +478,7 @@ public partial class SettingsViewModel : ObservableObject
         var general = Se.Settings.General;
         var appearance = Se.Settings.Appearance;
 
+        _profilesForEdit.Clear();
         foreach (var profile in general.Profiles)
         {
             var pd = new ProfileDisplay

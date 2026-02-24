@@ -38,7 +38,7 @@ public class WhisperDownloadService : IWhisperDownloadService
 
     private const string MacArmCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-mac.zip";
     private const string LinuxCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-Linux64.zip";
-    private const string WindowCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-windows.zip";
+    private const string WindowCTranslate2 = "https://github.com/SubtitleEdit/support-files/releases/download/whispercpp-183/whisper-ctranslate2-win64.zip";
     
     public WhisperDownloadService(HttpClient httpClient)
     {

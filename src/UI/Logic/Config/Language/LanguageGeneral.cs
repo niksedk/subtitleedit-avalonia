@@ -628,6 +628,12 @@ public class LanguageGeneral
     public string CenterVertically { get; set; }
     public string Id { get; set; }
     public string ApiSecret { get; set; }
+    public string WindowPositionAndSize { get; set; }
+    public string SyntaxColoring { get; set; }
+    public string WaveformSpectrogram { get; set; }
+    public string RecentFiles { get; set; }
+    public string Shortcuts { get; set; }
+    public string Models { get; set; }
 
     public LanguageGeneral()
     {
@@ -1255,5 +1261,11 @@ public class LanguageGeneral
         CenterVertically = "Center vertically";
         Id = "ID";
         ApiSecret = "Secret";
+        WindowPositionAndSize = "Window position and size";
+        SyntaxColoring = "Syntax coloring";
+        WaveformSpectrogram = "Waveform/spectrogram";
+        RecentFiles = "Recent files";
+        Shortcuts = "Shortcuts";
+        Models = "Models";
     }
 }

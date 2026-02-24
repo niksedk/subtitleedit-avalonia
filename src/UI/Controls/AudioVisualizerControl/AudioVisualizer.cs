@@ -2191,7 +2191,7 @@ public class AudioVisualizer : Control
         while (low <= high)
         {
             int mid = low + (high - low) / 2;
-            if (subtitle[mid].StartTime.TotalMilliseconds >= timeMs)
+            if (subtitle[mid].EndTime.TotalMilliseconds >= timeMs)
             {
                 result = mid;
                 high = mid - 1;

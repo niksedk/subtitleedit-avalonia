@@ -1388,7 +1388,53 @@ public partial class OcrViewModel : ObservableObject
                     MessageBoxButtons.Cancel,
                     MessageBoxIcon.Question,
                     "CPU",
-                    "GPU");
+                    "GPU CUDA 11",
+                    "GPU CUDA 12");
+
+                if (answer == MessageBoxResult.Cancel)
+                {
+                    PauseOcr();
+                    return;
+                }
+
+                var result = await _windowService.ShowDialogAsync<DownloadPaddleOcrWindow, DownloadPaddleOcrViewModel>(Window!,
+                    vm =>
+                    {
+                        var engine = PaddleOcrDownloadType.EngineCpu;
+                        if (answer == MessageBoxResult.Custom1)
+                        {
+                            engine = PaddleOcrDownloadType.EngineCpu;
+                        }
+                        else if (answer == MessageBoxResult.Custom2)
+                        {
+                            engine = PaddleOcrDownloadType.EngineGpu11;
+                        }
+                        else if (answer == MessageBoxResult.Custom3)
+                        {
+                            engine = PaddleOcrDownloadType.EngineGpu12;
+                        }
+                        
+                        vm.Initialize(engine);
+                    });
+
+                _isCtrlDown = false;
+
+                if (!result.OkPressed)
+                {
+                    PauseOcr();
+                    return;
+                }
+            }
+            else if (Configuration.IsRunningOnLinux && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr")))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    "Download Paddle OCR?",
+                    $"{Environment.NewLine}\"Paddle OCR\" requires downloading Paddle OCR.{Environment.NewLine}{Environment.NewLine}Download and use Paddle OCR?",
+                    MessageBoxButtons.Cancel,
+                    MessageBoxIcon.Question,
+                    "CPU",
+                    "GPU CUDA");
 
                 if (answer == MessageBoxResult.Cancel)
                 {
@@ -1400,8 +1446,8 @@ public partial class OcrViewModel : ObservableObject
                     vm =>
                     {
                         vm.Initialize(answer == MessageBoxResult.Custom1
-                        ? PaddleOcrDownloadType.EngineCpu
-                        : PaddleOcrDownloadType.EngineGpu);
+                            ? PaddleOcrDownloadType.EngineCpuLinux
+                            : PaddleOcrDownloadType.EngineGpuLinux);
                     });
 
                 _isCtrlDown = false;

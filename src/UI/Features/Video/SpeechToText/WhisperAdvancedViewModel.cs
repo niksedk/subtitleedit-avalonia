@@ -104,6 +104,12 @@ public partial class WhisperAdvancedViewModel : ObservableObject
         Parameters = "--vad_filter True --highlight_words True --word_timestamps True";
     }
 
+    [RelayCommand]
+    private void EnableVadCTranslate2()
+    {
+        Parameters = "--vad_filter True";
+    }
+
     private static string? GetVadCppFile()
     {
         var searchPaths = new List<string>

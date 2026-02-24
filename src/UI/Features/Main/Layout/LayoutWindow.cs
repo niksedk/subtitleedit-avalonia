@@ -113,36 +113,100 @@ public class LayoutWindow : Window
         {
             e.Handled = true;
             Close();
+            return;
+        }
+
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            if (_focusedLayout >= 0)
+            {
+                _vm.SelectedLayout = _focusedLayout + 1;
+                _vm.OkPressed = true;
+                Close();
+            }
+            return;
+        }
+
+        if (e.Key == Key.Left)
+        {
+            e.Handled = true;
+            if (_focusedLayout > 0)
+            {
+                ResetOldLayout();
+
+                _focusedLayout--;
+                _borders[_focusedLayout].RenderTransform = new ScaleTransform(1.1, 1.1);
+                _borders[_focusedLayout].Background = Brushes.DarkSeaGreen;
+            }
+            else
+            {
+                ResetOldLayout();
+
+                _focusedLayout = 11;
+                _borders[_focusedLayout].RenderTransform = new ScaleTransform(1.1, 1.1);
+                _borders[_focusedLayout].Background = Brushes.DarkSeaGreen;
+            }
+            return;
+        }
+
+        if (e.Key == Key.Right)
+        {
+            e.Handled = true;
+            if (_focusedLayout < 11)
+            {
+                ResetOldLayout();
+                _focusedLayout++;
+                _borders[_focusedLayout].RenderTransform = new ScaleTransform(1.1, 1.1);
+                _borders[_focusedLayout].Background = Brushes.DarkSeaGreen;
+            }
+            else
+            {
+                ResetOldLayout();
+                _focusedLayout = 0;
+                _borders[_focusedLayout].RenderTransform = new ScaleTransform(1.1, 1.1);
+                _borders[_focusedLayout].Background = Brushes.DarkSeaGreen;
+            }
+            return;
         }
 
         var layoutLookup = new Dictionary<Key, int>
         {
-            { Key.D1, 0 },
-            { Key.D2, 1 },
-            { Key.D3, 2 },
-            { Key.D4, 3 },
-            { Key.D5, 4 },
-            { Key.D6, 5 },
-            { Key.D7, 6 },
-            { Key.D8, 7 },
-            { Key.D9, 8 },
+            { Key.D1, 1 },
+            { Key.D2, 2 },
+            { Key.D3, 3 },
+            { Key.D4, 4 },
+            { Key.D5, 5 },
+            { Key.D6, 6 },
+            { Key.D7, 7 },
+            { Key.D8, 8 },
+            { Key.D9, 9 },
         };
         if (layoutLookup.TryGetValue(e.Key, out var layoutNumber))
         {
-            var fl = _focusedLayout - 1;
+            var fl = _focusedLayout;
             if (fl >= 0)
             {
                 _borders[fl].RenderTransform = new ScaleTransform(1.0, 1.0);
                 _borders[fl].Background = Brushes.Transparent;
             }
 
-            _borders[layoutNumber].RenderTransform = new ScaleTransform(1.1, 1.1);
-            _borders[layoutNumber].Background = Brushes.DarkSeaGreen;
+            _borders[layoutNumber - 1].RenderTransform = new ScaleTransform(1.1, 1.1);
+            _borders[layoutNumber - 1].Background = Brushes.DarkSeaGreen;
             await Task.Delay(500);
 
             _vm.SelectedLayout = layoutNumber;
             _vm.OkPressed = true;
             Close();
+        }
+    }
+
+    private void ResetOldLayout()
+    {
+        for (var i = 0; i < _borders.Count; i++)
+        {
+            _borders[i].RenderTransform = new ScaleTransform(1.0, 1.0);
+            _borders[i].Background = Brushes.Transparent;
         }
     }
 }
