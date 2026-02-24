@@ -689,8 +689,29 @@ public partial class OcrViewModel : ObservableObject
             return;
         }
 
-        await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize(Se.Language.Ocr.OcrImage, item.GetBitmap()); });
+        var result = await _windowService.ShowDialogAsync<ShowImageWindow, ShowImageViewModel>(Window!, vm => { vm.Initialize(Se.Language.Ocr.OcrImage, item.GetBitmapCropped(), item.Text); });
         _isCtrlDown = false;
+
+        if (result.LeftPressed)
+        {
+            var idx = OcrSubtitleItems.IndexOf(item);
+            var prevIdx = idx - 1;
+            if (prevIdx >= 0)
+            {
+                SelectedOcrSubtitleItem = OcrSubtitleItems[prevIdx];
+                await ViewSelectedImage();
+            }
+        }
+        else if (result.RightPressed)
+        {
+            var idx = OcrSubtitleItems.IndexOf(item);
+            var nextIdx = idx + 1;
+            if (nextIdx < OcrSubtitleItems.Count)
+            {
+                SelectedOcrSubtitleItem = OcrSubtitleItems[nextIdx];
+                await ViewSelectedImage();
+            }
+        }
     }
 
     [RelayCommand]
@@ -1938,7 +1959,7 @@ public partial class OcrViewModel : ObservableObject
             {
                 var pixelsLess = 0;
                 if (pixelsAreSpace > 7)
-                { 
+                {
                     pixelsLess = (int)Math.Round(pixelsAreSpace * 0.3m, MidpointRounding.AwayFromZero);
                 }
 

@@ -50,6 +50,8 @@ public class ShowImageWindow : Window
         flyout.Items.Add(menuItemClear);
 
 
+        var label = UiUtil.MakeLabel().WithBindText(vm, nameof(vm.Text)).WithFontSize(30).WithMarginTop(20).WithAlignmentCenter();
+
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonPanel = UiUtil.MakeButtonBar(buttonOk);
 
@@ -58,6 +60,7 @@ public class ShowImageWindow : Window
             RowDefinitions =
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
             },
             ColumnDefinitions =
@@ -72,11 +75,13 @@ public class ShowImageWindow : Window
         };
 
         grid.Add(image, 0);
-        grid.Add(buttonPanel, 1);
+        grid.Add(label, 1);
+        grid.Add(buttonPanel, 2);
 
         Content = grid;
 
-        Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
+        Loaded += delegate { buttonOk.Focus(); vm.Loaded(); }; // hack to make OnKeyDown work
+        Closing += (_, e) => vm.Closing(e);
         KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 }

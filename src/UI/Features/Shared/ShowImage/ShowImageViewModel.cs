@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using SkiaSharp;
+using System;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Shared.ShowImage;
@@ -15,8 +16,11 @@ public partial class ShowImageViewModel : ObservableObject
 {
     [ObservableProperty] private string _title;
     [ObservableProperty] private Bitmap? _previewImage;
+    [ObservableProperty] private string _text;
 
     public Window? Window { get; set; }
+    public bool LeftPressed { get; set; }
+    public bool RightPressed { get; set; }
 
     private readonly IFileHelper _fileHelper;
 
@@ -28,10 +32,17 @@ public partial class ShowImageViewModel : ObservableObject
         PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
     }
 
-    internal void Initialize(string title, Bitmap bitmap)
+    internal void Initialize(string title, Bitmap bitmap, string text = "")
     {
         Title = title;
         PreviewImage = bitmap;
+        Text = text;
+
+        if (Window != null) 
+        {
+            Window.Width = bitmap.PixelSize.Width + 40;
+            Window.Height = bitmap.PixelSize.Height + 150;
+        }   
     }
 
     [RelayCommand]
@@ -76,5 +87,27 @@ public partial class ShowImageViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.Left)
+        {
+            e.Handled = true;
+            LeftPressed = true;
+            Window?.Close();
+        }
+        else if (e.Key == Key.Right)
+        {
+            e.Handled = true;
+            RightPressed = true;
+            Window?.Close();
+        }
+    }
+
+    internal void Loaded()
+    {
+        UiUtil.RestoreWindowPosition(Window);
+    }
+
+    internal void Closing(WindowClosingEventArgs e)
+    {
+        UiUtil.SaveWindowPosition(Window);
     }
 }
