@@ -239,6 +239,11 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+        else if (e.Key == Key.Enter && SelectedSubtitleFormatName != null)
+        {
+            e.Handled = true;
+            Ok();
+        }
     }
 
     public void SearchTextChanged()

@@ -274,13 +274,12 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
         {
             if (bitmap.Format is { BitsPerPixel: 32 })
             {
-                var stride = bitmap.PixelSize.Width * 4;
                 var pixel = stackalloc byte[4];
                 bitmap.CopyPixels(
                     new Avalonia.PixelRect(x, y, 1, 1),
                     (nint)pixel,
                     4,
-                    stride);
+                    4);
 
                 return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
             }
@@ -291,7 +290,9 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
         }
         catch
         {
-            return Colors.Transparent;
+            using var skBitmap = bitmap.ToSkBitmap();
+            var skColor = skBitmap.GetPixel(x, y);
+            return Color.FromArgb(skColor.Alpha, skColor.Red, skColor.Green, skColor.Blue);
         }
     }
 
