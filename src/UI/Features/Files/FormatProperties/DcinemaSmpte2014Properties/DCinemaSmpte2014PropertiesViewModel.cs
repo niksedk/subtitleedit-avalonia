@@ -73,60 +73,60 @@ public partial class DCinemaSmpte2014PropertiesViewModel : ObservableObject
     {
         var ss = Se.Settings.File.DCinemaSmpte;
 
-        _generateIdAuto = ss.DCinemaAutoGenerateSubtitleId;
+        GenerateIdAuto = ss.DCinemaAutoGenerateSubtitleId;
 
         if (!string.IsNullOrEmpty(ss.CurrentDCinemaSubtitleId))
         {
-            _subtitleId = ss.CurrentDCinemaSubtitleId;
-            _reelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) ? reelNumber : 1;
-            _movieTitle = ss.CurrentDCinemaMovieTitle ?? string.Empty;
-            _selectedLanguage = ss.CurrentDCinemaLanguage ?? "en";
-            _fontId = ss.CurrentDCinemaFontId ?? string.Empty;
-            _editRate = ss.CurrentDCinemaEditRate ?? "24 1";
-            _selectedTimeCodeRate = ss.CurrentDCinemaTimeCodeRate ?? "24";
-            _startTime = string.IsNullOrEmpty(ss.CurrentDCinemaStartTime) ? "00:00:00:00" : ss.CurrentDCinemaStartTime;
-            _fontUri = ss.CurrentDCinemaFontUri ?? string.Empty;
-            _issueDate = ss.CurrentDCinemaIssueDate ?? DateTime.Now.ToString("s");
-            _fontColor = ColorFromString(ss.CurrentDCinemaFontColor);
+            SubtitleId = ss.CurrentDCinemaSubtitleId;
+            ReelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) ? reelNumber : 1;
+            MovieTitle = ss.CurrentDCinemaMovieTitle ?? string.Empty;
+            SelectedLanguage = ss.CurrentDCinemaLanguage ?? "en";
+            FontId = ss.CurrentDCinemaFontId ?? string.Empty;
+            EditRate = ss.CurrentDCinemaEditRate ?? "24 1";
+            SelectedTimeCodeRate = ss.CurrentDCinemaTimeCodeRate ?? "24";
+            StartTime = string.IsNullOrEmpty(ss.CurrentDCinemaStartTime) ? "00:00:00:00" : ss.CurrentDCinemaStartTime;
+            FontUri = ss.CurrentDCinemaFontUri ?? string.Empty;
+            IssueDate = ss.CurrentDCinemaIssueDate ?? DateTime.Now.ToString("s");
+            FontColor = ColorFromString(ss.CurrentDCinemaFontColor);
 
             if (ss.CurrentDCinemaFontEffect == "border")
             {
-                _selectedFontEffect = _fontEffects[1];
+                SelectedFontEffect = FontEffects[1];
             }
             else if (ss.CurrentDCinemaFontEffect == "shadow")
             {
-                _selectedFontEffect = _fontEffects[2];
+                SelectedFontEffect = FontEffects[2];
             }
             else
             {
-                _selectedFontEffect = _fontEffects[0];
+                SelectedFontEffect = FontEffects[0];
             }
 
-            _fontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor);
-            _fontSize = ss.CurrentDCinemaFontSize;
-            _topBottomMargin = ss.DCinemaBottomMargin;
-            _fadeUpTime = ss.DCinemaFadeUpTime;
-            _fadeDownTime = ss.DCinemaFadeDownTime;
+            FontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor);
+            FontSize = ss.CurrentDCinemaFontSize;
+            TopBottomMargin = ss.DCinemaBottomMargin;
+            FadeUpTime = ss.DCinemaFadeUpTime;
+            FadeDownTime = ss.DCinemaFadeDownTime;
         }
         else
         {
-            _subtitleId = DCinemaSmpte2007.GenerateId();
-            _reelNumber = 1;
-            _movieTitle = string.Empty;
-            _selectedLanguage = "en";
-            _fontId = "theFontId";
-            _editRate = "24 1";
-            _selectedTimeCodeRate = "24";
-            _startTime = "00:00:00:00";
-            _fontUri = "urn:uuid:3dec6dc0-39d0-498d-97d0-928d2eb78391";
-            _issueDate = DateTime.Now.ToString("s");
-            _fontColor = Colors.White;
-            _selectedFontEffect = _fontEffects[0];
-            _fontEffectColor = Colors.Black;
-            _fontSize = 42;
-            _topBottomMargin = 8;
-            _fadeUpTime = 0;
-            _fadeDownTime = 0;
+            SubtitleId = DCinemaSmpte2007.GenerateId();
+            ReelNumber = 1;
+            MovieTitle = string.Empty;
+            SelectedLanguage = "en";
+            FontId = "theFontId";
+            EditRate = "24 1";
+            SelectedTimeCodeRate = "24";
+            StartTime = "00:00:00:00";
+            FontUri = "urn:uuid:3dec6dc0-39d0-498d-97d0-928d2eb78391";
+            IssueDate = DateTime.Now.ToString("s");
+            FontColor = Colors.White;
+            SelectedFontEffect = FontEffects[0];
+            FontEffectColor = Colors.Black;
+            FontSize = 42;
+            TopBottomMargin = 8;
+            FadeUpTime = 0;
+            FadeDownTime = 0;
         }
     }
 
