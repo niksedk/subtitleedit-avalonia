@@ -12191,10 +12191,15 @@ public partial class MainViewModel :
 
             Renumber();
 
-            if (areLinesConsecutive && firstLine != null &&
-                nextLine != null &&
-                nextLine.StartTime.TotalSeconds < firstLine.EndTime.TotalSeconds + 15)
+            if (areLinesConsecutive && firstLine != null && nextLine != null)
             {
+                var indexOfNext = Subtitles.IndexOf(nextLine);
+                var timeToShift = nextLine.StartTime - firstLine.StartTime;
+                for (var i = indexOfNext; i < Subtitles.Count; i++)
+                {
+                    Subtitles[i].StartTime = Subtitles[i].StartTime - timeToShift;
+                }
+
                 nextLine.SetStartTimeOnly(firstLine.StartTime);
             }
         }
