@@ -467,7 +467,7 @@ public class LanguageSettings
         WaveFormsAndSpectrogramFoldersContainsX = "\"Waveforms\" and \"spectrogram\" folders contains {0}";
         DeleteWaveformAndSpectrogramFoldersQuestion = "Delete \"Waveforms\" and \"Spectrogram\" files?";
         WaveformGenerateSpectrogram = "Generate spectrogram";
-        WaveformSpectrogramMode = "Spectrogram mode (works at generate time)";
+        WaveformSpectrogramMode = "Spectrogram mode";
         WaveformCenterOnSingleClick = "Center on single click";
         WaveformSingleClickSelectsSubtitle = "Select subtitle on single click";
         WaveformRightClickSelectsSubtitle = "Select subtitle on right click";

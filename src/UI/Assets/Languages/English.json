@@ -1787,7 +1787,7 @@
       "waveFormsAndSpectrogramFoldersContainsX": "\u0022Waveforms\u0022 and \u0022spectrogram\u0022 folders contains {0}",
       "deleteWaveformAndSpectrogramFoldersQuestion": "Delete \u0022Waveforms\u0022 and \u0022Spectrogram\u0022 files?",
       "waveformGenerateSpectrogram": "Generate spectrogram",
-      "waveformSpectrogramMode": "Spectrogram mode (works at generate time)",
+      "waveformSpectrogramMode": "Spectrogram mode",
       "waveformCenterOnSingleClick": "Center on single click",
       "waveformSingleClickSelectsSubtitle": "Select subtitle on single click",
       "waveformRightClickSelectsSubtitle": "Select subtitle on right click",

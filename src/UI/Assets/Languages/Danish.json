@@ -1675,7 +1675,7 @@
       "WaveFormsAndSpectrogramFoldersContainsX": "\u0027B\u00F8lgeformer\u0027 og \u0027spektrogram\u0027-mapper indeholder {0}",
       "DeleteWaveformAndSpectrogramFoldersQuestion": "Slet \u0027Waveforms\u0027 og \u0027Spectrogram\u0027 filer?",
       "WaveformGenerateSpectrogram": "Generer spektrogram",
-      "WaveformSpectrogramMode": "Spektrogramtilstand (fungerer p\u00E5 genereringstidspunktet)",
+      "WaveformSpectrogramMode": "Spektrogramtilstand",
       "WaveformCenterOnSingleClick": "Centrer p\u00E5 enkelt klik",
       "WaveformSingleClickSelectsSubtitle": "V\u00E6lg undertekst ved et enkelt klik",
       "WaveformPauseOnSingleClick": "Pause ved et enkelt klik",

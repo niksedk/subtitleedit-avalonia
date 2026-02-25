@@ -1696,7 +1696,7 @@
       "waveFormsAndSpectrogramFoldersContainsX": "“Waveforms” 和 “Spectrogram” 文件夹包含 {0}",
       "deleteWaveformAndSpectrogramFoldersQuestion": "清空 “Spectrograms” 和 “Waveforms” 文件夹",
       "waveformGenerateSpectrogram": "生成频谱图",
-      "waveformSpectrogramMode": "频谱图模式 (在生成时生效)",
+      "waveformSpectrogramMode": "频谱图模式",
       "waveformCenterOnSingleClick": "单击时居中",
       "waveformSingleClickSelectsSubtitle": "单击时选择字幕",
       "waveformRightClickSelectsSubtitle": "右键单击时选择字幕",

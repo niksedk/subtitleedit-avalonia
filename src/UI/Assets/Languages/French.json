@@ -1658,7 +1658,7 @@
       "WaveFormsAndSpectrogramFoldersContainsX": "Les dossiers \u0022Waveforms\u0022 et \u0022spectrogram\u0022 contiennent {0}",
       "DeleteWaveformAndSpectrogramFoldersQuestion": "Supprimer les fichiers \u0022Waveforms\u0022 et \u0022Spectrogram\u0022 ?",
       "WaveformGenerateSpectrogram": "G\u00E9n\u00E9rer un spectrogramme",
-      "WaveformSpectrogramMode": "Mode spectrogramme (fonctionne au moment de la g\u00E9n\u00E9ration)",
+      "WaveformSpectrogramMode": "Mode spectrogramme",
       "WaveformCenterOnSingleClick": "Centrer au clic simple",
       "WaveformSingleClickSelectsSubtitle": "S\u00E9lectionnez le sous-titre en un seul clic",
       "WaveformPauseOnSingleClick": "Pause u clic simple",
