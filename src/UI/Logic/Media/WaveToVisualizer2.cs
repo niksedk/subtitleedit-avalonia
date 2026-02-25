@@ -347,11 +347,11 @@ public class SpectrogramData2 : IDisposable
         SampleDuration = br.ReadDouble();
 
         // Read raw samples
-        int sampleCount = (int)((fs.Length - 20) / sizeof(float)); // 20 bytes = 3 ints (12 bytes) + 1 double (8 bytes)
+        var sampleCount = (int)((fs.Length - 20) / sizeof(float)); // 20 bytes = 3 ints (12 bytes) + 1 double (8 bytes)
         _rawSamples = new float[sampleCount];
 
-        Span<byte> byteSpan = MemoryMarshal.AsBytes(_rawSamples.AsSpan());
-        fs.Read(byteSpan);
+        var byteSpan = MemoryMarshal.AsBytes(_rawSamples.AsSpan());
+        _ = fs.Read(byteSpan);
 
         // Generate images from raw data
         GenerateImagesFromRawData();

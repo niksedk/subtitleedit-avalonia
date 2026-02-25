@@ -23,7 +23,7 @@ public class WebVttPropertiesWindow : Window
         
         var labelLanguage = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(labelWidth);
         var comboBoxLanguage = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
-        var panelLangyage = new StackPanel
+        var panelLanguage = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
@@ -85,7 +85,7 @@ public class WebVttPropertiesWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        grid.Add(panelLangyage, 0);
+        grid.Add(panelLanguage, 0);
         grid.Add(panelLineHeight, 1);
         grid.Add(panelFontSize, 2);
         grid.Add(buttonPanel, 5);

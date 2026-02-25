@@ -29,6 +29,7 @@ public partial class ShowImageViewModel : ObservableObject
         _fileHelper = fileHelper;
 
         Title = string.Empty;
+        Text = string.Empty;
         PreviewImage = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
     }
 

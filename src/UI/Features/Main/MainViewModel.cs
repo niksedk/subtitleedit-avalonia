@@ -438,7 +438,9 @@ public partial class MainViewModel :
         FilePropertiesText = string.Empty;
 
         SubtitleFormats = [.. SubtitleFormatHelper.GetSubtitleFormatsWithFavoritesAtTop()];
-        SetSubtitleFormat(SubtitleFormats[0]);
+        _changingFormatProgrammatically = true;
+        SelectedSubtitleFormat = SubtitleFormats[0];
+        _changingFormatProgrammatically = false;
 
         Encodings = new ObservableCollection<TextEncoding>(EncodingHelper.GetEncodings());
         SelectedEncoding = Encodings.FirstOrDefault(p => p.DisplayName == Se.Settings.General.DefaultEncoding) ?? Encodings[0];
