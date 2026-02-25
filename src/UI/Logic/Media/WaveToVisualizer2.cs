@@ -370,9 +370,10 @@ public class SpectrogramData2 : IDisposable
 
         var images = new SKBitmap[chunkCount];
 
+        var sharedPalette = WavePeakGenerator2.SpectrogramDrawer.GeneratePaletteForCurrentStyle();
         Parallel.For(0, chunkCount, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, () =>
         {
-            return new WavePeakGenerator2.SpectrogramDrawer(FftSize);
+            return new WavePeakGenerator2.SpectrogramDrawer(FftSize, sharedPalette);
         },
         (iChunk, loopState, drawer) =>
         {
@@ -995,12 +996,12 @@ public class WavePeakGenerator2 : IDisposable
             return Path.Combine(dir, spectrogramFileName);
         }
 
-        public SpectrogramDrawer(int nfft)
+        public SpectrogramDrawer(int nfft, SKColor[] palette)
         {
             _nfft = nfft;
             _mapper = new MagnitudeToIndexMapper(100.0, MagnitudeIndexRange - 1);
             _fft = new RealFFT(nfft);
-            _palette = GeneratePalette();
+            _palette = palette;
             _segment = new double[nfft];
             _window = CreateRaisedCosineWindow(nfft);
             _magnitude1 = new double[nfft / 2];
@@ -1090,7 +1091,7 @@ public class WavePeakGenerator2 : IDisposable
             return a * a + b * b;
         }
 
-        private static SKColor[] GeneratePalette()
+        public static SKColor[] GeneratePaletteForCurrentStyle()
         {
             var palette = new SKColor[MagnitudeIndexRange];
             if (Se.Settings.Waveform.SpectrogramStyle == SeSpectrogramStyle.ClassicViridis.ToString())
