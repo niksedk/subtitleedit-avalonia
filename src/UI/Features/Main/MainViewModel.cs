@@ -22,6 +22,7 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
 using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Assa.AssaImageColorPicker;
@@ -1513,6 +1514,12 @@ public partial class MainViewModel :
         if (format is TmpegEncXml)
         {
             var result = await ShowDialogAsync<TmpegEncXmlPropertiesWindow, TmpegEncXmlPropertiesViewModel>(vm => { });
+            SetLibSeSettings();
+        }
+
+        if (format is DCinemaSmpte2014)
+        {
+            var result = await ShowDialogAsync<DCinemaSmpte2014PropertiesWindow, DCinemaSmpte2014PropertiesViewModel>(vm => { });
             SetLibSeSettings();
         }
 

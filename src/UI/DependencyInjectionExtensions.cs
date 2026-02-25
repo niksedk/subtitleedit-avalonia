@@ -19,6 +19,8 @@ using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.WebVttProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Files.ImportPlainText;
 using Nikse.SubtitleEdit.Features.Files.ManualChosenEncoding;
@@ -259,6 +261,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<CopyPasteTranslateViewModel>();
         collection.AddTransient<CustomContinuationStyleViewModel>();
         collection.AddTransient<CutVideoViewModel>();
+        collection.AddTransient<DCinemaSmpte2014PropertiesViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<DownloadGoogleLensOcrViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();
@@ -380,6 +383,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<VoiceSettingsViewModel>();
         collection.AddTransient<WaveformGuessTimeCodesViewModel>();
         collection.AddTransient<WaveformSeekSilenceViewModel>();
+        collection.AddTransient<WebVttPropertiesViewModel>();
         collection.AddTransient<WhisperAdvancedViewModel>();
         collection.AddTransient<WhisperPostProcessingViewModel>();
         collection.AddTransient<WordListsViewModel>();
