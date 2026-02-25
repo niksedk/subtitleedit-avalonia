@@ -12,6 +12,7 @@ public class SeFile
     public List<SeExportCustomFormatItem> ExportCustomFormats { get; set; } = new();
     public SeExportImages ExportImages { get; set; } = new();
     public SeExportPlainText ExportPlainText { get; set; } = new();
+    public SeDCinemaSmpte DCinemaSmpte { get; set; } = new();
 
     public SeFile()
     {

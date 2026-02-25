@@ -586,6 +586,15 @@ public partial class MainViewModel :
         TmpegEncXml.OffsetX = Se.Settings.Formats.TmpegEncXmlOffsetX.ToString(CultureInfo.InvariantCulture);
         TmpegEncXml.OffsetY = Se.Settings.Formats.TmpegEncXmlOffsetY.ToString(CultureInfo.InvariantCulture);
         TmpegEncXml.FontBold = Se.Settings.Formats.TmpegEncXmlFontBold ? "1" : "0";
+
+        Configuration.Settings.SubtitleSettings.DCinemaFontFile = Se.Settings.File.DCinemaSmpte.DCinemaFontFile;
+        Configuration.Settings.SubtitleSettings.DCinemaLoadFontResource = Se.Settings.File.DCinemaSmpte.DCinemaLoadFontResource;
+        Configuration.Settings.SubtitleSettings.DCinemaFontSize = Se.Settings.File.DCinemaSmpte.DCinemaFontSize;
+        Configuration.Settings.SubtitleSettings.DCinemaBottomMargin = Se.Settings.File.DCinemaSmpte.DCinemaBottomMargin;
+        Configuration.Settings.SubtitleSettings.DCinemaZPosition = Se.Settings.File.DCinemaSmpte.DCinemaZPosition;
+        Configuration.Settings.SubtitleSettings.DCinemaFadeUpTime = Se.Settings.File.DCinemaSmpte.DCinemaFadeUpTime;
+        Configuration.Settings.SubtitleSettings.DCinemaFadeDownTime = Se.Settings.File.DCinemaSmpte.DCinemaFadeDownTime;
+        Configuration.Settings.SubtitleSettings.DCinemaAutoGenerateSubtitleId = Se.Settings.File.DCinemaSmpte.DCinemaAutoGenerateSubtitleId;
     }
 
     private static void InitializeFfmpeg()
@@ -14104,7 +14113,7 @@ public partial class MainViewModel :
         if (e.AddedItems.Count == 1)
         {
             var format = e.AddedItems[0] as SubtitleFormat;
-            if (format is TimedTextImscRosetta or TmpegEncXml)
+            if (format is TimedTextImscRosetta or TmpegEncXml or DCinemaSmpte2014)
             {
                 IsFilePropertiesVisible = true;
                 FilePropertiesText = string.Format(Se.Language.Main.XPropertiesDotDotDot, format.Name);

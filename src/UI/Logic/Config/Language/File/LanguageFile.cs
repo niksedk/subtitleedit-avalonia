@@ -2,12 +2,14 @@
 
 public class LanguageFile
 {
+    public LanguageDCinemaProperties DCinemaProperties { get; set; } = new();
     public LanguageEbuSaveOptions EbuSaveOptions { get; set; } = new();
     public LanguageImport Import { get; set; } = new();
     public LanguageExport Export { get; set; } = new();
     public LanguageStatistics Statistics { get; set; } = new();
     public LanguageManualChosenEncoding ManualChosenEncoding { get; set; } = new();
     public LanguageRestoreAutoBackup RestoreAutoBackup { get; set; } = new();
+    public LanguageFilePropertiesDCinema PropertiesDCinema { get; set; } = new();
     public string Compare { get; set; }
     public string PreviousDifference { get; set; }
     public string NextDifference { get; set; }
