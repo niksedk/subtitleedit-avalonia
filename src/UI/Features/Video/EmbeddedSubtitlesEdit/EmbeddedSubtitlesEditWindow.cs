@@ -112,21 +112,21 @@ public class EmbeddedSubtitlesEditWindow : Window
                 {
                     Header = string.Empty,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Deleted), BindingMode.OneWay) { Converter = booleanToDeleteMarkConverter },
+                    Binding = new Binding(nameof(EmbeddedTrack.Deleted)) { Mode = BindingMode.OneWay, Converter = booleanToDeleteMarkConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Name,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Name), BindingMode.OneWay),
+                    Binding = new Binding(nameof(EmbeddedTrack.Name)) { Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Language,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.LanguageOrTitle), BindingMode.OneWay),
+                    Binding = new Binding(nameof(EmbeddedTrack.LanguageOrTitle)) { Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
@@ -140,21 +140,21 @@ public class EmbeddedSubtitlesEditWindow : Window
                 {
                     Header = Se.Language.General.Forced,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Forced), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter, Mode = BindingMode.OneWay },
+                    Binding = new Binding(nameof(EmbeddedTrack.Forced)) { Converter = booleanToCheckMarkConverter, Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Codec,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.Format), BindingMode.OneWay),
+                    Binding = new Binding(nameof(EmbeddedTrack.Format)) { Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.FileName,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(EmbeddedTrack.FileName), BindingMode.OneWay),
+                    Binding = new Binding(nameof(EmbeddedTrack.FileName)) { Mode = BindingMode.OneWay },
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },

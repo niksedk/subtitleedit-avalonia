@@ -24,7 +24,7 @@ public class SpellCheckWindow : Window
         var labelLine = new Label
         {
             VerticalAlignment = VerticalAlignment.Bottom,
-            [!Label.ContentProperty] = new Binding(nameof(SpellCheckViewModel.LineText), BindingMode.OneWay)
+            [!Label.ContentProperty] = new Binding(nameof(SpellCheckViewModel.LineText)) { Mode = BindingMode.OneWay }
         };
 
         var buttonEditWholeText = UiUtil.MakeButton(vm.EditWholeTextCommand, IconNames.Pencil);
@@ -111,7 +111,7 @@ public class SpellCheckWindow : Window
 
         var textBoxWord = new TextBox
         {
-            [!TextBox.TextProperty] = new Binding(nameof(SpellCheckViewModel.CurrentWord), BindingMode.TwoWay),
+            [!TextBox.TextProperty] = new Binding(nameof(SpellCheckViewModel.CurrentWord)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Center,
             Width = double.NaN,
         };
@@ -120,7 +120,7 @@ public class SpellCheckWindow : Window
         var buttonChange = new Button
         {
             Content = Se.Language.General.Change,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -130,7 +130,7 @@ public class SpellCheckWindow : Window
         var buttonChangeAll = new Button
         {
             Content = Se.Language.General.ChangeAll,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordAllCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.ChangeWordAllCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -140,7 +140,7 @@ public class SpellCheckWindow : Window
         var buttonSkipOne = new Button
         {
             Content = Se.Language.General.SkipOnce,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -150,7 +150,7 @@ public class SpellCheckWindow : Window
         var buttonSkipAll = new Button
         {
             Content = Se.Language.General.SkipAll,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordAllCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SkipWordAllCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -160,7 +160,7 @@ public class SpellCheckWindow : Window
         var buttonAddToNames = new Button
         {
             Content = Se.Language.General.AddToNamesListCaseSensitive,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToNamesListCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToNamesListCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -170,7 +170,7 @@ public class SpellCheckWindow : Window
         var buttonAddToDictionary = new Button
         {
             Content = Se.Language.General.AddToUserDictionary,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToUserDictionaryCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.AddToUserDictionaryCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -180,7 +180,7 @@ public class SpellCheckWindow : Window
         var buttonGoogleSearch = new Button
         {
             Content = Se.Language.General.GoogleIt,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.GoogleItCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.GoogleItCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -228,8 +228,8 @@ public class SpellCheckWindow : Window
     {
         var comboBoxDictionary = new ComboBox
         {
-            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Dictionaries), BindingMode.OneWay),
-            [!ComboBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedDictionary), BindingMode.TwoWay),
+            [!ComboBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Dictionaries)) { Mode = BindingMode.OneWay },
+            [!ComboBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedDictionary)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Center,
             Width = 200,
         };
@@ -237,7 +237,7 @@ public class SpellCheckWindow : Window
         var buttonDictionaryBrowse = new Button
         {
             Content = "...",
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.BrowseDictionaryCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.BrowseDictionaryCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -264,8 +264,8 @@ public class SpellCheckWindow : Window
 
         var listBoxSuggestions = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Suggestions), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedSuggestion), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Suggestions)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedSuggestion)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Top,
             Width = double.NaN,
             Height = double.NaN,
@@ -285,7 +285,7 @@ public class SpellCheckWindow : Window
         var buttonUseOnce = new Button
         {
             Content = Se.Language.General.UseOnce,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseOnceCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseOnceCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,
@@ -294,7 +294,7 @@ public class SpellCheckWindow : Window
         var buttonUseAlways = new Button
         {
             Content = Se.Language.General.UseAlways,
-            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand), BindingMode.OneWay),
+            [!Button.CommandProperty] = new Binding(nameof(SpellCheckViewModel.SuggestionUseAlwaysCommand)) { Mode = BindingMode.OneWay },
             Width = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Center,

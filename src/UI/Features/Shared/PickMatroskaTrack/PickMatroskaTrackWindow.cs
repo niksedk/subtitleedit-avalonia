@@ -120,14 +120,14 @@ public class PickMatroskaTrackWindow : Window
                 {
                     Header = Se.Language.General.Default,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter},
+                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsDefault)) { Mode = BindingMode.OneWay, Converter = booleanToCheckMarkConverter },
                     IsReadOnly = true,
                 },
                 new DataGridTextColumn
                 {
                     Header = Se.Language.General.Forced,
                     CellTheme = UiUtil.DataGridNoBorderNoPaddingCellTheme,
-                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced), BindingMode.OneWay) { Converter = booleanToCheckMarkConverter},
+                    Binding = new Binding(nameof(MatroskaTrackInfoDisplay.IsForced)) { Mode = BindingMode.OneWay, Converter = booleanToCheckMarkConverter},
                     IsReadOnly = true,
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star),
                 },

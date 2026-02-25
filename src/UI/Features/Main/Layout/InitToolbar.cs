@@ -242,7 +242,7 @@ public static class InitToolbar
             var assaSeparator = MakeSeparator();
             stackPanelLeft.Children.Add(assaSeparator);
             assaSeparator.DataContext = vm;
-            assaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa), BindingMode.TwoWay));
+            assaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.TwoWay });
             isLastSeparator = true;
         }
 

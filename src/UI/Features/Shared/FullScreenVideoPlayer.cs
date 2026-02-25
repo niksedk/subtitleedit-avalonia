@@ -28,7 +28,8 @@ public class FullScreenVideoWindow : Window
         var grid = new Grid
         {
             Background = Brushes.Transparent // Enable hit testing for pointer events
-        }.Children(videoPlayer);
+        };
+        grid.Children.Add(videoPlayer);
 
         Content = grid;
 

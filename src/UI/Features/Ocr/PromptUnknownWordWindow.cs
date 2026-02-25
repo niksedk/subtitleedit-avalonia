@@ -243,8 +243,8 @@ public class PromptUnknownWordWindow : Window
 
         var listBoxSuggestions = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Suggestions), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedSuggestion), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(SpellCheckViewModel.Suggestions)) { Source = vm, Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(SpellCheckViewModel.SelectedSuggestion)) { Source = vm, Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Top,
             Width = double.NaN,
             Height = double.NaN,

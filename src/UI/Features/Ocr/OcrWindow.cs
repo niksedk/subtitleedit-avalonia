@@ -421,7 +421,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.StartOcrSelectedLinesCommand,
         };
-        menuItemOcrSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemOcrSelectedLines.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemOcrSelectedLines);
 
         var menuItemInspectMatchesForLine = new MenuItem
@@ -430,7 +430,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.InspectLineCommand,
         };
-        menuItemInspectMatchesForLine.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsInspectLineVisible), BindingMode.TwoWay));
+        menuItemInspectMatchesForLine.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsInspectLineVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemInspectMatchesForLine);
 
         var menuItemShowImage = new MenuItem
@@ -439,7 +439,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.ViewSelectedImageCommand,
         };
-        menuItemShowImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemShowImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemShowImage);
 
         var menuItemSaveImage = new MenuItem
@@ -448,7 +448,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.SaveImageAsCommand,
         };
-        menuItemSaveImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemSaveImage.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemSaveImage);
 
         var menuItemCopyImageToClipboard = new MenuItem
@@ -457,7 +457,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.CopyImageToClipboardCommand,
         };
-        menuItemCopyImageToClipboard.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemCopyImageToClipboard.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemCopyImageToClipboard);
 
         flyout.Items.Add(new Separator());
@@ -468,7 +468,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.DeleteSelectedLinesCommand,
         };
-        menuItemDelete.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemDelete.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemDelete);
 
         flyout.Items.Add(new Separator());
@@ -479,7 +479,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.ToggleItalicCommand,
         };
-        menuItemItalic.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemItalic.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemItalic);
 
         var menuItemBold = new MenuItem
@@ -488,7 +488,7 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.ToggleBoldCommand,
         };
-        menuItemBold.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu), BindingMode.TwoWay));
+        menuItemBold.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowContextMenu)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(menuItemBold);
 
         vm.SubtitleGrid.ContextFlyout = flyout;
@@ -531,9 +531,9 @@ public class OcrWindow : Window
             }
         };
 
-        textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontFamily), BindingMode.TwoWay));
-        textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize), BindingMode.TwoWay));
-        textBoxText.Bind(TextBox.FontWeightProperty, new Binding(nameof(vm.TextBoxFontWeight), BindingMode.TwoWay));
+        textBoxText.Bind(FontFamilyProperty, new Binding(nameof(vm.TextBoxFontFamily)) { Mode = BindingMode.TwoWay });
+        textBoxText.Bind(FontSizeProperty, new Binding(nameof(vm.TextBoxFontSize)) { Mode = BindingMode.TwoWay });
+        textBoxText.Bind(TextBox.FontWeightProperty, new Binding(nameof(vm.TextBoxFontWeight)) { Mode = BindingMode.TwoWay });
 
         // Create a Flyout for the TextBox
         var flyout = new MenuFlyout();
@@ -674,8 +674,8 @@ public class OcrWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UnknownWords), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUnknownWord), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UnknownWords)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUnknownWord)) { Mode = BindingMode.TwoWay },
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -709,8 +709,8 @@ public class OcrWindow : Window
             DataContext = vm,
             Command = vm.UnknownWordsRemoveCurrentCommand,
         };
-        menuItemRemoveCurrent.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsUnknownWordSelected), BindingMode.OneWay));
-        menuItemRemoveCurrent.Bind(MenuItem.HeaderProperty, new Binding(nameof(vm.UnknownWordsRemoveCurrentText), BindingMode.OneWay));
+        menuItemRemoveCurrent.Bind(MenuItem.IsVisibleProperty, new Binding(nameof(vm.IsUnknownWordSelected)) { Mode = BindingMode.OneWay });
+        menuItemRemoveCurrent.Bind(MenuItem.HeaderProperty, new Binding(nameof(vm.UnknownWordsRemoveCurrentText)) { Mode = BindingMode.OneWay });
 
         flyout.Items.Add(menuItemRemoveCurrent);
 
@@ -761,8 +761,8 @@ public class OcrWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllFixes), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllFix), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllFixes)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllFix)) { Mode = BindingMode.TwoWay },
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -802,8 +802,8 @@ public class OcrWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllGuesses), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllGuess), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.AllGuesses)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedAllGuess)) { Mode = BindingMode.TwoWay },
             Width = double.NaN,
             Height = double.NaN,
             HorizontalAlignment = HorizontalAlignment.Stretch,

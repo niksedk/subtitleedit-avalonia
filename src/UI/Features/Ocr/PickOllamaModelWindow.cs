@@ -45,8 +45,8 @@ public class PickOllamaModelWindow : Window
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.Models), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedModel), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.Models)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedModel)) { Mode = BindingMode.TwoWay },
             Width = double.NaN,
             Height = double.NaN,
         };

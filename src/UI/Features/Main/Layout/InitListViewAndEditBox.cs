@@ -306,7 +306,7 @@ public static partial class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.GapBackgroundBrush), BindingMode.OneWay)
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.GapBackgroundBrush)) { Mode = BindingMode.OneWay },
                 };
 
                 var textBlock = new TextBlock
@@ -330,7 +330,7 @@ public static partial class InitListViewAndEditBox
         var actorColumn = new DataGridTextColumn
         {
             Header = Se.Language.General.Actor,
-            Binding = new Binding(nameof(SubtitleLineViewModel.Actor), BindingMode.OneWay),
+            Binding = new Binding(nameof(SubtitleLineViewModel.Actor)) { Mode = BindingMode.OneWay },
             Width = new DataGridLength(120),
             CellTheme = UiUtil.DataGridNoBorderCellTheme,
         };
@@ -351,7 +351,7 @@ public static partial class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.CpsBackgroundBrush), BindingMode.OneWay)
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.CpsBackgroundBrush)) { Mode = BindingMode.OneWay }
                 };
 
                 var textBlock = new TextBlock
@@ -382,7 +382,7 @@ public static partial class InitListViewAndEditBox
                 var border = new Border
                 {
                     Padding = new Thickness(4, 2),
-                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.WpmBackgroundBrush), BindingMode.OneWay)
+                    [!Border.BackgroundProperty] = new Binding(nameof(SubtitleLineViewModel.WpmBackgroundBrush)) { Mode = BindingMode.OneWay }
                 };
 
                 var textBlock = new TextBlock
@@ -449,7 +449,7 @@ public static partial class InitListViewAndEditBox
             Header = Se.Language.General.Styles,
             DataContext = vm,
         };
-        assaStylesMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible), BindingMode.TwoWay));
+        assaStylesMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(assaStylesMenuItem);
         vm.MenuItemStyles = assaStylesMenuItem;
 
@@ -458,7 +458,7 @@ public static partial class InitListViewAndEditBox
             Header = Se.Language.General.Actors,
             DataContext = vm,
         };
-        assaActorsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible), BindingMode.TwoWay));
+        assaActorsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.AreAssaContentMenuItemsVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(assaActorsMenuItem);
         vm.MenuItemActors = assaActorsMenuItem;
 
@@ -478,7 +478,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnEndTime)),
             }
         };
-        showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showEndTimeMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showEndTimeMenuItem);
 
         var showDurationMenuItem = new MenuItem
@@ -493,7 +493,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnDuration)),
             }
         };
-        showDurationMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showDurationMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showDurationMenuItem);
 
         var showGapMenuItem = new MenuItem
@@ -508,7 +508,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnGap)),
             }
         };
-        showGapMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showGapMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showGapMenuItem);
 
         var showStyleMenuItem = new MenuItem
@@ -548,7 +548,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnActor)),
             }
         };
-        showActorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showActorMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showActorMenuItem);
 
         var showCpsMenuItem = new MenuItem
@@ -563,7 +563,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnCps)),
             }
         };
-        showCpsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showCpsMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showCpsMenuItem);
 
         var showWpmMenuItem = new MenuItem
@@ -578,7 +578,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnWpm)),
             }
         };
-        showWpmMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible), BindingMode.TwoWay));
+        showWpmMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsSubtitleGridFlyoutHeaderVisible)) { Mode = BindingMode.TwoWay });
         flyout.Items.Add(showWpmMenuItem);
 
         var showLayerMenuItem = new MenuItem
@@ -593,7 +593,7 @@ public static partial class InitListViewAndEditBox
                 [!Visual.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnLayer)),
             }
         };
-        showLayerMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnLayerFlyoutMenuItem), BindingMode.TwoWay));
+        showLayerMenuItem.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.ShowColumnLayerFlyoutMenuItem)) { Source = vm, Mode = BindingMode.TwoWay });
         flyout.Items.Add(showLayerMenuItem);
 
 

@@ -87,7 +87,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.Names) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.Names) + ".Count") { Mode = BindingMode.OneWay, Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
@@ -98,8 +98,8 @@ public class WordListsWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.Names), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedName), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.Names)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedName)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Top,
             Width = double.NaN,
             Height = double.NaN,
@@ -161,7 +161,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.UserWords) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.UserWords) + ".Count") { Source = vm, Mode = BindingMode.OneWay, Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
@@ -173,8 +173,8 @@ public class WordListsWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UserWords), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUserWord), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.UserWords)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedUserWord)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Top,
             Width = double.NaN,
             Height = double.NaN,
@@ -223,7 +223,7 @@ public class WordListsWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.OcrFixes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.OcrFixes) + ".Count") { Mode = BindingMode.OneWay, Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
@@ -234,8 +234,8 @@ public class WordListsWindow : Window
 
         var listBox = new ListBox
         {
-            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.OcrFixes), BindingMode.OneWay),
-            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedOcrFix), BindingMode.TwoWay),
+            [!ListBox.ItemsSourceProperty] = new Binding(nameof(vm.OcrFixes)) { Mode = BindingMode.OneWay },
+            [!ListBox.SelectedItemProperty] = new Binding(nameof(vm.SelectedOcrFix)) { Mode = BindingMode.TwoWay },
             VerticalAlignment = VerticalAlignment.Top,
             Width = double.NaN,
             Height = double.NaN,

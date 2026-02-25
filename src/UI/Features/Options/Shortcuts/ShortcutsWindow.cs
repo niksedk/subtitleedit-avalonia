@@ -50,7 +50,7 @@ public class ShortcutsWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             Child = new TextBlock
             {
-                [!TextBlock.TextProperty] = new Binding(nameof(vm.FlatNodes) + ".Count", BindingMode.OneWay) { Converter = new NumberToStringWithThousandSeparator() },
+                [!TextBlock.TextProperty] = new Binding(nameof(vm.FlatNodes) + ".Count") { Source = vm, Mode = BindingMode.OneWay, Converter = new NumberToStringWithThousandSeparator() },
                 FontSize = 10,
                 VerticalAlignment = VerticalAlignment.Center,
                 Foreground = Brushes.WhiteSmoke,
