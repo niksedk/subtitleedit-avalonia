@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 
@@ -364,26 +365,29 @@ public class SpectrogramData2 : IDisposable
             return;
         }
 
-        var drawer = new WavePeakGenerator2.SpectrogramDrawer(FftSize);
-        int chunkSampleCount = FftSize * ImageWidth;
-        int chunkCount = _rawSamples.Length / chunkSampleCount;
+        var chunkSampleCount = FftSize * ImageWidth;
+        var chunkCount = _rawSamples.Length / chunkSampleCount;
 
-        var images = new List<SKBitmap>(chunkCount);
+        var images = new SKBitmap[chunkCount];
 
-        for (int iChunk = 0; iChunk < chunkCount; iChunk++)
+        Parallel.For(0, chunkCount, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, () =>
         {
-            int offset = iChunk * chunkSampleCount;
-            double[] chunkSamples = new double[chunkSampleCount];
+            return new WavePeakGenerator2.SpectrogramDrawer(FftSize);
+        },
+        (iChunk, loopState, drawer) =>
+        {
+            var offset = iChunk * chunkSampleCount;
+            var chunkSamples = new double[chunkSampleCount];
 
-            // Convert float to double for FFT processing
-            for (int i = 0; i < chunkSampleCount; i++)
+            for (var i = 0; i < chunkSampleCount; i++)
             {
                 chunkSamples[i] = _rawSamples[offset + i];
             }
 
-            SKBitmap bmp = drawer.Draw(chunkSamples);
-            images.Add(bmp);
-        }
+            images[iChunk] = drawer.Draw(chunkSamples);
+            return drawer;
+        },
+        _ => { /* No cleanup needed */ });
 
         Images = images;
     }
