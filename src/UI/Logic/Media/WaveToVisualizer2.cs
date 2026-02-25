@@ -3,13 +3,11 @@ using Nikse.SubtitleEdit.Logic.Config;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace Nikse.SubtitleEdit.Logic.Media;
 
@@ -266,7 +264,8 @@ public class WavePeakData2
 
 public class SpectrogramData2 : IDisposable
 {
-    private string? _loadFromDirectory;
+    private string? _loadFromFilePath;
+    private float[]? _rawSamples;
 
     public SpectrogramData2(int fftSize, int imageWidth, double sampleDuration, IList<SKBitmap> images)
     {
@@ -276,9 +275,18 @@ public class SpectrogramData2 : IDisposable
         Images = images;
     }
 
-    private SpectrogramData2(string loadFromDirectory)
+    internal SpectrogramData2(int fftSize, int imageWidth, double sampleDuration, float[] rawSamples)
     {
-        _loadFromDirectory = loadFromDirectory;
+        FftSize = fftSize;
+        ImageWidth = imageWidth;
+        SampleDuration = sampleDuration;
+        _rawSamples = rawSamples;
+        Images = [];
+    }
+
+    private SpectrogramData2(string loadFromFilePath)
+    {
+        _loadFromFilePath = loadFromFilePath;
         Images = [];
     }
 
@@ -292,59 +300,92 @@ public class SpectrogramData2 : IDisposable
 
     public bool IsLoaded
     {
-        get { return _loadFromDirectory == null; }
+        get { return _loadFromFilePath == null && _rawSamples == null; }
     }
 
     public void Load()
     {
-        if (_loadFromDirectory == null)
+        // Load from raw data if available
+        if (_rawSamples != null)
+        {
+            GenerateImagesFromRawData();
+            _rawSamples = null;
+            return;
+        }
+
+        // Load from binary file if path is set
+        if (_loadFromFilePath != null)
+        {
+            string filePath = _loadFromFilePath;
+            _loadFromFilePath = null;
+
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    return;
+                }
+
+                LoadFromBinaryFile(filePath);
+            }
+            catch (Exception exception)
+            {
+                Se.LogError(exception, $"Unable to load spectrogram from {filePath}");
+            }
+        }
+    }
+
+    private void LoadFromBinaryFile(string filePath)
+    {
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var br = new BinaryReader(fs);
+
+        // Read metadata
+        FftSize = br.ReadInt32();
+        ImageWidth = br.ReadInt32();
+        SampleDuration = br.ReadDouble();
+
+        // Read raw samples
+        int sampleCount = (int)((fs.Length - 20) / sizeof(float)); // 20 bytes = 3 ints (12 bytes) + 1 double (8 bytes)
+        _rawSamples = new float[sampleCount];
+
+        Span<byte> byteSpan = MemoryMarshal.AsBytes(_rawSamples.AsSpan());
+        fs.Read(byteSpan);
+
+        // Generate images from raw data
+        GenerateImagesFromRawData();
+        _rawSamples = null;
+    }
+
+    private void GenerateImagesFromRawData()
+    {
+        if (_rawSamples == null)
         {
             return;
         }
 
-        string directory = _loadFromDirectory;
-        string xmlInfoFileName = Path.Combine(directory, "Info.xml");
-        _loadFromDirectory = null;
+        var drawer = new WavePeakGenerator2.SpectrogramDrawer(FftSize);
+        int chunkSampleCount = FftSize * ImageWidth;
+        int chunkCount = _rawSamples.Length / chunkSampleCount;
 
-        try
+        var images = new List<SKBitmap>(chunkCount);
+
+        for (int iChunk = 0; iChunk < chunkCount; iChunk++)
         {
-            if (!File.Exists(xmlInfoFileName))
+            int offset = iChunk * chunkSampleCount;
+            double[] chunkSamples = new double[chunkSampleCount];
+
+            // Convert float to double for FFT processing
+            for (int i = 0; i < chunkSampleCount; i++)
             {
-                return;
+                chunkSamples[i] = _rawSamples[offset + i];
             }
 
-            var doc = new XmlDocument();
-            var culture = CultureInfo.InvariantCulture;
-            doc.Load(xmlInfoFileName);
-            FftSize = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("NFFT")?.InnerText, culture);
-            ImageWidth = Convert.ToInt32(doc.DocumentElement?.SelectSingleNode("ImageWidth")?.InnerText, culture);
-            SampleDuration = Convert.ToDouble(doc.DocumentElement?.SelectSingleNode("SampleDuration")?.InnerText, culture);
-
-            var fileNames = Directory.EnumerateFiles(directory, "*.jpg")
-                .OrderBy(n => int.Parse(Path.GetFileNameWithoutExtension(n)))
-                .ToList();
-
-            var images = new List<SKBitmap>(fileNames.Count);
-
-            foreach (string fileName in fileNames)
-            {
-                using (var fileStream = File.OpenRead(fileName))
-                {
-                    var skBitmap = SKBitmap.Decode(fileStream);
-                    images.Add(skBitmap);
-                }
-            }
-            Images = images;
-
-            if (Images.Count == 0)
-            {
-                Se.LogError($"No spectrogram images found in {directory}");
-            }
+            SKBitmap bmp = drawer.Draw(chunkSamples);
+            images.Add(bmp);
         }
-        catch (Exception exception)
-        {
-            Se.LogError(exception, $"Unable to load spectrom from {xmlInfoFileName}");
-        }
+
+        Images = images;
     }
 
     public void Dispose()
@@ -363,9 +404,30 @@ public class SpectrogramData2 : IDisposable
         Images = Array.Empty<SKBitmap>();
     }
 
-    public static SpectrogramData2 FromDisk(string spectrogramDirectory)
+    public static SpectrogramData2 FromDisk(string spectrogramFilePath)
     {
-        return new SpectrogramData2(spectrogramDirectory);
+        return new SpectrogramData2(spectrogramFilePath);
+    }
+
+    public static void SaveToBinaryFile(string filePath, int fftSize, int imageWidth, double sampleDuration, float[] samples)
+    {
+        var dir = Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+        using var bw = new BinaryWriter(fs);
+
+        // Write metadata
+        bw.Write(fftSize);
+        bw.Write(imageWidth);
+        bw.Write(sampleDuration);
+
+        // Write raw samples
+        ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(samples.AsSpan());
+        fs.Write(byteSpan);
     }
 }
 
@@ -787,7 +849,7 @@ public class WavePeakGenerator2 : IDisposable
 
     //////////////////////////////////////// SPECTRUM ///////////////////////////////////////////////////////////
 
-    public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramDirectory, System.Threading.CancellationToken token)
+    public SpectrogramData2 GenerateSpectrogram(int delayInMilliseconds, string spectrogramFilePath, System.Threading.CancellationToken token)
     {
         const int fftSize = 256; // image height = fft size / 2
         const int imageWidth = 1024;
@@ -797,19 +859,15 @@ public class WavePeakGenerator2 : IDisposable
         // ignore negative delays for now (pretty sure it can't happen in mkv and some places pass in -1 by mistake)
         delaySampleCount = Math.Max(delaySampleCount, 0);
 
-        var images = new List<SKBitmap>();
-        var drawer = new SpectrogramDrawer(fftSize);
         var readSampleDataValue = GetSampleDataReader();
-        Task? saveImageTask = null;
         double sampleAndChannelScale = GetSampleAndChannelScale();
         long fileSampleCount = Header.LengthInSamples;
         long fileSampleOffset = -delaySampleCount;
         int chunkSampleCount = fftSize * imageWidth;
         int chunkCount = (int)Math.Ceiling((double)(fileSampleCount + delaySampleCount) / chunkSampleCount);
         byte[] data = new byte[chunkSampleCount * Header.BlockAlign];
-        double[] chunkSamples = new double[chunkSampleCount];
-
-        Directory.CreateDirectory(spectrogramDirectory);
+        float[] allSamples = new float[chunkCount * chunkSampleCount];
+        int allSamplesOffset = 0;
 
         _stream.Seek(Header.DataStartPosition, SeekOrigin.Begin);
 
@@ -836,13 +894,11 @@ public class WavePeakGenerator2 : IDisposable
             // calculate padding at the end (when the data isn't an even multiple of our chunk size)
             int endPaddingSampleCount = chunkSampleCount - startPaddingSampleCount - fileReadSampleCount;
 
-            int chunkSampleOffset = 0;
-
             // add padding at the beginning
             if (startPaddingSampleCount > 0)
             {
-                Array.Clear(chunkSamples, chunkSampleOffset, startPaddingSampleCount);
-                chunkSampleOffset += startPaddingSampleCount;
+                Array.Clear(allSamples, allSamplesOffset, startPaddingSampleCount);
+                allSamplesOffset += startPaddingSampleCount;
             }
 
             // read samples from the file
@@ -860,34 +916,17 @@ public class WavePeakGenerator2 : IDisposable
                     {
                         value += readSampleDataValue(data, ref dataByteOffset);
                     }
-                    chunkSamples[chunkSampleOffset] = value * sampleAndChannelScale;
-                    chunkSampleOffset += 1;
+                    allSamples[allSamplesOffset] = (float)(value * sampleAndChannelScale);
+                    allSamplesOffset += 1;
                 }
             }
 
             // add padding at the end
             if (endPaddingSampleCount > 0)
             {
-                Array.Clear(chunkSamples, chunkSampleOffset, endPaddingSampleCount);
+                Array.Clear(allSamples, allSamplesOffset, endPaddingSampleCount);
+                allSamplesOffset += endPaddingSampleCount;
             }
-
-            // generate spectrogram for this chunk
-            SKBitmap bmp = drawer.Draw(chunkSamples);
-            images.Add(bmp);
-
-            // wait for previous image to finish saving
-            saveImageTask?.Wait();
-
-            // save image
-            string imagePath = Path.Combine(spectrogramDirectory, iChunk + ".jpg");
-            saveImageTask = Task.Factory.StartNew(() =>
-            {
-                using (var stream = File.OpenWrite(imagePath))
-                using (var pngData = bmp.Encode(SKEncodedImageFormat.Jpeg, 50))
-                {
-                    pngData.SaveTo(stream);
-                }
-            });
 
             if (token.IsCancellationRequested)
             {
@@ -895,27 +934,17 @@ public class WavePeakGenerator2 : IDisposable
             }
         }
 
-        // wait for last image to finish saving
-        saveImageTask?.Wait();
-
-        var doc = new XmlDocument();
-        var culture = CultureInfo.InvariantCulture;
         double sampleDuration = (double)fftSize / Header.SampleRate;
-        doc.LoadXml("<SpectrogramInfo><SampleDuration/><NFFT/><ImageWidth/><SecondsPerImage/></SpectrogramInfo>");
-        if (doc.DocumentElement != null)
-        {
-            doc.DocumentElement.SelectSingleNode("SampleDuration")!.InnerText = sampleDuration.ToString(culture);
-            doc.DocumentElement.SelectSingleNode("NFFT")!.InnerText = fftSize.ToString(culture);
-            doc.DocumentElement.SelectSingleNode("ImageWidth")!.InnerText = imageWidth.ToString(culture);
-            doc.DocumentElement.SelectSingleNode("SecondsPerImage")!.InnerText = ((double)chunkSampleCount / Header.SampleRate).ToString(culture); // currently unused; for backwards compatibility
-        }
 
+        // Save raw data to binary file
         if (!token.IsCancellationRequested)
         {
-            doc.Save(Path.Combine(spectrogramDirectory, "Info.xml"));
+            SpectrogramData2.SaveToBinaryFile(spectrogramFilePath, fftSize, imageWidth, sampleDuration, allSamples);
         }
 
-        return new SpectrogramData2(fftSize, imageWidth, sampleDuration, images);
+        var result = new SpectrogramData2(fftSize, imageWidth, sampleDuration, allSamples);
+        result.Load(); // Generate images immediately for display
+        return result;
     }
 
     public class SpectrogramDrawer
@@ -940,26 +969,26 @@ public class WavePeakGenerator2 : IDisposable
                 Directory.CreateDirectory(dir);
             }
 
-            if (string.IsNullOrEmpty(videoFileName) &&
+            if (!string.IsNullOrEmpty(videoFileName) &&
                 (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                  videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
             {
-                return Path.Combine(dir, $"{MovieHasher.GenerateHashFromString(videoFileName)}.wav");
+                return Path.Combine(dir, $"{MovieHasher.GenerateHashFromString(videoFileName)}.spectrogram");
             }
 
             var hash = MovieHasher.GenerateHash(videoFileName);
 
-            var dirs = Directory.GetDirectories(Se.SpectrogramsFolder, $"{hash}_*.wav")
+            var files = Directory.GetFiles(dir, $"{hash}_*.spectrogram")
                 .OrderBy(p => p)
                 .ToList();
-            if (dirs.Count > 0 && trackNumber < 0)
+            if (files.Count > 0 && trackNumber < 0)
             {
-                return dirs[0];
+                return files[0];
             }
 
-            var spectrogramFolder = trackNumber >= 0 ? $"{hash}-{trackNumber}" : hash;
+            var spectrogramFileName = trackNumber >= 0 ? $"{hash}-{trackNumber}.spectrogram" : $"{hash}.spectrogram";
 
-            return Path.Combine(dir, spectrogramFolder);
+            return Path.Combine(dir, spectrogramFileName);
         }
 
         public SpectrogramDrawer(int nfft)
