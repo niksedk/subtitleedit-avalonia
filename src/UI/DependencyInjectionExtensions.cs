@@ -246,6 +246,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<BookmarksListViewModel>();
         collection.AddTransient<BridgeGapsViewModel>();
         collection.AddTransient<BurnInEffectViewModel>();
+        collection.AddTransient<BurnInLogoViewModel>();
         collection.AddTransient<BurnInResolutionPickerViewModel>();
         collection.AddTransient<BurnInSettingsViewModel>();
         collection.AddTransient<BurnInViewModel>();
