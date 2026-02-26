@@ -123,42 +123,43 @@ public partial class BurnInLogoViewModel : ObservableObject
             return;
         }
 
-        // Get the video player control bounds
-        var videoPlayerWidth = VideoPlayerControl.Bounds.Width;
-        var videoPlayerHeight = VideoPlayerControl.Bounds.Height;
+        // Use the actual content dimensions from the video player
+        var contentWidth = VideoPlayerControl.ContentWidth;
+        var contentHeight = VideoPlayerControl.ContentHeight;
 
-        if (videoPlayerWidth <= 0 || videoPlayerHeight <= 0)
+        if (contentWidth <= 0 || contentHeight <= 0)
         {
             return;
         }
 
-        // Calculate the green border position (video content area)
-        const double controlsHeight = 55; // Height of video player controls
-        var availableHeight = videoPlayerHeight - controlsHeight;
-        if (availableHeight <= 0)
-        {
-            return;
-        }
-
+        // Calculate the actual video display area based on aspect ratio
         var screenAspect = (double)VideoWidth / VideoHeight;
-        var availableAspect = videoPlayerWidth / availableHeight;
+        var contentAspect = (double)contentWidth / contentHeight;
 
         double rectWidth, rectHeight, rectX, rectY;
 
-        if (availableAspect > screenAspect)
+        if (contentAspect > screenAspect)
         {
-            rectHeight = availableHeight;
-            rectWidth = availableHeight * screenAspect;
-            rectX = (videoPlayerWidth - rectWidth) / 2;
+            // Video is narrower than content space - pillarboxed
+            rectHeight = contentHeight;
+            rectWidth = rectHeight * screenAspect;
+            rectX = (contentWidth - rectWidth) / 2;
             rectY = 0;
         }
         else
         {
-            rectWidth = videoPlayerWidth;
-            rectHeight = videoPlayerWidth / screenAspect;
+            // Video is wider than content space - letterboxed
+            rectWidth = contentWidth;
+            rectHeight = rectWidth / screenAspect;
             rectX = 0;
-            rectY = (availableHeight - rectHeight) / 2;
+            rectY = (contentHeight - rectHeight) / 2;
         }
+
+        // Round to avoid sub-pixel rendering issues
+        rectWidth = Math.Round(rectWidth);
+        rectHeight = Math.Round(rectHeight);
+        rectX = Math.Round(rectX);
+        rectY = Math.Round(rectY);
 
         // Update the green border
         Dispatcher.UIThread.Post(() =>
@@ -278,11 +279,14 @@ public partial class BurnInLogoViewModel : ObservableObject
 
             VideoPlayerControl.VideoPlayerInstance.Pause();
 
-            // Wait a bit for the video player to render and have valid bounds
-            await Task.Delay(100);
+            // Wait for the video player to render and have valid bounds
+            // Try multiple times with increasing delays to ensure accurate border calculation
+            for (int i = 0; i < 3; i++)
+            {
+                await Task.Delay(50 + (i * 50)); // 50ms, 100ms, 150ms
+                UpdateBorder();
+            }
 
-            // Force update border and overlay position after video is loaded
-            UpdateBorder();
             if (HasLogo)
             {
                 UpdateLogoPosition();
