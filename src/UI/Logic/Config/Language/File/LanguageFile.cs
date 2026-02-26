@@ -4,7 +4,6 @@ namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
 
 public class LanguageFile
 {
-    public LanguageDCinemaProperties DCinemaProperties { get; set; } = new();
     public LanguageEbuSaveOptions EbuSaveOptions { get; set; } = new();
     public LanguageImport Import { get; set; } = new();
     public LanguageExport Export { get; set; } = new();
