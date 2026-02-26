@@ -100,6 +100,7 @@ public partial class BurnInViewModel : ObservableObject
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
     public DataGrid? BatchGrid { get; internal set; }
+    public BurnInLogo BurnInLogo { get; set; }
 
     private Subtitle _subtitle = new();
     private bool _loading = true;
@@ -210,6 +211,7 @@ public partial class BurnInViewModel : ObservableObject
         DisplayEffect = string.Empty;
         LogoInfo = string.Empty;
 
+        BurnInLogo = new BurnInLogo();
         _selectedEffects = new List<BurnInEffectItem>();
         _log = new StringBuilder();
         _loading = false;
@@ -871,10 +873,30 @@ public partial class BurnInViewModel : ObservableObject
             return;
         }
 
-        await _windowService.ShowDialogAsync<BurnInLogoWindow, BurnInLogoViewModel>(Window!, vm =>
+        var result = await _windowService.ShowDialogAsync<BurnInLogoWindow, BurnInLogoViewModel>(Window!, vm =>
         {
+            vm.BurnInLogo = BurnInLogo;
             vm.Initialize(VideoFileName, VideoWidth.Value, VideoHeight.Value);
         });
+
+        if (result != null && result.OkPressed)
+        {
+            BurnInLogo = result.BurnInLogo;
+            UpdateLogoInfo();
+        }
+    }
+
+    private void UpdateLogoInfo()
+    {
+        if (string.IsNullOrEmpty(BurnInLogo.LogoFileName))
+        {
+            LogoInfo = string.Empty;
+        }
+        else
+        {
+            var fileName = Path.GetFileName(BurnInLogo.LogoFileName);
+            LogoInfo = $"{fileName} @ ({BurnInLogo.X}, {BurnInLogo.Y})";
+        }
     }
 
     [RelayCommand]
