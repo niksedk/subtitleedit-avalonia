@@ -18,19 +18,19 @@ public class DCinemaSmpte2014PropertiesWindow : Window
         Title = Se.Language.File.PropertiesDCinema.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-        MinWidth = 600;
-        MinHeight = 600;
+        MinWidth = 550;
+        MinHeight = 500;
         vm.Window = this;
         DataContext = vm;
 
-        var labelWidth = 200;
+        var labelWidth = 150;
         var lang = Se.Language.File.PropertiesDCinema;
 
         // General section
         var checkBoxGenerateIdAuto = UiUtil.MakeCheckBox(lang.GenerateIdAuto, vm, nameof(vm.GenerateIdAuto));
 
         var labelSubtitleId = UiUtil.MakeLabel(lang.SubtitleId).WithMinWidth(labelWidth);
-        var textBoxSubtitleId = UiUtil.MakeTextBox(250, vm, nameof(vm.SubtitleId));
+        var textBoxSubtitleId = UiUtil.MakeTextBox(200, vm, nameof(vm.SubtitleId));
         var buttonGenerateId = UiUtil.MakeButton(lang.GenerateId, vm.GenerateSubtitleIdCommand);
         var panelSubtitleId = new StackPanel
         {
@@ -41,7 +41,7 @@ public class DCinemaSmpte2014PropertiesWindow : Window
         };
 
         var labelMovieTitle = UiUtil.MakeLabel(lang.MovieTitle).WithMinWidth(labelWidth);
-        var textBoxMovieTitle = UiUtil.MakeTextBox(350, vm, nameof(vm.MovieTitle));
+        var textBoxMovieTitle = UiUtil.MakeTextBox(300, vm, nameof(vm.MovieTitle));
         var panelMovieTitle = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -52,26 +52,18 @@ public class DCinemaSmpte2014PropertiesWindow : Window
 
         var labelReelNumber = UiUtil.MakeLabel(lang.ReelNumber).WithMinWidth(labelWidth);
         var numericUpDownReelNumber = UiUtil.MakeNumericUpDownInt(1, 250, 1, 120, vm, nameof(vm.ReelNumber));
+        var labelLanguage = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(80);
+        var comboBoxLanguage = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
         var panelReelNumber = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Spacing = 10,
-            Children = { labelReelNumber, numericUpDownReelNumber }
-        };
-
-        var labelLanguage = UiUtil.MakeLabel(Se.Language.General.Language).WithMinWidth(labelWidth);
-        var comboBoxLanguage = UiUtil.MakeComboBox<string>(vm.Languages, vm, nameof(vm.SelectedLanguage)).WithMinWidth(100);
-        var panelLanguage = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Spacing = 10,
-            Children = { labelLanguage, comboBoxLanguage }
+            Children = { labelReelNumber, numericUpDownReelNumber, labelLanguage, comboBoxLanguage }
         };
 
         var labelIssueDate = UiUtil.MakeLabel(lang.IssueDate).WithMinWidth(labelWidth);
-        var textBoxIssueDate = UiUtil.MakeTextBox(250, vm, nameof(vm.IssueDate));
+        var textBoxIssueDate = UiUtil.MakeTextBox(200, vm, nameof(vm.IssueDate));
         var buttonToday = UiUtil.MakeButton(lang.Now, vm.SetTodayIssueDateCommand);
         var panelIssueDate = new StackPanel
         {
@@ -82,23 +74,15 @@ public class DCinemaSmpte2014PropertiesWindow : Window
         };
 
         var labelEditRate = UiUtil.MakeLabel(lang.EditRate).WithMinWidth(labelWidth);
-        var textBoxEditRate = UiUtil.MakeTextBox(100, vm, nameof(vm.EditRate));
+        var textBoxEditRate = UiUtil.MakeTextBox(80, vm, nameof(vm.EditRate));
+        var labelTimeCodeRate = UiUtil.MakeLabel(lang.TimeCodeRate).WithMinWidth(100);
+        var comboBoxTimeCodeRate = UiUtil.MakeComboBox<string>(vm.TimeCodeRates, vm, nameof(vm.SelectedTimeCodeRate)).WithMinWidth(80);
         var panelEditRate = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Spacing = 10,
-            Children = { labelEditRate, textBoxEditRate }
-        };
-
-        var labelTimeCodeRate = UiUtil.MakeLabel(lang.TimeCodeRate).WithMinWidth(labelWidth);
-        var comboBoxTimeCodeRate = UiUtil.MakeComboBox<string>(vm.TimeCodeRates, vm, nameof(vm.SelectedTimeCodeRate)).WithMinWidth(100);
-        var panelTimeCodeRate = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Spacing = 10,
-            Children = { labelTimeCodeRate, comboBoxTimeCodeRate }
+            Children = { labelEditRate, textBoxEditRate, labelTimeCodeRate, comboBoxTimeCodeRate }
         };
 
         var labelStartTime = UiUtil.MakeLabel(lang.StartTime).WithMinWidth(labelWidth);
@@ -113,7 +97,7 @@ public class DCinemaSmpte2014PropertiesWindow : Window
 
         // Font section
         var labelFontId = UiUtil.MakeLabel(lang.FontId).WithMinWidth(labelWidth);
-        var textBoxFontId = UiUtil.MakeTextBox(250, vm, nameof(vm.FontId));
+        var textBoxFontId = UiUtil.MakeTextBox(200, vm, nameof(vm.FontId));
         var panelFontId = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -123,7 +107,7 @@ public class DCinemaSmpte2014PropertiesWindow : Window
         };
 
         var labelFontUri = UiUtil.MakeLabel(lang.FontUri).WithMinWidth(labelWidth);
-        var textBoxFontUri = UiUtil.MakeTextBox(250, vm, nameof(vm.FontUri));
+        var textBoxFontUri = UiUtil.MakeTextBox(200, vm, nameof(vm.FontUri));
         var buttonGenerateFontUri = UiUtil.MakeButton(lang.Generate, vm.GenerateFontUriCommand);
         var panelFontUri = new StackPanel
         {
@@ -189,44 +173,28 @@ public class DCinemaSmpte2014PropertiesWindow : Window
 
         var labelFontSize = UiUtil.MakeLabel(lang.FontSize).WithMinWidth(labelWidth);
         var numericUpDownFontSize = UiUtil.MakeNumericUpDownInt(0, 250, 42, 120, vm, nameof(vm.FontSize));
+        var labelTopBottomMargin = UiUtil.MakeLabel(lang.TopBottomMargin).WithMinWidth(100);
+        var numericUpDownTopBottomMargin = UiUtil.MakeNumericUpDownInt(1, 50, 8, 120, vm, nameof(vm.TopBottomMargin));
         var panelFontSize = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Spacing = 10,
-            Children = { labelFontSize, numericUpDownFontSize }
-        };
-
-        var labelTopBottomMargin = UiUtil.MakeLabel(lang.TopBottomMargin).WithMinWidth(labelWidth);
-        var numericUpDownTopBottomMargin = UiUtil.MakeNumericUpDownInt(1, 50, 8, 120, vm, nameof(vm.TopBottomMargin));
-        var panelTopBottomMargin = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Spacing = 10,
-            Children = { labelTopBottomMargin, numericUpDownTopBottomMargin }
+            Children = { labelFontSize, numericUpDownFontSize, labelTopBottomMargin, numericUpDownTopBottomMargin }
         };
 
         var labelFadeUpTime = UiUtil.MakeLabel(lang.FadeUpTime).WithMinWidth(labelWidth);
         var numericUpDownFadeUpTime = UiUtil.MakeNumericUpDownInt(0, 50, 0, 120, vm, nameof(vm.FadeUpTime));
         var labelFadeUpFrames = UiUtil.MakeLabel(lang.Frames);
+        var labelFadeDownTime = UiUtil.MakeLabel(lang.FadeDownTime).WithMinWidth(80);
+        var numericUpDownFadeDownTime = UiUtil.MakeNumericUpDownInt(0, 50, 0, 120, vm, nameof(vm.FadeDownTime));
+        var labelFadeDownFrames = UiUtil.MakeLabel(lang.Frames);
         var panelFadeUpTime = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             Spacing = 10,
-            Children = { labelFadeUpTime, numericUpDownFadeUpTime, labelFadeUpFrames }
-        };
-
-        var labelFadeDownTime = UiUtil.MakeLabel(lang.FadeDownTime).WithMinWidth(labelWidth);
-        var numericUpDownFadeDownTime = UiUtil.MakeNumericUpDownInt(0, 50, 0, 120, vm, nameof(vm.FadeDownTime));
-        var labelFadeDownFrames = UiUtil.MakeLabel(lang.Frames);
-        var panelFadeDownTime = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            Spacing = 10,
-            Children = { labelFadeDownTime, numericUpDownFadeDownTime, labelFadeDownFrames }
+            Children = { labelFadeUpTime, numericUpDownFadeUpTime, labelFadeUpFrames, labelFadeDownTime, numericUpDownFadeDownTime, labelFadeDownFrames }
         };
 
         // Font GroupBox
@@ -247,9 +215,7 @@ public class DCinemaSmpte2014PropertiesWindow : Window
                     panelFontEffect,
                     panelFontEffectColor,
                     panelFontSize,
-                    panelTopBottomMargin,
-                    panelFadeUpTime,
-                    panelFadeDownTime
+                    panelFadeUpTime
                 }
             }
         };
@@ -266,10 +232,8 @@ public class DCinemaSmpte2014PropertiesWindow : Window
                     panelSubtitleId,
                     panelMovieTitle,
                     panelReelNumber,
-                    panelLanguage,
                     panelIssueDate,
                     panelEditRate,
-                    panelTimeCodeRate,
                     panelStartTime,
                     fontGroupBox
                 }
