@@ -11306,6 +11306,12 @@ public partial class MainViewModel :
                         // and may not have completed by the time OnLoaded runs so wait and recheck the flag
                         await Task.Delay(100);
 
+                        // Check if file was opened via activation (e.g., from Finder on macOS)
+                        if (Program.FileOpenedViaActivation)
+                        {
+                            return;
+                        }
+
                         bool skipLoadVideo = false;
                         _videoFileName = first.VideoFileName;
                         await Task.Delay(25);
