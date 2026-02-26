@@ -8,7 +8,6 @@ using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Controls.VideoPlayer;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
-using SkiaSharp;
 using System;
 using System.IO;
 using System.Threading.Tasks;

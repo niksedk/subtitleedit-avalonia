@@ -68,7 +68,7 @@ public class FfmpegGenerator
     /// <summary>
     /// Generate ffmpeg parameters for a video with a burned-in Advanced Sub Station Alpha subtitle.
     /// </summary>
-    public static string GenerateHardcodedVideoFile(string inputVideoFileName, string assaSubtitleFileName, string outputVideoFileName, int width, int height, string videoEncoding, string preset, string pixelFormat, string crf, string audioEncoding, bool forceStereo, string sampleRate, string tune, string audioBitRate, string pass, string twoPassBitRate, string? cutStart = null, string? cutEnd = null, string audioCutTrack = "")
+    public static string GenerateHardcodedVideoFile(string inputVideoFileName, string assaSubtitleFileName, string outputVideoFileName, int width, int height, string videoEncoding, string preset, string pixelFormat, string crf, string audioEncoding, bool forceStereo, string sampleRate, string tune, string audioBitRate, string pass, string twoPassBitRate, string? cutStart = null, string? cutEnd = null, string audioCutTrack = "", Features.Video.BurnIn.BurnInLogo? burnInLogo = null)
     {
         if (width % 2 == 1)
         {
@@ -213,8 +213,31 @@ public class FfmpegGenerator
             cutEnd = " ";
         }
 
+        // Add logo overlay if specified
+        var logoInput = string.Empty;
+        var filterParameter = $"-vf \"scale={width}:{height},ass={Path.GetFileName(assaSubtitleFileName)}\"";
+
+        if (burnInLogo != null && !string.IsNullOrEmpty(burnInLogo.LogoFileName) && File.Exists(burnInLogo.LogoFileName))
+        {
+            logoInput = $" -i \"{burnInLogo.LogoFileName}\"";
+
+            // Convert alpha percentage (0-100) to 0.0-1.0
+            var alphaValue = (burnInLogo.Alpha / 100.0).ToString(CultureInfo.InvariantCulture);
+            var sizePercent = burnInLogo.Size.ToString(CultureInfo.InvariantCulture);
+
+            // Build filter_complex for video with logo overlay
+            // 1. Scale main video and apply subtitles
+            // 2. Scale logo by size percentage and apply alpha transparency
+            // 3. Overlay logo at specified X, Y position
+            var filterComplex = $"[0:v]scale={width}:{height},ass={Path.GetFileName(assaSubtitleFileName)}[withsubs];" +
+                               $"[1:v]scale=iw*{sizePercent}/100:ih*{sizePercent}/100,format=rgba,colorchannelmixer=aa={alphaValue}[logo];" +
+                               $"[withsubs][logo]overlay={burnInLogo.X}:{burnInLogo.Y}";
+
+            filterParameter = $"-filter_complex \"{filterComplex}\"";
+        }
+
         return
-            $"{cutStart}-i \"{inputVideoFileName}\"{cutEnd} -vf \"scale={width}:{height},ass={Path.GetFileName(assaSubtitleFileName)}\" -g 30 -bf 2 -s {width}x{height} {videoEncodingSettings} {passSettings} {presetSettings} {crfSettings} {pixelFormat} {audioSettings}{tuneParameter} -use_editlist 0 -movflags +faststart {outputVideoFileName}";
+            $"{cutStart}-i \"{inputVideoFileName}\"{logoInput}{cutEnd} {filterParameter} -g 30 -bf 2 -s {width}x{height} {videoEncodingSettings} {passSettings} {presetSettings} {crfSettings} {pixelFormat} {audioSettings}{tuneParameter} -use_editlist 0 -movflags +faststart {outputVideoFileName}";
     }
 
     private static Process GetFFmpegProcess(string imageFileName, string outputFileName, int videoWidth, int videoHeight, int seconds, decimal frameRate, bool addTimeCode = false, string addTimeColor = "white")

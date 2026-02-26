@@ -655,7 +655,8 @@ public partial class BurnInViewModel : ObservableObject
             jobItem.VideoBitRate,
             cutStart,
             cutEnd,
-            audioCutTracks);
+            audioCutTracks,
+            BurnInLogo);
 
         if (PromptForFfmpegParameters)
         {
