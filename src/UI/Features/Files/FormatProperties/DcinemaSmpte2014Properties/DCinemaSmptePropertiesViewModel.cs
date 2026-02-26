@@ -17,8 +17,10 @@ using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
 
-public partial class DCinemaSmpte2014PropertiesViewModel : ObservableObject
+public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 {
+    [ObservableProperty] private string _windowTitle = string.Empty;
+
     [ObservableProperty] private ObservableCollection<string> _languages = null!;
     [ObservableProperty] private ObservableCollection<string> _timeCodeRates = null!;
     [ObservableProperty] private ObservableCollection<string> _fontEffects = null!;
@@ -51,7 +53,7 @@ public partial class DCinemaSmpte2014PropertiesViewModel : ObservableObject
 
     private readonly IFileHelper _fileHelper;
 
-    public DCinemaSmpte2014PropertiesViewModel(IFileHelper fileHelper)
+    public DCinemaSmptePropertiesViewModel(IFileHelper fileHelper)
     {
         _fileHelper = fileHelper;
 
@@ -379,5 +381,10 @@ public partial class DCinemaSmpte2014PropertiesViewModel : ObservableObject
             e.Handled = true;
             Window?.Close();
         }
+    }
+
+    internal void Initialize(SubtitleFormat format)
+    {
+        WindowTitle = string.Format(Se.Language.File.XProperties, format.Name);
     }
 }

@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -10,7 +11,7 @@ public class TmpegEncXmlPropertiesWindow : Window
     public TmpegEncXmlPropertiesWindow(TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.File.TmpegEncXmlProperties;
+        Title = string.Format(Se.Language.File.XProperties, new TmpegEncXml().Name);
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         MinWidth = 400;

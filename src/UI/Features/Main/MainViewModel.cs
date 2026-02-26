@@ -1545,7 +1545,10 @@ public partial class MainViewModel :
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffectColor = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffectColor.ToHex();
             Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontSize = Configuration.Settings.SubtitleSettings.CurrentDCinemaFontSize;
 
-            var result = await ShowDialogAsync<DCinemaSmpte2014PropertiesWindow, DCinemaSmpte2014PropertiesViewModel>(vm => { });
+            var result = await ShowDialogAsync<DCinemaSmptePropertiesWindow, DCinemaSmptePropertiesViewModel>(vm => 
+            {
+                vm.Initialize(format);
+            });
             SetLibSeSettings();
         }
 

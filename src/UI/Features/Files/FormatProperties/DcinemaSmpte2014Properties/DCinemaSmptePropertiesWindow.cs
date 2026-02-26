@@ -10,12 +10,16 @@ using System;
 
 namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
 
-public class DCinemaSmpte2014PropertiesWindow : Window
+public class DCinemaSmptePropertiesWindow : Window
 {
-    public DCinemaSmpte2014PropertiesWindow(DCinemaSmpte2014PropertiesViewModel vm)
+    public DCinemaSmptePropertiesWindow(DCinemaSmptePropertiesViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.File.PropertiesDCinema.Title;
+        Bind(Window.TitleProperty, new Binding(nameof(vm.WindowTitle))
+        {
+            Source = vm,
+            Mode = BindingMode.OneWay,
+        });
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
         MinWidth = 550;

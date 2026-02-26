@@ -262,7 +262,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<CopyPasteTranslateViewModel>();
         collection.AddTransient<CustomContinuationStyleViewModel>();
         collection.AddTransient<CutVideoViewModel>();
-        collection.AddTransient<DCinemaSmpte2014PropertiesViewModel>();
+        collection.AddTransient<DCinemaSmptePropertiesViewModel>();
         collection.AddTransient<DownloadFfmpegViewModel>();
         collection.AddTransient<DownloadGoogleLensOcrViewModel>();
         collection.AddTransient<DownloadLibMpvViewModel>();

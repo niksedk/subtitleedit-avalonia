@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
 
 public class LanguageFile
 {
@@ -30,7 +32,7 @@ public class LanguageFile
     public string PickMatroskaTrackX { get; set; }
     public string RosettaProperties { get; set; }
     public string RosettaFontSize { get; set; }
-    public string TmpegEncXmlProperties { get; set; }
+    public string XProperties { get; set; }
 
     public LanguageFile()
     {
@@ -54,6 +56,6 @@ public class LanguageFile
         PickMatroskaTrackX = "Pick Matroska track - {0}";
         RosettaProperties = "Timed Text Rosetta IMSC properties";
         RosettaFontSize = "Font size (row height)";
-        TmpegEncXmlProperties = "TMPGEnc VME properties";
+        XProperties = "{0} properties";
     }
 }

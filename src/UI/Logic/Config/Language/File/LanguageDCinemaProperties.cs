@@ -1,4 +1,6 @@
-﻿namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
+﻿using System;
+
+namespace Nikse.SubtitleEdit.Logic.Config.Language.File;
 
 public class LanguageDCinemaProperties
 {
@@ -28,6 +30,7 @@ public class LanguageDCinemaProperties
     public string ChooseColor { get; set; }
     public string Generate { get; set; }
     public string GenerateNewIdOnSave { get; set; }
+    public IFormatProvider? TitleX { get; internal set; }
 
     public LanguageDCinemaProperties()
     { 
