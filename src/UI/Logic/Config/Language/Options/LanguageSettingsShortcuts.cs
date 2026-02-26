@@ -1,4 +1,4 @@
-﻿using Nikse.SubtitleEdit.Features.Main;
+﻿﻿using Nikse.SubtitleEdit.Features.Main;
 using System;
 
 namespace Nikse.SubtitleEdit.Logic.Config.Language.Options;
@@ -260,6 +260,7 @@ public class LanguageSettingsShortcuts
     public string AssaVideoColorPicker { get; set; }
     public string RecalculateDurationSelectedLines { get; set; }
     public string ToggleWaveformAndSpectrogramHeight { get; set; }
+    public string ToggleSpectrogramStyle { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -522,5 +523,6 @@ public class LanguageSettingsShortcuts
         AssaVideoColorPicker = "ASSA Video color picker";
         RecalculateDurationSelectedLines = "Recalculate duration (selected lines)";
         ToggleWaveformAndSpectrogramHeight = "Toggle waveform/spectrogram divided height";
+        ToggleSpectrogramStyle = "Toggle spectrogram style";
     }
 }

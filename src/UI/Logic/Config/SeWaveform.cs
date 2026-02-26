@@ -89,12 +89,12 @@ public class SeWaveform
         ShowToolbarHorizontalZoom = true;
         ShowToolbarVideoPositionSlider = true;
         ShowToolbarPlaybackSpeed = true;
-        SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
-        LastDisplayMode = WaveformDisplayMode.OnlyWaveform.ToString();
+        SpectrogramStyle = nameof(SeSpectrogramStyle.Classic);
+        LastDisplayMode = nameof(WaveformDisplayMode.OnlyWaveform);
         WaveformDrawStyle = Controls.AudioVisualizerControl.WaveformDrawStyle.Fancy.ToString();
         RightClickSelectsSubtitle = true;
         SingleClickAction = WaveformSingleClickActionType.SetVideoPositionAndPauseAndSelectSubtitle.ToString();
-        DoubleClickAction = WaveformDoubleClickActionType.None.ToString();
+        DoubleClickAction = nameof(WaveformDoubleClickActionType.None);
 
         GuessTimeCodeStartFromBeginning = false;
         GuessTimeCodeScanBlockSize = 100;

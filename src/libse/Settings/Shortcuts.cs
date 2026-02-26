@@ -404,6 +404,7 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string Waveform1000MsRight { get; set; }
         public string WaveformAudioToTextVosk { get; set; }
         public string WaveformAudioToTextWhisper { get; set; }
+        public string WaveformToggleSpectrogramStyle { get; set; }
         public string MainCheckFixTimingViaShotChanges { get; set; }
         public string MainTranslateGoogleIt { get; set; }
         public string MainTranslateGoogleTranslateIt { get; set; }

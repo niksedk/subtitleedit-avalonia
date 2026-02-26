@@ -2432,6 +2432,43 @@ public partial class MainViewModel :
         AudioVisualizer.ResetCache();
         _updateAudioVisualizer = true;
     }
+    
+    [RelayCommand]
+    private async Task SpectrogramToggleStyle()
+    {
+        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        {
+            return;
+        }
+
+        var currentStyle = Se.Settings.Waveform.SpectrogramStyle;
+        
+        // Cycle through available spectrogram styles
+        if (currentStyle == SeSpectrogramStyle.Classic.ToString())
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicViridis.ToString();
+        }
+        else if (currentStyle == SeSpectrogramStyle.ClassicViridis.ToString())
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicPlasma.ToString();
+        }
+        else if (currentStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicInferno.ToString();
+        }
+        else if (currentStyle == SeSpectrogramStyle.ClassicInferno.ToString())
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicTurbo.ToString();
+        }
+        else // ClassicTurbo or any other value, cycle back to Classic
+        {
+            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
+        }
+        
+        AudioVisualizer.ResetCache();
+        _updateAudioVisualizer = true;
+    }
+
 
 
     [RelayCommand]

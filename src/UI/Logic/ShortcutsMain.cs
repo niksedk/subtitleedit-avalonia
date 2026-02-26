@@ -329,6 +329,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ShowAssaAttachmentsCommand), Se.Language.Options.Shortcuts.AssaAttachments },
         { nameof(MainViewModel.RecalculateDurationSelectedLinesCommand), Se.Language.Options.Shortcuts.RecalculateDurationSelectedLines },
         { nameof(MainViewModel.WaveformToggleWaveformSpectrogramHeightCommand), Se.Language.Options.Shortcuts.ToggleWaveformAndSpectrogramHeight },
+        { nameof(MainViewModel.SpectrogramToggleStyleCommand), Se.Language.Options.Shortcuts.ToggleSpectrogramStyle },
     };
 
     private static List<AvailableShortcut> GetAllAvailableShortcuts(MainViewModel vm)
@@ -605,6 +606,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ShowAssaAttachmentsCommand, nameof(vm.ShowAssaAttachmentsCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RecalculateDurationSelectedLinesCommand, nameof(vm.RecalculateDurationSelectedLinesCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.WaveformToggleWaveformSpectrogramHeightCommand, nameof(vm.WaveformToggleWaveformSpectrogramHeightCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.SpectrogramToggleStyleCommand, nameof(vm.SpectrogramToggleStyleCommand), ShortcutCategory.General);
 
         return shortcuts;
     }
