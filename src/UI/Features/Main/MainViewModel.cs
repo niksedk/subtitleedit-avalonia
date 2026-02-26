@@ -7465,6 +7465,11 @@ public partial class MainViewModel :
 
         SelectAndScrollToRow(idx);
         vp.Position = Subtitles[idx].StartTime.TotalSeconds;
+
+        if (AudioVisualizer != null && AudioVisualizer.WavePeaks != null)
+        {
+            AudioVisualizerCenterOnPositionIfNeeded(vp.Position);
+        }
     }
 
     [RelayCommand]
@@ -7488,6 +7493,11 @@ public partial class MainViewModel :
 
         vp.Position = Subtitles[idx].StartTime.TotalSeconds;
         SelectAndScrollToRow(idx);
+
+        if (AudioVisualizer != null && AudioVisualizer.WavePeaks != null)
+        {
+            AudioVisualizerCenterOnPositionIfNeeded(vp.Position);
+        }
     }
 
     [RelayCommand]
@@ -7980,6 +7990,12 @@ public partial class MainViewModel :
         }
 
         vp.Position = s.StartTime.TotalSeconds;
+
+        if (AudioVisualizer != null && AudioVisualizer.WavePeaks != null)
+        {
+            AudioVisualizerCenterOnPositionIfNeeded(s.StartTime.TotalSeconds);
+        }
+
         _updateAudioVisualizer = true;
     }
 
@@ -7994,6 +8010,12 @@ public partial class MainViewModel :
         }
 
         vp.Position = s.EndTime.TotalSeconds;
+
+        if (AudioVisualizer != null && AudioVisualizer.WavePeaks != null)
+        {
+            AudioVisualizerCenterOnPositionIfNeeded(s.EndTime.TotalSeconds);
+        }
+
         _updateAudioVisualizer = true;
     }
 
