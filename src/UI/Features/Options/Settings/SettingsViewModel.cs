@@ -1527,8 +1527,8 @@ public partial class SettingsViewModel : ObservableObject
 
             if (FavoriteSubtitleFormats.Count > 0)
             {
-                SelectedFavoriteSubtitleFormat = index < FavoriteSubtitleFormats.Count 
-                    ? FavoriteSubtitleFormats[index] 
+                SelectedFavoriteSubtitleFormat = index < FavoriteSubtitleFormats.Count
+                    ? FavoriteSubtitleFormats[index]
                     : FavoriteSubtitleFormats[FavoriteSubtitleFormats.Count - 1];
             }
         }
@@ -1613,11 +1613,11 @@ public partial class SettingsViewModel : ObservableObject
 
         if (Directory.Exists(Se.SpectrogramsFolder))
         {
-            foreach (var directory in Directory.GetDirectories(Se.SpectrogramsFolder).ToList())
+            foreach (var file in Directory.GetFiles(Se.SpectrogramsFolder, "*.spectrogram").ToList())
             {
                 try
                 {
-                    Directory.Delete(directory, recursive: true);
+                    File.Delete(file);
                 }
                 catch
                 {
@@ -1630,7 +1630,7 @@ public partial class SettingsViewModel : ObservableObject
     private static List<string> GetWaveformAndSpecgtrogramFiles()
     {
         var files = Directory.GetFiles(Se.WaveformsFolder, "*.wav").ToList();
-        files.AddRange(Directory.GetFiles(Se.SpectrogramsFolder, "*.png", SearchOption.AllDirectories));
+        files.AddRange(Directory.GetFiles(Se.SpectrogramsFolder, "*.spectrogram", SearchOption.AllDirectories));
         return files;
     }
 

@@ -36,5 +36,20 @@ public class SeDCinemaSmpte
         DCinemaFadeUpTime = 0;
         DCinemaFadeDownTime = 0;
         DCinemaAutoGenerateSubtitleId = true;
+
+        CurrentDCinemaSubtitleId = string.Empty;
+        CurrentDCinemaMovieTitle = string.Empty;
+        CurrentDCinemaReelNumber = string.Empty;
+        CurrentDCinemaIssueDate = string.Empty;
+        CurrentDCinemaLanguage = string.Empty;
+        CurrentDCinemaEditRate = string.Empty;
+        CurrentDCinemaTimeCodeRate = string.Empty;
+        CurrentDCinemaStartTime = string.Empty;
+        CurrentDCinemaFontId = string.Empty;
+        CurrentDCinemaFontUri = string.Empty;
+        CurrentDCinemaFontColor = string.Empty;
+        CurrentDCinemaFontEffect = string.Empty;
+        CurrentDCinemaFontEffectColor = string.Empty;
+        CurrentDCinemaFontSize = 0;
     }
 }

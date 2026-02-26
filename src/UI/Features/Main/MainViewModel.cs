@@ -2432,44 +2432,53 @@ public partial class MainViewModel :
         AudioVisualizer.ResetCache();
         _updateAudioVisualizer = true;
     }
-    
+
     [RelayCommand]
     private async Task SpectrogramToggleStyle()
     {
-        if (Window == null || AudioVisualizer?.WavePeaks == null)
+        if (Window == null || AudioVisualizer == null || AudioVisualizer?.WavePeaks == null || string.IsNullOrEmpty(_videoFileName))
         {
             return;
         }
 
         var currentStyle = Se.Settings.Waveform.SpectrogramStyle;
-        
+
         // Cycle through available spectrogram styles
-        if (currentStyle == SeSpectrogramStyle.Classic.ToString())
+        if (currentStyle == nameof(SeSpectrogramStyle.Classic))
         {
-            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicViridis.ToString();
+            Se.Settings.Waveform.SpectrogramStyle = nameof(SeSpectrogramStyle.ClassicViridis);
         }
-        else if (currentStyle == SeSpectrogramStyle.ClassicViridis.ToString())
+        else if (currentStyle == nameof(SeSpectrogramStyle.ClassicViridis))
         {
-            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicPlasma.ToString();
+            Se.Settings.Waveform.SpectrogramStyle = nameof(SeSpectrogramStyle.ClassicPlasma);
         }
-        else if (currentStyle == SeSpectrogramStyle.ClassicPlasma.ToString())
+        else if (currentStyle == nameof(SeSpectrogramStyle.ClassicPlasma))
         {
-            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicInferno.ToString();
+            Se.Settings.Waveform.SpectrogramStyle = nameof(SeSpectrogramStyle.ClassicInferno);
         }
-        else if (currentStyle == SeSpectrogramStyle.ClassicInferno.ToString())
+        else if (currentStyle == nameof(SeSpectrogramStyle.ClassicInferno))
         {
-            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.ClassicTurbo.ToString();
+            Se.Settings.Waveform.SpectrogramStyle = nameof(SeSpectrogramStyle.ClassicTurbo);
         }
         else // ClassicTurbo or any other value, cycle back to Classic
         {
-            Se.Settings.Waveform.SpectrogramStyle = SeSpectrogramStyle.Classic.ToString();
+            Se.Settings.Waveform.SpectrogramStyle = nameof(SeSpectrogramStyle.Classic);
         }
-        
-        AudioVisualizer.ResetCache();
-        _updateAudioVisualizer = true;
+
+        var spectrogramFileName = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
+        if (File.Exists(spectrogramFileName))
+        {
+            var spectrogram = SpectrogramData2.FromDisk(spectrogramFileName);
+            if (spectrogram != null)
+            {
+                spectrogram.Load();
+                AudioVisualizer.SetSpectrogram(spectrogram);
+            }
+
+            AudioVisualizer.ResetCache();
+            _updateAudioVisualizer = true;
+        }
     }
-
-
 
     [RelayCommand]
     private async Task ShowWaveformGuessTimeCodes()
@@ -4565,10 +4574,10 @@ public partial class MainViewModel :
                 AudioVisualizer.UseSmpteDropFrameTime();
             }
 
-            var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
-            if (Directory.Exists(spectrogramFolder))
+            var spectrogramFileName = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
+            if (File.Exists(spectrogramFileName))
             {
-                var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+                var spectrogram = SpectrogramData2.FromDisk(spectrogramFileName);
                 if (spectrogram != null)
                 {
                     spectrogram.Load();
@@ -5561,7 +5570,7 @@ public partial class MainViewModel :
                     SettingsViewModel.DeleteWaveformAndSpectrogramFiles();
 
                     var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
-                    var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(_videoFileName, _audioTrack?.FfIndex ?? -1);
+                    var spectrogramFileName = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFileName(_videoFileName, _audioTrack?.FfIndex ?? -1);
                     if (!File.Exists(peakWaveFileName))
                     {
                         if (FfmpegHelper.IsFfmpegInstalled())
@@ -5572,7 +5581,7 @@ public partial class MainViewModel :
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             Task.Run(async () =>
                             {
-                                await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, _videoFileName);
+                                await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFileName, _videoFileName);
                             });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                         }
@@ -11540,8 +11549,8 @@ public partial class MainViewModel :
     {
         var trackNumber = _audioTrack?.FfIndex ?? -1;
         var peakWaveFileName = WavePeakGenerator2.GetPeakWaveFileName(videoFileName, trackNumber);
-        var spectrogramFolder = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFolder(videoFileName, trackNumber);
-        if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !Directory.Exists(spectrogramFolder)))
+        var spectrogramFileName = WavePeakGenerator2.SpectrogramDrawer.GetSpectrogramFileName(videoFileName, trackNumber);
+        if (!File.Exists(peakWaveFileName) || (Se.Settings.Waveform.GenerateSpectrogram && !File.Exists(spectrogramFileName)))
         {
             if (FfmpegHelper.IsFfmpegInstalled())
             {
@@ -11549,7 +11558,7 @@ public partial class MainViewModel :
                 var process = WaveFileExtractor.GetCommandLineProcess(videoFileName, trackNumber, tempWaveFileName,
                     Configuration.Settings.General.VlcWaveTranscodeSettings, out _);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFolder, videoFileName); });
+                Task.Run(async () => { await ExtractWaveformAndSpectrogramAndShotChanges(process, tempWaveFileName, peakWaveFileName, spectrogramFileName, videoFileName); });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
         }
@@ -11568,7 +11577,7 @@ public partial class MainViewModel :
                         AudioVisualizer.UseSmpteDropFrameTime();
                     }
 
-                    var spectrogram = SpectrogramData2.FromDisk(spectrogramFolder);
+                    var spectrogram = SpectrogramData2.FromDisk(spectrogramFileName);
                     if (spectrogram != null)
                     {
                         spectrogram.Load();

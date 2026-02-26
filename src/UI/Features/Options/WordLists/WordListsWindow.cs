@@ -80,7 +80,7 @@ public class WordListsWindow : Window
         var labelTitle = UiUtil.MakeLabel(Se.Language.Options.WordLists.NameAndIgnoreList).WithBold();
         var labelTitleBadgeCount = new Border
         {
-            Background = UiUtil.GetBorderBrush(),                // badge background
+            Background = UiUtil.GetBorderBrush(),     // badge background
             CornerRadius = new CornerRadius(10),      // makes it pill-like
             Padding = new Thickness(6, 0, 6, 0),      // spacing around text
             Margin = new Thickness(4, 0, 0, 0),

@@ -966,7 +966,7 @@ public class WavePeakGenerator2 : IDisposable
         private readonly double[] _magnitude1;
         private readonly double[] _magnitude2;
 
-        public static string GetSpectrogramFolder(string videoFileName, int trackNumber = -1)
+        public static string GetSpectrogramFileName(string videoFileName, int trackNumber = -1)
         {
             var dir = Se.SpectrogramsFolder;
             if (!Directory.Exists(dir))
