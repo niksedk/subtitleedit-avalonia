@@ -5,7 +5,6 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
-using System.Collections.Generic;
 
 namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
@@ -16,7 +15,7 @@ public class BurnInLogoWindow : Window
     public BurnInLogoWindow(BurnInLogoViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
-        Title = Se.Language.General.Effect;
+        Title = Se.Language.General.Logo;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
 

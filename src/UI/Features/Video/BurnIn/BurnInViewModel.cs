@@ -94,6 +94,7 @@ public partial class BurnInViewModel : ObservableObject
     [ObservableProperty] private bool _showAssaOnlyBox;
     [ObservableProperty] private string _targetVideoBitRateInfo;
     [ObservableProperty] private string _displayEffect;
+    [ObservableProperty] private string _logoInfo;
     [ObservableProperty] private bool _promptForFfmpegParameters;
 
     public Window? Window { get; set; }
@@ -207,6 +208,7 @@ public partial class BurnInViewModel : ObservableObject
         OutputFolder = string.Empty;
         TargetVideoBitRateInfo = string.Empty;
         DisplayEffect = string.Empty;
+        LogoInfo = string.Empty;
 
         _selectedEffects = new List<BurnInEffectItem>();
         _log = new StringBuilder();
@@ -859,6 +861,20 @@ public partial class BurnInViewModel : ObservableObject
 
         // Clamp the font size between minSize and maxSize
         return Math.Clamp(fontSize, minSize, maxSize);
+    }
+
+    [RelayCommand]
+    private async Task ShowLogo()
+    {
+        if (Window == null || VideoWidth == null || VideoHeight == null)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<BurnInLogoWindow, BurnInLogoViewModel>(Window!, vm =>
+        {
+            vm.Initialize(VideoFileName, VideoWidth.Value, VideoHeight.Value);
+        });
     }
 
     [RelayCommand]

@@ -634,6 +634,7 @@ public class LanguageGeneral
     public string RecentFiles { get; set; }
     public string Shortcuts { get; set; }
     public string Models { get; set; }
+    public string Logo { get; set; }
 
     public LanguageGeneral()
     {
@@ -1267,5 +1268,6 @@ public class LanguageGeneral
         RecentFiles = "Recent files";
         Shortcuts = "Shortcuts";
         Models = "Models";
+        Logo = "Logo";
     }
 }

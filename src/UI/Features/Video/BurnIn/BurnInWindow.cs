@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
-using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
@@ -16,16 +15,12 @@ namespace Nikse.SubtitleEdit.Features.Video.BurnIn;
 
 public class BurnInWindow : Window
 {
-    private readonly BurnInViewModel _vm;
-
     public BurnInWindow(BurnInViewModel vm)
     {
         UiUtil.InitializeWindow(this, GetType().Name);
         Title = Se.Language.Video.BurnIn.Title;
         SizeToContent = SizeToContent.WidthAndHeight;
         CanResize = false;
-        
-        _vm = vm;
         vm.Window = this;
         DataContext = vm;
 
@@ -112,6 +107,7 @@ public class BurnInWindow : Window
 
         Activated += delegate { buttonOk.Focus(); }; // hack to make OnKeyDown work
         Loaded += (_, _) => vm.Loaded();
+        KeyDown += (_, e) => vm.OnKeyDown(e);
     }
 
     private static Border MakeSubtitlesView(BurnInViewModel vm)
@@ -221,10 +217,26 @@ public class BurnInWindow : Window
             HorizontalAlignment = HorizontalAlignment.Left,
             Children =
             {
-                labelSelectedEffect,
                 buttonEffect,
+                labelSelectedEffect,
             }
-        };  
+        };
+
+        var labelLogo = UiUtil.MakeLabel(Se.Language.General.Logo);
+        var buttonLogo = UiUtil.MakeButtonBrowse(vm.ShowLogoCommand);
+        var labelLogoInfo = UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.DisplayEffect)).WithMarginRight(3);
+        var panelLogo = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Children =
+            {
+                buttonLogo,
+                labelLogoInfo,
+            }
+        };
+
 
         var grid = new Grid
         {
@@ -252,34 +264,34 @@ public class BurnInWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
+        var fontPanel = UiUtil.MakeHorizontalPanel(comboBoxFontName, checkBoxUseBold);
+
         grid.Add(labelFontName, 0, 0);
-        grid.Add(comboBoxFontName, 0, 1);
+        grid.Add(fontPanel, 0, 1);
 
         grid.Add(labelFontSizeFactor, 1, 0);
         grid.Add(panelFontSizeFactor, 1, 1);
 
-        grid.Add(checkBoxUseBold, 2, 1);
+        grid.Add(labelBoxType, 2, 0);
+        grid.Add(comboBoxBoxType, 2, 1);
 
-        grid.Add(labelBoxType, 3, 0);
-        grid.Add(comboBoxBoxType, 3, 1);
+        grid.Add(labelTextColor, 3, 0);
+        grid.Add(colorPickerTextColor, 3, 1);
 
-        grid.Add(labelTextColor, 4, 0);
-        grid.Add(colorPickerTextColor, 4, 1);
+        grid.Add(labelOutline, 4, 0);
+        grid.Add(panelBox, 4, 1);
 
-        grid.Add(labelOutline, 5, 0);
-        grid.Add(panelBox, 5, 1);
+        grid.Add(labelShadow, 5, 0);
+        grid.Add(panelShadow, 5, 1);
 
-        grid.Add(labelShadow, 6, 0);
-        grid.Add(panelShadow, 6, 1);
+        grid.Add(labelAlignment, 6, 0);
+        grid.Add(comboBoxAlignment, 6, 1);
 
-        grid.Add(labelAlignment, 7, 0);
-        grid.Add(comboBoxAlignment, 7, 1);
+        grid.Add(labelMargin, 7, 0);
+        grid.Add(panelMargin, 7, 1);
 
-        grid.Add(labelMargin, 8, 0);
-        grid.Add(panelMargin, 8, 1);
-
-        grid.Add(labelEffect, 9, 0);
-        grid.Add(panelEffect, 9, 1);
+        grid.Add(labelEffect, 8, 0);
+        grid.Add(panelEffect, 8, 1);
 
         var panel = new Grid
         {
@@ -295,7 +307,7 @@ public class BurnInWindow : Window
                 {
                     Content = "Current ASSA style will be used" + Environment.NewLine +
                     Environment.NewLine +
-                    "Change subtitle format if"+ Environment.NewLine + 
+                    "Change subtitle format if"+ Environment.NewLine +
                     "you want to set styles here",
                     FontWeight = FontWeight.Bold,
                     FontSize = 22,
@@ -306,7 +318,10 @@ public class BurnInWindow : Window
                 },
             }
         }.WithBindVisible(vm, nameof(vm.ShowAssaOnlyBox));
-        grid.Add(panel, 0, 0, 10, 2);
+        grid.Add(panel, 0, 0, 9, 2);
+
+        grid.Add(labelLogo, 10, 0);
+        grid.Add(panelLogo, 10, 1);
 
         return UiUtil.MakeBorderForControl(grid).WithMarginBottom(5).WithMarginRight(5);
     }
@@ -620,7 +635,7 @@ public class BurnInWindow : Window
             },
         };
         dataGrid.Bind(DataGrid.SelectedItemProperty, new Binding(nameof(vm.SelectedJobItem)) { Source = vm });
-        vm.BatchGrid = dataGrid;    
+        vm.BatchGrid = dataGrid;
 
         var buttonAdd = UiUtil.MakeButton(Se.Language.General.AddDotDotDot, vm.AddCommand);
         var buttonRemove = UiUtil.MakeButton(Se.Language.General.Remove, vm.RemoveCommand);
@@ -692,7 +707,7 @@ public class BurnInWindow : Window
     private static Border MakeTargetFileSizeView(BurnInViewModel vm)
     {
         var checkBoxUseTargetFileSize = UiUtil.MakeCheckBox(Se.Language.Video.BurnIn.TargetFileSize, vm, nameof(vm.UseTargetFileSize));
-        checkBoxUseTargetFileSize.IsCheckedChanged += (_,_) => vm.CheckBoxTargetFileChanged();
+        checkBoxUseTargetFileSize.IsCheckedChanged += (_, _) => vm.CheckBoxTargetFileChanged();
 
         var labelTargetFileSize = UiUtil.MakeLabel(Se.Language.Video.BurnIn.FileSizeMb);
         var numericUpDownTargetFileSize = UiUtil.MakeNumericUpDownInt(1, 1000_000_000, 0, 150, vm, nameof(vm.TargetFileSize));
@@ -829,11 +844,5 @@ public class BurnInWindow : Window
         grid.Add(statusText, 0, 0);
 
         return grid;
-    }
-
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        base.OnKeyDown(e);
-        _vm.OnKeyDown(e);
     }
 }
