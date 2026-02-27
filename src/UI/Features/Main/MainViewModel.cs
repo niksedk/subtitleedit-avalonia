@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
-using Avalonia.Input.Platform;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -22,7 +21,6 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
-using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Assa.AssaImageColorPicker;
@@ -43,6 +41,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.RosettaProperties;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
@@ -144,8 +143,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using AssaApplyCustomOverrideTagsViewModel = Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags.AssaApplyCustomOverrideTagsViewModel;
-using TmpegEncXmlPropertiesViewModel = Nikse.SubtitleEdit.Features.Files.FormatProperties.TmpegEncXmlProperties.TmpegEncXmlPropertiesViewModel;
 
 namespace Nikse.SubtitleEdit.Features.Main;
 
@@ -1603,6 +1600,21 @@ public partial class MainViewModel :
         }
 
         await ClipboardHelper.SetTextAsync(Window, _subtitleFileNameOriginal);
+    }
+
+    [RelayCommand]
+    private async Task CopyMsRelativeToCurrentSubtitleLineToClipboard()
+    {
+        var vp = GetVideoPlayerControl();
+        var selectedSubtitle = SelectedSubtitle;
+        if (Window == null || Window.Clipboard == null || vp == null || selectedSubtitle == null)
+        {
+            return;
+        }
+
+        var ms = (int)Math.Round(vp.Position * 1000 - selectedSubtitle.StartTime.TotalMilliseconds, MidpointRounding.AwayFromZero);
+
+        await ClipboardHelper.SetTextAsync(Window, ms.ToString(CultureInfo.InvariantCulture));
     }
 
     [RelayCommand]

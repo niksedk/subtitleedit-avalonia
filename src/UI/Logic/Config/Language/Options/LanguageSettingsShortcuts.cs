@@ -261,6 +261,7 @@ public class LanguageSettingsShortcuts
     public string RecalculateDurationSelectedLines { get; set; }
     public string ToggleWaveformAndSpectrogramHeight { get; set; }
     public string ToggleSpectrogramStyle { get; set; }
+    public string CopyMsRelativeToCurrentSubtitleLineToClipboard { get; set; }
 
     public LanguageSettingsShortcuts()
     {
@@ -524,5 +525,6 @@ public class LanguageSettingsShortcuts
         RecalculateDurationSelectedLines = "Recalculate duration (selected lines)";
         ToggleWaveformAndSpectrogramHeight = "Toggle waveform/spectrogram divided height";
         ToggleSpectrogramStyle = "Toggle spectrogram style";
+        CopyMsRelativeToCurrentSubtitleLineToClipboard = "Copy milliseconds relative to current subtitle line to clipboard";
     }
 }

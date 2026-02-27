@@ -97,6 +97,7 @@ public static class ShortcutsMain
         { nameof(MainViewModel.ExportBluRaySupCommand), Se.Language.Options.Shortcuts.ExportBluRaySup },
         { nameof(MainViewModel.ShowExportCustomTextFormatCommand), Se.Language.Options.Shortcuts.ExportCustomTextFormat },
         { nameof(MainViewModel.ShowExportPlainTextCommand), Se.Language.Options.Shortcuts.ExportPlainText },
+        { nameof(MainViewModel.CopyMsRelativeToCurrentSubtitleLineToClipboardCommand), Se.Language.Options.Shortcuts.CopyMsRelativeToCurrentSubtitleLineToClipboard },
 
         // Edit
         { nameof(MainViewModel.UndoCommand), Se.Language.General.Undo },
@@ -382,6 +383,7 @@ public static class ShortcutsMain
         AddShortcut(shortcuts, vm.ExportBluRaySupCommand, nameof(vm.ExportBluRaySupCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowExportCustomTextFormatCommand, nameof(vm.ShowExportCustomTextFormatCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.ShowExportPlainTextCommand, nameof(vm.ShowExportPlainTextCommand), ShortcutCategory.General);
+        AddShortcut(shortcuts, vm.CopyMsRelativeToCurrentSubtitleLineToClipboardCommand, nameof(vm.CopyMsRelativeToCurrentSubtitleLineToClipboardCommand), ShortcutCategory.General);
 
         AddShortcut(shortcuts, vm.UndoCommand, nameof(vm.UndoCommand), ShortcutCategory.General);
         AddShortcut(shortcuts, vm.RedoCommand, nameof(vm.RedoCommand), ShortcutCategory.General);
