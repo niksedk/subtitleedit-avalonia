@@ -1150,14 +1150,6 @@ public static partial class InitListViewAndEditBox
         var flyoutTextBox = new MenuFlyout();
         textEditor.ContextFlyout = flyoutTextBox;
         flyoutTextBox.Opening += vm.TextBoxContextOpening;
-        textEditor.PointerReleased += vm.ControlMacPointerReleased;
-        textEditor.PointerPressed += (sender, e) =>
-        {
-            if (e.GetCurrentPoint(textEditor).Properties.IsRightButtonPressed)
-            {
-                vm.StoreTextEditorPointerArgs(e);
-            }
-        };
 
         var cutMenuItem = new MenuItem { Header = Se.Language.General.Cut };
         cutMenuItem.Command = vm.TextBoxCutCommand;
@@ -1457,13 +1449,23 @@ public static partial class InitListViewAndEditBox
         };
 
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
-        
+
         if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
         {
             wrapper.SetAlignment(TextAlignment.Center);
         }
-        
+
         vm.EditTextBox = wrapper;
+
+        // Set up Mac context menu support
+        textEditor.PointerReleased += vm.ControlMacPointerReleased;
+        textEditor.PointerPressed += (sender, e) =>
+        {
+            if (e.GetCurrentPoint(textEditor).Properties.IsRightButtonPressed)
+            {
+                vm.StoreTextEditorPointerArgs(e);
+            }
+        };
 
         var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: false);
         helper.Initialize();
@@ -1553,13 +1555,23 @@ public static partial class InitListViewAndEditBox
         };
 
         var wrapper = new TextEditorWrapper(textEditor, textEditorBorder);
-        
+
         if (Se.Settings.Appearance.SubtitleTextBoxCenterText)
         {
             wrapper.SetAlignment(TextAlignment.Center);
         }
-        
+
         vm.EditTextBoxOriginal = wrapper;
+
+        // Set up Mac context menu support
+        textEditor.PointerReleased += vm.ControlMacPointerReleased;
+        textEditor.PointerPressed += (sender, e) =>
+        {
+            if (e.GetCurrentPoint(textEditor).Properties.IsRightButtonPressed)
+            {
+                vm.StoreTextEditorPointerArgs(e);
+            }
+        };
 
         var helper = new TextEditorBindingHelper(vm, textEditor, wrapper, textEditorBorder, defaultBorderBrush, focusedBorderBrush, isOriginal: true);
         helper.Initialize();
