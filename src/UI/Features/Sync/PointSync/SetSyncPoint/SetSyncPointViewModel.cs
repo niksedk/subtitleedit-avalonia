@@ -370,4 +370,9 @@ public partial class SetSyncPointViewModel : ObservableObject
             _updateAudioVisualizer = true;
         }
     }
+
+    internal void AudioVisualizerOnPrimarySingleClicked(object sender, ParagraphNullableEventArgs e)
+    {
+        VideoPlayerControl.Position = e.Seconds;
+    }
 }

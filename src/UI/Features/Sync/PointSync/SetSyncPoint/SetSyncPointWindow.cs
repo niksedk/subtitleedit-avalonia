@@ -46,6 +46,7 @@ public class SetSyncPointWindow : Window
             InvertMouseWheel = Se.Settings.Waveform.InvertMouseWheel,
         };
         vm.AudioVisualizer.OnVideoPositionChanged += vm.AudioVisualizerLeftPositionChanged;
+        vm.AudioVisualizer.OnPrimarySingleClicked += vm.AudioVisualizerOnPrimarySingleClicked;
 
         var comboBoxLeft = UiUtil.MakeComboBoxBindText(vm.Paragraphs, vm, nameof(SubtitleDisplayItem.Text), nameof(vm.SelectedParagraphIndex));
         comboBoxLeft.Width = double.NaN;
