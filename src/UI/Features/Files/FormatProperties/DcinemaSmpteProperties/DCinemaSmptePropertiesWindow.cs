@@ -8,7 +8,7 @@ using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
 
-namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
+namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 
 public class DCinemaSmptePropertiesWindow : Window
 {
@@ -132,6 +132,8 @@ public class DCinemaSmptePropertiesWindow : Window
         };
         panelFontColorPreview.Bind(Border.BackgroundProperty, new Binding(nameof(vm.FontColor))
         {
+            Source = vm,
+            Mode = BindingMode.OneWay,
             Converter = new ColorToBrushConverter()
         });
 
@@ -164,6 +166,8 @@ public class DCinemaSmptePropertiesWindow : Window
         };
         panelFontEffectColorPreview.Bind(Border.BackgroundProperty, new Binding(nameof(vm.FontEffectColor))
         {
+            Source = vm,
+            Mode = BindingMode.OneWay,
             Converter = new ColorToBrushConverter()
         });
 

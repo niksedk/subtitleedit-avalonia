@@ -19,7 +19,7 @@ using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Files.ExportPac;
 using Nikse.SubtitleEdit.Features.Files.ExportPlainText;
-using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 using Nikse.SubtitleEdit.Features.Files.FormatProperties.WebVttProperties;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
 using Nikse.SubtitleEdit.Features.Files.ImportPlainText;

@@ -22,7 +22,7 @@ using Nikse.SubtitleEdit.Core.Interfaces;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Features.Assa;
-using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
+using Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 using Nikse.SubtitleEdit.Features.Assa.AssaApplyCustomOverrideTags;
 using Nikse.SubtitleEdit.Features.Assa.AssaDraw;
 using Nikse.SubtitleEdit.Features.Assa.AssaImageColorPicker;

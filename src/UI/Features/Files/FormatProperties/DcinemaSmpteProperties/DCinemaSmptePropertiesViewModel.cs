@@ -7,6 +7,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.Forms;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Features.Shared.ColorPicker;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
@@ -15,7 +16,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpte2014Properties;
+namespace Nikse.SubtitleEdit.Features.Files.FormatProperties.DCinemaSmpteProperties;
 
 public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 {
@@ -52,10 +53,12 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private readonly IFileHelper _fileHelper;
+    private readonly IWindowService _windowService;
 
-    public DCinemaSmptePropertiesViewModel(IFileHelper fileHelper)
+    public DCinemaSmptePropertiesViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
+        _windowService = windowService;
 
         _languages = new ObservableCollection<string>();
         foreach (var x in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
@@ -219,30 +222,34 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
     [RelayCommand]
     private async Task ChooseFontColor()
     {
-        var vm = new ColorPickerViewModel { SelectedColor = FontColor };
-        var dialog = new ColorPickerWindow(vm);
-        if (Window != null)
+        if (Window == null)
         {
-            var result = await dialog.ShowDialog<bool?>(Window);
-            if (result == true)
-            {
-                FontColor = vm.SelectedColor;
-            }
+            return;
+        }
+
+        var vm = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(
+            Window, viewModel => { viewModel.SelectedColor = FontColor; });
+
+        if (vm.OkPressed)
+        {
+            FontColor = vm.SelectedColor;
         }
     }
 
     [RelayCommand]
     private async Task ChooseFontEffectColor()
     {
-        var vm = new ColorPickerViewModel { SelectedColor = FontEffectColor };
-        var dialog = new ColorPickerWindow(vm);
-        if (Window != null)
+        if (Window == null)
         {
-            var result = await dialog.ShowDialog<bool?>(Window);
-            if (result == true)
-            {
-                FontEffectColor = vm.SelectedColor;
-            }
+            return;
+        }
+
+        var vm = await _windowService.ShowDialogAsync<ColorPickerWindow, ColorPickerViewModel>(
+            Window, viewModel => { viewModel.SelectedColor = FontEffectColor; });
+
+        if (vm.OkPressed)
+        {
+            FontEffectColor = vm.SelectedColor;
         }
     }
 
