@@ -93,17 +93,17 @@ The following screenshots are available in this directory:
 - `ocr.png` — OCR window ✓
 - `ocr-preprocessing.png` — OCR pre-processing window ✓
 
-### ASSA (Missing)
-- `assa-styles.png` — ASSA styles window (MISSING)
-- `assa-properties.png` — ASSA properties window (MISSING)
-- `assa-attachments.png` — ASSA attachments window (MISSING)
-- `assa-draw.png` — ASSA draw window (MISSING)
-- `assa-set-position.png` — ASSA set position window (MISSING)
-- `assa-set-background.png` — ASSA set background window (MISSING)
-- `assa-progress-bar.png` — ASSA progress bar window (MISSING)
-- `assa-resolution-resampler.png` — ASSA resolution resampler window (MISSING)
-- `assa-image-color-picker.png` — ASSA image color picker window (MISSING)
-- `assa-override-tags.png` — ASSA override tags window (MISSING)
+### ASSA (✓ Complete)
+- `assa-styles.png` — ASSA styles window ✓
+- `assa-properties.png` — ASSA properties window ✓
+- `assa-attachments.png` — ASSA attachments window ✓
+- `assa-draw.png` — ASSA draw window ✓
+- `assa-set-position.png` — ASSA set position window ✓
+- `assa-set-background.png` — ASSA set background window ✓
+- `assa-progress-bar.png` — ASSA progress bar window ✓
+- `assa-resolution-resampler.png` — ASSA resolution resampler window ✓
+- `assa-image-color-picker.png` — ASSA image color picker window ✓
+- `assa-override-tags.png` — ASSA override tags window ✓
 
 ### Other Features (Partial)
 - `subtitle-grid.png` — Subtitle grid standalone ✓
