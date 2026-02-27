@@ -23,11 +23,6 @@ The subtitle grid is the main area for viewing and managing all subtitle lines.
 - **Shift+Click** — Select a range of lines
 - **Ctrl+A** — Select all lines
 
-## Editing in the Grid
-
-- **Double-click** a cell to edit it inline
-- Use the text editor below the grid for full editing
-
 ## Context Menu
 
 Right-click a line to access:
