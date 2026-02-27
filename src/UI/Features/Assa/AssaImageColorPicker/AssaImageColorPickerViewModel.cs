@@ -272,7 +272,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     {
         try
         {
-            if (bitmap.Format is { BitsPerPixel: 32 })
+            if (bitmap.Format == Avalonia.Platform.PixelFormat.Bgra8888)
             {
                 var pixel = stackalloc byte[4];
                 bitmap.CopyPixels(

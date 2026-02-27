@@ -420,7 +420,11 @@ public static class InitToolbar
 
         var foregroundColor = UiTheme.GetDarkThemeForegroundColor();
 
-        using var skBitmap = SKBitmap.Decode(filePath);
+        using var decodedBitmap = SKBitmap.Decode(filePath);
+        using var skBitmap = decodedBitmap.ColorType == SKColorType.Bgra8888
+            ? decodedBitmap
+            : decodedBitmap.Copy(SKColorType.Bgra8888);
+
         var width = skBitmap.Width;
         var height = skBitmap.Height;
         var result = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Premul);
