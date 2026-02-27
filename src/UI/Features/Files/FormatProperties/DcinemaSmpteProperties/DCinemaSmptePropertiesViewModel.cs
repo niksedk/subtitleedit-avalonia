@@ -74,9 +74,6 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 
     private void LoadSettings()
     {
-        // Reload settings from disk to get the latest saved values
-        Se.LoadSettings();
-
         var ss = Se.Settings.File.DCinemaSmpte;
 
         GenerateIdAuto = ss.DCinemaAutoGenerateSubtitleId;
@@ -87,41 +84,41 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
         if (isExistingSubtitle)
         {
             // For existing subtitles, use current/last saved settings
-            SubtitleId = !string.IsNullOrEmpty(ss.CurrentDCinemaSubtitleId) 
-                ? ss.CurrentDCinemaSubtitleId 
+            SubtitleId = !string.IsNullOrEmpty(ss.CurrentDCinemaSubtitleId)
+                ? ss.CurrentDCinemaSubtitleId
                 : DCinemaSmpte2007.GenerateId();
 
-            ReelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) && reelNumber > 0 
-                ? reelNumber 
+            ReelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) && reelNumber > 0
+                ? reelNumber
                 : 1;
 
             MovieTitle = ss.CurrentDCinemaMovieTitle ?? string.Empty;
-            SelectedLanguage = !string.IsNullOrEmpty(ss.CurrentDCinemaLanguage) 
-                ? ss.CurrentDCinemaLanguage 
+            SelectedLanguage = !string.IsNullOrEmpty(ss.CurrentDCinemaLanguage)
+                ? ss.CurrentDCinemaLanguage
                 : "en";
 
-            FontId = !string.IsNullOrEmpty(ss.CurrentDCinemaFontId) 
-                ? ss.CurrentDCinemaFontId 
+            FontId = !string.IsNullOrEmpty(ss.CurrentDCinemaFontId)
+                ? ss.CurrentDCinemaFontId
                 : "theFontId";
 
-            EditRate = !string.IsNullOrEmpty(ss.CurrentDCinemaEditRate) 
-                ? ss.CurrentDCinemaEditRate 
+            EditRate = !string.IsNullOrEmpty(ss.CurrentDCinemaEditRate)
+                ? ss.CurrentDCinemaEditRate
                 : "24 1";
 
-            SelectedTimeCodeRate = !string.IsNullOrEmpty(ss.CurrentDCinemaTimeCodeRate) 
-                ? ss.CurrentDCinemaTimeCodeRate 
+            SelectedTimeCodeRate = !string.IsNullOrEmpty(ss.CurrentDCinemaTimeCodeRate)
+                ? ss.CurrentDCinemaTimeCodeRate
                 : "24";
 
-            StartTime = !string.IsNullOrEmpty(ss.CurrentDCinemaStartTime) 
-                ? ss.CurrentDCinemaStartTime 
+            StartTime = !string.IsNullOrEmpty(ss.CurrentDCinemaStartTime)
+                ? ss.CurrentDCinemaStartTime
                 : "00:00:00:00";
 
-            FontUri = !string.IsNullOrEmpty(ss.CurrentDCinemaFontUri) 
-                ? ss.CurrentDCinemaFontUri 
+            FontUri = !string.IsNullOrEmpty(ss.CurrentDCinemaFontUri)
+                ? ss.CurrentDCinemaFontUri
                 : "urn:uuid:3dec6dc0-39d0-498d-97d0-928d2eb78391";
 
-            IssueDate = !string.IsNullOrEmpty(ss.CurrentDCinemaIssueDate) 
-                ? ss.CurrentDCinemaIssueDate 
+            IssueDate = !string.IsNullOrEmpty(ss.CurrentDCinemaIssueDate)
+                ? ss.CurrentDCinemaIssueDate
                 : DateTime.Now.ToString("s");
 
             FontColor = ColorFromString(ss.CurrentDCinemaFontColor, Colors.White);
@@ -142,7 +139,7 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
             FontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor, Colors.Black);
 
             FontSize = ss.CurrentDCinemaFontSize > 0
-                ? ss.CurrentDCinemaFontSize 
+                ? ss.CurrentDCinemaFontSize
                 : ss.DCinemaFontSize;
 
             TopBottomMargin = ss.DCinemaBottomMargin;
@@ -233,7 +230,7 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    private Color ColorFromString(string colorString, Color defaultColor)
+    private static Color ColorFromString(string colorString, Color defaultColor)
     {
         if (string.IsNullOrEmpty(colorString))
         {

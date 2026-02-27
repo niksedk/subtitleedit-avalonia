@@ -97,11 +97,12 @@ public partial class PickSubtitleFormatViewModel : ObservableObject
                 return;
             }
 
-            foreach (var encoding in _allSubtitleFormatNames)
+            foreach (var name in _allSubtitleFormatNames)
             {
-                if (encoding.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase))
+                if (name.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase) ||
+                    name.Replace("-", string.Empty).Contains(SearchText, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    SubtitleFormatNames.Add(encoding);
+                    SubtitleFormatNames.Add(name);
                 }
             }
 
