@@ -87,7 +87,7 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
         var mergedText = string.Empty;
         for (var i = 1; i < _subtitles.Count; i++)
         {
-            p = new SubtitleLineViewModel(_subtitles[i - 1]);
+            p = _subtitles[i - 1];
 
             var next = _subtitles[i];
             if (QualifiesForMerge(p, next, MaxMillisecondsDifference) && IsFixAllowed(p))
@@ -113,7 +113,10 @@ public partial class MergeSameTimeCodesViewModel : ObservableObject
                     .Replace("{\\an8}", string.Empty)
                     .Replace("{\\an9}", string.Empty);
 
-                mergedText = p.Text;
+                if (singleMergeSubtitles.Count == 2)
+                {
+                    mergedText = p.Text;
+                }
                 if (mergedText.StartsWith("<i>", StringComparison.Ordinal) && mergedText.EndsWith("</i>", StringComparison.Ordinal) && nextText.StartsWith("<i>", StringComparison.Ordinal) && nextText.EndsWith("</i>", StringComparison.Ordinal))
                 {
                     mergedText = GetMergedLines(mergedText.Remove(mergedText.Length - 4), nextText.Remove(0, 3), makeDialog);
