@@ -27,13 +27,21 @@ public partial class PaddleOcr
     private string _recPath;
     private CancellationToken _cancellationToken;
 
-    public static List<string> UrlsWindowsCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0.7z"];
+    public static List<string> UrlsWindowsCpu =
+        ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0.7z"];
 
-    public static List<string> UrlsLinuxCpu = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
+    public static List<string> UrlsLinuxCpu =
+        ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-CPU-v1.4.0-Linux.7z"];
 
-    public static List<string> UrlsWindowsGpuCuda11 = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-11.8.7z"];
+    public static List<string> UrlsWindowsGpuCuda11 =
+    [
+        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-11.8.7z"
+    ];
 
-    public static List<string> UrlsWindowsGpuCuda12 = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9.7z"];
+    public static List<string> UrlsWindowsGpuCuda12 =
+    [
+        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9.7z"
+    ];
 
     public static List<string> UrlsLinuxGpu =
     [
@@ -41,7 +49,10 @@ public partial class PaddleOcr
         "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR-GPU-v1.4.0-CUDA-12.9-Linux.7z.002"
     ];
 
-    public static List<string> UrlsSupportFiles = ["https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR.PP-OCRv5.support.files.VideOCR.7z"];
+    public static List<string> UrlsSupportFiles =
+    [
+        "https://github.com/timminator/PaddleOCR-Standalone/releases/download/v1.4.0/PaddleOCR.PP-OCRv5.support.files.VideOCR.7z"
+    ];
 
     private const string TextlineOrientationModelName = "PP-LCNet_x1_0_textline_ori";
 
@@ -178,7 +189,8 @@ public partial class PaddleOcr
     }
 
 
-    public async Task OcrBatch(OcrEngineType engineType, List<PaddleOcrBatchInput> bitmaps, string language, string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
+    public async Task OcrBatch(OcrEngineType engineType, List<PaddleOcrBatchInput> bitmaps, string language,
+        string mode, IProgress<PaddleOcrBatchProgress> progress, CancellationToken cancellationToken)
     {
         string detFilePrefix = MakeDetPrefix(language);
         string recFilePrefix = MakeRecPrefix(language);
@@ -230,33 +242,39 @@ public partial class PaddleOcr
         _batchFileNames.AddRange(batchFileNamesList);
 
         var parameters = $"ocr -i \"{folder}\" " +
-                    "--use_textline_orientation true " +
-                    "--use_doc_orientation_classify false " +
-                    "--use_doc_unwarping false " +
-                    $"--lang {language} " +
-                    $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
-                    $"--text_detection_model_name \"{detName}\" " +
-                    $"--text_recognition_model_dir \"{_recPath + Path.DirectorySeparatorChar + recName}\" " +
-                    $"--text_recognition_model_name \"{recName}\" " +
-                    $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
-                    $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
+                         "--use_textline_orientation true " +
+                         "--use_doc_orientation_classify false " +
+                         "--use_doc_unwarping false " +
+                         $"--lang {language} " +
+                         $"--text_detection_model_dir \"{_detPath + Path.DirectorySeparatorChar + detName}\" " +
+                         $"--text_detection_model_name \"{detName}\" " +
+                         $"--text_recognition_model_dir \"{_recPath + Path.DirectorySeparatorChar + recName}\" " +
+                         $"--text_recognition_model_name \"{recName}\" " +
+                         $"--textline_orientation_model_dir \"{_clsPath + Path.DirectorySeparatorChar + TextlineOrientationModelName}\" " +
+                         $"--textline_orientation_model_name \"{TextlineOrientationModelName}\"";
 
-        string paddleOCRPath = "paddleocr";
-        if (engineType == OcrEngineType.PaddleOcrStandalone && File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        var paddleOcrPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.bin");
+        if (engineType != OcrEngineType.PaddleOcrStandalone || !File.Exists(paddleOcrPath))
         {
-            paddleOCRPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe");
+            paddleOcrPath = "paddleocr";
+        }
+
+        if (engineType == OcrEngineType.PaddleOcrStandalone &&
+            File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe")))
+        {
+            paddleOcrPath = Path.Combine(Se.PaddleOcrFolder, "paddleocr.exe");
         }
 
         if (engineType == OcrEngineType.PaddleOcrPython)
         {
-            paddleOCRPath = GetPaddleOcrPytonPath();
+            paddleOcrPath = GetPaddleOcrPytonPath();
         }
 
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = paddleOCRPath,
+                FileName = paddleOcrPath,
                 Arguments = parameters,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -313,13 +331,14 @@ public partial class PaddleOcr
     private static string GetPaddleOcrPytonPath()
     {
         var possiblePaths = new[]
-       {
+        {
             // Windows user install
 //            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Programs\Python"),
 
             // Windows pip scripts dir (per environment)
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @"AppData\Local\Programs\Python"),
-            
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                @"AppData\Local\Programs\Python"),
+
             // Mac default Frameworks path
             "/Library/Frameworks/Python.framework/Versions",
 
@@ -381,7 +400,7 @@ public partial class PaddleOcr
         // Draw inner border rectangle
         using var paint = new SKPaint { Color = innerColor };
         canvas.DrawRect(borderSize, borderSize,
-                       finalWidth - borderSize * 2, finalHeight - borderSize * 2, paint);
+            finalWidth - borderSize * 2, finalHeight - borderSize * 2, paint);
 
         // Draw original bitmap in center
         canvas.DrawBitmap(source, totalBorder, totalBorder);
@@ -475,7 +494,8 @@ public partial class PaddleOcr
         return sb.ToString().Trim().Replace(" " + Environment.NewLine, Environment.NewLine);
     }
 
-    private List<List<PaddleOcrResultParser.TextDetectionResult>> MakeLines(List<PaddleOcrResultParser.TextDetectionResult> input)
+    private List<List<PaddleOcrResultParser.TextDetectionResult>> MakeLines(
+        List<PaddleOcrResultParser.TextDetectionResult> input)
     {
         var result = new List<List<PaddleOcrResultParser.TextDetectionResult>>();
         var heightAverage = input.Average(p => p.BoundingBox.Height);
@@ -492,7 +512,6 @@ public partial class PaddleOcr
             {
                 if (element.BoundingBox.Center.Y > last.BoundingBox.TopLeft.Y + heightAverage)
                 {
-
                     result.Add(line.OrderBy(p => p.BoundingBox.TopLeft.X).ToList());
                     line = new List<PaddleOcrResultParser.TextDetectionResult>();
                 }
@@ -531,7 +550,8 @@ public partial class PaddleOcr
 
         var data = arr[1];
 
-        string pattern = @"\[\[\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+]],\s*\(['""].*['""],\s*\d+\.\d+\)\]";
+        string pattern =
+            @"\[\[\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+]],\s*\(['""].*['""],\s*\d+\.\d+\)\]";
         var match = Regex.Match(data, pattern);
         if (match.Success)
         {
@@ -547,7 +567,6 @@ public partial class PaddleOcr
 
     private void OutputHandlerBatch(object sendingProcess, DataReceivedEventArgs outLine)
     {
-
         if (string.IsNullOrWhiteSpace(outLine.Data) || _cancellationToken.IsCancellationRequested)
         {
             return;
@@ -578,6 +597,7 @@ public partial class PaddleOcr
                         _textDetectionResults.Clear();
                         _batchProgress?.Report(progress);
                     }
+
                     _batchFileName = fileName.FileName;
                     return;
                 }
@@ -591,7 +611,8 @@ public partial class PaddleOcr
 
             var data = arr[1];
 
-            string pattern = @"\[\[\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+]],\s*\(['""].*['""],\s*\d+\.\d+\)\]";
+            string pattern =
+                @"\[\[\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+],\s*\[\d+\.\d+,\s*\d+\.\d+]],\s*\(['""].*['""],\s*\d+\.\d+\)\]";
             var match = Regex.Match(data, pattern);
             if (match.Success)
             {

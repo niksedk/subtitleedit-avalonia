@@ -1425,7 +1425,7 @@ public partial class OcrViewModel : ObservableObject
                     return;
                 }
             }
-            else if (Configuration.IsRunningOnLinux && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr")))
+            else if (Configuration.IsRunningOnLinux && !File.Exists(Path.Combine(Se.PaddleOcrFolder, "paddleocr.bin")))
             {
                 var answer = await MessageBox.Show(
                     Window!,

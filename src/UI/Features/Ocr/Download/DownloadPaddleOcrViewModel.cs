@@ -15,6 +15,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using Nikse.SubtitleEdit.Logic;
 using Timer = System.Timers.Timer;
 
 namespace Nikse.SubtitleEdit.Features.Ocr.Download;
@@ -139,12 +140,22 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
                 else if (_downloadType == PaddleOcrDownloadType.EngineCpuLinux)
                 {
                     StatusText = string.Format(Se.Language.General.UnpackingX, Se.Language.Ocr.PaddleOcr);
-                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.4.0-Linux", _cancellationTokenSource, text => ProgressText = text);
+                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-CPU-v1.4.0-Linux", _cancellationTokenSource, text => ProgressText = text);
+                    var binFile = Path.Combine(Se.PaddleOcrFolder, "paddleocr.bin");
+                    if (File.Exists(binFile))
+                    {
+                        LinuxHelper.MakeExecutable(binFile);
+                    }                    
                 }
                 else if (_downloadType == PaddleOcrDownloadType.EngineGpuLinux)
                 {
                     StatusText = string.Format(Se.Language.General.UnpackingX, Se.Language.Ocr.PaddleOcr);
-                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-CUDA-12.9-Linux", _cancellationTokenSource, text => ProgressText = text);
+                    Unpacker.Extract7Zip(firstFile, Se.PaddleOcrFolder, "PaddleOCR-GPU-v1.4.0-Linux", _cancellationTokenSource, text => ProgressText = text);
+                    var binFile = Path.Combine(Se.PaddleOcrFolder, "paddleocr.bin");
+                    if (File.Exists(binFile))
+                    {
+                        LinuxHelper.MakeExecutable(binFile);
+                    }
                 }
 
                 StopIndeterminateProgress();
@@ -268,7 +279,8 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             _downloadTaskUrls.AddRange(PaddleOcr.UrlsWindowsCpu);
             var url = _downloadTaskUrls[_downloadTaskIndex];
             var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
-            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress,
+                _cancellationTokenSource.Token);
         }
         else if (_downloadType == PaddleOcrDownloadType.EngineGpuLinux)
         {
@@ -276,7 +288,14 @@ public partial class DownloadPaddleOcrViewModel : ObservableObject
             var url = _downloadTaskUrls[_downloadTaskIndex];
             var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
             _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
-        }
+        }            
+        else if (_downloadType == PaddleOcrDownloadType.EngineCpuLinux)
+        {
+            _downloadTaskUrls.AddRange(PaddleOcr.UrlsLinuxCpu);
+            var url = _downloadTaskUrls[_downloadTaskIndex];
+            var fileName = Path.Combine(_tempFolder, Path.GetFileName(url));
+            _downloadTask = DownloadHelper.DownloadFileAsync(new HttpClient(), url, fileName, downloadProgress, _cancellationTokenSource.Token);
+        }         
         else
         {
             Se.LogError($"Unknown Paddle OCR download type: {_downloadType}");
