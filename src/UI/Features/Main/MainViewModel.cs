@@ -1575,7 +1575,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await Window.Clipboard.SetTextAsync(_subtitleFileName);
+        await ClipboardHelper.SetTextAsync(Window, _subtitleFileName);
     }
 
     [RelayCommand]
@@ -1586,7 +1586,7 @@ public partial class MainViewModel :
             return;
         }
 
-        await Window.Clipboard.SetTextAsync(_subtitleFileNameOriginal);
+        await ClipboardHelper.SetTextAsync(Window, _subtitleFileNameOriginal);
     }
 
     [RelayCommand]
@@ -8053,7 +8053,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var text = await Window.Clipboard.TryGetTextAsync();
+        var text = await ClipboardHelper.GetTextAsync(Window);
         if (string.IsNullOrEmpty(text))
         {
             return;
@@ -8076,7 +8076,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var text = await Window.Clipboard.TryGetTextAsync();
+        var text = await ClipboardHelper.GetTextAsync(Window);
         if (string.IsNullOrEmpty(text))
         {
             return;
@@ -14072,22 +14072,16 @@ public partial class MainViewModel :
             {
                 try
                 {
-                    if (Window?.Clipboard != null)
+                    if (Window != null)
                     {
-                        var clipboardTask = Window.Clipboard.TryGetTextAsync();
-                        var timeoutTask = Task.Delay(200); // 200ms timeout
-                        var completedTask = await Task.WhenAny(clipboardTask, timeoutTask);
-
-                        string? clipboardText = null;
-                        if (completedTask == clipboardTask)
+                        var clipboardText = await ClipboardHelper.GetTextAsync(Window);
+                        if (!string.IsNullOrEmpty(clipboardText))
                         {
-                            clipboardText = await clipboardTask;
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = !string.IsNullOrEmpty(clipboardText);
+                            });
                         }
-
-                        await Dispatcher.UIThread.InvokeAsync(() =>
-                        {
-                            MenuItemAudioVisualizerPasteFromClipboardMenuItem.IsVisible = !string.IsNullOrEmpty(clipboardText);
-                        });
                     }
                 }
                 catch

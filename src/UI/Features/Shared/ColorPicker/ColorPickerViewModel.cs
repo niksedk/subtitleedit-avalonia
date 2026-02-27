@@ -245,7 +245,7 @@ public partial class ColorPickerViewModel : ObservableObject
                     return;
                 }
 
-                await Window.Clipboard.SetTextAsync(hexColor);
+                await ClipboardHelper.SetTextAsync(Window, hexColor);
             });
         }
         else if (e.Key == Key.V && e.KeyModifiers.HasFlag(KeyModifiers.Control))
@@ -258,7 +258,7 @@ public partial class ColorPickerViewModel : ObservableObject
                     return;
                 }
 
-                var clipboardText = await Window.Clipboard.TryGetTextAsync();
+                var clipboardText = await ClipboardHelper.GetTextAsync(Window);
                 if (!string.IsNullOrWhiteSpace(clipboardText))
                 {
                     try

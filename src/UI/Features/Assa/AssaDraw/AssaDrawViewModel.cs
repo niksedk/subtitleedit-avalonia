@@ -635,7 +635,7 @@ public partial class AssaDrawViewModel : ObservableObject
         var code = GenerateAssaCode();
         if (!string.IsNullOrEmpty(code) && Window?.Clipboard != null)
         {
-            await Window.Clipboard.SetTextAsync(code);
+            await ClipboardHelper.SetTextAsync(Window, code);
         }
     }
 

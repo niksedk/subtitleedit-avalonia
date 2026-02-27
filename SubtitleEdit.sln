@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{2FFE3E54-9
 		docs\faq.md = docs\faq.md
 		docs\index.md = docs\index.md
 		docs\overview.md = docs\overview.md
+		docs\third-party-components.md = docs\third-party-components.md
 		docs\_config.yml = docs\_config.yml
 	EndProjectSection
 EndProject
