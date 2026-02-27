@@ -1549,6 +1549,22 @@ public partial class MainViewModel :
             {
                 vm.Initialize(format);
             });
+
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaSubtitleId = Se.Settings.File.DCinemaSmpte.CurrentDCinemaSubtitleId;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaMovieTitle = Se.Settings.File.DCinemaSmpte.CurrentDCinemaMovieTitle;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaReelNumber = Se.Settings.File.DCinemaSmpte.CurrentDCinemaReelNumber;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaIssueDate = Se.Settings.File.DCinemaSmpte.CurrentDCinemaIssueDate;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaLanguage = Se.Settings.File.DCinemaSmpte.CurrentDCinemaLanguage;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaEditRate = Se.Settings.File.DCinemaSmpte.CurrentDCinemaEditRate;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaTimeCodeRate = Se.Settings.File.DCinemaSmpte.CurrentDCinemaTimeCodeRate;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaStartTime = Se.Settings.File.DCinemaSmpte.CurrentDCinemaStartTime;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontId = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontId;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontUri = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontUri;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontColor = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontColor.FromHexToColor().ToSkColor();
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffect = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffect;
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontEffectColor = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontEffectColor.FromHexToColor().ToSkColor();
+            Configuration.Settings.SubtitleSettings.CurrentDCinemaFontSize = Se.Settings.File.DCinemaSmpte.CurrentDCinemaFontSize;
+
             SetLibSeSettings();
         }
 

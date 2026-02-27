@@ -70,29 +70,61 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 
         _timeCodeRates = new ObservableCollection<string> { "24", "25", "30", "48" };
         _fontEffects = new ObservableCollection<string> { "None", "Border", "Shadow" };
-
-        LoadSettings();
     }
 
     private void LoadSettings()
     {
+        // Reload settings from disk to get the latest saved values
+        Se.LoadSettings();
+
         var ss = Se.Settings.File.DCinemaSmpte;
 
         GenerateIdAuto = ss.DCinemaAutoGenerateSubtitleId;
 
-        if (!string.IsNullOrEmpty(ss.CurrentDCinemaSubtitleId))
+        // Determine if this is an existing subtitle or a new one
+        var isExistingSubtitle = Subtitle.Paragraphs.Count > 0;
+
+        if (isExistingSubtitle)
         {
-            SubtitleId = ss.CurrentDCinemaSubtitleId;
-            ReelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) ? reelNumber : 1;
+            // For existing subtitles, use current/last saved settings
+            SubtitleId = !string.IsNullOrEmpty(ss.CurrentDCinemaSubtitleId) 
+                ? ss.CurrentDCinemaSubtitleId 
+                : DCinemaSmpte2007.GenerateId();
+
+            ReelNumber = int.TryParse(ss.CurrentDCinemaReelNumber, out int reelNumber) && reelNumber > 0 
+                ? reelNumber 
+                : 1;
+
             MovieTitle = ss.CurrentDCinemaMovieTitle ?? string.Empty;
-            SelectedLanguage = ss.CurrentDCinemaLanguage ?? "en";
-            FontId = ss.CurrentDCinemaFontId ?? string.Empty;
-            EditRate = ss.CurrentDCinemaEditRate ?? "24 1";
-            SelectedTimeCodeRate = ss.CurrentDCinemaTimeCodeRate ?? "24";
-            StartTime = string.IsNullOrEmpty(ss.CurrentDCinemaStartTime) ? "00:00:00:00" : ss.CurrentDCinemaStartTime;
-            FontUri = ss.CurrentDCinemaFontUri ?? string.Empty;
-            IssueDate = ss.CurrentDCinemaIssueDate ?? DateTime.Now.ToString("s");
-            FontColor = ColorFromString(ss.CurrentDCinemaFontColor);
+            SelectedLanguage = !string.IsNullOrEmpty(ss.CurrentDCinemaLanguage) 
+                ? ss.CurrentDCinemaLanguage 
+                : "en";
+
+            FontId = !string.IsNullOrEmpty(ss.CurrentDCinemaFontId) 
+                ? ss.CurrentDCinemaFontId 
+                : "theFontId";
+
+            EditRate = !string.IsNullOrEmpty(ss.CurrentDCinemaEditRate) 
+                ? ss.CurrentDCinemaEditRate 
+                : "24 1";
+
+            SelectedTimeCodeRate = !string.IsNullOrEmpty(ss.CurrentDCinemaTimeCodeRate) 
+                ? ss.CurrentDCinemaTimeCodeRate 
+                : "24";
+
+            StartTime = !string.IsNullOrEmpty(ss.CurrentDCinemaStartTime) 
+                ? ss.CurrentDCinemaStartTime 
+                : "00:00:00:00";
+
+            FontUri = !string.IsNullOrEmpty(ss.CurrentDCinemaFontUri) 
+                ? ss.CurrentDCinemaFontUri 
+                : "urn:uuid:3dec6dc0-39d0-498d-97d0-928d2eb78391";
+
+            IssueDate = !string.IsNullOrEmpty(ss.CurrentDCinemaIssueDate) 
+                ? ss.CurrentDCinemaIssueDate 
+                : DateTime.Now.ToString("s");
+
+            FontColor = ColorFromString(ss.CurrentDCinemaFontColor, Colors.White);
 
             if (ss.CurrentDCinemaFontEffect == "border")
             {
@@ -107,14 +139,19 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
                 SelectedFontEffect = FontEffects[0];
             }
 
-            FontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor);
-            FontSize = ss.CurrentDCinemaFontSize;
+            FontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor, Colors.Black);
+
+            FontSize = ss.CurrentDCinemaFontSize > 0
+                ? ss.CurrentDCinemaFontSize 
+                : ss.DCinemaFontSize;
+
             TopBottomMargin = ss.DCinemaBottomMargin;
             FadeUpTime = ss.DCinemaFadeUpTime;
             FadeDownTime = ss.DCinemaFadeDownTime;
         }
         else
         {
+            // For new subtitles, use default settings (not Current settings for most properties)
             SubtitleId = DCinemaSmpte2007.GenerateId();
             ReelNumber = 1;
             MovieTitle = string.Empty;
@@ -125,13 +162,29 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
             StartTime = "00:00:00:00";
             FontUri = "urn:uuid:3dec6dc0-39d0-498d-97d0-928d2eb78391";
             IssueDate = DateTime.Now.ToString("s");
-            FontColor = Colors.White;
-            SelectedFontEffect = FontEffects[0];
-            FontEffectColor = Colors.Black;
-            FontSize = 42;
-            TopBottomMargin = 8;
-            FadeUpTime = 0;
-            FadeDownTime = 0;
+
+            // Load colors from Current settings (last used colors)
+            FontColor = ColorFromString(ss.CurrentDCinemaFontColor, Colors.White);
+
+            if (ss.CurrentDCinemaFontEffect == "border")
+            {
+                SelectedFontEffect = FontEffects[1];
+            }
+            else if (ss.CurrentDCinemaFontEffect == "shadow")
+            {
+                SelectedFontEffect = FontEffects[2];
+            }
+            else
+            {
+                SelectedFontEffect = FontEffects[0];
+            }
+
+            FontEffectColor = ColorFromString(ss.CurrentDCinemaFontEffectColor, Colors.Black);
+
+            FontSize = ss.DCinemaFontSize > 0 ? ss.DCinemaFontSize : 42;
+            TopBottomMargin = ss.DCinemaBottomMargin > 0 ? ss.DCinemaBottomMargin : 8;
+            FadeUpTime = ss.DCinemaFadeUpTime;
+            FadeDownTime = ss.DCinemaFadeDownTime;
         }
     }
 
@@ -140,6 +193,8 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
         var ss = Se.Settings.File.DCinemaSmpte;
 
         ss.DCinemaAutoGenerateSubtitleId = GenerateIdAuto;
+
+        // Save to Current settings (for existing subtitles)
         ss.CurrentDCinemaSubtitleId = SubtitleId;
         ss.CurrentDCinemaMovieTitle = MovieTitle;
         ss.CurrentDCinemaReelNumber = ReelNumber.ToString();
@@ -150,6 +205,7 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
         ss.CurrentDCinemaIssueDate = IssueDate;
         ss.CurrentDCinemaFontId = FontId;
         ss.CurrentDCinemaFontUri = FontUri;
+
         ss.CurrentDCinemaFontColor = ColorToString(FontColor);
 
         if (SelectedFontEffect == FontEffects[1])
@@ -167,6 +223,9 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 
         ss.CurrentDCinemaFontEffectColor = ColorToString(FontEffectColor);
         ss.CurrentDCinemaFontSize = FontSize;
+
+        // Save to Default settings (for new subtitles)
+        ss.DCinemaFontSize = FontSize;
         ss.DCinemaBottomMargin = TopBottomMargin;
         ss.DCinemaFadeUpTime = FadeUpTime;
         ss.DCinemaFadeDownTime = FadeDownTime;
@@ -174,31 +233,32 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
         Se.SaveSettings();
     }
 
-    private Color ColorFromString(string colorString)
+    private Color ColorFromString(string colorString, Color defaultColor)
     {
         if (string.IsNullOrEmpty(colorString))
         {
-            return Colors.White;
+            return defaultColor;
         }
 
         try
         {
-            return Color.Parse(colorString);
+            return colorString.FromHexToColor();
         }
         catch
         {
-            return Colors.White;
+            return defaultColor;
         }
     }
 
     private string ColorToString(Color color)
     {
-        return color.ToString();
+        return color.FromColorToHex();
     }
 
     public void Initialize(Subtitle subtitle)
     {
         Subtitle = subtitle;
+        LoadSettings();
     }
 
     [RelayCommand]
@@ -291,9 +351,9 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
 
                 FontId = importer.FontId ?? "theFontId";
                 FontUri = importer.FontUri ?? string.Empty;
-                FontColor = ColorFromString(importer.FontColor);
+                FontColor = ColorFromString(importer.FontColor, Colors.White);
                 SelectedFontEffect = importer.Effect ?? "None";
-                FontEffectColor = ColorFromString(importer.EffectColor);
+                FontEffectColor = ColorFromString(importer.EffectColor, Colors.Black);
 
                 if (int.TryParse(importer.FontSize, out var fontSize))
                 {
@@ -393,5 +453,6 @@ public partial class DCinemaSmptePropertiesViewModel : ObservableObject
     internal void Initialize(SubtitleFormat format)
     {
         WindowTitle = string.Format(Se.Language.File.XProperties, format.Name);
+        LoadSettings();
     }
 }
