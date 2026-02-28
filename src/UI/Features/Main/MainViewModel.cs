@@ -97,6 +97,7 @@ using Nikse.SubtitleEdit.Features.Tools.AdjustDuration;
 using Nikse.SubtitleEdit.Features.Tools.ApplyDurationLimits;
 using Nikse.SubtitleEdit.Features.Tools.ApplyMinGap;
 using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
+using Nikse.SubtitleEdit.Features.Tools.BeautifyTimeCodes;
 using Nikse.SubtitleEdit.Features.Tools.BridgeGaps;
 using Nikse.SubtitleEdit.Features.Tools.ChangeCasing;
 using Nikse.SubtitleEdit.Features.Tools.ChangeFormatting;
@@ -5476,6 +5477,25 @@ public partial class MainViewModel :
 
         _updateAudioVisualizer = true;
     }
+
+
+    [RelayCommand]
+    private async Task CommandShowBeautifyTimeCodes()
+    {
+        if (Window == null || AudioVisualizer == null || string.IsNullOrEmpty(_videoFileName))
+        {
+            return;
+        }
+
+        var viewModel = await _windowService
+            .ShowDialogAsync<BeautifyTimeCodesWindow, BeautifyTimeCodesViewModel>(Window!, vm => { vm.Initialize(Subtitles.ToList(), AudioVisualizer, _videoFileName); });
+
+        if (!viewModel.OkPressed)
+        {
+            return;
+        }
+    }
+
 
     [RelayCommand]
     private async Task FixCommonErrorsSelectedLines()

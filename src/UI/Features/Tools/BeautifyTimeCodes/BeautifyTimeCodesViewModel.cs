@@ -41,7 +41,7 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
       
     }
 
-    public void Initialize(List<SubtitleLineViewModel> subtitles)
+    public void Initialize(List<SubtitleLineViewModel> subtitles, Controls.AudioVisualizerControl.AudioVisualizer audioVisualizer, string videoFileName)
     {
         _allSubtitles.Clear();
         _allSubtitles.AddRange(subtitles.Select(p => new SubtitleLineViewModel(p)));
