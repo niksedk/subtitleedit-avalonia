@@ -217,9 +217,9 @@ public class MessageBox : Window
                 new MenuItem
                 {
                     Header = Se.Language.General.CopyTextToClipboard,
-                    Command = new RelayCommand(() =>
+                    Command = new RelayCommand(async() =>
                     {
-                        Clipboard!.SetTextAsync(message1);
+                        await ClipboardHelper.SetTextAsync(this, message1);
                     })
                 }
             }

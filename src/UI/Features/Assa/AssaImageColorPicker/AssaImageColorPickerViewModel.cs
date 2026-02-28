@@ -158,7 +158,7 @@ public partial class AssaImageColorPickerViewModel : ObservableObject
     {
         if (Window?.Clipboard != null)
         {
-            await Window.Clipboard.SetTextAsync(ClickedColorHex);
+            await ClipboardHelper.SetTextAsync(Window, ClickedColorHex);
 
             // Show check icon temporarily
             var originalContent = CopyButtonContent;
