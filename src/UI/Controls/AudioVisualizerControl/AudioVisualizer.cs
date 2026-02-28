@@ -475,7 +475,7 @@ public class AudioVisualizer : Control
         if (_isShiftDown && _isCtrlDown && !_isAltDown && e.Pointer.IsPrimary)
         {
             var position = RelativeXPositionToSeconds(e.GetPosition(this).X);
-            OnSetStartAndOffsetTheRest?.Invoke(this, new PositionEventArgs { PositionInSeconds = position });    
+            OnSetStartAndOffsetTheRest?.Invoke(this, new PositionEventArgs { PositionInSeconds = position });
             return;
         }
 
@@ -1012,45 +1012,59 @@ public class AudioVisualizer : Control
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
                 newEnd = _originalEndSeconds + deltaSeconds - StartPositionSeconds;
 
-                // check if we have room to move active paragraph
-                double availableStart = previous != null ? previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds : 0;
-                double availableEnd = next != null ? next.StartTime.TotalSeconds - 0.001 - MinGapSeconds : double.MaxValue;
-                double availableSpace = availableEnd - availableStart;
-                if (availableSpace + 0.001 < _originalDurationSeconds ||
-                    (previous != null && _originalStartSeconds < previous.EndTime.TotalSeconds) ||
-                    (next != null && _originalEndSeconds > next.StartTime.TotalSeconds))
+                // Check if the paragraph already overlaps with neighbors
+                bool alreadyOverlapping = false;
+                if (_activeParagraph != null && currentIndex >= 0)
                 {
-                    if (previous != null && next != null &&
-                        _originalStartSeconds >= previous.EndTime.TotalSeconds && _originalStartSeconds < previous.EndTime.TotalSeconds + MinGapSeconds &&
-                        _originalStartSeconds + _originalDurationSeconds <= next.StartTime.TotalSeconds &&
-                        _originalStartSeconds + _originalDurationSeconds > next.StartTime.TotalSeconds - MinGapSeconds)
+                    var prevParagraph = currentIndex > 0 ? _displayableParagraphs[currentIndex - 1] : null;
+                    var nextParagraph = currentIndex < _displayableParagraphs.Count - 1 ? _displayableParagraphs[currentIndex + 1] : null;
+
+                    bool alreadyOverlapsPrevious = prevParagraph != null && _originalStartSeconds < prevParagraph.EndTime.TotalSeconds;
+                    bool alreadyOverlapsNext = nextParagraph != null && _originalEndSeconds > nextParagraph.StartTime.TotalSeconds;
+                    alreadyOverlapping = alreadyOverlapsPrevious || alreadyOverlapsNext;
+                }
+
+                // Allow overlap if shift key, setting, or already overlapping
+                // (previous and next are already null if _isShiftDown or Se.Settings.Waveform.AllowOverlap)
+                bool allowOverlap = (previous == null && next == null) || alreadyOverlapping;
+
+                if (!allowOverlap && (previous != null || next != null))
+                {
+                    // Calculate available space considering MinGapSeconds
+                    double availableStart = previous != null ? previous.EndTime.TotalSeconds + MinGapSeconds : 0;
+                    double availableEnd = next != null ? next.StartTime.TotalSeconds - MinGapSeconds : double.MaxValue;
+                    double availableSpace = availableEnd - availableStart;
+
+                    // Check if there's enough room to move the paragraph
+                    if (availableSpace < _originalDurationSeconds)
                     {
-                        break; // no roome to move
+                        // Not enough space to move, keep original position
+                        break;
                     }
 
-                    _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
-                    _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + _originalDurationSeconds);
-                    break;
+                    // Clamp to available space to prevent overlap
+                    if (newStart < availableStart)
+                    {
+                        newStart = availableStart;
+                    }
+
+                    if (newEnd > availableEnd)
+                    {
+                        newStart = availableEnd - _originalDurationSeconds;
+                    }
                 }
 
-                // Clamp so it doesn't overlap previous or next
-                if (previous != null && newStart < previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds)
-                {
-                    newStart = previous.EndTime.TotalSeconds + 0.001 + MinGapSeconds;
-                }
-
-                if (next != null && newEnd > next.StartTime.TotalSeconds - 0.001 - MinGapSeconds)
-                {
-                    newStart = next.StartTime.TotalSeconds - 0.001 - MinGapSeconds - _originalDurationSeconds;
-                }
-
+                // Ensure start time is non-negative
                 if (newStart < 0)
                 {
                     newStart = 0;
                 }
 
-                _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
-                _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + _originalDurationSeconds);
+                if (_activeParagraph != null)
+                {
+                    _activeParagraph.StartTime = TimeSpan.FromSeconds(newStart);
+                    _activeParagraph.EndTime = TimeSpan.FromSeconds(newStart + _originalDurationSeconds);
+                }
                 break;
             case InteractionMode.ResizeLeftAnd:
                 newStart = _originalStartSeconds + deltaSeconds - StartPositionSeconds;
