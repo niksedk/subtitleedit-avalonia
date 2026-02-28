@@ -16,11 +16,11 @@ public partial class AboutViewModel : ObservableObject
     public string TitleText => $"Subtitle Edit {Se.Version}";
     public string LicenseText => "Subtitle Edit is free software under the MIT license.";
     public string DescriptionText =>
-        "Subtitle Edit 5 previews are early versions of the next major release." + Environment.NewLine +
-        "Some features may be missing, incomplete or experimental." + Environment.NewLine +
-        "We welcome your feedback to help improve the final version." + Environment.NewLine +
-        Environment.NewLine +
-        "Thank you for testing and supporting Subtitle Edit :)";
+       "Subtitle Edit 5 beta is a development version of our upcoming major release." + Environment.NewLine +
+       "We are actively refining the new tools and appreciate your help in testing." + Environment.NewLine +
+       "Please share your feedback to help us ensure the best possible final version." + Environment.NewLine +
+       Environment.NewLine +
+       "Thank you for being part of the Subtitle Edit community! :)";
 
     [RelayCommand]
     private async Task OpenGitHub()
