@@ -114,10 +114,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "reference", "reference", "{F97CA7CF-6808-41F2-A3B7-A4F4033E20AF}"
 	ProjectSection(SolutionItems) = preProject
 		docs\reference\assa-override-tags.md = docs\reference\assa-override-tags.md
+		docs\reference\assa.md = docs\reference\assa.md
 		docs\reference\command-line.md = docs\reference\command-line.md
 		docs\reference\keyboard-shortcuts.md = docs\reference\keyboard-shortcuts.md
 		docs\reference\mouse-controls.md = docs\reference\mouse-controls.md
+		docs\reference\subrip.md = docs\reference\subrip.md
 		docs\reference\supported-formats.md = docs\reference\supported-formats.md
+		docs\reference\webvtt.md = docs\reference\webvtt.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "screenshots", "screenshots", "{4F23FA81-26B9-4E5D-A7AC-C5C1CE2654DC}"

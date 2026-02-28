@@ -1,10 +1,10 @@
-# Advanced Sub Station Alpha (ASS) Format Reference
+# Advanced Sub Station Alpha (ASSA) Format Reference
 
 Advanced Sub Station Alpha (file extension `.ass`) is a powerful subtitle format that supports extensive text formatting, animations, and effects.
 
 ## Overview
 
-The Sub Station Alpha (SSA) format was created by programmer [Kotus](https://web.archive.org/web/20030618072944/http://www.eswat.demon.co.uk/) in 1996 for the anime fansubbing community. In 2002, Advanced Sub Station Alpha (ASS) was released with new features including layers, alpha channel support, and rotation.
+The Sub Station Alpha (SSA) format was created by programmer [Kotus](https://web.archive.org/web/20030618072944/http://www.eswat.demon.co.uk/) in 1996 for the anime fansubbing community. In 2002, Advanced Sub Station Alpha (ASSA) was released with new features including layers, alpha channel support, and rotation.
 
 Despite being called "Advanced Sub Station Alpha," the file extension remains `.ass` (though `.assa` would be more accurate).
 
