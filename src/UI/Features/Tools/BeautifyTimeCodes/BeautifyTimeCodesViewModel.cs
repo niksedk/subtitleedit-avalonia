@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BeautifyTimeCodes;
 
-public partial class BeautifyTimeCodesViewModel : ObservableObject
+public partial class BeautifyTimeCodesViewModel : ObservableObject, IDisposable
 {
     public Window? Window { get; set; }
 
@@ -24,6 +24,7 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
     private readonly List<SubtitleLineViewModel> _beautifiedSubtitles;
     private List<double> _shotChanges;
     private double _frameRate = 25.0;
+    private bool _disposed;
 
     [ObservableProperty]
     private BeautifySettings _settings;
@@ -60,7 +61,7 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
 
     private void UpdatePreview()
     {
-        if (AudioVisualizerBeautified == null)
+        if (AudioVisualizerBeautified == null || _allSubtitles.Count == 0)
         {
             return;
         }
@@ -72,11 +73,22 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
 
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
+            if (_disposed || AudioVisualizerBeautified == null)
+            {
+                return;
+            }
+
+            // Reuse existing ViewModels and just update their properties
             _beautifiedSubtitles.Clear();
             var subRipFormat = new Core.SubtitleFormats.SubRip();
-            foreach (var p in beautifiedParagraphs)
+            for (int i = 0; i < beautifiedParagraphs.Count; i++)
             {
-                _beautifiedSubtitles.Add(new SubtitleLineViewModel(p, subRipFormat));
+                var p = beautifiedParagraphs[i];
+                var vm = new SubtitleLineViewModel(p, subRipFormat)
+                {
+                    Number = i + 1
+                };
+                _beautifiedSubtitles.Add(vm);
             }
 
             // Update the beautified visualizer's paragraphs
@@ -131,12 +143,14 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
             AudioVisualizerOriginal.StartPositionSeconds = audioVisualizer.StartPositionSeconds;
             AudioVisualizerOriginal.ZoomFactor = audioVisualizer.ZoomFactor;
             AudioVisualizerOriginal.VerticalZoomFactor = audioVisualizer.VerticalZoomFactor;
+            AudioVisualizerOriginal.UpdateTheme();
 
             AudioVisualizerBeautified.WavePeaks = audioVisualizer.WavePeaks;
             AudioVisualizerBeautified.ShotChanges = new List<double>(_shotChanges);
             AudioVisualizerBeautified.StartPositionSeconds = audioVisualizer.StartPositionSeconds;
             AudioVisualizerBeautified.ZoomFactor = audioVisualizer.ZoomFactor;
             AudioVisualizerBeautified.VerticalZoomFactor = audioVisualizer.VerticalZoomFactor;
+            AudioVisualizerBeautified.UpdateTheme();
 
             // Trigger initial preview
             _dirty = true;
@@ -228,5 +242,19 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
     internal void ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
     {
         _dirty = true;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        StopPositionTimer();
+        _timerUpdatePreview?.Stop();
+        _timerUpdatePreview?.Dispose();
+
+        _disposed = true;
     }
 }

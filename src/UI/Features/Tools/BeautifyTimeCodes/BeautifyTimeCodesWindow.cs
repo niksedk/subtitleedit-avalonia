@@ -24,14 +24,14 @@ public class BeautifyTimeCodesWindow : Window
         // Settings panel - Row 1
         var checkBoxSnapToFrames = new CheckBox
         {
-            Content = "Snap to Frames",
+            Content = Se.Language.Tools.BeautifyTimeCodes.SnapToFrames,
             VerticalAlignment = VerticalAlignment.Center,
-            [!CheckBox.IsCheckedProperty] = new Avalonia.Data.Binding("Settings.SnapToFrames") { Source = vm, Mode = BindingMode.TwoWay },
+            [!CheckBox.IsCheckedProperty] = new Avalonia.Data.Binding($"{nameof(BeautifyTimeCodesViewModel.Settings)}.{nameof(BeautifySettings.SnapToFrames)}") { Source = vm, Mode = BindingMode.TwoWay },
         };
 
         var labelFrameGap = new TextBlock
         {
-            Text = "Frame Gap:",
+            Text = Se.Language.Tools.BeautifyTimeCodes.FrameGap,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -43,13 +43,13 @@ public class BeautifyTimeCodesWindow : Window
             FormatString = "0",
             Width = 120,
             VerticalAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.FrameGap") { Source = vm, Mode = BindingMode.TwoWay },
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding($"{nameof(BeautifyTimeCodesViewModel.Settings)}.{nameof(BeautifySettings.FrameGap)}") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericFrameGap.ValueChanged += vm.ValueChanged;
 
         var labelMinDuration = new TextBlock
         {
-            Text = "Min Duration (ms):",
+            Text = Se.Language.Tools.BeautifyTimeCodes.MinDuration,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -61,14 +61,14 @@ public class BeautifyTimeCodesWindow : Window
             FormatString = "0",
             Width = 120,
             VerticalAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.MinDurationMs") { Source = vm, Mode = BindingMode.TwoWay },
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding($"{nameof(BeautifyTimeCodesViewModel.Settings)}.{nameof(BeautifySettings.MinDurationMs)}") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericMinDuration.ValueChanged += vm.ValueChanged;
 
         // Settings panel - Row 2
         var labelShotChangeThreshold = new TextBlock
         {
-            Text = "Shot Change Threshold (ms):",
+            Text = Se.Language.Tools.BeautifyTimeCodes.ShotChangeThreshold,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -80,13 +80,13 @@ public class BeautifyTimeCodesWindow : Window
             FormatString = "0",
             Width = 120,
             VerticalAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeThresholdMs") { Source = vm, Mode = BindingMode.TwoWay },
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding($"{nameof(BeautifyTimeCodesViewModel.Settings)}.{nameof(BeautifySettings.ShotChangeThresholdMs)}") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericShotChangeThreshold.ValueChanged += vm.ValueChanged;
 
         var labelShotChangeOffset = new TextBlock
         {
-            Text = "Shot Change Offset (frames):",
+            Text = Se.Language.Tools.BeautifyTimeCodes.ShotChangeOffset,
             VerticalAlignment = VerticalAlignment.Center,
         };
 
@@ -98,7 +98,7 @@ public class BeautifyTimeCodesWindow : Window
             FormatString = "0",
             Width = 120,
             VerticalAlignment = VerticalAlignment.Center,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeOffsetFrames") { Source = vm, Mode = BindingMode.TwoWay },
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding($"{nameof(BeautifyTimeCodesViewModel.Settings)}.{nameof(BeautifySettings.ShotChangeOffsetFrames)}") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericShotChangeOffset.ValueChanged += vm.ValueChanged;
 
@@ -126,7 +126,7 @@ public class BeautifyTimeCodesWindow : Window
 
         var settingsTitle = new TextBlock
         {
-            Text = "Beautify Settings",
+            Text = Se.Language.Tools.BeautifyTimeCodes.BeautifySettings,
             FontWeight = FontWeight.Bold,
             FontSize = 14,
             Margin = new Avalonia.Thickness(0, 0, 0, 10),
@@ -151,7 +151,7 @@ public class BeautifyTimeCodesWindow : Window
         // Audio visualizers
         var labelOriginal = new TextBlock
         {
-            Text = "Original",
+            Text = Se.Language.Tools.BeautifyTimeCodes.Original,
             FontWeight = FontWeight.Bold,
             Margin = new Avalonia.Thickness(5),
         };
@@ -172,7 +172,7 @@ public class BeautifyTimeCodesWindow : Window
 
         var labelBeautified = new TextBlock
         {
-            Text = "Beautified",
+            Text = Se.Language.Tools.BeautifyTimeCodes.Beautified,
             FontWeight = FontWeight.Bold,
             Margin = new Avalonia.Thickness(5),
         };
@@ -237,5 +237,6 @@ public class BeautifyTimeCodesWindow : Window
 
         Activated += delegate { buttonOk.Focus(); };
         KeyDown += (_, e) => vm.OnKeyDown(e);
+        Closing += (_, __) => vm.Dispose();
     }
 }
