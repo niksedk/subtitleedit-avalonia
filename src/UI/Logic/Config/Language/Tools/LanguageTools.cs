@@ -6,6 +6,7 @@ public class LanguageTools
     public LanguageAdjustDisplayDurations AdjustDurations { get; set; } = new();
     public LanguageApplyDurationLimits ApplyDurationLimits { get; set; } = new();
     public LanguageApplyMinGaps ApplyMinGaps { get; set; } = new();
+    public LanguageBeautifyTimeCodes BeautifyTimeCodes { get; set; } = new();
     public LanguageBridgeGaps BridgeGaps { get; set; } = new();
     public LanguageSortBy SortBy { get; set; } = new();
     public LanguageBatchConvert BatchConvert { get; set; } = new();
