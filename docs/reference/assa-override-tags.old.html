@@ -1,0 +1,766 @@
+<app-nav-menu></app-nav-menu>
+
+<div class="nikse-left-menu-and-page">
+  <div class="left-menu">
+    <app-left-menu></app-left-menu>
+  </div>
+
+  <div>
+    <h1>ASSA - Override tags</h1>
+    <br />
+    <h2>Override tags</h2>
+    Advanced Sub Station Alpha override tags are used to add to or modify styles from the style header.
+    <br />
+    Override tags must appear within override blocks, which begin with &#123; and end with &#125;.
+    Any unrecognized text within override blocks is silently ignored, so they are also commonly used for inline comments.
+    Mixing comments and override tags in the same override block is not recommended.
+    <br />
+    <br />
+    <br />
+
+    <br />
+    <a id="italic">&nbsp;</a>
+    <h3>Italic</h3>
+    Switch italic text on or off.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\i1</b></td>
+        <td>Italic on</td>
+      </tr>
+      <tr>
+        <td><b>\i0</b></td>
+        <td>Italic off</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>How &#123;\i1&#125;are&#123;\i0&#125; you?</td>
+        <td>How <span class="font-style-italic">are</span> you?</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\i1&#125;This whole line is italic.</td>
+        <td><span class="font-style-italic">This whole line is italic.</span></td>
+      </tr>
+    </table>
+    <br />
+
+    <br />
+    <a id="bold">&nbsp;</a>
+    <h3>Bold</h3>
+    Switch bold text on or off.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\b1</b></td>
+        <td>Bold on</td>
+      </tr>
+      <tr>
+        <td><b>\b0</b></td>
+        <td>Bold off</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>How &#123;\b1&#125;are&#123;\b0&#125; you?</td>
+        <td>How <span class="font-style-bold">are</span> you?</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\b1&#125;This whole line is bold.</td>
+        <td><span class="font-style-bold">This whole line is bold.</span></td>
+      </tr>
+    </table>
+    <br />
+
+    <br />
+    <a id="underline">&nbsp;</a>
+    <h3>Underline</h3>
+    Switch underline text on or off.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\u1</b></td>
+        <td>Underline on</td>
+      </tr>
+      <tr>
+        <td><b>\u0</b></td>
+        <td>Underline off</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>How &#123;\u1&#125;are&#123;\u0&#125; you?</td>
+        <td>How <span class="font-style-underline">are</span> you?</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\u1&#125;This whole line is underlined.</td>
+        <td><span class="font-style-underline">This whole line is underlined.</span></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="strikeout">&nbsp;</a>
+    <h3>Strikeout</h3>
+    Switch strikeout (stikethrough) text on or off.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\s1</b></td>
+        <td>Strikeout on</td>
+      </tr>
+      <tr>
+        <td><b>\s0</b></td>
+        <td>Strikeout off</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>How &#123;\s1&#125;are&#123;\s0&#125; you?</td>
+        <td>How <span class="font-style-strikeout">are</span> you?</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\s1&#125;This whole line is in strikeout.</td>
+        <td><span class="font-style-strikeout">This whole line is in strikeout.</span></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="primary-color">&nbsp;</a>
+    <h3>Primary color</h3>
+    Set the primary color with two hex numbers for each of the three colors: blue, green, and red.
+    <br />
+    Note that it is not red/green/blue which is often used, but blue/green/red.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\c&H&lt;bbggrr&gt;&</b></td>
+        <td>Set primary color</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This is &#123;\c&H0000FF&&#125;red</td>
+        <td>This is <span class="font-color-red">red</span></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="outline-color">&nbsp;</a>
+    <h3>Outline color</h3>
+    Set the outline color with two hex numbers for each of the three colors: blue, green, and red.
+    <br />
+    Note that it is not red/green/blue which is often used, but blue/green/red.
+    <br />
+    Setting the outline color has no effect if text does not have an outline (either set with <b><a href="/subtitleedit/formats/assa-override-tags#border">\bord</a></b> or style).
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\3c&H&lt;bbggrr&gt;&</b></td>
+        <td>Set outline color</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\3c&H0000FF&&#125;a red outline</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Outline.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="shadow-color">&nbsp;</a>
+    <h3>Shadow color</h3>
+    Set the shadow color with two hex numbers for each of the three colors: blue, green, and red.
+    <br />
+    Note that it is not red/green/blue which is often used, but blue/green/red.
+    <br />
+    Setting the shadow color has no effect if text does not have an shadow (either set with <b><a href="/subtitleedit/formats/assa-override-tags#shadow">\shad</a></b> or style).
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\4c&H&lt;bbggrr&gt;&</b></td>
+        <td>Set shadow color</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\4c&H0000FF&&#125;a red shadow</td>
+        <td><img src="/assets/SubtitleEdit/Assa/ShadowColor.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="border">&nbsp;</a>
+    <h3>Outline (border)</h3>
+    Set the outline size. Allows decimal values with period as decimal point, like "3.5".
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\bord&lt;size&gt;</b></td>
+        <td>Set outline size (rounded)</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\bord8.5&#125;a large border</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Border.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\bord0&#125;This has no border/outline</td>
+        <td>This has no outline</td>
+      </tr>
+      <tr>
+        <td><b>\xbord&lt;size&gt;</b></td>
+        <td>Set outline width</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\xbord8.5&#125;a large border width</td>
+        <td><img src="/assets/SubtitleEdit/Assa/BorderWidth.png" /></td>
+      </tr>
+      <tr>
+        <td><b>\ybord&lt;size&gt;</b></td>
+        <td>Set outline height</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\ybord8.5&#125;a large border height</td>
+        <td><img src="/assets/SubtitleEdit/Assa/BorderHeight.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+    <br />
+    <a id="shadow">&nbsp;</a>
+    <h3>Shadow</h3>
+    Set the shadow distance. Allows decimal values with period as decimal point, like "3.5".
+    <br />
+    <b>\xshad</b> and <b>\yshad</b> can be negative.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\shad&lt;size&gt;</b></td>
+        <td>Set shadow size</td>
+      </tr>
+
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\shad3&#125;normal shadow</td>
+        <td><img src="/assets/SubtitleEdit/Assa/ShadowNormal.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\shad8.5&#125;a far away shadow</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Shadow.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\shad0&#125;This has no shadow</td>
+        <td>This has no shadow</td>
+      </tr>
+      <tr>
+        <td><b>\xshad&lt;size&gt;</b></td>
+        <td>Set shadow width</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\xshad8.5&#125;only xshad</td>
+        <td><img src="/assets/SubtitleEdit/Assa/ShadowX.png" /></td>
+      </tr>
+      <tr>
+        <td><b>\yshad&lt;size&gt;</b></td>
+        <td>Set shadow height</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\yshad8.5&#125;only yshad</td>
+        <td><img src="/assets/SubtitleEdit/Assa/ShadowY.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="font-size">&nbsp;</a>
+    <h3>Font size</h3>
+    Set the font size. Allows decimal values with period as decimal point, like "25.5".
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fs&lt;size&gt;</b></td>
+        <td>Set font size</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This has &#123;\fs35&#125;font size 35</td>
+        <td>This has <span style="font-size: 35px">font size 35</span></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="font-name">&nbsp;</a>
+    <h3>Font name</h3>
+    Set the font name. It's okay for the font name to contain spaces.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fn&lt;font name&gt;</b></td>
+        <td>Set font name</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>This uses &#123;\fnSofia&#125;font Sofia</td>
+        <td>This uses <span class="font-sofia">font Sofia</span></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="alignment">&nbsp;</a>
+    <h3>Alignment</h3>
+    Set the alignment in a numeric key pad like format.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\an7</b> (Top left)</td>
+        <td><b>\an8</b> (Top center)</td>
+        <td><b>\an9</b> (Top right)</td>
+      </tr>
+      <tr>
+        <td><b>\an4</b> (Middle left)</td>
+        <td><b>\an5</b> (Middle center)</td>
+        <td><b>\an6</b> (Middle right)</td>
+      </tr>
+      <tr>
+        <td><b>\an1</b> (Bottom left)</td>
+        <td><b>\an2</b> (Bottom center)</td>
+        <td><b>\an3</b> (Bottom right)</td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="blur-edges">&nbsp;</a>
+    <h3>Blur edges</h3>
+    Blur effect for the edges of the text or outline.
+    <br />
+    If the text has a outline (set with <b>\bord</b> or style) the outline will be blurred, but if outline is not present, then the text will be blurred.
+    <br />
+    Allows decimal values with period as decimal point, like "3.5". ??
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\be1</b></td>
+        <td>Blur edges on</td>
+      </tr>
+      <tr>
+        <td><b>\be0</b></td>
+        <td>Blur edges off</td>
+      </tr>
+      <tr>
+        <td><b>\be&lt;strength&gt;</b></td>
+        <td>Blur edges with higher values</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Some &#123;\be1&#125;blurred edges&#123;\be0&#125; works</td>
+        <td><img src="/assets/SubtitleEdit/Assa/BlurredEdges.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Some &#123;\be8&#125;blurred edges&#123;\be0&#125; works</td>
+        <td><img src="/assets/SubtitleEdit/Assa/BlurredEdges8.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example w outline</span>Some &#123;\be8&#125;blurred edges&#123;\be0&#125; works</td>
+        <td><img src="/assets/SubtitleEdit/Assa/BlurredEdgesOutline.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="font-scale">&nbsp;</a>
+    <h3>Font scale</h3>
+    Scale font size in percent.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fscx&lt;percent&gt;</b></td>
+        <td>Set font scale for width</td>
+      </tr>
+      <tr>
+        <td><b>\fscy&lt;percent&gt;</b></td>
+        <td>Set font scale for height</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Current size &#123;\fscx200&#125;Double width</td>
+        <td><img src="/assets/SubtitleEdit/Assa/FontScaleX.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Current size &#123;\fscx200&#125;Double width</td>
+        <td><img src="/assets/SubtitleEdit/Assa/FontScaleY.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Current size &#123;\fscx200\fscx200&#125;Double size</td>
+        <td><img src="/assets/SubtitleEdit/Assa/FontScale.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="font-spacing">&nbsp;</a>
+    <h3>Font spacing</h3>
+    Pixels between letters.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fsp&lt;pixels&gt;</b></td>
+        <td>Set font spacing in pixels</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Normal spacing &#123;\fsp5&#125;5 pixel spacing</td>
+        <td><img src="/assets/SubtitleEdit/Assa/FontSpacing.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="text-rotation">&nbsp;</a>
+    <h3>Text rotation</h3>
+    Degrees for rotation.
+    <br />
+    Negative values are allowed.
+    <br />
+    "360" is the current position.
+    <br />
+    Values above 360 and below -360 are allowed.
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fr&lt;degree&gt;</b></td>
+        <td>Angle (z axis for text rotation, counterclockwise)</td>
+      </tr>
+      <tr>
+        <td><b>\frz&lt;degree&gt;</b></td>
+        <td>Angle (z axis for text rotation, counterclockwise)</td>
+      </tr>
+      <tr>
+        <td><b>\frx&lt;degree&gt;</b></td>
+        <td>Angle (x axis for text rotation)</td>
+      </tr>
+      <tr>
+        <td><b>\fry&lt;degree&gt;</b></td>
+        <td>Angle (y axis for text rotation)</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\fr45&#125;Test angle</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Angle45.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\frx45&#125;A NEW HOPE</td>
+        <td><img src="/assets/SubtitleEdit/Assa/AngleX.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\fry45&#125;Rotate Y axis</td>
+        <td><img src="/assets/SubtitleEdit/Assa/AngleY.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="text-shearing">&nbsp;</a>
+    <h3>Text shearing</h3>
+    Perform a shearing (perspective distortion) transformation of the text. A factor of 0 (zero) means no distortion.
+    <br />
+    Usually factor will be a small number; values outside the range -2 to 2 are unlikely to have desireable results.
+    <br />
+    Shearing is performed after rotation, on the rotated coordinates. The coordinate system used for shearing is not affected by the rotation origin.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fax&lt;factor&gt;</b></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><b>\fay&lt;factor&gt;</b></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\fax1&#125;fax1 text</td>
+        <td><img src="/assets/SubtitleEdit/Assa/TextShearingX1.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\fay1&#125;fay1 text</td>
+        <td><img src="/assets/SubtitleEdit/Assa/TextShearingY1.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="alpha">&nbsp;</a>
+    <h3>Alpha</h3>
+    Set the alpha (transparency) between 0 and ff hex (0-255 decimal).
+    <br />
+    0 means opaque/fully visible, FF (255 decimal) is fully transparent/invisible (note: this is opposite of other programs!).
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\alpha&H&lt;value&gt;</b></td>
+        <td>Set text alpha</td>
+      </tr>
+      <tr>
+        <td><b>\1a&H&lt;value&gt;</b></td>
+        <td>set primary alpha (text)</td>
+      </tr>
+      <tr>
+        <td><b>\3a&H&lt;value&gt;</b></td>
+        <td>set outline alpha</td>
+      </tr>
+      <tr>
+        <td><b>\4a&H&lt;value&gt;</b></td>
+        <td>set shadow alpha</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example w opaque box style</span>&#123;\alpha&HCC\1a0&#125;Transparent box</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Alpha1.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\an7\alpha&HCC&#125;Watermark</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Alpha2.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="reset">&nbsp;</a>
+    <h3>Reset styles</h3>
+    Reset all style overrides.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\r</b></td>
+        <td>Reset override styles</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\c&H0000ff&\i1&#125;Italic&#123;\r&#125; test</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Reset.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="pos">&nbsp;</a>
+    <h3>Position</h3>
+    Set position for the current text.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\pos(x,y)</b></td>
+        <td>
+          Set position according to the coordinate system below<br />
+          NOTE: The [Script Info] tags "PlayResX" and "PlayResY" should be set to the actual video size.
+          If "PlayResX" and "PlayResY" are not defined, a resolution of 384x288 is assumed.<br />
+          <br />
+          <img src="/assets/SubtitleEdit/Assa/Pos1.png" />
+        </td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\an2\pos(180,240)&#125;This is \pos(180,240) with \an2</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Pos2.png" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\an7\pos(180,240)&#125;This is \pos(180,240) with \an7</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Pos3.png" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="origin">&nbsp;</a>
+    <h3>Rotation origin</h3>
+    Set the origin point used for <a href="/subtitleedit/formats/assa-override-tags#text-rotation">rotation</a>. This affects all rotations of the line. The X and Y coordinates are given in integer script resolution pixels.
+    <br />
+    When there is no <b>\org</b> tag in a line, the rotation origin is implicitly the same as the position anchor point, e.g. center bottom of text for <b>\an2</b>.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\org(x,y)</b></td>
+        <td>
+          Fix the rotation origin at point (x,y)
+        </td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="fade-in-out">&nbsp;</a>
+    <h3>Fade in/out</h3>
+    Fade-in and fade-out effect in milliseconds.
+    <br />
+    Adding a fade effect does not extend the duration of the line, but uses the start and end of the line's existing display time.
+    For this reason, you should be careful that fadein + fadeout is not greater than the duration of the line.
+    For example, if a line displayed for 4 seconds, the sum of fadein and fadeout should not be greater than 4000 ms.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\fad(fadein_ms,fadeout_ms)</b></td>
+        <td>Display line with fadein and fadeout effect.</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\fad(500,500&#125;Fade test</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Fade1.gif" /></td>
+      </tr>
+      <tr>
+        <td><b>\fade(a1,a2,a3,t1,t2,t3,t4)</b></td>
+        <td>
+          Display line with complex fade-in and fade-out effect.<br />
+          five-part fade using three alpha values a1, a2 and a3 and four times t1, t2, t3 and t4.
+          The alpha values are given in decimal and are between 0 and 255, with 0 being fully visible and 255 being invisible.
+          The time values are in milliseconds after the start of the line.
+          All seven parameters are required.
+
+          <ul>
+            <li>Before t1, the line has alpha a1.                              </li>
+            <li>Between t1 and t2 the line fades from alpha a1 to alpha a2.    </li>
+            <li>Between t2 and t3 the line has alpha a2 constantly.            </li>
+            <li>Between t3 and t4 the line fades from alpha a2 to alpha a3.    </li>
+            <li>After t4 the line has alpha a3.                                </li>
+          </ul>
+
+        </td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>Fade &#123;\fade(0,255,0,1000,1200,1300,1500)&#125;(Advanced)</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Fade2.gif" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="move">&nbsp;</a>
+    <h3>Move</h3>
+    Move text from one position to another.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\move(x1,y1,x2,y2)</b></td>
+        <td>Move line</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\move(350,350,1500,350)&#125;Move test</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Move1.gif" /></td>
+      </tr>
+      <tr>
+        <td><b>\move(x1,y1,x2,y2,t1,t2)</b></td>
+        <td>Move line. "t1" is the millisecond in the line where the move starts, "t2" is the millisecond in the line where the move stops.</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\move(350,350,1500,350,500,2600)&#125;Move test</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Move2.gif" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="transform">&nbsp;</a>
+    <h3>Animated transform</h3>
+    Perform a gradual, animated transformation from one style to another.
+    <br />
+    <br />
+    These tags are supported: \fs \fsp \c \1c \2c \3c \4c \alpha \1a \2a \3a \4a \fscx \fscy \frx \fry \frz \fr \fax \fay \bord \xbord \ybord \shad \xshad \yshad \clip \iclip \be \blur
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\t(&lt;style tag(s)&gt;)</b></td>
+        <td>Perform transformation</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\1c&HFFFFFF&\t(\1c&H0000FF&)&#125;Color</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Transform1.gif" /></td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\1c&HFFFFFF&\t(\1c&H0000FF&\fs90)&#125;Color</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Transform2.gif" /></td>
+      </tr>
+      <tr>
+        <td> <b>\t(accel,style modifiers)</b> </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td> <b>\t(t1,t2,style modifiers)</b> </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td> <b>\t(t1,t2,accel,style modifiers)</b> </td>
+        <td></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <a id="clip">&nbsp;</a>
+    <h3>Clip</h3>
+    Clip or inverse clip with a viewport rectangle.
+    <br />
+    <br />
+    <br />
+    <table class="table">
+      <tr>
+        <td><b>\clip(x1,y1,x2,y2)</b></td>
+        <td>Clip all outside defined viewport rectangle</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\clip(0,0,320,180)&#125;text text text</td>
+        <td><img src="/assets/SubtitleEdit/Assa/Clip.png" height="300" /></td>
+      </tr>
+      <tr>
+        <td><b>\iclip(x1,y1,x2,y2)</b></td>
+        <td>Clip all inside defined viewport rectangle (inverse clip)</td>
+      </tr>
+      <tr>
+        <td><span class="example">Example</span>&#123;\iclip(0,0,320,180)&#125;text text text</td>
+        <td><img src="/assets/SubtitleEdit/Assa/IClip.png" height="300" /></td>
+      </tr>
+    </table>
+    <br />
+
+
+    <br />
+    <br />
+    <br />
+    <br />
+    <app-comments-view blogItemId="620a323d-6e40-4a05-8fde-747b0dc012a3"></app-comments-view>
+    <br />
+
+  </div>
+</div>

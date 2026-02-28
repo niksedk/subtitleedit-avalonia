@@ -90,9 +90,14 @@ Subtitle Edit is a free, open-source editor for video subtitles. This is the doc
 
 ## Reference
 
+### Format Documentation
+- [Supported Formats](reference/supported-formats.md) — List of all supported subtitle formats
+- [SubRip (SRT) Format](reference/subrip.md) — Complete SubRip format reference and guide
+- [Advanced Sub Station Alpha (ASSA) Format](reference/assa.md) — Complete ASSA format reference and guide
+- [ASSA Override Tags Reference](reference/assa-override-tags.md) — Complete ASSA/SSA override tags reference
+
+### Application Reference
 - [Keyboard Shortcuts Reference](reference/keyboard-shortcuts.md) — Complete list of keyboard shortcuts
 - [Mouse Controls Reference](reference/mouse-controls.md) — Mouse interactions
-- [Supported Formats](reference/supported-formats.md) — List of supported subtitle formats
-- [ASSA Override Tags Reference](reference/assa-override-tags.md) — Complete ASS/SSA override tags reference
 - [Command Line (seconv)](reference/command-line.md) — Command-line converter
 - [Third-Party Components](third-party-components.md) — FFmpeg, MPV, Tesseract, Whisper setup guide

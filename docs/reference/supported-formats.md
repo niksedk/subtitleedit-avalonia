@@ -4,13 +4,16 @@ Subtitle Edit supports a wide range of subtitle formats for reading and writing.
 
 ## Text-Based Formats
 
-| Format | Extension(s) |
-|--------|-------------|
-| SubRip | .srt |
-| Advanced SubStation Alpha (ASSA) | .ass |
-| SubStation Alpha (SSA) | .ssa |
+| Format | Extension(s) | Documentation |
+|--------|-------------|---------------|
+| SubRip | .srt | [Format Reference](subrip.md) |
+| Advanced SubStation Alpha (ASSA) | .ass | [Format Reference](assa.md) |
+| SubStation Alpha (SSA) | .ssa | [Format Reference](assa.md) |
 
-> **See also:** [ASSA Override Tags Reference](assa-override-tags.md) — Complete list of ASS/SSA override tags for styling and animation
+> **See also:** 
+> - [ASSA Override Tags Reference](assa-override-tags.md) — Complete list of ASS/SSA override tags for styling and animation
+> - [SubRip Format Reference](subrip.md) — Complete guide to SRT format
+> - [ASSA Format Reference](assa.md) — Complete guide to ASS/SSA format
 | WebVTT | .vtt |
 | MicroDVD | .sub |
 | SAMI | .smi |
