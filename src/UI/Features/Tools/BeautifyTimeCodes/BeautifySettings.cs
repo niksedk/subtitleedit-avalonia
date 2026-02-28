@@ -18,4 +18,16 @@ public partial class BeautifySettings : ObservableObject
 
     [ObservableProperty]
     private double _minDurationMs = 800;
+
+    public Core.Common.BeautifySettings ToCore()
+    {
+        return new Core.Common.BeautifySettings
+        {
+            SnapToFrames = SnapToFrames,
+            FrameGap = FrameGap,
+            ShotChangeThresholdMs = ShotChangeThresholdMs,
+            ShotChangeOffsetFrames = ShotChangeOffsetFrames,
+            MinDurationMs = MinDurationMs
+        };
+    }
 }

@@ -5480,7 +5480,7 @@ public partial class MainViewModel :
 
 
     [RelayCommand]
-    private async Task CommandShowBeautifyTimeCodes()
+    private async Task ShowBeautifyTimeCodes()
     {
         if (Window == null || AudioVisualizer == null || string.IsNullOrEmpty(_videoFileName))
         {

@@ -2,13 +2,11 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Tools.BeautifyTimeCodes;
 
@@ -19,6 +17,7 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
     public bool OkPressed { get; private set; }
 
     private readonly System.Timers.Timer _timerUpdatePreview;
+    private Avalonia.Threading.DispatcherTimer? _positionTimer;
     private bool _dirty;
     private readonly List<SubtitleLineViewModel> _allSubtitles;
     private readonly List<SubtitleLineViewModel> _originalSubtitles;
@@ -67,7 +66,9 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
         }
 
         // Apply beautify and update the beautified visualizer
-        var beautifiedParagraphs = ApplyBeautify(_allSubtitles.Select(p => p.Paragraph!)).ToList();
+        var paragraphs = _allSubtitles.Select(p => p.Paragraph!).OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
+        var beautifier = new Core.Common.TimeCodesBeautifier(paragraphs, _frameRate, _shotChanges, Settings.ToCore());
+        var beautifiedParagraphs = beautifier.Beautify();
 
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
@@ -95,166 +96,97 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
         // Get shot changes from the existing AudioVisualizer
         _shotChanges = audioVisualizer.ShotChanges ?? new List<double>();
 
-        // Get frame rate (try to get from video or use default 25 fps)
+        // Get frame rate from video file using ffmpeg/ffprobe
         _frameRate = 25.0; // Default fallback
-
-        // Copy visualizer properties from the main window's AudioVisualizer
-        if (AudioVisualizerOriginal != null)
+        if (!string.IsNullOrEmpty(videoFileName) && System.IO.File.Exists(videoFileName))
         {
+            try
+            {
+                var mediaInfo = Logic.Media.FfmpegMediaInfo2.Parse(videoFileName);
+                if (mediaInfo.FramesRate > 0)
+                {
+                    _frameRate = (double)mediaInfo.FramesRate;
+                }
+            }
+            catch
+            {
+                // Fall back to default 25 fps if ffmpeg fails
+            }
+        }
+
+        // Defer AudioVisualizer setup until window is loaded
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            // Ensure visualizers are created before copying properties
+            if (AudioVisualizerOriginal == null || AudioVisualizerBeautified == null)
+            {
+                // Visualizers not initialized yet - this shouldn't happen
+                return;
+            }
+
+            // Copy visualizer properties from the main window's AudioVisualizer
             AudioVisualizerOriginal.WavePeaks = audioVisualizer.WavePeaks;
-            AudioVisualizerOriginal.ShotChanges = audioVisualizer.ShotChanges;
+            AudioVisualizerOriginal.ShotChanges = new List<double>(_shotChanges);
             AudioVisualizerOriginal.AllSelectedParagraphs = new List<SubtitleLineViewModel>(_originalSubtitles);
             AudioVisualizerOriginal.StartPositionSeconds = audioVisualizer.StartPositionSeconds;
             AudioVisualizerOriginal.ZoomFactor = audioVisualizer.ZoomFactor;
             AudioVisualizerOriginal.VerticalZoomFactor = audioVisualizer.VerticalZoomFactor;
-        }
 
-        if (AudioVisualizerBeautified != null)
-        {
             AudioVisualizerBeautified.WavePeaks = audioVisualizer.WavePeaks;
-            AudioVisualizerBeautified.ShotChanges = audioVisualizer.ShotChanges;
+            AudioVisualizerBeautified.ShotChanges = new List<double>(_shotChanges);
             AudioVisualizerBeautified.StartPositionSeconds = audioVisualizer.StartPositionSeconds;
             AudioVisualizerBeautified.ZoomFactor = audioVisualizer.ZoomFactor;
             AudioVisualizerBeautified.VerticalZoomFactor = audioVisualizer.VerticalZoomFactor;
-        }
 
-        _dirty = true;
-        _timerUpdatePreview.Start();
+            // Trigger initial preview
+            _dirty = true;
+
+            // Force immediate render
+            AudioVisualizerOriginal.InvalidateVisual();
+            AudioVisualizerBeautified.InvalidateVisual();
+
+            _timerUpdatePreview.Start();
+
+            // Start position timer for audio visualizer updates
+            StartPositionTimer();
+        });
     }
 
-    private IEnumerable<Paragraph> ApplyBeautify(IEnumerable<Paragraph> input)
+    private void StartPositionTimer()
     {
-        var paragraphs = input.OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
-        var result = new List<Paragraph>();
-
-        for (int i = 0; i < paragraphs.Count; i++)
+        _positionTimer = new Avalonia.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        _positionTimer.Tick += (s, e) =>
         {
-            var p = new Paragraph(paragraphs[i]);
-
-            // Frame alignment
-            if (Settings.SnapToFrames)
+            if (AudioVisualizerOriginal != null && AudioVisualizerBeautified != null)
             {
-                p.StartTime = AlignToFrame(p.StartTime, _frameRate);
-                p.EndTime = AlignToFrame(p.EndTime, _frameRate);
+                // Keep visualizers synchronized - they share the same position
+                AudioVisualizerBeautified.CurrentVideoPositionSeconds = AudioVisualizerOriginal.CurrentVideoPositionSeconds;
+
+                AudioVisualizerOriginal.InvalidateVisual();
+                AudioVisualizerBeautified.InvalidateVisual();
             }
-
-            // Shot change snapping
-            if (_shotChanges.Count > 0)
-            {
-                p.StartTime = SnapStartToShotChange(p.StartTime, Settings.ShotChangeThresholdMs, Settings.ShotChangeOffsetFrames, _frameRate);
-                p.EndTime = SnapEndToShotChange(p.EndTime, Settings.ShotChangeThresholdMs, Settings.ShotChangeOffsetFrames, _frameRate);
-            }
-
-            // Gap management with previous paragraph
-            if (i > 0)
-            {
-                var previousEnd = result[i - 1].EndTime.TotalMilliseconds;
-                var frameGapMs = FramesToMilliseconds(Settings.FrameGap, _frameRate);
-                var minStart = previousEnd + frameGapMs;
-
-                if (p.StartTime.TotalMilliseconds < minStart)
-                {
-                    p.StartTime = new TimeCode(minStart);
-                }
-            }
-
-            // Validation: Ensure End > Start
-            if (p.EndTime.TotalMilliseconds <= p.StartTime.TotalMilliseconds)
-            {
-                p.EndTime = new TimeCode(p.StartTime.TotalMilliseconds + Settings.MinDurationMs);
-            }
-
-            // Validation: Ensure minimum duration
-            var duration = p.EndTime.TotalMilliseconds - p.StartTime.TotalMilliseconds;
-            if (duration < Settings.MinDurationMs)
-            {
-                p.EndTime = new TimeCode(p.StartTime.TotalMilliseconds + Settings.MinDurationMs);
-            }
-
-            result.Add(p);
-        }
-
-        return result;
+        };
+        _positionTimer.Start();
     }
 
-    private TimeCode AlignToFrame(TimeCode timeCode, double fps)
+    private void StopPositionTimer()
     {
-        var totalMilliseconds = timeCode.TotalMilliseconds;
-        var frameNumber = Math.Round(totalMilliseconds * fps / 1000.0);
-        var alignedMilliseconds = frameNumber * 1000.0 / fps;
-        return new TimeCode(alignedMilliseconds);
-    }
-
-    private TimeCode SnapStartToShotChange(TimeCode timeCode, int thresholdMs, int offsetFrames, double fps)
-    {
-        var timeSeconds = timeCode.TotalMilliseconds / 1000.0;
-        var thresholdSeconds = thresholdMs / 1000.0;
-
-        foreach (var shotChange in _shotChanges)
+        if (_positionTimer != null)
         {
-            var diff = Math.Abs(timeSeconds - shotChange);
-            if (diff < thresholdSeconds)
-            {
-                // Snap to offsetFrames AFTER the shot change
-                var offsetSeconds = offsetFrames / fps;
-                var snappedSeconds = shotChange + offsetSeconds;
-                return new TimeCode(snappedSeconds * 1000.0);
-            }
+            _positionTimer.Stop();
+            _positionTimer = null;
         }
-
-        return timeCode;
-    }
-
-    private TimeCode SnapEndToShotChange(TimeCode timeCode, int thresholdMs, int offsetFrames, double fps)
-    {
-        var timeSeconds = timeCode.TotalMilliseconds / 1000.0;
-        var thresholdSeconds = thresholdMs / 1000.0;
-
-        foreach (var shotChange in _shotChanges)
-        {
-            var diff = Math.Abs(timeSeconds - shotChange);
-            if (diff < thresholdSeconds)
-            {
-                // Snap to offsetFrames BEFORE the shot change
-                var offsetSeconds = offsetFrames / fps;
-                var snappedSeconds = shotChange - offsetSeconds;
-                return new TimeCode(Math.Max(0, snappedSeconds * 1000.0));
-            }
-        }
-
-        return timeCode;
-    }
-
-    private double FramesToMilliseconds(int frames, double fps)
-    {
-        return frames * 1000.0 / fps;
-    }
-
-    public List<SubtitleLineViewModel> GetBeautifiedSubtitles()
-    {
-        return new List<SubtitleLineViewModel>(_beautifiedSubtitles);
-    }
-
-    private void SyncVisualizers()
-    {
-        if (AudioVisualizerOriginal == null || AudioVisualizerBeautified == null)
-        {
-            return;
-        }
-
-        // Sync scroll position
-        AudioVisualizerBeautified.StartPositionSeconds = AudioVisualizerOriginal.StartPositionSeconds;
-
-        // Sync zoom
-        AudioVisualizerBeautified.ZoomFactor = AudioVisualizerOriginal.ZoomFactor;
-        AudioVisualizerBeautified.VerticalZoomFactor = AudioVisualizerOriginal.VerticalZoomFactor;
     }
 
     [RelayCommand]
     private void Ok()
     {
+        StopPositionTimer();
+
         // Apply final beautification
-        var beautifiedParagraphs = ApplyBeautify(_allSubtitles.Select(p => p.Paragraph!)).ToList();
+        var paragraphs = _allSubtitles.Select(p => p.Paragraph!).OrderBy(p => p.StartTime.TotalMilliseconds).ToList();
+        var beautifier = new Core.Common.TimeCodesBeautifier(paragraphs, _frameRate, _shotChanges, Settings.ToCore());
+        var beautifiedParagraphs = beautifier.Beautify();
 
         _allSubtitles.Clear();
         var subRipFormat = new Core.SubtitleFormats.SubRip();
@@ -270,7 +202,13 @@ public partial class BeautifyTimeCodesViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
+        StopPositionTimer();
         Window?.Close();
+    }
+
+    public List<SubtitleLineViewModel> GetBeautifiedSubtitles()
+    {
+        return new List<SubtitleLineViewModel>(_allSubtitles);
     }
 
     internal void OnKeyDown(KeyEventArgs e)

@@ -21,10 +21,11 @@ public class BeautifyTimeCodesWindow : Window
         vm.Window = this;
         DataContext = vm;
 
-        // Settings panel
+        // Settings panel - Row 1
         var checkBoxSnapToFrames = new CheckBox
         {
             Content = "Snap to Frames",
+            VerticalAlignment = VerticalAlignment.Center,
             [!CheckBox.IsCheckedProperty] = new Avalonia.Data.Binding("Settings.SnapToFrames") { Source = vm, Mode = BindingMode.TwoWay },
         };
 
@@ -32,7 +33,6 @@ public class BeautifyTimeCodesWindow : Window
         {
             Text = "Frame Gap:",
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(15, 0, 5, 0),
         };
 
         var numericFrameGap = new NumericUpDown
@@ -41,52 +41,16 @@ public class BeautifyTimeCodesWindow : Window
             Maximum = 10,
             Increment = 1,
             FormatString = "0",
-            Width = 80,
+            Width = 120,
+            VerticalAlignment = VerticalAlignment.Center,
             [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.FrameGap") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericFrameGap.ValueChanged += vm.ValueChanged;
-
-        var labelShotChangeThreshold = new TextBlock
-        {
-            Text = "Shot Change Threshold (ms):",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(15, 0, 5, 0),
-        };
-
-        var numericShotChangeThreshold = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 1000,
-            Increment = 10,
-            FormatString = "0",
-            Width = 80,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeThresholdMs") { Source = vm, Mode = BindingMode.TwoWay },
-        };
-        numericShotChangeThreshold.ValueChanged += vm.ValueChanged;
-
-        var labelShotChangeOffset = new TextBlock
-        {
-            Text = "Shot Change Offset (frames):",
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(15, 0, 5, 0),
-        };
-
-        var numericShotChangeOffset = new NumericUpDown
-        {
-            Minimum = 0,
-            Maximum = 10,
-            Increment = 1,
-            FormatString = "0",
-            Width = 80,
-            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeOffsetFrames") { Source = vm, Mode = BindingMode.TwoWay },
-        };
-        numericShotChangeOffset.ValueChanged += vm.ValueChanged;
 
         var labelMinDuration = new TextBlock
         {
             Text = "Min Duration (ms):",
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(15, 0, 5, 0),
         };
 
         var numericMinDuration = new NumericUpDown
@@ -95,25 +59,70 @@ public class BeautifyTimeCodesWindow : Window
             Maximum = 10000,
             Increment = 100,
             FormatString = "0",
-            Width = 80,
+            Width = 120,
+            VerticalAlignment = VerticalAlignment.Center,
             [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.MinDurationMs") { Source = vm, Mode = BindingMode.TwoWay },
         };
         numericMinDuration.ValueChanged += vm.ValueChanged;
 
+        // Settings panel - Row 2
+        var labelShotChangeThreshold = new TextBlock
+        {
+            Text = "Shot Change Threshold (ms):",
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        var numericShotChangeThreshold = new NumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 1000,
+            Increment = 10,
+            FormatString = "0",
+            Width = 120,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeThresholdMs") { Source = vm, Mode = BindingMode.TwoWay },
+        };
+        numericShotChangeThreshold.ValueChanged += vm.ValueChanged;
+
+        var labelShotChangeOffset = new TextBlock
+        {
+            Text = "Shot Change Offset (frames):",
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        var numericShotChangeOffset = new NumericUpDown
+        {
+            Minimum = 0,
+            Maximum = 10,
+            Increment = 1,
+            FormatString = "0",
+            Width = 120,
+            VerticalAlignment = VerticalAlignment.Center,
+            [!NumericUpDown.ValueProperty] = new Avalonia.Data.Binding("Settings.ShotChangeOffsetFrames") { Source = vm, Mode = BindingMode.TwoWay },
+        };
+        numericShotChangeOffset.ValueChanged += vm.ValueChanged;
+
         var settingsGrid = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"),
-            ColumnSpacing = 5,
+            RowDefinitions = new RowDefinitions("Auto,12,Auto,12,Auto"),
+            ColumnDefinitions = new ColumnDefinitions("Auto,10,120,30,Auto,10,120"),
+            RowSpacing = 0,
         };
-        settingsGrid.Add(checkBoxSnapToFrames, 0);
-        settingsGrid.Add(labelFrameGap, 1);
-        settingsGrid.Add(numericFrameGap, 2);
-        settingsGrid.Add(labelShotChangeThreshold, 3);
-        settingsGrid.Add(numericShotChangeThreshold, 4);
-        settingsGrid.Add(labelShotChangeOffset, 5);
-        settingsGrid.Add(numericShotChangeOffset, 6);
-        settingsGrid.Add(labelMinDuration, 7);
-        settingsGrid.Add(numericMinDuration, 8);
+
+        // Row 0: Checkbox (spans 3 columns)
+        settingsGrid.Add(checkBoxSnapToFrames, 0, 0, 1, 3);
+
+        // Row 2: Frame Gap and Min Duration
+        settingsGrid.Add(labelFrameGap, 2, 0);
+        settingsGrid.Add(numericFrameGap, 2, 2);
+        settingsGrid.Add(labelMinDuration, 2, 4);
+        settingsGrid.Add(numericMinDuration, 2, 6);
+
+        // Row 4: Shot Change Threshold and Shot Change Offset
+        settingsGrid.Add(labelShotChangeThreshold, 4, 0);
+        settingsGrid.Add(numericShotChangeThreshold, 4, 2);
+        settingsGrid.Add(labelShotChangeOffset, 4, 4);
+        settingsGrid.Add(numericShotChangeOffset, 4, 6);
 
         var settingsTitle = new TextBlock
         {
@@ -199,13 +208,13 @@ public class BeautifyTimeCodesWindow : Window
 
         var visualizerGrid = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*,10,Auto,*"),
+            RowDefinitions = new RowDefinitions("Auto,5*,10,Auto,5*"),
             ColumnDefinitions = new ColumnDefinitions("*"),
         };
         visualizerGrid.Add(labelOriginal, 0, 0);
-        visualizerGrid.Add(borderOriginal, 0, 1);
-        visualizerGrid.Add(labelBeautified, 0, 3);
-        visualizerGrid.Add(borderBeautified, 0, 4);
+        visualizerGrid.Add(borderOriginal, 1, 0);
+        visualizerGrid.Add(labelBeautified, 3, 0);
+        visualizerGrid.Add(borderBeautified, 4, 0);
 
         // Buttons
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
@@ -221,8 +230,8 @@ public class BeautifyTimeCodesWindow : Window
             RowSpacing = 10,
         };
         grid.Add(settingsBorder, 0, 0);
-        grid.Add(visualizerGrid, 0, 1);
-        grid.Add(panelButtons, 0, 2);
+        grid.Add(visualizerGrid, 1, 0);
+        grid.Add(panelButtons, 2, 0);
 
         Content = grid;
 
