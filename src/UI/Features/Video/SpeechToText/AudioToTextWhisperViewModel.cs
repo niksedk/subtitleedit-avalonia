@@ -739,6 +739,7 @@ public partial class AudioToTextWhisperViewModel : ObservableObject
         }
 
         var targetFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".wav");
+        _filesToDelete.Add(targetFile);
         try
         {
             var process = GetFfmpegProcess(_videoFileName, _audioTrackNumber, targetFile);
