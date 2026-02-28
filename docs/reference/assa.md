@@ -468,6 +468,7 @@ Subtitle Edit can convert many formats to ASS:
 
 - [ASSA Override Tags](assa-override-tags.md) — Comprehensive override tags reference
 - [SubRip Format](subrip.md) — Simpler alternative format
+- [WebVTT Format](webvtt.md) — Modern HTML5 subtitle format
 - [Supported Formats](supported-formats.md) — All formats supported by Subtitle Edit
 - [Command Line](command-line.md) — Batch conversion with Subtitle Edit
 

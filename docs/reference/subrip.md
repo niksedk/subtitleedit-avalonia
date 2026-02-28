@@ -332,6 +332,7 @@ Subtitle Edit can convert many formats to SubRip:
 
 ## See Also
 
+- [WebVTT Format](webvtt.md) — Modern HTML5 subtitle format with advanced features
 - [ASSA Format](assa.md) — Advanced Sub Station Alpha format
 - [ASSA Override Tags](assa-override-tags.md) — ASS-style tags reference
 - [Supported Formats](supported-formats.md) — All formats supported by Subtitle Edit

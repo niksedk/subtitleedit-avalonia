@@ -7,14 +7,15 @@ Subtitle Edit supports a wide range of subtitle formats for reading and writing.
 | Format | Extension(s) | Documentation |
 |--------|-------------|---------------|
 | SubRip | .srt | [Format Reference](subrip.md) |
+| WebVTT (Web Video Text Tracks) | .vtt, .webvtt | [Format Reference](webvtt.md) |
 | Advanced SubStation Alpha (ASSA) | .ass | [Format Reference](assa.md) |
 | SubStation Alpha (SSA) | .ssa | [Format Reference](assa.md) |
 
 > **See also:** 
-> - [ASSA Override Tags Reference](assa-override-tags.md) — Complete list of ASS/SSA override tags for styling and animation
 > - [SubRip Format Reference](subrip.md) — Complete guide to SRT format
+> - [WebVTT Format Reference](webvtt.md) — Complete guide to WebVTT format (HTML5 standard)
 > - [ASSA Format Reference](assa.md) — Complete guide to ASS/SSA format
-| WebVTT | .vtt |
+> - [ASSA Override Tags Reference](assa-override-tags.md) — Complete list of ASS/SSA override tags for styling and animation
 | MicroDVD | .sub |
 | SAMI | .smi |
 | Timed Text (TTML) | .ttml, .xml, .dfxp |
