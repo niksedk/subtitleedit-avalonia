@@ -1,5 +1,18 @@
 ﻿# Subtitle Edit (Avalonia)
 
+# ⚠️ Repository Archived
+
+This development repository is now archived. **Subtitle Edit 5** development has officially moved to the main organization repository.
+
+### 🚀 New Home:
+**[SubtitleEdit/subtitleedit](https://github.com/SubtitleEdit/subtitleedit)**
+
+Please head over there for the latest releases, issues, and pull requests.
+
+
+---
+
+
 Welcome to **subtitleedit-avalonia** — the early preview of the next major release of **Subtitle Edit**!
 
 This version is being rebuilt using [Avalonia UI](https://avaloniaui.net/) to enable true cross-platform support.
