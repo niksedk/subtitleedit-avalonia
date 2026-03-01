@@ -1,4 +1,4 @@
-﻿# Subtitle Edit (Avalonia)
+﻿
 
 # ⚠️ Repository Archived
 
@@ -9,9 +9,13 @@ This development repository is now archived. **Subtitle Edit 5** development has
 
 Please head over there for the latest releases, issues, and pull requests.
 
+---
 
 ---
 
+---
+
+# Subtitle Edit (Avalonia)
 
 Welcome to **subtitleedit-avalonia** — the early preview of the next major release of **Subtitle Edit**!
 
